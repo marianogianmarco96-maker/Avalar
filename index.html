@@ -282,6 +282,30 @@ dialog.lbdlg{width:min(1000px,96vw)}
 /* --- adattamenti per la pagina ospitata --- */
 .top{top:env(safe-area-inset-top,0px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 main#view{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+/* --- adattamento schermo: la barra delle sezioni diventa una barra in basso su telefono/tablet --- */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+.spacer-top{display:none}
+body{min-width:0}
+.top{min-width:0}
+.brand{min-width:0}
+@media (max-width:1500px){.top{gap:12px}.srch{width:150px}.brand small{display:none}.brand b{font-size:.95rem;letter-spacing:.1em}#nav a{padding:8px 9px;font-size:.74rem;letter-spacing:.06em}}
+@media (max-width:1280px){
+  .top{gap:8px}
+  #nav{position:fixed;left:0;right:0;bottom:0;z-index:40;flex:none;gap:2px;justify-content:flex-start;overflow-x:auto;
+    padding:6px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px));
+    background:linear-gradient(180deg,var(--wine) 0,var(--wine-d) 100%);border-top:3px double var(--gold2);box-shadow:0 -3px 12px #0006}
+  #nav a{flex:1 1 0;min-width:max-content;text-align:center;padding:11px 8px;font-size:.7rem;letter-spacing:.05em}
+  .page{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+  #toasts{bottom:calc(78px + env(safe-area-inset-bottom,0px))}
+  .spacer-top{display:block!important}
+}
+@media (max-width:520px){
+  .brand span{display:none}
+  .top{padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}
+  main#view{padding-left:max(4px,env(safe-area-inset-left,0px));padding-right:max(4px,env(safe-area-inset-right,0px))}
+  #nav a{font-size:.64rem;letter-spacing:.03em;padding:11px 6px}
+}
+
 
 </style>
 <header class="top">
