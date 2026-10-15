@@ -1,0 +1,220 @@
+/* Campagna D&D — accesso e archiviazione locale.
+   - Ospite: legge una copia pubblica (data.json), solo lettura, nulla viene salvato.
+   - Amministratore: il codice decifra data.enc (dati completi); le modifiche stanno in IndexedDB
+     di questo browser. Il codice non viene mai salvato in chiaro. */
+(() => {
+  'use strict';
+  const rq = r => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+  const done = t => new Promise((res, rej) => { t.oncomplete = res; t.onerror = () => rej(t.error); t.onabort = () => rej(t.error); });
+  const b64d = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  const ls = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch { } }, del: k => { try { localStorage.removeItem(k); } catch { } } };
+  const domReady = () => document.readyState === 'loading' ? new Promise(r => addEventListener('DOMContentLoaded', r, { once: true })) : Promise.resolve();
+  const clone = v => JSON.parse(JSON.stringify(v));
+  const ROERR = () => new Error('Sola lettura: accedi come amministratore per modificare.');
+
+  let ROLE = null, DB = null, MEM = {}, BLOBMAP = {};
+  const store = (s, m = 'readonly') => DB.transaction(s, m).objectStore(s);
+  const kvGet = k => rq(store('kv').get(k));
+  const kvSet = async (k, v) => { const t = DB.transaction('kv', 'readwrite'); t.objectStore('kv').put(v, k); await done(t); };
+  const idbOpen = () => new Promise((res, rej) => {
+    const r = indexedDB.open('campagna-dnd-admin', 1);
+    r.onupgradeneeded = () => { const d = r.result; d.createObjectStore('docs'); d.createObjectStore('files'); d.createObjectStore('kv'); };
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  });
+
+  /* ---------- cifratura ---------- */
+  async function deriveRaw(code, salt, it) {
+    const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(code), 'PBKDF2', false, ['deriveBits']);
+    return new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: it }, km, 256));
+  }
+  const aesKey = raw => crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['decrypt']);
+
+  /* ---------- aperture ---------- */
+  async function guestOpen() {
+    const r = await fetch('data.json', { cache: 'no-cache' });
+    if (!r.ok) throw new Error('Impossibile caricare i dati (' + r.status + ').');
+    const d = await r.json(); MEM = {};
+    for (const [c, docs] of Object.entries(d.stores)) MEM[c] = new Map(Object.entries(docs));
+    BLOBMAP = d.blobmap || {}; ROLE = 'guest';
+  }
+  async function seedAdmin(payload, raw) {
+    const t = DB.transaction(['docs', 'kv'], 'readwrite'); const d = t.objectStore('docs'); d.clear();
+    for (const [c, docs] of Object.entries(payload.stores)) for (const [id, v] of Object.entries(docs)) d.put(v, c + '/' + id);
+    t.objectStore('kv').put(payload.dataVersion, 'dataVersion'); t.objectStore('kv').put(payload.blobmap, 'blobmap'); t.objectStore('kv').put(false, 'dirty');
+    await done(t);
+    // immagini riservate (cifrate): le decifro e le tengo nel browser
+    const key = await aesKey(raw); const types = {};
+    for (const b of Object.values(payload.stores.blobs || {})) types[b.aid] = b.type;
+    for (const [aid, path] of Object.entries(payload.blobmap)) {
+      if (!path.startsWith('priv/')) continue;
+      try {
+        const buf = new Uint8Array(await (await fetch(path)).arrayBuffer());
+        const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: buf.slice(0, 12) }, key, buf.slice(12));
+        const t2 = DB.transaction('files', 'readwrite'); t2.objectStore('files').put({ blob: new Blob([plain], { type: types[aid] || 'image/jpeg' }), type: types[aid] }, aid); await done(t2);
+      } catch { }
+    }
+  }
+  async function adminOpen(code, remember) {
+    DB = await idbOpen();
+    let enc = null; try { const r = await fetch('data.enc', { cache: 'no-cache' }); if (r.ok) enc = await r.json(); } catch { }
+    const have = (await rq(store('docs').count())) > 0;
+    let raw;
+    if (code != null) { if (!enc) throw new Error('Per il primo accesso serve internet.'); raw = await deriveRaw(code, b64d(enc.salt), enc.it); }
+    else { raw = await kvGet('key'); if (!raw) throw new Error('nokey'); }
+    let payload = null;
+    if (enc) {
+      try { payload = JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64d(enc.iv) }, await aesKey(raw), b64d(enc.ct)))); }
+      catch { throw new Error(code != null ? 'Codice non corretto.' : 'nokey'); }
+    } else if (!have) throw new Error('Impossibile aprire i dati: serve internet al primo accesso.');
+    if (payload && !have) await seedAdmin(payload, raw);
+    if (remember) { await kvSet('key', raw); ls.set('cdnd_remember', 'admin'); }
+    const ks = await rq(store('docs').getAllKeys()), vs = await rq(store('docs').getAll()); MEM = {};
+    ks.forEach((k, i) => { const j = k.indexOf('/'); const c = k.slice(0, j); (MEM[c] = MEM[c] || new Map()).set(k.slice(j + 1), vs[i]); });
+    BLOBMAP = (await kvGet('blobmap')) || {}; ROLE = 'admin';
+    if (payload && have && payload.dataVersion !== await kvGet('dataVersion')) offerUpdate(payload, raw);
+  }
+
+  /* ---------- schermata di accesso ---------- */
+  const LOGIN_CSS = `#login{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at 50% 20%,#7d2530 0%,#561820 55%,#2d0d12 100%);color:#f5e6c4;font-family:'Crimson Pro',Georgia,serif}
+#login .box{width:min(420px,100%);background:#fbf5e3;color:#2b1d14;border:1px solid #d4b06a;border-radius:12px;padding:28px 26px;box-shadow:0 12px 40px #0008}
+#login h1{margin:0 0 2px;font-family:'Cinzel',Georgia,serif;font-size:1.35rem;letter-spacing:.06em;color:#561820;text-align:center}
+#login .sub{text-align:center;color:#8a7560;margin:0 0 20px}
+#login button,#login input[type=password]{font:inherit;width:100%;box-sizing:border-box;border-radius:8px;padding:11px 14px}
+#login .btn{cursor:pointer;border:1px solid #a98334;background:#f3e8cc;color:#561820;font-family:'Cinzel',Georgia,serif;letter-spacing:.05em;font-size:.9rem}
+#login .btn.p{background:#7d2530;color:#fbf5e3;border-color:#561820}
+#login .btn:disabled{opacity:.6;cursor:wait}
+#login input[type=password]{border:1px solid #c4ae80;background:#fffdf4;margin-bottom:8px}
+#login .or{display:flex;align-items:center;gap:10px;color:#8a7560;margin:16px 0;font-size:.9rem}#login .or:before,#login .or:after{content:"";flex:1;border-top:1px solid #dccaa0}
+#login label{display:flex;align-items:center;gap:8px;font-size:.95rem;color:#5a4636;margin:2px 0 10px}
+#login .err{color:#a3262f;min-height:1.2em;margin:6px 0 0;font-size:.95rem}
+#login small{display:block;color:#8a7560;margin-top:6px}`;
+  function loginUI(msg) {
+    return new Promise(resolve => {
+      const st = document.createElement('style'); st.textContent = LOGIN_CSS; document.head.append(st);
+      const el = document.createElement('div'); el.id = 'login';
+      el.innerHTML = `<div class="box"><h1>CAMPAGNA D&amp;D</h1><p class="sub">Diario di campagna di Avalar</p>
+        <button class="btn p" id="lg-guest">Entra come ospite</button><small style="text-align:center">Sola lettura, nessuna modifica possibile.</small>
+        <div class="or">oppure</div>
+        <form id="lg-form" autocomplete="off"><input type="password" id="lg-code" placeholder="Codice amministratore" autocomplete="current-password" spellcheck="false">
+        <label><input type="checkbox" id="lg-rem" checked> Ricordami su questo dispositivo</label>
+        <button class="btn" id="lg-adm" type="submit">Entra come amministratore</button></form>
+        <p class="err" id="lg-err">${msg || ''}</p></div>`;
+      document.body.append(el);
+      const err = t => { el.querySelector('#lg-err').textContent = t || ''; };
+      const finish = () => { el.remove(); st.remove(); resolve(); };
+      el.querySelector('#lg-guest').onclick = async e => {
+        e.target.disabled = true; err('');
+        try { await guestOpen(); ls.set('cdnd_remember', 'guest'); finish(); } catch (x) { e.target.disabled = false; err(x.message || String(x)); }
+      };
+      el.querySelector('#lg-form').onsubmit = async e => {
+        e.preventDefault(); const code = el.querySelector('#lg-code').value; if (!code) { err('Inserisci il codice.'); return; }
+        const b = el.querySelector('#lg-adm'); b.disabled = true; b.textContent = 'Verifico…'; err('');
+        try { await adminOpen(code, el.querySelector('#lg-rem').checked); finish(); }
+        catch (x) { b.disabled = false; b.textContent = 'Entra come amministratore'; err(x.message === 'nokey' ? 'Accesso non riuscito.' : (x.message || String(x))); }
+      };
+      el.querySelector('#lg-code').focus();
+    });
+  }
+
+  const ready = (async () => {
+    await domReady();
+    const rem = ls.get('cdnd_remember');
+    if (rem === 'guest') { try { await guestOpen(); } catch { await loginUI(); } }
+    else if (rem === 'admin') {
+      try { await adminOpen(null, true); }
+      catch (x) { ls.del('cdnd_remember'); await loginUI(x.message === 'nokey' ? 'Accedi di nuovo con il codice.' : ''); }
+    } else await loginUI();
+    applyRoleUI();
+  })();
+
+  /* ---------- database (stessa interfaccia usata dall'app) ---------- */
+  const col = c => {
+    const snap = () => ({ docs: [...(MEM[c] || new Map()).entries()].map(([id, v]) => ({ id, data: () => clone(v) })), docChanges: () => [] });
+    return {
+      onSnapshot(cb) { setTimeout(() => cb(snap()), 0); return () => { }; },
+      async get() { return snap(); },
+      doc(id) {
+        return {
+          async get() { const v = (MEM[c] || new Map()).get(id); return { exists: v !== undefined, id, data: () => v === undefined ? undefined : clone(v) }; },
+          async set(v) { if (ROLE !== 'admin') throw ROERR(); v = clone(v); (MEM[c] = MEM[c] || new Map()).set(id, v); const t = DB.transaction('docs', 'readwrite'); t.objectStore('docs').put(v, c + '/' + id); await done(t); kvSet('dirty', true).catch(() => { }); },
+          async delete() { if (ROLE !== 'admin') throw ROERR(); if (MEM[c]) MEM[c].delete(id); const t = DB.transaction('docs', 'readwrite'); t.objectStore('docs').delete(c + '/' + id); await done(t); kvSet('dirty', true).catch(() => { }); }
+        };
+      }
+    };
+  };
+  const newId = () => Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join('');
+  const assets = {
+    async upload(blob) { if (ROLE !== 'admin') throw ROERR(); const id = 'L' + newId(); const t = DB.transaction('files', 'readwrite'); t.objectStore('files').put({ blob, type: blob.type }, id); await done(t); kvSet('dirty', true).catch(() => { }); return { id, url: '#local/' + id, sizeBytes: blob.size, contentType: blob.type }; },
+    async list() { return { assets: [], usage: null }; },
+    async delete() { }
+  };
+  const user = { canEdit: async () => ROLE === 'admin', isOwner: async () => ROLE === 'admin', can: async () => ROLE === 'admin' };
+  const downloads = {
+    async save({ filename, data }) {
+      const b = data instanceof Blob ? data : new Blob([data]); const u = URL.createObjectURL(b);
+      const a = document.createElement('a'); a.href = u; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 4000);
+    }
+  };
+  window.claude = { use: async name => { if (name === 'db') { await ready; return { collection: col }; } if (name === 'assets') return assets; if (name === 'user') return user; if (name === 'downloads') return downloads; return null; } };
+  Object.defineProperty(window, '__RO', { get: () => ROLE !== 'admin' });
+
+  window.__blobFetch = async aid => {
+    await ready;
+    if (DB) { const f = await rq(store('files').get(aid)); if (f) return { ok: true, blob: async () => f.blob }; }
+    const p = BLOBMAP[aid]; if (!p || p.startsWith('priv/')) return { ok: false, status: 404 };
+    return fetch(p);
+  };
+  window.__blobHref = aid => { const p = BLOBMAP[aid]; return p && !p.startsWith('priv/') ? p : ''; };
+
+  /* ---------- interfaccia per ruolo ---------- */
+  const HIDE_ACTS = ['edit', 'up', 'rensess', 'reimg', 'delRel', 'del', 'copyctx', 'wipe', 'vedit', 'vdm', 'vpl', 'undo', 'toggleDisc', 'subup', 'rename', 'renSec', 'redraw', 'portrait', 'newsess', 'newent', 'merge', 'histgen', 'editreg', 'editpin', 'editmap', 'editgen', 'editEntry', 'drawundo', 'drawok', 'drawcancel', 'delreg', 'delpin', 'delphoto', 'delmap', 'delSec', 'delEntry', 'delDoc', 'cpDoc', 'copyEnt', 'bkFull', 'bkData', 'attach', 'analyze', 'addreg', 'addpin', 'addphotos', 'addSec', 'addRel', 'addEntry', 'demo'];
+  const GUEST_CSS = HIDE_ACTS.map(a => `html.ro [data-act="${a}"]`).join(',') + `,html.ro a[href="#/import"],html.ro a[href="#/backup"],html.ro #b-edit,html.ro #b-add,html.ro #b-addreg,html.ro #seg,html.ro #access,html.ro input[type=file],html.ro label:has(input[type=file]){display:none!important}`;
+  function pill(txt, cls) { const s = document.createElement('span'); s.textContent = txt; s.style.cssText = 'font:600 .72rem/1 Georgia,serif;letter-spacing:.06em;text-transform:uppercase;padding:6px 9px;border-radius:99px;border:1px solid #ffffff40;background:#00000030;color:#f5e6c4;white-space:nowrap'; if (cls) s.className = cls; return s; }
+  function applyRoleUI() {
+    const root = document.documentElement; root.classList.add(ROLE === 'admin' ? 'adm' : 'ro');
+    if (ROLE !== 'admin') {
+      const st = document.createElement('style'); st.textContent = GUEST_CSS; document.head.append(st);
+      const guard = () => { if (/^#\/(import|backup)/.test(location.hash)) location.hash = '#/'; };
+      addEventListener('hashchange', guard); guard();
+    }
+    const top = document.querySelector('header.top'), theme = document.getElementById('themeBtn'); if (!top || !theme) return;
+    const wrap = document.createElement('span'); wrap.style.cssText = 'display:flex;gap:6px;align-items:center;flex:none';
+    wrap.append(pill(ROLE === 'admin' ? 'Admin' : 'Ospite · sola lettura'));
+    if (ROLE === 'admin') { const b = document.createElement('button'); b.className = 'iconbtn'; b.style.cssText = 'width:auto;padding:0 12px;border-radius:99px;font:600 .72rem Georgia,serif;letter-spacing:.06em;text-transform:uppercase'; b.textContent = '✎ Chiedi a Claude'; b.onclick = askClaude; wrap.append(b); }
+    const out = document.createElement('button'); out.className = 'iconbtn'; out.title = 'Esci'; out.textContent = '⎋'; out.onclick = async () => { ls.del('cdnd_remember'); if (DB) { try { const t = DB.transaction('kv', 'readwrite'); t.objectStore('kv').delete('key'); await done(t); } catch { } } location.reload(); };
+    wrap.append(out); top.insertBefore(wrap, theme);
+  }
+
+  /* ---------- amministratore: richiesta a Claude ---------- */
+  function askClaude() {
+    let d = document.getElementById('askdlg'); if (d) d.remove();
+    d = document.createElement('dialog'); d.id = 'askdlg'; d.style.cssText = 'border:1px solid #a98334;border-radius:12px;background:#fbf5e3;color:#2b1d14;padding:20px;width:min(560px,92vw);font:16px/1.4 Georgia,serif';
+    d.innerHTML = `<h3 style="margin:0 0 6px;font-family:Cinzel,Georgia,serif;color:#561820">Chiedi una modifica a Claude</h3>
+      <p style="margin:0 0 10px;color:#5a4636">Scrivi cosa vuoi cambiare. Copia il testo e incollalo nella chat con Claude: lui aggiorna i dati e ti manda la nuova versione del sito (qui comparirà «Aggiorna ora»).</p>
+      <textarea id="ask-t" rows="6" style="width:100%;box-sizing:border-box;border:1px solid #c4ae80;border-radius:8px;padding:10px;font:inherit;background:#fffdf4" placeholder="Es.: nella scheda di Robin aggiungi che…"></textarea>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button id="ask-c" class="btn primary">Copia richiesta</button><button id="ask-x" class="btn">Copia richiesta + contesto</button><button id="ask-k" class="btn ghost" style="margin-left:auto">Chiudi</button></div><p id="ask-m" style="min-height:1.2em;color:#3f6b46;margin:8px 0 0"></p>`;
+    document.body.append(d); d.showModal();
+    const text = async ctx => { const body = d.querySelector('#ask-t').value.trim(); if (!body) { d.querySelector('#ask-m').textContent = 'Scrivi prima la richiesta.'; return null; } let t = 'Richiesta di modifica per la campagna D&D:\n\n' + body + '\n'; if (ctx && window.__cronache?.buildContext) { try { t += '\n--- Contesto della campagna ---\n' + await window.__cronache.buildContext({ full: false }); } catch { } } return t; };
+    const copy = async t => { try { await navigator.clipboard.writeText(t); } catch { const a = document.createElement('textarea'); a.value = t; document.body.append(a); a.select(); document.execCommand('copy'); a.remove(); } d.querySelector('#ask-m').textContent = 'Copiato: incollalo nella chat con Claude.'; };
+    d.querySelector('#ask-c').onclick = async () => { const t = await text(false); if (t) copy(t); };
+    d.querySelector('#ask-x').onclick = async () => { const t = await text(true); if (t) copy(t); };
+    d.querySelector('#ask-k').onclick = () => d.close();
+  }
+
+  /* ---------- aggiornamento dei dati (amministratore) ---------- */
+  function offerUpdate(fresh, raw) {
+    const bar = document.createElement('div');
+    bar.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#561820;color:#f5e6c4;padding:12px max(16px,env(safe-area-inset-left,0px));display:flex;gap:10px;flex-wrap:wrap;align-items:center;font:15px/1.3 Georgia,serif;box-shadow:0 -2px 10px #0006';
+    const msg = document.createElement('span'); msg.style.flex = '1 1 260px'; bar.append(msg);
+    const mk = (t, f) => { const b = document.createElement('button'); b.textContent = t; b.style.cssText = 'padding:7px 12px;border-radius:6px;border:1px solid #f5e6c488;background:#00000030;color:inherit;cursor:pointer;font:inherit'; b.onclick = f; bar.append(b); };
+    kvGet('dirty').then(async isDirty => {
+      await domReady();
+      msg.textContent = isDirty ? 'È disponibile una nuova versione dei dati. Su questo dispositivo hai fatto modifiche che verrebbero sostituite: prima fai un backup.' : 'È disponibile una nuova versione dei dati della campagna.';
+      if (isDirty) mk('Vai al backup', () => { location.hash = '#/backup'; });
+      mk(isDirty ? 'Sostituisci comunque' : 'Aggiorna ora', async () => { await seedAdmin(fresh, raw); location.reload(); });
+      mk('Più tardi', () => bar.remove());
+      document.body.append(bar);
+    });
+  }
+  if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => { }));
+})();
