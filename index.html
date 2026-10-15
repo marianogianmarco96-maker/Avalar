@@ -1,0 +1,1762 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Campagna D&D</title>
+<meta name="theme-color" content="#561820"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><script src="local.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+:root{
+  --display:'Cinzel','Trajan Pro','Palatino Linotype','Book Antiqua',Palatino,Georgia,serif;
+  --body:'Crimson Pro','Iowan Old Style','Palatino Linotype','Book Antiqua',Georgia,serif;
+  --bg:#eadcbc; --bg2:#f3e8cc; --paper:#fbf5e3; --paper2:#f6ecd2; --ink:#2b1d14; --ink2:#5a4636; --mute:#8a7560;
+  --wine:#7d2530; --wine2:#a7343b; --wine-d:#561820; --gold:#a98334; --gold2:#d4b06a;
+  --line:#dccaa0; --line2:#c4ae80; --ok:#3f6b46; --warn:#a8641c; --bad:#a3262f;
+  --shadow:0 1px 0 #fff9 inset,0 2px 10px #4a2f1a24;
+  --tex:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .1 0 0 0 .10 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --t-pg:#8f2d3a; --t-png:#3b5f8a; --t-luogo:#3f7a4a; --t-oggetto:#9a7022; --t-fazione:#6a4a8c; --t-missione:#b4541c; --t-lore:#5b6670;
+  color-scheme:light;
+}
+:root[data-theme=dark]{
+  --bg:#15100d; --bg2:#1c1511; --paper:#241b16; --paper2:#2b211b; --ink:#ecdfc6; --ink2:#c5b193; --mute:#94806a;
+  --wine:#8c2c38; --wine2:#c4494f; --wine-d:#2c0f14; --gold:#c9a24b; --gold2:#e0c071;
+  --line:#3a2d24; --line2:#55402f; --ok:#7bb383; --warn:#e0a05a; --bad:#e8707a;
+  --shadow:0 1px 0 #ffffff0a inset,0 2px 12px #00000066;
+  --tex:none;
+  --t-pg:#c4606c; --t-png:#6f98c8; --t-luogo:#6fb27b; --t-oggetto:#cfa24f; --t-fazione:#a58bd0; --t-missione:#e08a52; --t-lore:#97a3ae;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17.5px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse at 15% 0%,#fff7 0,transparent 55%),radial-gradient(ellipse at 100% 100%,#7d253018 0,transparent 55%),var(--tex)}
+:root[data-theme=dark] body::before{background:radial-gradient(ellipse at 15% 0%,#7d25301c 0,transparent 55%)}
+a{color:var(--wine2);text-decoration:none}
+a:hover{text-decoration:underline}
+h1,h2,h3,h4{font-family:var(--display);font-weight:600;letter-spacing:.02em;margin:0;line-height:1.2;color:var(--wine)}
+:root[data-theme=dark] h1,:root[data-theme=dark] h2,:root[data-theme=dark] h3{color:var(--gold2)}
+h1{font-size:2rem} h2{font-size:1.35rem} h3{font-size:1.1rem} h4{font-size:1rem;margin:.9em 0 .2em}
+small,.mute{color:var(--mute)}
+button,input,select,textarea{font:inherit;color:inherit}
+::selection{background:#a7343b44}
+
+/* ---------- header ---------- */
+.top{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:18px;padding:0 20px;height:58px;
+  background:linear-gradient(180deg,var(--wine) 0,var(--wine-d) 100%);color:#f5e6c4;border-bottom:3px double var(--gold2);box-shadow:0 3px 12px #0005}
+.brand{display:flex;align-items:center;gap:10px;color:#f5e6c4;text-decoration:none!important;flex:none}
+.brand svg{width:30px;height:30px}
+.brand b{display:block;font-family:var(--display);letter-spacing:.14em;font-size:1.05rem;line-height:1}
+.brand small{display:block;color:#e7cf9a;font-size:.78rem;line-height:1.1;margin-top:3px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#nav{display:flex;gap:2px;flex:1;overflow-x:auto;scrollbar-width:none}
+#nav a{color:#f1dfb6;font-family:var(--display);font-size:.78rem;letter-spacing:.09em;text-transform:uppercase;padding:8px 11px;border-radius:4px;white-space:nowrap;text-decoration:none}
+#nav a:hover{background:#ffffff18}
+#nav a.on{background:#00000040;color:#fff;box-shadow:inset 0 -2px 0 var(--gold2)}
+.srch{position:relative;flex:none;width:230px}
+.top .srch input[type=search]{width:100%;background:#00000030;color:#fff;padding:7px 12px;border-radius:20px;border:1px solid #ffffff40;background:#00000030;color:#fff;outline:none}
+.srch input::placeholder{color:#e0cb9b}
+.top .srch input[type=search]:focus{background:#00000055;border-color:var(--gold2);box-shadow:none}
+#qres{position:absolute;right:0;top:42px;width:380px;max-width:92vw;background:var(--paper);color:var(--ink);border:1px solid var(--line2);border-radius:6px;box-shadow:0 10px 30px #0006;display:none;max-height:70vh;overflow:auto}
+#qres.on{display:block}
+#qres a{display:flex;gap:8px;align-items:center;padding:7px 12px;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}
+#qres a:hover,#qres a.sel{background:var(--paper2)}
+#qres .more{padding:7px 12px;font-size:.9rem;color:var(--mute)}
+.iconbtn{background:#00000030;border:1px solid #ffffff30;color:#f5e6c4;width:34px;height:34px;border-radius:50%;cursor:pointer;flex:none;font-size:1rem}
+.iconbtn:hover{background:#00000055}
+
+/* ---------- layout ---------- */
+main{position:relative;z-index:1}
+.page{max-width:1020px;margin:0 auto;padding:26px 20px 90px}
+.page.narrow{max-width:760px}
+.pagehead{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.pagehead h1{flex:1;min-width:200px}
+.pagehead .acts{display:flex;gap:8px;flex-wrap:wrap}
+.orn{height:14px;margin:6px 0 18px;background:linear-gradient(90deg,transparent,var(--gold) 20%,var(--gold) 46%,transparent 46%,transparent 54%,var(--gold) 54%,var(--gold) 80%,transparent);background-size:100% 1px;background-repeat:no-repeat;background-position:center;position:relative}
+.orn::after{content:"";position:absolute;left:50%;top:50%;width:9px;height:9px;background:var(--gold);transform:translate(-50%,-50%) rotate(45deg);box-shadow:0 0 0 3px var(--bg)}
+.card{background:var(--paper);border:1px solid var(--line2);border-radius:5px;padding:18px 22px;box-shadow:var(--shadow);position:relative;margin-bottom:18px}
+.card::before{content:"";position:absolute;inset:4px;border:1px solid var(--line);border-radius:3px;pointer-events:none}
+.card>*{position:relative}
+.card h2{margin-bottom:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.spread{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.empty{text-align:center;color:var(--mute);padding:34px 10px}
+.hint{font-size:.9rem;color:var(--mute)}
+
+/* ---------- controls ---------- */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:4px;border:1px solid var(--line2);background:var(--paper2);color:var(--ink);cursor:pointer;font-family:var(--display);font-size:.78rem;letter-spacing:.07em;text-transform:uppercase;text-decoration:none!important;line-height:1.2}
+.btn:hover{border-color:var(--gold);background:var(--paper)}
+.btn.primary{background:linear-gradient(180deg,var(--wine2),var(--wine));color:#fbeccb;border-color:var(--wine-d);box-shadow:0 1px 0 #ffffff30 inset}
+.btn.primary:hover{filter:brightness(1.1)}
+.btn.danger{background:var(--bad);color:#fff;border-color:#0004}
+.btn.ghost{background:transparent}
+.btn.sm{padding:4px 9px;font-size:.7rem}
+.btn[disabled]{opacity:.5;pointer-events:none}
+.btn.on{background:var(--wine);color:#fbeccb;border-color:var(--wine-d)}
+input[type=text],input[type=search],input[type=number],input[type=date],select,textarea,input:not([type]){width:100%;padding:8px 10px;border:1px solid var(--line2);border-radius:4px;background:var(--paper);outline:none}
+textarea{resize:vertical;line-height:1.5}
+input:focus,select:focus,textarea:focus{border-color:var(--wine2);box-shadow:0 0 0 2px #a7343b33}
+label.f{display:block;margin:0 0 12px}
+label.f>span{display:block;font-family:var(--display);font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink2);margin-bottom:4px}
+label.chk{display:flex;gap:8px;align-items:center;margin:0 0 12px;cursor:pointer}
+label.chk input{width:auto}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:4px;overflow:hidden}
+.seg button{background:var(--paper2);border:0;padding:5px 11px;cursor:pointer;font-family:var(--display);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+.seg button.on{background:var(--wine);color:#fbeccb}
+
+.badge{display:inline-block;padding:1px 8px;border-radius:3px;font-family:var(--display);font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--t-lore);white-space:nowrap;vertical-align:middle}
+.badge.t-pg{background:var(--t-pg)}.badge.t-png{background:var(--t-png)}.badge.t-luogo{background:var(--t-luogo)}.badge.t-oggetto{background:var(--t-oggetto)}.badge.t-fazione{background:var(--t-fazione)}.badge.t-missione{background:var(--t-missione)}.badge.t-lore{background:var(--t-lore)}
+:root[data-theme=dark] .badge{color:#16100c}
+.pill{display:inline-block;padding:0 9px;border:1px solid var(--line2);border-radius:12px;font-size:.85rem;color:var(--ink2);background:var(--paper2)}
+.pill.warn{color:var(--warn);border-color:var(--warn)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border:1px solid var(--line2);border-radius:14px;background:var(--paper2);color:var(--ink);font-size:.92rem;text-decoration:none!important;cursor:pointer}
+.chip:hover{border-color:var(--gold);background:var(--paper)}
+.chip.on{background:var(--wine);color:#fbeccb;border-color:var(--wine-d)}
+.chip em{font-style:normal;color:var(--mute);font-size:.82rem}
+.chip.on em{color:#e9cf9a}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+
+/* ---------- prose ---------- */
+.prose p{margin:.55em 0}
+.prose ul{margin:.5em 0;padding-left:1.4em}
+.prose h4{color:var(--wine)}
+.prose .xref{border-bottom:1px dotted var(--wine2)}
+.prose .xref.dead{border-bottom:0;color:var(--ink2);font-style:italic}
+.clamp2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lead{font-size:1.08rem}
+
+/* ---------- lists ---------- */
+.vl{position:relative;overflow:auto;background:var(--paper);border:1px solid var(--line2);border-radius:5px;box-shadow:var(--shadow)}
+.vl-in{position:relative}
+.vl-row{position:absolute;left:0;right:0}
+.erow{display:flex;gap:12px;align-items:center;height:100%;padding:0 16px;border-bottom:1px solid var(--line);color:var(--ink);text-decoration:none!important;cursor:pointer;overflow:hidden}
+.erow:hover{background:var(--paper2)}
+.erow .main{flex:1;min-width:0}
+.erow .t{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.erow .t small{font-weight:400}
+.erow .b{color:var(--ink2);font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.erow .r{flex:none;text-align:right;font-size:.85rem;color:var(--mute);max-width:200px}
+.erow .num{flex:none;width:52px;font-family:var(--display);font-size:1.2rem;color:var(--wine);text-align:center}
+:root[data-theme=dark] .erow .num{color:var(--gold2)}
+.erow.ev{align-items:flex-start;padding-top:10px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.filters input[type=search]{max-width:260px}
+
+/* ---------- entity page ---------- */
+.ehead .meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.ehead h1{margin:2px 0 4px}
+.ehead .brief{font-style:italic;color:var(--ink2);font-size:1.12rem}
+.sec{border-top:1px solid var(--line);padding:6px 0}
+.sec:first-of-type{border-top:0}
+.sec>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;padding:6px 0;font-family:var(--display);color:var(--wine);letter-spacing:.04em;font-size:1.02rem}
+:root[data-theme=dark] .sec>summary{color:var(--gold2)}
+.sec>summary::-webkit-details-marker{display:none}
+.sec>summary::before{content:"▸";color:var(--gold);transition:transform .15s}
+.sec[open]>summary::before{transform:rotate(90deg)}
+.sec>summary .cnt{font-size:.78rem;color:var(--mute);font-family:var(--body)}
+.sec>summary .sp{flex:1}
+.entry{display:flex;gap:12px;padding:6px 0 8px;position:relative}
+.entry .tag{flex:none;width:64px;font-family:var(--display);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);padding-top:5px;text-align:right}
+.entry .tag a{color:var(--mute)}
+.entry .tx{flex:1;min-width:0}
+.entry .tx .prose p:first-child{margin-top:0}
+.entry .eacts{opacity:0;flex:none;display:flex;gap:4px;transition:opacity .15s}
+.entry:hover .eacts,.entry:focus-within .eacts{opacity:1}
+@media (hover:none){.entry .eacts{opacity:1}}
+.icb{border:0;background:transparent;cursor:pointer;color:var(--mute);font-size:1rem;padding:2px 6px;border-radius:3px}
+.icb:hover{background:var(--paper2);color:var(--wine2)}
+.rel{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:4px 0}
+.rel .lab{color:var(--mute);font-size:.9rem}
+
+.stat{display:flex;gap:14px;flex-wrap:wrap}
+.stat div{flex:1;min-width:110px;text-align:center;padding:10px 6px;border:1px solid var(--line);border-radius:4px;background:var(--paper2)}
+.stat b{display:block;font-family:var(--display);font-size:1.6rem;color:var(--wine)}
+:root[data-theme=dark] .stat b{color:var(--gold2)}
+.stat span{font-size:.85rem;color:var(--mute)}
+.banner{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:10px 16px;border:1px solid var(--warn);border-left-width:5px;border-radius:4px;background:var(--paper);margin-bottom:18px}
+.banner.ok{border-color:var(--ok)}
+.steps{counter-reset:s;list-style:none;padding:0;margin:8px 0}
+.steps li{counter-increment:s;position:relative;padding:8px 0 8px 46px}
+.steps li::before{content:counter(s);position:absolute;left:0;top:6px;width:32px;height:32px;border-radius:50%;background:var(--wine);color:#fbeccb;font-family:var(--display);display:flex;align-items:center;justify-content:center}
+.arc{border-top:1px solid var(--line);padding:6px 0}
+.arc>summary{cursor:pointer;font-family:var(--display);color:var(--wine);list-style:none}
+:root[data-theme=dark] .arc>summary{color:var(--gold2)}
+.arc>summary::-webkit-details-marker{display:none}
+.arc>summary small{font-family:var(--body);margin-left:8px}
+
+/* ---------- import ---------- */
+textarea.big{min-height:260px;font-family:ui-monospace,Consolas,monospace;font-size:.85rem}
+.plan h3{margin:14px 0 6px}
+.plan ul{margin:4px 0;padding-left:20px}
+.plan .w{color:var(--warn)}
+.plan .e{color:var(--bad)}
+.plan li small{display:block}
+.codebox{white-space:pre-wrap;font-family:ui-monospace,Consolas,monospace;font-size:.82rem;background:var(--paper2);border:1px solid var(--line);padding:10px;border-radius:4px;max-height:260px;overflow:auto}
+
+/* ---------- dialog / toast ---------- */
+dialog.dlg{border:1px solid var(--gold);border-radius:6px;padding:0;background:var(--paper);color:var(--ink);width:min(560px,94vw);box-shadow:0 20px 60px #000a;max-height:92vh}
+dialog.dlg.wide{width:min(860px,96vw)}
+dialog.dlg::backdrop{background:#150b0acc}
+dialog.dlg form{padding:20px 24px;margin:0}
+dialog.dlg h3{margin-bottom:12px}
+dialog.dlg menu{display:flex;justify-content:flex-end;gap:8px;padding:0;margin:14px 0 0}
+#toasts{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{background:var(--wine-d);color:#fbeccb;padding:9px 18px;border-radius:4px;border:1px solid var(--gold2);box-shadow:0 6px 20px #0008;transition:opacity .4s}
+.toast.out{opacity:0}.toast.err{background:var(--bad)}
+
+/* ---------- maps ---------- */
+.maplist{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.mapcard{display:block;background:var(--paper);border:1px solid var(--line2);border-radius:5px;overflow:hidden;box-shadow:var(--shadow);color:var(--ink);text-decoration:none!important}
+.mapcard:hover{border-color:var(--gold);transform:translateY(-1px)}
+.mapcard .im{height:140px;background:#2a2018 center/cover no-repeat}
+.mapcard .tx{padding:10px 14px 12px}
+.mapcard .tx b{font-family:var(--display);color:var(--wine);font-size:.95rem}
+:root[data-theme=dark] .mapcard .tx b{color:var(--gold2)}
+.mapcard .tx p{margin:2px 0 0;color:var(--ink2);font-size:.9rem}
+.mapview{display:grid;grid-template-columns:1fr 330px;height:calc(100vh - 58px);height:calc(100dvh - 58px)}
+.mapmain{display:flex;flex-direction:column;min-width:0;min-height:0}
+.maptools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:8px 12px;background:var(--paper2);border-bottom:1px solid var(--line2)}
+.maptools .crumb{font-family:var(--display);font-size:.8rem;letter-spacing:.05em;margin-right:auto}
+.maptools .crumb span{color:var(--mute)}
+.stage{position:relative;flex:1;overflow:hidden;background:#1b1511;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.stage.panning{cursor:grabbing}
+.stage.adding{cursor:crosshair}
+.stage:fullscreen{background:#000}
+.layer{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+.layer img{display:block;pointer-events:none;-webkit-user-drag:none;max-width:none}
+.pin{position:absolute;transform:translate(-50%,-100%) scale(var(--inv,1));transform-origin:50% 100%;cursor:pointer;width:28px;height:36px;filter:drop-shadow(0 2px 2px #0008)}
+.pin svg{display:block;width:100%;height:100%}
+.pin.ghost{opacity:.55}
+.pin.ghost svg path{stroke-dasharray:3 2}
+.pin.sel{z-index:5;filter:drop-shadow(0 0 6px #ffd76a) drop-shadow(0 2px 2px #0008)}
+.pin:hover{z-index:6}
+.pin .pl{position:absolute;left:50%;top:-4px;transform:translate(-50%,-100%);white-space:nowrap;background:#1b1511dd;color:#f7e8c6;font-family:var(--display);font-size:11px;letter-spacing:.04em;padding:2px 7px;border-radius:3px;border:1px solid #d4b06a88;pointer-events:none}
+.stage.nolabels .pin:not(:hover):not(.sel) .pl{display:none}
+.pin.drag{cursor:grabbing}
+.mapside{background:var(--paper);border-left:1px solid var(--line2);overflow:auto;padding:16px 18px;min-height:0}
+.mapside h2{font-size:1.15rem}
+.pinrow{display:flex;gap:8px;align-items:center;padding:6px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.pinrow:hover{background:var(--paper2)}
+.pinrow.sel{background:var(--paper2);box-shadow:inset 3px 0 0 var(--wine2)}
+.pinrow .dot{width:10px;height:10px;border-radius:50%;flex:none}
+.pinrow small{margin-left:auto}
+.hud{position:absolute;left:10px;bottom:10px;background:#1b1511cc;color:#e9d7ae;font-size:.8rem;padding:3px 9px;border-radius:3px;pointer-events:none}
+.noimg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#d8c49a;text-align:center;padding:30px}
+
+/* ---------- responsive ---------- */
+@media (max-width:900px){
+  .top{gap:8px;padding:0 10px}.srch{width:150px}.brand small{display:none}
+  .grid2{grid-template-columns:1fr}
+  .mapview{grid-template-columns:1fr;grid-template-rows:62vh auto;height:auto}
+  .mapmain{height:62vh}
+  .mapside{border-left:0;border-top:1px solid var(--line2)}
+  .entry .tag{width:44px}
+}
+@media (max-width:620px){.srch{display:none}h1{font-size:1.5rem}.page{padding:18px 12px 80px}}
+@media print{.top,.acts,.eacts{display:none!important}body::before{display:none}}
+
+/* ---------- foto dei segnaposto ---------- */
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:6px;margin:10px 0}
+.gph{position:relative;display:block;aspect-ratio:1;border:1px solid var(--line2);border-radius:4px;overflow:hidden;background:#2a2018}
+.gph img{width:100%;height:100%;object-fit:cover;cursor:zoom-in;display:block}
+.gph .x{position:absolute;top:2px;right:2px;width:22px;height:22px;border:0;border-radius:50%;background:#000a;color:#fff;cursor:pointer;line-height:1}
+dialog.lbdlg{width:min(1000px,96vw)}
+.lb{display:flex;align-items:center;gap:8px;justify-content:center}
+.lb img{max-width:calc(100% - 110px);max-height:74vh;object-fit:contain;border-radius:3px;background:#1b1511}
+
+/* ---------- ritratti ---------- */
+.ehead.hasp{display:grid;grid-template-columns:176px 1fr;gap:22px;align-items:start}
+.portrait{width:176px;border-radius:4px;border:2px solid var(--gold);box-shadow:0 3px 12px #0005;cursor:zoom-in;display:block}
+.av{flex:none;width:44px;height:44px;border-radius:50%;object-fit:cover;object-position:top;border:2px solid var(--gold)}
+@media (max-width:620px){.ehead.hasp{grid-template-columns:1fr}.portrait{width:140px}}
+
+/* ---------- regioni sulla mappa ---------- */
+#pinsbox{pointer-events:none}.pin,.vh{pointer-events:auto}
+#regsvg{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible}
+.regp{fill:var(--c);fill-opacity:0;stroke:var(--c);stroke-opacity:.45;stroke-width:1.6;stroke-dasharray:5 4;vector-effect:non-scaling-stroke;cursor:pointer;pointer-events:all;transition:fill-opacity .15s}
+.regp:hover{fill-opacity:.2;stroke-opacity:1;stroke-dasharray:none}
+.regp.on{fill-opacity:.08;stroke-opacity:1;stroke-width:3.2;stroke-dasharray:none;filter:drop-shadow(0 0 5px var(--c))}
+.stage.adding .regp,.stage.drawing .regp{pointer-events:none}
+.drawline{fill:none;stroke:#fff;stroke-width:2;stroke-dasharray:6 4;vector-effect:non-scaling-stroke;pointer-events:none}
+.vh{position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid var(--wine2);transform:translate(-50%,-50%) scale(var(--inv,1));cursor:grab;box-shadow:0 1px 4px #0008}
+.vh.first{background:var(--gold2)}
+.lockhint{font-size:.88rem;color:var(--mute);margin:6px 0}
+/* --- adattamenti per la pagina ospitata --- */
+.top{top:env(safe-area-inset-top,0px);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main#view{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+</style>
+<header class="top">
+  <button class="iconbtn" id="backBtn" title="Indietro" onclick="history.back()">‹</button><button class="iconbtn" id="fwdBtn" title="Avanti" onclick="history.forward()">›</button>
+  <a class="brand" href="#/">
+    <svg viewBox="0 0 32 32" fill="none" stroke="#e7cf9a" stroke-width="1.7" stroke-linejoin="round"><path d="M4 7h9c2 0 3 1 3 3v16c0-2-1-3-3-3H4zM28 7h-9c-2 0-3 1-3 3v16c0-2 1-3 3-3h9z"/><path d="M16 10v16" stroke-width="1.2"/><path d="M8 12h4M8 15h4M20 12h4M20 15h4" stroke-width="1.2" stroke-linecap="round"/></svg>
+    <span><b>CAMPAGNA D&amp;D</b><small id="campName">La mia campagna</small></span>
+  </a>
+  <nav id="nav">
+    <a href="#/">Campagna</a><a href="#/sessioni">Sessioni</a><a href="#/schede">Schede</a><a href="#/mappe">Mappe</a><a href="#/import">Importa</a><a href="#/backup">Backup</a>
+  </nav>
+  <div class="srch"><input id="q" type="search" placeholder="Cerca…  ( / )" autocomplete="off"><div id="qres"></div></div>
+  <button class="iconbtn" id="themeBtn" title="Cambia tema">☾</button>
+</header>
+<main id="view"></main>
+<div id="toasts"></div>
+<script>
+'use strict';
+/* =====================================================================
+   CRONACHE — gestore locale di campagna. Singolo file, nessuna dipendenza.
+   Dati: IndexedDB del browser (+ backup JSON).
+   ===================================================================== */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const unesc = s => String(s).replace(/&amp;|&lt;|&gt;|&quot;|&#39;/g, m => ({ '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'" }[m]));
+const norm = s => String(s ?? '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim();
+const fold = s => String(s ?? '').toLowerCase().replace(/[À-ſ]/g, c => c.normalize('NFD')[0]); // mantiene la lunghezza
+const slug = s => norm(s).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'x';
+const uid = (p = '') => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const clone = o => (typeof structuredClone === 'function' ? structuredClone(o) : JSON.parse(JSON.stringify(o)));
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const fmtDate = ts => ts ? new Date(ts).toLocaleString('it-IT', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
+const fmtSize = b => b > 1e6 ? (b / 1e6).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1e3)) + ' KB';
+
+const TYPES = { pg: 'Personaggio', png: 'PNG', luogo: 'Luogo', oggetto: 'Oggetto', fazione: 'Fazione', missione: 'Missione', lore: 'Lore' };
+const TYPE_PL = { pg: 'Personaggi', png: 'PNG', luogo: 'Luoghi', oggetto: 'Oggetti', fazione: 'Fazioni', missione: 'Missioni', lore: 'Lore' };
+const TYPE_ORDER = ['pg', 'png', 'luogo', 'oggetto', 'fazione', 'missione', 'lore'];
+const PNG_ATT = { alleato: 'Alleati', nemico: 'Nemici', neutrale: 'Neutrali' }, PNG_IMP = { importante: 'Importanti', minore: 'Secondari' }, LUOGO_CAT = { regione: 'Regioni', citta: 'Città e quartieri', edificio: 'Locali ed edifici', dungeon: 'Dungeon e sotterranei', altro: 'Altro' };
+const catPills = e => { const a = e.type === 'png' ? [PNG_ATT[e.cat] && e.cat, PNG_IMP[e.imp] && (e.imp === 'minore' ? 'secondario' : e.imp)] : e.type === 'luogo' ? [LUOGO_CAT[e.cat] && LUOGO_CAT[e.cat].toLowerCase()] : []; return a.filter(Boolean).map(x => `<span class="pill">${esc(x)}</span>`).join(' '); };
+const TYPE_COLOR = { pg: '#8f2d3a', png: '#3b5f8a', luogo: '#3f7a4a', oggetto: '#b0802a', fazione: '#6a4a8c', missione: '#b4541c', lore: '#5b6670' };
+const TYPE_ALIAS = {
+  pg: 'pg', pc: 'pg', personaggio: 'pg', giocatore: 'pg', 'personaggio giocante': 'pg',
+  png: 'png', npc: 'png', 'personaggio non giocante': 'png',
+  luogo: 'luogo', location: 'luogo', posto: 'luogo', citta: 'luogo', regione: 'luogo', dungeon: 'luogo',
+  oggetto: 'oggetto', item: 'oggetto', artefatto: 'oggetto', arma: 'oggetto',
+  fazione: 'fazione', organizzazione: 'fazione', gruppo: 'fazione', gilda: 'fazione',
+  missione: 'missione', quest: 'missione', incarico: 'missione',
+  lore: 'lore', altro: 'lore', evento: 'lore', creatura: 'lore', divinita: 'lore', concetto: 'lore', mostro: 'lore'
+};
+const typeOf = s => TYPE_ALIAS[norm(s)] || null;
+const badge = t => `<span class="badge t-${t}">${esc(t === 'pg' ? 'PG' : (TYPES[t] || t))}</span>`;
+
+/* ---------- testo: markdown leggero + link [[id]] ---------- */
+function findEnt(ref) {
+  ref = String(ref || '').trim();
+  if (!ref) return null;
+  if (S.ents.has(ref)) return S.ents.get(ref);
+  const a = S.byName.get(norm(ref));
+  return a && a.length ? S.ents.get(a[0]) : null;
+}
+function inl(s) {
+  let h = esc(s);
+  h = h.replace(/\[\[([^\]|]+?)(?:\|([^\]]+?))?\]\]/g, (m, a, b) => {
+    const e = findEnt(unesc(a));
+    const t = b || (e ? esc(e.name) : a);
+    return e ? `<a class="xref" href="#/scheda/${encodeURIComponent(e.id)}">${t}</a>` : `<span class="xref dead">${t}</span>`;
+  });
+  h = h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/(^|[\s(])\*([^*\s][^*]*?)\*(?=[\s).,;:!?]|$)/g, '$1<em>$2</em>');
+  return h;
+}
+function md(t) {
+  t = String(t ?? '').replace(/\r/g, '').trim();
+  if (!t) return '';
+  const out = [];
+  for (const block of t.split(/\n\s*\n/)) {
+    let list = false, para = [];
+    const flush = () => { if (para.length) { out.push('<p>' + para.join('<br>') + '</p>'); para = []; } };
+    for (const line of block.split('\n')) {
+      let m;
+      if ((m = line.match(/^#{1,4}\s+(.*)/))) { flush(); if (list) { out.push('</ul>'); list = false; } out.push(`<h4>${inl(m[1])}</h4>`); }
+      else if ((m = line.match(/^\s*[-*•]\s+(.*)/))) { flush(); if (!list) { out.push('<ul>'); list = true; } out.push(`<li>${inl(m[1])}</li>`); }
+      else { if (list) { out.push('</ul>'); list = false; } para.push(inl(line)); }
+    }
+    flush(); if (list) out.push('</ul>');
+  }
+  return out.join('');
+}
+const prose = t => `<div class="prose">${md(t)}</div>`;
+
+/* ---------- UI: toast, dialoghi ---------- */
+function toast(msg, kind = '') {
+  const d = document.createElement('div'); d.className = 'toast ' + kind; d.textContent = msg;
+  $('#toasts').append(d); setTimeout(() => d.classList.add('out'), kind === 'err' ? 6000 : 3200); setTimeout(() => d.remove(), kind === 'err' ? 6500 : 3700);
+}
+function openDlg(html, cls = '') {
+  const d = document.createElement('dialog'); d.className = 'dlg ' + cls; d.innerHTML = html;
+  document.body.append(d); d.addEventListener('close', () => setTimeout(() => d.remove(), 60));
+  d.showModal(); return d;
+}
+function ask(msg, { ok = 'Conferma', danger = false, title = 'Conferma' } = {}) {
+  return new Promise(res => {
+    const d = openDlg(`<form method="dialog"><h3>${esc(title)}</h3><div class="prose">${md(msg)}</div><menu><button value="cancel" class="btn ghost">Annulla</button><button value="ok" class="btn ${danger ? 'danger' : 'primary'}" autofocus>${esc(ok)}</button></menu></form>`);
+    d.addEventListener('close', () => res(d.returnValue === 'ok'));
+  });
+}
+function showInfo(title, html, cls = '') {
+  const d = openDlg(`<form method="dialog"><h3>${esc(title)}</h3>${html}<menu><button value="ok" class="btn primary">Chiudi</button></menu></form>`, cls);
+  return d;
+}
+/* formDlg: campi {k,label,type,value,options,rows,placeholder,hint,list,req} */
+function formDlg({ title, fields, ok = 'Salva', wide = false, intro = '' }) {
+  return new Promise(res => {
+    const fh = fields.map(f => {
+      const id = 'ff-' + f.k, v = f.value ?? '', req = f.req ? 'required' : '';
+      const hint = f.hint ? `<small class="hint">${f.hint}</small>` : '';
+      if (f.type === 'check') return `<label class="chk"><input type="checkbox" id="${id}" ${f.value ? 'checked' : ''}> <span>${esc(f.label)}</span></label>`;
+      let ctl;
+      if (f.type === 'textarea') ctl = `<textarea id="${id}" rows="${f.rows || 5}" ${req} placeholder="${esc(f.placeholder || '')}">${esc(v)}</textarea>`;
+      else if (f.type === 'select') ctl = `<select id="${id}">${f.options.map(([ov, ol]) => `<option value="${esc(ov)}" ${String(ov) === String(v) ? 'selected' : ''}>${esc(ol)}</option>`).join('')}</select>`;
+      else if (f.type === 'file') ctl = `<input type="file" id="${id}" accept="${esc(f.accept || '')}" ${req} ${f.multiple ? 'multiple' : ''}>`;
+      else ctl = `<input type="${f.type === 'number' ? 'number' : 'text'}" id="${id}" value="${esc(v)}" ${req} ${f.list ? `list="${f.list}"` : ''} placeholder="${esc(f.placeholder || '')}" ${f.step ? `step="${f.step}"` : ''} autocomplete="off">`;
+      return `<label class="f"><span>${esc(f.label)}</span>${ctl}${hint}</label>`;
+    }).join('');
+    const d = openDlg(`<form method="dialog"><h3>${esc(title)}</h3>${intro ? `<p class="hint">${intro}</p>` : ''}${fh}<menu><button value="cancel" class="btn ghost" formnovalidate>Annulla</button><button value="ok" class="btn primary">${esc(ok)}</button></menu></form>`, wide ? 'wide' : '');
+    d.addEventListener('close', () => {
+      if (d.returnValue !== 'ok') return res(null);
+      const o = {};
+      for (const f of fields) {
+        const el = $('#ff-' + f.k, d);
+        o[f.k] = f.type === 'check' ? el.checked : f.type === 'file' ? (f.multiple ? [...el.files] : el.files[0]) : f.type === 'number' ? (el.value === '' ? null : Number(el.value)) : el.value;
+      }
+      res(o);
+    });
+    const first = $('input:not([type=checkbox]),textarea,select', d); if (first) setTimeout(() => first.focus(), 30);
+  });
+}
+function ensureEntList() {
+  let dl = $('#dl-ents');
+  if (!dl) { dl = document.createElement('datalist'); dl.id = 'dl-ents'; document.body.append(dl); }
+  const ents = [...S.ents.values()].sort((a, b) => (a.type === 'luogo' ? 0 : 1) - (b.type === 'luogo' ? 0 : 1) || a.name.localeCompare(b.name));
+  dl.innerHTML = ents.map(e => `<option value="${esc(e.name)} (${esc(TYPES[e.type])})"></option>`).join('');
+}
+function pickEntity(text) {
+  text = String(text || '').trim(); if (!text) return null;
+  const m = text.match(/^(.*) \(([^)]+)\)$/);
+  if (m) { const ids = S.byName.get(norm(m[1])) || []; const t = typeOf(m[2]); const hit = ids.map(i => S.ents.get(i)).find(e => e.type === t); if (hit) return hit; }
+  return findEnt(text);
+}
+
+/* ---------- liste virtualizzate (restano fluide con migliaia di righe) ---------- */
+function vlist(host, items, rowH, render) {
+  host.classList.add('vl'); host.innerHTML = '<div class="vl-in"></div>';
+  const inner = host.firstChild; let first = -1, last = -1, raf = 0;
+  const fit = () => { const top = host.getBoundingClientRect().top; host.style.height = Math.max(300, innerHeight - top - 20) + 'px'; };
+  function paint() {
+    raf = 0;
+    const top = host.scrollTop, h = host.clientHeight || 600;
+    const a = Math.max(0, Math.floor(top / rowH) - 5), b = Math.min(items.length, Math.ceil((top + h) / rowH) + 5);
+    if (a === first && b === last) return; first = a; last = b;
+    let html = ''; for (let i = a; i < b; i++) html += `<div class="vl-row" style="top:${i * rowH}px;height:${rowH}px">${render(items[i], i)}</div>`;
+    inner.innerHTML = html;
+  }
+  const onScroll = () => { if (!raf) raf = requestAnimationFrame(paint); };
+  host.addEventListener('scroll', onScroll, { passive: true });
+  const onResize = () => { fit(); first = -1; paint(); };
+  addEventListener('resize', onResize); onCleanup(() => removeEventListener('resize', onResize));
+  const api = {
+    setItems(it) { items = it; inner.style.height = items.length * rowH + 'px'; host.scrollTop = 0; first = -1; paint(); },
+    repaint() { first = -1; paint(); },
+    scrollTo(i) { host.scrollTop = i * rowH; }
+  };
+  fit(); inner.style.height = items.length * rowH + 'px'; paint();
+  setTimeout(() => { fit(); api.repaint(); }, 0);
+  return api;
+}
+
+/* ---------- router ---------- */
+const routes = []; let cleanups = [];
+const route = (re, fn) => routes.push([re, fn]);
+const onCleanup = f => cleanups.push(f);
+let acts = {};
+const setActs = a => { acts = a; };
+function setView(html, cls = '') { const v = $('#view'); v.innerHTML = cls === 'raw' ? html : `<div class="page ${cls}">${html}</div>`; }
+async function navigate() {
+  const h = location.hash.slice(1) || '/';
+  const [path, qs] = h.split('?'); const q = new URLSearchParams(qs || '');
+  for (const f of cleanups) { try { f(); } catch { } } cleanups = []; acts = {};
+  document.documentElement.classList.remove('nofs');
+  for (const [re, fn] of routes) {
+    const m = path.match(re);
+    if (m) {
+      try { await fn(m.slice(1).map(decodeURIComponent), q); }
+      catch (e) { console.error(e); setView(`<div class="card"><h2>Qualcosa è andato storto</h2><p>${esc(e.message || e)}</p></div>`); }
+      markNav(path); return;
+    }
+  }
+  setView(`<div class="empty"><h2>Pagina non trovata</h2><p><a href="#/">Torna alla campagna</a></p></div>`);
+}
+function markNav(path) {
+  const key = path === '/' ? '/' : '/' + path.split('/')[1];
+  const map = { '/scheda': '/schede', '/cronologia': '/sessioni' };
+  const k = map[key] || key;
+  $$('#nav a').forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + k));
+}
+async function rerender() { const y = scrollY; await navigate(); scrollTo(0, y); }
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-act]'); if (!a) return;
+  const f = acts[a.dataset.act]; if (f) { e.preventDefault(); Promise.resolve(f(a, e)).catch(err => { console.error(err); toast(String(err.message || err), 'err'); }); }
+});
+
+/* ---------- Dati: database dell'artifact (db + assets) ---------- */
+const STORES = ['meta', 'entities', 'bodies', 'sessions', 'sbodies', 'events', 'maps', 'blobs', 'pins', 'links', 'regions'];
+const MIRROR = ['meta', 'entities', 'sessions', 'events', 'maps', 'blobs', 'pins', 'links', 'regions']; // sempre in memoria (record leggeri)
+const KEYP = { meta: 'k', entities: 'id', bodies: 'id', sessions: 'n', sbodies: 'n', events: 'id', maps: 'id', blobs: 'id', pins: 'id', links: 'k', regions: 'id' };
+let CDB = null, CASSETS = null;
+const M = {}; for (const s of MIRROR) M[s] = new Map();
+const IMPORTS = []; let impSeq = 0; // registro di annullamento: solo in memoria
+const cl = v => v === undefined ? v : structuredClone(v);
+const did = k => { let r = String(k).replace(/[^A-Za-z0-9_\-.:@+]/g, c => '~' + c.charCodeAt(0).toString(16) + '~'); if (r === '.' || r === '..') r = '~' + r; return r.slice(0, 200); };
+const stable = v => JSON.stringify(v, (k, x) => x && typeof x === 'object' && !Array.isArray(x) ? Object.fromEntries(Object.keys(x).sort().map(q => [q, x[q]])) : x);
+const keyOf = (s, v) => v[KEYP[s]];
+const colOf = s => CDB.collection(s);
+async function openDB() {
+  CDB = await claude.use('db'); CASSETS = await claude.use('assets');
+  if (!CDB) throw new Error('Il database locale non è disponibile: il browser potrebbe bloccare l\'archiviazione (navigazione privata?).');
+  await Promise.all(MIRROR.map(s => new Promise((res, rej) => {
+    let first = true;
+    colOf(s).onSnapshot(snap => {
+      if (first) { first = false; for (const d of snap.docs) { const v = d.data(); M[s].set(keyOf(s, v), v); } res(); return; }
+      let ext = false;
+      for (const ch of snap.docChanges()) {
+        const v = ch.doc.data();
+        if (ch.type === 'removed') { const k = [...M[s].keys()].find(k => did(k) === ch.doc.id); if (k !== undefined) { M[s].delete(k); ext = true; } continue; }
+        const k = keyOf(s, v), cur = M[s].get(k);
+        if (cur !== undefined && stable(cur) === stable(v)) continue;
+        M[s].set(k, v); ext = true;
+      }
+      if (ext) extChanged();
+    }, e => { if (first) { first = false; rej(new Error(e.message || 'Errore del database')); } });
+  })));
+}
+let extT = null;
+function extChanged() { clearTimeout(extT); extT = setTimeout(async () => { await loadCaches(); if (!document.querySelector('dialog[open]') && !document.querySelector('.mapwrap.editing')) { try { rerender(); } catch { } } }, 400); }
+const lazy = s => s === 'bodies' || s === 'sbodies';
+async function dbGet(s, k) {
+  if (s === 'blobs') { const r = M.blobs.get(k); return r ? withBlob(r) : undefined; }
+  if (s === 'imports') return IMPORTS.find(x => x.id === k);
+  if (lazy(s)) { const d = await colOf(s).doc(did(k)).get(); return d.exists ? d.data() : undefined; }
+  return cl(M[s].get(k));
+}
+const BCACHE = new Map();
+async function withBlob(r) {
+  let b = BCACHE.get(r.id);
+  if (!b) {
+    try { const resp = await window.__blobFetch(r.aid); if (!resp.ok) throw new Error('http ' + resp.status); b = await resp.blob(); }
+    catch { // fetch bloccato dalla pagina: carica come <img> e ricopia su canvas
+      b = await new Promise((res, rej) => { const im = new Image(); im.onload = () => { const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; c.getContext('2d').drawImage(im, 0, 0); c.toBlob(x => x ? res(x) : rej(new Error('Immagine non leggibile')), r.type === 'image/png' ? 'image/png' : 'image/webp', .95); }; im.onerror = () => rej(new Error('Immagine non raggiungibile')); im.src = window.__blobHref(r.aid); });
+    }
+    BCACHE.set(r.id, b); if (BCACHE.size > 12) BCACHE.delete(BCACHE.keys().next().value);
+  }
+  return { id: r.id, blob: b, type: r.type };
+}
+async function dbAll(s) {
+  if (s === 'imports') return IMPORTS.slice();
+  if (lazy(s)) { const q = await colOf(s).get(); return q.docs.map(d => d.data()); }
+  return [...M[s].values()].map(cl);
+}
+const dbIdx = async (s, i, k) => [...M[s].values()].filter(v => Array.isArray(v[i]) ? v[i].includes(k) : v[i] === k).map(cl);
+const dbCount = async s => M[s].size;
+const dbScan = async (s, fn) => { if (lazy(s)) { for (const d of (await colOf(s).get()).docs) fn(d.data()); } else for (const v of M[s].values()) fn(v); };
+
+/* scrittura: aggiorna subito la memoria, poi il database (a gruppi paralleli) */
+async function persist(ops) {
+  const todo = ops.slice(); const workers = Array.from({ length: Math.min(6, todo.length) }, async () => {
+    while (todo.length) {
+      const o = todo.shift(); const ref = colOf(o.s).doc(did(o.k));
+      if (o.del) await ref.delete(); else {
+        const raw = JSON.stringify(o.v); if (raw.length > 250000) throw new Error('Documento troppo grande (' + Math.round(raw.length / 1024) + ' KB, massimo 250): dividilo in parti più piccole.');
+        await ref.set(o.v);
+      }
+    }
+  });
+  await Promise.all(workers);
+}
+async function putBlobRec(v) { // v: {id, blob, type} -> carica su assets, salva il puntatore
+  if (!CASSETS) throw new Error('Il caricamento di immagini richiede i permessi di modifica.');
+  const up = await CASSETS.upload(v.blob); BCACHE.set(v.id, v.blob);
+  return { id: v.id, aid: up.id, type: v.type || up.contentType };
+}
+const dbPut = async (s, v) => runBatch([s], '', async b => b.put(s, v), { reload: false });
+const dbDel = async (s, k) => runBatch([s], '', async b => b.del(s, k), { reload: false });
+
+/* ---------- stato in memoria: SOLO i dati leggeri ---------- */
+const S = { ents: new Map(), byName: new Map(), sidx: new Map(), sess: [], maps: [], meta: {} };
+async function loadCaches() {
+  const ents = [...M.entities.values()], sess = [...M.sessions.values()], maps = [...M.maps.values()], meta = [...M.meta.values()];
+  S.ents = new Map(); S.byName = new Map(); S.sidx = new Map();
+  for (const e of ents) {
+    S.ents.set(e.id, e);
+    S.sidx.set(e.id, norm([e.name, ...(e.alias || []), e.brief || '', e.status || ''].join(' ')));
+    for (const n of [e.name, ...(e.alias || [])]) {
+      const k = norm(n); if (!k) continue;
+      const a = S.byName.get(k); if (a) { if (!a.includes(e.id)) a.push(e.id); } else S.byName.set(k, [e.id]);
+    }
+  }
+  S.sess = sess.sort((a, b) => a.n - b.n);
+  S.maps = maps.sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.name.localeCompare(b.name));
+  S.meta = {}; for (const m of meta) S.meta[m.k] = m.v;
+  const nm = $('#campName'); if (nm) nm.textContent = getMeta('campaign', { name: 'La mia campagna' }).name;
+}
+const getMeta = (k, d) => S.meta[k] ?? d;
+async function setMeta(k, v) { await dbPut('meta', { k, v }); S.meta[k] = v; }
+const lastSessionN = () => S.sess.length ? S.sess[S.sess.length - 1].n : null;
+
+/* ---------- scritture a blocchi con registro di annullamento (in memoria) ---------- */
+async function runBatch(stores, label, fn, { undo = false, extra = {}, reload = true } = {}) {
+  const ops = [], wr = new Map(); // wr: "s|k" -> operazione finale da scrivere
+  const prevOf = async (s, k) => lazy(s) ? await dbGet(s, k) : (s === 'blobs' ? cl(M.blobs.get(k)) : cl(M[s].get(k)));
+  const b = {
+    get: (s, k) => dbGet(s, k),
+    idx: (s, i, k) => dbIdx(s, i, k),
+    async put(s, v) {
+      const k = keyOf(s, v), prev = await prevOf(s, k); ops.push({ s, k, prev });
+      let rec = v; if (s === 'blobs') rec = v.blob ? await putBlobRec(v) : cl(v);
+      wr.set(s + '|' + did(k), { s, k, v: cl(rec) });
+    },
+    async del(s, k) { const prev = await prevOf(s, k); if (prev !== undefined) { ops.push({ s, k, prev }); wr.set(s + '|' + did(k), { s, k, del: true }); } }
+  };
+  await fn(b);
+  const list = [...wr.values()];
+  for (const o of list) { if (lazy(o.s)) continue; if (o.del) M[o.s].delete(o.k); else M[o.s].set(o.k, o.v); }
+  try { await persist(list); }
+  catch (e) { try { await resync(); } catch { } throw e; }
+  if (undo) { IMPORTS.push({ id: ++impSeq, ts: Date.now(), label, ops, ...extra }); while (IMPORTS.length > 8) IMPORTS.shift(); }
+  if (reload) await loadCaches();
+}
+async function resync() { for (const s of MIRROR) { const q = await colOf(s).get(); M[s] = new Map(q.docs.map(d => { const v = d.data(); return [keyOf(s, v), v]; })); } await loadCaches(); }
+async function undoLastImport() {
+  const rec = IMPORTS[IMPORTS.length - 1]; if (!rec) throw new Error('Niente da annullare (il registro di annullamento vale solo finché la pagina resta aperta)');
+  const list = [];
+  for (const o of [...rec.ops].reverse()) list.push(o.prev === undefined ? { s: o.s, k: o.k, del: true } : { s: o.s, k: o.k, v: o.prev });
+  for (const o of list) { if (lazy(o.s)) continue; if (o.del) M[o.s].delete(o.k); else M[o.s].set(o.k, cl(o.v)); }
+  await persist(list); IMPORTS.pop(); await loadCaches();
+}
+
+const pref = (k, d) => { try { const v = localStorage.getItem('cr-' + k); return v == null ? d : JSON.parse(v); } catch { return d; } };
+const setPref = (k, v) => { try { localStorage.setItem('cr-' + k, JSON.stringify(v)); } catch { } };
+
+/* =====================================================================
+   DATI: import JSON (anteprima + annulla), contesto per Claude, backup,
+   elaborazione immagini, lettura .docx
+   ===================================================================== */
+
+/* ---------- import: lettura tollerante ---------- */
+function parseLoose(raw) {
+  let t = String(raw || '').trim();
+  const f = t.match(/```(?:json)?\s*([\s\S]*?)```/i); if (f) t = f[1].trim();
+  const a = t.indexOf('{'), b = t.lastIndexOf('}');
+  if (a >= 0 && b > a) t = t.slice(a, b + 1);
+  try { return JSON.parse(t); }
+  catch (e1) { try { return JSON.parse(t.replace(/,\s*([}\]])/g, '$1')); } catch { throw e1; } }
+}
+
+const lightSession = (s, oldS) => ({
+  n: s.n, title: s.title ?? oldS?.title ?? '', date: s.date ?? oldS?.date ?? '', gameDate: s.gameDate ?? oldS?.gameDate ?? '',
+  brief: s.brief ?? oldS?.brief ?? '', arc: s.arc ?? oldS?.arc ?? ''
+});
+
+/* ---------- import: costruisce il piano senza scrivere nulla ---------- */
+async function planImport(raw) {
+  const P = { errors: [], warns: [], ents: [], sess: [], events: 0, evSessions: [], pins: [], misc: [], writes: [], general: null, label: '' };
+  let j;
+  try { j = parseLoose(raw); } catch (e) { P.errors.push('Il testo non è un JSON valido (' + e.message + '). Controlla di aver copiato l\'intera risposta, dalla prima all\'ultima parentesi graffa.'); return P; }
+  if (!j || typeof j !== 'object' || Array.isArray(j)) { P.errors.push('Il JSON deve essere un oggetto { … }.'); return P; }
+  if (!String(j.formato || '').startsWith('cronache/')) P.warns.push('Manca il campo "formato": "cronache/1". Proseguo comunque.');
+  const known = ['formato', 'sessioni', 'sessione', 'riassunto_generale', 'archi', 'entita_nuove', 'entita_aggiornate', 'eventi', 'mappe', 'segnaposto'];
+  const unk = Object.keys(j).filter(k => !known.includes(k)); if (unk.length) P.warns.push('Campi sconosciuti ignorati: ' + unk.join(', '));
+
+  const L = new Map(), B = new Map(), dirtyL = new Set(), dirtyB = new Set(), planned = new Map(), links = new Map(), entInfo = new Map();
+  const getL = id => { if (L.has(id)) return L.get(id); const e = S.ents.get(id); if (!e) return null; const c = clone(e); L.set(id, c); return c; };
+  const getB = async id => { if (B.has(id)) return B.get(id); let b = await dbGet('bodies', id); b = b ? clone(b) : { id, sections: [] }; B.set(id, b); return b; };
+  const info = (id) => { if (!entInfo.has(id)) { const e = L.get(id) || S.ents.get(id); entInfo.set(id, { id, name: e?.name || id, type: e?.type, isNew: false, notes: [] }); } return entInfo.get(id); };
+  const resolve = ref => {
+    if (ref == null || ref === '') return null; ref = String(ref).trim();
+    if (L.has(ref) || S.ents.has(ref)) return ref;
+    const k = norm(ref); const pl = planned.get(k); if (pl) return pl;
+    const a = S.byName.get(k); if (a && a.length) { if (a.length > 1) P.warns.push(`Il nome «${ref}» corrisponde a più schede: uso la prima (${a[0]}). Meglio usare l'id.`); return a[0]; }
+    return null;
+  };
+  const findDup = (nome, alias, type) => {
+    for (const n of [nome, ...(alias || [])]) {
+      const k = norm(n); if (!k) continue;
+      const pl = planned.get(k); if (pl && (L.get(pl)?.type === type)) return pl;
+      const a = S.byName.get(k); if (a) { const hit = a.find(id => S.ents.get(id).type === type); if (hit) return hit; }
+    }
+    return null;
+  };
+  const sNums = []; const sessList = Array.isArray(j.sessioni) ? j.sessioni : (j.sessione ? [j.sessione] : []);
+  for (const s of sessList) { const n = Number(s.numero ?? s.n); if (Number.isFinite(n) && n > 0) sNums.push(Math.round(n)); }
+  const curN = sNums.length ? Math.max(...sNums) : lastSessionN();
+  const nOf = (x, d = curN) => (x === undefined ? d : (x === null ? null : (Number.isFinite(Number(x)) ? Number(x) : d)));
+  const touch = (id, n) => { const l = getL(id); if (!l || n == null || !Number.isFinite(n)) return; l.sessions = l.sessions || []; if (!l.sessions.includes(n)) { l.sessions.push(n); l.sessions.sort((a, b) => a - b); } l.upd = Date.now(); dirtyL.add(id); };
+  const addEntry = (b, title, text, n) => {
+    title = String(title || 'Note').trim(); text = String(text || '').trim(); if (!text) return false;
+    let s = b.sections.find(x => norm(x.title) === norm(title)); if (!s) { s = { title, entries: [] }; b.sections.push(s); }
+    if (s.entries.some(x => norm(x.text) === norm(text))) return false;
+    s.entries.push({ n: n ?? null, text }); return true;
+  };
+  const addLink = (from, ref, label, note) => {
+    const to = resolve(ref); if (!to) { P.warns.push(`Relazione di «${info(from).name}» verso «${ref}»: scheda non trovata, saltata.`); return; }
+    if (to === from) return;
+    const lab = String(label || '').trim(); const k = from + '|' + to + '|' + norm(lab);
+    if (!links.has(k)) { links.set(k, { k, from, to, label: lab }); note.push(`relazione: ${lab || '→'} ${L.get(to)?.name || S.ents.get(to)?.name || to}`); }
+  };
+
+  /* ----- sessioni ----- */
+  const sessWrites = [];
+  for (const s of sessList) {
+    const n = Math.round(Number(s.numero ?? s.n));
+    if (!Number.isFinite(n) || n < 1) { P.warns.push('Una sessione senza "numero" valido è stata saltata.'); continue; }
+    const old = S.sess.find(x => x.n === n); const oldB = old ? await dbGet('sbodies', n) : null;
+    const summary = s.riassunto ?? s.summary ?? oldB?.summary ?? '';
+    const brief = s.breve ?? (old?.brief || String(summary).replace(/\s+/g, ' ').slice(0, 160));
+    const light = lightSession({ n, title: s.titolo, date: s.data, gameDate: s.data_in_gioco, brief, arc: s.arco }, old);
+    sessWrites.push({ s: 'sessions', v: light }, { s: 'sbodies', v: { n, summary, docs: oldB?.docs || [] } });
+    P.sess.push({ n, title: light.title, replaced: !!old, len: String(summary).length });
+    if (old) P.warns.push(`La sessione ${n} esisteva già: verrà aggiornata con i nuovi dati.`);
+  }
+
+  /* ----- entità nuove ----- */
+  const portraitWrites = [];
+  const setPortrait = async (id, data, notes) => {
+    if (!data) return;
+    try {
+      if (!/^data:image\/(png|jpe?g|webp);base64,/i.test(String(data))) throw new Error('formato non valido (serve un data URL base64 PNG/JPG/WebP)');
+      const im = await processImage(dataURLtoBlob(String(data)), 900); const l = getL(id);
+      l.portrait = { id: 'portrait-' + id, thumb: im.thumb }; dirtyL.add(id); notes.push('ritratto');
+      portraitWrites.push({ s: 'blobs', v: { id: 'portrait-' + id, blob: im.blob, type: im.blob.type } });
+    } catch (e) { P.warns.push(`Ritratto di «${info(id).name}» non importato: ${e.message}`); }
+  };
+  const applyUpdate = async (id, u, n, nt) => {
+    const l = getL(id), b = await getB(id), inf = info(id), notes = inf.notes;
+    const nome = u.nome; if (nome && nome !== l.name) { l.alias = [...new Set([...(l.alias || []), l.name])]; notes.push(`rinominata da «${l.name}»`); l.name = nome; planned.set(norm(nome), id); }
+    if (u.breve != null && u.breve !== l.brief && (!nt || !l.brief)) { l.brief = String(u.breve); notes.push('riga breve aggiornata'); }
+    if (u.stato != null && u.stato !== l.status) { notes.push(`stato: ${l.status || '—'} → ${u.stato}`); l.status = String(u.stato); }
+    if (u.scoperto != null && !!u.scoperto !== (l.discovered !== false)) { l.discovered = !!u.scoperto; notes.push(l.discovered ? 'segnata come scoperta' : 'segnata come NON scoperta'); }
+    const al = (u.alias_aggiunti || u.alias || []).map(String).filter(a => a && norm(a) !== norm(l.name)); const newAl = al.filter(a => !(l.alias || []).some(x => norm(x) === norm(a)));
+    if (newAl.length) { l.alias = [...(l.alias || []), ...newAl]; notes.push('alias: ' + newAl.join(', ')); newAl.forEach(a => planned.set(norm(a), id)); }
+    const ag = u.aggiunte || []; let added = 0;
+    for (const a of ag) { if (addEntry(b, a.sezione || a.titolo, a.testo, nOf(a.sessione, n))) added++; }
+    if (added) notes.push(`+${added} aggiunt${added > 1 ? 'e' : 'a'} alle schede`);
+    for (const r of u.sostituzioni || []) {
+      const t = String(r.testo || '').trim(); if (!t) continue; const title = r.sezione || r.titolo || 'Note';
+      let s = b.sections.find(x => norm(x.title) === norm(title)); if (!s) { s = { title, entries: [] }; b.sections.push(s); }
+      s.entries = [{ n: null, text: t }]; notes.push(`sezione «${title}» riscritta`);
+    }
+    for (const r of u.relazioni_aggiunte || u.relazioni || []) addLink(id, r.con, r.etichetta, notes);
+    await setPortrait(id, u.ritratto, notes);
+    l.upd = Date.now(); dirtyL.add(id); dirtyB.add(id); touch(id, n);
+  };
+  for (const e of j.entita_nuove || []) {
+    const type = typeOf(e.tipo); const nome = String(e.nome || '').trim();
+    if (!nome) { P.warns.push('Una nuova entità senza "nome" è stata saltata.'); continue; }
+    if (!type) P.warns.push(`«${nome}»: tipo "${e.tipo}" sconosciuto, uso "lore".`);
+    const t = type || 'lore'; const n = nOf(e.sessione);
+    let dup = null; if (e.id && (S.ents.has(String(e.id)) || L.has(String(e.id)))) dup = String(e.id); if (!dup) dup = findDup(nome, e.alias, t);
+    if (dup) {
+      P.warns.push(`«${nome}» esiste già (${dup}): unita alla scheda esistente invece di duplicarla.`);
+      await applyUpdate(dup, { ritratto: e.ritratto, breve: e.breve, stato: e.stato, scoperto: e.scoperto, alias_aggiunti: e.alias, aggiunte: (e.sezioni || []).map(s => ({ sezione: s.titolo, testo: s.testo, sessione: s.sessione })), relazioni_aggiunte: e.relazioni }, n, true);
+      continue;
+    }
+    let id = String(e.id || (t + '-' + slug(nome))).trim(); const base = id; let i = 2; while (S.ents.has(id) || L.has(id)) id = base + '-' + (i++);
+    const l = { id, type: t, name: nome, alias: [...new Set((e.alias || []).map(String).filter(a => a && norm(a) !== norm(nome)))], brief: String(e.breve || ''), status: String(e.stato || ''), discovered: e.scoperto !== false, sessions: [], upd: Date.now() };
+    L.set(id, l); B.set(id, { id, sections: [] }); dirtyL.add(id); dirtyB.add(id);
+    for (const nm of [nome, ...l.alias]) planned.set(norm(nm), id);
+    const inf = info(id); inf.isNew = true; inf.name = nome; inf.type = t;
+    const b = B.get(id); for (const s of e.sezioni || []) addEntry(b, s.titolo, s.testo, nOf(s.sessione, n));
+    await setPortrait(id, e.ritratto, inf.notes);
+    touch(id, n);
+  }
+  /* relazioni delle nuove, dopo averle create tutte */
+  for (const e of j.entita_nuove || []) {
+    const id = planned.get(norm(String(e.nome || ''))); if (!id) continue;
+    for (const r of e.relazioni || []) addLink(id, r.con, r.etichetta, info(id).notes);
+  }
+  /* ----- entità aggiornate ----- */
+  for (const u of j.entita_aggiornate || []) {
+    const id = resolve(u.id ?? u.nome); if (!id) { P.warns.push(`Aggiornamento saltato: scheda «${u.id ?? u.nome}» non trovata. Se è nuova, mettila in "entita_nuove".`); continue; }
+    await applyUpdate(id, u, nOf(u.sessione), false);
+  }
+  /* ----- eventi ----- */
+  const evWrites = [], evDel = new Set(); const evCount = new Map();
+  for (const ev of j.eventi || []) {
+    const n = ev.sessione != null ? Number(ev.sessione) : curN; const title = String(ev.titolo || '').trim();
+    if (!title && !ev.testo) continue;
+    if (!evDel.has(n)) { evDel.add(n); for (const o of await dbIdx('events', 'n', n)) evWrites.push({ s: 'events', k: o.id, del: true }); }
+    const idx = evCount.get(n) || 0; evCount.set(n, idx + 1);
+    const ents = []; for (const r of ev.entita || []) { const id = resolve(r); if (id) { ents.push(id); touch(id, n); } else P.warns.push(`Evento «${title}»: entità «${r}» non trovata.`); }
+    evWrites.push({ s: 'events', v: { id: `ev-${n}-${String(idx).padStart(3, '0')}`, n, idx, title, text: String(ev.testo || ''), gameDate: ev.data_in_gioco || '', ents: [...new Set(ents)] } });
+    P.events++;
+  }
+  P.evSessions = [...evDel];
+
+  /* ----- riassunto generale, archi ----- */
+  const miscWrites = [];
+  if (typeof j.riassunto_generale === 'string' && j.riassunto_generale.trim()) {
+    const old = getMeta('general', null);
+    P.general = { oldLen: old?.text?.length || 0, newLen: j.riassunto_generale.length, text: j.riassunto_generale };
+    const hist = [...getMeta('generalHist', [])]; if (old?.text) hist.push({ ts: old.ts, upto: old.upto, text: old.text });
+    miscWrites.push({ s: 'meta', v: { k: 'general', v: { text: j.riassunto_generale.trim(), upto: curN, ts: Date.now() } } }, { s: 'meta', v: { k: 'generalHist', v: hist.slice(-10) } });
+  }
+  if (Array.isArray(j.archi) && j.archi.length) {
+    const arcs = clone(getMeta('arcs', []));
+    for (const a of j.archi) {
+      const id = String(a.id || 'arco-' + slug(a.titolo || '')); const rec = { id, title: a.titolo || id, from: a.da ?? null, to: a.a ?? null, summary: a.riassunto || '' };
+      const i = arcs.findIndex(x => x.id === id); if (i >= 0) arcs[i] = { ...arcs[i], ...rec }; else arcs.push(rec);
+      P.misc.push(`Arco narrativo «${rec.title}» ${i >= 0 ? 'aggiornato' : 'creato'}`);
+    }
+    miscWrites.push({ s: 'meta', v: { k: 'arcs', v: arcs } });
+  }
+  /* ----- mappe e segnaposto ----- */
+  const resolveMap = ref => { if (!ref) return null; const r = String(ref).trim(); return S.maps.find(m => m.id === r) || S.maps.find(m => norm(m.name) === norm(r)) || null; };
+  const mapWrites = [];
+  for (const m of j.mappe || []) {
+    const mp = resolveMap(m.id ?? m.nome); if (!mp) { P.warns.push(`Mappa «${m.id ?? m.nome}» non trovata (carica prima l'immagine nell'app).`); continue; }
+    const c = clone(mp); if (m.descrizione != null) c.desc = String(m.descrizione); if (m.scoperta != null) c.discovered = !!m.scoperta;
+    mapWrites.push({ s: 'maps', v: c }); P.misc.push(`Mappa «${mp.name}» aggiornata`);
+  }
+  const pinCache = new Map();
+  for (const p of j.segnaposto || []) {
+    const mp = resolveMap(p.mappa); if (!mp) { P.warns.push(`Segnaposto saltato: mappa «${p.mappa}» non trovata.`); continue; }
+    const entId = p.entita ? resolve(p.entita) : null;
+    if (p.entita && !entId) { if (!p.etichetta) { P.warns.push(`Segnaposto «${p.entita}» su «${mp.name}»: scheda non trovata, saltato.`); continue; } P.warns.push(`Segnaposto «${p.entita}»: scheda non trovata, uso solo l'etichetta.`); }
+    const x = Number(p.x), y = Number(p.y); if (!Number.isFinite(x) || !Number.isFinite(y)) { P.warns.push(`Segnaposto su «${mp.name}» senza coordinate x/y valide: saltato.`); continue; }
+    if (!pinCache.has(mp.id)) pinCache.set(mp.id, (await dbIdx('pins', 'mapId', mp.id)).map(clone));
+    const list = pinCache.get(mp.id);
+    let ex = entId ? list.find(q => q.entityId === entId) : list.find(q => !q.entityId && norm(q.label) === norm(p.etichetta));
+    const target = p.apre_mappa ? resolveMap(p.apre_mappa) : null; if (p.apre_mappa && !target) P.warns.push(`«apre_mappa» «${p.apre_mappa}» non trovata.`);
+    const rec = ex ? { ...ex } : { id: 'pin-' + uid(), mapId: mp.id, entityId: entId, label: null, discovered: true, targetMapId: null };
+    rec.x = clamp(x, 0, 100); rec.y = clamp(y, 0, 100); if (p.etichetta != null) rec.label = String(p.etichetta); if (p.scoperto != null) rec.discovered = !!p.scoperto; if (target) rec.targetMapId = target.id;
+    if (!ex) list.push(rec); else list[list.indexOf(ex)] = rec;
+    mapWrites.push({ s: 'pins', v: rec });
+    P.pins.push({ map: mp.name, name: entId ? (L.get(entId)?.name || S.ents.get(entId)?.name) : p.etichetta, moved: !!ex, x: rec.x, y: rec.y });
+  }
+  /* ----- assemblaggio ----- */
+  const writes = [...sessWrites];
+  for (const id of dirtyL) writes.push({ s: 'entities', v: L.get(id) });
+  for (const id of dirtyB) writes.push({ s: 'bodies', v: B.get(id) });
+  for (const l of links.values()) writes.push({ s: 'links', v: l });
+  writes.push(...evWrites, ...miscWrites, ...mapWrites, ...portraitWrites);
+  P.writes = writes;
+  P.ents = [...entInfo.values()].filter(x => dirtyL.has(x.id)).sort((a, b) => (b.isNew - a.isNew) || a.name.localeCompare(b.name));
+  P.linksCount = links.size;
+  if (!writes.length && !P.errors.length) P.errors.push('Il file è valido ma non contiene nulla da importare.');
+  P.label = `Import${sNums.length ? ' sessione ' + sNums.join(', ') : ''}: ${P.ents.filter(e => e.isNew).length} nuove schede, ${P.ents.filter(e => !e.isNew).length} aggiornate`;
+  return P;
+}
+async function applyImport(P) {
+  const stores = [...new Set(P.writes.map(w => w.s))];
+  await runBatch(stores, P.label, async b => { for (const w of P.writes) { if (w.del) await b.del(w.s, w.k); else await b.put(w.s, w.v); } }, { undo: true });
+}
+
+/* ---------- contesto da incollare a Claude ---------- */
+const FORMAT_SPEC = `Sei l'assistente che tiene aggiornato il database della mia campagna di D&D (app "Campagna D&D").
+Qui sotto trovi lo STATO ATTUALE. Ti incollerò anche il riassunto di una nuova sessione (e, se serve, immagini di mappe con indicazioni sui luoghi).
+Il tuo compito: rispondere SOLO con un unico JSON valido, in un blocco di codice, nel formato descritto. Niente altro testo prima o dopo.
+
+REGOLE
+- Niente duplicati: se un PNG/luogo/oggetto/fazione è già nell'elenco ENTITÀ (anche con nome scritto diversamente), aggiornalo in "entita_aggiornate" con il suo id esatto. Crea una "entita_nuova" solo se davvero non esiste.
+- In "aggiunte" metti SOLO le novità di questa sessione: vengono accodate alla scheda con l'indicazione della sessione. Non riscrivere ciò che c'è già; usa "sostituzioni" solo per condensare una sezione diventata troppo lunga.
+- "breve" = una riga (max ~120 caratteri). "stato" = poche parole (vivo, morto, attiva, completata, distrutto, scomparso…).
+- Tipi: pg, png, luogo, oggetto, fazione, missione, lore (creature, divinità, concetti, eventi storici…).
+- Sezioni consigliate: PG → Background, Storia personale, Sviluppi; PNG → Descrizione, Ruolo, Storia; luogo → Descrizione, Storia; missione → Obiettivo, Sviluppi.
+- Nei testi puoi usare **grassetto**, elenchi con "-" e citare altre schede con [[id]] o [[id|testo]] (diventano link).
+- "riassunto_generale": riscrivilo integrando la nuova sessione, in modo compatto e scorrevole. La lunghezza deve restare quasi costante: condensa il vecchio, non accumulare.
+- "eventi": 3–10 momenti chiave della sessione in ordine cronologico, 1–2 frasi ciascuno.
+- Se ti mando più sessioni insieme, indica "sessione" su ogni elemento che lo richiede.
+- "segnaposto": x e y sono percentuali (0–100) dell'immagine, x da sinistra, y dall'alto. Usa l'id della mappa dall'elenco MAPPE. Un luogo già presente sulla stessa mappa viene spostato. "apre_mappa" = id di una mappa più dettagliata collegata al segnaposto.
+- Non inventare nulla che non sia nel riassunto o nelle mie indicazioni. Ometti i campi che non servono.
+
+FORMATO (tutti i campi sono facoltativi)
+{
+ "formato": "cronache/1",
+ "sessioni": [{"numero": 12, "titolo": "…", "data": "2026-10-10", "data_in_gioco": "3 Ghiaccio 1042", "arco": "arco-1", "breve": "1–2 frasi", "riassunto": "riassunto completo della sessione"}],
+ "riassunto_generale": "…",
+ "archi": [{"id": "arco-1", "titolo": "…", "da": 1, "a": 8, "riassunto": "…"}],
+ "entita_nuove": [{"id": "png-mira", "tipo": "png", "nome": "Mira", "alias": ["La Volpe"], "breve": "…", "stato": "viva", "scoperto": true, "sezioni": [{"titolo": "Descrizione", "testo": "…"}], "relazioni": [{"con": "luogo-porto", "etichetta": "vive a"}]}],
+ "entita_aggiornate": [{"id": "png-mira", "nome": null, "breve": null, "stato": "morta", "alias_aggiunti": [], "scoperto": true, "aggiunte": [{"sezione": "Storia", "testo": "…"}], "sostituzioni": [], "relazioni_aggiunte": [{"con": "fazione-x", "etichetta": "alleata di"}]}],
+ "eventi": [{"sessione": 12, "titolo": "…", "testo": "…", "data_in_gioco": "…", "entita": ["png-mira"]}],
+ "mappe": [{"id": "map-mondo", "descrizione": "…", "scoperta": true}],
+ "segnaposto": [{"mappa": "map-mondo", "entita": "luogo-porto", "etichetta": null, "x": 42.5, "y": 31.0, "apre_mappa": null, "scoperto": true}]
+}`;
+
+async function buildContext({ full = false } = {}) {
+  const camp = getMeta('campaign', { name: 'Campagna' }).name, gen = getMeta('general', null), arcs = getMeta('arcs', []);
+  const last = lastSessionN(); const recentFrom = S.sess.length ? S.sess[Math.max(0, S.sess.length - 4)].n : 0;
+  const pins = await dbAll('pins'); const byMap = new Map(); for (const p of pins) { if (!byMap.has(p.mapId)) byMap.set(p.mapId, []); byMap.get(p.mapId).push(p); }
+  const o = [];
+  o.push(`=== CRONACHE · CONTESTO CAMPAGNA ===`, FORMAT_SPEC, '', `=== STATO ATTUALE ===`, `Campagna: ${camp}`, `Sessioni registrate: ${S.sess.length}${last != null ? ` (ultima: n. ${last}${S.sess[S.sess.length - 1].title ? ' — ' + S.sess[S.sess.length - 1].title : ''})` : ''}`);
+  o.push('', '--- RIASSUNTO GENERALE ATTUALE ---', gen?.text || '(vuoto: è la prima sessione)');
+  if (arcs.length) { o.push('', '--- ARCHI NARRATIVI ---'); for (const a of arcs) o.push(`${a.id} | ${a.title} | sessioni ${a.from ?? '?'}–${a.to ?? '…'} | ${(a.summary || '').replace(/\s+/g, ' ').slice(0, 300)}`); }
+  const recent = S.sess.slice(-3).filter(s => s.brief); if (recent.length) { o.push('', '--- ULTIME SESSIONI (breve) ---'); for (const s of recent) o.push(`Sess. ${s.n}${s.title ? ' · ' + s.title : ''}: ${s.brief}`); }
+  o.push('', `--- ENTITÀ (formato: id | tipo | nome (alias) | stato${full ? ' | breve' : ' | breve solo per le schede recenti'}) ---`);
+  const ents = [...S.ents.values()].sort((a, b) => TYPE_ORDER.indexOf(a.type) - TYPE_ORDER.indexOf(b.type) || a.name.localeCompare(b.name));
+  if (!ents.length) o.push('(nessuna entità ancora)');
+  for (const e of ents) {
+    const recentE = (e.sessions || []).some(n => n >= recentFrom);
+    const al = e.alias?.length ? ` (alias: ${e.alias.join(', ')})` : '';
+    o.push(`${e.id} | ${e.type} | ${e.name}${al} | ${e.status || '—'}${e.type === 'luogo' && e.discovered === false ? ' | NON scoperto' : ''}${(full || recentE) && e.brief ? ' | ' + e.brief : ''}`);
+  }
+  o.push('', '--- MAPPE (id | nome | madre | scoperta | dimensioni | descrizione | segnaposto già presenti: entità@x,y) ---');
+  if (!S.maps.length) o.push('(nessuna mappa caricata)');
+  for (const m of S.maps) {
+    const ps = (byMap.get(m.id) || []).map(p => `${p.entityId || '«' + p.label + '»'}@${p.x.toFixed(1)},${p.y.toFixed(1)}${p.targetMapId ? '→' + p.targetMapId : ''}`).join('; ');
+    o.push(`${m.id} | ${m.name} | ${m.parent || '—'} | ${m.discovered === false ? 'no' : 'sì'} | ${m.w}x${m.h} | ${(m.desc || '').replace(/\s+/g, ' ')} | ${ps || 'nessuno'}`);
+  }
+  o.push('', '=== FINE CONTESTO — qui sotto il riassunto della nuova sessione ===');
+  return o.join('\n');
+}
+async function buildEntityText(id) {
+  const e = S.ents.get(id), b = await dbGet('bodies', id) || { sections: [] };
+  const out = await dbIdx('links', 'from', id);
+  const o = [`# ${e.name} [${id}] (${TYPES[e.type]})`, e.status ? `Stato: ${e.status}` : '', e.alias?.length ? `Alias: ${e.alias.join(', ')}` : '', e.brief ? `Breve: ${e.brief}` : ''].filter(Boolean);
+  for (const s of b.sections) { o.push('', '## ' + s.title); for (const en of s.entries) o.push((en.n != null ? `[Sess. ${en.n}] ` : '') + en.text); }
+  if (out.length) { o.push('', '## Relazioni'); for (const l of out) o.push(`- ${l.label || '→'} ${S.ents.get(l.to)?.name || l.to} [${l.to}]`); }
+  return o.join('\n');
+}
+async function copyText(text, okMsg = 'Copiato negli appunti') {
+  try { await navigator.clipboard.writeText(text); toast(okMsg); return true; }
+  catch {
+    const d = openDlg(`<form method="dialog"><h3>Copia manualmente</h3><p class="hint">Il browser non permette la copia automatica da qui. Seleziona tutto (Ctrl+A) e copia (Ctrl+C).</p><textarea class="big" id="cpx" readonly></textarea><menu><button class="btn primary" value="ok">Chiudi</button></menu></form>`, 'wide');
+    const t = $('#cpx', d); t.value = text; t.focus(); t.select(); return false;
+  }
+}
+
+/* ---------- backup ---------- */
+const BK_STORES = ['meta', 'entities', 'bodies', 'sessions', 'sbodies', 'events', 'maps', 'pins', 'links', 'regions'];
+const blobToDataURL = b => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsDataURL(b); });
+function dataURLtoBlob(u) { const [h, d] = u.split(','); const mime = h.match(/:(.*?);/)[1]; const bin = atob(d); const a = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); return new Blob([a], { type: mime }); }
+async function buildBackup(withImages) {
+  const data = {}; for (const st of BK_STORES) data[st] = await dbAll(st);
+  const parts = ['{"formato":"cronache-backup/1","ts":' + Date.now() + ',"stores":', JSON.stringify(data)];
+  if (withImages) {
+    const blobs = await dbAll('blobs'); parts.push(',"blobs":[');
+    for (let i = 0; i < blobs.length; i++) { const r = await dbGet('blobs', blobs[i].id).catch(() => null); if (!r) continue; parts.push((i ? ',' : '') + JSON.stringify({ id: r.id, type: r.type, data: await blobToDataURL(r.blob) })); }
+    parts.push(']');
+  }
+  parts.push('}'); return new Blob(parts, { type: 'application/json' });
+}
+async function download(blob, name) {
+  const dl = await claude.use('downloads'); if (!dl) throw new Error('Il salvataggio di file non è disponibile qui.');
+  try { await dl.save({ filename: name, data: blob }); } catch (e) { if (e && e.code === 'declined') return; throw new Error(e.message || 'Salvataggio non riuscito'); }
+}
+const stamp = () => { const d = new Date(), p = n => String(n).padStart(2, '0'); return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}`; };
+async function doBackup(withImages) {
+  const blob = await buildBackup(withImages);
+  await download(blob, `campagna-dnd-backup-${stamp()}${withImages ? '' : '-solo-dati'}.json`);
+  await setMeta('lastBackup', Date.now()); toast('Backup scaricato (' + fmtSize(blob.size) + ')');
+}
+async function restoreBackup(text) {
+  let j; try { j = JSON.parse(text); } catch (e) { throw new Error('File non valido: ' + e.message); }
+  if (j.formato !== 'cronache-backup/1' || !j.stores) throw new Error('Questo non sembra un backup di Campagna D&D.');
+  await wipeAll(true);
+  const ops = []; for (const st of BK_STORES) for (const r of j.stores[st] || []) ops.push({ s: st, k: r[KEYP[st]], v: r });
+  if (j.blobs) for (const bl of j.blobs) { const blob = dataURLtoBlob(bl.data); ops.push({ s: 'blobs', k: bl.id, v: await putBlobRec({ id: bl.id, blob, type: bl.type || blob.type }) }); }
+  for (const o of ops) if (!lazy(o.s)) M[o.s].set(o.k, o.v);
+  await persist(ops); await loadCaches();
+  return { images: !!j.blobs };
+}
+async function wipeAll(keepBlobs) {
+  const st = STORES.filter(x => !(keepBlobs && x === 'blobs')); const ops = [];
+  for (const x of st) { if (lazy(x)) { for (const d of (await colOf(x).get()).docs) ops.push({ s: x, k: d.id, del: true }); } else { for (const k of M[x].keys()) ops.push({ s: x, k, del: true }); M[x].clear(); } }
+  await persist(ops); IMPORTS.length = 0; await loadCaches();
+}
+
+/* ---------- immagini delle mappe ---------- */
+async function loadBitmap(file) {
+  if (window.createImageBitmap) { try { return await createImageBitmap(file); } catch { } }
+  return await new Promise((res, rej) => { const u = URL.createObjectURL(file), im = new Image(); im.onload = () => { res(im); }; im.onerror = () => rej(new Error('Immagine non leggibile')); im.src = u; });
+}
+const canvasBlob = (c, type, q) => new Promise(r => c.toBlob(r, type, q));
+async function processImage(file, MAX = 4096) {
+  if (!file.type) { const x = (file.name || '').toLowerCase().split('.').pop(); const t = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', jfif: 'image/jpeg', webp: 'image/webp', gif: 'image/gif', bmp: 'image/bmp' }[x]; if (t) file = new File([file], file.name, { type: t }); }
+  if (!/^image\/(png|jpe?g|webp|gif|bmp)$/i.test(file.type)) throw new Error('Formato non supportato: usa PNG, JPG o WebP.');
+  const bmp = await loadBitmap(file); const w = bmp.width, h = bmp.height;
+  let blob = file, W = w, H = h;
+  const keep = file.size <= 5 * 1048576 && Math.max(w, h) <= MAX && /^image\/(png|jpe?g|webp)$/i.test(file.type);
+  if (!keep) {
+    const s = Math.min(1, MAX / Math.max(w, h)); W = Math.round(w * s); H = Math.round(h * s);
+    const c = document.createElement('canvas'); c.width = W; c.height = H; c.getContext('2d').drawImage(bmp, 0, 0, W, H);
+    blob = await canvasBlob(c, 'image/webp', 0.92); if (!blob || blob.type !== 'image/webp') blob = await canvasBlob(c, 'image/jpeg', 0.9);
+  }
+  const ts = 360 / Math.max(W, 1), tc = document.createElement('canvas'); tc.width = Math.min(360, W); tc.height = Math.max(1, Math.round(H * Math.min(1, ts)));
+  tc.getContext('2d').drawImage(bmp, 0, 0, tc.width, tc.height);
+  return { blob, w: W, h: H, thumb: tc.toDataURL('image/jpeg', 0.7), shrunk: !keep };
+}
+
+/* ---------- lettura .docx (zip + deflate nativo, offline) ---------- */
+async function docxText(file) {
+  const buf = new Uint8Array(await file.arrayBuffer()), dv = new DataView(buf.buffer);
+  let e = buf.length - 22; while (e >= 0 && !(buf[e] === 0x50 && buf[e + 1] === 0x4b && buf[e + 2] === 5 && buf[e + 3] === 6)) e--;
+  if (e < 0) throw new Error('File .docx non valido');
+  const cnt = dv.getUint16(e + 10, true); let p = dv.getUint32(e + 16, true); const dec = new TextDecoder();
+  for (let i = 0; i < cnt; i++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) break;
+    const method = dv.getUint16(p + 10, true), csize = dv.getUint32(p + 20, true), nlen = dv.getUint16(p + 28, true), xlen = dv.getUint16(p + 30, true), clen = dv.getUint16(p + 32, true), lho = dv.getUint32(p + 42, true);
+    const name = dec.decode(buf.subarray(p + 46, p + 46 + nlen));
+    if (name === 'word/document.xml') {
+      const start = lho + 30 + dv.getUint16(lho + 26, true) + dv.getUint16(lho + 28, true); const data = buf.slice(start, start + csize);
+      let xml; if (method === 0) xml = dec.decode(data);
+      else { if (typeof DecompressionStream === 'undefined') throw new Error('Il browser non supporta la lettura dei .docx: incolla il testo.'); xml = await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text(); }
+      return xml.replace(/<w:tab\/>/g, '\t').replace(/<w:br[^>]*\/>/g, '\n').replace(/<\/w:p>/g, '\n').replace(/<[^>]+>/g, '')
+        .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, '&').replace(/\n{3,}/g, '\n\n').trim();
+    }
+    p += 46 + nlen + xlen + clen;
+  }
+  throw new Error('Nel .docx non ho trovato il testo.');
+}
+async function readTextFile(file) {
+  const n = file.name.toLowerCase();
+  if (n.endsWith('.docx')) return await docxText(file);
+  if (n.endsWith('.pdf')) throw new Error('I PDF non si leggono offline: apri il PDF, copia il testo e incollalo.');
+  if (n.endsWith('.doc')) throw new Error('Il vecchio formato .doc non è supportato: salvalo come .docx o incolla il testo.');
+  return (await file.text()).trim();
+}
+
+/* ---------- campagna di esempio (solo per provare) ---------- */
+const DEMO_JSON = {
+  formato: 'cronache/1',
+  sessioni: [
+    { numero: 1, titolo: 'La locanda del Corvo Zoppo', data: '2026-09-12', data_in_gioco: '1 Messe', breve: 'Il gruppo si incontra a Valdoro e accetta l\'incarico di Mira.', riassunto: 'I quattro avventurieri si ritrovano alla locanda del **Corvo Zoppo** a Valdoro. La mercante [[png-mira]] offre una ricompensa per recuperare un carico scomparso lungo la Via del Sale.\n\nDopo una rissa con i Lupi Grigi, il gruppo parte all\'alba.' },
+    { numero: 2, titolo: 'Sulla Via del Sale', data: '2026-09-19', data_in_gioco: '3 Messe', breve: 'Imboscata dei Lupi Grigi e scoperta del Faro Spezzato.', riassunto: 'Lungo la Via del Sale il gruppo cade in un\'imboscata dei [[fazione-lupi-grigi]]. Un prigioniero rivela che il carico è stato portato al **Faro Spezzato**.\n\n- Il capobanda Rurik fugge\n- Il gruppo trova una mappa incompleta' }
+  ],
+  riassunto_generale: 'Il gruppo, riunitosi a Valdoro, lavora per la mercante Mira per ritrovare un carico misterioso. Sulla Via del Sale ha scontrato i Lupi Grigi e ora cerca il Faro Spezzato, dove il carico sembra essere stato nascosto.',
+  archi: [{ id: 'arco-1', titolo: 'Il carico scomparso', da: 1, a: 2, riassunto: 'Dalla locanda di Valdoro alla ricerca del Faro Spezzato.' }],
+  entita_nuove: [
+    { id: 'pg-aldric', tipo: 'pg', nome: 'Aldric', breve: 'Paladino di Pelor, voce del gruppo', stato: 'vivo', sezioni: [{ titolo: 'Background', testo: 'Ex soldato della guardia di Valdoro, ha giurato fedeltà a Pelor dopo l\'assedio.', sessione: null }] },
+    { id: 'png-mira', tipo: 'png', nome: 'Mira', alias: ['La Volpe'], breve: 'Mercante di Valdoro che ha assoldato il gruppo', stato: 'viva', sezioni: [{ titolo: 'Descrizione', testo: 'Donna sulla quarantina, sguardo acuto, mantello verde.' }], relazioni: [{ con: 'luogo-valdoro', etichetta: 'commercia a' }] },
+    { id: 'png-rurik', tipo: 'png', nome: 'Rurik', breve: 'Capobanda dei Lupi Grigi', stato: 'in fuga', sezioni: [{ titolo: 'Descrizione', testo: 'Uomo massiccio con una cicatrice sull\'occhio sinistro.' }], relazioni: [{ con: 'fazione-lupi-grigi', etichetta: 'guida' }] },
+    { id: 'luogo-valdoro', tipo: 'luogo', nome: 'Valdoro', breve: 'Città mercantile sulla costa', sezioni: [{ titolo: 'Descrizione', testo: 'Porto fortificato, sede della locanda del Corvo Zoppo.' }] },
+    { id: 'luogo-faro-spezzato', tipo: 'luogo', nome: 'Faro Spezzato', breve: 'Rovina sulla scogliera, forse nasconde il carico', scoperto: false, sezioni: [{ titolo: 'Descrizione', testo: 'Citato dal prigioniero; nessuno del gruppo l\'ha ancora visto.' }] },
+    { id: 'fazione-lupi-grigi', tipo: 'fazione', nome: 'Lupi Grigi', breve: 'Banda di briganti della Via del Sale', stato: 'attiva' },
+    { id: 'missione-carico', tipo: 'missione', nome: 'Il carico scomparso', breve: 'Ritrovare il carico di Mira', stato: 'attiva', sezioni: [{ titolo: 'Obiettivo', testo: 'Recuperare il carico di sale rosa e riportarlo a Mira.', sessione: 1 }] },
+    { id: 'oggetto-mappa', tipo: 'oggetto', nome: 'Mappa incompleta', breve: 'Metà di una mappa trovata ai Lupi', sessione: 2 }
+  ],
+  eventi: [
+    { sessione: 1, titolo: 'L\'incarico di Mira', testo: 'Mira offre 500 mo per ritrovare il carico.', data_in_gioco: '1 Messe', entita: ['png-mira', 'missione-carico'] },
+    { sessione: 1, titolo: 'Rissa alla locanda', testo: 'I Lupi Grigi provocano il gruppo.', entita: ['fazione-lupi-grigi'] },
+    { sessione: 2, titolo: 'Imboscata', testo: 'I Lupi tendono un\'imboscata sulla Via del Sale; Rurik fugge.', entita: ['png-rurik'] },
+    { sessione: 2, titolo: 'Il Faro Spezzato', testo: 'Un prigioniero rivela dove si trova il carico.', entita: ['luogo-faro-spezzato', 'oggetto-mappa'] }
+  ]
+};
+
+/* =====================================================================
+   VISTE: campagna, sessioni, schede, cronologia, ricerca
+   ===================================================================== */
+const sessOf = n => S.sess.find(s => s.n === n);
+const sessLink = n => n == null ? '' : `<a href="#/sessioni/${n}">Sess. ${n}</a>`;
+const sessChips = arr => {
+  if (!arr?.length) return '<span class="mute">—</span>';
+  const f = n => `<a class="chip" href="#/sessioni/${n}">${n}</a>`;
+  if (arr.length <= 14) return `<div class="chips">${arr.map(f).join('')}</div>`;
+  return `<div class="chips">${arr.slice(0, 6).map(f).join('')}<span class="mute">… ${arr.length - 12} …</span>${arr.slice(-6).map(f).join('')}</div>`;
+};
+const rangeTxt = arr => !arr?.length ? '' : arr.length === 1 ? 'Sess. ' + arr[0] : `Sess. ${arr[0]}–${arr[arr.length - 1]}`;
+const hasData = () => S.sess.length || S.ents.size;
+
+/* ================= HOME ================= */
+route(/^\/$/, async () => {
+  const camp = getMeta('campaign', { name: 'La mia campagna' }), gen = getMeta('general', null), arcs = getMeta('arcs', []);
+  const evCount = await dbCount('events'); const lastBk = getMeta('lastBackup', 0);
+  const stale = !window.__RO && hasData() && (!lastBk || Date.now() - lastBk > 14 * 864e5);
+  const cnt = {}; for (const e of S.ents.values()) cnt[e.type] = (cnt[e.type] || 0) + 1;
+  const empty = !hasData() && !S.maps.length;
+  let h = `<div class="pagehead"><h1>${esc(camp.name)}</h1><div class="acts"><button class="btn" data-act="rename">Rinomina</button><button class="btn" data-act="copyctx">Copia contesto per Claude</button><a class="btn primary" href="#/import">Importa aggiornamento</a></div></div><div class="orn"></div>`;
+  if (stale) h += `<div class="banner"><span>${lastBk ? 'L\'ultimo backup risale a ' + fmtDate(lastBk) + '.' : 'Non hai ancora fatto nessun backup.'} I dati stanno solo nel browser: un backup ti mette al sicuro.</span><a class="btn sm" href="#/backup">Vai al backup</a></div>`;
+  if (empty) {
+    h += `<div class="card"><h2>Benvenuto, Dungeon Master</h2><p class="lead">La campagna è vuota. Il flusso di lavoro è questo:</p><ol class="steps">
+      <li><b>Copia il contesto</b> con il pulsante qui sopra (all'inizio è quasi vuoto: contiene le istruzioni e il formato).</li>
+      <li><b>Incollalo a Claude</b> insieme al riassunto della sessione preparato con Gemini (e, se vuoi, a una mappa con indicazioni sui luoghi).</li>
+      <li><b>Claude risponde con un JSON.</b> Premi «Importa aggiornamento», incollalo, controlla l'anteprima e conferma.</li>
+      <li>Il riassunto generale, le schede, la cronologia e i segnaposto sulle mappe si aggiornano. Se qualcosa non va, puoi annullare l'ultima importazione.</li></ol>
+      <div class="row"><a class="btn" href="#/mappe">Carica una mappa</a><button class="btn ghost" data-act="demo">Prova con dati di esempio</button></div>
+      <p class="hint">I dati di esempio si possono cancellare da Backup → «Svuota tutto».</p></div>`;
+  } else {
+    h += `<div class="card"><div class="stat"><div><b>${S.sess.length}</b><span>sessioni</span></div><div><b>${S.ents.size}</b><span>schede</span></div><div><b>${evCount}</b><span>eventi</span></div><div><b>${S.maps.length}</b><span>mappe</span></div></div>
+      <div class="chips" style="margin-top:12px">${TYPE_ORDER.filter(t => cnt[t]).map(t => `<a class="chip" href="#/schede?tipo=${t}">${TYPE_PL[t]} <em>${cnt[t]}</em></a>`).join('')}</div></div>`;
+    const pro = await dbGet('bodies', 'lore-introduzione-al-mondo');
+    if (pro?.sections?.length) h += `<div class="card"><div class="spread"><h2>Prologo</h2><a href="#/scheda/lore-introduzione-al-mondo">Apri la scheda →</a></div><details class="arc" open><summary>Il mondo di gioco<small>introduzione</small></summary>${pro.sections.map(sc => `${sc.title ? `<h3>${esc(sc.title)}</h3>` : ''}${sc.entries.map(en => prose(en.text)).join('')}`).join('')}</details></div>`;
+    h += `<div class="card"><div class="spread"><h2>Riassunto di quanto fatto finora</h2><div class="row"><button class="btn sm" data-act="editgen">Modifica</button>${(getMeta('generalHist', []).length) ? '<button class="btn sm ghost" data-act="histgen">Versioni precedenti</button>' : ''}</div></div>
+      ${gen?.text ? prose(gen.text) + `<p class="hint">Aggiornato ${fmtDate(gen.ts)}${gen.upto != null ? ' · fino alla sessione ' + gen.upto : ''}</p>` : '<p class="empty">Il riassunto comparirà alla prima importazione.</p>'}
+      ${S.sess.length ? `<div class="spread" style="margin-top:14px"><h3 style="margin:0">Sessione per sessione</h3><a href="#/sessioni">Tutte le sessioni →</a></div><p class="hint">Apri una riga per il dettaglio, poi «Apri la sessione» per il resoconto completo.</p>${S.sess.map(s => `<details class="arc"><summary><b>${s.n}. ${esc(s.title || 'Sessione ' + s.n)}</b>${s.gameDate ? `<small>${esc(s.gameDate)}</small>` : ''}<br><span class="mute" style="font-family:var(--body);font-weight:400;letter-spacing:0;font-size:.95rem">${esc(s.short || s.brief || '')}</span></summary>${s.brief && s.brief !== s.short ? `<p>${esc(s.brief)}</p>` : ''}<a class="btn sm" href="#/sessioni/${s.n}">Apri la sessione →</a></details>`).join('')}` : ''}</div>`;
+    if (arcs.length) h += `<div class="card"><h2>Archi narrativi</h2>${arcs.map(a => `<details class="arc"><summary>${esc(a.title)}<small>${a.from != null ? 'sessioni ' + a.from + '–' + (a.to ?? '…') : ''}</small></summary>${prose(a.summary)}</details>`).join('')}</div>`;
+  }
+  setView(h);
+  setActs({
+    rename: async () => { const r = await formDlg({ title: 'Nome della campagna', fields: [{ k: 'name', label: 'Nome', value: camp.name, req: true }] }); if (r) { await setMeta('campaign', { ...camp, name: r.name.trim() }); $('#campName').textContent = r.name.trim(); rerender(); } },
+    copyctx: copyContextFlow,
+    editgen: async () => { const r = await formDlg({ title: 'Riassunto della campagna', wide: true, fields: [{ k: 'text', label: 'Testo (supporta **grassetto**, elenchi con -, [[id]])', type: 'textarea', rows: 16, value: gen?.text || '' }] }); if (r) { const hist = [...getMeta('generalHist', [])]; if (gen?.text) hist.push({ ts: gen.ts, upto: gen.upto, text: gen.text }); await setMeta('generalHist', hist.slice(-10)); await setMeta('general', { text: r.text.trim(), upto: gen?.upto ?? lastSessionN(), ts: Date.now() }); rerender(); } },
+    histgen: () => {
+      const hist = [...getMeta('generalHist', [])].reverse();
+      const d = showInfo('Versioni precedenti del riassunto', hist.map((v, i) => `<details class="arc"><summary>${fmtDate(v.ts)}${v.upto != null ? ' · fino a sess. ' + v.upto : ''}</summary>${prose(v.text)}<button type="button" class="btn sm" data-restore="${i}">Ripristina questa versione</button></details>`).join(''), 'wide');
+      d.addEventListener('click', async e => { const b = e.target.closest('[data-restore]'); if (!b) return; const v = hist[+b.dataset.restore]; const cur = getMeta('general', null); const hh = [...getMeta('generalHist', [])]; if (cur?.text) hh.push({ ts: cur.ts, upto: cur.upto, text: cur.text }); await setMeta('generalHist', hh.slice(-10)); await setMeta('general', { text: v.text, upto: v.upto, ts: Date.now() }); d.close(); rerender(); toast('Versione ripristinata'); });
+    },
+    demo: async () => { const P = await planImport(JSON.stringify(DEMO_JSON)); await applyImport(P); toast('Dati di esempio caricati'); rerender(); }
+  });
+});
+async function copyContextFlow() {
+  let full = false;
+  if (S.ents.size > 40) {
+    const a = await buildContext({ full: false }), b = await buildContext({ full: true });
+    const tk = s => '~' + Math.round(s.length / 3.6 / 100) * 100 + ' token';
+    const r = await formDlg({ title: 'Copia contesto per Claude', ok: 'Copia', fields: [{ k: 'm', label: 'Quanto dettaglio sulle schede', type: 'select', value: 'c', options: [['c', `Compatto (consigliato) · ${tk(a)}`], ['f', `Completo, con la riga breve di ogni scheda · ${tk(b)}`]], hint: 'Il compatto include la riga breve solo per le schede apparse nelle ultime sessioni: resta piccolo anche con centinaia di schede.' }] });
+    if (!r) return; full = r.m === 'f'; await copyText(full ? b : a, 'Contesto copiato: incollalo a Claude insieme al riassunto'); return;
+  }
+  await copyText(await buildContext({ full }), 'Contesto copiato: incollalo a Claude insieme al riassunto');
+}
+
+/* ================= SESSIONI ================= */
+const sessTabs = a => `<div class="chips" style="margin:0 0 12px"><a class="chip ${a === 's' ? 'on' : ''}" href="#/sessioni">Sessioni</a><a class="chip ${a === 'c' ? 'on' : ''}" href="#/cronologia">Cronologia</a></div>`;
+route(/^\/sessioni$/, async () => {
+  const items = [...S.sess].reverse();
+  setView(`<div class="pagehead"><h1>Sessioni</h1><div class="acts"><button class="btn" data-act="newsess">+ Nuova sessione</button></div></div>${sessTabs('s')}
+    <div class="filters"><input type="search" id="sq" placeholder="Filtra per titolo o testo breve…"><span class="hint" id="scnt">${items.length} sessioni</span></div><div id="slist"></div>`);
+  if (!items.length) { $('#slist').outerHTML = `<div class="empty">Nessuna sessione ancora. Arriveranno con la prima importazione.</div>`; }
+  else {
+    const vl = vlist($('#slist'), items, 78, s => `<a class="erow" href="#/sessioni/${s.n}"><div class="num">${s.n}</div><div class="main"><div class="t">${esc(s.title || 'Sessione ' + s.n)} ${s.arc ? `<small>· ${esc(s.arc)}</small>` : ''}</div><div class="b">${esc(s.short || s.brief)}</div></div><button class="icb" data-act="rensess" data-n="${s.n}" title="Rinomina la sessione">✎</button><div class="r" style="min-width:150px">${esc(s.date || '')}${s.gameDate ? '<br>' + esc(s.gameDate) : ''}</div></a>`);
+    $('#sq').oninput = e => { const q = fold(e.target.value); const f = q ? items.filter(s => fold(s.title + ' ' + s.brief + ' ' + s.n).includes(q)) : items; vl.setItems(f); $('#scnt').textContent = f.length + ' sessioni'; };
+  }
+  setActs({ newsess: () => editSessionDlg(null), rensess: a => renameSession(+a.dataset.n) });
+});
+async function renameSession(n) {
+  const s = sessOf(n); if (!s) return;
+  const r = await formDlg({ title: `Rinomina la sessione ${n}`, fields: [{ k: 'title', label: 'Nuovo titolo', value: s.title || '', req: true }] }); if (!r) return;
+  await runBatch(['sessions'], '', async t => t.put('sessions', { ...s, title: r.title.trim() })); rerender();
+}
+async function editSessionDlg(n) {
+  const s = n != null ? sessOf(n) : null, b = n != null ? await dbGet('sbodies', n) : null;
+  const r = await formDlg({
+    title: s ? `Modifica sessione ${n}` : 'Nuova sessione', wide: true, fields: [
+      ...(s ? [] : [{ k: 'n', label: 'Numero', type: 'number', value: (lastSessionN() || 0) + 1, req: true }]),
+      { k: 'title', label: 'Titolo', value: s?.title || '' }, { k: 'date', label: 'Data reale', value: s?.date || '' }, { k: 'gameDate', label: 'Data in gioco', value: s?.gameDate || '' },
+      { k: 'arc', label: 'Arco narrativo (id o nome)', value: s?.arc || '' },
+      { k: 'brief', label: 'Riga breve', value: s?.brief || '' }, { k: 'summary', label: 'Riassunto', type: 'textarea', rows: 10, value: b?.summary || '' }]
+  });
+  if (!r) return;
+  const num = s ? n : Math.round(r.n); if (!s && sessOf(num)) { toast('Esiste già la sessione ' + num, 'err'); return; }
+  await runBatch(['sessions', 'sbodies'], '', async t => {
+    await t.put('sessions', { n: num, title: r.title.trim(), date: r.date.trim(), gameDate: r.gameDate.trim(), arc: r.arc.trim(), brief: r.brief.trim() || r.summary.replace(/\s+/g, ' ').slice(0, 160) });
+    await t.put('sbodies', { n: num, summary: r.summary, docs: b?.docs || [] });
+  });
+  if (s) rerender(); else location.hash = '#/sessioni/' + num;
+}
+route(/^\/sessioni\/(\d+)$/, async ([ns]) => {
+  const n = +ns, s = sessOf(n); if (!s) return setView(`<div class="empty"><h2>Sessione non trovata</h2><a href="#/sessioni">Torna all'elenco</a></div>`);
+  const b = await dbGet('sbodies', n) || { summary: '', docs: [] }; const evs = (await dbIdx('events', 'n', n)).sort((a, c) => a.idx - c.idx);
+  const ents = [...S.ents.values()].filter(e => e.sessions?.includes(n));
+  const grp = TYPE_ORDER.map(t => [t, ents.filter(e => e.type === t).sort((a, c) => a.name.localeCompare(c.name))]).filter(x => x[1].length);
+  const prev = S.sess.filter(x => x.n < n).pop(), next = S.sess.find(x => x.n > n);
+  setView(`<div class="pagehead"><div style="flex:1"><div class="hint">${prev ? `<a href="#/sessioni/${prev.n}">← ${prev.n}</a>` : ''} ${next ? `<a href="#/sessioni/${next.n}">${next.n} →</a>` : ''}</div><h1>${n}. ${esc(s.title || 'Sessione ' + n)}</h1><div class="hint">${[s.date, s.gameDate && 'in gioco: ' + s.gameDate, s.arc && 'arco: ' + s.arc].filter(Boolean).map(esc).join(' · ')}</div></div>
+      <div class="acts"><button class="btn" data-act="rensess" data-n="${n}">Rinomina</button><button class="btn" data-act="edit">Modifica</button><button class="btn danger" data-act="del">Elimina</button></div></div><div class="orn"></div>
+    <div class="card"><h2>Riassunto</h2>${b.summary ? prose(b.summary) : '<p class="empty">Nessun riassunto.</p>'}</div>
+    ${evs.length ? `<div class="card"><h2>Momenti chiave</h2>${evs.map(e => `<div class="entry"><div class="tag">${e.idx + 1}</div><div class="tx"><b>${esc(e.title)}</b>${e.gameDate ? ` <small>${esc(e.gameDate)}</small>` : ''}${prose(e.text)}${e.ents?.length ? `<div class="chips">${e.ents.filter(i => S.ents.has(i)).map(i => `<a class="chip" href="#/scheda/${encodeURIComponent(i)}">${esc(S.ents.get(i).name)}</a>`).join('')}</div>` : ''}</div></div>`).join('')}</div>` : ''}
+    ${grp.length ? `<div class="card"><h2>Schede di questa sessione</h2>${grp.map(([t, l]) => `<p>${badge(t)} <span class="chips" style="display:inline-flex">${l.map(e => `<a class="chip" href="#/scheda/${encodeURIComponent(e.id)}">${esc(e.name)}</a>`).join('')}</span></p>`).join('')}</div>` : ''}
+    <div class="card"><div class="spread"><h2>Documenti allegati</h2><button class="btn sm" data-act="attach">+ Allega testo</button></div>
+      ${b.docs?.length ? b.docs.map((d, i) => `<details class="arc"><summary>${esc(d.name)}<small>${fmtSize(d.text.length)}</small></summary><div class="row" style="margin:6px 0"><button class="btn sm" data-act="delDoc" data-i="${i}">Rimuovi</button><button class="btn sm ghost" data-act="cpDoc" data-i="${i}">Copia testo</button></div><div class="prose"><p style="white-space:pre-wrap">${esc(d.text.length > 20000 ? d.text.slice(0, 20000) + '\n\n[… testo troncato nella visualizzazione: ' + d.text.length + ' caratteri totali]' : d.text)}</p></div></details>`).join('') : '<p class="hint">Qui puoi tenere il testo originale della sessione (.txt, .md, .docx, oppure incollato) come riferimento. I PDF vanno copiati e incollati.</p>'}</div>`);
+  setActs({
+    rensess: () => renameSession(n),
+    edit: () => editSessionDlg(n),
+    del: async () => { if (!await ask(`Eliminare la **sessione ${n}**? Le schede restano, ma i suoi eventi e il riassunto verranno cancellati.`, { danger: true, ok: 'Elimina' })) return; await runBatch(['sessions', 'sbodies', 'events'], '', async t => { await t.del('sessions', n); await t.del('sbodies', n); for (const e of evs) await t.del('events', e.id); }); location.hash = '#/sessioni'; },
+    attach: async () => {
+      const r = await formDlg({ title: 'Allega testo alla sessione', wide: true, fields: [{ k: 'f', label: 'File (.txt, .md, .docx)', type: 'file', accept: '.txt,.md,.docx,text/plain' }, { k: 'name', label: 'Nome (se incolli il testo)', placeholder: 'Trascrizione' }, { k: 't', label: 'Oppure incolla qui il testo', type: 'textarea', rows: 8 }] });
+      if (!r) return; let text = r.t.trim(), name = r.name.trim() || 'Testo';
+      if (r.f) { text = await readTextFile(r.f); name = r.f.name; }
+      if (!text) { toast('Niente da allegare', 'err'); return; }
+      await runBatch(['sbodies'], '', async t => { const cur = await t.get('sbodies', n) || { n, summary: '', docs: [] }; cur.docs = [...(cur.docs || []), { name, text, ts: Date.now() }]; await t.put('sbodies', cur); }); rerender();
+    },
+    delDoc: async a => { if (!await ask('Rimuovere questo documento?', { danger: true, ok: 'Rimuovi' })) return; await runBatch(['sbodies'], '', async t => { const cur = await t.get('sbodies', n); cur.docs.splice(+a.dataset.i, 1); await t.put('sbodies', cur); }); rerender(); },
+    cpDoc: a => copyText(b.docs[+a.dataset.i].text)
+  });
+});
+
+/* ================= SCHEDE: elenco ================= */
+const ES = { types: [], q: '', sort: 'name', cats: [], imps: [] };
+route(/^\/schede$/, async (_, q) => {
+  if (q.has('tipo')) { ES.types = [q.get('tipo')]; ES.cats = []; ES.imps = []; }
+  const cnt = {}; for (const e of S.ents.values()) cnt[e.type] = (cnt[e.type] || 0) + 1;
+  setView(`<div class="pagehead"><h1>Schede</h1><div class="acts"><button class="btn" data-act="newent">+ Nuova scheda</button></div></div>
+    <div class="filters"><div class="chips" id="tchips"><a class="chip" data-t="">Tutte <em>${S.ents.size}</em></a>${TYPE_ORDER.filter(t => cnt[t]).map(t => `<a class="chip" data-t="${t}">${TYPE_PL[t]} <em>${cnt[t]}</em></a>`).join('')}</div></div>
+    <div class="filters" id="cchips"></div>
+    <div class="filters"><input type="search" id="eq" placeholder="Cerca per nome, alias, stato…" value="${esc(ES.q)}"><select id="esort" style="width:auto"><option value="name">Ordine alfabetico</option><option value="recent">Modificate di recente</option><option value="first">Prima apparizione</option></select><span class="hint" id="ecnt"></span></div><div id="elist"></div>`);
+  $('#esort').value = ES.sort;
+  if (!S.ents.size) { $('#elist').outerHTML = '<div class="empty">Nessuna scheda ancora.</div>'; }
+  else {
+    const vl = vlist($('#elist'), [], 70, e => `<a class="erow" href="#/scheda/${encodeURIComponent(e.id)}">${e.portrait ? `<img class="av" src="${e.portrait.thumb}" alt="">` : ''}${badge(e.type)}<div class="main"><div class="t">${esc(e.name)} ${e.alias?.length ? `<small>${esc(e.alias.slice(0, 2).join(', '))}</small>` : ''} ${catPills(e)}</div><div class="b">${esc(e.brief)}</div></div><div class="r">${e.status ? `<span class="pill ${e.discovered === false ? 'warn' : ''}">${esc(e.status)}</span><br>` : ''}${e.discovered === false ? '<span class="pill warn">non scoperto</span><br>' : ''}${esc(rangeTxt(e.sessions))}</div></a>`);
+    const apply = () => {
+      const qq = norm(ES.q); const terms = qq.split(' ').filter(Boolean);
+      const ck = e => { const m = e.type === 'png' ? PNG_ATT : e.type === 'luogo' ? LUOGO_CAT : null; if (!m) return true; const sel = ES.cats.filter(k => k in m); return !sel.length || sel.includes(e.cat); };
+      const ik = e => { if (e.type !== 'png') return true; const sel = ES.imps.filter(k => k in PNG_IMP); return !sel.length || sel.includes(e.imp); };
+      let l = [...S.ents.values()].filter(e => (!ES.types.length || ES.types.includes(e.type)) && ck(e) && ik(e) && terms.every(w => S.sidx.get(e.id).includes(w)));
+      if (ES.sort === 'recent') l.sort((a, b) => (b.upd || 0) - (a.upd || 0)); else if (ES.sort === 'first') l.sort((a, b) => (a.sessions?.[0] ?? 1e9) - (b.sessions?.[0] ?? 1e9) || a.name.localeCompare(b.name)); else l.sort((a, b) => a.name.localeCompare(b.name, 'it'));
+      vl.setItems(l); $('#ecnt').textContent = l.length + ' schede';
+      $$('#tchips .chip').forEach(c => c.classList.toggle('on', c.dataset.t ? ES.types.includes(c.dataset.t) : !ES.types.length));
+      subChips();
+    };
+    const subChips = () => {
+      const host = $('#cchips'); let h = '';
+      const base = t => [...S.ents.values()].filter(e => e.type === t), cn = (t, f, k) => base(t).filter(e => e[f] === k).length;
+      const grp = (t, f, label, map, arr) => `<span class="hint">${label}:</span>` + Object.entries(map).filter(([k]) => cn(t, f, k)).map(([k, l]) => `<a class="chip ${arr.includes(k) ? 'on' : ''}" data-f="${f}" data-v="${k}">${l} <em>${cn(t, f, k)}</em></a>`).join('');
+      if (ES.types.includes('png')) h += grp('png', 'cat', 'Atteggiamento', PNG_ATT, ES.cats) + ' ' + grp('png', 'imp', 'Importanza', PNG_IMP, ES.imps) + ' ';
+      if (ES.types.includes('luogo')) h += grp('luogo', 'cat', 'Luoghi', LUOGO_CAT, ES.cats);
+      if (ES.types.length || ES.cats.length || ES.imps.length) h += ' <a class="chip" data-reset="1">✕ Azzera filtri</a>';
+      host.innerHTML = h; host.style.display = h ? '' : 'none';
+    };
+    const tog = (a, v) => { const i = a.indexOf(v); i >= 0 ? a.splice(i, 1) : a.push(v); };
+    $('#cchips').onclick = e => { const c = e.target.closest('.chip'); if (!c) return; if (c.dataset.reset) { ES.types = []; ES.cats = []; ES.imps = []; } else tog(c.dataset.f === 'imp' ? ES.imps : ES.cats, c.dataset.v); apply(); };
+    $('#tchips').onclick = e => { const c = e.target.closest('.chip'); if (!c) return; if (!c.dataset.t) { ES.types = []; ES.cats = []; ES.imps = []; } else { tog(ES.types, c.dataset.t); if (!ES.types.includes('png')) ES.imps = []; if (!ES.types.includes('png') && !ES.types.includes('luogo')) ES.cats = []; } apply(); };
+    $('#eq').oninput = e => { ES.q = e.target.value; apply(); }; $('#esort').onchange = e => { ES.sort = e.target.value; apply(); };
+    apply();
+  }
+  setActs({ newent: newEntityDlg });
+});
+async function newEntityDlg(pre = {}) {
+  const r = await formDlg({ title: 'Nuova scheda', fields: [{ k: 'type', label: 'Tipo', type: 'select', value: pre.type || (ES.types[0] || 'png'), options: TYPE_ORDER.map(t => [t, TYPES[t]]) }, { k: 'name', label: 'Nome', req: true, value: pre.name || '' }, { k: 'brief', label: 'Riga breve', placeholder: 'Una riga di descrizione' }, { k: 'status', label: 'Stato', placeholder: 'vivo, attiva, distrutto…' }] });
+  if (!r) return null;
+  const id = await createEntity({ type: r.type, name: r.name.trim(), brief: r.brief.trim(), status: r.status.trim() });
+  if (!pre.stay) location.hash = '#/scheda/' + encodeURIComponent(id); return id;
+}
+async function createEntity({ type, name, brief = '', status = '', discovered = true }) {
+  let id = type + '-' + slug(name); const base = id; let i = 2; while (S.ents.has(id)) id = base + '-' + (i++);
+  await runBatch(['entities', 'bodies'], '', async t => { await t.put('entities', { id, type, name, alias: [], brief, status, discovered, sessions: [], upd: Date.now() }); await t.put('bodies', { id, sections: [] }); });
+  return id;
+}
+
+/* ================= SCHEDA: dettaglio ================= */
+function entrySecHtml(sec, si, editable = true) {
+  const n = sec.entries.length, KEEP = 8;
+  const ent = (en, ei) => `<div class="entry"><div class="tag">${en.n != null ? sessLink(en.n) : '·'}</div><div class="tx">${prose(en.text)}</div><div class="eacts"><button class="icb" data-act="editEntry" data-si="${si}" data-ei="${ei}" title="Modifica">✎</button><button class="icb" data-act="delEntry" data-si="${si}" data-ei="${ei}" title="Elimina">✕</button></div></div>`;
+  let body;
+  if (n > KEEP + 2) body = `<details class="older"><summary class="hint" style="cursor:pointer;margin:4px 0 8px">Mostra le ${n - KEEP} voci precedenti</summary>${sec.entries.slice(0, n - KEEP).map((e, i) => ent(e, i)).join('')}</details>${sec.entries.slice(n - KEEP).map((e, i) => ent(e, n - KEEP + i)).join('')}`;
+  else body = sec.entries.map(ent).join('') || '<p class="hint">Sezione vuota.</p>';
+  return `<details class="sec" open><summary>${esc(sec.title)} <span class="cnt">${n > 1 ? n + ' voci' : ''}</span><span class="sp"></span><button class="icb" data-act="addEntry" data-si="${si}" title="Aggiungi voce">＋</button><button class="icb" data-act="renSec" data-si="${si}" title="Rinomina">✎</button><button class="icb" data-act="delSec" data-si="${si}" title="Elimina sezione">✕</button></summary>${body}</details>`;
+}
+async function mutBody(id, fn) {
+  await runBatch(['bodies', 'entities'], '', async t => {
+    const body = await t.get('bodies', id) || { id, sections: [] }; await fn(body);
+    await t.put('bodies', body); await t.put('entities', { ...S.ents.get(id), upd: Date.now() });
+  });
+}
+route(/^\/scheda\/(.+)$/, async ([id]) => {
+  const e = S.ents.get(id); if (!e) return setView(`<div class="empty"><h2>Scheda non trovata</h2><p>«${esc(id)}» non esiste (forse è stata eliminata o unita).</p><a href="#/schede">Vai all'elenco</a></div>`);
+  const [body, outL, inL, evs, pins] = await Promise.all([dbGet('bodies', id), dbIdx('links', 'from', id), dbIdx('links', 'to', id), dbIdx('events', 'ents', id), dbIdx('pins', 'entityId', id)]);
+  const b = body || { id, sections: [] };
+  evs.sort((a, c) => a.n - c.n || a.idx - c.idx);
+  const chipE = (i, lab) => { const x = S.ents.get(i); return x ? `<a class="chip" href="#/scheda/${encodeURIComponent(i)}">${esc(x.name)}</a>` : ''; };
+  const mapsOf = pins.map(p => ({ p, m: S.maps.find(m => m.id === p.mapId) })).filter(x => x.m);
+  setView(`<div class="card ehead ${e.portrait ? 'hasp' : ''}">${e.portrait ? `<img class="portrait" src="${e.portrait.thumb}" data-act="viewportrait" alt="${esc(e.name)}" title="Ingrandisci">` : ''}<div class="ehb"><div class="meta">${badge(e.type)}${e.status ? `<span class="pill">${esc(e.status)}</span>` : ''}${catPills(e)}${e.discovered === false ? '<span class="pill warn">non scoperto dai giocatori</span>' : ''}<span class="hint">${esc(rangeTxt(e.sessions))}</span></div>
+      <h1>${esc(e.name)}</h1>${e.alias?.length ? `<div class="hint">Detto anche: ${e.alias.map(esc).join(', ')}</div>` : ''}${e.brief ? `<div class="brief">${inl(e.brief)}</div>` : ''}
+      <div class="row" style="margin-top:12px"><button class="btn sm" data-act="edit">Modifica dati</button><button class="btn sm" data-act="addSec">+ Sezione</button><button class="btn sm ghost" data-act="copyEnt">Copia per Claude</button>${[...M.regions.values()].filter(r => r.entityId === id).map(r => `<a class="btn sm" href="#/mappe/${encodeURIComponent(r.mapId)}?reg=${encodeURIComponent(r.id)}">Vedi sulla mappa</a>`).join('')}<button class="btn sm" data-act="portrait">${e.portrait ? 'Cambia ritratto' : '+ Ritratto'}</button><button class="btn sm ghost" data-act="merge">Unisci in un'altra scheda</button><button class="btn sm danger" data-act="del">Elimina</button></div></div></div>
+    <div class="card">${b.sections.length ? b.sections.map((s, i) => entrySecHtml(s, i)).join('') : '<p class="empty">Nessun contenuto ancora. Verrà riempita dalle importazioni, oppure aggiungi una sezione a mano.</p>'}</div>
+    <div class="grid2"><div class="card"><div class="spread"><h2>Collegamenti</h2><button class="btn sm" data-act="addRel">+ Collega</button></div>
+      ${outL.length || inL.length ? `${outL.map(l => `<div class="rel"><span class="lab">${esc(l.label || 'collegata a')}</span>${chipE(l.to)}<button class="icb" data-act="delRel" data-k="${esc(l.k)}">✕</button></div>`).join('')}${inL.map(l => `<div class="rel">${chipE(l.from)}<span class="lab">${esc(l.label || 'collegata a')} → questa scheda</span><button class="icb" data-act="delRel" data-k="${esc(l.k)}">✕</button></div>`).join('')}` : '<p class="hint">Nessun collegamento.</p>'}</div>
+      <div class="card"><h2>Apparizioni</h2>${sessChips(e.sessions)}
+      ${mapsOf.length ? `<h2 style="margin-top:14px">Sulle mappe</h2><div class="chips">${mapsOf.map(({ p, m }) => `<a class="chip" href="#/mappe/${encodeURIComponent(m.id)}?pin=${encodeURIComponent(p.id)}">${esc(m.name)}</a>`).join('')}</div>${mapsOf.some(x => x.p.photos?.length) ? `<div class="gallery" style="margin-top:10px">${mapsOf.flatMap(({ p, m }) => (p.photos || []).map(ph => `<a class="gph" href="#/mappe/${encodeURIComponent(m.id)}?pin=${encodeURIComponent(p.id)}"><img src="${ph.thumb}" alt=""></a>`)).join('')}</div>` : ''}` : ''}
+      ${e.type === 'luogo' ? `<div style="margin-top:14px"><label class="chk"><input type="checkbox" data-act="toggleDisc" ${e.discovered !== false ? 'checked' : ''}> Scoperto dai giocatori</label></div>` : ''}</div></div>
+    ${evs.length ? `<div class="card"><h2>Eventi</h2>${evs.map(v => `<div class="entry"><div class="tag">${sessLink(v.n)}</div><div class="tx"><b>${esc(v.title)}</b>${prose(v.text)}</div></div>`).join('')}</div>` : ''}`);
+  const edEntry = async (a, add) => {
+    const si = +a.dataset.si, ei = add ? -1 : +a.dataset.ei; const cur = add ? null : b.sections[si].entries[ei];
+    const r = await formDlg({ title: add ? `Nuova voce in «${b.sections[si].title}»` : 'Modifica voce', wide: true, fields: [{ k: 'text', label: 'Testo', type: 'textarea', rows: 10, value: cur?.text || '', req: true }, { k: 'n', label: 'Sessione (vuoto = nessuna)', type: 'number', value: add ? lastSessionN() : cur.n }] });
+    if (!r) return; await mutBody(id, bd => { if (add) bd.sections[si].entries.push({ n: r.n, text: r.text.trim() }); else bd.sections[si].entries[ei] = { n: r.n, text: r.text.trim() }; }); rerender();
+  };
+  setActs({
+    edit: async () => {
+      const r = await formDlg({ title: 'Dati della scheda', fields: [{ k: 'type', label: 'Tipo', type: 'select', value: e.type, options: TYPE_ORDER.map(t => [t, TYPES[t]]) }, { k: 'name', label: 'Nome', value: e.name, req: true }, { k: 'brief', label: 'Riga breve', value: e.brief }, { k: 'status', label: 'Stato', value: e.status }, ...(e.type === 'png' ? [{ k: 'cat', label: 'Atteggiamento', type: 'select', value: e.cat || '', options: [['', '— non assegnato —'], ...Object.entries(PNG_ATT)] }, { k: 'imp', label: 'Importanza', type: 'select', value: e.imp || '', options: [['', '— non assegnata —'], ...Object.entries(PNG_IMP)] }] : e.type === 'luogo' ? [{ k: 'cat', label: 'Categoria del luogo', type: 'select', value: e.cat || '', options: [['', '— non assegnata —'], ...Object.entries(LUOGO_CAT)] }] : []), { k: 'alias', label: 'Alias (separati da virgola)', value: (e.alias || []).join(', ') }, { k: 'disc', label: 'Scoperto/noto ai giocatori', type: 'check', value: e.discovered !== false }] });
+      if (!r) return; await runBatch(['entities'], '', async t => t.put('entities', { ...e, type: r.type, name: r.name.trim(), brief: r.brief.trim(), status: r.status.trim(), alias: r.alias.split(',').map(x => x.trim()).filter(Boolean), discovered: r.disc, ...('cat' in r ? { cat: r.cat } : {}), ...('imp' in r ? { imp: r.imp } : {}), upd: Date.now() })); rerender();
+    },
+    viewportrait: async () => { const rec = await dbGet('blobs', e.portrait.id); if (!rec) return; const url = URL.createObjectURL(rec.blob); const d = openDlg(`<form method="dialog" style="padding:12px 16px"><div class="spread" style="margin-bottom:8px"><b>${esc(e.name)}</b><button class="btn sm" value="x">Chiudi</button></div><div class="lb"><img src="${url}" alt=""></div></form>`, 'wide lbdlg'); d.addEventListener('close', () => URL.revokeObjectURL(url)); },
+    portrait: async () => {
+      const r = await formDlg({ title: 'Ritratto di ' + e.name, fields: [{ k: 'f', label: 'Immagine (PNG, JPG, WebP)', type: 'file', accept: 'image/*' }, ...(e.portrait ? [{ k: 'rm', label: 'Rimuovi il ritratto attuale', type: 'check', value: false }] : [])] }); if (!r) return;
+      if (r.rm) { await runBatch(['entities', 'blobs'], '', async t => { await t.del('blobs', e.portrait.id); const c = { ...e, upd: Date.now() }; delete c.portrait; await t.put('entities', c); }); return rerender(); }
+      if (!r.f) return; toast('Elaboro l\'immagine…'); const im = await processImage(r.f, 900);
+      await runBatch(['entities', 'blobs'], '', async t => { await t.put('blobs', { id: 'portrait-' + id, blob: im.blob, type: im.blob.type }); await t.put('entities', { ...e, portrait: { id: 'portrait-' + id, thumb: im.thumb }, upd: Date.now() }); }); rerender();
+    },
+    toggleDisc: async a => { await runBatch(['entities'], '', async t => t.put('entities', { ...e, discovered: a.checked, upd: Date.now() })); rerender(); },
+    copyEnt: async () => copyText(await buildEntityText(id), 'Scheda copiata'),
+    del: async () => {
+      if (!await ask(`Eliminare la scheda **${e.name}**?\n\nSaranno rimossi anche i suoi collegamenti e ${pins.length} segnaposto sulle mappe. Non si può annullare (fai un backup se hai dubbi).`, { danger: true, ok: 'Elimina' })) return;
+      await deleteEntity(id); location.hash = '#/schede';
+    },
+    merge: async () => {
+      ensureEntList(); const r = await formDlg({ title: `Unisci «${e.name}»`, intro: 'Tutto il contenuto, gli alias, i collegamenti, i segnaposto e gli eventi di questa scheda passano alla scheda di destinazione, e questa viene eliminata. Utile per correggere i duplicati.', fields: [{ k: 'to', label: 'Scheda di destinazione', list: 'dl-ents', req: true }] });
+      if (!r) return; const dst = pickEntity(r.to); if (!dst || dst.id === id) { toast('Scheda di destinazione non valida', 'err'); return; }
+      if (!await ask(`Unire **${e.name}** dentro **${dst.name}**?`, { ok: 'Unisci' })) return; await mergeEntity(id, dst.id); location.hash = '#/scheda/' + encodeURIComponent(dst.id);
+    },
+    addSec: async () => { const r = await formDlg({ title: 'Nuova sezione', wide: true, fields: [{ k: 'title', label: 'Titolo', req: true, placeholder: 'Background, Storia personale…' }, { k: 'text', label: 'Testo', type: 'textarea', rows: 8 }, { k: 'n', label: 'Sessione (vuoto = nessuna)', type: 'number', value: null }] }); if (!r) return; await mutBody(id, bd => { bd.sections.push({ title: r.title.trim(), entries: r.text.trim() ? [{ n: r.n, text: r.text.trim() }] : [] }); }); rerender(); },
+    renSec: async a => { const si = +a.dataset.si; const r = await formDlg({ title: 'Rinomina sezione', fields: [{ k: 't', label: 'Titolo', value: b.sections[si].title, req: true }] }); if (!r) return; await mutBody(id, bd => { bd.sections[si].title = r.t.trim(); }); rerender(); },
+    delSec: async a => { const si = +a.dataset.si; if (!await ask(`Eliminare la sezione **${b.sections[si].title}** e le sue ${b.sections[si].entries.length} voci?`, { danger: true, ok: 'Elimina' })) return; await mutBody(id, bd => { bd.sections.splice(si, 1); }); rerender(); },
+    addEntry: a => edEntry(a, true), editEntry: a => edEntry(a, false),
+    delEntry: async a => { if (!await ask('Eliminare questa voce?', { danger: true, ok: 'Elimina' })) return; await mutBody(id, bd => { bd.sections[+a.dataset.si].entries.splice(+a.dataset.ei, 1); }); rerender(); },
+    addRel: async () => { ensureEntList(); const r = await formDlg({ title: 'Nuovo collegamento', fields: [{ k: 'to', label: 'Con la scheda', list: 'dl-ents', req: true }, { k: 'label', label: 'Tipo di relazione', placeholder: 'alleato di, vive a, possiede…' }] }); if (!r) return; const t = pickEntity(r.to); if (!t || t.id === id) { toast('Scheda non trovata', 'err'); return; } const lab = r.label.trim(); await runBatch(['links'], '', async x => x.put('links', { k: id + '|' + t.id + '|' + norm(lab), from: id, to: t.id, label: lab })); rerender(); },
+    delRel: async a => { await runBatch(['links'], '', async x => x.del('links', a.dataset.k)); rerender(); }
+  });
+});
+async function deleteEntity(id) {
+  const [outL, inL, evs, pins] = await Promise.all([dbIdx('links', 'from', id), dbIdx('links', 'to', id), dbIdx('events', 'ents', id), dbIdx('pins', 'entityId', id)]);
+  await runBatch(['entities', 'bodies', 'links', 'events', 'pins', 'blobs'], '', async t => {
+    await t.del('entities', id); await t.del('bodies', id); await t.del('blobs', 'portrait-' + id);
+    for (const l of [...outL, ...inL]) await t.del('links', l.k);
+    for (const p of pins) { await t.del('pins', p.id); for (const ph of p.photos || []) await t.del('blobs', ph.id); }
+    for (const v of evs) await t.put('events', { ...v, ents: v.ents.filter(x => x !== id) });
+  });
+}
+async function mergeEntity(src, dst) {
+  const [sb, db_, outL, inL, evs, pins] = await Promise.all([dbGet('bodies', src), dbGet('bodies', dst), dbIdx('links', 'from', src), dbIdx('links', 'to', src), dbIdx('events', 'ents', src), dbIdx('pins', 'entityId', src)]);
+  const s = S.ents.get(src), d = S.ents.get(dst);
+  const nb = clone(db_ || { id: dst, sections: [] });
+  for (const sec of sb?.sections || []) { let t = nb.sections.find(x => norm(x.title) === norm(sec.title)); if (!t) { t = { title: sec.title, entries: [] }; nb.sections.push(t); } for (const en of sec.entries) if (!t.entries.some(x => norm(x.text) === norm(en.text))) t.entries.push(en); t.entries.sort((a, b) => (a.n ?? -1) - (b.n ?? -1)); }
+  const alias = [...new Set([...(d.alias || []), s.name, ...(s.alias || [])])].filter(a => norm(a) !== norm(d.name));
+  const light = { ...d, alias, brief: d.brief || s.brief, status: d.status || s.status, sessions: [...new Set([...(d.sessions || []), ...(s.sessions || [])])].sort((a, b) => a - b), discovered: d.discovered !== false || s.discovered !== false, upd: Date.now() };
+  const srcPortrait = s.portrait && !d.portrait ? await dbGet('blobs', s.portrait.id) : null;
+  if (srcPortrait) light.portrait = { id: 'portrait-' + dst, thumb: s.portrait.thumb };
+  await runBatch(['entities', 'bodies', 'links', 'events', 'pins', 'blobs'], '', async t => {
+    if (srcPortrait) await t.put('blobs', { id: 'portrait-' + dst, blob: srcPortrait.blob, type: srcPortrait.type });
+    await t.del('blobs', 'portrait-' + src);
+    await t.put('entities', light); await t.put('bodies', nb); await t.del('entities', src); await t.del('bodies', src);
+    for (const l of outL) { await t.del('links', l.k); if (l.to !== dst) await t.put('links', { ...l, k: dst + '|' + l.to + '|' + norm(l.label), from: dst }); }
+    for (const l of inL) { await t.del('links', l.k); if (l.from !== dst) await t.put('links', { ...l, k: l.from + '|' + dst + '|' + norm(l.label), to: dst }); }
+    for (const v of evs) await t.put('events', { ...v, ents: [...new Set(v.ents.map(x => x === src ? dst : x))] });
+    for (const p of pins) await t.put('pins', { ...p, entityId: dst });
+  });
+}
+
+/* ================= CRONOLOGIA ================= */
+route(/^\/cronologia$/, async () => {
+  const all = (await dbAll('events')).sort((a, b) => a.n - b.n || a.idx - b.idx);
+  setView(`<div class="pagehead"><h1>Cronologia</h1></div>${sessTabs('c')}<div class="filters"><input type="search" id="tq" placeholder="Filtra eventi…"><select id="ts" style="width:auto"><option value="">Tutte le sessioni</option>${S.sess.map(s => `<option value="${s.n}">Sessione ${s.n}${s.title ? ' · ' + esc(s.title) : ''}</option>`).join('')}</select><button class="btn sm" id="trev">↑↓ Inverti</button><span class="hint" id="tcnt"></span></div><div id="tlist"></div>`);
+  if (!all.length) { $('#tlist').outerHTML = '<div class="empty">Nessun evento ancora: la cronologia si riempie con le importazioni.</div>'; return; }
+  let rev = false; const byId = new Map(all.map(x => [x.id, x]));
+  const vl = vlist($('#tlist'), [], 92, v => `<div class="erow ev" data-ev="${esc(v.id)}"><div class="num">${v.n}</div><div class="main"><div class="t">${esc(v.title)} ${v.gameDate ? `<small>· ${esc(v.gameDate)}</small>` : ''}</div><div class="b clamp2" style="white-space:normal">${esc(v.text)}</div></div></div>`);
+  const apply = () => { const q = fold($('#tq').value), s = $('#ts').value; let l = all.filter(v => (!s || v.n === +s) && (!q || fold(v.title + ' ' + v.text).includes(q))); if (rev) l = [...l].reverse(); vl.setItems(l); $('#tcnt').textContent = l.length + ' eventi'; };
+  $('#tq').oninput = apply; $('#ts').onchange = apply; $('#trev').onclick = () => { rev = !rev; apply(); }; apply();
+  $('#tlist').addEventListener('click', e => { const r = e.target.closest('[data-ev]'); if (!r) return; const v = byId.get(r.dataset.ev); showInfo(`${v.title}`, `<p class="hint">${sessLink(v.n)}${v.gameDate ? ' · ' + esc(v.gameDate) : ''}</p>${prose(v.text)}${v.ents?.length ? `<div class="chips">${v.ents.filter(i => S.ents.has(i)).map(i => `<a class="chip" href="#/scheda/${encodeURIComponent(i)}" onclick="this.closest('dialog').close()">${esc(S.ents.get(i).name)}</a>`).join('')}</div>` : ''}`); });
+});
+
+/* ================= RICERCA ================= */
+const plain = t => String(t).replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, '$2').replace(/\[\[([^\]|]+)\]\]/g, (m, a) => findEnt(a)?.name || a).replace(/\*\*/g, '');
+function snippet(text, terms) {
+  text = plain(text); const f = fold(text); let at = -1; for (const w of terms) { const i = f.indexOf(w); if (i >= 0 && (at < 0 || i < at)) at = i; }
+  if (at < 0) return esc(text.slice(0, 160));
+  const a = Math.max(0, at - 60), z = Math.min(text.length, at + 140); let s = esc(text.slice(a, z).replace(/\s+/g, ' '));
+  for (const w of terms) s = s.replace(new RegExp('(' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig'), '<mark>$1</mark>');
+  return (a > 0 ? '…' : '') + s + (z < text.length ? '…' : '');
+}
+route(/^\/cerca$/, async (_, q) => {
+  const query = q.get('q') || ''; const terms = fold(query).split(/\s+/).filter(Boolean);
+  setView(`<div class="pagehead"><h1>Ricerca</h1></div><div class="filters"><input type="search" id="fq" value="${esc(query)}" placeholder="Cerca in tutta la campagna…"></div><div id="fres"><p class="hint">Cerco…</p></div>`);
+  $('#fq').onkeydown = e => { if (e.key === 'Enter') location.hash = '#/cerca?q=' + encodeURIComponent(e.target.value); };
+  if (!terms.length) { $('#fres').innerHTML = '<p class="hint">Scrivi qualcosa da cercare: schede, riassunti di sessione, eventi, testi delle schede e documenti allegati.</p>'; return; }
+  let dead = false; onCleanup(() => dead = true);
+  const hit = t => { const f = fold(t); return terms.every(w => f.includes(w)); };
+  const out = []; const LIM = 80;
+  for (const e of S.ents.values()) if (terms.every(w => S.sidx.get(e.id).includes(norm(w)))) out.push({ k: 0, h: `<a class="erow" style="height:auto;padding:10px 4px" href="#/scheda/${encodeURIComponent(e.id)}">${badge(e.type)}<div class="main"><div class="t">${esc(e.name)}</div><div class="b">${esc(e.brief)}</div></div></a>` });
+  const sec = []; const add = (kind, href, title, text) => { if (sec.length < LIM) sec.push({ k: 1, h: `<a class="erow" style="height:auto;padding:10px 4px;align-items:flex-start" href="${href}"><span class="badge">${kind}</span><div class="main"><div class="t">${esc(title)}</div><div class="b" style="white-space:normal">${snippet(text, terms)}</div></div></a>` }); };
+  const render = (done) => { $('#fres').innerHTML = `<p class="hint">${out.length + sec.length} risultati${done ? '' : ' (sto ancora cercando…)'}</p><div class="card" style="padding:6px 16px">${[...out, ...sec].map(x => x.h).join('') || '<p class="empty">Nessun risultato.</p>'}</div>`; };
+  render(false);
+  const scan = (store, fn) => dbScan(store, v => { if (!dead) fn(v); });
+  await scan('sbodies', v => { const docs = (v.docs || []).map(d => d.text).join('\n'); const t = v.summary + '\n' + docs; if (hit(t)) add('Sessione', '#/sessioni/' + v.n, `Sessione ${v.n}${sessOf(v.n)?.title ? ' · ' + sessOf(v.n).title : ''}`, t); }); if (dead) return; render(false);
+  await scan('events', v => { const t = v.title + ' ' + v.text; if (hit(t)) add('Evento', '#/sessioni/' + v.n, `${v.title} (sess. ${v.n})`, v.text || v.title); }); if (dead) return;
+  await scan('bodies', v => { const e = S.ents.get(v.id); if (!e) return; const t = v.sections.map(s => s.title + ': ' + s.entries.map(x => x.text).join(' ')).join('\n'); if (hit(t) || hit(e.name + ' ' + t)) add(TYPES[e.type], '#/scheda/' + encodeURIComponent(v.id), e.name, t); });
+  if (!dead) render(true);
+});
+
+/* =====================================================================
+   MAPPE: elenco, caricamento, visualizzatore con zoom/pan e segnaposto
+   ===================================================================== */
+const mapById = id => S.maps.find(m => m.id === id);
+const mapPath = m => { const p = []; let c = m, g = 0; while (c && g++ < 20) { p.unshift(c); c = c.parent ? mapById(c.parent) : null; } return p; };
+const PIN_PATH = 'M14 35C14 35 2 21 2 13a12 12 0 0 1 24 0c0 8-12 22-12 22z';
+
+async function uploadMapDlg(pre = {}) {
+  const r = await formDlg({
+    title: 'Carica una mappa', intro: 'PNG, JPG o WebP. Se è molto grande la riduco (lato lungo max 4096 px) per tenere l\'app veloce.',
+    fields: [{ k: 'f', label: 'Immagine', type: 'file', accept: 'image/*', req: true }, { k: 'name', label: 'Nome della mappa', req: true, placeholder: 'Il Continente, Valdoro, Faro Spezzato…' }, { k: 'desc', label: 'Descrizione (aiuta Claude a capirla)', type: 'textarea', rows: 3, placeholder: 'es. Mappa del continente, il nord è in alto.' },
+    { k: 'parent', label: 'Mappa madre (di cui questa è un dettaglio)', type: 'select', value: pre.parent || '', options: [['', '— nessuna (mappa principale) —'], ...S.maps.map(m => [m.id, m.name])] }, { k: 'disc', label: 'Scoperta dai giocatori', type: 'check', value: true }]
+  });
+  if (!r) return null;
+  toast('Elaboro l\'immagine…'); const im = await processImage(r.f);
+  let id = 'map-' + slug(r.name); const base = id; let i = 2; while (mapById(id)) id = base + '-' + (i++);
+  const rec = { id, name: r.name.trim(), desc: r.desc.trim(), parent: r.parent || null, discovered: r.disc, w: im.w, h: im.h, thumb: im.thumb, order: S.maps.length, ts: Date.now() };
+  await runBatch(['maps', 'blobs'], '', async t => { await t.put('blobs', { id, blob: im.blob, type: im.blob.type }); await t.put('maps', rec); });
+  toast(im.shrunk ? `Mappa caricata (ridimensionata a ${im.w}×${im.h})` : 'Mappa caricata'); return id;
+}
+
+route(/^\/mappe$/, async () => {
+  const ordered = []; const walk = (pid, depth) => { for (const m of S.maps.filter(x => (x.parent || null) === pid)) { ordered.push({ m, depth }); walk(m.id, depth + 1); } };
+  walk(null, 0); for (const m of S.maps) if (!ordered.some(o => o.m.id === m.id)) ordered.push({ m, depth: 0 });
+  const pinCount = {}; for (const p of await dbAll('pins')) pinCount[p.mapId] = (pinCount[p.mapId] || 0) + 1;
+  setView(`<div class="pagehead"><h1>Mappe</h1><div class="acts"><button class="btn primary" data-act="up">+ Carica mappa</button></div></div>
+    ${ordered.length ? `<div class="maplist">${ordered.map(({ m, depth }) => `<a class="mapcard" href="#/mappe/${encodeURIComponent(m.id)}"><div class="im" style="background-image:url('${m.thumb || ''}')"></div><div class="tx"><b>${esc(m.name)}</b><p>${m.parent ? '↳ ' + esc(mapById(m.parent)?.name || '') + ' · ' : ''}${pinCount[m.id] || 0} segnaposto${m.discovered === false ? ' · <i>non scoperta</i>' : ''}</p>${m.desc ? `<p class="clamp2 mute">${esc(m.desc)}</p>` : ''}</div></a>`).join('')}</div>`
+      : `<div class="card empty"><h2>Nessuna mappa</h2><p>Carica la mappa generale del mondo e poi, se vuoi, quelle più piccole (regioni, città, dungeon) indicando di quale mappa sono un dettaglio. I luoghi scoperti compariranno come segnaposto.</p><button class="btn primary" data-act="up">+ Carica la prima mappa</button></div>`}`);
+  setActs({ up: async () => { const id = await uploadMapDlg(); if (id) location.hash = '#/mappe/' + encodeURIComponent(id); } });
+});
+
+route(/^\/mappe\/(.+)$/, async ([id], q) => {
+  const m = mapById(id); if (!m) return setView(`<div class="empty"><h2>Mappa non trovata</h2><a href="#/mappe">Torna alle mappe</a></div>`);
+  const [rec, pins0] = await Promise.all([dbGet('blobs', id), dbIdx('pins', 'mapId', id)]);
+  let pins = pins0; let regs = [...M.regions.values()].filter(r => r.mapId === id); const url = rec ? URL.createObjectURL(rec.blob) : null; onCleanup(() => url && URL.revokeObjectURL(url));
+  const st = { k: 1, x: 0, y: 0, players: false, edit: false, add: false, sel: q.get('pin') || null, reg: q.get('reg') || null, regs: pref('mapRegs', true), draw: null, vedit: false, labels: pref('mapLabels', true) };
+  const lock = m.locked === true;
+  const crumb = mapPath(m).map((x, i, a) => i === a.length - 1 ? `<b>${esc(x.name)}</b>` : `<a href="#/mappe/${encodeURIComponent(x.id)}">${esc(x.name)}</a>`).join(' <span>›</span> ');
+  setView(`<div class="mapview" id="mv"><div class="mapmain"><div class="maptools"><span class="crumb"><a href="#/mappe">Mappe</a> <span>›</span> ${crumb}</span>
+      <button class="btn sm" data-act="zout" title="Riduci">−</button><button class="btn sm" data-act="zin" title="Ingrandisci">+</button><button class="btn sm" data-act="fit">Adatta</button>
+      <button class="btn sm" data-act="labels" id="b-lab">Nomi</button><button class="btn sm" data-act="regs" id="b-reg">Regioni</button>
+      <span class="seg" id="seg"><button data-act="vdm" class="on">DM</button><button data-act="vpl">Giocatori</button></span>
+      <button class="btn sm" data-act="edit" id="b-edit">Modifica</button><button class="btn sm primary" data-act="addpin" id="b-add" style="display:none">+ Segnaposto</button><button class="btn sm primary" data-act="addreg" id="b-addreg" style="display:none">+ Regione</button><span id="drawbar" style="display:none" class="row"><button class="btn sm primary" data-act="drawok">✓ Chiudi regione</button><button class="btn sm" data-act="drawundo">↶ Togli punto</button><button class="btn sm" data-act="drawcancel">Annulla</button></span>
+      <button class="btn sm" data-act="fs" title="Schermo intero">⛶</button></div>
+    <div class="stage" id="stage"><div class="layer" id="layer" style="width:${m.w}px;height:${m.h}px">${url ? `<img src="${url}" width="${m.w}" height="${m.h}" alt="${esc(m.name)}" draggable="false">` : ''}<svg id="regsvg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg><div id="pinsbox" style="position:absolute;inset:0"></div></div>
+      ${url ? '' : `<div class="noimg"><div><p>L'immagine di questa mappa non è presente (forse hai ripristinato un backup «solo dati»).</p><button class="btn" data-act="reimg">Carica di nuovo l'immagine</button></div></div>`}<div class="hud" id="hud"></div></div></div>
+    <aside class="mapside" id="mside"></aside></div>`, 'raw');
+  const stage = $('#stage'), layer = $('#layer'), box = $('#pinsbox'), mv = $('#mv');
+  const entOf = p => p.entityId ? S.ents.get(p.entityId) : null;
+  const visible = p => !(p.discovered === false || (entOf(p) && entOf(p).discovered === false));
+  const pname = p => entOf(p)?.name || p.label || '(senza nome)';
+  const hud = t => { $('#hud').textContent = t; $('#hud').style.display = t ? '' : 'none'; };
+  const apply = () => { layer.style.transform = `translate(${st.x}px,${st.y}px) scale(${st.k})`; layer.style.setProperty('--inv', (1 / st.k).toFixed(4)); };
+  const fitK = () => { const r = stage.getBoundingClientRect(); return Math.min(r.width / m.w, r.height / m.h) * 0.98; };
+  const fit = () => { const r = stage.getBoundingClientRect(); st.k = fitK(); st.x = (r.width - m.w * st.k) / 2; st.y = (r.height - m.h * st.k) / 2; apply(); };
+  const zoomAt = (cx, cy, f) => { const nk = clamp(st.k * f, fitK() * 0.6, 8); const g = nk / st.k; st.x = cx - (cx - st.x) * g; st.y = cy - (cy - st.y) * g; st.k = nk; apply(); };
+  const center = (p, zoom) => { const r = stage.getBoundingClientRect(); if (zoom) st.k = Math.max(st.k, Math.min(8, fitK() * zoom)); st.x = r.width / 2 - (p.x / 100 * m.w) * st.k; st.y = r.height / 2 - (p.y / 100 * m.h) * st.k; apply(); };
+  const toPct = (cx, cy) => { const r = stage.getBoundingClientRect(); return { x: clamp(((cx - r.left - st.x) / st.k) / m.w * 100, 0, 100), y: clamp(((cy - r.top - st.y) / st.k) / m.h * 100, 0, 100) }; };
+
+  const regEnt = r => S.ents.get(r.entityId);
+  const regName = r => regEnt(r)?.name || r.label || 'Regione';
+  const regVisible = r => !(regEnt(r) && regEnt(r).discovered === false);
+  const ptsPath = pts => 'M' + pts.map(q => q[0] + ' ' + q[1]).join(' L') + ' Z';
+  const inPoly = (p, pts) => { let c = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) { const [xi, yi] = pts[i], [xj, yj] = pts[j]; if ((yi > p.y) !== (yj > p.y) && p.x < (xj - xi) * (p.y - yi) / (yj - yi) + xi) c = !c; } return c; };
+  const curReg = () => regs.find(r => r.id === st.reg);
+  function renderRegs() {
+    const svg = $('#regsvg'); if (!svg) return; let h = '';
+    const sel = curReg();
+    if (st.regs && sel && !(st.players && !regVisible(sel))) h += `<path d="M0 0H100V100H0Z ${ptsPath(sel.points)}" fill="rgba(8,6,4,.6)" fill-rule="evenodd" style="pointer-events:none"/>`;
+    if (st.regs) for (const r of regs) { if (st.players && !regVisible(r)) continue; h += `<polygon class="regp ${r.id === st.reg ? 'on' : ''}" data-reg="${esc(r.id)}" style="--c:${esc(r.color || '#d4b06a')}" points="${r.points.map(q => q.join(',')).join(' ')}"><title>${esc(regName(r))}</title></polygon>`; }
+    if (st.draw && st.draw.pts.length) h += `<polyline class="drawline" points="${st.draw.pts.map(q => q.join(',')).join(' ')}"/>`;
+    svg.innerHTML = h;
+  }
+  const vhHtml = () => {
+    if (st.draw) return st.draw.pts.map((q, i) => `<div class="vh ${i === 0 ? 'first' : ''}" style="left:${q[0]}%;top:${q[1]}%"></div>`).join('');
+    const sel = curReg(); if (st.vedit && sel && st.edit) return sel.points.map((q, i) => `<div class="vh" data-vh="${i}" style="left:${q[0]}%;top:${q[1]}%" title="Trascina · Alt+clic per eliminare"></div>`).join('');
+    return '';
+  };
+  const saveReg = async r => { await runBatch(['regions'], '', async t => t.put('regions', r), { reload: false }); regs = [...M.regions.values()].filter(x => x.mapId === id); };
+  const fitRegion = r => { const xs = r.points.map(q => q[0]), ys = r.points.map(q => q[1]); const bx = (Math.max(...xs) - Math.min(...xs)) / 100 * m.w, by = (Math.max(...ys) - Math.min(...ys)) / 100 * m.h; const rc = stage.getBoundingClientRect(); st.k = clamp(Math.min(rc.width / bx, rc.height / by) * 0.75, fitK() * 0.6, 8); center({ x: (Math.max(...xs) + Math.min(...xs)) / 2, y: (Math.max(...ys) + Math.min(...ys)) / 2 }); };
+
+  function pinHtml(p) {
+    const e = entOf(p), vis = visible(p); if (st.players && !vis) return '';
+    const col = e ? TYPE_COLOR[e.type] : '#a7343b';
+    return `<div class="pin ${vis ? '' : 'ghost'} ${st.sel === p.id ? 'sel' : ''}" data-pin="${esc(p.id)}" style="left:${p.x}%;top:${p.y}%"><svg viewBox="0 0 28 36"><path d="${PIN_PATH}" fill="${col}" stroke="#fff" stroke-width="1.6"/>${p.targetMapId ? '<path d="M8.5 13h9m-3.5-4.2l4.2 4.2-4.2 4.2" stroke="#fff" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>' : (p.visited === false ? '<circle cx="14" cy="13" r="4.2" fill="none" stroke="#fbf1d6" stroke-width="2"/>' : '<circle cx="14" cy="13" r="4.6" fill="#fbf1d6"/>')}</svg><span class="pl">${esc(pname(p))}</span></div>`;
+  }
+  const renderPins = () => { box.innerHTML = pins.map(pinHtml).join('') + vhHtml(); stage.classList.toggle('nolabels', !st.labels); };
+  function renderSide() {
+    const sel = pins.find(p => p.id === st.sel && (!st.players || visible(p)));
+    const children = S.maps.filter(c => c.parent === m.id && (!st.players || c.discovered !== false));
+    const vis = pins.filter(p => !st.players || visible(p)).sort((a, b) => pname(a).localeCompare(pname(b), 'it'));
+    let h = '';
+    if (sel) {
+      const e = entOf(sel), tm = sel.targetMapId ? mapById(sel.targetMapId) : null;
+      h += `<div class="spread"><h2>${esc(pname(sel))}</h2><button class="icb" data-act="desel" title="Chiudi">✕</button></div>${e && !st.players ? badge(e.type) : ''} ${!visible(sel) ? '<span class="pill warn">non scoperto</span>' : ''}
+        ${e && !st.players ? `${e.brief ? `<p><i>${inl(e.brief)}</i></p>` : ''}${e.status ? `<p class="hint">Stato: ${esc(e.status)}</p>` : ''}` : ''}
+        ${sel.photos?.length ? `<div class="gallery">${sel.photos.map((ph, i) => `<div class="gph"><img src="${ph.thumb}" data-act="viewphoto" data-i="${i}" alt="${esc(ph.name || '')}" title="Ingrandisci">${st.edit && !st.players ? `<button class="x" data-act="delphoto" data-i="${i}" title="Rimuovi foto">✕</button>` : ''}</div>`).join('')}</div>` : ''}
+        ${st.edit && !st.players ? '<button class="btn sm" data-act="addphotos" style="margin-top:6px">+ Aggiungi foto</button>' : ''}
+        <div class="row" style="margin:10px 0">${e && !st.players ? `<a class="btn sm" href="#/scheda/${encodeURIComponent(e.id)}">Apri scheda</a>` : ''}${tm && (!st.players || tm.discovered !== false) ? `<a class="btn sm primary" href="#/mappe/${encodeURIComponent(tm.id)}">Apri «${esc(tm.name)}»</a>` : ''}</div>
+        ${st.edit && !st.players ? `<div class="row"><button class="btn sm" data-act="editpin">Modifica segnaposto</button><button class="btn sm danger" data-act="delpin">Elimina</button></div><p class="hint">Trascina il segnaposto sulla mappa per spostarlo.</p>` : ''}<div class="orn"></div>`;
+    }
+    const selR = curReg();
+    if (selR && !(st.players && !regVisible(selR))) {
+      const e = regEnt(selR), inside = pins.filter(p => inPoly(p, selR.points) && (!st.players || visible(p))).sort((a, b) => pname(a).localeCompare(pname(b), 'it'));
+      h += `<div class="spread"><h2>${esc(regName(selR))}</h2><button class="icb" data-act="deselreg" title="Chiudi">✕</button></div><span class="badge t-luogo">Regione</span>
+        ${e && !st.players ? `${e.brief ? `<p><i>${inl(e.brief)}</i></p>` : ''}` : ''}
+        ${e && !st.players ? `<div class="row" style="margin:8px 0"><a class="btn sm primary" href="#/scheda/${encodeURIComponent(e.id)}">Apri la scheda della regione</a></div><div id="regbody" class="prose"></div>` : ''}
+        <h4>Segnalibri in questa regione <small>(${inside.length})</small></h4>${inside.length ? `<div class="chips">${inside.map(p => `<a class="chip" data-act="selpin" data-id="${esc(p.id)}">${esc(pname(p))}</a>`).join('')}</div>` : '<p class="hint">Nessun segnalibro qui, per ora.</p>'}
+        ${st.edit && !st.players ? `<div class="row" style="margin:10px 0"><button class="btn sm ${st.vedit ? 'on' : ''}" data-act="vedit">${st.vedit ? 'Fine modifica contorno' : 'Modifica contorno'}</button><button class="btn sm" data-act="redraw">Ridisegna</button><button class="btn sm" data-act="editreg">Cambia scheda/colore</button><button class="btn sm danger" data-act="delreg">Elimina regione</button></div>${st.vedit ? '<p class="hint">Trascina i punti per spostarli · doppio clic sul bordo per aggiungerne uno · Alt+clic su un punto per eliminarlo.</p>' : ''}` : ''}<div class="orn"></div>`;
+      if (e && !st.players) dbGet('bodies', e.id).then(b => { const host = $('#regbody'); if (!host || !b) return; host.innerHTML = (b.sections || []).slice(0, 6).map(sec => `<h4>${esc(sec.title)}</h4>` + sec.entries.slice(-2).map(en => prose(en.text.length > 500 ? en.text.slice(0, 500) + '…' : en.text)).join('')).join('') || '<p class="hint">La scheda è ancora vuota: la riempiremo giocando.</p>'; });
+    }
+    h += `<h2>${esc(m.name)}</h2>${m.discovered === false ? '<span class="pill warn">mappa non scoperta</span>' : ''}${lock ? '<span class="pill">🔒 mappa principale</span>' : ''}${m.desc ? prose(m.desc) : ''}`;
+    if (st.edit && !st.players) h += `<div class="row" style="margin:8px 0">${lock ? '' : '<button class="btn sm" data-act="editmap">Modifica mappa</button><button class="btn sm" data-act="reimg">Sostituisci immagine</button>'}<button class="btn sm" data-act="subup">+ Mappa di dettaglio</button>${lock ? '' : '<button class="btn sm danger" data-act="delmap">Elimina mappa</button>'}</div>${lock ? '<p class="lockhint">La mappa principale è protetta: puoi aggiungere segnalibri e regioni, non cambiarla.</p>' : ''}`;
+    const vr = regs.filter(r => !st.players || regVisible(r)).sort((a, b) => regName(a).localeCompare(regName(b), 'it'));
+    if (vr.length && st.regs) h += `<h4>Regioni <small>(${vr.length})</small></h4><div class="chips">${vr.map(r => `<a class="chip ${r.id === st.reg ? 'on' : ''}" data-act="selreg" data-id="${esc(r.id)}"><span class="dot" style="width:9px;height:9px;border-radius:50%;background:${esc(r.color || '#d4b06a')};display:inline-block"></span>${esc(regName(r))}</a>`).join('')}</div>`;
+    if (children.length) h += `<h4>Mappe di dettaglio</h4><div class="chips">${children.map(c => `<a class="chip" href="#/mappe/${encodeURIComponent(c.id)}">${esc(c.name)}</a>`).join('')}</div>`;
+    h += `<h4>Luoghi sulla mappa <small>(${vis.length})</small></h4>${vis.length ? vis.map(p => `<div class="pinrow ${st.sel === p.id ? 'sel' : ''}" data-act="selpin" data-id="${esc(p.id)}"><span class="dot" style="background:${entOf(p) ? TYPE_COLOR[entOf(p).type] : '#a7343b'}"></span>${esc(pname(p))}${visible(p) ? '' : '<small>nascosto</small>'}${p.targetMapId ? '<small>↳ mappa</small>' : ''}</div>`).join('') : '<p class="hint">Nessun segnaposto.</p>'}`;
+    $('#mside').innerHTML = h;
+  }
+  const refresh = () => { renderPins(); renderRegs(); renderSide(); };
+  const selectReg = (rid, ctr) => { st.reg = rid; st.vedit = false; refresh(); syncUI(); if (rid && ctr) { const r = curReg(); if (r) fitRegion(r); } };
+  const selectPin = (pid, ctr) => { st.sel = pid; refresh(); if (ctr && pid) center(pins.find(p => p.id === pid), 2.2); };
+  const syncUI = () => {
+    $('#b-edit').classList.toggle('on', st.edit); $('#b-add').style.display = st.edit && !st.players && !st.draw ? '' : 'none'; $('#b-addreg').style.display = st.edit && !st.players && !st.draw ? '' : 'none'; $('#drawbar').style.display = st.draw ? '' : 'none'; $('#b-lab').classList.toggle('on', st.labels); $('#b-reg').classList.toggle('on', st.regs);
+    stage.classList.toggle('drawing', !!st.draw);
+    $$('#seg button').forEach(b => b.classList.toggle('on', (b.dataset.act === 'vpl') === st.players));
+    stage.classList.toggle('adding', st.add || !!st.draw); hud(st.add ? 'Clicca sulla mappa dove vuoi mettere il segnaposto (Esc per annullare)' : st.draw ? `Disegna il contorno: clicca per aggiungere i punti (${st.draw.pts.length}) · Invio o «Chiudi regione» per finire · Esc per annullare` : '');
+  };
+
+  /* ----- salvataggio segnaposto ----- */
+  const savePin = async (p, newBlobs = [], delIds = []) => { await runBatch(['pins', 'blobs'], '', async t => { for (const b of newBlobs) await t.put('blobs', b); for (const d of delIds) await t.del('blobs', d); await t.put('pins', p); }, { reload: false }); };
+  const prepPhotos = async files => {
+    const blobs = [], metas = [], errors = []; if (files?.length) toast('Elaboro ' + files.length + ' foto…');
+    for (const f of files || []) { try { const im = await processImage(f, 1600); const pid = 'pinimg-' + uid(); blobs.push({ id: pid, blob: im.blob, type: im.blob.type }); metas.push({ id: pid, thumb: im.thumb, name: f.name, w: im.w, h: im.h }); } catch (e) { errors.push((f.name || 'foto') + ': ' + (e.message || e)); } }
+    return { blobs, metas, errors, asked: files?.length || 0 };
+  };
+  const photoReport = ph => { if (ph.errors.length) showInfo('Alcune foto non sono state aggiunte', '<ul>' + ph.errors.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul><p class="hint">Formati accettati: PNG, JPG, WebP (le foto HEIC/HEIF dell\'iPhone vanno prima convertite in JPG).</p>'); };
+  const COLORS = [['#d9b13c', 'Oro'], ['#6f9fd0', 'Azzurro'], ['#4a9a5a', 'Verde'], ['#2f6f6a', 'Verde scuro'], ['#9a7a5a', 'Marrone'], ['#c9853a', 'Arancio'], ['#d96a3a', 'Rosso fuoco'], ['#9b5fb0', 'Viola'], ['#5a7fa0', 'Blu acciaio'], ['#cc4455', 'Rosso']];
+  const regDlg = async r => {
+    ensureEntList(); const e = r ? regEnt(r) : null;
+    const f = await formDlg({ title: r ? 'Regione: scheda e colore' : 'Nuova regione', fields: [{ k: 'ent', label: 'Scheda della regione (digita il nome)', list: 'dl-ents', value: e ? `${e.name} (${TYPES[e.type]})` : '', req: true, hint: 'Se la scheda non esiste, la creo come Luogo di categoria «Regione».' }, { k: 'color', label: 'Colore', type: 'select', value: r?.color || '#d9b13c', options: COLORS }] });
+    if (!f) return null;
+    let ent = pickEntity(f.ent), entityId = ent?.id;
+    if (!ent) { entityId = await createEntity({ type: 'luogo', name: f.ent.trim() }); await dbPut('entities', { ...S.ents.get(entityId), cat: 'regione' }); await loadCaches(); }
+    return { entityId, color: f.color };
+  };
+  const pinDlg = async (p, pos) => {
+    ensureEntList(); const e = p ? entOf(p) : null;
+    const r = await formDlg({
+      title: p ? 'Modifica segnaposto' : 'Nuovo segnaposto', fields: [
+        { k: 'ent', label: 'Scheda collegata (digita il nome)', list: 'dl-ents', value: e ? `${e.name} (${TYPES[e.type]})` : '', hint: 'Scegli dai suggerimenti, oppure scrivi un nome nuovo.' },
+        { k: 'label', label: 'Etichetta (solo se non c\'è una scheda)', value: p?.label || '' },
+        { k: 'photos', label: 'Foto del luogo (facoltative, anche più di una)', type: 'file', accept: 'image/*', multiple: true },
+        { k: 'target', label: 'Apre la mappa di dettaglio', type: 'select', value: p?.targetMapId || '', options: [['', '— nessuna —'], ...S.maps.filter(x => x.id !== m.id).map(x => [x.id, x.name])] },
+        { k: 'create', label: 'Se la scheda non esiste, creala come nuovo Luogo', type: 'check', value: true }, { k: 'visited', label: 'Visitato dal party', type: 'check', value: p ? p.visited !== false : true }, { k: 'disc', label: 'Visibile ai giocatori (scoperto)', type: 'check', value: p ? p.discovered !== false : true }]
+    });
+    if (!r) return;
+    let ent = pickEntity(r.ent), entityId = ent?.id || null, label = r.label.trim() || null;
+    if (!ent && r.ent.trim()) { if (r.create) { entityId = await createEntity({ type: 'luogo', name: r.ent.trim() }); label = null; } else label = r.ent.trim(); }
+    if (!entityId && !label) { toast('Serve una scheda o un\'etichetta', 'err'); return; }
+    const ph = await prepPhotos(r.photos);
+    const np = p ? { ...p, entityId, label, targetMapId: r.target || null, discovered: r.disc, visited: r.visited, photos: [...(p.photos || []), ...ph.metas] } : { id: 'pin-' + uid(), mapId: m.id, entityId, label, x: pos.x, y: pos.y, targetMapId: r.target || null, discovered: r.disc, visited: r.visited, photos: ph.metas };
+    try { await savePin(np, ph.blobs); }
+    catch (e) { // le foto non si sono caricate: salva comunque il segnaposto, senza foto, e dillo chiaramente
+      if (ph.blobs.length) { const np2 = { ...np, photos: p ? (p.photos || []) : [] }; await savePin(np2); pins = p ? pins.map(x => x.id === p.id ? np2 : x) : [...pins, np2]; selectPin(np2.id); showInfo('Segnaposto salvato, ma senza foto', '<p>Il caricamento delle immagini non è riuscito: <b>' + esc(e.message || String(e)) + '</b></p><p class="hint">Controlla il banner dei permessi in alto o riprova con «Aggiungi foto».</p>'); return; }
+      throw e;
+    }
+    pins = p ? pins.map(x => x.id === p.id ? np : x) : [...pins, np]; selectPin(np.id); toast('Segnaposto salvato' + (ph.metas.length ? ' · ' + ph.metas.length + ' foto' : '')); photoReport(ph);
+  };
+
+  /* ----- interazione ----- */
+  const ptr = new Map(); let drag = null;
+  const dist = () => { const [a, b] = [...ptr.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
+  stage.addEventListener('pointerdown', e => {
+    if (e.button > 0) return; try { stage.setPointerCapture(e.pointerId); } catch { }
+    ptr.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (ptr.size === 2) { drag = { type: 'pinch', d0: dist(), k0: st.k }; return; }
+    const vh = e.target.closest('.vh[data-vh]');
+    if (vh && st.vedit && st.edit && !st.draw) {
+      const sel = curReg(); const i = +vh.dataset.vh;
+      if (e.altKey) { if (sel.points.length > 3) { const np = { ...sel, points: sel.points.filter((_, k) => k !== i) }; saveReg(np).then(refresh); } else toast('Una regione ha bisogno di almeno 3 punti', 'err'); return; }
+      drag = { type: 'vh', i, el: vh, sx: e.clientX, sy: e.clientY, moved: false, pts: sel.points.map(q => q.slice()) }; return;
+    }
+    const re = e.target.closest('[data-reg]');
+    const pe = e.target.closest('.pin');
+    if (pe && st.edit && !st.players && !st.add) { drag = { type: 'pin', id: pe.dataset.pin, el: pe, sx: e.clientX, sy: e.clientY, moved: false }; pe.classList.add('drag'); return; }
+    drag = { type: 'pan', pin: pe ? pe.dataset.pin : null, reg: re ? re.dataset.reg : null, sx: e.clientX, sy: e.clientY, ox: st.x, oy: st.y, moved: false };
+  });
+  stage.addEventListener('pointermove', e => {
+    if (ptr.has(e.pointerId)) ptr.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (!drag) return;
+    if (drag.type === 'pinch' && ptr.size === 2) { const [a, b] = [...ptr.values()]; const r = stage.getBoundingClientRect(); const f = (drag.k0 * dist() / drag.d0) / st.k; zoomAt((a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top, f); return; }
+    const dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
+    if (drag.type === 'pan') { if (!drag.moved && Math.hypot(dx, dy) > 4) { drag.moved = true; stage.classList.add('panning'); } if (drag.moved) { st.x = drag.ox + dx; st.y = drag.oy + dy; apply(); } }
+    else if (drag.type === 'vh') { if (!drag.moved && Math.hypot(dx, dy) > 3) drag.moved = true; if (drag.moved) { const c = toPct(e.clientX, e.clientY); drag.el.style.left = c.x + '%'; drag.el.style.top = c.y + '%'; drag.pts[drag.i] = [+c.x.toFixed(2), +c.y.toFixed(2)]; const sel = curReg(); sel.points = drag.pts; renderRegs(); } }
+    else if (drag.type === 'pin') { if (!drag.moved && Math.hypot(dx, dy) > 3) drag.moved = true; if (drag.moved) { const c = toPct(e.clientX, e.clientY); drag.el.style.left = c.x + '%'; drag.el.style.top = c.y + '%'; drag.pos = c; } }
+  });
+  const end = async e => {
+    ptr.delete(e.pointerId); stage.classList.remove('panning'); const d = drag; if (ptr.size === 0) drag = null; if (!d) return;
+    if (d.type === 'vh') { if (d.moved) { const sel = curReg(); await saveReg({ ...sel, points: d.pts }); refresh(); } return; }
+    if (d.type === 'pan' && !d.moved && e.type === 'pointerup') {
+      if (st.draw) { const pos = toPct(e.clientX, e.clientY); st.draw.pts.push([+pos.x.toFixed(2), +pos.y.toFixed(2)]); renderPins(); renderRegs(); syncUI(); }
+      else if (st.add && !st.players) { const pos = toPct(e.clientX, e.clientY); st.add = false; syncUI(); await pinDlg(null, pos); }
+      else if (d.pin) selectPin(d.pin); else if (d.reg) selectReg(d.reg); else if (st.sel || st.reg) { st.sel = null; selectReg(null); }
+    } else if (d.type === 'pin') {
+      d.el.classList.remove('drag');
+      if (d.moved && d.pos) { const p = pins.find(x => x.id === d.id); const np = { ...p, x: +d.pos.x.toFixed(2), y: +d.pos.y.toFixed(2) }; await savePin(np); pins = pins.map(x => x.id === p.id ? np : x); selectPin(np.id); }
+      else selectPin(d.id);
+    }
+  };
+  stage.addEventListener('pointerup', end); stage.addEventListener('pointercancel', e => { ptr.delete(e.pointerId); drag = null; stage.classList.remove('panning'); });
+  stage.addEventListener('wheel', e => { e.preventDefault(); const r = stage.getBoundingClientRect(); zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0016))); }, { passive: false });
+  stage.addEventListener('dblclick', async e => {
+    if (st.vedit && st.edit && !st.draw && e.target.closest('[data-reg]')) { const sel = curReg(); if (sel) { const c = toPct(e.clientX, e.clientY); let bi = 0, bd = 1e9; sel.points.forEach((a, i) => { const b = sel.points[(i + 1) % sel.points.length]; const dx = b[0] - a[0], dy = b[1] - a[1]; const t = clamp(((c.x - a[0]) * dx + (c.y - a[1]) * dy) / (dx * dx + dy * dy || 1), 0, 1); const d = Math.hypot(a[0] + t * dx - c.x, a[1] + t * dy - c.y); if (d < bd) { bd = d; bi = i; } }); const pts = sel.points.map(q => q.slice()); pts.splice(bi + 1, 0, [+c.x.toFixed(2), +c.y.toFixed(2)]); await saveReg({ ...sel, points: pts }); refresh(); } return; }
+    if (st.add || st.draw || e.target.closest('.pin')) return; const r = stage.getBoundingClientRect(); zoomAt(e.clientX - r.left, e.clientY - r.top, 1.8); });
+  const onKey = e => { if (e.key === 'Escape' && st.draw) { st.draw = null; refresh(); syncUI(); } else if (e.key === 'Escape' && st.add) { st.add = false; syncUI(); } else if (e.key === 'Enter' && st.draw) acts.drawok(); };
+  addEventListener('keydown', onKey); onCleanup(() => removeEventListener('keydown', onKey));
+  const onRes = () => { if (!document.fullscreenElement) return; };
+  const onFs = () => setTimeout(fit, 80); document.addEventListener('fullscreenchange', onFs); onCleanup(() => document.removeEventListener('fullscreenchange', onFs));
+  void onRes;
+
+  setActs({
+    zin: () => { const r = stage.getBoundingClientRect(); zoomAt(r.width / 2, r.height / 2, 1.4); }, zout: () => { const r = stage.getBoundingClientRect(); zoomAt(r.width / 2, r.height / 2, 1 / 1.4); }, fit,
+    regs: () => { st.regs = !st.regs; setPref('mapRegs', st.regs); if (!st.regs) st.reg = null; refresh(); syncUI(); },
+    selreg: a => selectReg(a.dataset.id, true), deselreg: () => selectReg(null),
+    vedit: () => { st.vedit = !st.vedit; refresh(); },
+    addreg: () => { st.draw = { pts: [], redo: null }; st.add = false; refresh(); syncUI(); },
+    redraw: () => { const r = curReg(); if (!r) return; st.draw = { pts: [], redo: r.id }; st.vedit = false; refresh(); syncUI(); },
+    drawundo: () => { if (st.draw) { st.draw.pts.pop(); renderPins(); renderRegs(); syncUI(); } },
+    drawcancel: () => { st.draw = null; refresh(); syncUI(); },
+    drawok: async () => {
+      if (!st.draw) return; if (st.draw.pts.length < 3) { toast('Servono almeno 3 punti', 'err'); return; }
+      const pts = st.draw.pts, redo = st.draw.redo;
+      if (redo) { const r = regs.find(x => x.id === redo); await saveReg({ ...r, points: pts }); st.draw = null; refresh(); syncUI(); toast('Contorno aggiornato'); return; }
+      const nr = await regDlg(null); if (!nr) return;
+      const rid = 'reg-' + uid(); await saveReg({ id: rid, mapId: m.id, entityId: nr.entityId, color: nr.color, points: pts, ts: Date.now() });
+      st.draw = null; st.reg = rid; refresh(); syncUI(); toast('Regione creata');
+    },
+    editreg: async () => { const r = curReg(); const nr = await regDlg(r); if (!nr) return; await saveReg({ ...r, entityId: nr.entityId, color: nr.color }); refresh(); },
+    delreg: async () => { const r = curReg(); if (!await ask(`Eliminare il contorno della regione «${regName(r)}»? (la scheda resta)`, { danger: true, ok: 'Elimina' })) return; await dbDel('regions', r.id); regs = [...M.regions.values()].filter(x => x.mapId === id); st.reg = null; st.vedit = false; refresh(); },
+    labels: () => { st.labels = !st.labels; setPref('mapLabels', st.labels); renderPins(); syncUI(); },
+    vdm: () => { st.players = false; refresh(); syncUI(); }, vpl: () => { st.players = true; st.edit = false; st.add = false; refresh(); syncUI(); },
+    edit: () => { if (st.players) { st.players = false; } st.edit = !st.edit; st.add = false; refresh(); syncUI(); },
+    addpin: () => { st.add = true; syncUI(); },
+    fs: () => { if (document.fullscreenElement) document.exitFullscreen(); else mv.requestFullscreen?.().catch(() => toast('Schermo intero non disponibile', 'err')); },
+    selpin: a => selectPin(a.dataset.id, true), desel: () => selectPin(null),
+    editpin: () => pinDlg(pins.find(p => p.id === st.sel)),
+    addphotos: async () => {
+      const p = pins.find(x => x.id === st.sel); const r = await formDlg({ title: `Aggiungi foto a «${pname(p)}»`, ok: 'Aggiungi', fields: [{ k: 'photos', label: 'Foto (puoi sceglierne più di una)', type: 'file', accept: 'image/*', multiple: true, req: true }] }); if (!r) return;
+      const ph = await prepPhotos(r.photos); photoReport(ph); if (!ph.metas.length) return; const np = { ...p, photos: [...(p.photos || []), ...ph.metas] }; await savePin(np, ph.blobs); pins = pins.map(x => x.id === p.id ? np : x); renderSide(); toast(ph.metas.length + ' foto aggiunte');
+    },
+    delphoto: async a => { const p = pins.find(x => x.id === st.sel), i = +a.dataset.i; if (!await ask('Rimuovere questa foto?', { danger: true, ok: 'Rimuovi' })) return; const gone = p.photos[i]; const np = { ...p, photos: p.photos.filter((_, k) => k !== i) }; await savePin(np, [], [gone.id]); pins = pins.map(x => x.id === p.id ? np : x); renderSide(); },
+    viewphoto: a => {
+      const p = pins.find(x => x.id === st.sel), list = p.photos || []; let i = +a.dataset.i, url = null;
+      const d = openDlg(`<form method="dialog" style="padding:12px 16px"><div class="spread" style="margin-bottom:8px"><b id="lbt"></b><button class="btn sm" value="x">Chiudi</button></div><div class="lb"><button type="button" class="btn" id="lbp">‹</button><img id="lbi" alt=""><button type="button" class="btn" id="lbn">›</button></div></form>`, 'wide lbdlg');
+      const img = $('#lbi', d);
+      const show = async () => { const rec = await dbGet('blobs', list[i].id); if (url) URL.revokeObjectURL(url); url = rec ? URL.createObjectURL(rec.blob) : ''; img.src = url; $('#lbt', d).textContent = `${pname(p)} · foto ${i + 1}/${list.length}`; $('#lbp', d).style.visibility = $('#lbn', d).style.visibility = list.length > 1 ? 'visible' : 'hidden'; };
+      $('#lbp', d).onclick = () => { i = (i - 1 + list.length) % list.length; show(); }; $('#lbn', d).onclick = () => { i = (i + 1) % list.length; show(); };
+      d.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') $('#lbp', d).click(); else if (e.key === 'ArrowRight') $('#lbn', d).click(); });
+      d.addEventListener('close', () => url && URL.revokeObjectURL(url)); show();
+    },
+    delpin: async () => { const p = pins.find(x => x.id === st.sel); if (!await ask(`Eliminare il segnaposto «${pname(p)}»? (la scheda resta)`, { danger: true, ok: 'Elimina' })) return; await runBatch(['pins', 'blobs'], '', async t => { await t.del('pins', p.id); for (const ph of p.photos || []) await t.del('blobs', ph.id); }, { reload: false }); pins = pins.filter(x => x.id !== p.id); selectPin(null); },
+    editmap: async () => {
+      const r = await formDlg({ title: 'Modifica mappa', fields: [{ k: 'name', label: 'Nome', value: m.name, req: true }, { k: 'desc', label: 'Descrizione', type: 'textarea', rows: 4, value: m.desc }, { k: 'parent', label: 'Mappa madre', type: 'select', value: m.parent || '', options: [['', '— nessuna —'], ...S.maps.filter(x => x.id !== m.id).map(x => [x.id, x.name])] }, { k: 'disc', label: 'Scoperta dai giocatori', type: 'check', value: m.discovered !== false }] });
+      if (!r) return; await runBatch(['maps'], '', async t => t.put('maps', { ...m, name: r.name.trim(), desc: r.desc.trim(), parent: r.parent || null, discovered: r.disc })); rerender();
+    },
+    reimg: async () => {
+      const r = await formDlg({ title: 'Sostituisci l\'immagine', intro: 'I segnaposto sono memorizzati in percentuale: se la nuova immagine ha la stessa proporzione restano al loro posto.', fields: [{ k: 'f', label: 'Nuova immagine', type: 'file', accept: 'image/*', req: true }] }); if (!r) return;
+      const im = await processImage(r.f); if (Math.abs(im.w / im.h - m.w / m.h) > 0.02 && !await ask('La proporzione della nuova immagine è diversa: i segnaposto potrebbero risultare spostati. Continuare?', { ok: 'Continua' })) return;
+      await runBatch(['maps', 'blobs'], '', async t => { await t.put('blobs', { id, blob: im.blob, type: im.blob.type }); await t.put('maps', { ...m, w: im.w, h: im.h, thumb: im.thumb }); }); rerender();
+    },
+    subup: async () => { const nid = await uploadMapDlg({ parent: m.id }); if (nid) location.hash = '#/mappe/' + encodeURIComponent(nid); },
+    delmap: async () => {
+      if (!await ask(`Eliminare la mappa **${m.name}** con i suoi ${pins.length} segnaposto? Le schede restano.`, { danger: true, ok: 'Elimina' })) return;
+      const all = await dbAll('pins');
+      await runBatch(['maps', 'blobs', 'pins'], '', async t => { await t.del('maps', id); await t.del('blobs', id); for (const p of all) { if (p.mapId === id) { await t.del('pins', p.id); for (const ph of p.photos || []) await t.del('blobs', ph.id); } else if (p.targetMapId === id) await t.put('pins', { ...p, targetMapId: null }); } for (const c of S.maps.filter(x => x.parent === id)) await t.put('maps', { ...c, parent: m.parent || null }); });
+      location.hash = '#/mappe';
+    }
+  });
+  refresh(); syncUI(); requestAnimationFrame(() => { fit(); if (st.sel && pins.some(p => p.id === st.sel)) center(pins.find(p => p.id === st.sel), 2.2); else if (st.reg && curReg()) fitRegion(curReg()); });
+  addEventListener('resize', fit); onCleanup(() => removeEventListener('resize', fit));
+});
+
+/* =====================================================================
+   IMPORTA, BACKUP, RICERCA RAPIDA, TEMA, AVVIO
+   ===================================================================== */
+function planHtml(P) {
+  let h = '';
+  if (P.errors.length) h += `<div class="banner"><div>${P.errors.map(e => `<p class="e" style="margin:2px 0"><b>Errore:</b> ${esc(e)}</p>`).join('')}</div></div>`;
+  if (P.warns.length) h += `<div class="card plan"><h3>Attenzione (${P.warns.length})</h3><ul>${P.warns.map(w => `<li class="w">${esc(w)}</li>`).join('')}</ul></div>`;
+  if (P.errors.length) return h;
+  const nNew = P.ents.filter(e => e.isNew).length, nUpd = P.ents.length - nNew;
+  h += `<div class="card plan"><h2>Anteprima: cosa cambierà</h2><div class="stat"><div><b>${P.sess.length}</b><span>sessioni</span></div><div><b>${nNew}</b><span>schede nuove</span></div><div><b>${nUpd}</b><span>schede aggiornate</span></div><div><b>${P.events}</b><span>eventi</span></div><div><b>${P.pins.length}</b><span>segnaposto</span></div></div>`;
+  if (P.sess.length) h += `<h3>Sessioni</h3><ul>${P.sess.map(s => `<li>Sessione ${s.n}${s.title ? ' — ' + esc(s.title) : ''} <small>${s.replaced ? 'esistente, verrà aggiornata' : 'nuova'} · riassunto di ${s.len} caratteri</small></li>`).join('')}</ul>`;
+  if (P.general) h += `<h3>Riassunto generale</h3><p>Verrà riscritto (${P.general.oldLen} → ${P.general.newLen} caratteri). La versione attuale resta salvata nello storico.</p><details class="arc"><summary>Leggi il nuovo testo</summary>${prose(P.general.text)}</details>`;
+  const lst = l => l.map(e => `<li>${badge(e.type || 'lore')} <b>${esc(e.name)}</b>${e.notes.length ? `<small>${e.notes.map(esc).join(' · ')}</small>` : '<small>solo apparizione in sessione</small>'}</li>`).join('');
+  if (nNew) h += `<h3>Nuove schede (${nNew})</h3><ul>${lst(P.ents.filter(e => e.isNew))}</ul>`;
+  if (nUpd) h += `<h3>Schede aggiornate (${nUpd})</h3><ul>${lst(P.ents.filter(e => !e.isNew))}</ul>`;
+  if (P.events) h += `<h3>Cronologia</h3><p>${P.events} eventi per la sessione ${P.evSessions.join(', ')}${P.evSessions.length ? ' (quelli già presenti per le stesse sessioni vengono sostituiti)' : ''}.</p>`;
+  if (P.pins.length) h += `<h3>Segnaposto</h3><ul>${P.pins.map(p => `<li><b>${esc(p.name || '?')}</b> su «${esc(p.map)}» <small>${p.moved ? 'spostato' : 'nuovo'} · x ${p.x.toFixed(1)} %, y ${p.y.toFixed(1)} %</small></li>`).join('')}</ul>`;
+  if (P.misc.length) h += `<h3>Altro</h3><ul>${P.misc.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
+  if (P.linksCount) h += `<p class="hint">${P.linksCount} collegamenti tra schede.</p>`;
+  return h + `</div>`;
+}
+route(/^\/import$/, async () => {
+  const hist = (await dbAll('imports')).reverse();
+  setView(`<div class="pagehead"><h1>Importa aggiornamento</h1><div class="acts"><button class="btn" data-act="copyctx">Copia contesto per Claude</button></div></div><div class="orn"></div>
+    <div class="card"><p class="lead" style="margin-top:0">Incolla qui la risposta di Claude (il JSON) oppure scegli il file. Prima di scrivere qualsiasi cosa vedrai un'anteprima.</p>
+      <textarea class="big" id="jin" placeholder='{ "formato": "cronache/1", … }' spellcheck="false"></textarea>
+      <div class="row" style="margin-top:10px"><button class="btn primary" data-act="analyze">Analizza</button><label class="btn ghost" style="cursor:pointer">…oppure scegli un file<input type="file" id="jfile" accept=".json,.txt,application/json" hidden></label></div></div>
+    <div id="planbox"></div>
+    <div class="card"><h2>Importazioni recenti</h2>${hist.length ? hist.map((h, i) => `<div class="spread" style="border-top:1px solid var(--line);padding:6px 0"><span>${esc(h.label)} <small>${fmtDate(h.ts)}</small></span>${i === 0 ? '<button class="btn sm" data-act="undo">Annulla questa importazione</button>' : ''}</div>`).join('') + '<p class="hint">Annullare ripristina le schede e i dati toccati da quell\'importazione allo stato di prima. Le modifiche manuali fatte nel frattempo sulle stesse schede andrebbero perse.</p>' : '<p class="hint">Nessuna importazione ancora.</p>'}</div>`);
+  let plan = null;
+  $('#jfile').onchange = async e => { const f = e.target.files[0]; if (f) { $('#jin').value = await f.text(); analyze(); } };
+  async function analyze() {
+    const v = $('#jin').value; if (!v.trim()) { toast('Incolla prima il JSON', 'err'); return; }
+    plan = await planImport(v); $('#planbox').innerHTML = planHtml(plan) + (!plan.errors.length ? `<div class="row" style="margin:6px 0 20px"><button class="btn primary" data-act="confirm">Conferma e importa</button><button class="btn ghost" data-act="cancel">Annulla</button></div>` : '');
+    $('#planbox').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  setActs({
+    copyctx: copyContextFlow, analyze,
+    cancel: () => { plan = null; $('#planbox').innerHTML = ''; },
+    confirm: async a => {
+      if (!plan || plan.errors.length) return; a.disabled = true;
+      try { await applyImport(plan); } catch (e) { a.disabled = false; throw new Error('Importazione non riuscita, non è stato modificato nulla: ' + e.message); }
+      toast('Importazione completata'); const n = plan.sess.length ? plan.sess[plan.sess.length - 1].n : null; location.hash = n != null ? '#/sessioni/' + n : '#/';
+    },
+    undo: async () => { if (!await ask('Annullare l\'ultima importazione?', { ok: 'Annulla importazione', danger: true })) return; await undoLastImport(); toast('Importazione annullata'); rerender(); }
+  });
+});
+
+route(/^\/backup$/, async () => {
+  const lastBk = getMeta('lastBackup', 0); let usage = null;
+  try { const as = await claude.use('assets'); if (as) usage = (await as.list()).usage; } catch { }
+  setView(`<div class="pagehead"><h1>Backup e dati</h1></div><div class="orn"></div>
+    <div class="card"><h2>Salva una copia</h2><p>I dati vivono in questo browser (funzionano anche offline). Un backup è un file che puoi tenere dove vuoi e ricaricare quando serve.</p>
+      <div class="row"><button class="btn primary" data-act="bkFull">Backup completo (con mappe)</button><button class="btn" data-act="bkData">Solo dati (leggero)</button></div>
+      <p class="hint">Ultimo backup: ${lastBk ? fmtDate(lastBk) : 'mai'}. Il «solo dati» non include le immagini delle mappe, che di solito cambiano di rado.</p></div>
+    <div class="card"><h2>Ripristina da un backup</h2><p>Sostituisce <b>tutto</b> il contenuto attuale con quello del file.</p><label class="btn" style="cursor:pointer">Scegli il file di backup…<input type="file" id="rfile" accept=".json,application/json" hidden></label></div>
+    <div class="card"><h2>Dove sono i dati</h2><p class="hint">I dati e le immagini sono salvati in questo browser, su questo dispositivo${usage ? ': <b>' + fmtSize(usage.bytes) + '</b> su ' + fmtSize(usage.maxBytes) + ' (' + usage.files + ' file)' : ''}. Le modifiche fatte qui restano su questo dispositivo: fai un backup ogni tanto. Gli aggiornamenti della campagna arrivano come nuova versione dei dati (il sito te lo propone).</p></div>
+    <div class="card"><h2>Zona pericolosa</h2><p>Cancella tutto (schede, sessioni, mappe, cronologia). Fai prima un backup.</p><button class="btn danger" data-act="wipe">Svuota tutto</button></div>`);
+  $('#rfile').onchange = async e => {
+    const f = e.target.files[0]; if (!f) return;
+    if (!await ask(`Ripristinare il backup **${f.name}**? Il contenuto attuale verrà **sostituito**.`, { danger: true, ok: 'Ripristina' })) { e.target.value = ''; return; }
+    try { const r = await restoreBackup(await f.text()); toast('Backup ripristinato' + (r.images ? '' : ' (le immagini delle mappe esistenti sono rimaste)')); location.hash = '#/'; }
+    catch (err) { toast(err.message, 'err'); }
+  };
+  setActs({
+    bkFull: () => doBackup(true).then(rerender), bkData: () => doBackup(false).then(rerender),
+    wipe: async () => {
+      const r = await formDlg({ title: 'Svuota tutto', ok: 'Cancella definitivamente', fields: [{ k: 't', label: 'Scrivi CANCELLA per confermare', req: true }] });
+      if (!r || r.t.trim() !== 'CANCELLA') { if (r) toast('Conferma non corretta', 'err'); return; } await wipeAll(); toast('Tutto cancellato'); location.hash = '#/';
+    }
+  });
+});
+
+/* ---------- ricerca rapida in alto ---------- */
+function setupQuickSearch() {
+  const qi = $('#q'), qr = $('#qres');
+  const close = () => qr.classList.remove('on');
+  qi.addEventListener('input', () => {
+    const terms = norm(qi.value).split(' ').filter(Boolean); if (!terms.length) return close();
+    const ents = [...S.ents.values()].filter(e => terms.every(w => S.sidx.get(e.id).includes(w))).sort((a, b) => (norm(b.name).startsWith(terms[0]) - norm(a.name).startsWith(terms[0])) || a.name.localeCompare(b.name)).slice(0, 8);
+    const ss = S.sess.filter(s => terms.every(w => norm(s.title + ' ' + s.brief + ' ' + s.n).includes(w))).slice(0, 3);
+    const ms = S.maps.filter(m => terms.every(w => norm(m.name).includes(w))).slice(0, 3);
+    qr.innerHTML = ents.map(e => `<a href="#/scheda/${encodeURIComponent(e.id)}">${badge(e.type)} <span>${esc(e.name)}</span></a>`).join('') + ss.map(s => `<a href="#/sessioni/${s.n}"><span class="badge">Sess.</span> <span>${s.n}. ${esc(s.title)}</span></a>`).join('') + ms.map(m => `<a href="#/mappe/${encodeURIComponent(m.id)}"><span class="badge">Mappa</span> <span>${esc(m.name)}</span></a>`).join('')
+      + `<a href="#/cerca?q=${encodeURIComponent(qi.value)}"><span class="mute">Cerca «${esc(qi.value)}» in tutti i testi ↵</span></a>`;
+    qr.classList.add('on');
+  });
+  qi.addEventListener('keydown', e => { if (e.key === 'Enter' && qi.value.trim()) { location.hash = '#/cerca?q=' + encodeURIComponent(qi.value.trim()); close(); qi.blur(); } else if (e.key === 'Escape') { close(); qi.blur(); } });
+  qr.addEventListener('click', () => { close(); qi.value = ''; });
+  document.addEventListener('click', e => { if (!e.target.closest('.srch')) close(); });
+  document.addEventListener('keydown', e => { if ((e.key === '/' || (e.key.toLowerCase() === 'k' && (e.ctrlKey || e.metaKey))) && !/input|textarea|select/i.test(document.activeElement?.tagName || '')) { e.preventDefault(); qi.focus(); qi.select(); } });
+}
+
+/* ---------- tema e avvio ---------- */
+function applyTheme(t) { document.documentElement.dataset.theme = t; $('#themeBtn').textContent = t === 'dark' ? '☀' : '☾'; }
+async function checkAccess(PERM) {
+  const why = [];
+  try { const u = await claude.use('user'); if (u && !(await u.canEdit())) why.push('questo account può solo consultare la pagina (servono i permessi di modifica sull\'artifact)'); } catch { }
+  if (!CASSETS) why.push('il caricamento di immagini (mappe, foto, ritratti) non è abilitato');
+  try { if (PERM) { const st = await PERM.state(); const bad = Object.entries(st).filter(([k, v]) => ['db', 'assets', 'downloads'].includes(k) && v !== 'granted').map(([k, v]) => k + ': ' + v); if (bad.length) why.push('permessi non concessi (' + bad.join(', ') + ')'); } } catch { }
+  const old = $('#access'); if (old) old.remove();
+  if (!why.length) return;
+  const d = document.createElement('div'); d.id = 'access'; d.className = 'card'; d.style.cssText = 'margin:12px max(16px,env(safe-area-inset-left,0px));border-color:var(--warn)';
+  d.innerHTML = '<b>Alcune modifiche potrebbero non funzionare:</b> ' + esc(why.join('; ')) + '. ' + (PERM ? '<button class="btn sm" id="accBtn">Gestisci permessi</button>' : '');
+  $('#view').before(d); const bt = $('#accBtn'); if (bt) bt.onclick = async () => { try { await PERM.manage(); } catch { } location.reload(); };
+}
+(async function boot() {
+  applyTheme(pref('theme', matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  $('#themeBtn').onclick = () => { const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; setPref('theme', t); applyTheme(t); };
+  try {
+    let PERM = null; try { PERM = await claude.use('permissions'); if (PERM) await PERM.request(['db', 'assets', 'downloads']); } catch { }
+    await openDB(); await loadCaches(); checkAccess(PERM);
+  } catch (e) {
+    setView(`<div class="card"><h2>Impossibile aprire i dati</h2><p>${esc(e.message || e)}</p><p class="hint">Ricarica la pagina; se il problema resta, apri il sito almeno una volta con internet attivo.</p></div>`); return;
+  }
+  setupQuickSearch(); addEventListener('hashchange', navigate); navigate();
+  window.__cronache = { S, planImport, applyImport, buildContext, runBatch, dbAll, dbGet, loadCaches, processImage };
+})();
+
+</script>
+
+</body></html>
