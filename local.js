@@ -10,7 +10,7 @@
   const ls = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch { } }, del: k => { try { localStorage.removeItem(k); } catch { } } };
   const domReady = () => document.readyState === 'loading' ? new Promise(r => addEventListener('DOMContentLoaded', r, { once: true })) : Promise.resolve();
   const clone = v => JSON.parse(JSON.stringify(v));
-  const ROERR = () => new Error('Sola lettura: accedi come amministratore per modificare.');
+  const ROERR = () => new Error('Sola lettura: accedi come Dungeon Master per modificare.');
 
   let ROLE = null, DB = null, MEM = {}, BLOBMAP = {};
   const store = (s, m = 'readonly') => DB.transaction(s, m).objectStore(s);
@@ -93,11 +93,11 @@
       const st = document.createElement('style'); st.textContent = LOGIN_CSS; document.head.append(st);
       const el = document.createElement('div'); el.id = 'login';
       el.innerHTML = `<div class="box"><h1>CAMPAGNA D&amp;D</h1><p class="sub">Diario di campagna di Avalar</p>
-        <button class="btn p" id="lg-guest">Entra come ospite</button><small style="text-align:center">Sola lettura, nessuna modifica possibile.</small>
+        <button class="btn p" id="lg-guest">Entra come Giocatore</button><small style="text-align:center">Sola lettura, nessuna modifica possibile.</small>
         <div class="or">oppure</div>
-        <form id="lg-form" autocomplete="off"><input type="password" id="lg-code" placeholder="Codice amministratore" autocomplete="current-password" spellcheck="false">
+        <form id="lg-form" autocomplete="off"><input type="password" id="lg-code" placeholder="Codice del Dungeon Master" autocomplete="current-password" spellcheck="false">
         <label><input type="checkbox" id="lg-rem" checked> Ricordami su questo dispositivo</label>
-        <button class="btn" id="lg-adm" type="submit">Entra come amministratore</button></form>
+        <button class="btn" id="lg-adm" type="submit">Entra come Dungeon Master</button></form>
         <p class="err" id="lg-err">${msg || ''}</p></div>`;
       document.body.append(el);
       const err = t => { el.querySelector('#lg-err').textContent = t || ''; };
@@ -110,7 +110,7 @@
         e.preventDefault(); const code = el.querySelector('#lg-code').value; if (!code) { err('Inserisci il codice.'); return; }
         const b = el.querySelector('#lg-adm'); b.disabled = true; b.textContent = 'Verifico…'; err('');
         try { await adminOpen(code, el.querySelector('#lg-rem').checked); finish(); }
-        catch (x) { b.disabled = false; b.textContent = 'Entra come amministratore'; err(x.message === 'nokey' ? 'Accesso non riuscito.' : (x.message || String(x))); }
+        catch (x) { b.disabled = false; b.textContent = 'Entra come Dungeon Master'; err(x.message === 'nokey' ? 'Accesso non riuscito.' : (x.message || String(x))); }
       };
       el.querySelector('#lg-code').focus();
     });
@@ -169,6 +169,19 @@
   /* ---------- interfaccia per ruolo ---------- */
   const HIDE_ACTS = ['edit', 'up', 'rensess', 'reimg', 'delRel', 'del', 'copyctx', 'wipe', 'vedit', 'vdm', 'vpl', 'undo', 'toggleDisc', 'subup', 'rename', 'renSec', 'redraw', 'portrait', 'newsess', 'newent', 'merge', 'histgen', 'editreg', 'editpin', 'editmap', 'editgen', 'editEntry', 'drawundo', 'drawok', 'drawcancel', 'delreg', 'delpin', 'delphoto', 'delmap', 'delSec', 'delEntry', 'delDoc', 'cpDoc', 'copyEnt', 'bkFull', 'bkData', 'attach', 'analyze', 'addreg', 'addpin', 'addphotos', 'addSec', 'addRel', 'addEntry', 'demo'];
   const GUEST_CSS = HIDE_ACTS.map(a => `html.ro [data-act="${a}"]`).join(',') + `,html.ro a[href="#/import"],html.ro a[href="#/backup"],html.ro #b-edit,html.ro #b-add,html.ro #b-addreg,html.ro #seg,html.ro #access,html.ro input[type=file],html.ro label:has(input[type=file]){display:none!important}`;
+  const ROLE_CSS = `.rolebar{display:flex;gap:6px;align-items:center;flex:none}
+.rolepill{font:600 .72rem/1 Georgia,serif;letter-spacing:.06em;text-transform:uppercase;padding:7px 10px;border-radius:99px;border:1px solid #ffffff40;background:#00000030;color:#f5e6c4;white-space:nowrap}
+.rolepill.adm{border-color:#e7cf9a99;color:#f7e3ae}
+.rolepill .rp-s{display:none}
+.logout{white-space:nowrap;display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 13px 0 11px;border-radius:99px;border:1px solid #e7cf9a80;background:#00000030;color:#f5e6c4;font:600 .72rem Georgia,serif;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;flex:none;transition:background .15s,border-color .15s}
+.logout:hover,.logout:focus-visible{background:#a7343b;border-color:#e7cf9a;outline:none}
+.logout:active{transform:translateY(1px)}
+.logout:disabled{opacity:.6}
+.iconbtn.askbtn{width:auto;white-space:nowrap;padding:0 12px;border-radius:99px;font:600 .72rem Georgia,serif;letter-spacing:.06em;text-transform:uppercase}
+.askbtn .ab-i{display:none}
+@media (max-width:1500px){.rolepill .rp-l{display:none}.rolepill .rp-s{display:inline}}
+@media (max-width:900px){.logout{width:34px;padding:0;justify-content:center}.logout span{display:none}.iconbtn.askbtn{width:34px;padding:0}.askbtn .ab-t{display:none}.askbtn .ab-i{display:inline}}
+@media (max-width:520px){.rolepill{padding:6px 8px;font-size:.66rem}.rolebar{gap:5px}}`;
   function pill(txt, cls) { const s = document.createElement('span'); s.textContent = txt; s.style.cssText = 'font:600 .72rem/1 Georgia,serif;letter-spacing:.06em;text-transform:uppercase;padding:6px 9px;border-radius:99px;border:1px solid #ffffff40;background:#00000030;color:#f5e6c4;white-space:nowrap'; if (cls) s.className = cls; return s; }
   function applyRoleUI() {
     const root = document.documentElement; root.classList.add(ROLE === 'admin' ? 'adm' : 'ro');
@@ -178,11 +191,19 @@
       addEventListener('hashchange', guard); guard();
     }
     const top = document.querySelector('header.top'), theme = document.getElementById('themeBtn'); if (!top || !theme) return;
-    const wrap = document.createElement('span'); wrap.style.cssText = 'display:flex;gap:6px;align-items:center;flex:none';
-    wrap.append(pill(ROLE === 'admin' ? 'Admin' : 'Ospite · sola lettura'));
-    if (ROLE === 'admin') { const b = document.createElement('button'); b.className = 'iconbtn'; b.style.cssText = 'width:auto;padding:0 12px;border-radius:99px;font:600 .72rem Georgia,serif;letter-spacing:.06em;text-transform:uppercase'; b.textContent = '✎ Chiedi a Claude'; b.onclick = askClaude; wrap.append(b); }
-    const out = document.createElement('button'); out.className = 'iconbtn'; out.title = 'Esci'; out.textContent = '⎋'; out.onclick = async () => { ls.del('cdnd_remember'); if (DB) { try { const t = DB.transaction('kv', 'readwrite'); t.objectStore('kv').delete('key'); await done(t); } catch { } } location.reload(); };
-    wrap.append(out); top.insertBefore(wrap, theme);
+    const st2 = document.createElement('style'); st2.textContent = ROLE_CSS; document.head.append(st2);
+    const wrap = document.createElement('span'); wrap.className = 'rolebar';
+    const badge = document.createElement('span'); badge.className = 'rolepill ' + (ROLE === 'admin' ? 'adm' : 'gst');
+    badge.title = ROLE === 'admin' ? 'Dungeon Master' : 'Giocatore · sola lettura';
+    badge.innerHTML = ROLE === 'admin' ? '<span class="rp-l">Dungeon Master</span><span class="rp-s">DM</span>' : '<span class="rp-l">Giocatore · sola lettura</span><span class="rp-s">Giocatore</span>';
+    wrap.append(badge);
+    if (ROLE === 'admin') { const b = document.createElement('button'); b.className = 'iconbtn askbtn'; b.title = 'Chiedi una modifica a Claude'; b.innerHTML = '<span class="ab-i">✎</span><span class="ab-t">Chiedi a Claude</span>'; b.onclick = askClaude; wrap.append(b); }
+    const out = document.createElement('button'); out.className = 'logout'; out.type = 'button'; out.title = 'Esci e torna alla schermata di accesso'; out.setAttribute('aria-label', 'Esci');
+    out.innerHTML = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M16 8l4 4-4 4"/><path d="M20 12H9"/></svg><span>Esci</span>';
+    out.onclick = async () => { out.disabled = true; ls.del('cdnd_remember'); if (DB) { try { const t = DB.transaction('kv', 'readwrite'); t.objectStore('kv').delete('key'); await done(t); } catch { } } location.reload(); };
+    wrap.append(out);
+    const sp = document.createElement('span'); sp.style.cssText = 'flex:1 1 0;min-width:0'; sp.className = 'spacer-top';
+    top.insertBefore(sp, theme); top.insertBefore(wrap, theme);
   }
 
   /* ---------- amministratore: richiesta a Claude ---------- */
