@@ -1,5 +1,9 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Campagna D&D</title>
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Campagna D&amp;D · Avalar</title>
+<meta name="description" content="Diario della campagna di Dungeons &amp; Dragons ambientata nel regno di Avalar: sessioni, personaggi, luoghi e mappe.">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Campagna D&amp;D"><meta property="og:title" content="Campagna D&amp;D · Avalar"><meta property="og:description" content="Diario della campagna di Avalar: sessioni, personaggi, luoghi e mappe."><meta property="og:image" content="icon-512.png"><meta name="twitter:card" content="summary">
+<script>try{var t=JSON.parse(localStorage.getItem('cr-theme'));if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t}catch(e){}</script>
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#eadcbc;color:#2b1d14}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 <meta name="theme-color" content="#561820"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><script src="local.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap">
@@ -306,19 +310,44 @@ body{min-width:0}
   #nav a{font-size:.64rem;letter-spacing:.03em;padding:11px 6px}
 }
 
+/* --- correzioni ottobre 2026 --- */
+.srchbtn{display:none;align-items:center;justify-content:center;text-decoration:none!important}
+.srchbtn svg{width:17px;height:17px}
+@media (max-width:620px){.srchbtn{display:inline-flex}}
+.sessnav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.sessnav a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border:1px solid var(--line2);border-radius:22px;background:var(--paper2);color:var(--ink);font-size:.95rem;text-decoration:none!important}
+.sessnav a:hover{border-color:var(--gold)}
+.erow .num{font-family:var(--body);font-weight:600;font-size:1.35rem}
+@media (max-width:620px){
+  .erow{gap:8px;padding:0 10px}
+  .erow .t{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.2;font-size:.98rem}
+  .erow .t small,.erow .t .pill,.erow .r .pill,.erow .r br{display:none}
+  .erow .r{max-width:64px;font-size:.75rem}
+  .erow .badge{font-size:.55rem;padding:1px 5px}
+  .erow .av{width:36px;height:36px}
+}
+.pin .pl.below{top:auto;bottom:-4px;transform:translate(-50%,100%)}
+.pin .pl.right{left:100%;top:40%;transform:translate(2px,-50%)}
+.pin .pl.left{left:auto;right:100%;top:40%;transform:translate(-2px,-50%)}
+.pin .pl.hide{display:none}
+.pin:hover .pl.hide,.pin.sel .pl.hide{display:block}
+:focus-visible{outline:2px solid var(--gold2);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 
 </style>
+</head><body>
 <header class="top">
-  <button class="iconbtn" id="backBtn" title="Indietro" onclick="history.back()">‹</button><button class="iconbtn" id="fwdBtn" title="Avanti" onclick="history.forward()">›</button>
-  <a class="brand" href="#/">
-    <svg viewBox="0 0 32 32" fill="none" stroke="#e7cf9a" stroke-width="1.7" stroke-linejoin="round"><path d="M4 7h9c2 0 3 1 3 3v16c0-2-1-3-3-3H4zM28 7h-9c-2 0-3 1-3 3v16c0-2 1-3 3-3h9z"/><path d="M16 10v16" stroke-width="1.2"/><path d="M8 12h4M8 15h4M20 12h4M20 15h4" stroke-width="1.2" stroke-linecap="round"/></svg>
+  <button class="iconbtn" id="backBtn" title="Indietro" aria-label="Indietro" onclick="history.back()">‹</button><button class="iconbtn" id="fwdBtn" title="Avanti" aria-label="Avanti" onclick="history.forward()">›</button>
+  <a class="brand" href="#/" aria-label="Campagna D&amp;D, pagina iniziale">
+    <svg aria-hidden="true" viewBox="0 0 32 32" fill="none" stroke="#e7cf9a" stroke-width="1.7" stroke-linejoin="round"><path d="M4 7h9c2 0 3 1 3 3v16c0-2-1-3-3-3H4zM28 7h-9c-2 0-3 1-3 3v16c0-2 1-3 3-3h9z"/><path d="M16 10v16" stroke-width="1.2"/><path d="M8 12h4M8 15h4M20 12h4M20 15h4" stroke-width="1.2" stroke-linecap="round"/></svg>
     <span><b>CAMPAGNA D&amp;D</b><small id="campName">La mia campagna</small></span>
   </a>
   <nav id="nav">
     <a href="#/">Campagna</a><a href="#/sessioni">Sessioni</a><a href="#/schede">Schede</a><a href="#/mappe">Mappe</a><a href="#/import">Importa</a><a href="#/backup">Backup</a>
   </nav>
-  <div class="srch"><input id="q" type="search" placeholder="Cerca…  ( / )" autocomplete="off"><div id="qres"></div></div>
-  <button class="iconbtn" id="themeBtn" title="Cambia tema">☾</button>
+  <div class="srch"><input id="q" type="search" placeholder="Cerca…  ( / )" aria-label="Cerca nella campagna" autocomplete="off"><div id="qres"></div></div>
+  <a class="iconbtn srchbtn" id="srchBtn" href="#/cerca" title="Cerca" aria-label="Cerca nella campagna"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8"/></svg></a>
+  <button class="iconbtn" id="themeBtn" title="Cambia tema" aria-label="Cambia tema">☾</button>
 </header>
 <main id="view"></main>
 <div id="toasts"></div>
@@ -368,7 +397,9 @@ function findEnt(ref) {
   const a = S.byName.get(norm(ref));
   return a && a.length ? S.ents.get(a[0]) : null;
 }
+const DM_NOTE = /\s*\*\((?:Dalla scaletta del DM|Nota del DM)[^)]*\)\*|^\*Riassunto ricavato dalla scaletta del DM[^*\n]*\*\s*/gm;
 function inl(s) {
+  if (window.__RO) s = String(s ?? '').replace(DM_NOTE, '');
   let h = esc(s);
   h = h.replace(/\[\[([^\]|]+?)(?:\|([^\]]+?))?\]\]/g, (m, a, b) => {
     const e = findEnt(unesc(a));
@@ -379,7 +410,9 @@ function inl(s) {
   return h;
 }
 function md(t) {
-  t = String(t ?? '').replace(/\r/g, '').trim();
+  t = String(t ?? '').replace(/\r/g, '');
+  if (window.__RO) t = t.replace(DM_NOTE, '');
+  t = t.trim();
   if (!t) return '';
   const out = [];
   for (const block of t.split(/\n\s*\n/)) {
@@ -504,9 +537,15 @@ async function navigate() {
       markNav(path); return;
     }
   }
-  setView(`<div class="empty"><h2>Pagina non trovata</h2><p><a href="#/">Torna alla campagna</a></p></div>`);
+  setView(`<div class="empty"><h2>Pagina non trovata</h2><p><a href="#/">Torna alla campagna</a></p></div>`); document.title = 'Pagina non trovata · Campagna D&D';
+}
+function setTitle(path) {
+  const base = 'Campagna D&D', camp = getMeta('campaign', null)?.name;
+  const h = path === '/' ? '' : ($('#view h1')?.textContent || $('#view .crumb b')?.textContent || '').trim();
+  document.title = h ? `${h} · ${base}` : camp ? `${base} · ${camp}` : base;
 }
 function markNav(path) {
+  setTitle(path);
   const key = path === '/' ? '/' : '/' + path.split('/')[1];
   const map = { '/scheda': '/schede', '/cronologia': '/sessioni' };
   const k = map[key] || key;
@@ -1127,6 +1166,7 @@ async function copyContextFlow() {
 }
 
 /* ================= SESSIONI ================= */
+const arcName = id => { const a = getMeta('arcs', []).find(x => x.id === id || norm(x.title) === norm(id)); return a ? a.title : id; };
 const sessTabs = a => `<div class="chips" style="margin:0 0 12px"><a class="chip ${a === 's' ? 'on' : ''}" href="#/sessioni">Sessioni</a><a class="chip ${a === 'c' ? 'on' : ''}" href="#/cronologia">Cronologia</a></div>`;
 route(/^\/sessioni$/, async () => {
   const items = [...S.sess].reverse();
@@ -1134,7 +1174,7 @@ route(/^\/sessioni$/, async () => {
     <div class="filters"><input type="search" id="sq" placeholder="Filtra per titolo o testo breve…"><span class="hint" id="scnt">${items.length} sessioni</span></div><div id="slist"></div>`);
   if (!items.length) { $('#slist').outerHTML = `<div class="empty">Nessuna sessione ancora. Arriveranno con la prima importazione.</div>`; }
   else {
-    const vl = vlist($('#slist'), items, 78, s => `<a class="erow" href="#/sessioni/${s.n}"><div class="num">${s.n}</div><div class="main"><div class="t">${esc(s.title || 'Sessione ' + s.n)} ${s.arc ? `<small>· ${esc(s.arc)}</small>` : ''}</div><div class="b">${esc(s.short || s.brief)}</div></div><button class="icb" data-act="rensess" data-n="${s.n}" title="Rinomina la sessione">✎</button><div class="r" style="min-width:150px">${esc(s.date || '')}${s.gameDate ? '<br>' + esc(s.gameDate) : ''}</div></a>`);
+    const vl = vlist($('#slist'), items, 78, s => `<a class="erow" href="#/sessioni/${s.n}"><div class="num">${s.n}</div><div class="main"><div class="t">${esc(s.title || 'Sessione ' + s.n)} ${s.arc ? `<small>· ${esc(arcName(s.arc))}</small>` : ''}</div><div class="b">${esc(s.short || s.brief)}</div></div><button class="icb" data-act="rensess" data-n="${s.n}" title="Rinomina la sessione">✎</button><div class="r" style="min-width:150px">${esc(s.date || '')}${s.gameDate ? '<br>' + esc(s.gameDate) : ''}</div></a>`);
     $('#sq').oninput = e => { const q = fold(e.target.value); const f = q ? items.filter(s => fold(s.title + ' ' + s.brief + ' ' + s.n).includes(q)) : items; vl.setItems(f); $('#scnt').textContent = f.length + ' sessioni'; };
   }
   setActs({ newsess: () => editSessionDlg(null), rensess: a => renameSession(+a.dataset.n) });
@@ -1167,7 +1207,7 @@ route(/^\/sessioni\/(\d+)$/, async ([ns]) => {
   const ents = [...S.ents.values()].filter(e => e.sessions?.includes(n));
   const grp = TYPE_ORDER.map(t => [t, ents.filter(e => e.type === t).sort((a, c) => a.name.localeCompare(c.name))]).filter(x => x[1].length);
   const prev = S.sess.filter(x => x.n < n).pop(), next = S.sess.find(x => x.n > n);
-  setView(`<div class="pagehead"><div style="flex:1"><div class="hint">${prev ? `<a href="#/sessioni/${prev.n}">← ${prev.n}</a>` : ''} ${next ? `<a href="#/sessioni/${next.n}">${next.n} →</a>` : ''}</div><h1>${n}. ${esc(s.title || 'Sessione ' + n)}</h1><div class="hint">${[s.date, s.gameDate && 'in gioco: ' + s.gameDate, s.arc && 'arco: ' + s.arc].filter(Boolean).map(esc).join(' · ')}</div></div>
+  setView(`<div class="pagehead"><div style="flex:1"><nav class="sessnav" aria-label="Sessioni vicine">${prev ? `<a href="#/sessioni/${prev.n}" rel="prev">← Sessione ${prev.n}</a>` : ''}${next ? `<a href="#/sessioni/${next.n}" rel="next">Sessione ${next.n} →</a>` : ''}</nav><h1>${n}. ${esc(s.title || 'Sessione ' + n)}</h1><div class="hint">${[s.date, s.gameDate && 'in gioco: ' + s.gameDate, s.arc && 'arco: ' + arcName(s.arc)].filter(Boolean).map(esc).join(' · ')}</div></div>
       <div class="acts"><button class="btn" data-act="rensess" data-n="${n}">Rinomina</button><button class="btn" data-act="edit">Modifica</button><button class="btn danger" data-act="del">Elimina</button></div></div><div class="orn"></div>
     <div class="card"><h2>Riassunto</h2>${b.summary ? prose(b.summary) : '<p class="empty">Nessun riassunto.</p>'}</div>
     ${evs.length ? `<div class="card"><h2>Momenti chiave</h2>${evs.map(e => `<div class="entry"><div class="tag">${e.idx + 1}</div><div class="tx"><b>${esc(e.title)}</b>${e.gameDate ? ` <small>${esc(e.gameDate)}</small>` : ''}${prose(e.text)}${e.ents?.length ? `<div class="chips">${e.ents.filter(i => S.ents.has(i)).map(i => `<a class="chip" href="#/scheda/${encodeURIComponent(i)}">${esc(S.ents.get(i).name)}</a>`).join('')}</div>` : ''}</div></div>`).join('')}</div>` : ''}
@@ -1258,6 +1298,8 @@ async function mutBody(id, fn) {
   });
 }
 route(/^\/scheda\/(.+)$/, async ([id]) => {
+  const moved = !S.ents.has(id) && [...S.ents.values()].find(x => (x.alias || []).some(a => x.type + '-' + slug(a) === id)); // scheda unita in un'altra
+  if (moved) { location.replace('#/scheda/' + encodeURIComponent(moved.id)); return; }
   const e = S.ents.get(id); if (!e) return setView(`<div class="empty"><h2>Scheda non trovata</h2><p>«${esc(id)}» non esiste (forse è stata eliminata o unita).</p><a href="#/schede">Vai all'elenco</a></div>`);
   const [body, outL, inL, evs, pins] = await Promise.all([dbGet('bodies', id), dbIdx('links', 'from', id), dbIdx('links', 'to', id), dbIdx('events', 'ents', id), dbIdx('pins', 'entityId', id)]);
   const b = body || { id, sections: [] };
@@ -1267,11 +1309,11 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
   setView(`<div class="card ehead ${e.portrait ? 'hasp' : ''}">${e.portrait ? `<img class="portrait" src="${e.portrait.thumb}" data-act="viewportrait" alt="${esc(e.name)}" title="Ingrandisci">` : ''}<div class="ehb"><div class="meta">${badge(e.type)}${e.status ? `<span class="pill">${esc(e.status)}</span>` : ''}${catPills(e)}${e.discovered === false ? '<span class="pill warn">non scoperto dai giocatori</span>' : ''}<span class="hint">${esc(rangeTxt(e.sessions))}</span></div>
       <h1>${esc(e.name)}</h1>${e.alias?.length ? `<div class="hint">Detto anche: ${e.alias.map(esc).join(', ')}</div>` : ''}${e.brief ? `<div class="brief">${inl(e.brief)}</div>` : ''}
       <div class="row" style="margin-top:12px"><button class="btn sm" data-act="edit">Modifica dati</button><button class="btn sm" data-act="addSec">+ Sezione</button><button class="btn sm ghost" data-act="copyEnt">Copia per Claude</button>${[...M.regions.values()].filter(r => r.entityId === id).map(r => `<a class="btn sm" href="#/mappe/${encodeURIComponent(r.mapId)}?reg=${encodeURIComponent(r.id)}">Vedi sulla mappa</a>`).join('')}<button class="btn sm" data-act="portrait">${e.portrait ? 'Cambia ritratto' : '+ Ritratto'}</button><button class="btn sm ghost" data-act="merge">Unisci in un'altra scheda</button><button class="btn sm danger" data-act="del">Elimina</button></div></div></div>
-    <div class="card">${b.sections.length ? b.sections.map((s, i) => entrySecHtml(s, i)).join('') : '<p class="empty">Nessun contenuto ancora. Verrà riempita dalle importazioni, oppure aggiungi una sezione a mano.</p>'}</div>
+    <div class="card">${b.sections.length ? b.sections.map((s, i) => entrySecHtml(s, i)).join('') : `<p class="empty">${window.__RO ? 'Nessuna informazione su questa scheda, per ora.' : 'Nessun contenuto ancora. Verrà riempita dalle importazioni, oppure aggiungi una sezione a mano.'}</p>`}</div>
     <div class="grid2"><div class="card"><div class="spread"><h2>Collegamenti</h2><button class="btn sm" data-act="addRel">+ Collega</button></div>
       ${outL.length || inL.length ? `${outL.map(l => `<div class="rel"><span class="lab">${esc(l.label || 'collegata a')}</span>${chipE(l.to)}<button class="icb" data-act="delRel" data-k="${esc(l.k)}">✕</button></div>`).join('')}${inL.map(l => `<div class="rel">${chipE(l.from)}<span class="lab">${esc(l.label || 'collegata a')} → questa scheda</span><button class="icb" data-act="delRel" data-k="${esc(l.k)}">✕</button></div>`).join('')}` : '<p class="hint">Nessun collegamento.</p>'}</div>
       <div class="card"><h2>Apparizioni</h2>${sessChips(e.sessions)}
-      ${mapsOf.length ? `<h2 style="margin-top:14px">Sulle mappe</h2><div class="chips">${mapsOf.map(({ p, m }) => `<a class="chip" href="#/mappe/${encodeURIComponent(m.id)}?pin=${encodeURIComponent(p.id)}">${esc(m.name)}</a>`).join('')}</div>${mapsOf.some(x => x.p.photos?.length) ? `<div class="gallery" style="margin-top:10px">${mapsOf.flatMap(({ p, m }) => (p.photos || []).map(ph => `<a class="gph" href="#/mappe/${encodeURIComponent(m.id)}?pin=${encodeURIComponent(p.id)}"><img src="${ph.thumb}" alt=""></a>`)).join('')}</div>` : ''}` : ''}
+      ${mapsOf.length ? `<h2 style="margin-top:14px">Sulle mappe</h2><div class="chips">${mapsOf.map(({ p, m }) => `<a class="chip" href="#/mappe/${encodeURIComponent(m.id)}?pin=${encodeURIComponent(p.id)}">${esc(m.name)}</a>`).join('')}</div>${mapsOf.some(x => x.p.photos?.length) ? `<div class="gallery" style="margin-top:10px">${mapsOf.flatMap(({ p, m }) => (p.photos || []).map(ph => `<a class="gph" href="#/mappe/${encodeURIComponent(m.id)}?pin=${encodeURIComponent(p.id)}" title="Vedi sulla mappa «${esc(m.name)}»"><img src="${ph.thumb}" alt="${esc(ph.name ? ph.name.replace(/\.[a-z0-9]+$/i, '') : 'Foto di ' + e.name)}"></a>`)).join('')}</div>` : ''}` : ''}
       ${e.type === 'luogo' ? `<div style="margin-top:14px"><label class="chk"><input type="checkbox" data-act="toggleDisc" ${e.discovered !== false ? 'checked' : ''}> Scoperto dai giocatori</label></div>` : ''}</div></div>
     ${evs.length ? `<div class="card"><h2>Eventi</h2>${evs.map(v => `<div class="entry"><div class="tag">${sessLink(v.n)}</div><div class="tx"><b>${esc(v.title)}</b>${prose(v.text)}</div></div>`).join('')}</div>` : ''}`);
   const edEntry = async (a, add) => {
@@ -1432,7 +1474,25 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
   const visible = p => !(p.discovered === false || (entOf(p) && entOf(p).discovered === false));
   const pname = p => entOf(p)?.name || p.label || '(senza nome)';
   const hud = t => { $('#hud').textContent = t; $('#hud').style.display = t ? '' : 'none'; };
-  const apply = () => { layer.style.transform = `translate(${st.x}px,${st.y}px) scale(${st.k})`; layer.style.setProperty('--inv', (1 / st.k).toFixed(4)); };
+  /* etichette che si sovrappongono: la seconda va sotto il segnaposto, se non basta si mostra solo al passaggio */
+  let dcRaf = 0;
+  const declutter = () => {
+    if (dcRaf) return;
+    dcRaf = requestAnimationFrame(() => {
+      dcRaf = 0; const ls = $$('.pin .pl', box).sort((a, b) => b.parentNode.classList.contains('sel') - a.parentNode.classList.contains('sel'));
+      const POS = ['below', 'right', 'left'];
+      ls.forEach(l => l.classList.remove(...POS, 'hide')); if (!st.labels) return;
+      const placed = [], hit = r => placed.some(q => r.left < q.right + 3 && r.right > q.left - 3 && r.top < q.bottom + 3 && r.bottom > q.top - 3);
+      for (const l of ls) {
+        let r = l.getBoundingClientRect(); if (!r.width) continue;
+        for (let i = 0; hit(r) && i <= POS.length; i++) { l.classList.remove(...POS); l.classList.add(POS[i] || 'hide'); r = l.getBoundingClientRect(); }
+        if (l.classList.contains('hide')) continue;
+        placed.push(r);
+      }
+    });
+  };
+  onCleanup(() => cancelAnimationFrame(dcRaf));
+  const apply = () => { layer.style.transform = `translate(${st.x}px,${st.y}px) scale(${st.k})`; layer.style.setProperty('--inv', (1 / st.k).toFixed(4)); declutter(); };
   const fitK = () => { const r = stage.getBoundingClientRect(); return Math.min(r.width / m.w, r.height / m.h) * 0.98; };
   const fit = () => { const r = stage.getBoundingClientRect(); st.k = fitK(); st.x = (r.width - m.w * st.k) / 2; st.y = (r.height - m.h * st.k) / 2; apply(); };
   const zoomAt = (cx, cy, f) => { const nk = clamp(st.k * f, fitK() * 0.6, 8); const g = nk / st.k; st.x = cx - (cx - st.x) * g; st.y = cy - (cy - st.y) * g; st.k = nk; apply(); };
@@ -1466,7 +1526,7 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
     const col = e ? TYPE_COLOR[e.type] : '#a7343b';
     return `<div class="pin ${vis ? '' : 'ghost'} ${st.sel === p.id ? 'sel' : ''}" data-pin="${esc(p.id)}" style="left:${p.x}%;top:${p.y}%"><svg viewBox="0 0 28 36"><path d="${PIN_PATH}" fill="${col}" stroke="#fff" stroke-width="1.6"/>${p.targetMapId ? '<path d="M8.5 13h9m-3.5-4.2l4.2 4.2-4.2 4.2" stroke="#fff" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>' : (p.visited === false ? '<circle cx="14" cy="13" r="4.2" fill="none" stroke="#fbf1d6" stroke-width="2"/>' : '<circle cx="14" cy="13" r="4.6" fill="#fbf1d6"/>')}</svg><span class="pl">${esc(pname(p))}</span></div>`;
   }
-  const renderPins = () => { box.innerHTML = pins.map(pinHtml).join('') + vhHtml(); stage.classList.toggle('nolabels', !st.labels); };
+  const renderPins = () => { box.innerHTML = pins.map(pinHtml).join('') + vhHtml(); stage.classList.toggle('nolabels', !st.labels); declutter(); };
   function renderSide() {
     const sel = pins.find(p => p.id === st.sel && (!st.players || visible(p)));
     const children = S.maps.filter(c => c.parent === m.id && (!st.players || c.discovered !== false));
