@@ -311,6 +311,12 @@ body{min-width:0}
 }
 
 /* --- correzioni ottobre 2026 --- */
+.selbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:8px 12px;margin-bottom:10px;border:1px solid var(--gold);border-radius:5px;background:var(--paper)}
+.selbar .sp{flex:1}
+.selbar label{display:flex;gap:6px;align-items:center}
+.erow.pick{cursor:pointer}
+.erow.pick input{width:20px;height:20px;flex:none;accent-color:var(--wine);pointer-events:none}
+.erow.pick.on{background:var(--paper2);box-shadow:inset 3px 0 0 var(--wine2)}
 .srchbtn{display:none;align-items:center;justify-content:center;text-decoration:none!important}
 .srchbtn svg{width:17px;height:17px}
 @media (max-width:620px){.srchbtn{display:inline-flex}}
@@ -1231,25 +1237,28 @@ route(/^\/sessioni\/(\d+)$/, async ([ns]) => {
 });
 
 /* ================= SCHEDE: elenco ================= */
-const ES = { types: [], q: '', sort: 'name', cats: [], imps: [] };
+const ES = { types: [], q: '', sort: 'name', cats: [], imps: [], selMode: false, sel: new Set() };
 route(/^\/schede$/, async (_, q) => {
-  if (q.has('tipo')) { ES.types = [q.get('tipo')]; ES.cats = []; ES.imps = []; }
+  // il tipo indicato nel link si applica una volta sola, poi lo si cambia dai filtri
+  if (q.has('tipo')) { ES.types = [q.get('tipo')]; ES.cats = []; ES.imps = []; history.replaceState(null, '', '#/schede'); }
   const cnt = {}; for (const e of S.ents.values()) cnt[e.type] = (cnt[e.type] || 0) + 1;
-  setView(`<div class="pagehead"><h1>Schede</h1><div class="acts"><button class="btn" data-act="newent">+ Nuova scheda</button></div></div>
+  setView(`<div class="pagehead"><h1>Schede</h1><div class="acts"><button class="btn ${ES.selMode ? 'on' : ''}" data-act="selmode">${ES.selMode ? 'Fine selezione' : 'Seleziona'}</button><button class="btn" data-act="newent">+ Nuova scheda</button></div></div>
     <div class="filters"><div class="chips" id="tchips"><a class="chip" data-t="">Tutte <em>${S.ents.size}</em></a>${TYPE_ORDER.filter(t => cnt[t]).map(t => `<a class="chip" data-t="${t}">${TYPE_PL[t]} <em>${cnt[t]}</em></a>`).join('')}</div></div>
     <div class="filters" id="cchips"></div>
-    <div class="filters"><input type="search" id="eq" placeholder="Cerca per nome, alias, stato…" value="${esc(ES.q)}"><select id="esort" style="width:auto"><option value="name">Ordine alfabetico</option><option value="recent">Modificate di recente</option><option value="first">Prima apparizione</option></select><span class="hint" id="ecnt"></span></div><div id="elist"></div>`);
+    <div class="filters"><input type="search" id="eq" placeholder="Cerca per nome, alias, stato…" value="${esc(ES.q)}"><select id="esort" style="width:auto"><option value="name">Ordine alfabetico</option><option value="recent">Modificate di recente</option><option value="first">Prima apparizione</option></select><span class="hint" id="ecnt"></span></div>${ES.selMode ? `<div class="selbar" id="selbar"><b id="selcnt"></b><button class="btn sm" data-act="selall">Seleziona tutte quelle in elenco</button><button class="btn sm ghost" data-act="selnone">Deseleziona</button><span class="sp"></span><label>Sposta in <select id="seltype" style="width:auto">${TYPE_ORDER.map(t => `<option value="${t}">${TYPE_PL[t]}</option>`).join('')}</select></label><button class="btn sm primary" data-act="selmove">Sposta</button></div>` : ''}<div id="elist"></div>`);
   $('#esort').value = ES.sort;
   if (!S.ents.size) { $('#elist').outerHTML = '<div class="empty">Nessuna scheda ancora.</div>'; }
   else {
-    const vl = vlist($('#elist'), [], 70, e => `<a class="erow" href="#/scheda/${encodeURIComponent(e.id)}">${e.portrait ? `<img class="av" src="${e.portrait.thumb}" alt="">` : ''}${badge(e.type)}<div class="main"><div class="t">${esc(e.name)} ${e.alias?.length ? `<small>${esc(e.alias.slice(0, 2).join(', '))}</small>` : ''} ${catPills(e)}</div><div class="b">${esc(e.brief)}</div></div><div class="r">${e.status ? `<span class="pill ${e.discovered === false ? 'warn' : ''}">${esc(e.status)}</span><br>` : ''}${e.discovered === false ? '<span class="pill warn">non scoperto</span><br>' : ''}${esc(rangeTxt(e.sessions))}</div></a>`);
+    const vl = vlist($('#elist'), [], 70, e => `${ES.selMode ? `<div class="erow pick ${ES.sel.has(e.id) ? 'on' : ''}" data-pick="${esc(e.id)}" role="checkbox" aria-checked="${ES.sel.has(e.id)}" tabindex="0"><input type="checkbox" tabindex="-1" ${ES.sel.has(e.id) ? 'checked' : ''} aria-hidden="true">` : `<a class="erow" href="#/scheda/${encodeURIComponent(e.id)}">`}${e.portrait ? `<img class="av" src="${e.portrait.thumb}" alt="">` : ''}${badge(e.type)}<div class="main"><div class="t">${esc(e.name)} ${e.alias?.length ? `<small>${esc(e.alias.slice(0, 2).join(', '))}</small>` : ''} ${catPills(e)}</div><div class="b">${esc(e.brief)}</div></div><div class="r">${e.status ? `<span class="pill ${e.discovered === false ? 'warn' : ''}">${esc(e.status)}</span><br>` : ''}${e.discovered === false ? '<span class="pill warn">non scoperto</span><br>' : ''}${esc(rangeTxt(e.sessions))}</div>${ES.selMode ? '</div>' : '</a>'}`);
+    let shown = [];
+    const selInfo = () => { const c = $('#selcnt'); if (c) c.textContent = ES.sel.size === 1 ? '1 scheda selezionata' : ES.sel.size + ' schede selezionate'; };
     const apply = () => {
       const qq = norm(ES.q); const terms = qq.split(' ').filter(Boolean);
       const ck = e => { const m = e.type === 'png' ? PNG_ATT : e.type === 'luogo' ? LUOGO_CAT : null; if (!m) return true; const sel = ES.cats.filter(k => k in m); return !sel.length || sel.includes(e.cat); };
       const ik = e => { if (e.type !== 'png') return true; const sel = ES.imps.filter(k => k in PNG_IMP); return !sel.length || sel.includes(e.imp); };
       let l = [...S.ents.values()].filter(e => (!ES.types.length || ES.types.includes(e.type)) && ck(e) && ik(e) && terms.every(w => S.sidx.get(e.id).includes(w)));
       if (ES.sort === 'recent') l.sort((a, b) => (b.upd || 0) - (a.upd || 0)); else if (ES.sort === 'first') l.sort((a, b) => (a.sessions?.[0] ?? 1e9) - (b.sessions?.[0] ?? 1e9) || a.name.localeCompare(b.name)); else l.sort((a, b) => a.name.localeCompare(b.name, 'it'));
-      vl.setItems(l); $('#ecnt').textContent = l.length + ' schede';
+      shown = l; vl.setItems(l); $('#ecnt').textContent = l.length + ' schede'; selInfo();
       $$('#tchips .chip').forEach(c => c.classList.toggle('on', c.dataset.t ? ES.types.includes(c.dataset.t) : !ES.types.length));
       subChips();
     };
@@ -1263,12 +1272,35 @@ route(/^\/schede$/, async (_, q) => {
       host.innerHTML = h; host.style.display = h ? '' : 'none';
     };
     const tog = (a, v) => { const i = a.indexOf(v); i >= 0 ? a.splice(i, 1) : a.push(v); };
-    $('#cchips').onclick = e => { const c = e.target.closest('.chip'); if (!c) return; if (c.dataset.reset) { ES.types = []; ES.cats = []; ES.imps = []; } else tog(c.dataset.f === 'imp' ? ES.imps : ES.cats, c.dataset.v); apply(); };
-    $('#tchips').onclick = e => { const c = e.target.closest('.chip'); if (!c) return; if (!c.dataset.t) { ES.types = []; ES.cats = []; ES.imps = []; } else { tog(ES.types, c.dataset.t); if (!ES.types.includes('png')) ES.imps = []; if (!ES.types.includes('png') && !ES.types.includes('luogo')) ES.cats = []; } apply(); };
+    // un filtro alla volta: scegliendone un altro, il precedente si spegne; ricliccandolo si torna a «Tutte»
+    const one = (a, v) => a.length === 1 && a[0] === v ? [] : [v];
+    $('#cchips').onclick = e => { const c = e.target.closest('.chip'); if (!c) return; if (c.dataset.reset) { ES.types = []; ES.cats = []; ES.imps = []; } else if (c.dataset.f === 'imp') ES.imps = one(ES.imps, c.dataset.v); else ES.cats = one(ES.cats, c.dataset.v); apply(); };
+    $('#tchips').onclick = e => { const c = e.target.closest('.chip'); if (!c) return; ES.types = c.dataset.t ? one(ES.types, c.dataset.t) : []; ES.cats = []; ES.imps = []; apply(); };
+    const pick = r => { const id = r.dataset.pick; ES.sel.has(id) ? ES.sel.delete(id) : ES.sel.add(id); vl.repaint(); selInfo(); };
+    $('#elist').addEventListener('click', e => { const r = e.target.closest('[data-pick]'); if (r) { e.preventDefault(); pick(r); } });
+    $('#elist').addEventListener('keydown', e => { const r = e.target.closest('[data-pick]'); if (r && (e.key === ' ' || e.key === 'Enter')) { e.preventDefault(); pick(r); } });
     $('#eq').oninput = e => { ES.q = e.target.value; apply(); }; $('#esort').onchange = e => { ES.sort = e.target.value; apply(); };
     apply();
+    setActs({
+      newent: newEntityDlg,
+      selmode: () => { ES.selMode = !ES.selMode; ES.sel.clear(); rerender(); },
+      selall: () => { shown.forEach(e => ES.sel.add(e.id)); vl.repaint(); selInfo(); },
+      selnone: () => { ES.sel.clear(); vl.repaint(); selInfo(); },
+      selmove: async () => {
+        const t = $('#seltype').value, ids = [...ES.sel].filter(id => S.ents.has(id) && S.ents.get(id).type !== t);
+        if (!ids.length) { toast(ES.sel.size ? 'Le schede selezionate sono già di questo tipo' : 'Seleziona prima almeno una scheda', 'err'); return; }
+        const names = ids.map(id => S.ents.get(id).name);
+        if (!await ask(`Spostare in **${TYPE_PL[t]}** ${ids.length === 1 ? 'questa scheda' : `queste ${ids.length} schede`}?\n\n${names.map(n => '- ' + n).join('\n')}`, { ok: 'Sposta' })) return;
+        await runBatch(['entities'], '', async b => { for (const id of ids) { const e = { ...S.ents.get(id), type: t, upd: Date.now() }; if (!['png', 'luogo'].includes(t)) delete e.cat; if (t !== 'png') delete e.imp; await b.put('entities', e); } });
+        ES.sel.clear(); ES.types = [t]; ES.cats = []; ES.imps = []; rerender();
+        // la modifica vale su questo dispositivo: per renderla definitiva sul sito la si manda a Claude
+        if (window.__sendRequest && await ask(`Fatto su questo dispositivo. Vuoi inviare la modifica a Claude per renderla definitiva sul sito?`, { ok: 'Invia a Claude', title: 'Schede spostate' }))
+          window.__sendRequest(`Sposta ${ids.length === 1 ? names[0] : ids.length + ' schede'} in ${TYPE_PL[t]}`, `Sposta in ${TYPE_PL[t]} (tipo "${t}") queste schede:\n\n${ids.map(id => `- ${S.ents.get(id).name} (${id})`).join('\n')}`);
+      }
+    });
+    return;
   }
-  setActs({ newent: newEntityDlg });
+  setActs({ newent: newEntityDlg, selmode: () => { ES.selMode = !ES.selMode; ES.sel.clear(); rerender(); } });
 });
 async function newEntityDlg(pre = {}) {
   const r = await formDlg({ title: 'Nuova scheda', fields: [{ k: 'type', label: 'Tipo', type: 'select', value: pre.type || (ES.types[0] || 'png'), options: TYPE_ORDER.map(t => [t, TYPES[t]]) }, { k: 'name', label: 'Nome', req: true, value: pre.name || '' }, { k: 'brief', label: 'Riga breve', placeholder: 'Una riga di descrizione' }, { k: 'status', label: 'Stato', placeholder: 'vivo, attiva, distrutto…' }] });

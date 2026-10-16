@@ -167,7 +167,7 @@
   window.__blobHref = aid => { const p = BLOBMAP[aid]; return p && !p.startsWith('priv/') ? p : ''; };
 
   /* ---------- interfaccia per ruolo ---------- */
-  const HIDE_ACTS = ['edit', 'up', 'rensess', 'reimg', 'delRel', 'del', 'copyctx', 'wipe', 'vedit', 'vdm', 'vpl', 'undo', 'toggleDisc', 'subup', 'rename', 'renSec', 'redraw', 'portrait', 'newsess', 'newent', 'merge', 'histgen', 'editreg', 'editpin', 'editmap', 'editgen', 'editEntry', 'drawundo', 'drawok', 'drawcancel', 'delreg', 'delpin', 'delphoto', 'delmap', 'delSec', 'delEntry', 'delDoc', 'cpDoc', 'copyEnt', 'bkFull', 'bkData', 'attach', 'analyze', 'addreg', 'addpin', 'addphotos', 'addSec', 'addRel', 'addEntry', 'demo'];
+  const HIDE_ACTS = ['selmode', 'selall', 'selnone', 'selmove', 'edit', 'up', 'rensess', 'reimg', 'delRel', 'del', 'copyctx', 'wipe', 'vedit', 'vdm', 'vpl', 'undo', 'toggleDisc', 'subup', 'rename', 'renSec', 'redraw', 'portrait', 'newsess', 'newent', 'merge', 'histgen', 'editreg', 'editpin', 'editmap', 'editgen', 'editEntry', 'drawundo', 'drawok', 'drawcancel', 'delreg', 'delpin', 'delphoto', 'delmap', 'delSec', 'delEntry', 'delDoc', 'cpDoc', 'copyEnt', 'bkFull', 'bkData', 'attach', 'analyze', 'addreg', 'addpin', 'addphotos', 'addSec', 'addRel', 'addEntry', 'demo'];
   const GUEST_CSS = HIDE_ACTS.map(a => `html.ro [data-act="${a}"]`).join(',') + `,html.ro a[href="#/import"],html.ro a[href="#/backup"],html.ro #b-edit,html.ro #b-add,html.ro #b-addreg,html.ro #seg,html.ro #access,html.ro input[type=file],html.ro label:has(input[type=file]){display:none!important}`;
   const ROLE_CSS = `.rolebar{display:flex;gap:6px;align-items:center;flex:none}
 .rolepill{font:600 .72rem/1 Georgia,serif;letter-spacing:.06em;text-transform:uppercase;padding:7px 10px;border-radius:99px;border:1px solid #ffffff40;background:#00000030;color:#f5e6c4;white-space:nowrap}
@@ -208,6 +208,14 @@
 
   /* ---------- amministratore: richiesta a Claude ---------- */
   const ASK_REPO = 'https://github.com/marianogianmarco96-maker/Avalar';
+  // apre GitHub con una richiesta per Claude già compilata (solo per il DM)
+  window.__sendRequest = (title, body) => {
+    if (ROLE !== 'admin') return;
+    const page = (document.title || '').replace(/ · Campagna D&D.*$/, '');
+    const t = '[Richiesta] ' + (title.length > 70 ? title.slice(0, 67) + '…' : title);
+    const txt = body.slice(0, 6000) + '\n\n---\nInviata dal sito, pagina: ' + page + ' (' + location.hash + ')';
+    window.open(ASK_REPO + '/issues/new?title=' + encodeURIComponent(t) + '&body=' + encodeURIComponent(txt), '_blank', 'noopener');
+  };
   function askClaude() {
     let d = document.getElementById('askdlg'); if (d) d.remove();
     d = document.createElement('dialog'); d.id = 'askdlg'; d.style.cssText = 'border:1px solid #a98334;border-radius:12px;background:#fbf5e3;color:#2b1d14;padding:20px;width:min(560px,92vw);font:16px/1.4 Georgia,serif';
@@ -220,10 +228,7 @@
     const copy = async t => { try { await navigator.clipboard.writeText(t); } catch { const a = document.createElement('textarea'); a.value = t; document.body.append(a); a.select(); document.execCommand('copy'); a.remove(); } d.querySelector('#ask-m').textContent = 'Copiato: incollalo nella chat con Claude.'; };
     d.querySelector('#ask-s').onclick = () => {
       const body = d.querySelector('#ask-t').value.trim(); if (!body) { d.querySelector('#ask-m').textContent = 'Scrivi prima la richiesta.'; return; }
-      const page = (document.title || '').replace(/ · Campagna D&D.*$/, '');
-      const title = '[Richiesta] ' + (body.split('\n')[0].length > 70 ? body.split('\n')[0].slice(0, 67) + '…' : body.split('\n')[0]);
-      const txt = body.slice(0, 6000) + '\n\n---\nInviata dal sito, pagina: ' + page + ' (' + location.hash + ')';
-      window.open(ASK_REPO + '/issues/new?title=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(txt), '_blank', 'noopener');
+      window.__sendRequest(body.split('\n')[0], body);
       d.querySelector('#ask-m').textContent = 'Si è aperto GitHub: premi «Create» per inviare la richiesta.';
     };
     d.querySelector('#ask-c').onclick = async () => { const t = await text(false); if (t) copy(t); };
