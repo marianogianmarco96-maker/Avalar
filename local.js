@@ -179,6 +179,9 @@
 .logout:disabled{opacity:.6}
 .iconbtn.askbtn{width:auto;white-space:nowrap;padding:0 12px;border-radius:99px;font:600 .72rem Georgia,serif;letter-spacing:.06em;text-transform:uppercase}
 .askbtn .ab-i{display:none}
+#upbtn.spin .ab-i,#upbtn.spin .ab-t{opacity:.6}
+#upbtn .ab-i{font-size:1.05rem}
+@media (max-width:1700px){#upbtn{width:34px;padding:0}#upbtn .ab-t{display:none}#upbtn .ab-i{display:inline}}
 @media (max-width:1500px){.rolepill .rp-l{display:none}.rolepill .rp-s{display:inline}}
 @media (max-width:900px){.logout{width:34px;padding:0;justify-content:center}.logout span{display:none}.iconbtn.askbtn{width:34px;padding:0}.askbtn .ab-t{display:none}.askbtn .ab-i{display:inline}}
 @media (max-width:520px){.rolepill{padding:6px 8px;font-size:.66rem}.rolebar{gap:5px}}`;
@@ -198,6 +201,7 @@
     badge.innerHTML = ROLE === 'admin' ? '<span class="rp-l">Dungeon Master</span><span class="rp-s">DM</span>' : '<span class="rp-l">Giocatore · sola lettura</span><span class="rp-s">Giocatore</span>';
     wrap.append(badge);
     if (ROLE === 'admin') { const b = document.createElement('button'); b.className = 'iconbtn askbtn'; b.title = 'Chiedi una modifica a Claude'; b.innerHTML = '<span class="ab-i">✎</span><span class="ab-t">Chiedi a Claude</span>'; b.onclick = askClaude; wrap.append(b); }
+    const up = document.createElement('button'); up.className = 'iconbtn askbtn'; up.id = 'upbtn'; up.type = 'button'; up.setAttribute('aria-label', 'Verifica aggiornamento'); up.title = 'Verifica se c\'è una versione più recente del sito e caricala subito'; up.innerHTML = '<span class="ab-i">⟳</span><span class="ab-t">Verifica aggiornamento</span>'; up.onclick = () => checkUpdate(up); wrap.append(up);
     const out = document.createElement('button'); out.className = 'logout'; out.type = 'button'; out.title = 'Esci e torna alla schermata di accesso'; out.setAttribute('aria-label', 'Esci');
     out.innerHTML = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M16 8l4 4-4 4"/><path d="M20 12H9"/></svg><span>Esci</span>';
     out.onclick = async () => { out.disabled = true; ls.del('cdnd_remember'); if (DB) { try { const t = DB.transaction('kv', 'readwrite'); t.objectStore('kv').delete('key'); await done(t); } catch { } } location.reload(); };
@@ -235,6 +239,41 @@
     d.querySelector('#ask-x').onclick = async () => { const t = await text(true); if (t) copy(t); };
     d.querySelector('#ask-k').onclick = () => d.close();
   }
+
+  /* ---------- verifica aggiornamento (tutti) ----------
+     Scarica di nuovo dal server i file del sito, scavalcando le copie del browser: se qualcosa è cambiato
+     ricarica la pagina con la versione nuova, altrimenti lo dice. */
+  function notice(t) {
+    let n = document.getElementById('upnote'); if (n) n.remove();
+    n = document.createElement('div'); n.id = 'upnote'; n.setAttribute('role', 'status'); n.textContent = t;
+    n.style.cssText = 'position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:9999;max-width:min(520px,92vw);background:#561820;color:#f5e6c4;padding:10px 16px;border-radius:8px;font:15px/1.35 Georgia,serif;box-shadow:0 4px 16px #0006;text-align:center';
+    document.body.append(n); setTimeout(() => n.remove(), 7000);
+  }
+  async function checkUpdate(btn) {
+    btn.disabled = true; btn.classList.add('spin');
+    try {
+      const files = ['index.html', 'local.js', 'sw.js', ROLE === 'admin' ? 'data.enc' : 'data.json'];
+      const fresh = await Promise.all(files.map(async f => { const r = await fetch(f + '?v=' + Date.now(), { cache: 'reload' }); if (!r.ok) throw new Error(); return r.text(); }));
+      const reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : null;
+      if (reg) await reg.update().catch(() => { });
+      let changed = !('caches' in window);
+      if (!changed) {
+        const name = (await caches.keys()).find(k => k.startsWith('campagna-') && k !== 'campagna-fonts');
+        const c = name && await caches.open(name);
+        for (let i = 0; i < files.length && !changed; i++) {
+          if (files[i] === 'sw.js') { changed = !!(reg && (reg.installing || reg.waiting)); continue; }
+          const old = c && (await c.match(files[i], { ignoreSearch: true }) || (files[i] === 'index.html' ? await c.match('./') : null));
+          changed = !old || (await old.text()) !== fresh[i];
+        }
+        // la prossima apertura usa subito i file appena scaricati
+        if (c) for (let i = 0; i < files.length; i++) if (files[i] !== 'sw.js') { await c.put(files[i], new Response(fresh[i], { headers: { 'Content-Type': files[i].endsWith('.js') ? 'text/javascript' : files[i].endsWith('.html') ? 'text/html' : 'application/json' } })); if (files[i] === 'index.html') await c.put('./', new Response(fresh[i], { headers: { 'Content-Type': 'text/html' } })); }
+      }
+      if (changed) { ls.set('cdnd_updated', '1'); location.reload(); return; }
+      notice('Hai già la versione più recente. Se hai appena approvato una modifica, GitHub può metterci qualche minuto a pubblicarla: riprova tra poco.');
+    } catch { notice('Non riesco a contattare il sito: controlla la connessione e riprova.'); }
+    btn.disabled = false; btn.classList.remove('spin');
+  }
+  if (ls.get('cdnd_updated')) { ls.del('cdnd_updated'); domReady().then(() => setTimeout(() => notice('Sito aggiornato all\'ultima versione.'), 600)); }
 
   /* ---------- aggiornamento dei dati (amministratore) ---------- */
   function offerUpdate(fresh, raw) {
