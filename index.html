@@ -408,7 +408,7 @@ function findEnt(ref) {
   const a = S.byName.get(norm(ref));
   return a && a.length ? S.ents.get(a[0]) : null;
 }
-const DM_NOTE = /\s*\*\((?:Dalla scaletta del DM|Nota del DM)[^)]*\)\*|^\*Riassunto ricavato dalla scaletta del DM[^*\n]*\*\s*/gm;
+const DM_NOTE = /\s*\*\((?:Dalla scaletta del DM|Nota del DM)[^)]*\)\*|^\*Riassunto ricavato dalla scaletta del DM[^*\n]*\*\s*|^\*\(Solo DM\)\*[^\n]*/gm;
 function inl(s) {
   if (window.__RO) s = String(s ?? '').replace(DM_NOTE, '');
   let h = esc(s);
