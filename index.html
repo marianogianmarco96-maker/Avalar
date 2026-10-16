@@ -1505,11 +1505,14 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
   const ptsPath = pts => 'M' + pts.map(q => q[0] + ' ' + q[1]).join(' L') + ' Z';
   const inPoly = (p, pts) => { let c = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) { const [xi, yi] = pts[i], [xj, yj] = pts[j]; if ((yi > p.y) !== (yj > p.y) && p.x < (xj - xi) * (p.y - yi) / (yj - yi) + xi) c = !c; } return c; };
   const curReg = () => regs.find(r => r.id === st.reg);
+  // regioni che contengono il segnaposto aperto (quando non è stata scelta a mano una regione)
+  const homeRegs = () => { const p = !st.reg && pins.find(x => x.id === st.sel); return p ? regs.filter(r => inPoly(p, r.points) && (!st.players || regVisible(r))) : []; };
   function renderRegs() {
     const svg = $('#regsvg'); if (!svg) return; let h = '';
     const sel = curReg();
     if (st.regs && sel && !(st.players && !regVisible(sel))) h += `<path d="M0 0H100V100H0Z ${ptsPath(sel.points)}" fill="rgba(8,6,4,.6)" fill-rule="evenodd" style="pointer-events:none"/>`;
-    if (st.regs) for (const r of regs) { if (st.players && !regVisible(r)) continue; h += `<polygon class="regp ${r.id === st.reg ? 'on' : ''}" data-reg="${esc(r.id)}" style="--c:${esc(r.color || '#d4b06a')}" points="${r.points.map(q => q.join(',')).join(' ')}"><title>${esc(regName(r))}</title></polygon>`; }
+    const home = homeRegs().map(r => r.id);
+    if (st.regs) for (const r of regs) { if (st.players && !regVisible(r)) continue; h += `<polygon class="regp ${r.id === st.reg || home.includes(r.id) ? 'on' : ''}" data-reg="${esc(r.id)}" style="--c:${esc(r.color || '#d4b06a')}" points="${r.points.map(q => q.join(',')).join(' ')}"><title>${esc(regName(r))}</title></polygon>`; }
     if (st.draw && st.draw.pts.length) h += `<polyline class="drawline" points="${st.draw.pts.map(q => q.join(',')).join(' ')}"/>`;
     svg.innerHTML = h;
   }
@@ -1540,6 +1543,17 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
         ${st.edit && !st.players ? '<button class="btn sm" data-act="addphotos" style="margin-top:6px">+ Aggiungi foto</button>' : ''}
         <div class="row" style="margin:10px 0">${e && !st.players ? `<a class="btn sm" href="#/scheda/${encodeURIComponent(e.id)}">Apri scheda</a>` : ''}${tm && (!st.players || tm.discovered !== false) ? `<a class="btn sm primary" href="#/mappe/${encodeURIComponent(tm.id)}">Apri «${esc(tm.name)}»</a>` : ''}</div>
         ${st.edit && !st.players ? `<div class="row"><button class="btn sm" data-act="editpin">Modifica segnaposto</button><button class="btn sm danger" data-act="delpin">Elimina</button></div><p class="hint">Trascina il segnaposto sulla mappa per spostarlo.</p>` : ''}<div class="orn"></div>`;
+      if (!curReg()) { // segnaposto aperto: solo la regione in cui si trova, non l'elenco di tutta la mappa
+        const home = homeRegs();
+        h += home.length ? home.map((r, i) => { const re = regEnt(r); return `<h4>Si trova in</h4><div class="spread"><h2><span class="dot" style="width:11px;height:11px;border-radius:50%;background:${esc(r.color || '#d4b06a')};display:inline-block;margin-right:6px"></span>${esc(regName(r))}</h2></div>
+          ${re && !st.players && re.brief ? `<p><i>${inl(re.brief)}</i></p>` : ''}${re && !st.players && i === 0 ? '<div id="regbody" class="prose"></div>' : ''}
+          <div class="row" style="margin:8px 0">${re && !st.players ? `<a class="btn sm primary" href="#/scheda/${encodeURIComponent(re.id)}">Apri la scheda della regione</a>` : ''}<button class="btn sm" data-act="selreg" data-id="${esc(r.id)}">Mostra la regione</button></div>`; }).join('')
+          : '<p class="hint">Questo luogo non si trova in nessuna regione disegnata sulla mappa.</p>';
+        h += `<p class="hint" style="margin-top:12px"><a href="#" data-act="desel">← Tutta la mappa: regioni e luoghi</a></p>`;
+        const re = home[0] && regEnt(home[0]);
+        if (re && !st.players) dbGet('bodies', re.id).then(b => { const host = $('#regbody'); if (!host || !b) return; const sec = (b.sections || []).find(x => x.entries?.length); host.innerHTML = sec ? `<h4>${esc(sec.title)}</h4>` + prose(sec.entries[sec.entries.length - 1].text.length > 500 ? sec.entries[sec.entries.length - 1].text.slice(0, 500) + '…' : sec.entries[sec.entries.length - 1].text) : ''; });
+        $('#mside').innerHTML = h; return;
+      }
     }
     const selR = curReg();
     if (selR && !(st.players && !regVisible(selR))) {
