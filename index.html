@@ -1608,7 +1608,8 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
     $('#mside').innerHTML = h;
   }
   const refresh = () => { renderPins(); renderRegs(); renderSide(); };
-  const selectReg = (rid, ctr) => { st.reg = rid; st.vedit = false; refresh(); syncUI(); if (rid && ctr) { const r = curReg(); if (r) fitRegion(r); } };
+  // aprendo una regione si chiude il segnaposto aperto, così resta evidenziata solo lei
+  const selectReg = (rid, ctr) => { st.reg = rid; if (rid) st.sel = null; st.vedit = false; refresh(); syncUI(); if (rid && ctr) { const r = curReg(); if (r) fitRegion(r); } };
   const selectPin = (pid, ctr) => { st.sel = pid; refresh(); if (ctr && pid) center(pins.find(p => p.id === pid), 2.2); };
   const syncUI = () => {
     $('#b-edit').classList.toggle('on', st.edit); $('#b-add').style.display = st.edit && !st.players && !st.draw ? '' : 'none'; $('#b-addreg').style.display = st.edit && !st.players && !st.draw ? '' : 'none'; $('#drawbar').style.display = st.draw ? '' : 'none'; $('#b-lab').classList.toggle('on', st.labels); $('#b-reg').classList.toggle('on', st.regs);
