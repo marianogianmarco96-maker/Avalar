@@ -169,23 +169,21 @@
   /* ---------- interfaccia per ruolo ---------- */
   const HIDE_ACTS = ['selmode', 'selall', 'selnone', 'selmove', 'edit', 'up', 'rensess', 'reimg', 'delRel', 'del', 'copyctx', 'wipe', 'vedit', 'vdm', 'vpl', 'undo', 'toggleDisc', 'subup', 'rename', 'renSec', 'redraw', 'portrait', 'newsess', 'newent', 'merge', 'histgen', 'editreg', 'editpin', 'editmap', 'editgen', 'editEntry', 'drawundo', 'drawok', 'drawcancel', 'delreg', 'delpin', 'delphoto', 'delmap', 'delSec', 'delEntry', 'delDoc', 'cpDoc', 'copyEnt', 'bkFull', 'bkData', 'attach', 'analyze', 'addreg', 'addpin', 'addphotos', 'addSec', 'addRel', 'addEntry', 'demo'];
   const GUEST_CSS = HIDE_ACTS.map(a => `html.ro [data-act="${a}"]`).join(',') + `,html.ro a[href="#/import"],html.ro a[href="#/backup"],html.ro #b-edit,html.ro #b-add,html.ro #b-addreg,html.ro #seg,html.ro #access,html.ro input[type=file],html.ro label:has(input[type=file]){display:none!important}`;
-  const ROLE_CSS = `.rolebar{display:flex;gap:6px;align-items:center;flex:none}
-.rolepill{font:600 .72rem/1 Georgia,serif;letter-spacing:.06em;text-transform:uppercase;padding:7px 10px;border-radius:99px;border:1px solid #ffffff40;background:#00000030;color:#f5e6c4;white-space:nowrap}
-.rolepill.adm{border-color:#e7cf9a99;color:#f7e3ae}
-.rolepill .rp-s{display:none}
-.logout{white-space:nowrap;display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 13px 0 11px;border-radius:99px;border:1px solid #e7cf9a80;background:#00000030;color:#f5e6c4;font:600 .72rem Georgia,serif;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;flex:none;transition:background .15s,border-color .15s}
-.logout:hover,.logout:focus-visible{background:#a7343b;border-color:#e7cf9a;outline:none}
-.logout:active{transform:translateY(1px)}
-.logout:disabled{opacity:.6}
-.iconbtn.askbtn{width:auto;white-space:nowrap;padding:0 12px;border-radius:99px;font:600 .72rem Georgia,serif;letter-spacing:.06em;text-transform:uppercase}
-.askbtn .ab-i{display:none}
-#upbtn.spin .ab-i,#upbtn.spin .ab-t{opacity:.6}
-#upbtn .ab-i{font-size:1.05rem}
-@media (max-width:1700px){#upbtn{width:34px;padding:0}#upbtn .ab-t{display:none}#upbtn .ab-i{display:inline}}
-@media (max-width:1500px){.rolepill .rp-l{display:none}.rolepill .rp-s{display:inline}}
-@media (max-width:900px){.logout{width:34px;padding:0;justify-content:center}.logout span{display:none}.iconbtn.askbtn{width:34px;padding:0}.askbtn .ab-t{display:none}.askbtn .ab-i{display:inline}}
-@media (max-width:520px){.rolepill{padding:6px 8px;font-size:.66rem}.rolebar{gap:5px}}`;
-  function pill(txt, cls) { const s = document.createElement('span'); s.textContent = txt; s.style.cssText = 'font:600 .72rem/1 Georgia,serif;letter-spacing:.06em;text-transform:uppercase;padding:6px 9px;border-radius:99px;border:1px solid #ffffff40;background:#00000030;color:#f5e6c4;white-space:nowrap'; if (cls) s.className = cls; return s; }
+  // strumenti: un piccolo pannello nell'angolo in basso a sinistra, così in alto restano solo le sezioni
+  const ROLE_CSS = `#tools{position:fixed;left:max(14px,env(safe-area-inset-left,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:45;display:flex;flex-direction:column-reverse;align-items:flex-start;gap:7px;font:600 .7rem/1 Georgia,serif}
+#tools .tlist{display:none;flex-direction:column;align-items:stretch;gap:6px;padding:8px;border-radius:12px;background:var(--wine-d,#561820);border:1px solid #e7cf9a80;box-shadow:0 6px 20px #0007;min-width:210px}
+#tools.open .tlist{display:flex}
+.tbtn{display:flex;align-items:center;gap:9px;height:36px;padding:0 12px 0 9px;border-radius:18px;border:1px solid #e7cf9a66;background:#00000030;color:#f5e6c4;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;font:inherit;white-space:nowrap;text-align:left}
+.tbtn:hover,.tbtn:focus-visible{background:#a7343b;border-color:#e7cf9a;outline:none}
+.tbtn:disabled{opacity:.6}
+.tbtn .ti{width:18px;text-align:center;font-size:1rem;flex:none}
+.tbtn svg{width:16px;height:16px;flex:none;margin:0 1px}
+#tools .ttog{height:40px;padding:0 14px 0 11px;border-radius:20px;background:linear-gradient(180deg,var(--wine,#7d2530),var(--wine-d,#561820));border:1px solid #e7cf9a;box-shadow:0 3px 12px #0006}
+#tools .ttog .tr{font-size:.6rem;padding:3px 6px;border-radius:9px;border:1px solid #e7cf9a99;color:#f7e3ae;margin-left:2px}
+#tools .trole{padding:4px 6px 6px;color:#e7cf9a;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid #e7cf9a40;margin-bottom:2px}
+#tools #themeBtn{width:auto;height:36px;border-radius:18px;font-size:inherit;padding:0 12px 0 9px}
+@media (max-width:1280px){#tools{bottom:calc(74px + env(safe-area-inset-bottom,0px))}}
+@media (max-width:620px){#tools .ttog .tl{display:none}#tools .ttog{width:40px;padding:0;justify-content:center}#tools .ttog .tr{display:none}}`;
   function applyRoleUI() {
     const root = document.documentElement; root.classList.add(ROLE === 'admin' ? 'adm' : 'ro');
     if (ROLE !== 'admin') {
@@ -195,19 +193,27 @@
     }
     const top = document.querySelector('header.top'), theme = document.getElementById('themeBtn'); if (!top || !theme) return;
     const st2 = document.createElement('style'); st2.textContent = ROLE_CSS; document.head.append(st2);
-    const wrap = document.createElement('span'); wrap.className = 'rolebar';
-    const badge = document.createElement('span'); badge.className = 'rolepill ' + (ROLE === 'admin' ? 'adm' : 'gst');
-    badge.title = ROLE === 'admin' ? 'Dungeon Master' : 'Giocatore · sola lettura';
-    badge.innerHTML = ROLE === 'admin' ? '<span class="rp-l">Dungeon Master</span><span class="rp-s">DM</span>' : '<span class="rp-l">Giocatore · sola lettura</span><span class="rp-s">Giocatore</span>';
-    wrap.append(badge);
-    if (ROLE === 'admin') { const b = document.createElement('button'); b.className = 'iconbtn askbtn'; b.title = 'Chiedi una modifica a Claude'; b.innerHTML = '<span class="ab-i">✎</span><span class="ab-t">Chiedi a Claude</span>'; b.onclick = askClaude; wrap.append(b); }
-    const up = document.createElement('button'); up.className = 'iconbtn askbtn'; up.id = 'upbtn'; up.type = 'button'; up.setAttribute('aria-label', 'Verifica aggiornamento'); up.title = 'Verifica se c\'è una versione più recente del sito e caricala subito'; up.innerHTML = '<span class="ab-i">⟳</span><span class="ab-t">Verifica aggiornamento</span>'; up.onclick = () => checkUpdate(up); wrap.append(up);
-    const out = document.createElement('button'); out.className = 'logout'; out.type = 'button'; out.title = 'Esci e torna alla schermata di accesso'; out.setAttribute('aria-label', 'Esci');
-    out.innerHTML = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M16 8l4 4-4 4"/><path d="M20 12H9"/></svg><span>Esci</span>';
-    out.onclick = async () => { out.disabled = true; ls.del('cdnd_remember'); if (DB) { try { const t = DB.transaction('kv', 'readwrite'); t.objectStore('kv').delete('key'); await done(t); } catch { } } location.reload(); };
-    wrap.append(out);
-    const sp = document.createElement('span'); sp.style.cssText = 'flex:1 1 0;min-width:0'; sp.className = 'spacer-top';
-    top.insertBefore(sp, theme); top.insertBefore(wrap, theme);
+    const adm = ROLE === 'admin';
+    const box = document.createElement('aside'); box.id = 'tools'; box.setAttribute('aria-label', 'Strumenti');
+    const tog = document.createElement('button'); tog.type = 'button'; tog.className = 'tbtn ttog'; tog.setAttribute('aria-expanded', 'false');
+    tog.innerHTML = `<span class="ti" aria-hidden="true">⚙</span><span class="tl">Strumenti</span><span class="tr">${adm ? 'DM' : 'Giocatore'}</span>`;
+    tog.title = 'Strumenti · ' + (adm ? 'Dungeon Master' : 'Giocatore');
+    const list = document.createElement('div'); list.className = 'tlist';
+    const role = document.createElement('div'); role.className = 'trole'; role.textContent = adm ? 'Dungeon Master' : 'Giocatore · sola lettura'; list.append(role);
+    const mk = (icon, label, title, fn, id) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'tbtn'; if (id) b.id = id; b.title = title; b.innerHTML = `<span class="ti" aria-hidden="true">${icon}</span><span class="tl">${label}</span>`; b.onclick = fn; list.append(b); return b; };
+    const setOpen = o => { box.classList.toggle('open', o); tog.setAttribute('aria-expanded', String(o)); };
+    tog.onclick = () => setOpen(!box.classList.contains('open'));
+    document.addEventListener('click', e => { if (!box.contains(e.target)) setOpen(false); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
+    const up = mk('⟳', 'Verifica aggiornamento', 'Verifica se c\'è una versione più recente del sito e caricala subito', () => checkUpdate(up), 'upbtn');
+    if (adm) mk('✎', 'Chiedi a Claude', 'Chiedi una modifica a Claude', () => { setOpen(false); askClaude(); });
+    theme.className = 'tbtn'; list.append(theme);
+    const out = mk('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M16 8l4 4-4 4"/><path d="M20 12H9"/></svg>', 'Esci', 'Esci e torna alla schermata di accesso', async () => { out.disabled = true; ls.del('cdnd_remember'); if (DB) { try { const t = DB.transaction('kv', 'readwrite'); t.objectStore('kv').delete('key'); await done(t); } catch { } } location.reload(); });
+    box.append(tog, list); document.body.append(box);
+    // il tema mostra anche la scritta, l'app cambia solo l'icona
+    const tl = () => { if (!theme.querySelector('.tl')) { const ic = theme.textContent; theme.innerHTML = `<span class="ti" aria-hidden="true">${ic}</span><span class="tl">${ic === '☀' ? 'Tema chiaro' : 'Tema scuro'}</span>`; } };
+    tl(); new MutationObserver(tl).observe(theme, { childList: true, characterData: true, subtree: true });
+    const sp = document.createElement('span'); sp.style.cssText = 'flex:1 1 0;min-width:0'; sp.className = 'spacer-top'; top.insertBefore(sp, document.getElementById('srchBtn'));
   }
 
   /* ---------- amministratore: richiesta a Claude ---------- */

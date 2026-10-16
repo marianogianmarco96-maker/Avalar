@@ -247,14 +247,14 @@ dialog.dlg menu{display:flex;justify-content:flex-end;gap:8px;padding:0;margin:1
 
 /* ---------- responsive ---------- */
 @media (max-width:900px){
-  .top{gap:8px;padding:0 10px}.srch{width:150px}.brand small{display:none}
+  .top{gap:8px;padding:0 10px}.brand small{display:none}
   .grid2{grid-template-columns:1fr}
   .mapview{grid-template-columns:1fr;grid-template-rows:62vh auto;height:auto}
   .mapmain{height:62vh}
   .mapside{border-left:0;border-top:1px solid var(--line2)}
   .entry .tag{width:44px}
 }
-@media (max-width:620px){.srch{display:none}h1{font-size:1.5rem}.page{padding:18px 12px 80px}}
+@media (max-width:620px){h1{font-size:1.5rem}.page{padding:18px 12px 80px}}
 @media print{.top,.acts,.eacts{display:none!important}body::before{display:none}}
 
 /* ---------- foto dei segnaposto ---------- */
@@ -292,7 +292,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{min-width:0}
 .top{min-width:0}
 .brand{min-width:0}
-@media (max-width:1500px){.top{gap:12px}.srch{width:150px}.brand small{display:none}.brand b{font-size:.95rem;letter-spacing:.1em}#nav a{padding:8px 9px;font-size:.74rem;letter-spacing:.06em}}
+@media (max-width:1500px){.top{gap:12px}.brand small{display:none}.brand b{font-size:.95rem;letter-spacing:.1em}#nav a{padding:8px 9px;font-size:.74rem;letter-spacing:.06em}}
 @media (max-width:1280px){
   .top{gap:8px}
   #nav{position:fixed;left:0;right:0;bottom:0;z-index:40;flex:none;gap:2px;justify-content:flex-start;overflow-x:auto;
@@ -317,9 +317,13 @@ body{min-width:0}
 .erow.pick{cursor:pointer}
 .erow.pick input{width:20px;height:20px;flex:none;accent-color:var(--wine);pointer-events:none}
 .erow.pick.on{background:var(--paper2);box-shadow:inset 3px 0 0 var(--wine2)}
-.srchbtn{display:none;align-items:center;justify-content:center;text-decoration:none!important}
-.srchbtn svg{width:17px;height:17px}
-@media (max-width:620px){.srchbtn{display:inline-flex}}
+.srchbtn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none!important;width:30px;height:30px}
+.srchbtn svg{width:15px;height:15px}
+/* in alto solo le sezioni: la ricerca si apre in una casella sotto la barra */
+.top .srch{position:absolute;right:max(14px,env(safe-area-inset-right,0px));top:calc(100% + 8px);width:min(360px,calc(100vw - 28px));display:none;z-index:35}
+.top.srchopen .srch{display:block}
+.top.srchopen .srchbtn{background:#00000055;border-color:var(--gold2)}
+.top .srch input[type=search],.top .srch input[type=search]:focus{background:var(--wine-d);border-color:var(--gold2);box-shadow:0 6px 18px #0006;padding:9px 14px}
 .sessnav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
 .sessnav a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border:1px solid var(--line2);border-radius:22px;background:var(--paper2);color:var(--ink);font-size:.95rem;text-decoration:none!important}
 .sessnav a:hover{border-color:var(--gold)}
@@ -1860,8 +1864,14 @@ function setupQuickSearch() {
   });
   qi.addEventListener('keydown', e => { if (e.key === 'Enter' && qi.value.trim()) { location.hash = '#/cerca?q=' + encodeURIComponent(qi.value.trim()); close(); qi.blur(); } else if (e.key === 'Escape') { close(); qi.blur(); } });
   qr.addEventListener('click', () => { close(); qi.value = ''; });
-  document.addEventListener('click', e => { if (!e.target.closest('.srch')) close(); });
-  document.addEventListener('keydown', e => { if ((e.key === '/' || (e.key.toLowerCase() === 'k' && (e.ctrlKey || e.metaKey))) && !/input|textarea|select/i.test(document.activeElement?.tagName || '')) { e.preventDefault(); qi.focus(); qi.select(); } });
+  const top = $('.top'), btn = $('#srchBtn');
+  const openS = () => { top.classList.add('srchopen'); qi.focus(); qi.select(); };
+  const closeS = () => { top.classList.remove('srchopen'); close(); };
+  btn.addEventListener('click', e => { e.preventDefault(); top.classList.contains('srchopen') ? closeS() : openS(); });
+  qr.addEventListener('click', closeS);
+  qi.addEventListener('keydown', e => { if (e.key === 'Escape' || e.key === 'Enter') closeS(); });
+  document.addEventListener('click', e => { if (!e.target.closest('.srch') && !e.target.closest('#srchBtn')) closeS(); });
+  document.addEventListener('keydown', e => { if ((e.key === '/' || (e.key.toLowerCase() === 'k' && (e.ctrlKey || e.metaKey))) && !/input|textarea|select/i.test(document.activeElement?.tagName || '')) { e.preventDefault(); openS(); } });
 }
 
 /* ---------- tema e avvio ---------- */
