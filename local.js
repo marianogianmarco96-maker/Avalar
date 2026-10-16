@@ -207,16 +207,25 @@
   }
 
   /* ---------- amministratore: richiesta a Claude ---------- */
+  const ASK_REPO = 'https://github.com/marianogianmarco96-maker/Avalar';
   function askClaude() {
     let d = document.getElementById('askdlg'); if (d) d.remove();
     d = document.createElement('dialog'); d.id = 'askdlg'; d.style.cssText = 'border:1px solid #a98334;border-radius:12px;background:#fbf5e3;color:#2b1d14;padding:20px;width:min(560px,92vw);font:16px/1.4 Georgia,serif';
     d.innerHTML = `<h3 style="margin:0 0 6px;font-family:Cinzel,Georgia,serif;color:#561820">Chiedi una modifica a Claude</h3>
-      <p style="margin:0 0 10px;color:#5a4636">Scrivi cosa vuoi cambiare. Copia il testo e incollalo nella chat con Claude: lui aggiorna i dati e ti manda la nuova versione del sito (qui comparirà «Aggiorna ora»).</p>
+      <p style="margin:0 0 10px;color:#5a4636">Scrivi cosa vuoi cambiare e premi «Invia a Claude»: si apre GitHub con la richiesta già compilata, tu confermi con «Create». Claude la studia e prepara la modifica, che resta in attesa finché non la approvi tu.</p>
       <textarea id="ask-t" rows="6" style="width:100%;box-sizing:border-box;border:1px solid #c4ae80;border-radius:8px;padding:10px;font:inherit;background:#fffdf4" placeholder="Es.: nella scheda di Robin aggiungi che…"></textarea>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button id="ask-c" class="btn primary">Copia richiesta</button><button id="ask-x" class="btn">Copia richiesta + contesto</button><button id="ask-k" class="btn ghost" style="margin-left:auto">Chiudi</button></div><p id="ask-m" style="min-height:1.2em;color:#3f6b46;margin:8px 0 0"></p>`;
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button id="ask-s" class="btn primary">Invia a Claude</button><button id="ask-c" class="btn">Copia richiesta</button><button id="ask-x" class="btn">Copia richiesta + contesto</button><button id="ask-k" class="btn ghost" style="margin-left:auto">Chiudi</button></div><p id="ask-m" style="min-height:1.2em;color:#3f6b46;margin:8px 0 0"></p>`;
     document.body.append(d); d.showModal();
     const text = async ctx => { const body = d.querySelector('#ask-t').value.trim(); if (!body) { d.querySelector('#ask-m').textContent = 'Scrivi prima la richiesta.'; return null; } let t = 'Richiesta di modifica per la campagna D&D:\n\n' + body + '\n'; if (ctx && window.__cronache?.buildContext) { try { t += '\n--- Contesto della campagna ---\n' + await window.__cronache.buildContext({ full: false }); } catch { } } return t; };
     const copy = async t => { try { await navigator.clipboard.writeText(t); } catch { const a = document.createElement('textarea'); a.value = t; document.body.append(a); a.select(); document.execCommand('copy'); a.remove(); } d.querySelector('#ask-m').textContent = 'Copiato: incollalo nella chat con Claude.'; };
+    d.querySelector('#ask-s').onclick = () => {
+      const body = d.querySelector('#ask-t').value.trim(); if (!body) { d.querySelector('#ask-m').textContent = 'Scrivi prima la richiesta.'; return; }
+      const page = (document.title || '').replace(/ · Campagna D&D.*$/, '');
+      const title = '[Richiesta] ' + (body.split('\n')[0].length > 70 ? body.split('\n')[0].slice(0, 67) + '…' : body.split('\n')[0]);
+      const txt = body.slice(0, 6000) + '\n\n---\nInviata dal sito, pagina: ' + page + ' (' + location.hash + ')';
+      window.open(ASK_REPO + '/issues/new?title=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(txt), '_blank', 'noopener');
+      d.querySelector('#ask-m').textContent = 'Si è aperto GitHub: premi «Create» per inviare la richiesta.';
+    };
     d.querySelector('#ask-c').onclick = async () => { const t = await text(false); if (t) copy(t); };
     d.querySelector('#ask-x').onclick = async () => { const t = await text(true); if (t) copy(t); };
     d.querySelector('#ask-k').onclick = () => d.close();
