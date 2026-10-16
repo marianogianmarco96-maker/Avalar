@@ -1,5 +1,5 @@
-const VERSION = '1792150000';
-const CORE = ['./', 'index.html', 'local.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'data.json', 'data.enc'];
+const VERSION = '1792160000';
+const CORE = ['./', 'index.html', 'local.js', 'idee.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'data.json', 'data.enc'];
 const CACHE = 'campagna-' + VERSION, FONTS = 'campagna-fonts';
 self.addEventListener('install', e => {
   e.waitUntil((async () => {
@@ -33,7 +33,7 @@ self.addEventListener('fetch', e => {
     return;
   }
   if (url.origin !== location.origin) return;
-  const core = req.mode === 'navigate' || /\/(index\.html|local\.js|data\.json|data\.enc|manifest\.webmanifest)?$/.test(url.pathname);
+  const core = req.mode === 'navigate' || /\/(index\.html|local\.js|idee\.js|data\.json|data\.enc|manifest\.webmanifest)?$/.test(url.pathname);
   e.respondWith((async () => {
     const c = await caches.open(CACHE);
     if (core) {
