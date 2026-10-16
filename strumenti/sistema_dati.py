@@ -23,6 +23,11 @@ def norm(s):
     return ' '.join(''.join(c for c in s if not unicodedata.combining(c)).split())
 
 
+def did(k):
+    # stessa codifica delle chiavi dei documenti usata dal sito
+    return re.sub(r'[^A-Za-z0-9_\-.:@+]', lambda m: '~%x~' % ord(m.group(0)), k)[:200]
+
+
 def unisci_prigioni(S):
     E = S['entities']
     if SRC not in E:
@@ -45,7 +50,7 @@ def unisci_prigioni(S):
             l = {**l, 'from': DST if l['from'] == SRC else l['from'], 'to': DST if l['to'] == SRC else l['to']}
             if l['from'] != l['to']:
                 l['k'] = f"{l['from']}|{l['to']}|{norm(l['label'])}"
-                S['links'][l['k']] = l
+                S['links'][did(l['k'])] = l
     for v in S['events'].values():
         v['ents'] = list(dict.fromkeys(DST if x == SRC else x for x in v['ents']))
     for p in list(S['pins'].values()) + list(S['regions'].values()):
