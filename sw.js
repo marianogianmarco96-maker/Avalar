@@ -37,7 +37,8 @@ self.addEventListener('fetch', e => {
   e.respondWith((async () => {
     const c = await caches.open(CACHE);
     if (core) {
-      try { const r = await fetch(req); if (r.ok) c.put(req.mode === 'navigate' ? './' : req, r.clone()); return r; }
+      // chiede sempre al server se il file è cambiato, invece di usare la copia del browser (GitHub Pages la tiene 10 minuti)
+      try { const r = await fetch(req.mode === 'navigate' ? new Request(req.url, { cache: 'no-cache', credentials: 'same-origin' }) : new Request(req, { cache: 'no-cache' })); if (r.ok) c.put(req.mode === 'navigate' ? './' : req, r.clone()); return r; }
       catch { return (await c.match(req, { ignoreSearch: true })) || (await c.match('./')) || Response.error(); }
     }
     const hit = await c.match(req);
