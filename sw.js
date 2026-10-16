@@ -1,21 +1,23 @@
-const VERSION = '1792091153';
+const VERSION = '1792091153-2';
 const CORE = ['./', 'index.html', 'local.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'data.json', 'data.enc'];
 const CACHE = 'campagna-' + VERSION, FONTS = 'campagna-fonts';
 self.addEventListener('install', e => {
   e.waitUntil((async () => {
     const c = await caches.open(CACHE);
     await Promise.all(CORE.map(u => c.add(new Request(u, { cache: 'reload' })).catch(() => { })));
-    try {
-      const d = await (await c.match('data.json')).json();
-      const files = [...new Set(Object.values(d.blobmap || {}))];
-      for (let i = 0; i < files.length; i += 6) await Promise.all(files.slice(i, i + 6).map(u => c.add(u).catch(() => { })));
-    } catch { }
+    // le immagini non si scaricano tutte in anticipo (sono molti MB su rete mobile):
+    // vengono salvate per l'uso offline la prima volta che si aprono
     await self.skipWaiting();
   })());
 });
 self.addEventListener('activate', e => {
   e.waitUntil((async () => {
-    for (const k of await caches.keys()) if (k !== CACHE && k !== FONTS) await caches.delete(k);
+    const keep = await caches.open(CACHE);
+    for (const k of await caches.keys()) {
+      if (k === CACHE || k === FONTS) continue;
+      if (k.startsWith('campagna-')) { const old = await caches.open(k); for (const r of await old.keys()) if (/\/(blobs|priv)\//.test(r.url) && !(await keep.match(r))) await keep.put(r, await old.match(r)); }
+      await caches.delete(k);
+    }
     await self.clients.claim();
   })());
 });
