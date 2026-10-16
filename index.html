@@ -332,6 +332,7 @@ body{min-width:0}
   .erow{gap:8px;padding:0 10px}
   .erow .t{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.2;font-size:.98rem}
   .erow .t small,.erow .t .pill,.erow .r .pill,.erow .r br{display:none}
+  .erow .t .pill.ongoing{display:inline-block;font-size:.75rem}
   .erow .r{max-width:64px;font-size:.75rem}
   .erow .badge{font-size:.55rem;padding:1px 5px}
   .erow .av{width:36px;height:36px}
@@ -407,7 +408,7 @@ function findEnt(ref) {
   const a = S.byName.get(norm(ref));
   return a && a.length ? S.ents.get(a[0]) : null;
 }
-const DM_NOTE = /\s*\*\((?:Dalla scaletta del DM|Nota del DM)[^)]*\)\*|^\*Riassunto ricavato dalla scaletta del DM[^*\n]*\*\s*/gm;
+const DM_NOTE = /\s*\*\((?:Dalla scaletta del DM|Nota del DM)[^)]*\)\*|^\*Riassunto ricavato dalla scaletta del DM[^*\n]*\*\s*|^\*\(Solo DM\)\*[^\n]*/gm;
 function inl(s) {
   if (window.__RO) s = String(s ?? '').replace(DM_NOTE, '');
   let h = esc(s);
@@ -720,9 +721,11 @@ function parseLoose(raw) {
   catch (e1) { try { return JSON.parse(t.replace(/,\s*([}\]])/g, '$1')); } catch { throw e1; } }
 }
 
+const ongoingPill = s => s.ongoing ? ' <span class="pill warn ongoing" title="La sessione si è interrotta a metà e continua la prossima volta">in corso</span>' : '';
 const lightSession = (s, oldS) => ({
   n: s.n, title: s.title ?? oldS?.title ?? '', date: s.date ?? oldS?.date ?? '', gameDate: s.gameDate ?? oldS?.gameDate ?? '',
-  brief: s.brief ?? oldS?.brief ?? '', arc: s.arc ?? oldS?.arc ?? ''
+  brief: s.brief ?? oldS?.brief ?? '', arc: s.arc ?? oldS?.arc ?? '',
+  ...((s.ongoing ?? oldS?.ongoing) ? { ongoing: true } : {})
 });
 
 /* ---------- import: costruisce il piano senza scrivere nulla ---------- */
@@ -1148,7 +1151,7 @@ route(/^\/$/, async () => {
     if (pro?.sections?.length) h += `<div class="card"><div class="spread"><h2>Prologo</h2><a href="#/scheda/lore-introduzione-al-mondo">Apri la scheda →</a></div><details class="arc" open><summary>Il mondo di gioco<small>introduzione</small></summary>${pro.sections.map(sc => `${sc.title ? `<h3>${esc(sc.title)}</h3>` : ''}${sc.entries.map(en => prose(en.text)).join('')}`).join('')}</details></div>`;
     h += `<div class="card"><div class="spread"><h2>Riassunto di quanto fatto finora</h2><div class="row"><button class="btn sm" data-act="editgen">Modifica</button>${(getMeta('generalHist', []).length) ? '<button class="btn sm ghost" data-act="histgen">Versioni precedenti</button>' : ''}</div></div>
       ${gen?.text ? prose(gen.text) + `<p class="hint">Aggiornato ${fmtDate(gen.ts)}${gen.upto != null ? ' · fino alla sessione ' + gen.upto : ''}</p>` : '<p class="empty">Il riassunto comparirà alla prima importazione.</p>'}
-      ${S.sess.length ? `<div class="spread" style="margin-top:14px"><h3 style="margin:0">Sessione per sessione</h3><a href="#/sessioni">Tutte le sessioni →</a></div><p class="hint">Apri una riga per il dettaglio, poi «Apri la sessione» per il resoconto completo.</p>${S.sess.map(s => `<details class="arc"><summary><b>${s.n}. ${esc(s.title || 'Sessione ' + s.n)}</b>${s.gameDate ? `<small>${esc(s.gameDate)}</small>` : ''}<br><span class="mute" style="font-family:var(--body);font-weight:400;letter-spacing:0;font-size:.95rem">${esc(s.short || s.brief || '')}</span></summary>${s.brief && s.brief !== s.short ? `<p>${esc(s.brief)}</p>` : ''}<a class="btn sm" href="#/sessioni/${s.n}">Apri la sessione →</a></details>`).join('')}` : ''}</div>`;
+      ${S.sess.length ? `<div class="spread" style="margin-top:14px"><h3 style="margin:0">Sessione per sessione</h3><a href="#/sessioni">Tutte le sessioni →</a></div><p class="hint">Apri una riga per il dettaglio, poi «Apri la sessione» per il resoconto completo.</p>${S.sess.map(s => `<details class="arc"><summary><b>${s.n}. ${esc(s.title || 'Sessione ' + s.n)}</b>${ongoingPill(s)}${s.gameDate ? `<small>${esc(s.gameDate)}</small>` : ''}<br><span class="mute" style="font-family:var(--body);font-weight:400;letter-spacing:0;font-size:.95rem">${esc(s.short || s.brief || '')}</span></summary>${s.brief && s.brief !== s.short ? `<p>${esc(s.brief)}</p>` : ''}<a class="btn sm" href="#/sessioni/${s.n}">Apri la sessione →</a></details>`).join('')}` : ''}</div>`;
     if (arcs.length) h += `<div class="card"><h2>Archi narrativi</h2>${arcs.map(a => `<details class="arc"><summary>${esc(a.title)}<small>${a.from != null ? 'sessioni ' + a.from + '–' + (a.to ?? '…') : ''}</small></summary>${prose(a.summary)}</details>`).join('')}</div>`;
   }
   setView(h);
@@ -1184,7 +1187,7 @@ route(/^\/sessioni$/, async () => {
     <div class="filters"><input type="search" id="sq" placeholder="Filtra per titolo o testo breve…"><span class="hint" id="scnt">${items.length} sessioni</span></div><div id="slist"></div>`);
   if (!items.length) { $('#slist').outerHTML = `<div class="empty">Nessuna sessione ancora. Arriveranno con la prima importazione.</div>`; }
   else {
-    const vl = vlist($('#slist'), items, 78, s => `<a class="erow" href="#/sessioni/${s.n}"><div class="num">${s.n}</div><div class="main"><div class="t">${esc(s.title || 'Sessione ' + s.n)} ${s.arc ? `<small>· ${esc(arcName(s.arc))}</small>` : ''}</div><div class="b">${esc(s.short || s.brief)}</div></div><button class="icb" data-act="rensess" data-n="${s.n}" title="Rinomina la sessione">✎</button><div class="r" style="min-width:150px">${esc(s.date || '')}${s.gameDate ? '<br>' + esc(s.gameDate) : ''}</div></a>`);
+    const vl = vlist($('#slist'), items, 78, s => `<a class="erow" href="#/sessioni/${s.n}"><div class="num">${s.n}</div><div class="main"><div class="t">${esc(s.title || 'Sessione ' + s.n)}${ongoingPill(s)} ${s.arc ? `<small>· ${esc(arcName(s.arc))}</small>` : ''}</div><div class="b">${esc(s.short || s.brief)}</div></div><button class="icb" data-act="rensess" data-n="${s.n}" title="Rinomina la sessione">✎</button><div class="r" style="min-width:150px">${esc(s.date || '')}${s.gameDate ? '<br>' + esc(s.gameDate) : ''}</div></a>`);
     $('#sq').oninput = e => { const q = fold(e.target.value); const f = q ? items.filter(s => fold(s.title + ' ' + s.brief + ' ' + s.n).includes(q)) : items; vl.setItems(f); $('#scnt').textContent = f.length + ' sessioni'; };
   }
   setActs({ newsess: () => editSessionDlg(null), rensess: a => renameSession(+a.dataset.n) });
@@ -1201,12 +1204,12 @@ async function editSessionDlg(n) {
       ...(s ? [] : [{ k: 'n', label: 'Numero', type: 'number', value: (lastSessionN() || 0) + 1, req: true }]),
       { k: 'title', label: 'Titolo', value: s?.title || '' }, { k: 'date', label: 'Data reale', value: s?.date || '' }, { k: 'gameDate', label: 'Data in gioco', value: s?.gameDate || '' },
       { k: 'arc', label: 'Arco narrativo (id o nome)', value: s?.arc || '' },
-      { k: 'brief', label: 'Riga breve', value: s?.brief || '' }, { k: 'summary', label: 'Riassunto', type: 'textarea', rows: 10, value: b?.summary || '' }]
+      { k: 'brief', label: 'Riga breve', value: s?.brief || '' }, { k: 'ongoing', label: 'Sessione in corso (si è interrotta a metà)', type: 'check', value: !!s?.ongoing }, { k: 'summary', label: 'Riassunto', type: 'textarea', rows: 10, value: b?.summary || '' }]
   });
   if (!r) return;
   const num = s ? n : Math.round(r.n); if (!s && sessOf(num)) { toast('Esiste già la sessione ' + num, 'err'); return; }
   await runBatch(['sessions', 'sbodies'], '', async t => {
-    await t.put('sessions', { n: num, title: r.title.trim(), date: r.date.trim(), gameDate: r.gameDate.trim(), arc: r.arc.trim(), brief: r.brief.trim() || r.summary.replace(/\s+/g, ' ').slice(0, 160) });
+    await t.put('sessions', { n: num, title: r.title.trim(), date: r.date.trim(), gameDate: r.gameDate.trim(), arc: r.arc.trim(), brief: r.brief.trim() || r.summary.replace(/\s+/g, ' ').slice(0, 160), ...(r.ongoing ? { ongoing: true } : {}) });
     await t.put('sbodies', { n: num, summary: r.summary, docs: b?.docs || [] });
   });
   if (s) rerender(); else location.hash = '#/sessioni/' + num;
@@ -1217,7 +1220,7 @@ route(/^\/sessioni\/(\d+)$/, async ([ns]) => {
   const ents = [...S.ents.values()].filter(e => e.sessions?.includes(n));
   const grp = TYPE_ORDER.map(t => [t, ents.filter(e => e.type === t).sort((a, c) => a.name.localeCompare(c.name))]).filter(x => x[1].length);
   const prev = S.sess.filter(x => x.n < n).pop(), next = S.sess.find(x => x.n > n);
-  setView(`<div class="pagehead"><div style="flex:1"><nav class="sessnav" aria-label="Sessioni vicine">${prev ? `<a href="#/sessioni/${prev.n}" rel="prev">← Sessione ${prev.n}</a>` : ''}${next ? `<a href="#/sessioni/${next.n}" rel="next">Sessione ${next.n} →</a>` : ''}</nav><h1>${n}. ${esc(s.title || 'Sessione ' + n)}</h1><div class="hint">${[s.date, s.gameDate && 'in gioco: ' + s.gameDate, s.arc && 'arco: ' + arcName(s.arc)].filter(Boolean).map(esc).join(' · ')}</div></div>
+  setView(`<div class="pagehead"><div style="flex:1"><nav class="sessnav" aria-label="Sessioni vicine">${prev ? `<a href="#/sessioni/${prev.n}" rel="prev">← Sessione ${prev.n}</a>` : ''}${next ? `<a href="#/sessioni/${next.n}" rel="next">Sessione ${next.n} →</a>` : ''}</nav><h1>${n}. ${esc(s.title || 'Sessione ' + n)}${ongoingPill(s)}</h1><div class="hint">${[s.date, s.gameDate && 'in gioco: ' + s.gameDate, s.arc && 'arco: ' + arcName(s.arc)].filter(Boolean).map(esc).join(' · ')}</div></div>
       <div class="acts"><button class="btn" data-act="rensess" data-n="${n}">Rinomina</button><button class="btn" data-act="edit">Modifica</button><button class="btn danger" data-act="del">Elimina</button></div></div><div class="orn"></div>
     <div class="card"><h2>Riassunto</h2>${b.summary ? prose(b.summary) : '<p class="empty">Nessun riassunto.</p>'}</div>
     ${evs.length ? `<div class="card"><h2>Momenti chiave</h2>${evs.map(e => `<div class="entry"><div class="tag">${e.idx + 1}</div><div class="tx"><b>${esc(e.title)}</b>${e.gameDate ? ` <small>${esc(e.gameDate)}</small>` : ''}${prose(e.text)}${e.ents?.length ? `<div class="chips">${e.ents.filter(i => S.ents.has(i)).map(i => `<a class="chip" href="#/scheda/${encodeURIComponent(i)}">${esc(S.ents.get(i).name)}</a>`).join('')}</div>` : ''}</div></div>`).join('')}</div>` : ''}

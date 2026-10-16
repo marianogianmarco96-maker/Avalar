@@ -6,7 +6,7 @@ Uso:
 
 La copia per i giocatori toglie: schede non scoperte (con collegamenti, ritratti e menzioni,
 che restano come testo semplice), sezioni del DM (titolo con «DM»), voci e note ricavate dalla scaletta del DM,
-documenti allegati alle sessioni, cronologia del riassunto e immagini riservate (priv/).
+voci, eventi e paragrafi che iniziano con «*(Solo DM)*», documenti allegati alle sessioni, cronologia del riassunto e immagini riservate (priv/).
 Le immagini in priv/ sono cifrate con la stessa chiave dei dati.
 """
 import base64
@@ -21,7 +21,9 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 ORDINE = ['entities', 'bodies', 'sessions', 'sbodies', 'events', 'links', 'maps', 'pins', 'regions', 'meta', 'blobs']
 SEZIONE_DM = re.compile(r'\bDM\b')
 NOTA_DM = re.compile(r'\s*\*\(Dalla scaletta del DM: da integrare con il resoconto\.\)\*')
-VOCE_DM = re.compile(r'^(\*Dalla scaletta del DM\.\*|Secondo la scaletta)')
+VOCE_DM = re.compile(r'^(\*Dalla scaletta del DM\.\*|Secondo la scaletta|\*\(Solo DM\)\*)')
+# paragrafo di un riassunto che solo il DM deve vedere
+PARAGRAFO_DM = re.compile(r'^\*\(Solo DM\)\*[^\n]*(\n\n|\n|$)', re.M)
 NOTA_DM_SESSIONE = re.compile(r'^\*Riassunto ricavato dalla scaletta del DM[^*\n]*\*\s*', re.M)
 
 
@@ -58,8 +60,8 @@ def copia_ospite(d):
         'entities': E,
         'bodies': bodies,
         'sessions': S['sessions'],
-        'sbodies': {k: {**b, 'summary': NOTA_DM_SESSIONE.sub('', testo(b['summary'])), 'docs': []} for k, b in S['sbodies'].items()},
-        'events': {k: {**v, 'text': testo(v['text']), 'ents': [x for x in v['ents'] if x in E]} for k, v in S['events'].items()},
+        'sbodies': {k: {**b, 'summary': PARAGRAFO_DM.sub('', NOTA_DM_SESSIONE.sub('', testo(b['summary']))).strip(), 'docs': []} for k, b in S['sbodies'].items()},
+        'events': {k: {**v, 'text': testo(v['text']), 'ents': [x for x in v['ents'] if x in E]} for k, v in S['events'].items() if not VOCE_DM.match(v['text'])},
         'links': {k: l for k, l in S['links'].items() if l['from'] in E and l['to'] in E},
         'maps': mappe,
         'pins': pins,
