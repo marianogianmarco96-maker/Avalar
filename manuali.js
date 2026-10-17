@@ -52,9 +52,14 @@
 .man-idx a:hover .t{text-decoration:underline}
 .man-idx .t{flex:1}.man-idx .p{color:var(--wine);font-variant-numeric:tabular-nums}
 .man-idx li.ch{margin-top:6px;font-weight:600}
-.man-view{position:relative;width:100%;height:calc(100vh - 210px);min-height:420px;border:1px solid var(--line2);border-radius:5px;overflow:hidden;background:#222;box-shadow:var(--shadow)}
+.man-toc{margin:0 0 10px}
+.man-toc summary{cursor:pointer;font-family:var(--display);letter-spacing:.06em;color:var(--wine);padding:4px 0}
+.man-toc .man-idx{margin:8px 0 4px;padding:10px 14px;background:var(--paper);border:1px solid var(--line2);border-radius:5px}
+.man-view{position:relative;width:100%;height:calc(100vh - 210px);min-height:300px;border:1px solid var(--line2);border-radius:5px;overflow:hidden;background:#222;box-shadow:var(--shadow)}
 .man-view iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-@media (max-width:1280px){.man-view{height:calc(100vh - 250px)}}`;
+@media (max-width:1280px){.man-view{height:calc(100vh - 250px)}}
+@media (max-width:760px){.man-head{margin-bottom:6px;gap:6px}.man-head .sessnav{margin-bottom:2px}.man-head .sessnav a{min-height:34px}.man-head h1{font-size:1.15rem;min-width:0}.man-head .hint{display:none}
+  .man-head .acts{width:100%;flex-wrap:nowrap}.man-go label{display:none}.man-go input{width:4.5em}.man-head .acts>a.btn{padding:7px 10px;font-size:.7rem}}`;
   let cssDone = false;
   const css = () => { if (cssDone) return; cssDone = true; const s = document.createElement('style'); s.textContent = CSS; document.head.append(s); };
 
@@ -93,11 +98,19 @@
     const m = visibili().find(x => x.id === id);
     if (!m) { setView(`<div class="empty"><h2>Manuale non trovato</h2><p><a href="#/manuali">Torna ai manuali</a></p></div>`); return; }
     const p = Math.max(0, parseInt(q.get('p'), 10) || 0), src = pageUrl(m, p);
-    setView(`<div class="pagehead"><div style="flex:1"><nav class="sessnav" aria-label="Manuali"><a href="#/manuali">← Tutti i manuali</a></nav><h1>${esc(m.title)}</h1><div class="hint">${esc(m.sub)}${p ? ' · pagina ' + p : ''}</div></div>
-      <div class="acts"><form class="man-go" id="man-go"><label for="man-p">Vai a pagina</label><input id="man-p" type="number" min="1" inputmode="numeric" value="${p || ''}"><button class="btn" type="submit">Vai</button></form><a class="btn" href="${esc(src)}" target="_blank" rel="noopener">Apri in una nuova scheda</a></div></div>
-      <div class="man-view"><iframe src="${esc(src)}" title="${esc(m.title)}" allowfullscreen allow="fullscreen" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
-      <p class="hint">Se il manuale non si carica qui, usa «Apri in una nuova scheda».</p>
-      <div class="card"><h2>Indice</h2><ul class="man-idx">${m.idx.map(([t, n]) => `<li class="${/^(Cap\.|Appendice)/.test(t) ? 'ch' : ''}"><a href="${toPage(m, n)}"><span class="t">${esc(t)}</span><span class="p">${n}</span></a></li>`).join('')}</ul></div>`);
+    setView(`<div class="pagehead man-head"><div style="flex:1"><nav class="sessnav" aria-label="Manuali"><a href="#/manuali">← Tutti i manuali</a></nav><h1>${esc(m.title)}</h1><div class="hint">${esc(m.sub)}${p ? ' · pagina ' + p : ''}</div></div>
+      <div class="acts"><form class="man-go" id="man-go"><label for="man-p">Vai a pagina</label><input id="man-p" type="number" min="1" inputmode="numeric" value="${p || ''}"><button class="btn" type="submit">Vai</button></form><a class="btn" href="${esc(src)}" target="_blank" rel="noopener" title="Se il manuale non si carica qui, aprilo direttamente su AnyFlip">Apri in una nuova scheda</a></div></div>
+      <details class="man-toc"><summary>Indice del manuale</summary><ul class="man-idx">${m.idx.map(([t, n]) => `<li class="${/^(Cap\.|Appendice)/.test(t) ? 'ch' : ''}"><a href="${toPage(m, n)}"><span class="t">${esc(t)}</span><span class="p">${n}</span></a></li>`).join('')}</ul></details>
+      <div class="man-view"><iframe src="${esc(src)}" title="${esc(m.title)}" allowfullscreen allow="fullscreen" referrerpolicy="no-referrer-when-downgrade"></iframe></div>`);
+    // il libro occupa tutto lo spazio visibile fino alla barra in basso: così sul telefono non serve scorrere la pagina
+    // e il dito dentro il libro sfoglia, invece di contendersi lo scorrimento con il sito
+    const fit = () => {
+      const v = $('.man-view'); if (!v) return;
+      const nav = $('#nav'), navH = nav && getComputedStyle(nav).position === 'fixed' ? nav.offsetHeight : 0;
+      v.style.height = Math.max(300, innerHeight - (v.getBoundingClientRect().top + scrollY) - navH - 8) + 'px';
+    };
+    fit(); addEventListener('resize', fit); onCleanup(() => removeEventListener('resize', fit));
+    $('.man-toc').ontoggle = fit;
     $('#man-go').onsubmit = e => { e.preventDefault(); const n = parseInt($('#man-p').value, 10); if (n > 0) location.hash = toPage(m, n); };
   });
 })();
