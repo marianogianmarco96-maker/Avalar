@@ -27,7 +27,8 @@
     { id: 'mostri', dm: true, off: 0, title: 'Manuale dei Mostri', sub: 'D&D 5ª edizione', desc: 'Le statistiche e il comportamento delle creature da mettere contro il party.', url: 'https://online.anyflip.com/fqnfa/ltch/mobile/index.html',
       idx: [['Introduzione · come leggere le statistiche', 4], ['Mostri dalla A alla Z', 11], ['Appendice A · Creature varie (animali e bestie)', 317], ['Appendice B · Personaggi non giocanti', 342]] }
   ];
-  const pageUrl = (m, p) => p ? `${m.url}#p=${p + m.off}` : m.url;
+  // la versione «mobile» di AnyFlip ignora #p= e riparte dalla copertina: per saltare a una pagina si usa l'indirizzo principale del libro
+  const pageUrl = (m, p) => p ? `${m.url.replace(/mobile\/index\.html$/, '')}#p=${p + m.off}` : m.url;
   const visibili = () => MANUALI.filter(m => !m.dm || !window.__RO);
 
   const CSS = `.man-sec{margin:4px 0 10px;font-size:1.05rem}
