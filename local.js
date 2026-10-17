@@ -1,7 +1,8 @@
 /* Campagna D&D — accesso e archiviazione locale.
    - Ospite: legge una copia pubblica (data.json), solo lettura, nulla viene salvato.
-   - Amministratore: il codice decifra data.enc (dati completi); le modifiche stanno in IndexedDB
-     di questo browser. Il codice non viene mai salvato in chiaro. */
+   - Amministratore: il codice decifra data.enc (dati completi), tenuti in IndexedDB. Le modifiche fatte sul sito
+     restano qui solo finché non vengono inviate a Claude (una richiesta cifrata su GitHub) o scartate:
+     i dati veri sono sempre quelli pubblicati. Il codice non viene mai salvato in chiaro. */
 (() => {
   'use strict';
   const rq = r => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
@@ -12,7 +13,9 @@
   const clone = v => JSON.parse(JSON.stringify(v));
   const ROERR = () => new Error('Sola lettura: accedi come Dungeon Master per modificare.');
 
-  let ROLE = null, DB = null, MEM = {}, BLOBMAP = {};
+  let ROLE = null, DB = null, MEM = {}, BLOBMAP = {}, RAW = null;
+  // modifiche non ancora inviate: chiavi 'raccolta/id' dei documenti e id delle immagini caricate
+  let PEND = new Set(), PFILES = new Set(), DROPPED = false;
   const store = (s, m = 'readonly') => DB.transaction(s, m).objectStore(s);
   const kvGet = k => rq(store('kv').get(k));
   const kvSet = async (k, v) => { const t = DB.transaction('kv', 'readwrite'); t.objectStore('kv').put(v, k); await done(t); };
@@ -27,7 +30,7 @@
     const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(code), 'PBKDF2', false, ['deriveBits']);
     return new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: it }, km, 256));
   }
-  const aesKey = raw => crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['decrypt']);
+  const aesKey = raw => crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt', 'decrypt']);
 
   /* ---------- aperture ---------- */
   async function guestOpen() {
@@ -40,7 +43,7 @@
   async function seedAdmin(payload, raw) {
     const t = DB.transaction(['docs', 'kv'], 'readwrite'); const d = t.objectStore('docs'); d.clear();
     for (const [c, docs] of Object.entries(payload.stores)) for (const [id, v] of Object.entries(docs)) d.put(v, c + '/' + id);
-    t.objectStore('kv').put(payload.dataVersion, 'dataVersion'); t.objectStore('kv').put(payload.blobmap, 'blobmap'); t.objectStore('kv').put(false, 'dirty');
+    t.objectStore('kv').put(payload.dataVersion, 'dataVersion'); t.objectStore('kv').put(payload.blobmap, 'blobmap'); t.objectStore('kv').put(false, 'dirty'); t.objectStore('kv').put([], 'pending'); t.objectStore('kv').put([], 'pfiles');
     await done(t);
     // immagini riservate (cifrate): le decifro e le tengo nel browser
     const key = await aesKey(raw); const types = {};
@@ -66,12 +69,26 @@
       try { payload = JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64d(enc.iv) }, await aesKey(raw), b64d(enc.ct)))); }
       catch { throw new Error(code != null ? 'Codice non corretto.' : 'nokey'); }
     } else if (!have) throw new Error('Impossibile aprire i dati: serve internet al primo accesso.');
+    RAW = raw;
     if (payload && !have) await seedAdmin(payload, raw);
+    else if (payload) {
+      // i dati pubblicati comandano: se sono cambiati li riprendo, rimettendo sopra solo le modifiche ancora da inviare
+      const pend = (await kvGet('pending')) || [], pfiles = (await kvGet('pfiles')) || [], dirty = await kvGet('dirty');
+      if (dirty && !pend.length && !pfiles.length) { await seedAdmin(payload, raw); DROPPED = true; } // modifiche vecchie, mai inviate
+      else if (payload.dataVersion !== await kvGet('dataVersion')) {
+        const keep = await Promise.all(pend.map(async k => [k, await rq(store('docs').get(k))]));
+        await seedAdmin(payload, raw);
+        const t = DB.transaction(['docs', 'kv'], 'readwrite');
+        for (const [k, v] of keep) v === undefined ? t.objectStore('docs').delete(k) : t.objectStore('docs').put(v, k);
+        t.objectStore('kv').put(pend, 'pending'); t.objectStore('kv').put(pfiles, 'pfiles'); t.objectStore('kv').put(pend.length + pfiles.length > 0, 'dirty');
+        await done(t);
+      }
+    }
+    PEND = new Set((await kvGet('pending')) || []); PFILES = new Set((await kvGet('pfiles')) || []);
     if (remember) { await kvSet('key', raw); ls.set('cdnd_remember', 'admin'); }
     const ks = await rq(store('docs').getAllKeys()), vs = await rq(store('docs').getAll()); MEM = {};
     ks.forEach((k, i) => { const j = k.indexOf('/'); const c = k.slice(0, j); (MEM[c] = MEM[c] || new Map()).set(k.slice(j + 1), vs[i]); });
-    BLOBMAP = (await kvGet('blobmap')) || {}; ROLE = 'admin';
-    if (payload && have && payload.dataVersion !== await kvGet('dataVersion')) offerUpdate(payload, raw);
+    BLOBMAP = (await kvGet('blobmap')) || {}; ROLE = 'admin'; window.__online = true;
   }
 
   /* ---------- schermata di accesso ---------- */
@@ -125,6 +142,7 @@
       catch (x) { ls.del('cdnd_remember'); await loginUI(x.message === 'nokey' ? 'Accedi di nuovo con il codice.' : ''); }
     } else await loginUI();
     applyRoleUI();
+    if (ROLE === 'admin') { outbox(); if (DROPPED) setTimeout(() => notice('Ho tolto da questo browser le modifiche vecchie mai inviate: ora vedi i dati pubblicati.'), 800); }
   })();
 
   /* ---------- database (stessa interfaccia usata dall'app) ---------- */
@@ -136,15 +154,27 @@
       doc(id) {
         return {
           async get() { const v = (MEM[c] || new Map()).get(id); return { exists: v !== undefined, id, data: () => v === undefined ? undefined : clone(v) }; },
-          async set(v) { if (ROLE !== 'admin') throw ROERR(); v = clone(v); (MEM[c] = MEM[c] || new Map()).set(id, v); const t = DB.transaction('docs', 'readwrite'); t.objectStore('docs').put(v, c + '/' + id); await done(t); kvSet('dirty', true).catch(() => { }); },
-          async delete() { if (ROLE !== 'admin') throw ROERR(); if (MEM[c]) MEM[c].delete(id); const t = DB.transaction('docs', 'readwrite'); t.objectStore('docs').delete(c + '/' + id); await done(t); kvSet('dirty', true).catch(() => { }); }
+          async set(v) {
+            if (ROLE !== 'admin') throw ROERR(); v = clone(v); const m = MEM[c] = MEM[c] || new Map();
+            if (m.has(id) && JSON.stringify(m.get(id)) === JSON.stringify(v)) return; // nulla di nuovo
+            m.set(id, v); const t = DB.transaction('docs', 'readwrite'); t.objectStore('docs').put(v, c + '/' + id); await done(t); changed(c + '/' + id);
+          },
+          async delete() { if (ROLE !== 'admin') throw ROERR(); if (!MEM[c] || !MEM[c].has(id)) return; MEM[c].delete(id); const t = DB.transaction('docs', 'readwrite'); t.objectStore('docs').delete(c + '/' + id); await done(t); changed(c + '/' + id); }
         };
       }
     };
   };
+  // la data dell'ultimo backup è solo di questo browser: non è una modifica da inviare
+  const LOCAL_ONLY = new Set(['meta/lastBackup']);
+  function changed(k) {
+    if (k && !LOCAL_ONLY.has(k)) PEND.add(k);
+    const t = DB.transaction('kv', 'readwrite'); const o = t.objectStore('kv');
+    o.put([...PEND], 'pending'); o.put([...PFILES], 'pfiles'); o.put(PEND.size + PFILES.size > 0, 'dirty');
+    done(t).catch(() => { }); outbox();
+  }
   const newId = () => Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join('');
   const assets = {
-    async upload(blob) { if (ROLE !== 'admin') throw ROERR(); const id = 'L' + newId(); const t = DB.transaction('files', 'readwrite'); t.objectStore('files').put({ blob, type: blob.type }, id); await done(t); kvSet('dirty', true).catch(() => { }); return { id, url: '#local/' + id, sizeBytes: blob.size, contentType: blob.type }; },
+    async upload(blob) { if (ROLE !== 'admin') throw ROERR(); const id = 'L' + newId(); const t = DB.transaction('files', 'readwrite'); t.objectStore('files').put({ blob, type: blob.type }, id); await done(t); PFILES.add(id); changed(); return { id, url: '#local/' + id, sizeBytes: blob.size, contentType: blob.type }; },
     async list() { return { assets: [], usage: null }; },
     async delete() { }
   };
@@ -252,7 +282,7 @@
   function notice(t) {
     let n = document.getElementById('upnote'); if (n) n.remove();
     n = document.createElement('div'); n.id = 'upnote'; n.setAttribute('role', 'status'); n.textContent = t;
-    n.style.cssText = 'position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:9999;max-width:min(520px,92vw);background:#561820;color:#f5e6c4;padding:10px 16px;border-radius:8px;font:15px/1.35 Georgia,serif;box-shadow:0 4px 16px #0006;text-align:center';
+    n.style.cssText = 'position:fixed;left:50%;top:calc(70px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:9999;max-width:min(520px,92vw);background:#561820;color:#f5e6c4;padding:10px 16px;border-radius:8px;font:15px/1.35 Georgia,serif;box-shadow:0 4px 16px #0006;text-align:center';
     document.body.append(n); setTimeout(() => n.remove(), 7000);
   }
   async function checkUpdate(btn) {
@@ -281,20 +311,94 @@
   }
   if (ls.get('cdnd_updated')) { ls.del('cdnd_updated'); domReady().then(() => setTimeout(() => notice('Sito aggiornato all\'ultima versione.'), 600)); }
 
-  /* ---------- aggiornamento dei dati (amministratore) ---------- */
-  function offerUpdate(fresh, raw) {
-    const bar = document.createElement('div');
-    bar.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#561820;color:#f5e6c4;padding:12px max(16px,env(safe-area-inset-left,0px));display:flex;gap:10px;flex-wrap:wrap;align-items:center;font:15px/1.3 Georgia,serif;box-shadow:0 -2px 10px #0006';
-    const msg = document.createElement('span'); msg.style.flex = '1 1 260px'; bar.append(msg);
-    const mk = (t, f) => { const b = document.createElement('button'); b.textContent = t; b.style.cssText = 'padding:7px 12px;border-radius:6px;border:1px solid #f5e6c488;background:#00000030;color:inherit;cursor:pointer;font:inherit'; b.onclick = f; bar.append(b); };
-    kvGet('dirty').then(async isDirty => {
-      await domReady();
-      msg.textContent = isDirty ? 'È disponibile una nuova versione dei dati. Su questo dispositivo hai fatto modifiche che verrebbero sostituite: prima fai un backup.' : 'È disponibile una nuova versione dei dati della campagna.';
-      if (isDirty) mk('Vai al backup', () => { location.hash = '#/backup'; });
-      mk(isDirty ? 'Sostituisci comunque' : 'Aggiorna ora', async () => { await seedAdmin(fresh, raw); location.reload(); });
-      mk('Più tardi', () => bar.remove());
-      document.body.append(bar);
-    });
+  /* ---------- modifiche fatte sul sito (amministratore) ----------
+     Ogni modifica compare subito in un riquadro «da inviare a Claude». Inviandola si apre GitHub con una richiesta
+     già pronta: il contenuto è cifrato con la chiave del DM, così su GitHub nessuno legge i segreti della campagna.
+     Dopo l'invio (o se la si scarta) il browser torna ai dati pubblicati: qui non resta nulla. */
+  const b64e = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); };
+  const GROUPS = [[['entities', 'bodies'], 'scheda', 'schede'], [['sessions', 'sbodies'], 'sessione', 'sessioni'], [['events'], 'evento', 'eventi'], [['maps'], 'mappa', 'mappe'],
+    [['pins'], 'segnalino', 'segnalini'], [['regions'], 'regione', 'regioni'], [['links'], 'collegamento', 'collegamenti'], [['blobs'], 'immagine', 'immagini'], [['meta'], 'impostazione', 'impostazioni']];
+  function summary() {
+    const ids = {}; for (const k of PEND) { const j = k.indexOf('/'); (ids[k.slice(0, j)] = ids[k.slice(0, j)] || new Set()).add(k.slice(j + 1)); }
+    const out = [];
+    for (const [cs, one, many] of GROUPS) { const u = new Set(); for (const c of cs) for (const id of ids[c] || []) u.add(id.replace(/^portrait-/, '')); if (u.size) out.push(u.size + ' ' + (u.size === 1 ? one : many)); }
+    const other = Object.keys(ids).filter(c => !GROUPS.some(g => g[0].includes(c))); if (other.length) out.push('altro');
+    if (!out.length && PFILES.size) out.push(PFILES.size + (PFILES.size === 1 ? ' immagine' : ' immagini'));
+    return out.join(', ');
+  }
+  // dati pubblicati, per mandare solo i campi cambiati (le schede contengono anche il ritratto, troppo grande da rimandare)
+  let SERVER = null;
+  async function serverData() {
+    const enc = await (await fetch('data.enc', { cache: 'no-cache' })).json();
+    if (!SERVER || SERVER.iv !== enc.iv) SERVER = { iv: enc.iv, d: JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64d(enc.iv) }, await aesKey(RAW), b64d(enc.ct)))) };
+    return SERVER.d;
+  }
+  async function buildRequest() {
+    const base = (await serverData()).stores, ops = [];
+    for (const k of PEND) {
+      const j = k.indexOf('/'), c = k.slice(0, j), id = k.slice(j + 1), m = MEM[c], old = base[c] && base[c][id];
+      if (!m || !m.has(id)) { if (old !== undefined) ops.push({ c, id, del: 1 }); continue; }
+      const v = m.get(id);
+      if (old === undefined || typeof v !== 'object' || typeof old !== 'object' || !v || !old || Array.isArray(v)) { ops.push({ c, id, v }); continue; }
+      const set = {}, unset = Object.keys(old).filter(f => !(f in v));
+      for (const f of Object.keys(v)) if (JSON.stringify(v[f]) !== JSON.stringify(old[f])) set[f] = v[f];
+      if (Object.keys(set).length || unset.length) ops.push({ c, id, set, unset });
+    }
+    const files = {};
+    for (const aid of PFILES) { const f = await rq(store('files').get(aid)); if (f) files[aid] = { type: f.type || f.blob.type, b64: b64e(new Uint8Array(await f.blob.arrayBuffer())) }; }
+    let bytes = new TextEncoder().encode(JSON.stringify({ v: 1, base: await kvGet('dataVersion'), at: new Date().toISOString(), ops, files }));
+    if ('CompressionStream' in window) bytes = new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer());
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await aesKey(RAW), bytes));
+    const all = new Uint8Array(12 + ct.length); all.set(iv); all.set(ct, 12);
+    const block = 'AVALAR-MODIFICHE-1\n' + b64e(all).replace(/.{76}/g, '$&\n').trim() + '\nFINE';
+    const sum = summary(), title = '[Richiesta] Modifiche dal sito: ' + sum;
+    const intro = 'Modifiche fatte sul sito dal Dungeon Master (' + sum + ').\n\nIl contenuto è cifrato con il codice del DM, così chi legge GitHub non vede i segreti della campagna.\n\n'
+      + 'Per Claude: salva il blocco in un file e applicalo con `python3 strumenti/applica_richiesta.py CODICE file.txt dm.json` (dopo `pubblica.py apri`, poi `pubblica.py salva`).\n\n';
+    const url = b => ASK_REPO + '/issues/new?title=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(b);
+    const inl = url(intro + '```\n' + block + '\n```\n');
+    if (inl.length < 7000) return { url: inl };
+    // troppo grande per stare nell'indirizzo (di solito per le immagini): va allegato come file
+    return { url: url(intro + '**Le modifiche sono nel file «modifiche-avalar.txt» che il sito ha appena scaricato: allegalo qui sotto (trascinalo in questo riquadro o tocca «Paste, drop, or click to add files») prima di premere «Create».**\n'), file: new Blob([block + '\n'], { type: 'text/plain' }) };
+  }
+  async function resetToServer(btn) {
+    if (btn) btn.disabled = true;
+    try {
+      const enc = await (await fetch('data.enc', { cache: 'no-cache' })).json();
+      const payload = JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64d(enc.iv) }, await aesKey(RAW), b64d(enc.ct))));
+      const t = DB.transaction('files', 'readwrite'); for (const aid of PFILES) t.objectStore('files').delete(aid); await done(t);
+      await seedAdmin(payload, RAW); location.reload();
+    } catch { if (btn) btn.disabled = false; notice('Non riesco a scaricare i dati pubblicati: controlla la connessione e riprova.'); }
+  }
+  const OB_CSS = `#outbox{position:fixed;z-index:44;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));width:min(430px,calc(100vw - 92px));box-sizing:border-box;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:11px 12px;border-radius:12px;background:#561820;color:#f5e6c4;border:1px solid #e7cf9a;box-shadow:0 6px 20px #0007;font:15px/1.35 Georgia,serif}
+#outbox .om{flex:1 1 100%}#outbox .om b{color:#f7e3ae;font-weight:600}
+#outbox button{padding:7px 12px;border-radius:7px;border:1px solid #f5e6c488;background:#00000030;color:inherit;cursor:pointer;font:inherit}
+#outbox button.p{background:#e7cf9a;color:#561820;border-color:#e7cf9a;font-weight:600}#outbox button:disabled{opacity:.6;cursor:wait}
+@media (max-width:1280px){#outbox{bottom:calc(74px + env(safe-area-inset-bottom,0px))}}`;
+  let OB = null, PREP = null, PREPV = 0, SENT = false;
+  function outbox() {
+    if (ROLE !== 'admin' || !document.body) return;
+    if (!PEND.size && !PFILES.size) { if (OB) OB.remove(); OB = null; return; }
+    if (!OB) { const st = document.createElement('style'); st.textContent = OB_CSS; document.head.append(st); OB = document.createElement('div'); OB.id = 'outbox'; OB.setAttribute('role', 'status'); document.body.append(OB); }
+    SENT = false; PREP = null; const v = ++PREPV; drawOutbox();
+    clearTimeout(outbox.t); outbox.t = setTimeout(() => buildRequest().then(r => { if (v === PREPV) { PREP = r; drawOutbox(); } }, () => { if (v === PREPV) { PREP = { err: true }; drawOutbox(); } }), 400);
+  }
+  function drawOutbox() {
+    if (!OB) return; OB.innerHTML = '';
+    const msg = document.createElement('div'); msg.className = 'om'; OB.append(msg);
+    const mk = (t, f, p) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = t; if (p) b.className = 'p'; b.onclick = () => f(b); OB.append(b); return b; };
+    if (SENT) {
+      msg.innerHTML = PREP && PREP.file ? '<b>Su GitHub allega il file «modifiche-avalar.txt» e premi «Create».</b> Quando hai finito, togli le modifiche da questo browser: le vedrai sul sito dopo che avrai approvato la modifica di Claude.' : '<b>Su GitHub premi «Create» per inviare la richiesta.</b> Quando hai finito, togli le modifiche da questo browser: le vedrai sul sito dopo che avrai approvato la modifica di Claude.';
+      mk('Fatto, togli dal browser', b => resetToServer(b), true); mk('Riapri GitHub', () => send()); return;
+    }
+    msg.innerHTML = '<b>Da inviare a Claude:</b> ' + summary() + '. Finché non le invii valgono solo su questo browser.';
+    const go = mk(PREP ? (PREP.err ? 'Errore, riprova' : 'Invia a Claude') : 'Preparo…', () => PREP && !PREP.err ? send() : outbox(), true); if (!PREP) go.disabled = true;
+    mk('Scarta', b => { if (confirm('Scartare le modifiche non inviate? Il sito torna ai dati pubblicati.')) resetToServer(b); });
+  }
+  function send() {
+    const r = PREP; if (!r || r.err) return;
+    if (r.file) { const u = URL.createObjectURL(r.file), a = document.createElement('a'); a.href = u; a.download = 'modifiche-avalar.txt'; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 60000); }
+    window.open(r.url, '_blank', 'noopener'); SENT = true; drawOutbox();
   }
   if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => { }));
 })();

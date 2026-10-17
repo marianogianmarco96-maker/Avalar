@@ -1131,7 +1131,7 @@ const hasData = () => S.sess.length || S.ents.size;
 route(/^\/$/, async () => {
   const camp = getMeta('campaign', { name: 'La mia campagna' }), gen = getMeta('general', null), arcs = getMeta('arcs', []);
   const evCount = await dbCount('events'); const lastBk = getMeta('lastBackup', 0);
-  const stale = !window.__RO && hasData() && (!lastBk || Date.now() - lastBk > 14 * 864e5);
+  const stale = !window.__RO && !window.__online && hasData() && (!lastBk || Date.now() - lastBk > 14 * 864e5);
   const cnt = {}; for (const e of S.ents.values()) cnt[e.type] = (cnt[e.type] || 0) + 1;
   const empty = !hasData() && !S.maps.length;
   let h = `<div class="pagehead"><h1>${esc(camp.name)}</h1><div class="acts"><button class="btn" data-act="rename">Rinomina</button><button class="btn" data-act="copyctx">Copia contesto per Claude</button><a class="btn primary" href="#/import">Importa aggiornamento</a></div></div><div class="orn"></div>`;
@@ -1300,9 +1300,6 @@ route(/^\/schede$/, async (_, q) => {
         if (!await ask(`Spostare in **${TYPE_PL[t]}** ${ids.length === 1 ? 'questa scheda' : `queste ${ids.length} schede`}?\n\n${names.map(n => '- ' + n).join('\n')}`, { ok: 'Sposta' })) return;
         await runBatch(['entities'], '', async b => { for (const id of ids) { const e = { ...S.ents.get(id), type: t, upd: Date.now() }; if (!['png', 'luogo'].includes(t)) delete e.cat; if (t !== 'png') delete e.imp; await b.put('entities', e); } });
         ES.sel.clear(); ES.types = [t]; ES.cats = []; ES.imps = []; rerender();
-        // la modifica vale su questo dispositivo: per renderla definitiva sul sito la si manda a Claude
-        if (window.__sendRequest && await ask(`Fatto su questo dispositivo. Vuoi inviare la modifica a Claude per renderla definitiva sul sito?`, { ok: 'Invia a Claude', title: 'Schede spostate' }))
-          window.__sendRequest(`Sposta ${ids.length === 1 ? names[0] : ids.length + ' schede'} in ${TYPE_PL[t]}`, `Sposta in ${TYPE_PL[t]} (tipo "${t}") queste schede:\n\n${ids.map(id => `- ${S.ents.get(id).name} (${id})`).join('\n')}`);
       }
     });
     return;
