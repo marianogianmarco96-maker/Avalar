@@ -1,7 +1,7 @@
 <!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Campagna D&amp;D · Avalar</title>
 <meta name="description" content="Diario della campagna di Dungeons &amp; Dragons ambientata nel regno di Avalar: sessioni, personaggi, luoghi e mappe.">
-<meta property="og:type" content="website"><meta property="og:site_name" content="Campagna D&amp;D"><meta property="og:title" content="Campagna D&amp;D · Avalar"><meta property="og:description" content="Diario della campagna di Avalar: sessioni, personaggi, luoghi e mappe."><meta property="og:image" content="icon-512.png"><meta name="twitter:card" content="summary">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Campagna D&amp;D"><meta property="og:title" content="Campagna D&amp;D · Avalar"><meta property="og:description" content="Diario della campagna di Avalar: sessioni, personaggi, luoghi e mappe."><meta property="og:image" content="https://marianogianmarco96-maker.github.io/Avalar/og-image.jpg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image">
 <script>try{var t=JSON.parse(localStorage.getItem('cr-theme'));if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t}catch(e){}</script>
 <style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#eadcbc;color:#2b1d14}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 <meta name="theme-color" content="#561820"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><script src="local.js"></script>
@@ -445,6 +445,109 @@ body{min-width:0}
 :root[data-theme=dark] .card.tl .entry .tx>b{color:var(--gold2)}
 .page{animation:pagein .35s ease}
 @keyframes pagein{from{opacity:0}to{opacity:1}}
+/* --- struttura ottobre 2026: barre, menu Altro, collegamenti, filtri, ricerca --- */
+:root{--mute:#75614d}
+:root[data-theme=dark]{--bg:#1c1511;--bg2:#221a15;--tex:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .9 0 0 0 0 .75 0 0 0 .035 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+:root[data-theme=dark] body::before{background:radial-gradient(ellipse at 15% 0%,#7d25301c 0,transparent 55%),var(--tex)}
+.prose .xref{border-bottom:0}
+.prose .xref:hover{text-decoration:underline}
+.num{font-family:var(--body);font-variant-numeric:lining-nums;font-weight:600}
+.statline b,.card.tl .entry .tag::before,.sessfab a{font-family:var(--body);font-weight:600}
+.card.tl .entry .tag::before{font-size:1rem}
+/* barra delle sezioni: icone solo quando sta in basso */
+#nav .nic{display:none}
+@media (max-width:1280px){
+  #nav a{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 6px 6px}
+  #nav .nic{display:block;width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  #nav a.on{box-shadow:none;background:#00000045;color:var(--gold2)}
+  .page{padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))}
+  #toasts{bottom:calc(90px + env(safe-area-inset-bottom,0px))}
+  .sessfab{bottom:calc(80px + env(safe-area-inset-bottom,0px))}
+}
+@media (max-width:520px){#nav a{padding:7px 3px 6px;font-size:.6rem}}
+/* telefono: nome della campagna in alto, indietro solo dentro una pagina */
+@media (max-width:620px){
+  #fwdBtn{display:none}
+  #backBtn{display:none}
+  html.deep #backBtn{display:block}
+  .brand span{display:block!important;min-width:0}
+  .brand b{display:none}
+  .brand small{display:block!important;font-family:var(--display);font-size:.92rem;letter-spacing:.06em;color:#f5e6c4;margin:0;max-width:none}
+  .brand{flex:1}
+  html.deep .brand svg{display:none}
+}
+/* home */
+.homelinks{display:flex;gap:10px 22px;flex-wrap:wrap;justify-content:center;margin:4px 0 14px}
+.homelinks a{font-family:var(--display);font-size:.85rem;letter-spacing:.04em}
+.arc.prologo>summary{display:flex;align-items:baseline;gap:4px;padding:6px 0;font-size:1.05rem}
+.arc.prologo>summary::before{content:"▸";color:var(--gold);margin-right:6px;transition:transform .2s}
+.arc.prologo[open]>summary::before{transform:rotate(90deg)}
+/* sessione: Racconto e Momenti chiave come schede */
+.stabs{display:flex;gap:4px;margin:0 0 -1px;position:relative;z-index:1}
+.stabs button{padding:9px 18px;border:1px solid var(--line2);border-bottom:0;border-radius:6px 6px 0 0;background:var(--paper2);color:var(--ink2);font-family:var(--display);font-size:.82rem;letter-spacing:.05em;cursor:pointer}
+.stabs button.on{background:var(--paper);color:var(--wine);box-shadow:inset 0 2px 0 var(--wine2)}
+:root[data-theme=dark] .stabs button.on{color:var(--gold2)}
+.stabs+.card,.stabs~[data-tab]{border-top-left-radius:0}
+.endnav{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0 6px}
+.endnav a{display:block;padding:14px 16px;border:1px solid var(--line2);border-radius:6px;background:var(--paper);color:var(--ink);text-decoration:none!important;box-shadow:var(--shadow)}
+.endnav a:hover{border-color:var(--gold)}
+.endnav a.nx{text-align:right}
+.endnav small{display:block;font-family:var(--display);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase}
+.endnav b{display:block;margin-top:4px;color:var(--wine);font-weight:600;line-height:1.3}
+:root[data-theme=dark] .endnav b{color:var(--gold2)}
+@media (max-width:1280px){.sessnav{display:none}}
+@media (max-width:620px){.endnav{grid-template-columns:1fr;margin-bottom:60px}.endnav a.nx{order:-1}}
+/* menu Altro */
+.moreacts{position:relative;display:inline-block}
+.moreacts>summary{list-style:none}
+.moreacts>summary::-webkit-details-marker{display:none}
+.moreacts[open]>summary{border-color:var(--gold);background:var(--paper)}
+.mamenu{position:absolute;right:0;top:calc(100% + 6px);z-index:25;min-width:220px;display:flex;flex-direction:column;padding:6px;background:var(--paper);border:1px solid var(--line2);border-radius:6px;box-shadow:0 10px 28px #0005}
+.mamenu .btn{justify-content:flex-start;border:0;background:transparent;padding:10px 12px;font-size:.74rem;width:100%;text-align:left}
+.mamenu .btn:hover{background:var(--paper2)}
+.mamenu .btn.danger{color:var(--bad);background:transparent}
+.eheadacts .mamenu{left:0;right:auto}
+html.ro .moreacts{display:none}
+/* collegamenti come schedine */
+.relh{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)!important;margin:14px 0 6px}
+.relh:first-of-type{margin-top:6px}
+.relcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.relc{position:relative;display:flex;align-items:center;border:1px solid var(--line);border-radius:6px;background:var(--paper2)}
+.relc:hover{border-color:var(--gold)}
+.relc a{flex:1;min-width:0;display:flex;align-items:center;gap:10px;padding:8px 10px;color:var(--ink);text-decoration:none!important}
+.relc .av{width:40px;height:40px}
+.relc .noav{display:flex;align-items:center;justify-content:center;background:var(--t-lore);color:#fff;font-family:var(--display);font-size:1.05rem}
+.noav.t-pg{background:var(--t-pg)}.noav.t-png{background:var(--t-png)}.noav.t-luogo{background:var(--t-luogo)}.noav.t-oggetto{background:var(--t-oggetto)}.noav.t-fazione{background:var(--t-fazione)}.noav.t-missione{background:var(--t-missione)}
+:root[data-theme=dark] .relc .noav{color:#16100c}
+.relc b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-weight:600;line-height:1.2;overflow:hidden}
+.relc small{display:block;font-size:.82rem;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.relc .icb{flex:none;margin-right:4px}
+details.older>summary{list-style:none}
+details.older>summary::-webkit-details-marker{display:none}
+details.older[open]>summary{display:none}
+/* elenco schede: filtri richiudibili sul telefono */
+.fbtn{display:none}
+.fbtn em{font-style:normal;margin-left:4px;color:var(--wine2)}
+@media (max-width:620px){
+  .fwrap{display:flex;flex-direction:column}
+  .fwrap .frow{order:-1;flex-wrap:nowrap}
+  .fwrap .frow input[type=search]{flex:1;max-width:none;min-width:0}
+  .fbtn{display:inline-flex;flex:none;min-height:40px}
+  .fwrap #esort,.fwrap #ecnt{display:none}
+  .fwrap .ftypes,.fwrap #cchips{display:none}
+  .fwrap.open .ftypes,.fwrap.open #cchips{display:flex}
+  .fwrap.open #esort{display:block;flex:1 1 100%}
+  .fwrap.open .frow{flex-wrap:wrap}
+  .fwrap .ftypes .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+}
+/* ricerca rapida: risultati divisi per tipo; sul telefono a tutto schermo */
+#qres .qh{padding:9px 12px 4px;font-family:var(--display);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);background:var(--paper2);border-bottom:1px solid var(--line)}
+@media (max-width:620px){
+  .top.srchopen .srch{position:fixed;left:0;right:0;width:auto;top:calc(61px + env(safe-area-inset-top,0px));bottom:0;padding:12px max(12px,env(safe-area-inset-right,0px)) 12px max(12px,env(safe-area-inset-left,0px));background:var(--bg);z-index:45;overflow:auto}
+  .top.srchopen .srch input[type=search]{font-size:1.05rem;padding:12px 16px}
+  .top.srchopen #qres{position:static;width:100%;max-width:none;max-height:none;margin-top:12px;box-shadow:none}
+  .top.srchopen #qres a{min-height:50px;font-size:1.02rem;padding:10px 14px}
+}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 
 </style>
@@ -456,7 +559,7 @@ body{min-width:0}
     <span><b>CAMPAGNA D&amp;D</b><small id="campName">La mia campagna</small></span>
   </a>
   <nav id="nav">
-    <a href="#/">Campagna</a><a href="#/sessioni">Sessioni</a><a href="#/schede">Schede</a><a href="#/mappe">Mappe</a><a href="#/manuali">Manuali</a><a href="#/import">Importa</a><a href="#/backup">Backup</a>
+    <a href="#/"><svg class="nic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Home</span></a><a href="#/sessioni"><svg class="nic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h11a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6z"/><path d="M6 3a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2"/><path d="M9 8h7M9 12h7M9 16h4"/></svg><span>Sessioni</span></a><a href="#/schede"><svg class="nic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="12" height="15" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v13"/><circle cx="9" cy="11" r="2"/><path d="M6 17c.8-1.6 1.8-2.3 3-2.3s2.2.7 3 2.3"/></svg><span>Schede</span></a><a href="#/mappe"><svg class="nic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></svg><span>Mappe</span></a><a href="#/manuali"><svg class="nic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6a3 3 0 0 1 2 1 3 3 0 0 1 2-1h6v15h-6a3 3 0 0 0-2 1 3 3 0 0 0-2-1H4z"/><path d="M12 5v15"/></svg><span>Manuali</span></a><a href="#/import"><svg class="nic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5"/><path d="M4 19h16"/></svg><span>Importa</span></a><a href="#/backup"><svg class="nic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg><span>Backup</span></a>
   </nav>
   <div class="srch"><input id="q" type="search" placeholder="Cerca…  ( / )" aria-label="Cerca nella campagna" autocomplete="off"><div id="qres"></div></div>
   <a class="iconbtn srchbtn" id="srchBtn" href="#/cerca" title="Cerca" aria-label="Cerca nella campagna"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8"/></svg></a>
@@ -663,6 +766,7 @@ function setTitle(path) {
 }
 function markNav(path) {
   setTitle(path);
+  document.documentElement.classList.toggle('deep', /^\/(sessioni|scheda|mappe|manuali)\/./.test(path));
   const key = path === '/' ? '/' : '/' + path.split('/')[1];
   const map = { '/scheda': '/schede', '/cronologia': '/sessioni' };
   const k = map[key] || key;
@@ -827,6 +931,9 @@ function parseLoose(raw) {
   catch (e1) { try { return JSON.parse(t.replace(/,\s*([}\]])/g, '$1')); } catch { throw e1; } }
 }
 
+// pulsanti del DM meno usati, raccolti in un menu (ai giocatori non compare)
+const moreActs = html => `<details class="moreacts"><summary class="btn">Altro ▾</summary><div class="mamenu">${html}</div></details>`;
+document.addEventListener('click', e => { for (const d of document.querySelectorAll('details.moreacts[open]')) if (!d.contains(e.target) || e.target.closest('.mamenu button,.mamenu a')) d.open = false; });
 const ongoingPill = s => s.ongoing ? ' <span class="pill warn ongoing" title="La sessione si è interrotta a metà e continua la prossima volta">in corso</span>' : '';
 const lightSession = (s, oldS) => ({
   n: s.n, title: s.title ?? oldS?.title ?? '', date: s.date ?? oldS?.date ?? '', gameDate: s.gameDate ?? oldS?.gameDate ?? '',
@@ -1253,15 +1360,16 @@ route(/^\/$/, async () => {
   } else {
     const last = S.sess[S.sess.length - 1], party = [...S.ents.values()].filter(e => e.type === 'pg').sort((a, c) => (a.sessions?.[0] ?? 99) - (c.sessions?.[0] ?? 99) || a.name.localeCompare(c.name));
     const bgMap = S.maps.find(m => !m.parent && m.thumb) || S.maps.find(m => m.thumb);
-    if (last) h += `<a class="hero" href="#/sessioni/${last.n}">${bgMap ? `<span class="bg" style="background-image:url('${bgMap.thumb}')"></span>` : ''}<span class="in"><small>Ultima sessione · ${last.n}</small><b class="ht">${esc(last.title || 'Sessione ' + last.n)}${ongoingPill(last)}</b>${last.short || last.brief ? `<span class="hb">${esc(last.short || last.brief)}</span>` : ''}<span class="go">${last.ongoing ? 'Riprendi da qui' : 'Continua a leggere'} →</span></span></a>`;
+    if (last) h += `<a class="hero" href="#/sessioni/${last.n}">${bgMap ? `<span class="bg" style="background-image:url('${bgMap.thumb}')"></span>` : ''}<span class="in"><small>Ultima sessione · <span class="num">${last.n}</span></small><b class="ht">${esc(last.title || 'Sessione ' + last.n)}${ongoingPill(last)}</b>${last.short || last.brief ? `<span class="hb">${esc(last.short || last.brief)}</span>` : ''}<span class="go">${last.ongoing ? 'Riprendi da qui' : 'Continua a leggere'} →</span></span></a>`;
     if (party.length) h += `<div class="card party"><h2>Il gruppo</h2><div class="pgs">${party.map(e => `<a href="#/scheda/${encodeURIComponent(e.id)}">${e.portrait ? `<img src="${e.portrait.thumb}" data-pid="${esc(e.portrait.id)}" alt="">` : `<span class="noimg">${esc(e.name[0])}</span>`}<b>${esc(e.name)}</b></a>`).join('')}</div></div>`;
-    h += `<div class="card"><p class="statline"><span><b>${S.sess.length}</b> sessioni</span> · <span><b>${S.ents.size}</b> schede</span> · <span><b>${evCount}</b> eventi</span> · <span><b>${S.maps.length}</b> mappe</span></p>
+    h += `<div class="card"><p class="statline num"><span><b>${S.sess.length}</b> sessioni</span> · <span><b>${S.ents.size}</b> schede</span> · <span><b>${evCount}</b> eventi</span> · <span><b>${S.maps.length}</b> mappe</span></p>
       <div class="chips">${TYPE_ORDER.filter(t => cnt[t]).map(t => `<a class="chip" href="#/schede?tipo=${t}">${TYPE_PL[t]} <em>${cnt[t]}</em></a>`).join('')}</div></div>`;
     const pro = await dbGet('bodies', 'lore-introduzione-al-mondo');
-    if (pro?.sections?.length) h += `<div class="card"><div class="spread"><h2>Prologo</h2><a href="#/scheda/lore-introduzione-al-mondo">Apri la scheda →</a></div><details class="arc" open><summary>Il mondo di gioco<small>introduzione</small></summary>${pro.sections.map(sc => `${sc.title ? `<h3>${esc(sc.title)}</h3>` : ''}${sc.entries.map(en => prose(en.text)).join('')}`).join('')}</details></div>`;
+    if (pro?.sections?.length) h += `<div class="card"><div class="spread"><h2>Prologo</h2><a href="#/scheda/lore-introduzione-al-mondo">Apri la scheda →</a></div><details class="arc prologo"><summary>Leggi il prologo<small>il mondo di gioco</small></summary>${pro.sections.map(sc => `${sc.title ? `<h3>${esc(sc.title)}</h3>` : ''}${sc.entries.map(en => prose(en.text)).join('')}`).join('')}</details></div>`;
     h += `<div class="card"><div class="spread"><h2>Riassunto di quanto fatto finora</h2><div class="row"><button class="btn sm" data-act="editgen">Modifica</button>${(getMeta('generalHist', []).length) ? '<button class="btn sm ghost" data-act="histgen">Versioni precedenti</button>' : ''}</div></div>
       ${gen?.text ? `<div class="cap">${prose(gen.text)}</div>` + `<p class="hint">Aggiornato ${fmtDate(gen.ts)}${gen.upto != null ? ' · fino alla sessione ' + gen.upto : ''}</p>` : '<p class="empty">Il riassunto comparirà alla prima importazione.</p>'}
-      ${S.sess.length ? `<div class="spread" style="margin-top:14px"><h3 style="margin:0">Sessione per sessione</h3><a href="#/sessioni">Tutte le sessioni →</a></div><p class="hint">Apri una riga per il dettaglio, poi «Apri la sessione» per il resoconto completo.</p>${S.sess.map(s => `<details class="arc"><summary><b>${s.n}. ${esc(s.title || 'Sessione ' + s.n)}</b>${ongoingPill(s)}${s.gameDate ? `<small>${esc(s.gameDate)}</small>` : ''}<br><span class="mute" style="font-family:var(--body);font-weight:400;letter-spacing:0;font-size:.95rem">${esc(s.short || s.brief || '')}</span></summary>${s.brief && s.brief !== s.short ? `<p>${esc(s.brief)}</p>` : ''}<a class="btn sm" href="#/sessioni/${s.n}">Apri la sessione →</a></details>`).join('')}` : ''}</div>`;
+      ${S.sess.length ? `<div class="spread" style="margin-top:14px"><h3 style="margin:0">Sessione per sessione</h3><a href="#/sessioni">Tutte le sessioni →</a></div>${S.sess.slice(-3).map(s => `<details class="arc"><summary><b><span class="num">${s.n}.</span> ${esc(s.title || 'Sessione ' + s.n)}</b>${ongoingPill(s)}${s.gameDate ? `<small>${esc(s.gameDate)}</small>` : ''}<br><span class="mute" style="font-family:var(--body);font-weight:400;letter-spacing:0;font-size:.95rem">${esc(s.short || s.brief || '')}</span></summary>${s.brief && s.brief !== s.short ? `<p>${esc(s.brief)}</p>` : ''}<a class="btn sm" href="#/sessioni/${s.n}">Apri la sessione →</a></details>`).join('')}` : ''}</div>`;
+    if (S.sess.length) h += `<p class="homelinks"><a href="#/sessioni">Tutte le sessioni →</a><a href="#/cronologia">Cronologia completa →</a></p>`;
     if (arcs.length) h += `<div class="card"><h2>Archi narrativi</h2>${arcs.map(a => `<details class="arc"><summary>${esc(a.title)}<small>${a.from != null ? 'sessioni ' + a.from + '–' + (a.to ?? '…') : ''}</small></summary>${prose(a.summary)}</details>`).join('')}</div>`;
   }
   setView(h);
@@ -1332,14 +1440,17 @@ route(/^\/sessioni\/(\d+)$/, async ([ns]) => {
   const ents = [...S.ents.values()].filter(e => e.sessions?.includes(n));
   const grp = TYPE_ORDER.map(t => [t, ents.filter(e => e.type === t).sort((a, c) => a.name.localeCompare(c.name))]).filter(x => x[1].length);
   const prev = S.sess.filter(x => x.n < n).pop(), next = S.sess.find(x => x.n > n);
-  setView(`<div class="pagehead"><div style="flex:1"><nav class="sessnav" aria-label="Sessioni vicine">${prev ? `<a href="#/sessioni/${prev.n}" rel="prev">← Sessione ${prev.n}</a>` : ''}${next ? `<a href="#/sessioni/${next.n}" rel="next">Sessione ${next.n} →</a>` : ''}</nav>${prev || next ? `<nav class="sessfab" aria-label="Sessione precedente o successiva">${prev ? `<a href="#/sessioni/${prev.n}" title="Sessione ${prev.n}">‹ ${prev.n}</a>` : ''}${next ? `<a href="#/sessioni/${next.n}" title="Sessione ${next.n}">${next.n} ›</a>` : ''}</nav>` : ''}<h1>${n}. ${esc(s.title || 'Sessione ' + n)}${ongoingPill(s)}</h1><div class="hint">${[s.date, s.gameDate && 'in gioco: ' + s.gameDate, s.arc && 'arco: ' + arcName(s.arc)].filter(Boolean).map(esc).join(' · ')}</div></div>
-      <div class="acts"><button class="btn" data-act="rensess" data-n="${n}">Rinomina</button><button class="btn" data-act="edit">Modifica</button><button class="btn danger" data-act="del">Elimina</button></div></div><div class="orn"></div>
-    <div class="card cap"><h2>Riassunto</h2>${b.summary ? prose(b.summary) : '<p class="empty">Nessun riassunto.</p>'}</div>
-    ${evs.length ? `<div class="card tl"><h2>Momenti chiave</h2>${evs.map(e => `<div class="entry"><div class="tag" data-n="${e.idx + 1}">${e.idx + 1}</div><div class="tx"><b>${esc(e.title)}</b>${e.gameDate ? ` <small>${esc(e.gameDate)}</small>` : ''}${prose(e.text)}${e.ents?.length ? `<div class="chips">${e.ents.filter(i => S.ents.has(i)).map(i => `<a class="chip" href="#/scheda/${encodeURIComponent(i)}">${esc(S.ents.get(i).name)}</a>`).join('')}</div>` : ''}</div></div>`).join('')}</div>` : ''}
+  setView(`<div class="pagehead"><div style="flex:1"><nav class="sessnav" aria-label="Sessioni vicine">${prev ? `<a href="#/sessioni/${prev.n}" rel="prev">← Sessione ${prev.n}</a>` : ''}${next ? `<a href="#/sessioni/${next.n}" rel="next">Sessione ${next.n} →</a>` : ''}</nav>${prev || next ? `<nav class="sessfab" aria-label="Sessione precedente o successiva">${prev ? `<a href="#/sessioni/${prev.n}" title="Sessione ${prev.n}">‹ ${prev.n}</a>` : ''}${next ? `<a href="#/sessioni/${next.n}" title="Sessione ${next.n}">${next.n} ›</a>` : ''}</nav>` : ''}<h1><span class="num">${n}.</span> ${esc(s.title || 'Sessione ' + n)}${ongoingPill(s)}</h1><div class="hint">${[s.date, s.gameDate && 'in gioco: ' + s.gameDate, s.arc && 'arco: ' + arcName(s.arc)].filter(Boolean).map(esc).join(' · ')}</div></div>
+      <div class="acts"><button class="btn" data-act="edit">Modifica</button>${moreActs('<button class="btn" data-act="rensess" data-n="' + n + '">Rinomina</button><button class="btn danger" data-act="del">Elimina</button>')}</div></div><div class="orn"></div>
+    ${b.summary && evs.length ? `<div class="stabs" role="tablist"><button type="button" role="tab" data-act="stab" data-t="racc" class="on" aria-selected="true">Racconto</button><button type="button" role="tab" data-act="stab" data-t="mom" aria-selected="false">Momenti chiave</button></div>` : ''}
+    <div class="card cap" data-tab="racc"><h2>Riassunto</h2>${b.summary ? prose(b.summary) : '<p class="empty">Nessun riassunto.</p>'}</div>
+    ${evs.length ? `<div class="card tl" data-tab="mom"${b.summary ? ' hidden' : ''}><h2>Momenti chiave</h2>${evs.map(e => `<div class="entry"><div class="tag" data-n="${e.idx + 1}">${e.idx + 1}</div><div class="tx"><b>${esc(e.title)}</b>${e.gameDate ? ` <small>${esc(e.gameDate)}</small>` : ''}${prose(e.text)}${e.ents?.length ? `<div class="chips">${e.ents.filter(i => S.ents.has(i)).map(i => `<a class="chip" href="#/scheda/${encodeURIComponent(i)}">${esc(S.ents.get(i).name)}</a>`).join('')}</div>` : ''}</div></div>`).join('')}</div>` : ''}
     ${grp.length ? `<div class="card"><h2>Schede di questa sessione</h2>${grp.map(([t, l]) => `<p>${badge(t)} <span class="chips" style="display:inline-flex">${l.map(e => `<a class="chip" href="#/scheda/${encodeURIComponent(e.id)}">${esc(e.name)}</a>`).join('')}</span></p>`).join('')}</div>` : ''}
     ${!window.__RO || b.docs?.length ? `<div class="card"><div class="spread"><h2>Documenti allegati</h2><button class="btn sm" data-act="attach">+ Allega testo</button></div>
-      ${b.docs?.length ? b.docs.map((d, i) => `<details class="arc"><summary>${esc(d.name)}<small>${fmtSize(d.text.length)}</small></summary><div class="row" style="margin:6px 0"><button class="btn sm" data-act="delDoc" data-i="${i}">Rimuovi</button><button class="btn sm ghost" data-act="cpDoc" data-i="${i}">Copia testo</button></div><div class="prose"><p style="white-space:pre-wrap">${esc(d.text.length > 20000 ? d.text.slice(0, 20000) + '\n\n[… testo troncato nella visualizzazione: ' + d.text.length + ' caratteri totali]' : d.text)}</p></div></details>`).join('') : '<p class="hint">Qui puoi tenere il testo originale della sessione (.txt, .md, .docx, oppure incollato) come riferimento. I PDF vanno copiati e incollati.</p>'}</div>` : ''}`);
+      ${b.docs?.length ? b.docs.map((d, i) => `<details class="arc"><summary>${esc(d.name)}<small>${fmtSize(d.text.length)}</small></summary><div class="row" style="margin:6px 0"><button class="btn sm" data-act="delDoc" data-i="${i}">Rimuovi</button><button class="btn sm ghost" data-act="cpDoc" data-i="${i}">Copia testo</button></div><div class="prose"><p style="white-space:pre-wrap">${esc(d.text.length > 20000 ? d.text.slice(0, 20000) + '\n\n[… testo troncato nella visualizzazione: ' + d.text.length + ' caratteri totali]' : d.text)}</p></div></details>`).join('') : '<p class="hint">Qui puoi tenere il testo originale della sessione (.txt, .md, .docx, oppure incollato) come riferimento. I PDF vanno copiati e incollati.</p>'}</div>` : ''}
+    ${prev || next ? `<nav class="endnav" aria-label="Continua a leggere">${prev ? `<a href="#/sessioni/${prev.n}" rel="prev"><small>← Sessione precedente</small><b><span class="num">${prev.n}.</span> ${esc(prev.title || 'Sessione ' + prev.n)}</b></a>` : '<span></span>'}${next ? `<a href="#/sessioni/${next.n}" rel="next" class="nx"><small>Sessione successiva →</small><b><span class="num">${next.n}.</span> ${esc(next.title || 'Sessione ' + next.n)}</b></a>` : ''}</nav>` : ''}`);
   setActs({
+    stab: a => { $$('.stabs button').forEach(x => { const on = x === a; x.classList.toggle('on', on); x.setAttribute('aria-selected', on); }); $$('[data-tab]').forEach(c => c.hidden = c.dataset.tab !== a.dataset.t); },
     rensess: () => renameSession(n),
     edit: () => editSessionDlg(n),
     del: async () => { if (!await ask(`Eliminare la **sessione ${n}**? Le schede restano, ma i suoi eventi e il riassunto verranno cancellati.`, { danger: true, ok: 'Elimina' })) return; await runBatch(['sessions', 'sbodies', 'events'], '', async t => { await t.del('sessions', n); await t.del('sbodies', n); for (const e of evs) await t.del('events', e.id); }); location.hash = '#/sessioni'; },
@@ -1362,9 +1473,9 @@ route(/^\/schede$/, async (_, q) => {
   if (q.has('tipo')) { ES.types = [q.get('tipo')]; ES.cats = []; ES.imps = []; history.replaceState(null, '', '#/schede'); }
   const cnt = {}; for (const e of S.ents.values()) cnt[e.type] = (cnt[e.type] || 0) + 1;
   setView(`<div class="pagehead"><h1>Schede</h1><div class="acts"><button class="btn ${ES.selMode ? 'on' : ''}" data-act="selmode">${ES.selMode ? 'Fine selezione' : 'Seleziona'}</button><button class="btn" data-act="newent">+ Nuova scheda</button></div></div>
-    <div class="filters"><div class="chips" id="tchips"><a class="chip" data-t="">Tutte <em>${S.ents.size}</em></a>${TYPE_ORDER.filter(t => cnt[t]).map(t => `<a class="chip" data-t="${t}">${TYPE_PL[t]} <em>${cnt[t]}</em></a>`).join('')}</div></div>
+    <div class="fwrap" id="fwrap"><div class="filters ftypes"><div class="chips" id="tchips"><a class="chip" data-t="">Tutte <em>${S.ents.size}</em></a>${TYPE_ORDER.filter(t => cnt[t]).map(t => `<a class="chip" data-t="${t}">${TYPE_PL[t]} <em>${cnt[t]}</em></a>`).join('')}</div></div>
     <div class="filters" id="cchips"></div>
-    <div class="filters"><input type="search" id="eq" placeholder="Cerca per nome, alias, stato…" value="${esc(ES.q)}"><select id="esort" style="width:auto"><option value="name">Ordine alfabetico</option><option value="recent">Modificate di recente</option><option value="first">Prima apparizione</option></select><span class="hint" id="ecnt"></span></div>${ES.selMode ? `<div class="selbar" id="selbar"><b id="selcnt"></b><button class="btn sm" data-act="selall">Seleziona tutte quelle in elenco</button><button class="btn sm ghost" data-act="selnone">Deseleziona</button><span class="sp"></span><label>Sposta in <select id="seltype" style="width:auto">${TYPE_ORDER.map(t => `<option value="${t}">${TYPE_PL[t]}</option>`).join('')}</select></label><button class="btn sm primary" data-act="selmove">Sposta</button></div>` : ''}<div id="elist"></div>`);
+    <div class="filters frow"><input type="search" id="eq" placeholder="Cerca per nome, alias, stato…" value="${esc(ES.q)}"><button type="button" class="btn fbtn" aria-expanded="false">Filtri<em id="fcnt"></em></button><select id="esort" style="width:auto"><option value="name">Ordine alfabetico</option><option value="recent">Modificate di recente</option><option value="first">Prima apparizione</option></select><span class="hint" id="ecnt"></span></div></div>${ES.selMode ? `<div class="selbar" id="selbar"><b id="selcnt"></b><button class="btn sm" data-act="selall">Seleziona tutte quelle in elenco</button><button class="btn sm ghost" data-act="selnone">Deseleziona</button><span class="sp"></span><label>Sposta in <select id="seltype" style="width:auto">${TYPE_ORDER.map(t => `<option value="${t}">${TYPE_PL[t]}</option>`).join('')}</select></label><button class="btn sm primary" data-act="selmove">Sposta</button></div>` : ''}<div id="elist"></div>`);
   $('#esort').value = ES.sort;
   if (!S.ents.size) { $('#elist').outerHTML = '<div class="empty">Nessuna scheda ancora.</div>'; }
   else {
@@ -1378,6 +1489,7 @@ route(/^\/schede$/, async (_, q) => {
       let l = [...S.ents.values()].filter(e => (!ES.types.length || ES.types.includes(e.type)) && ck(e) && ik(e) && terms.every(w => S.sidx.get(e.id).includes(w)));
       if (ES.sort === 'recent') l.sort((a, b) => (b.upd || 0) - (a.upd || 0)); else if (ES.sort === 'first') l.sort((a, b) => (a.sessions?.[0] ?? 1e9) - (b.sessions?.[0] ?? 1e9) || a.name.localeCompare(b.name)); else l.sort((a, b) => a.name.localeCompare(b.name, 'it'));
       shown = l; vl.setItems(l); $('#ecnt').textContent = l.length + ' schede'; selInfo();
+      const nf = ES.types.length + ES.cats.length + ES.imps.length + (ES.sort !== 'name' ? 1 : 0); $('#fcnt').textContent = nf ? ' · ' + nf : '';
       $$('#tchips .chip').forEach(c => c.classList.toggle('on', c.dataset.t ? ES.types.includes(c.dataset.t) : !ES.types.length));
       subChips();
     };
@@ -1395,6 +1507,8 @@ route(/^\/schede$/, async (_, q) => {
     const one = (a, v) => a.length === 1 && a[0] === v ? [] : [v];
     $('#cchips').onclick = e => { const c = e.target.closest('.chip'); if (!c) return; if (c.dataset.reset) { ES.types = []; ES.cats = []; ES.imps = []; } else if (c.dataset.f === 'imp') ES.imps = one(ES.imps, c.dataset.v); else ES.cats = one(ES.cats, c.dataset.v); apply(); };
     $('#tchips').onclick = e => { const c = e.target.closest('.chip'); if (!c) return; ES.types = c.dataset.t ? one(ES.types, c.dataset.t) : []; ES.cats = []; ES.imps = []; apply(); };
+    const ftog = () => { const w = $('#fwrap'), o = !w.classList.contains('open'); w.classList.toggle('open', o); $('.fbtn').setAttribute('aria-expanded', o); };
+    $('.fbtn').onclick = ftog;
     const pick = r => { const id = r.dataset.pick; ES.sel.has(id) ? ES.sel.delete(id) : ES.sel.add(id); vl.repaint(); selInfo(); };
     $('#elist').addEventListener('click', e => { const r = e.target.closest('[data-pick]'); if (r) { e.preventDefault(); pick(r); } });
     $('#elist').addEventListener('keydown', e => { const r = e.target.closest('[data-pick]'); if (r && (e.key === ' ' || e.key === 'Enter')) { e.preventDefault(); pick(r); } });
@@ -1454,18 +1568,25 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
   evs.sort((a, c) => a.n - c.n || a.idx - c.idx);
   const chipE = (i, lab) => { const x = S.ents.get(i); return x ? `<a class="chip" href="#/scheda/${encodeURIComponent(i)}">${esc(x.name)}</a>` : ''; };
   const mapsOf = pins.map(p => ({ p, m: S.maps.find(m => m.id === p.mapId) })).filter(x => x.m);
+  // collegamenti: una carta per scheda collegata (ritratto, nome, relazione), raggruppate per tipo
+  const relCards = (outs, ins) => {
+    const rows = [...outs.map(l => ({ l, x: S.ents.get(l.to), lab: l.label || 'collegata a' })), ...ins.map(l => ({ l, x: S.ents.get(l.from), lab: (l.label || 'collegata a') + ' questa scheda' }))].filter(r => r.x);
+    const grp = [['Persone', ['pg', 'png']], ['Luoghi', ['luogo']], ['Oggetti', ['oggetto']], ['Fazioni e missioni', ['fazione', 'missione']], ['Altro', ['lore']]];
+    const known = grp.flatMap(g => g[1]);
+    return grp.map(([t, ty]) => [t, rows.filter(r => ty.includes(r.x.type) || (t === 'Altro' && !known.includes(r.x.type)))]).filter(g => g[1].length).map(([t, l]) => `<h4 class="relh">${t}</h4><div class="relcards">${l.map(({ l: k, x, lab }) => `<div class="relc"><a href="#/scheda/${encodeURIComponent(x.id)}">${x.portrait ? `<img class="av" src="${x.portrait.thumb}" alt="">` : `<span class="av noav t-${x.type}">${esc(x.name[0])}</span>`}<span><b>${esc(x.name)}</b><small>${esc(lab)}</small></span></a><button class="icb" data-act="delRel" data-k="${esc(k.k)}" title="Togli il collegamento">✕</button></div>`).join('')}</div>`).join('');
+  };
   const toc = [...b.sections.map((sc, i) => [sc.title.replace(/\s*\(.*\)$/, ''), 'sec-' + i]), ['Collegamenti', 'sec-rel'], ...(evs.length ? [['Eventi', 'sec-ev']] : [])];
   setView(`<div class="card ehead ${e.portrait ? 'hasp' : ''}">${e.portrait ? `<img class="portrait" src="${e.portrait.thumb}" data-act="viewportrait" alt="${esc(e.name)}" title="Ingrandisci">` : ''}<div class="ehb"><div class="meta">${badge(e.type)}${e.status ? `<span class="pill">${esc(e.status)}</span>` : ''}${catPills(e)}${e.discovered === false ? '<span class="pill warn">non scoperto dai giocatori</span>' : ''}<span class="hint">${esc(rangeTxt(e.sessions))}</span></div>
       <h1>${esc(e.name)}</h1>${e.alias?.length ? `<div class="hint">Detto anche: ${e.alias.map(esc).join(', ')}</div>` : ''}${e.brief ? `<div class="brief">${inl(e.brief)}</div>` : ''}
-      </div><div class="row eheadacts"><button class="btn sm" data-act="edit">Modifica dati</button><button class="btn sm" data-act="addSec">+ Sezione</button><button class="btn sm ghost" data-act="copyEnt">Copia per Claude</button>${[...M.regions.values()].filter(r => r.entityId === id).map(r => `<a class="btn sm" href="#/mappe/${encodeURIComponent(r.mapId)}?reg=${encodeURIComponent(r.id)}">Vedi sulla mappa</a>`).join('')}<button class="btn sm" data-act="portrait">${e.portrait ? 'Cambia ritratto' : '+ Ritratto'}</button><button class="btn sm ghost" data-act="merge">Unisci in un'altra scheda</button><button class="btn sm danger" data-act="del">Elimina</button></div></div>
+      </div><div class="row eheadacts"><button class="btn sm" data-act="edit">Modifica dati</button>${[...M.regions.values()].filter(r => r.entityId === id).map(r => `<a class="btn sm" href="#/mappe/${encodeURIComponent(r.mapId)}?reg=${encodeURIComponent(r.id)}">Vedi sulla mappa</a>`).join('')}${moreActs(`<button class="btn sm" data-act="addSec">+ Sezione</button><button class="btn sm" data-act="portrait">${e.portrait ? 'Cambia ritratto' : '+ Ritratto'}</button><button class="btn sm ghost" data-act="copyEnt">Copia per Claude</button><button class="btn sm ghost" data-act="merge">Unisci in un'altra scheda</button><button class="btn sm danger" data-act="del">Elimina</button>`)}</div></div>
     ${toc.length > 2 ? `<nav class="toc" aria-label="Sezioni della scheda">${toc.map(([t, k]) => `<button type="button" data-act="goto" data-to="${k}">${esc(t)}</button>`).join('')}</nav>` : ''}
     <div class="card">${b.sections.length ? b.sections.map((s, i) => entrySecHtml(s, i)).join('') : `<p class="empty">${window.__RO ? 'Nessuna informazione su questa scheda, per ora.' : 'Nessun contenuto ancora. Verrà riempita dalle importazioni, oppure aggiungi una sezione a mano.'}</p>`}</div>
     <div class="grid2"><div class="card" id="sec-rel"><div class="spread"><h2>Collegamenti</h2><button class="btn sm" data-act="addRel">+ Collega</button></div>
-      ${outL.length || inL.length ? `${outL.map(l => `<div class="rel"><span class="lab">${esc(l.label || 'collegata a')}</span>${chipE(l.to)}<button class="icb" data-act="delRel" data-k="${esc(l.k)}">✕</button></div>`).join('')}${inL.map(l => `<div class="rel">${chipE(l.from)}<span class="lab">${esc(l.label || 'collegata a')} → questa scheda</span><button class="icb" data-act="delRel" data-k="${esc(l.k)}">✕</button></div>`).join('')}` : '<p class="hint">Nessun collegamento.</p>'}</div>
+      ${outL.length || inL.length ? relCards(outL, inL) : '<p class="hint">Nessun collegamento.</p>'}</div>
       <div class="card"><h2>Apparizioni</h2>${sessChips(e.sessions)}
       ${mapsOf.length ? `<h2 style="margin-top:14px">Sulle mappe</h2><div class="chips">${mapsOf.map(({ p, m }) => `<a class="chip" href="#/mappe/${encodeURIComponent(m.id)}?pin=${encodeURIComponent(p.id)}">${esc(m.name)}</a>`).join('')}</div>${mapsOf.some(x => x.p.photos?.length) ? `<div class="gallery" style="margin-top:10px">${mapsOf.flatMap(({ p, m }) => (p.photos || []).map(ph => `<a class="gph" href="#/mappe/${encodeURIComponent(m.id)}?pin=${encodeURIComponent(p.id)}" title="Vedi sulla mappa «${esc(m.name)}»"><img src="${ph.thumb}" alt="${esc(ph.name ? ph.name.replace(/\.[a-z0-9]+$/i, '') : 'Foto di ' + e.name)}"></a>`)).join('')}</div>` : ''}` : ''}
       ${e.type === 'luogo' ? `<div style="margin-top:14px"><label class="chk"><input type="checkbox" data-act="toggleDisc" ${e.discovered !== false ? 'checked' : ''}> Scoperto dai giocatori</label></div>` : ''}</div></div>
-    ${evs.length ? `<div class="card" id="sec-ev"><h2>Eventi</h2>${evs.map(v => `<div class="entry"><div class="tag">${sessLink(v.n)}</div><div class="tx"><b>${esc(v.title)}</b>${prose(v.text)}</div></div>`).join('')}</div>` : ''}`);
+    ${evs.length ? `<div class="card" id="sec-ev"><h2>Eventi</h2>${(() => { const ev = v => `<div class="entry"><div class="tag">${sessLink(v.n)}</div><div class="tx"><b>${esc(v.title)}</b>${prose(v.text)}</div></div>`, K = 5; return evs.length > K + 1 ? `<details class="older"><summary class="more">Mostra i ${evs.length - K} eventi precedenti</summary>${evs.slice(0, -K).map(ev).join('')}</details>${evs.slice(-K).map(ev).join('')}` : evs.map(ev).join(''); })()}</div>` : ''}`);
   if (e.portrait) dbGet('blobs', e.portrait.id).then(rec => { const im = $('.ehead .portrait'); if (!rec?.blob || !im) return; const u = URL.createObjectURL(rec.blob); im.onload = () => im.closest('.ehead')?.classList.add('sharp'); im.src = u; onCleanup(() => URL.revokeObjectURL(u)); }).catch(() => { });
   const tocEl = $('.toc');
   if (tocEl) {
@@ -1603,6 +1724,8 @@ async function uploadMapDlg(pre = {}) {
 }
 
 route(/^\/mappe$/, async () => {
+  const root = S.maps.filter(m => !m.parent && m.discovered !== false);
+  if (window.__RO && root.length === 1) { location.replace('#/mappe/' + encodeURIComponent(root[0].id)); return; }
   const ordered = []; const walk = (pid, depth) => { for (const m of S.maps.filter(x => (x.parent || null) === pid)) { ordered.push({ m, depth }); walk(m.id, depth + 1); } };
   walk(null, 0); for (const m of S.maps) if (!ordered.some(o => o.m.id === m.id)) ordered.push({ m, depth: 0 });
   const pinCount = {}; for (const p of await dbAll('pins')) pinCount[p.mapId] = (pinCount[p.mapId] || 0) + 1;
@@ -1981,7 +2104,8 @@ function setupQuickSearch() {
     const ents = [...S.ents.values()].filter(e => terms.every(w => S.sidx.get(e.id).includes(w))).sort((a, b) => (norm(b.name).startsWith(terms[0]) - norm(a.name).startsWith(terms[0])) || a.name.localeCompare(b.name)).slice(0, 8);
     const ss = S.sess.filter(s => terms.every(w => norm(s.title + ' ' + s.brief + ' ' + s.n).includes(w))).slice(0, 3);
     const ms = S.maps.filter(m => terms.every(w => norm(m.name).includes(w))).slice(0, 3);
-    qr.innerHTML = ents.map(e => `<a href="#/scheda/${encodeURIComponent(e.id)}">${badge(e.type)} <span>${esc(e.name)}</span></a>`).join('') + ss.map(s => `<a href="#/sessioni/${s.n}"><span class="badge">Sess.</span> <span>${s.n}. ${esc(s.title)}</span></a>`).join('') + ms.map(m => `<a href="#/mappe/${encodeURIComponent(m.id)}"><span class="badge">Mappa</span> <span>${esc(m.name)}</span></a>`).join('')
+    const qh = (t, l) => l.length ? `<div class="qh">${t}</div>` : '';
+    qr.innerHTML = qh('Schede', ents) + ents.map(e => `<a href="#/scheda/${encodeURIComponent(e.id)}">${badge(e.type)} <span>${esc(e.name)}</span></a>`).join('') + qh('Sessioni', ss) + ss.map(s => `<a href="#/sessioni/${s.n}"><span class="badge">Sess.</span> <span>${s.n}. ${esc(s.title)}</span></a>`).join('') + qh('Mappe', ms) + ms.map(m => `<a href="#/mappe/${encodeURIComponent(m.id)}"><span class="badge">Mappa</span> <span>${esc(m.name)}</span></a>`).join('')
       + `<a href="#/cerca?q=${encodeURIComponent(qi.value)}"><span class="mute">Cerca «${esc(qi.value)}» in tutti i testi ↵</span></a>`;
     qr.classList.add('on');
   });

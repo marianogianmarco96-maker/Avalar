@@ -92,7 +92,11 @@
   }
 
   /* ---------- schermata di accesso ---------- */
-  const LOGIN_CSS = `#login{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at 50% 20%,#7d2530 0%,#561820 55%,#2d0d12 100%);color:#f5e6c4;font-family:'Crimson Pro',Georgia,serif}
+  const LOGIN_CSS = `#login{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at 50% 20%,#7d2530cc 0%,#561820e6 55%,#2d0d12 100%),url(login-mappa.jpg) center/cover #2d0d12;color:#f5e6c4;font-family:'Crimson Pro',Georgia,serif}
+#login .grp{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 18px}
+#login .grp span{aspect-ratio:3/4;border-radius:6px;border:2px solid #a98334;background:url(login-gruppo.jpg) 0 0/400% 100% no-repeat #2b1d14;box-shadow:0 2px 8px #0004}
+#login .grp span:nth-child(2){background-position:33.333% 0}#login .grp span:nth-child(3){background-position:66.666% 0}#login .grp span:nth-child(4){background-position:100% 0}
+@media (prefers-color-scheme:dark){#login .box{background:#241b16;color:#ecdfc6;border-color:#55402f}#login h1{color:#e0c071}#login .sub,#login small,#login .or{color:#94806a}#login label{color:#c5b193}#login .btn{background:#2b211b;color:#e0c071;border-color:#55402f}#login .btn.p{background:#8c2c38;color:#fbeccb;border-color:#c4494f}#login input[type=password]{background:#1c1511;color:#ecdfc6;border-color:#55402f}#login .or:before,#login .or:after{border-color:#3a2d24}}
 #login .box{width:min(420px,100%);background:#fbf5e3;color:#2b1d14;border:1px solid #d4b06a;border-radius:12px;padding:28px 26px;box-shadow:0 12px 40px #0008}
 #login h1{margin:0 0 2px;font-family:'Cinzel',Georgia,serif;font-size:1.35rem;letter-spacing:.06em;color:#561820;text-align:center}
 #login .sub{text-align:center;color:#8a7560;margin:0 0 20px}
@@ -109,7 +113,7 @@
     return new Promise(resolve => {
       const st = document.createElement('style'); st.textContent = LOGIN_CSS; document.head.append(st);
       const el = document.createElement('div'); el.id = 'login';
-      el.innerHTML = `<div class="box"><h1>CAMPAGNA D&amp;D</h1><p class="sub">Diario di campagna di Avalar</p>
+      el.innerHTML = `<div class="box"><h1>CAMPAGNA D&amp;D</h1><p class="sub">Diario di campagna di Avalar</p><div class="grp" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
         <button class="btn p" id="lg-guest">Entra come Giocatore</button><small style="text-align:center">Sola lettura, nessuna modifica possibile.</small>
         <div class="or">oppure</div>
         <form id="lg-form" autocomplete="off"><input type="password" id="lg-code" placeholder="Codice del Dungeon Master" autocomplete="current-password" spellcheck="false">
@@ -199,21 +203,22 @@
   /* ---------- interfaccia per ruolo ---------- */
   const HIDE_ACTS = ['selmode', 'selall', 'selnone', 'selmove', 'edit', 'up', 'rensess', 'reimg', 'delRel', 'del', 'copyctx', 'wipe', 'vedit', 'vdm', 'vpl', 'undo', 'toggleDisc', 'subup', 'rename', 'renSec', 'redraw', 'portrait', 'newsess', 'newent', 'merge', 'histgen', 'editreg', 'editpin', 'editmap', 'editgen', 'editEntry', 'drawundo', 'drawok', 'drawcancel', 'delreg', 'delpin', 'delphoto', 'delmap', 'delSec', 'delEntry', 'delDoc', 'cpDoc', 'copyEnt', 'bkFull', 'bkData', 'attach', 'analyze', 'addreg', 'addpin', 'addphotos', 'addSec', 'addRel', 'addEntry', 'demo'];
   const GUEST_CSS = HIDE_ACTS.map(a => `html.ro [data-act="${a}"]`).join(',') + `,html.ro a[href="#/import"],html.ro a[href="#/backup"],html.ro #b-edit,html.ro #b-add,html.ro #b-addreg,html.ro #seg,html.ro #access,html.ro input[type=file],html.ro label:has(input[type=file]){display:none!important}`;
-  // strumenti: un piccolo pannello nell'angolo in basso a sinistra, così in alto restano solo le sezioni
-  const ROLE_CSS = `#tools{position:fixed;left:max(14px,env(safe-area-inset-left,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:45;display:flex;flex-direction:column-reverse;align-items:flex-start;gap:7px;font:600 .7rem/1 Georgia,serif}
-#tools .tlist{display:none;flex-direction:column;align-items:stretch;gap:6px;padding:8px;border-radius:12px;background:var(--wine-d,#561820);border:1px solid #e7cf9a80;box-shadow:0 6px 20px #0007;min-width:210px}
+  // strumenti: un ingranaggio nella barra in alto, accanto alla ricerca, con il menu a tendina (non copre più il testo)
+  const ROLE_CSS = `#tools{position:relative;flex:none;z-index:45;font:600 .7rem/1 Georgia,serif}
+#tools .tlist{display:none;position:absolute;right:0;top:calc(100% + 12px);flex-direction:column;align-items:stretch;gap:6px;padding:8px;border-radius:12px;background:var(--wine-d,#561820);border:1px solid #e7cf9a80;box-shadow:0 6px 20px #0007;min-width:210px}
 #tools.open .tlist{display:flex}
 .tbtn{display:flex;align-items:center;gap:9px;height:36px;padding:0 12px 0 9px;border-radius:18px;border:1px solid #e7cf9a66;background:#00000030;color:#f5e6c4;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;font:inherit;white-space:nowrap;text-align:left}
 .tbtn:hover,.tbtn:focus-visible{background:#a7343b;border-color:#e7cf9a;outline:none}
 .tbtn:disabled{opacity:.6}
 .tbtn .ti{width:18px;text-align:center;font-size:1rem;flex:none}
 .tbtn svg{width:16px;height:16px;flex:none;margin:0 1px}
-#tools .ttog{height:40px;padding:0 14px 0 11px;border-radius:20px;background:linear-gradient(180deg,var(--wine,#7d2530),var(--wine-d,#561820));border:1px solid #e7cf9a;box-shadow:0 3px 12px #0006}
+#tools .ttog{height:34px;padding:0 12px 0 9px;border-radius:17px;background:#00000030;border:1px solid #ffffff30}
+#tools.open .ttog{background:#00000055;border-color:#e7cf9a}
 #tools .ttog .tr{font-size:.6rem;padding:3px 6px;border-radius:9px;border:1px solid #e7cf9a99;color:#f7e3ae;margin-left:2px}
 #tools .trole{padding:4px 6px 6px;color:#e7cf9a;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid #e7cf9a40;margin-bottom:2px}
 #tools #themeBtn{width:auto;height:36px;border-radius:18px;font-size:inherit;padding:0 12px 0 9px}
-@media (max-width:1280px){#tools{bottom:calc(74px + env(safe-area-inset-bottom,0px))}}
-@media (max-width:620px){#tools .ttog .tl{display:none}#tools .ttog{width:40px;padding:0;justify-content:center}#tools .ttog .tr{display:none}}`;
+@media (max-width:1280px){#tools .ttog .tl{display:none}}
+@media (max-width:620px){#tools .ttog{width:34px;padding:0;justify-content:center}#tools .ttog .tr{display:none}}`;
   function applyRoleUI() {
     const root = document.documentElement; root.classList.add(ROLE === 'admin' ? 'adm' : 'ro');
     if (ROLE !== 'admin') {
@@ -239,7 +244,7 @@
     if (adm) mk('✎', 'Chiedi a Claude', 'Chiedi una modifica a Claude', () => { setOpen(false); askClaude(); });
     theme.className = 'tbtn'; list.append(theme);
     const out = mk('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M16 8l4 4-4 4"/><path d="M20 12H9"/></svg>', 'Esci', 'Esci e torna alla schermata di accesso', async () => { out.disabled = true; ls.del('cdnd_remember'); if (DB) { try { const t = DB.transaction('kv', 'readwrite'); t.objectStore('kv').delete('key'); await done(t); } catch { } } location.reload(); });
-    box.append(tog, list); document.body.append(box);
+    box.append(tog, list); top.append(box);
     // il tema mostra anche la scritta, l'app cambia solo l'icona
     const tl = () => { if (!theme.querySelector('.tl')) { const ic = theme.textContent; theme.innerHTML = `<span class="ti" aria-hidden="true">${ic}</span><span class="tl">${ic === '☀' ? 'Tema chiaro' : 'Tema scuro'}</span>`; } };
     tl(); new MutationObserver(tl).observe(theme, { childList: true, characterData: true, subtree: true });
