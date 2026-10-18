@@ -332,7 +332,9 @@ Se ti chiedo modifiche o approfondimenti su una proposta, rispondi con la propos
   claude.use('db').then(() => {
     if (window.__RO) return;
     const nav = document.getElementById('nav'); if (!nav || nav.querySelector('a[href="#/idee"]')) return;
-    const a = document.createElement('a'); a.href = '#/idee'; a.textContent = 'Idee';
+    const a = document.createElement('a'); a.href = '#/idee';
+    // icona del d20, come le altre sezioni della barra
+    a.innerHTML = '<svg class="nic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 7l5 9H7z"/><path d="M12 2v5M3 7l4 9M21 7l-4 9M3 17l4-1M21 17l-4-1M12 22l-5-6M12 22l5-6"/></svg><span>Idee</span>';
     nav.insertBefore(a, nav.querySelector('a[href="#/import"]'));
     if (location.hash.startsWith('#/idee')) a.classList.add('on');
   });
