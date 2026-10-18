@@ -28,15 +28,20 @@
   };
   const TONES = ['Avventura', 'Mistero e indagine', 'Horror', 'Intrigo politico', 'Esplorazione', 'Azione e combattimento', 'Dramma personale', 'Comico'];
   const LENGTHS = { serata: 'una serata di gioco (3–4 ore)', breve: 'una sessione breve (1–2 ore)', lunga: 'una sessione lunga o divisa in due serate' };
-  const DEF = { kind: 'next', count: 3, length: 'serata', tones: [], focus: [], level: '', note: '', ctx: 'full', docs: false };
+  const DEF = { kind: 'next', count: 3, length: 'serata', tones: [], focus: [], level: '', note: '', ctx: 'recent', docs: false };
+  const RECENT = 3; // sessioni recenti raccontate per intero nel contesto «Ultime sessioni»
 
   const now = () => new Date().toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
   const tokOf = s => Math.round(s.length / 3.6);
+  const BIG = 40000;
   const flat = s => String(s || '').replace(/\s+/g, ' ').trim();
 
   /* ---------- contesto della campagna (completo: è solo per il DM) ---------- */
   async function campaignText(o) {
-    const full = o.ctx === 'full', focus = new Set(o.focus);
+    // tre misure di contesto: «full» tutto, «recent» per intero solo le ultime sessioni e le schede che vi compaiono,
+    // «short» il minimo (brevi delle sessioni, schede in primo piano): resta piccolo anche per l'app di Claude
+    const mode = ['full', 'short'].includes(o.ctx) ? o.ctx : 'recent', full = mode === 'full', focus = new Set(o.focus);
+    const recentFrom = S.sess.length ? S.sess[Math.max(0, S.sess.length - (mode === 'short' ? 1 : RECENT))].n : 0;
     const camp = getMeta('campaign', { name: 'Campagna' }).name, gen = getMeta('general', null), arcs = getMeta('arcs', []);
     const sb = new Map((await dbAll('sbodies')).map(b => [b.n, b]));
     const evs = (await dbAll('events')).sort((a, b) => a.n - b.n || a.idx - b.idx);
@@ -48,27 +53,33 @@
     for (const s of S.sess) {
       L.push('', `## Sessione ${s.n}${s.title ? ' · ' + s.title : ''}${s.gameDate ? ' (in gioco: ' + s.gameDate + ')' : ''}`);
       const b = sb.get(s.n);
-      if (full && b?.summary) L.push(b.summary.trim());
+      const whole = full || s.n >= recentFrom;
+      if (whole && b?.summary) L.push(b.summary.trim());
+      else if (mode === 'short') L.push(s.short || s.brief || '');
       else { if (s.brief) L.push(s.brief); for (const e of evs.filter(e => e.n === s.n)) L.push(`- ${e.title}: ${flat(e.text)}`); }
-      if (o.docs) for (const d of b?.docs || []) L.push('', `[Appunti del DM · ${d.name}]`, d.text.trim());
+      if (o.docs && whole) for (const d of b?.docs || []) L.push('', `[Appunti del DM · ${d.name}]`, d.text.trim());
     }
     const ents = [...S.ents.values()].sort((a, b) => TYPE_ORDER.indexOf(a.type) - TYPE_ORDER.indexOf(b.type) || a.name.localeCompare(b.name));
     const entText = e => {
       const b = bodies.get(e.id), out = links.filter(l => l.from === e.id && S.ents.has(l.to));
+      // in «recent» le schede non in primo piano tengono solo le voci delle ultime sessioni (e quelle senza sessione)
+      const keep = en => full || focus.has(e.id) || en.n == null || en.n >= recentFrom;
       const r = [`### ${e.name} [${e.id}] · ${TYPES[e.type] || e.type}${e.status ? ' · ' + e.status : ''}${e.discovered === false ? ' · NON ancora scoperto dai giocatori' : ''}`];
       if (e.alias?.length) r.push('Alias: ' + e.alias.join(', '));
       if (e.brief) r.push(e.brief);
-      for (const s of b?.sections || []) { if (!s.entries.length) continue; r.push(`**${s.title}**`); for (const en of s.entries) r.push((en.n != null ? `[Sess. ${en.n}] ` : '') + en.text.trim()); }
+      for (const s of b?.sections || []) { const es = s.entries.filter(keep); if (!es.length) continue; r.push(`**${s.title}**`); for (const en of es) r.push((en.n != null ? `[Sess. ${en.n}] ` : '') + en.text.trim()); }
       if (out.length) r.push('Relazioni: ' + out.map(l => `${l.label || '→'} ${S.ents.get(l.to).name} [${l.to}]`).join('; '));
       return r.join('\n');
     };
-    const deep = ents.filter(e => full || e.type === 'pg' || focus.has(e.id));
-    L.push('', `--- SCHEDE${full ? '' : ' IN PRIMO PIANO E PERSONAGGI GIOCANTI'} (testo completo) ---`);
+    const deep = ents.filter(e => full || focus.has(e.id) || (mode === 'recent' && (e.type === 'pg' || (e.sessions || []).some(n => n >= recentFrom))));
+    L.push('', `--- SCHEDE${full ? '' : mode === 'recent' ? ' DEI PERSONAGGI, IN PRIMO PIANO E DELLE ULTIME SESSIONI' : ' IN PRIMO PIANO'} (testo completo) ---`);
+    if (!deep.length) L.push('(nessuna: vedi l\'elenco qui sotto)');
     for (const e of deep) L.push('', entText(e));
     const rest = ents.filter(e => !deep.includes(e));
     if (rest.length) {
-      L.push('', '--- ALTRE SCHEDE (id | tipo | nome | stato | breve) ---');
-      for (const e of rest) L.push(`${e.id} | ${e.type} | ${e.name}${e.alias?.length ? ' (' + e.alias.join(', ') + ')' : ''} | ${e.status || '—'}${e.discovered === false ? ' | NON scoperto' : ''}${e.brief ? ' | ' + flat(e.brief) : ''}`);
+      const br = e => e.brief && (mode !== 'short' || e.type === 'pg' || (e.sessions || []).some(n => n >= recentFrom));
+      L.push('', `--- ALTRE SCHEDE (id | tipo | nome | stato${mode === 'short' ? ' | breve solo per PG e schede recenti' : ' | breve'}) ---`);
+      for (const e of rest) L.push(`${e.id} | ${e.type} | ${e.name}${e.alias?.length ? ' (' + e.alias.join(', ') + ')' : ''} | ${e.status || '—'}${e.discovered === false ? ' | NON scoperto' : ''}${br(e) ? ' | ' + flat(e.brief) : ''}`);
     }
     const saved = await ideasAll();
     if (saved.length) { L.push('', '--- IDEE GIÀ PROPOSTE IN PASSATO (evita di ripeterle) ---'); for (const i of saved.slice(0, 30)) L.push(`- ${i.title}`); }
@@ -134,6 +145,7 @@ Se ti chiedo modifiche o approfondimenti su una proposta, rispondi con la propos
       if (r.status === 401) throw new Error('La chiave di Claude non è valida. Controllala in «Collega Claude».');
       if (r.status === 429) throw new Error('Troppe richieste in poco tempo: riprova tra un minuto.');
       if (r.status === 529 || r.status >= 500) throw new Error('Claude è momentaneamente sovraccarico: riprova tra poco.');
+      if (/too long|too many tokens|context (length|window)/i.test(m)) throw new Error('La richiesta è troppo lunga per Claude: scegli «Breve» in «Quanta storia mandare a Claude».');
       if (/credit balance/i.test(m)) throw new Error('Il credito del tuo account Claude è esaurito: ricaricalo su console.anthropic.com.');
       throw new Error(m || 'Richiesta non riuscita (' + r.status + ').');
     }
@@ -195,7 +207,7 @@ Se ti chiedo modifiche o approfondimenti su una proposta, rispondi con la propos
   const css = () => { if (cssDone) return; cssDone = true; const s = document.createElement('style'); s.textContent = CSS; document.head.append(s); };
 
   let CONV = null, BUSY = null; // conversazione in corso: resta finché la pagina è aperta
-  const loadForm = () => ({ ...DEF, ...pref('idee-form', {}) });
+  const loadForm = () => { const p = pref('idee-form', {}); if (p.v !== 2) { delete p.ctx; p.v = 2; } return { ...DEF, ...p }; }; // v2: il contesto predefinito non è più «Completo»
   const saveForm = o => setPref('idee-form', o);
   const titleOf = (t, o) => (String(t).match(/^##\s+(.+)$/m)?.[1] || `${KINDS[o.kind][0]} · ${now()}`).replace(/\*\*/g, '').replace(/\[\[([^\]|]+?)(?:\|([^\]]+?))?\]\]/g, (m, a, b) => b || S.ents.get(a)?.name || a).slice(0, 120);
 
@@ -221,19 +233,19 @@ Se ti chiedo modifiche o approfondimenti su una proposta, rispondi con la propos
         <label class="f"><span>Toni e generi</span><div class="idee-tones" id="i-tones">${TONES.map(t => `<span class="chip ${o.tones.includes(t) ? 'on' : ''}" role="checkbox" tabindex="0" aria-checked="${o.tones.includes(t)}" data-tone="${esc(t)}">${esc(t)}</span>`).join('')}</div></label>
         <label class="f"><span>Schede da mettere al centro (facoltativo)</span><input type="text" id="i-fadd" list="dl-ents" placeholder="Scrivi un nome: PG, PNG, luogo, fazione…" autocomplete="off"><div class="idee-focus" id="i-focus"></div></label>
         <label class="f"><span>Indicazioni per Claude (facoltativo)</span><textarea id="i-note" rows="3" placeholder="es. Vorrei una oneshot su Violet e l'uovo di drago, ambientata prima della prigione.">${esc(o.note)}</textarea></label>
-        <details><summary class="hint" style="cursor:pointer">Quanta storia mandare a Claude</summary>
-          <label class="f" style="margin-top:8px"><span>Contesto</span>${sel('ctx', [['full', 'Completo: tutte le sessioni e tutte le schede'], ['short', 'Essenziale: momenti chiave e schede in primo piano']], o.ctx)}</label>
+        <details><summary class="hint" style="cursor:pointer">Quanta storia mandare a Claude (accorciala qui se la richiesta è troppo lunga)</summary>
+          <label class="f" style="margin-top:8px"><span>Contesto</span>${sel('ctx', [['recent', `Ultime sessioni (consigliato): le ultime ${RECENT} per intero, le altre in breve`], ['short', 'Breve: solo l\'essenziale, per le chat più piccole'], ['full', 'Completo: tutte le sessioni e tutte le schede']], o.ctx)}</label>
           <label class="chk"><input type="checkbox" id="i-docs" ${o.docs ? 'checked' : ''}> <span>Aggiungi anche i tuoi appunti e le scalette delle sessioni (Claude imita il tuo stile, ma la richiesta pesa di più)</span></label>
         </details>
-        <div class="row" style="margin-top:14px"><button class="btn primary" data-act="igen">Genera con Claude</button><button class="btn" data-act="icopy">Copia per Claude</button><span class="hint" id="i-size"></span></div>
+        <div class="row" style="margin-top:14px"><button class="btn primary" data-act="igen">Genera con Claude</button><button class="btn" data-act="icopy">Copia per Claude</button><button class="btn" data-act="itxt" title="Scarica la richiesta come file da allegare alla chat">Scarica per Claude</button><span class="hint" id="i-size"></span></div>
         ${api ? '' : '<p class="hint" style="margin-bottom:0">Per generare qui serve collegare Claude con una chiave API. In alternativa «Copia per Claude» prepara la richiesta da incollare in una chat con Claude; poi con «Salva una risposta di Claude» la conservi qui.</p>'}
       </div>
       <div id="i-conv"></div>
       <div class="card"><h2>Idee salvate</h2>${saved.length ? `<div class="idee-list">${saved.map(i => `<a class="erow" href="#/idee/${encodeURIComponent(i.id)}"><div class="main"><div class="t">${esc(i.title)}</div><div class="b">${esc(i.kindLabel || '')}${i.kindLabel ? ' · ' : ''}${esc(new Date(i.ts).toLocaleDateString('it-IT'))}</div></div></a>`).join('')}</div>` : '<p class="empty" style="padding:12px">Nessuna idea salvata. Quando una proposta ti piace, premi «Salva tra le idee».</p>'}<p class="hint" style="margin-bottom:0">Le idee restano in questo browser, separate dai dati della campagna: i giocatori non le vedono mai.</p></div>`);
 
-    const read = () => ({ kind: $('#i-kind').value, count: +$('#i-count').value, length: $('#i-length').value, level: $('#i-level').value.trim(), note: $('#i-note').value, ctx: $('#i-ctx').value, docs: $('#i-docs').checked, tones: [...document.querySelectorAll('#i-tones .chip.on')].map(c => c.dataset.tone), focus: o.focus });
+    const read = () => ({ kind: $('#i-kind').value, count: +$('#i-count').value, length: $('#i-length').value, level: $('#i-level').value.trim(), note: $('#i-note').value, ctx: $('#i-ctx').value, docs: $('#i-docs').checked, tones: [...document.querySelectorAll('#i-tones .chip.on')].map(c => c.dataset.tone), focus: o.focus, v: 2 });
     let sizeT = null;
-    const size = () => { clearTimeout(sizeT); sizeT = setTimeout(async () => { const f = read(); saveForm(f); const p = await buildPrompt(f); const t = tokOf(p.system + p.user); const m = MODELS.find(x => x[0] === (api?.model || MODELS[0][0])); const c = (t * m[2] + 8000 * m[3]) / 1e6; const el = $('#i-size'); if (el) el.textContent = `Circa ${Math.round(t / 1000)} mila token di storia${api ? ` · circa ${c.toFixed(2).replace('.', ',')} $ a richiesta` : ''}`; }, 250); };
+    const size = () => { clearTimeout(sizeT); sizeT = setTimeout(async () => { const f = read(); saveForm(f); const p = await buildPrompt(f); const t = tokOf(p.system + p.user); const m = MODELS.find(x => x[0] === (api?.model || MODELS[0][0])); const c = (t * m[2] + 8000 * m[3]) / 1e6; const el = $('#i-size'); if (el) el.textContent = `Circa ${Math.round(t / 1000)} mila token di storia${t > BIG ? ' (lunga: meglio «Scarica per Claude» o un contesto più breve)' : ''}${api ? ` · circa ${c.toFixed(2).replace('.', ',')} $ a richiesta` : ''}`; }, 250); };
     const paintFocus = () => { $('#i-focus').innerHTML = o.focus.map(id => { const e = S.ents.get(id); return `<span class="chip">${badge(e.type)} ${esc(e.name)}<button type="button" data-unfocus="${esc(id)}" aria-label="Togli ${esc(e.name)}">×</button></span>`; }).join(''); size(); };
     paintFocus();
     const fadd = $('#i-fadd');
@@ -295,7 +307,8 @@ Se ti chiedo modifiche o approfondimenti su una proposta, rispondi con la propos
         await ideaPut({ id, ts: Date.now(), title: titleOf(t.a, CONV.o), kind: CONV.o.kind, kindLabel: KINDS[CONV.o.kind][0], request: CONV.turns.slice(0, +a.dataset.i + 1).map(x => x.q).join('\n\n---\n\n'), text: t.a });
         t.saved = true; toast('Idea salvata'); rerender();
       },
-      icopy: async () => { const f = read(); saveForm(f); const p = await buildPrompt(f); await copyText(p.system + '\n\n=== LA MIA RICHIESTA ===\n' + p.user, 'Richiesta copiata: incollala in una chat con Claude'); },
+      icopy: async () => { const f = read(); saveForm(f); const p = await buildPrompt(f); const txt = p.system + '\n\n=== LA MIA RICHIESTA ===\n' + p.user; await copyText(txt, tokOf(txt) > BIG ? 'Richiesta copiata, ma è lunga: se la chat la rifiuta usa «Scarica per Claude» e allega il file, oppure scegli un contesto più breve' : 'Richiesta copiata: incollala in una chat con Claude'); },
+      itxt: async () => { const f = read(); saveForm(f); const p = await buildPrompt(f); const dl = await claude.use('downloads'); await dl.save({ filename: 'richiesta-per-claude.txt', data: new Blob([p.system + '\n\n=== LA MIA RICHIESTA ===\n' + p.user], { type: 'text/plain' }) }); toast('File scaricato: allegalo in una chat con Claude e scrivi «Segui le istruzioni nel file»'); },
       ipaste: async () => {
         const r = await formDlg({ title: 'Salva una risposta di Claude', ok: 'Salva', wide: true, fields: [{ k: 't', label: 'Risposta di Claude', type: 'textarea', rows: 12, req: true, placeholder: 'Incolla qui le proposte che ti ha dato Claude' }, { k: 'n', label: 'Titolo (facoltativo)', placeholder: 'Se lo lasci vuoto uso il primo titolo della risposta' }, { k: 'k', label: 'Tipo', type: 'select', value: read().kind, options: Object.entries(KINDS).map(([k, v]) => [k, v[0]]) }] });
         if (!r || !r.t.trim()) return;
