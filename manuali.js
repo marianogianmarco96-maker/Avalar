@@ -9,7 +9,9 @@
     { id: 'xanathar', col: '#25506a', dm: false, title: 'Guida Omnicomprensiva di Xanathar', sub: 'Espansione per i giocatori', desc: 'Nuove sottoclassi, talenti razziali, incantesimi e strumenti per arricchire la storia del personaggio.', url: 'https://online.anyflip.com/fqnfa/gmdk/mobile/index.html' },
     { id: 'mostri', col: '#3f5a2c', dm: true, title: 'Manuale dei Mostri', sub: 'D&D 5ª edizione', desc: 'Le statistiche e il comportamento delle creature da mettere contro il party.', url: 'https://online.anyflip.com/fqnfa/ltch/mobile/index.html' }
   ];
-  const visibili = () => MANUALI.filter(m => !m.dm || !window.__RO);
+  // tutti vedono tutti i manuali; quelli «dm» li apre solo il Dungeon Master
+  const visibili = () => MANUALI;
+  const vietato = m => m.dm && window.__RO;
 
   const CSS = `.man-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,220px));gap:22px 18px;margin:6px 0 22px}
 .man-tile{display:flex;flex-direction:column;gap:8px;color:var(--ink);text-decoration:none!important}
@@ -33,7 +35,13 @@
 @media (max-width:620px){.man-bar b{font-size:.85rem}.man-bar .btn{padding:6px 9px;font-size:.68rem}}
 .man-bar .btn{white-space:nowrap}
 .man-full iframe{flex:1;width:100%;border:0;background:#222}
-html.man-open #tools{display:none}`;
+html.man-open #tools{display:none}
+.man-no{border:2px solid var(--gold2);border-radius:10px;padding:26px 24px 20px;width:min(420px,90vw);text-align:center;color:#f5e6c4;background:radial-gradient(ellipse at 50% 0%,#a7343b 0,#2c0f14 75%);box-shadow:0 20px 60px #000c}
+.man-no::backdrop{background:#0a0505cc}
+.man-no .ic{font-size:2rem;line-height:1;color:var(--gold2)}
+.man-no h2{font-family:var(--display);color:var(--gold2)!important;font-size:1.5rem;margin:10px 0 8px}
+.man-no p{margin:0 0 18px;font-size:1.05rem;line-height:1.45}
+.man-no button{font-family:var(--display);letter-spacing:.06em;background:var(--gold2);color:#2c0f14;border:0;border-radius:20px;padding:10px 22px;cursor:pointer}`;
   let cssDone = false;
   const css = () => { if (cssDone) return; cssDone = true; const s = document.createElement('style'); s.textContent = CSS; document.head.append(s); };
 
@@ -43,6 +51,11 @@ html.man-open #tools{display:none}`;
   const tile = m => `<a class="man-tile" href="#/manuali/${m.id}"><div class="man-cov" style="--c:${m.col}">${m.dm ? '<span class="man-dm">SOLO DM</span>' : ''}
     <div class="man-ph"><small>DUNGEONS &amp; DRAGONS</small><b>${esc(m.title)}</b><i>${esc(m.sub)}</i></div>
     <img alt="" loading="lazy" data-src="${esc(covers(m).join(' '))}"></div><b class="t">${esc(m.title)}</b><div class="sub">${esc(m.sub)}</div></a>`;
+  const nega = () => {
+    const d = document.createElement('dialog'); d.className = 'man-no';
+    d.innerHTML = `<div class="ic" aria-hidden="true">❦</div><h2>Come osi?!</h2><p>Solo il Dungeon Master ha il diritto di accedere alla conoscenza racchiusa in questo manuale!</p><button type="button">Chiedo perdono</button>`;
+    document.body.append(d); d.querySelector('button').onclick = () => d.close(); d.onclose = () => d.remove(); d.showModal();
+  };
   const loadCovers = () => $$('.man-cov img[data-src]').forEach(img => {
     const list = img.dataset.src.split(' '); let i = 0;
     img.onload = () => { if (img.naturalWidth > 40) img.classList.add('ok'); };
@@ -56,6 +69,7 @@ html.man-open #tools{display:none}`;
     setView(`<div class="pagehead"><h1>Manuali</h1></div><div class="orn"></div>
       <div class="man-grid">${[...pg, ...dm].map(tile).join('')}</div>`);
     loadCovers();
+    $$('.man-tile').forEach(a => { const m = MANUALI.find(x => a.getAttribute('href') === '#/manuali/' + x.id); if (m && vietato(m)) a.onclick = e => { e.preventDefault(); nega(); }; });
   });
 
   // il libro occupa esattamente lo spazio tra l'intestazione e la barra delle sezioni: niente scorrimento della pagina,
@@ -64,6 +78,7 @@ html.man-open #tools{display:none}`;
     await claude.use('db'); css();
     const m = visibili().find(x => x.id === id);
     if (!m) { setView(`<div class="empty"><h2>Manuale non trovato</h2><p><a href="#/manuali">Torna ai manuali</a></p></div>`); return; }
+    if (vietato(m)) { location.replace('#/manuali'); setTimeout(nega, 300); return; }
     setView(`<h1 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">${esc(m.title)}</h1>
       <div class="man-full"><div class="man-bar"><b>${esc(m.title)}</b>${anyflip(m)}</div>
       <iframe src="${esc(m.url)}" title="${esc(m.title)}" allowfullscreen allow="fullscreen" referrerpolicy="no-referrer-when-downgrade"></iframe></div>`);
