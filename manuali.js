@@ -15,9 +15,9 @@
 
   const CSS = `.man-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,220px));gap:22px 18px;margin:6px 0 22px}
 .man-tile{display:flex;flex-direction:column;gap:8px;color:var(--ink);text-decoration:none!important}
-.man-cov{position:relative;aspect-ratio:3/4;border-radius:4px 8px 8px 4px;overflow:hidden;border:1px solid #0005;box-shadow:inset 6px 0 0 #00000038,0 6px 16px #0000004d;background:var(--c);transition:transform .2s,box-shadow .2s}
+.man-cov{position:relative;aspect-ratio:5/7;border-radius:4px 8px 8px 4px;overflow:hidden;border:1px solid #0005;box-shadow:inset 6px 0 0 #00000038,0 6px 16px #0000004d;background:var(--c);transition:transform .2s,box-shadow .2s}
 .man-tile:hover .man-cov{transform:translateY(-3px);box-shadow:inset 6px 0 0 #00000038,0 10px 22px #0000005c}
-.man-cov img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .3s}
+.man-cov img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 0;opacity:0;transition:opacity .3s}
 .man-cov img.ok{opacity:1}
 .man-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px 14px 16px 20px;text-align:center;color:#f5e6c4;background:radial-gradient(ellipse at 50% 30%,#ffffff26,transparent 70%),linear-gradient(160deg,transparent 50%,#00000050)}
 .man-ph::before{content:"";position:absolute;inset:9px 9px 9px 15px;border:1.5px solid #e7cf9a99;border-radius:3px}
@@ -46,8 +46,8 @@ html.man-open #tools{display:none}
   const css = () => { if (cssDone) return; cssDone = true; const s = document.createElement('style'); s.textContent = CSS; document.head.append(s); };
 
   const anyflip = m => `<a class="btn" href="${esc(m.url)}" target="_blank" rel="noopener">Apri su AnyFlip</a>`;
-  // copertina: la prima pagina del libro su AnyFlip (in italiano); se non si carica resta il riquadro col titolo italiano
-  const covers = m => { const b = m.url.replace(/mobile\/index\.html$/, ''); return [b + 'files/shot.jpg', b + 'files/mobile/1.jpg']; };
+  // copertina italiana del libro (copertine/<id>.jpg); se non si carica resta il riquadro col titolo italiano
+  const covers = m => ['copertine/' + m.id + '.jpg'];
   const tile = m => `<a class="man-tile" href="#/manuali/${m.id}"><div class="man-cov" style="--c:${m.col}">${m.dm ? '<span class="man-dm">SOLO DM</span>' : ''}
     <div class="man-ph"><small>DUNGEONS &amp; DRAGONS</small><b>${esc(m.title)}</b><i>${esc(m.sub)}</i></div>
     <img alt="" loading="lazy" data-src="${esc(covers(m).join(' '))}"></div><b class="t">${esc(m.title)}</b><div class="sub">${esc(m.sub)}</div></a>`;
