@@ -343,6 +343,108 @@ body{min-width:0}
 .pin .pl.hide{display:none}
 .pin:hover .pl.hide,.pin.sel .pl.hide{display:block}
 :focus-visible{outline:2px solid var(--gold2);outline-offset:2px}
+/* --- grafica ottobre 2026: lettura su telefono, home, schede, atmosfera --- */
+/* elenchi: sul telefono testo intero, giorno e stato sotto il titolo */
+.erow .d{display:none}
+.vl.flow{overflow:visible;height:auto}
+.vl.flow .vl-row{position:static;height:auto}
+@media (max-width:620px){
+  .vl.flow .erow{height:auto;align-items:flex-start;padding:13px 12px;gap:10px}
+  .vl.flow .erow .num{width:40px;padding-top:1px}
+  .vl.flow .erow .t{-webkit-line-clamp:3;font-size:1.04rem;line-height:1.25}
+  .vl.flow .erow .b{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.35;margin-top:3px;font-size:.97rem}
+  .vl.flow .erow .r{display:none}
+  .vl.flow .erow .d{display:block;margin-top:4px;font-size:.8rem;color:var(--mute);font-variant:small-caps;letter-spacing:.04em}
+  .vl.flow .erow .av{margin-top:2px}
+  .vl.flow .erow .badge{margin-top:4px}
+  .vl.flow .erow.ev{padding-top:13px}
+  .card{padding:16px 16px}
+  .card::before{inset:3px}
+  /* voci delle schede: niente colonna vuota a sinistra, la sessione va sopra il testo */
+  .entry{display:block;padding:6px 0 10px}
+  .entry .tag{width:auto;text-align:left;padding:0 0 2px}
+  .entry .tag.dot{display:none}
+  .entry .eacts{position:absolute;top:2px;right:0}
+}
+/* sessione: frecce in basso a destra, sopra la barra delle sezioni */
+.sessfab{display:none}
+@media (max-width:1280px){
+  .sessfab{position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:calc(68px + env(safe-area-inset-bottom,0px));z-index:39;display:flex;border-radius:24px;overflow:hidden;border:1.5px solid var(--gold);background:var(--paper);box-shadow:0 4px 14px #4a2f1a55}
+  .sessfab a{display:flex;align-items:center;justify-content:center;min-width:62px;min-height:46px;padding:0 14px;color:var(--wine);font-family:var(--display);font-size:.95rem;text-decoration:none!important}
+  :root[data-theme=dark] .sessfab a{color:var(--gold2)}
+  .sessfab a+a{border-left:1px solid var(--line2)}
+  .sessfab a:active{background:var(--paper2)}
+}
+/* storie lunghe richiudibili */
+.fold{max-height:15em;overflow:hidden;position:relative}
+.fold::after{content:"";position:absolute;left:0;right:0;bottom:0;height:5em;background:linear-gradient(180deg,transparent,var(--paper));pointer-events:none}
+.more{display:block;margin:6px auto 4px;padding:9px 20px;border-radius:20px;border:1px solid var(--gold);background:var(--paper2);color:var(--wine);font-family:var(--display);font-size:.8rem;letter-spacing:.06em;cursor:pointer}
+:root[data-theme=dark] .more{color:var(--gold2)}
+
+/* home: ultima sessione in evidenza e il gruppo */
+.hero{position:relative;display:block;border-radius:6px;overflow:hidden;border:1.5px solid var(--gold);box-shadow:var(--shadow);margin-bottom:18px;background:var(--wine-d);color:#f6e7c4;text-decoration:none!important}
+.hero .bg{position:absolute;inset:0;background:center/cover no-repeat;opacity:.4;filter:saturate(.8);transition:transform .6s ease}
+.hero:hover .bg{transform:scale(1.03)}
+.hero .in{position:relative;display:block;padding:22px 22px 20px;background:linear-gradient(180deg,#2c0f1433 0,#2c0f14cc 75%)}
+.hero small{display:block;font-family:var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--gold2);font-size:.72rem}
+.hero .ht{display:block;font-family:var(--display);font-weight:600;color:#fff;font-size:1.5rem;line-height:1.2;margin:6px 0}
+.hero .ht .pill{font-family:var(--body);font-size:.75rem;vertical-align:middle;background:#00000040;color:var(--gold2);border-color:var(--gold2)}
+.hero .hb{display:block;color:#f1e1bd;line-height:1.45;margin-bottom:14px;max-width:62ch}
+.hero .go{display:inline-block;background:var(--gold2);color:#2c0f14;font-family:var(--display);font-size:.85rem;letter-spacing:.06em;padding:10px 18px;border-radius:22px}
+.party h2{margin-bottom:12px}
+.party .pgs{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,150px));gap:14px;text-align:center}
+.party a{color:inherit;text-decoration:none!important}
+.party img,.party .noimg{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;object-position:top;border-radius:6px;border:2px solid var(--gold);box-shadow:0 3px 10px #0004;transition:transform .15s}
+.party .noimg{display:flex;align-items:center;justify-content:center;background:var(--paper2);font-family:var(--display);font-size:2rem;color:var(--wine)}
+.party a:hover img{transform:translateY(-2px)}
+.party b{display:block;font-family:var(--display);font-weight:600;color:var(--wine);font-size:.9rem;margin-top:6px;letter-spacing:.04em}
+:root[data-theme=dark] .party b,:root[data-theme=dark] .statline b{color:var(--gold2)}
+@media (max-width:620px){.party .pgs{grid-template-columns:repeat(4,1fr);gap:8px}.party b{font-size:.78rem}.hero .ht{font-size:1.3rem}.hero .in{padding:18px 16px 16px}}
+.statline{text-align:center;color:var(--ink2);margin:0 0 12px}
+.statline b{font-family:var(--display);color:var(--wine);font-size:1.15em}
+.statline span{white-space:nowrap}
+@media (max-width:620px){.statline{font-size:.92rem}}
+
+/* schede: ritratto più grande, sul telefono diventa la copertina */
+.ehead .eheadacts{margin-top:12px}
+.ehead.hasp{grid-template-columns:220px 1fr}
+.ehead.hasp .portrait{width:220px}
+.ehead.hasp .eheadacts{grid-column:2;margin-top:0}
+.toc{position:sticky;top:calc(58px + env(safe-area-inset-top,0px));z-index:20;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:8px 2px;margin:-6px 0 12px;background:var(--bg)}
+.toc::-webkit-scrollbar{display:none}
+.toc button{flex:none;padding:7px 14px;border-radius:18px;border:1px solid var(--line2);background:var(--paper);color:var(--ink);font-size:.92rem;cursor:pointer}
+.toc button.on{background:var(--wine);color:#fbeccb;border-color:var(--wine)}
+.sec,#sec-rel,#sec-ev{scroll-margin-top:calc(118px + env(safe-area-inset-top,0px))}
+@media (max-width:620px){
+  .ehead.hasp{display:block;padding:0;overflow:hidden}
+  .ehead.hasp::before{display:none}
+  .ehead.hasp .portrait{width:100%;height:min(105vw,440px);object-fit:cover;object-position:50% 15%;border:0;border-radius:0;box-shadow:none}
+  .ehead.hasp .ehb{position:absolute;left:0;right:0;top:min(105vw,440px);transform:translateY(-100%);padding:80px 18px 16px;background:linear-gradient(180deg,transparent 0,#1a0c0ce6 60%);pointer-events:none}
+  .ehead.hasp .ehb a{pointer-events:auto}
+  .ehead.hasp h1{color:#fff!important;font-size:2rem}
+  .ehead.hasp .ehb .hint{color:#e6d3a8}
+  .ehead.hasp .brief{color:#f5e6c4}
+  .ehead.hasp .brief a{color:var(--gold2)}
+  .ehead.hasp .pill{background:#00000055;color:#f5e6c4;border-color:#e7cf9a88}
+  .ehead.hasp .eheadacts{padding:12px 16px 14px}
+  html.ro .ehead.hasp .eheadacts{display:none}
+  .toc{top:calc(58px + env(safe-area-inset-top,0px))}
+}
+
+/* atmosfera: capolettera, fregi, linea del tempo */
+.cap>.prose>p:first-child::first-letter,.cap>p:first-child::first-letter{float:left;font-family:var(--display);font-size:3.4em;line-height:.85;padding:5px 5px 0 0;color:var(--wine);text-shadow:1px 1px 0 var(--gold2)}
+:root[data-theme=dark] .cap>.prose>p:first-child::first-letter{color:var(--gold2);text-shadow:1px 1px 0 var(--wine)}
+.card.cap>h2,.card.tl>h2{text-align:center}
+.card.cap>h2::after,.card.tl>h2::after{content:"❦";display:block;color:var(--gold);font-size:1rem;margin-top:2px}
+.card.tl .entry{display:flex;gap:12px;padding:4px 0 14px}
+.card.tl .entry .tag{flex:none;width:32px;position:relative;padding:0;color:transparent;font-size:0;text-align:center;align-self:stretch}
+.card.tl .entry .tag::before{content:attr(data-n);position:relative;z-index:1;display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--wine);color:#fbeccb;font-family:var(--display);font-size:.85rem;border:2px solid var(--gold2)}
+.card.tl .entry .tag::after{content:"";position:absolute;left:50%;top:30px;bottom:-14px;width:2px;transform:translateX(-50%);background:var(--gold)}
+.card.tl .entry:last-child .tag::after{display:none}
+.card.tl .entry .tx>b{font-family:var(--display);font-weight:600;color:var(--wine);letter-spacing:.02em}
+:root[data-theme=dark] .card.tl .entry .tx>b{color:var(--gold2)}
+.page{animation:pagein .35s ease}
+@keyframes pagein{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 
 </style>
@@ -502,12 +604,16 @@ function pickEntity(text) {
 }
 
 /* ---------- liste virtualizzate (restano fluide con migliaia di righe) ---------- */
+const MOBILE = matchMedia('(max-width:620px)');
 function vlist(host, items, rowH, render) {
   host.classList.add('vl'); host.innerHTML = '<div class="vl-in"></div>';
   const inner = host.firstChild; let first = -1, last = -1, raf = 0;
-  const fit = () => { const top = host.getBoundingClientRect().top; host.style.height = Math.max(300, innerHeight - top - 20) + 'px'; };
+  // sul telefono niente riquadro con lo scorrimento interno: righe nel flusso della pagina, alte quanto il testo
+  const flow = () => MOBILE.matches && items.length <= 1500;
+  const fit = () => { host.classList.toggle('flow', flow()); if (flow()) { host.style.height = ''; inner.style.height = ''; return; } const top = host.getBoundingClientRect().top; host.style.height = Math.max(300, innerHeight - top - 20) + 'px'; inner.style.height = items.length * rowH + 'px'; };
   function paint() {
     raf = 0;
+    if (flow()) { first = last = -1; inner.innerHTML = items.map((it, i) => `<div class="vl-row">${render(it, i)}</div>`).join(''); return; }
     const top = host.scrollTop, h = host.clientHeight || 600;
     const a = Math.max(0, Math.floor(top / rowH) - 5), b = Math.min(items.length, Math.ceil((top + h) / rowH) + 5);
     if (a === first && b === last) return; first = a; last = b;
@@ -519,11 +625,11 @@ function vlist(host, items, rowH, render) {
   const onResize = () => { fit(); first = -1; paint(); };
   addEventListener('resize', onResize); onCleanup(() => removeEventListener('resize', onResize));
   const api = {
-    setItems(it) { items = it; inner.style.height = items.length * rowH + 'px'; host.scrollTop = 0; first = -1; paint(); },
+    setItems(it) { items = it; fit(); host.scrollTop = 0; first = -1; paint(); },
     repaint() { first = -1; paint(); },
-    scrollTo(i) { host.scrollTop = i * rowH; }
+    scrollTo(i) { if (flow()) inner.children[i]?.scrollIntoView({ block: 'center' }); else host.scrollTop = i * rowH; }
   };
-  fit(); inner.style.height = items.length * rowH + 'px'; paint();
+  fit(); paint();
   setTimeout(() => { fit(); api.repaint(); }, 0);
   return api;
 }
@@ -1145,16 +1251,22 @@ route(/^\/$/, async () => {
       <div class="row"><a class="btn" href="#/mappe">Carica una mappa</a><button class="btn ghost" data-act="demo">Prova con dati di esempio</button></div>
       <p class="hint">I dati di esempio si possono cancellare da Backup → «Svuota tutto».</p></div>`;
   } else {
-    h += `<div class="card"><div class="stat"><div><b>${S.sess.length}</b><span>sessioni</span></div><div><b>${S.ents.size}</b><span>schede</span></div><div><b>${evCount}</b><span>eventi</span></div><div><b>${S.maps.length}</b><span>mappe</span></div></div>
-      <div class="chips" style="margin-top:12px">${TYPE_ORDER.filter(t => cnt[t]).map(t => `<a class="chip" href="#/schede?tipo=${t}">${TYPE_PL[t]} <em>${cnt[t]}</em></a>`).join('')}</div></div>`;
+    const last = S.sess[S.sess.length - 1], party = [...S.ents.values()].filter(e => e.type === 'pg').sort((a, c) => (a.sessions?.[0] ?? 99) - (c.sessions?.[0] ?? 99) || a.name.localeCompare(c.name));
+    const bgMap = S.maps.find(m => !m.parent && m.thumb) || S.maps.find(m => m.thumb);
+    if (last) h += `<a class="hero" href="#/sessioni/${last.n}">${bgMap ? `<span class="bg" style="background-image:url('${bgMap.thumb}')"></span>` : ''}<span class="in"><small>Ultima sessione · ${last.n}</small><b class="ht">${esc(last.title || 'Sessione ' + last.n)}${ongoingPill(last)}</b>${last.short || last.brief ? `<span class="hb">${esc(last.short || last.brief)}</span>` : ''}<span class="go">${last.ongoing ? 'Riprendi da qui' : 'Continua a leggere'} →</span></span></a>`;
+    if (party.length) h += `<div class="card party"><h2>Il gruppo</h2><div class="pgs">${party.map(e => `<a href="#/scheda/${encodeURIComponent(e.id)}">${e.portrait ? `<img src="${e.portrait.thumb}" data-pid="${esc(e.portrait.id)}" alt="">` : `<span class="noimg">${esc(e.name[0])}</span>`}<b>${esc(e.name)}</b></a>`).join('')}</div></div>`;
+    h += `<div class="card"><p class="statline"><span><b>${S.sess.length}</b> sessioni</span> · <span><b>${S.ents.size}</b> schede</span> · <span><b>${evCount}</b> eventi</span> · <span><b>${S.maps.length}</b> mappe</span></p>
+      <div class="chips">${TYPE_ORDER.filter(t => cnt[t]).map(t => `<a class="chip" href="#/schede?tipo=${t}">${TYPE_PL[t]} <em>${cnt[t]}</em></a>`).join('')}</div></div>`;
     const pro = await dbGet('bodies', 'lore-introduzione-al-mondo');
     if (pro?.sections?.length) h += `<div class="card"><div class="spread"><h2>Prologo</h2><a href="#/scheda/lore-introduzione-al-mondo">Apri la scheda →</a></div><details class="arc" open><summary>Il mondo di gioco<small>introduzione</small></summary>${pro.sections.map(sc => `${sc.title ? `<h3>${esc(sc.title)}</h3>` : ''}${sc.entries.map(en => prose(en.text)).join('')}`).join('')}</details></div>`;
     h += `<div class="card"><div class="spread"><h2>Riassunto di quanto fatto finora</h2><div class="row"><button class="btn sm" data-act="editgen">Modifica</button>${(getMeta('generalHist', []).length) ? '<button class="btn sm ghost" data-act="histgen">Versioni precedenti</button>' : ''}</div></div>
-      ${gen?.text ? prose(gen.text) + `<p class="hint">Aggiornato ${fmtDate(gen.ts)}${gen.upto != null ? ' · fino alla sessione ' + gen.upto : ''}</p>` : '<p class="empty">Il riassunto comparirà alla prima importazione.</p>'}
+      ${gen?.text ? `<div class="cap">${prose(gen.text)}</div>` + `<p class="hint">Aggiornato ${fmtDate(gen.ts)}${gen.upto != null ? ' · fino alla sessione ' + gen.upto : ''}</p>` : '<p class="empty">Il riassunto comparirà alla prima importazione.</p>'}
       ${S.sess.length ? `<div class="spread" style="margin-top:14px"><h3 style="margin:0">Sessione per sessione</h3><a href="#/sessioni">Tutte le sessioni →</a></div><p class="hint">Apri una riga per il dettaglio, poi «Apri la sessione» per il resoconto completo.</p>${S.sess.map(s => `<details class="arc"><summary><b>${s.n}. ${esc(s.title || 'Sessione ' + s.n)}</b>${ongoingPill(s)}${s.gameDate ? `<small>${esc(s.gameDate)}</small>` : ''}<br><span class="mute" style="font-family:var(--body);font-weight:400;letter-spacing:0;font-size:.95rem">${esc(s.short || s.brief || '')}</span></summary>${s.brief && s.brief !== s.short ? `<p>${esc(s.brief)}</p>` : ''}<a class="btn sm" href="#/sessioni/${s.n}">Apri la sessione →</a></details>`).join('')}` : ''}</div>`;
     if (arcs.length) h += `<div class="card"><h2>Archi narrativi</h2>${arcs.map(a => `<details class="arc"><summary>${esc(a.title)}<small>${a.from != null ? 'sessioni ' + a.from + '–' + (a.to ?? '…') : ''}</small></summary>${prose(a.summary)}</details>`).join('')}</div>`;
   }
   setView(h);
+  // ritratti del gruppo a piena risoluzione
+  document.querySelectorAll('.party img[data-pid]').forEach(im => dbGet('blobs', im.dataset.pid).then(rec => { if (!rec?.blob) return; const u = URL.createObjectURL(rec.blob); im.src = u; onCleanup(() => URL.revokeObjectURL(u)); }).catch(() => { }));
   setActs({
     rename: async () => { const r = await formDlg({ title: 'Nome della campagna', fields: [{ k: 'name', label: 'Nome', value: camp.name, req: true }] }); if (r) { await setMeta('campaign', { ...camp, name: r.name.trim() }); $('#campName').textContent = r.name.trim(); rerender(); } },
     copyctx: copyContextFlow,
@@ -1187,7 +1299,7 @@ route(/^\/sessioni$/, async () => {
     <div class="filters"><input type="search" id="sq" placeholder="Filtra per titolo o testo breve…"><span class="hint" id="scnt">${items.length} sessioni</span></div><div id="slist"></div>`);
   if (!items.length) { $('#slist').outerHTML = `<div class="empty">Nessuna sessione ancora. Arriveranno con la prima importazione.</div>`; }
   else {
-    const vl = vlist($('#slist'), items, 78, s => `<a class="erow" href="#/sessioni/${s.n}"><div class="num">${s.n}</div><div class="main"><div class="t">${esc(s.title || 'Sessione ' + s.n)}${ongoingPill(s)} ${s.arc ? `<small>· ${esc(arcName(s.arc))}</small>` : ''}</div><div class="b">${esc(s.short || s.brief)}</div></div><button class="icb" data-act="rensess" data-n="${s.n}" title="Rinomina la sessione">✎</button><div class="r" style="min-width:150px">${esc(s.date || '')}${s.gameDate ? '<br>' + esc(s.gameDate) : ''}</div></a>`);
+    const vl = vlist($('#slist'), items, 78, s => `<a class="erow" href="#/sessioni/${s.n}"><div class="num">${s.n}</div><div class="main"><div class="t">${esc(s.title || 'Sessione ' + s.n)}${ongoingPill(s)} ${s.arc ? `<small>· ${esc(arcName(s.arc))}</small>` : ''}</div><div class="b">${esc(s.short || s.brief)}</div>${s.gameDate || s.date ? `<div class="d">${esc([s.gameDate, s.date].filter(Boolean).join(' · '))}</div>` : ''}</div><button class="icb" data-act="rensess" data-n="${s.n}" title="Rinomina la sessione">✎</button><div class="r" style="min-width:150px">${esc(s.date || '')}${s.gameDate ? '<br>' + esc(s.gameDate) : ''}</div></a>`);
     $('#sq').oninput = e => { const q = fold(e.target.value); const f = q ? items.filter(s => fold(s.title + ' ' + s.brief + ' ' + s.n).includes(q)) : items; vl.setItems(f); $('#scnt').textContent = f.length + ' sessioni'; };
   }
   setActs({ newsess: () => editSessionDlg(null), rensess: a => renameSession(+a.dataset.n) });
@@ -1220,13 +1332,13 @@ route(/^\/sessioni\/(\d+)$/, async ([ns]) => {
   const ents = [...S.ents.values()].filter(e => e.sessions?.includes(n));
   const grp = TYPE_ORDER.map(t => [t, ents.filter(e => e.type === t).sort((a, c) => a.name.localeCompare(c.name))]).filter(x => x[1].length);
   const prev = S.sess.filter(x => x.n < n).pop(), next = S.sess.find(x => x.n > n);
-  setView(`<div class="pagehead"><div style="flex:1"><nav class="sessnav" aria-label="Sessioni vicine">${prev ? `<a href="#/sessioni/${prev.n}" rel="prev">← Sessione ${prev.n}</a>` : ''}${next ? `<a href="#/sessioni/${next.n}" rel="next">Sessione ${next.n} →</a>` : ''}</nav><h1>${n}. ${esc(s.title || 'Sessione ' + n)}${ongoingPill(s)}</h1><div class="hint">${[s.date, s.gameDate && 'in gioco: ' + s.gameDate, s.arc && 'arco: ' + arcName(s.arc)].filter(Boolean).map(esc).join(' · ')}</div></div>
+  setView(`<div class="pagehead"><div style="flex:1"><nav class="sessnav" aria-label="Sessioni vicine">${prev ? `<a href="#/sessioni/${prev.n}" rel="prev">← Sessione ${prev.n}</a>` : ''}${next ? `<a href="#/sessioni/${next.n}" rel="next">Sessione ${next.n} →</a>` : ''}</nav>${prev || next ? `<nav class="sessfab" aria-label="Sessione precedente o successiva">${prev ? `<a href="#/sessioni/${prev.n}" title="Sessione ${prev.n}">‹ ${prev.n}</a>` : ''}${next ? `<a href="#/sessioni/${next.n}" title="Sessione ${next.n}">${next.n} ›</a>` : ''}</nav>` : ''}<h1>${n}. ${esc(s.title || 'Sessione ' + n)}${ongoingPill(s)}</h1><div class="hint">${[s.date, s.gameDate && 'in gioco: ' + s.gameDate, s.arc && 'arco: ' + arcName(s.arc)].filter(Boolean).map(esc).join(' · ')}</div></div>
       <div class="acts"><button class="btn" data-act="rensess" data-n="${n}">Rinomina</button><button class="btn" data-act="edit">Modifica</button><button class="btn danger" data-act="del">Elimina</button></div></div><div class="orn"></div>
-    <div class="card"><h2>Riassunto</h2>${b.summary ? prose(b.summary) : '<p class="empty">Nessun riassunto.</p>'}</div>
-    ${evs.length ? `<div class="card"><h2>Momenti chiave</h2>${evs.map(e => `<div class="entry"><div class="tag">${e.idx + 1}</div><div class="tx"><b>${esc(e.title)}</b>${e.gameDate ? ` <small>${esc(e.gameDate)}</small>` : ''}${prose(e.text)}${e.ents?.length ? `<div class="chips">${e.ents.filter(i => S.ents.has(i)).map(i => `<a class="chip" href="#/scheda/${encodeURIComponent(i)}">${esc(S.ents.get(i).name)}</a>`).join('')}</div>` : ''}</div></div>`).join('')}</div>` : ''}
+    <div class="card cap"><h2>Riassunto</h2>${b.summary ? prose(b.summary) : '<p class="empty">Nessun riassunto.</p>'}</div>
+    ${evs.length ? `<div class="card tl"><h2>Momenti chiave</h2>${evs.map(e => `<div class="entry"><div class="tag" data-n="${e.idx + 1}">${e.idx + 1}</div><div class="tx"><b>${esc(e.title)}</b>${e.gameDate ? ` <small>${esc(e.gameDate)}</small>` : ''}${prose(e.text)}${e.ents?.length ? `<div class="chips">${e.ents.filter(i => S.ents.has(i)).map(i => `<a class="chip" href="#/scheda/${encodeURIComponent(i)}">${esc(S.ents.get(i).name)}</a>`).join('')}</div>` : ''}</div></div>`).join('')}</div>` : ''}
     ${grp.length ? `<div class="card"><h2>Schede di questa sessione</h2>${grp.map(([t, l]) => `<p>${badge(t)} <span class="chips" style="display:inline-flex">${l.map(e => `<a class="chip" href="#/scheda/${encodeURIComponent(e.id)}">${esc(e.name)}</a>`).join('')}</span></p>`).join('')}</div>` : ''}
-    <div class="card"><div class="spread"><h2>Documenti allegati</h2><button class="btn sm" data-act="attach">+ Allega testo</button></div>
-      ${b.docs?.length ? b.docs.map((d, i) => `<details class="arc"><summary>${esc(d.name)}<small>${fmtSize(d.text.length)}</small></summary><div class="row" style="margin:6px 0"><button class="btn sm" data-act="delDoc" data-i="${i}">Rimuovi</button><button class="btn sm ghost" data-act="cpDoc" data-i="${i}">Copia testo</button></div><div class="prose"><p style="white-space:pre-wrap">${esc(d.text.length > 20000 ? d.text.slice(0, 20000) + '\n\n[… testo troncato nella visualizzazione: ' + d.text.length + ' caratteri totali]' : d.text)}</p></div></details>`).join('') : '<p class="hint">Qui puoi tenere il testo originale della sessione (.txt, .md, .docx, oppure incollato) come riferimento. I PDF vanno copiati e incollati.</p>'}</div>`);
+    ${!window.__RO || b.docs?.length ? `<div class="card"><div class="spread"><h2>Documenti allegati</h2><button class="btn sm" data-act="attach">+ Allega testo</button></div>
+      ${b.docs?.length ? b.docs.map((d, i) => `<details class="arc"><summary>${esc(d.name)}<small>${fmtSize(d.text.length)}</small></summary><div class="row" style="margin:6px 0"><button class="btn sm" data-act="delDoc" data-i="${i}">Rimuovi</button><button class="btn sm ghost" data-act="cpDoc" data-i="${i}">Copia testo</button></div><div class="prose"><p style="white-space:pre-wrap">${esc(d.text.length > 20000 ? d.text.slice(0, 20000) + '\n\n[… testo troncato nella visualizzazione: ' + d.text.length + ' caratteri totali]' : d.text)}</p></div></details>`).join('') : '<p class="hint">Qui puoi tenere il testo originale della sessione (.txt, .md, .docx, oppure incollato) come riferimento. I PDF vanno copiati e incollati.</p>'}</div>` : ''}`);
   setActs({
     rensess: () => renameSession(n),
     edit: () => editSessionDlg(n),
@@ -1256,7 +1368,7 @@ route(/^\/schede$/, async (_, q) => {
   $('#esort').value = ES.sort;
   if (!S.ents.size) { $('#elist').outerHTML = '<div class="empty">Nessuna scheda ancora.</div>'; }
   else {
-    const vl = vlist($('#elist'), [], 70, e => `${ES.selMode ? `<div class="erow pick ${ES.sel.has(e.id) ? 'on' : ''}" data-pick="${esc(e.id)}" role="checkbox" aria-checked="${ES.sel.has(e.id)}" tabindex="0"><input type="checkbox" tabindex="-1" ${ES.sel.has(e.id) ? 'checked' : ''} aria-hidden="true">` : `<a class="erow" href="#/scheda/${encodeURIComponent(e.id)}">`}${e.portrait ? `<img class="av" src="${e.portrait.thumb}" alt="">` : ''}${badge(e.type)}<div class="main"><div class="t">${esc(e.name)} ${e.alias?.length ? `<small>${esc(e.alias.slice(0, 2).join(', '))}</small>` : ''} ${catPills(e)}</div><div class="b">${esc(e.brief)}</div></div><div class="r">${e.status ? `<span class="pill ${e.discovered === false ? 'warn' : ''}">${esc(e.status)}</span><br>` : ''}${e.discovered === false ? '<span class="pill warn">non scoperto</span><br>' : ''}${esc(rangeTxt(e.sessions))}</div>${ES.selMode ? '</div>' : '</a>'}`);
+    const vl = vlist($('#elist'), [], 70, e => `${ES.selMode ? `<div class="erow pick ${ES.sel.has(e.id) ? 'on' : ''}" data-pick="${esc(e.id)}" role="checkbox" aria-checked="${ES.sel.has(e.id)}" tabindex="0"><input type="checkbox" tabindex="-1" ${ES.sel.has(e.id) ? 'checked' : ''} aria-hidden="true">` : `<a class="erow" href="#/scheda/${encodeURIComponent(e.id)}">`}${e.portrait ? `<img class="av" src="${e.portrait.thumb}" alt="">` : ''}${badge(e.type)}<div class="main"><div class="t">${esc(e.name)} ${e.alias?.length ? `<small>${esc(e.alias.slice(0, 2).join(', '))}</small>` : ''} ${catPills(e)}</div><div class="b">${esc(e.brief)}</div>${e.status || e.sessions?.length || e.discovered === false ? `<div class="d">${esc([e.status, e.discovered === false && 'non scoperto', rangeTxt(e.sessions)].filter(Boolean).join(' · '))}</div>` : ''}</div><div class="r">${e.status ? `<span class="pill ${e.discovered === false ? 'warn' : ''}">${esc(e.status)}</span><br>` : ''}${e.discovered === false ? '<span class="pill warn">non scoperto</span><br>' : ''}${esc(rangeTxt(e.sessions))}</div>${ES.selMode ? '</div>' : '</a>'}`);
     let shown = [];
     const selInfo = () => { const c = $('#selcnt'); if (c) c.textContent = ES.sel.size === 1 ? '1 scheda selezionata' : ES.sel.size + ' schede selezionate'; };
     const apply = () => {
@@ -1321,11 +1433,11 @@ async function createEntity({ type, name, brief = '', status = '', discovered = 
 /* ================= SCHEDA: dettaglio ================= */
 function entrySecHtml(sec, si, editable = true) {
   const n = sec.entries.length, KEEP = 8;
-  const ent = (en, ei) => `<div class="entry"><div class="tag">${en.n != null ? sessLink(en.n) : '·'}</div><div class="tx">${prose(en.text)}</div><div class="eacts"><button class="icb" data-act="editEntry" data-si="${si}" data-ei="${ei}" title="Modifica">✎</button><button class="icb" data-act="delEntry" data-si="${si}" data-ei="${ei}" title="Elimina">✕</button></div></div>`;
+  const ent = (en, ei) => `<div class="entry"><div class="tag${en.n != null ? '' : ' dot'}">${en.n != null ? sessLink(en.n) : '·'}</div><div class="tx">${en.text.length > 1400 ? `<div class="fold">${prose(en.text)}</div><button type="button" class="more" data-act="unfold">Leggi tutto</button>` : prose(en.text)}</div><div class="eacts"><button class="icb" data-act="editEntry" data-si="${si}" data-ei="${ei}" title="Modifica">✎</button><button class="icb" data-act="delEntry" data-si="${si}" data-ei="${ei}" title="Elimina">✕</button></div></div>`;
   let body;
   if (n > KEEP + 2) body = `<details class="older"><summary class="hint" style="cursor:pointer;margin:4px 0 8px">Mostra le ${n - KEEP} voci precedenti</summary>${sec.entries.slice(0, n - KEEP).map((e, i) => ent(e, i)).join('')}</details>${sec.entries.slice(n - KEEP).map((e, i) => ent(e, n - KEEP + i)).join('')}`;
   else body = sec.entries.map(ent).join('') || '<p class="hint">Sezione vuota.</p>';
-  return `<details class="sec" open><summary>${esc(sec.title)} <span class="cnt">${n > 1 ? n + ' voci' : ''}</span><span class="sp"></span><button class="icb" data-act="addEntry" data-si="${si}" title="Aggiungi voce">＋</button><button class="icb" data-act="renSec" data-si="${si}" title="Rinomina">✎</button><button class="icb" data-act="delSec" data-si="${si}" title="Elimina sezione">✕</button></summary>${body}</details>`;
+  return `<details class="sec" open id="sec-${si}"><summary>${esc(sec.title)} <span class="cnt">${n > 1 ? n + ' voci' : ''}</span><span class="sp"></span><button class="icb" data-act="addEntry" data-si="${si}" title="Aggiungi voce">＋</button><button class="icb" data-act="renSec" data-si="${si}" title="Rinomina">✎</button><button class="icb" data-act="delSec" data-si="${si}" title="Elimina sezione">✕</button></summary>${body}</details>`;
 }
 async function mutBody(id, fn) {
   await runBatch(['bodies', 'entities'], '', async t => {
@@ -1342,16 +1454,25 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
   evs.sort((a, c) => a.n - c.n || a.idx - c.idx);
   const chipE = (i, lab) => { const x = S.ents.get(i); return x ? `<a class="chip" href="#/scheda/${encodeURIComponent(i)}">${esc(x.name)}</a>` : ''; };
   const mapsOf = pins.map(p => ({ p, m: S.maps.find(m => m.id === p.mapId) })).filter(x => x.m);
+  const toc = [...b.sections.map((sc, i) => [sc.title.replace(/\s*\(.*\)$/, ''), 'sec-' + i]), ['Collegamenti', 'sec-rel'], ...(evs.length ? [['Eventi', 'sec-ev']] : [])];
   setView(`<div class="card ehead ${e.portrait ? 'hasp' : ''}">${e.portrait ? `<img class="portrait" src="${e.portrait.thumb}" data-act="viewportrait" alt="${esc(e.name)}" title="Ingrandisci">` : ''}<div class="ehb"><div class="meta">${badge(e.type)}${e.status ? `<span class="pill">${esc(e.status)}</span>` : ''}${catPills(e)}${e.discovered === false ? '<span class="pill warn">non scoperto dai giocatori</span>' : ''}<span class="hint">${esc(rangeTxt(e.sessions))}</span></div>
       <h1>${esc(e.name)}</h1>${e.alias?.length ? `<div class="hint">Detto anche: ${e.alias.map(esc).join(', ')}</div>` : ''}${e.brief ? `<div class="brief">${inl(e.brief)}</div>` : ''}
-      <div class="row" style="margin-top:12px"><button class="btn sm" data-act="edit">Modifica dati</button><button class="btn sm" data-act="addSec">+ Sezione</button><button class="btn sm ghost" data-act="copyEnt">Copia per Claude</button>${[...M.regions.values()].filter(r => r.entityId === id).map(r => `<a class="btn sm" href="#/mappe/${encodeURIComponent(r.mapId)}?reg=${encodeURIComponent(r.id)}">Vedi sulla mappa</a>`).join('')}<button class="btn sm" data-act="portrait">${e.portrait ? 'Cambia ritratto' : '+ Ritratto'}</button><button class="btn sm ghost" data-act="merge">Unisci in un'altra scheda</button><button class="btn sm danger" data-act="del">Elimina</button></div></div></div>
+      </div><div class="row eheadacts"><button class="btn sm" data-act="edit">Modifica dati</button><button class="btn sm" data-act="addSec">+ Sezione</button><button class="btn sm ghost" data-act="copyEnt">Copia per Claude</button>${[...M.regions.values()].filter(r => r.entityId === id).map(r => `<a class="btn sm" href="#/mappe/${encodeURIComponent(r.mapId)}?reg=${encodeURIComponent(r.id)}">Vedi sulla mappa</a>`).join('')}<button class="btn sm" data-act="portrait">${e.portrait ? 'Cambia ritratto' : '+ Ritratto'}</button><button class="btn sm ghost" data-act="merge">Unisci in un'altra scheda</button><button class="btn sm danger" data-act="del">Elimina</button></div></div>
+    ${toc.length > 2 ? `<nav class="toc" aria-label="Sezioni della scheda">${toc.map(([t, k]) => `<button type="button" data-act="goto" data-to="${k}">${esc(t)}</button>`).join('')}</nav>` : ''}
     <div class="card">${b.sections.length ? b.sections.map((s, i) => entrySecHtml(s, i)).join('') : `<p class="empty">${window.__RO ? 'Nessuna informazione su questa scheda, per ora.' : 'Nessun contenuto ancora. Verrà riempita dalle importazioni, oppure aggiungi una sezione a mano.'}</p>`}</div>
-    <div class="grid2"><div class="card"><div class="spread"><h2>Collegamenti</h2><button class="btn sm" data-act="addRel">+ Collega</button></div>
+    <div class="grid2"><div class="card" id="sec-rel"><div class="spread"><h2>Collegamenti</h2><button class="btn sm" data-act="addRel">+ Collega</button></div>
       ${outL.length || inL.length ? `${outL.map(l => `<div class="rel"><span class="lab">${esc(l.label || 'collegata a')}</span>${chipE(l.to)}<button class="icb" data-act="delRel" data-k="${esc(l.k)}">✕</button></div>`).join('')}${inL.map(l => `<div class="rel">${chipE(l.from)}<span class="lab">${esc(l.label || 'collegata a')} → questa scheda</span><button class="icb" data-act="delRel" data-k="${esc(l.k)}">✕</button></div>`).join('')}` : '<p class="hint">Nessun collegamento.</p>'}</div>
       <div class="card"><h2>Apparizioni</h2>${sessChips(e.sessions)}
       ${mapsOf.length ? `<h2 style="margin-top:14px">Sulle mappe</h2><div class="chips">${mapsOf.map(({ p, m }) => `<a class="chip" href="#/mappe/${encodeURIComponent(m.id)}?pin=${encodeURIComponent(p.id)}">${esc(m.name)}</a>`).join('')}</div>${mapsOf.some(x => x.p.photos?.length) ? `<div class="gallery" style="margin-top:10px">${mapsOf.flatMap(({ p, m }) => (p.photos || []).map(ph => `<a class="gph" href="#/mappe/${encodeURIComponent(m.id)}?pin=${encodeURIComponent(p.id)}" title="Vedi sulla mappa «${esc(m.name)}»"><img src="${ph.thumb}" alt="${esc(ph.name ? ph.name.replace(/\.[a-z0-9]+$/i, '') : 'Foto di ' + e.name)}"></a>`)).join('')}</div>` : ''}` : ''}
       ${e.type === 'luogo' ? `<div style="margin-top:14px"><label class="chk"><input type="checkbox" data-act="toggleDisc" ${e.discovered !== false ? 'checked' : ''}> Scoperto dai giocatori</label></div>` : ''}</div></div>
-    ${evs.length ? `<div class="card"><h2>Eventi</h2>${evs.map(v => `<div class="entry"><div class="tag">${sessLink(v.n)}</div><div class="tx"><b>${esc(v.title)}</b>${prose(v.text)}</div></div>`).join('')}</div>` : ''}`);
+    ${evs.length ? `<div class="card" id="sec-ev"><h2>Eventi</h2>${evs.map(v => `<div class="entry"><div class="tag">${sessLink(v.n)}</div><div class="tx"><b>${esc(v.title)}</b>${prose(v.text)}</div></div>`).join('')}</div>` : ''}`);
+  if (e.portrait) dbGet('blobs', e.portrait.id).then(rec => { const im = $('.ehead .portrait'); if (!rec?.blob || !im) return; const u = URL.createObjectURL(rec.blob); im.onload = () => im.closest('.ehead')?.classList.add('sharp'); im.src = u; onCleanup(() => URL.revokeObjectURL(u)); }).catch(() => { });
+  const tocEl = $('.toc');
+  if (tocEl) {
+    const marks = toc.map(([, k]) => document.getElementById(k)).filter(Boolean);
+    const onScr = () => { const y = innerHeight * .3; let cur = marks[0]; for (const m of marks) if (m.getBoundingClientRect().top < y) cur = m; tocEl.querySelectorAll('button').forEach(x => { const on = x.dataset.to === cur?.id; if (on && !x.classList.contains('on')) x.scrollIntoView({ block: 'nearest', inline: 'center' }); x.classList.toggle('on', on); }); };
+    addEventListener('scroll', onScr, { passive: true }); onCleanup(() => removeEventListener('scroll', onScr)); onScr();
+  }
   const edEntry = async (a, add) => {
     const si = +a.dataset.si, ei = add ? -1 : +a.dataset.ei; const cur = add ? null : b.sections[si].entries[ei];
     const r = await formDlg({ title: add ? `Nuova voce in «${b.sections[si].title}»` : 'Modifica voce', wide: true, fields: [{ k: 'text', label: 'Testo', type: 'textarea', rows: 10, value: cur?.text || '', req: true }, { k: 'n', label: 'Sessione (vuoto = nessuna)', type: 'number', value: add ? lastSessionN() : cur.n }] });
@@ -1383,6 +1504,8 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
     addSec: async () => { const r = await formDlg({ title: 'Nuova sezione', wide: true, fields: [{ k: 'title', label: 'Titolo', req: true, placeholder: 'Background, Storia personale…' }, { k: 'text', label: 'Testo', type: 'textarea', rows: 8 }, { k: 'n', label: 'Sessione (vuoto = nessuna)', type: 'number', value: null }] }); if (!r) return; await mutBody(id, bd => { bd.sections.push({ title: r.title.trim(), entries: r.text.trim() ? [{ n: r.n, text: r.text.trim() }] : [] }); }); rerender(); },
     renSec: async a => { const si = +a.dataset.si; const r = await formDlg({ title: 'Rinomina sezione', fields: [{ k: 't', label: 'Titolo', value: b.sections[si].title, req: true }] }); if (!r) return; await mutBody(id, bd => { bd.sections[si].title = r.t.trim(); }); rerender(); },
     delSec: async a => { const si = +a.dataset.si; if (!await ask(`Eliminare la sezione **${b.sections[si].title}** e le sue ${b.sections[si].entries.length} voci?`, { danger: true, ok: 'Elimina' })) return; await mutBody(id, bd => { bd.sections.splice(si, 1); }); rerender(); },
+    goto: a => document.getElementById(a.dataset.to)?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+    unfold: a => { a.previousElementSibling?.classList.remove('fold'); a.remove(); },
     addEntry: a => edEntry(a, true), editEntry: a => edEntry(a, false),
     delEntry: async a => { if (!await ask('Eliminare questa voce?', { danger: true, ok: 'Elimina' })) return; await mutBody(id, bd => { bd.sections[+a.dataset.si].entries.splice(+a.dataset.ei, 1); }); rerender(); },
     addRel: async () => { ensureEntList(); const r = await formDlg({ title: 'Nuovo collegamento', fields: [{ k: 'to', label: 'Con la scheda', list: 'dl-ents', req: true }, { k: 'label', label: 'Tipo di relazione', placeholder: 'alleato di, vive a, possiede…' }] }); if (!r) return; const t = pickEntity(r.to); if (!t || t.id === id) { toast('Scheda non trovata', 'err'); return; } const lab = r.label.trim(); await runBatch(['links'], '', async x => x.put('links', { k: id + '|' + t.id + '|' + norm(lab), from: id, to: t.id, label: lab })); rerender(); },
