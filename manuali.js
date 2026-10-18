@@ -3,34 +3,12 @@
    Usa le funzioni della pagina principale (route, setView, esc…). */
 (() => {
   'use strict';
-  // idx: voci dell'indice con il numero di pagina stampato sul libro; off: pagine del flipbook prima della pagina 1 stampata
   const MANUALI = [
-    { id: 'giocatore', dm: false, off: 0, title: 'Manuale del Giocatore', sub: 'D&D 5ª edizione', desc: 'Le regole base: creazione del personaggio, razze, classi, incantesimi, equipaggiamento e combattimento.', url: 'https://online.anyflip.com/piwcj/iafx/mobile/index.html',
-      idx: [['Introduzione', 5], ['Cap. 1 · Creare un personaggio passo per passo', 11], ['Livelli e punti esperienza', 15],
-        ['Cap. 2 · Razze', 17], ['Nano', 18], ['Elfo', 21], ['Halfling', 26], ['Umano', 29], ['Dragonide', 32], ['Gnomo', 35], ['Mezzelfo', 38], ['Mezzorco', 40], ['Tiefling', 42],
-        ['Cap. 3 · Classi', 45], ['Barbaro', 46], ['Bardo', 51], ['Chierico', 56], ['Druido', 64], ['Guerriero', 70], ['Monaco', 76], ['Paladino', 82], ['Ranger', 89], ['Ladro', 94], ['Stregone', 99], ['Warlock', 105], ['Mago', 112],
-        ['Cap. 4 · Personalità e background', 121], ['Allineamento', 122], ['Ispirazione', 125], ['Background', 125],
-        ['Cap. 5 · Equipaggiamento', 143], ['Armature e scudi', 144], ['Armi', 146], ['Equipaggiamento da avventuriero', 148], ['Strumenti', 154], ['Cavalcature e veicoli', 155], ['Merci e servizi, stile di vita', 157],
-        ['Cap. 6 · Opzioni di personalizzazione', 163], ['Multiclasse', 163], ['Talenti', 165],
-        ['Cap. 7 · Usare i punteggi di caratteristica', 171], ['Prove di caratteristica e abilità', 174], ['Tiri salvezza', 179],
-        ['Cap. 8 · Avventura', 181], ['Viaggio e movimento', 181], ['Ambiente, luce e visione', 183], ['Riposo breve e lungo', 186],
-        ['Cap. 9 · Combattimento', 189], ['Iniziativa e ordine di combattimento', 189], ['Azioni in combattimento', 192], ['Attaccare, copertura', 193], ['Danni e guarigione, morte', 196], ['Combattimento in sella e sott\'acqua', 198],
-        ['Cap. 10 · Lanciare incantesimi', 201], ['Cap. 11 · Incantesimi: liste per classe', 207], ['Descrizioni degli incantesimi (A–Z)', 211],
-        ['Appendice A · Condizioni', 290], ['Appendice B · Divinità del multiverso', 293], ['Appendice C · I piani di esistenza', 300], ['Appendice D · Statistiche delle creature', 304], ['Appendice E · Letture d\'ispirazione', 312]] },
-    { id: 'tasha', dm: false, off: 0, title: 'Calderone Omnicomprensivo di Tasha', sub: 'Espansione per i giocatori', desc: 'Opzioni di classe aggiuntive, sottoclassi, personalizzazione delle origini, nuovi incantesimi e oggetti magici.', url: 'https://online.anyflip.com/jzhjh/dako/mobile/index.html',
-      idx: [['Cap. 1 · Opzioni del personaggio', 7], ['Personalizzare l\'origine', 7], ['Artefice', 9], ['Barbaro', 24], ['Bardo', 27], ['Chierico', 30], ['Druido', 35], ['Guerriero', 41], ['Monaco', 48], ['Paladino', 52], ['Ranger', 56], ['Ladro', 62], ['Stregone', 65], ['Warlock', 70], ['Mago', 75], ['Talenti', 79],
-        ['Cap. 2 · Patroni del gruppo', 85], ['Cap. 3 · Miscellanea magica', 105], ['Incantesimi', 106], ['Oggetti magici', 114], ['Cap. 4 · Strumenti del Dungeon Master', 141]] },
-    { id: 'xanathar', dm: false, off: 0, title: 'Guida Omnicomprensiva di Xanathar', sub: 'Espansione per i giocatori', desc: 'Nuove sottoclassi, talenti razziali, incantesimi e strumenti per arricchire la storia del personaggio.', url: 'https://online.anyflip.com/fqnfa/gmdk/mobile/index.html',
-      idx: [['Cap. 1 · Opzioni del personaggio', 7], ['Barbaro', 8], ['Bardo', 14], ['Chierico', 18], ['Druido', 22], ['Guerriero', 28], ['Monaco', 33], ['Paladino', 37], ['Ranger', 40], ['Ladro', 45], ['Stregone', 48], ['Warlock', 54], ['Mago', 59],
-        ['Questa è la tua vita (origini del personaggio)', 61], ['Talenti razziali', 73],
-        ['Cap. 2 · Strumenti del Dungeon Master', 77], ['Cap. 3 · Incantesimi', 147], ['Appendice A · Campagne condivise', 172], ['Appendice B · Nomi dei personaggi', 175]] },
-    { id: 'mostri', dm: true, off: 0, title: 'Manuale dei Mostri', sub: 'D&D 5ª edizione', desc: 'Le statistiche e il comportamento delle creature da mettere contro il party.', url: 'https://online.anyflip.com/fqnfa/ltch/mobile/index.html',
-      idx: [['Introduzione · come leggere le statistiche', 4], ['Mostri dalla A alla Z', 11], ['Appendice A · Creature varie (animali e bestie)', 317], ['Appendice B · Personaggi non giocanti', 342]] }
+    { id: 'giocatore', dm: false, title: 'Manuale del Giocatore', sub: 'D&D 5ª edizione', desc: 'Le regole base: creazione del personaggio, razze, classi, incantesimi, equipaggiamento e combattimento.', url: 'https://online.anyflip.com/piwcj/iafx/mobile/index.html' },
+    { id: 'tasha', dm: false, title: 'Calderone Omnicomprensivo di Tasha', sub: 'Espansione per i giocatori', desc: 'Opzioni di classe aggiuntive, sottoclassi, personalizzazione delle origini, nuovi incantesimi e oggetti magici.', url: 'https://online.anyflip.com/jzhjh/dako/mobile/index.html' },
+    { id: 'xanathar', dm: false, title: 'Guida Omnicomprensiva di Xanathar', sub: 'Espansione per i giocatori', desc: 'Nuove sottoclassi, talenti razziali, incantesimi e strumenti per arricchire la storia del personaggio.', url: 'https://online.anyflip.com/fqnfa/gmdk/mobile/index.html' },
+    { id: 'mostri', dm: true, title: 'Manuale dei Mostri', sub: 'D&D 5ª edizione', desc: 'Le statistiche e il comportamento delle creature da mettere contro il party.', url: 'https://online.anyflip.com/fqnfa/ltch/mobile/index.html' }
   ];
-  // la versione «mobile» di AnyFlip ignora #p= e riparte dalla copertina: per saltare a una pagina si usa l'indirizzo principale del libro
-  const pageUrl = (m, p) => p ? `${m.url.replace(/mobile\/index\.html$/, '')}#p=${p + m.off}` : m.url;
-  // immagini delle singole pagine pubblicate da AnyFlip (stessi percorsi dei flipbook FlipHTML5); si provano in ordine
-  const pageImgs = (m, p) => { const b = m.url.replace(/mobile\/index\.html$/, ''), n = p + m.off; return [`${b}files/large/${n}.jpg`, `${b}files/mobile/${n}.jpg`, `${b}files/large/${n}.webp`]; };
   const visibili = () => MANUALI.filter(m => !m.dm || !window.__RO);
 
   const CSS = `.man-sec{margin:4px 0 10px;font-size:1.05rem}
@@ -40,96 +18,45 @@
 .man-card .sub{font-size:.85rem;color:var(--mute);margin-top:-4px}
 .man-card p{margin:0;flex:1}
 .man-card .acts{display:flex;gap:8px;flex-wrap:wrap}
-.man-find{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
-.man-find input{flex:1 1 220px;min-width:0;padding:9px 12px;border:1px solid var(--line2);border-radius:4px;background:var(--paper);color:var(--ink);font:inherit}
-.man-find select{padding:8px;border:1px solid var(--line2);border-radius:4px;background:var(--paper);color:var(--ink);font:inherit}
-.man-go{display:flex;gap:6px;align-items:center}
-.man-go input{width:5.5em;padding:7px 8px;border:1px solid var(--line2);border-radius:4px;background:var(--paper);color:var(--ink);font:inherit}
-.man-res{margin:6px 0 20px;padding:0;list-style:none}
-.man-res li a{display:flex;gap:10px;align-items:baseline;padding:8px 10px;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink)}
-.man-res li a:hover{background:var(--paper2)}
-.man-res .t{flex:1}.man-res .m{font-size:.85rem;color:var(--mute)}.man-res .p{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--wine)}
-.man-idx{columns:2 260px;column-gap:24px;margin:0;padding:0;list-style:none}
-.man-idx li{break-inside:avoid}
-.man-idx a{display:flex;gap:8px;padding:3px 0;text-decoration:none;color:var(--ink)}
-.man-idx a:hover .t{text-decoration:underline}
-.man-idx .t{flex:1}.man-idx .p{color:var(--wine);font-variant-numeric:tabular-nums}
-.man-idx li.ch{margin-top:6px;font-weight:600}
-.man-toc{margin:0 0 10px}
-.man-toc summary{cursor:pointer;font-family:var(--display);letter-spacing:.06em;color:var(--wine);padding:4px 0}
-.man-toc .man-idx{margin:8px 0 4px;padding:10px 14px;background:var(--paper);border:1px solid var(--line2);border-radius:5px}
-.man-view{position:relative;width:100%;height:calc(100vh - 210px);min-height:300px;border:1px solid var(--line2);border-radius:5px;overflow:hidden;background:#222;box-shadow:var(--shadow)}
-.man-page{position:absolute;inset:0;overflow:auto;background:#fff;-webkit-overflow-scrolling:touch}
-.man-page img{display:block;width:100%;height:auto;min-height:200px}
-.man-pnav{display:flex;align-items:center;gap:8px;margin:0 0 8px;flex-wrap:wrap}
-.man-pnav span{min-width:6em;text-align:center}
-.man-note{margin:0 0 8px}
-.man-view iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-@media (max-width:1280px){.man-view{height:calc(100vh - 250px)}}
-@media (max-width:760px){.man-head{margin-bottom:6px;gap:6px}.man-head .sessnav{margin-bottom:2px}.man-head .sessnav a{min-height:34px}.man-head h1{font-size:1.15rem;min-width:0}.man-head .hint{display:none}
-  .man-head .acts{width:100%;flex-wrap:nowrap}.man-go label{display:none}.man-go input{width:4.5em}.man-head .acts>a.btn{padding:7px 10px;font-size:.7rem}}`;
+.man-full{position:fixed;left:0;right:0;z-index:30;display:flex;flex-direction:column;background:var(--bg)}
+.man-bar{display:flex;align-items:center;gap:10px;padding:6px max(10px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line2);background:var(--paper)}
+.man-bar b{flex:1;min-width:0;font-family:var(--display);color:var(--wine);line-height:1.2;overflow-wrap:anywhere}
+@media (max-width:620px){.man-bar b{font-size:.85rem}.man-bar .btn{padding:6px 9px;font-size:.68rem}}
+.man-bar .btn{white-space:nowrap}
+.man-full iframe{flex:1;width:100%;border:0;background:#222}
+html.man-open #tools{display:none}`;
   let cssDone = false;
   const css = () => { if (cssDone) return; cssDone = true; const s = document.createElement('style'); s.textContent = CSS; document.head.append(s); };
 
-  const frame = (m, src) => `<iframe src="${esc(src)}" title="${esc(m.title)}" allowfullscreen allow="fullscreen" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+  const anyflip = m => `<a class="btn" href="${esc(m.url)}" target="_blank" rel="noopener">Apri su AnyFlip</a>`;
   const card = m => `<div class="card man-card"><h2>${esc(m.title)}</h2><div class="sub">${esc(m.sub)}</div><p>${esc(m.desc)}</p>
-    <div class="acts"><a class="btn primary" href="#/manuali/${m.id}">Sfoglia</a><a class="btn" href="${esc(m.url)}" target="_blank" rel="noopener">Apri in una nuova scheda</a></div></div>`;
-  const toPage = (m, p) => `#/manuali/${m.id}?p=${p}`;
-  // cerca tra le voci degli indici; un numero da solo porta a quella pagina
-  function find(q, list) {
-    const n = norm(q); if (!n) return [];
-    if (/^\d{1,4}$/.test(n)) return list.map(m => ({ m, t: 'Vai a pagina ' + n, p: +n }));
-    const words = n.split(' ');
-    return list.flatMap(m => m.idx.filter(([t]) => { const x = norm(t); return words.every(w => x.includes(w)); }).map(([t, p]) => ({ m, t, p })));
-  }
+    <div class="acts"><a class="btn primary" href="#/manuali/${m.id}">Sfoglia</a>${anyflip(m)}</div></div>`;
 
-  route(/^\/manuali$/, async (_, q) => {
+  route(/^\/manuali$/, async () => {
     await claude.use('db'); css();
     const vis = visibili(), pg = vis.filter(m => !m.dm), dm = vis.filter(m => m.dm);
     setView(`<div class="pagehead"><h1>Manuali</h1></div><div class="orn"></div>
-      <div class="man-find" role="search"><input id="man-q" type="search" placeholder="Cerca nei manuali: un argomento (es. «talenti», «combattimento») o un numero di pagina" aria-label="Cerca nei manuali" autocomplete="off" value="${esc(q.get('q') || '')}">
-        <select id="man-in" aria-label="In quale manuale"><option value="">Tutti i manuali</option>${vis.map(m => `<option value="${m.id}">${esc(m.title)}</option>`).join('')}</select></div>
-      <ul class="man-res" id="man-res" aria-live="polite"></ul>
       <h2 class="man-sec">Per i giocatori</h2><div class="man-grid">${pg.map(card).join('')}</div>
       ${dm.length ? `<h2 class="man-sec">Solo per il Dungeon Master</h2><div class="man-grid">${dm.map(card).join('')}</div>` : ''}`);
-    const inp = $('#man-q'), sel = $('#man-in'), out = $('#man-res');
-    const show = () => {
-      const list = sel.value ? vis.filter(m => m.id === sel.value) : vis, r = find(inp.value, list);
-      out.innerHTML = !norm(inp.value) ? '' : r.length ? r.slice(0, 60).map(x => `<li><a href="${toPage(x.m, x.p)}"><span class="t">${esc(x.t)}</span><span class="m">${esc(x.m.title)}</span><span class="p">p. ${x.p}</span></a></li>`).join('')
-        : `<li class="hint" style="padding:8px 10px">Nessuna voce trovata. Prova un'altra parola, oppure scrivi il numero di pagina.</li>`;
-    };
-    inp.oninput = show; sel.onchange = show; show();
-    inp.onkeydown = e => { if (e.key === 'Enter') { const a = out.querySelector('a'); if (a) location.hash = a.getAttribute('href'); } };
   });
 
-  route(/^\/manuali\/([\w-]+)$/, async ([id], q) => {
+  // il libro occupa esattamente lo spazio tra l'intestazione e la barra delle sezioni: niente scorrimento della pagina,
+  // così il dito dentro il libro usa solo i comandi di AnyFlip
+  route(/^\/manuali\/([\w-]+)$/, async ([id]) => {
     await claude.use('db'); css();
     const m = visibili().find(x => x.id === id);
     if (!m) { setView(`<div class="empty"><h2>Manuale non trovato</h2><p><a href="#/manuali">Torna ai manuali</a></p></div>`); return; }
-    const p = Math.max(0, parseInt(q.get('p'), 10) || 0), src = pageUrl(m, p);
-    setView(`<div class="pagehead man-head"><div style="flex:1"><nav class="sessnav" aria-label="Manuali"><a href="#/manuali">← Tutti i manuali</a></nav><h1>${esc(m.title)}</h1><div class="hint">${esc(m.sub)}${p ? ' · pagina ' + p : ''}</div></div>
-      <div class="acts"><form class="man-go" id="man-go"><label for="man-p">Vai a pagina</label><input id="man-p" type="number" min="1" inputmode="numeric" value="${p || ''}"><button class="btn" type="submit">Vai</button></form><a class="btn" href="${esc(src)}" target="_blank" rel="noopener" title="Se il manuale non si carica qui, aprilo direttamente su AnyFlip">Apri in una nuova scheda</a></div></div>
-      <details class="man-toc"><summary>Indice del manuale</summary><ul class="man-idx">${m.idx.map(([t, n]) => `<li class="${/^(Cap\.|Appendice)/.test(t) ? 'ch' : ''}"><a href="${toPage(m, n)}"><span class="t">${esc(t)}</span><span class="p">${n}</span></a></li>`).join('')}</ul></details>
-      ${p ? `<div class="man-pnav"><a class="btn" href="${toPage(m, Math.max(1, p - 1))}" aria-label="Pagina precedente">‹ ${Math.max(1, p - 1)}</a><span>Pagina <b>${p}</b></span><a class="btn" href="${toPage(m, p + 1)}" aria-label="Pagina successiva">${p + 1} ›</a><button class="btn ghost" type="button" id="man-book">Sfoglia il libro</button></div>` : ''}
-      <div class="man-view">${p ? `<div class="man-page"><img id="man-img" alt="Pagina ${p} di ${esc(m.title)}" referrerpolicy="no-referrer"></div>` : frame(m, src)}</div>`);
-    // il libro occupa tutto lo spazio visibile fino alla barra in basso: così sul telefono non serve scorrere la pagina
-    // e il dito dentro il libro sfoglia, invece di contendersi lo scorrimento con il sito
+    setView(`<h1 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">${esc(m.title)}</h1>
+      <div class="man-full"><div class="man-bar"><b>${esc(m.title)}</b>${anyflip(m)}</div>
+      <iframe src="${esc(m.url)}" title="${esc(m.title)}" allowfullscreen allow="fullscreen" referrerpolicy="no-referrer-when-downgrade"></iframe></div>`);
     const fit = () => {
-      const v = $('.man-view'); if (!v) return;
-      const nav = $('#nav'), navH = nav && getComputedStyle(nav).position === 'fixed' ? nav.offsetHeight : 0;
-      v.style.height = Math.max(300, innerHeight - (v.getBoundingClientRect().top + scrollY) - navH - 8) + 'px';
+      const f = $('.man-full'); if (!f) return;
+      const top = $('header.top'), nav = $('#nav');
+      f.style.top = (top ? top.getBoundingClientRect().bottom : 0) + 'px';
+      f.style.bottom = (nav && getComputedStyle(nav).position === 'fixed' ? nav.offsetHeight : 0) + 'px';
     };
-    fit(); addEventListener('resize', fit); onCleanup(() => removeEventListener('resize', fit));
-    $('.man-toc').ontoggle = fit;
-    // con un numero di pagina si mostra l'immagine di quella pagina: il libro animato di AnyFlip riparte sempre dalla copertina.
-    // Se le immagini non sono raggiungibili si torna al libro, con un avviso
-    const book = note => { const v = $('.man-view'); if (!v) return; v.innerHTML = frame(m, src); $('.man-pnav')?.remove(); if (note) v.insertAdjacentHTML('beforebegin', `<p class="hint man-note">${note}</p>`); fit(); };
-    if (p) {
-      const img = $('#man-img'), list = pageImgs(m, p); let i = 0;
-      img.onerror = () => { if (++i < list.length) img.src = list[i]; else book(`Non riesco a mostrare qui la pagina ${p}: il libro parte dalla copertina, usa la barra in basso nel libro per arrivare a pagina ${p}.`); };
-      img.src = list[0];
-      $('#man-book').onclick = () => book('');
-    }
-    $('#man-go').onsubmit = e => { e.preventDefault(); const n = parseInt($('#man-p').value, 10); if (n > 0) location.hash = toPage(m, n); };
+    document.documentElement.classList.add('man-open'); scrollTo(0, 0); fit();
+    addEventListener('resize', fit);
+    onCleanup(() => { removeEventListener('resize', fit); document.documentElement.classList.remove('man-open'); });
   });
 })();
