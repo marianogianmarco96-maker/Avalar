@@ -29,6 +29,8 @@
   ];
   // la versione «mobile» di AnyFlip ignora #p= e riparte dalla copertina: per saltare a una pagina si usa l'indirizzo principale del libro
   const pageUrl = (m, p) => p ? `${m.url.replace(/mobile\/index\.html$/, '')}#p=${p + m.off}` : m.url;
+  // immagini delle singole pagine pubblicate da AnyFlip (stessi percorsi dei flipbook FlipHTML5); si provano in ordine
+  const pageImgs = (m, p) => { const b = m.url.replace(/mobile\/index\.html$/, ''), n = p + m.off; return [`${b}files/large/${n}.jpg`, `${b}files/mobile/${n}.jpg`, `${b}files/large/${n}.webp`]; };
   const visibili = () => MANUALI.filter(m => !m.dm || !window.__RO);
 
   const CSS = `.man-sec{margin:4px 0 10px;font-size:1.05rem}
@@ -57,6 +59,11 @@
 .man-toc summary{cursor:pointer;font-family:var(--display);letter-spacing:.06em;color:var(--wine);padding:4px 0}
 .man-toc .man-idx{margin:8px 0 4px;padding:10px 14px;background:var(--paper);border:1px solid var(--line2);border-radius:5px}
 .man-view{position:relative;width:100%;height:calc(100vh - 210px);min-height:300px;border:1px solid var(--line2);border-radius:5px;overflow:hidden;background:#222;box-shadow:var(--shadow)}
+.man-page{position:absolute;inset:0;overflow:auto;background:#fff;-webkit-overflow-scrolling:touch}
+.man-page img{display:block;width:100%;height:auto;min-height:200px}
+.man-pnav{display:flex;align-items:center;gap:8px;margin:0 0 8px;flex-wrap:wrap}
+.man-pnav span{min-width:6em;text-align:center}
+.man-note{margin:0 0 8px}
 .man-view iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 @media (max-width:1280px){.man-view{height:calc(100vh - 250px)}}
 @media (max-width:760px){.man-head{margin-bottom:6px;gap:6px}.man-head .sessnav{margin-bottom:2px}.man-head .sessnav a{min-height:34px}.man-head h1{font-size:1.15rem;min-width:0}.man-head .hint{display:none}
@@ -64,6 +71,7 @@
   let cssDone = false;
   const css = () => { if (cssDone) return; cssDone = true; const s = document.createElement('style'); s.textContent = CSS; document.head.append(s); };
 
+  const frame = (m, src) => `<iframe src="${esc(src)}" title="${esc(m.title)}" allowfullscreen allow="fullscreen" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
   const card = m => `<div class="card man-card"><h2>${esc(m.title)}</h2><div class="sub">${esc(m.sub)}</div><p>${esc(m.desc)}</p>
     <div class="acts"><a class="btn primary" href="#/manuali/${m.id}">Sfoglia</a><a class="btn" href="${esc(m.url)}" target="_blank" rel="noopener">Apri in una nuova scheda</a></div></div>`;
   const toPage = (m, p) => `#/manuali/${m.id}?p=${p}`;
@@ -102,7 +110,8 @@
     setView(`<div class="pagehead man-head"><div style="flex:1"><nav class="sessnav" aria-label="Manuali"><a href="#/manuali">← Tutti i manuali</a></nav><h1>${esc(m.title)}</h1><div class="hint">${esc(m.sub)}${p ? ' · pagina ' + p : ''}</div></div>
       <div class="acts"><form class="man-go" id="man-go"><label for="man-p">Vai a pagina</label><input id="man-p" type="number" min="1" inputmode="numeric" value="${p || ''}"><button class="btn" type="submit">Vai</button></form><a class="btn" href="${esc(src)}" target="_blank" rel="noopener" title="Se il manuale non si carica qui, aprilo direttamente su AnyFlip">Apri in una nuova scheda</a></div></div>
       <details class="man-toc"><summary>Indice del manuale</summary><ul class="man-idx">${m.idx.map(([t, n]) => `<li class="${/^(Cap\.|Appendice)/.test(t) ? 'ch' : ''}"><a href="${toPage(m, n)}"><span class="t">${esc(t)}</span><span class="p">${n}</span></a></li>`).join('')}</ul></details>
-      <div class="man-view"><iframe src="${esc(src)}" title="${esc(m.title)}" allowfullscreen allow="fullscreen" referrerpolicy="no-referrer-when-downgrade"></iframe></div>`);
+      ${p ? `<div class="man-pnav"><a class="btn" href="${toPage(m, Math.max(1, p - 1))}" aria-label="Pagina precedente">‹ ${Math.max(1, p - 1)}</a><span>Pagina <b>${p}</b></span><a class="btn" href="${toPage(m, p + 1)}" aria-label="Pagina successiva">${p + 1} ›</a><button class="btn ghost" type="button" id="man-book">Sfoglia il libro</button></div>` : ''}
+      <div class="man-view">${p ? `<div class="man-page"><img id="man-img" alt="Pagina ${p} di ${esc(m.title)}" referrerpolicy="no-referrer"></div>` : frame(m, src)}</div>`);
     // il libro occupa tutto lo spazio visibile fino alla barra in basso: così sul telefono non serve scorrere la pagina
     // e il dito dentro il libro sfoglia, invece di contendersi lo scorrimento con il sito
     const fit = () => {
@@ -112,6 +121,15 @@
     };
     fit(); addEventListener('resize', fit); onCleanup(() => removeEventListener('resize', fit));
     $('.man-toc').ontoggle = fit;
+    // con un numero di pagina si mostra l'immagine di quella pagina: il libro animato di AnyFlip riparte sempre dalla copertina.
+    // Se le immagini non sono raggiungibili si torna al libro, con un avviso
+    const book = note => { const v = $('.man-view'); if (!v) return; v.innerHTML = frame(m, src); $('.man-pnav')?.remove(); if (note) v.insertAdjacentHTML('beforebegin', `<p class="hint man-note">${note}</p>`); fit(); };
+    if (p) {
+      const img = $('#man-img'), list = pageImgs(m, p); let i = 0;
+      img.onerror = () => { if (++i < list.length) img.src = list[i]; else book(`Non riesco a mostrare qui la pagina ${p}: il libro parte dalla copertina, usa la barra in basso nel libro per arrivare a pagina ${p}.`); };
+      img.src = list[0];
+      $('#man-book').onclick = () => book('');
+    }
     $('#man-go').onsubmit = e => { e.preventDefault(); const n = parseInt($('#man-p').value, 10); if (n > 0) location.hash = toPage(m, n); };
   });
 })();
