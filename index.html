@@ -224,7 +224,8 @@ dialog.dlg menu{display:flex;justify-content:flex-end;gap:8px;padding:0;margin:1
 .stage.panning{cursor:grabbing}
 .stage.adding{cursor:crosshair}
 .stage:fullscreen{background:#000}
-.layer{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+.layer{position:absolute;left:0;top:0;transform-origin:0 0}
+.stage.panning .layer{will-change:transform}
 .layer img{display:block;pointer-events:none;-webkit-user-drag:none;max-width:none}
 .pin{position:absolute;transform:translate(-50%,-100%) scale(var(--inv,1));transform-origin:50% 100%;cursor:pointer;width:28px;height:36px;filter:drop-shadow(0 2px 2px #0008)}
 .pin svg{display:block;width:100%;height:100%}
@@ -275,11 +276,11 @@ dialog.lbdlg{width:min(1000px,96vw)}
 /* ---------- regioni sulla mappa ---------- */
 #pinsbox{pointer-events:none}.pin,.vh{pointer-events:auto}
 #regsvg{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible}
-.regp{fill:var(--c);fill-opacity:0;stroke:var(--c);stroke-opacity:.45;stroke-width:1.6;stroke-dasharray:5 4;vector-effect:non-scaling-stroke;cursor:pointer;pointer-events:all;transition:fill-opacity .15s}
+.regp{fill:var(--c);fill-opacity:0;stroke:var(--c);stroke-opacity:.75;stroke-width:calc(2px * var(--inv,1));stroke-dasharray:calc(6px * var(--inv,1)) calc(4px * var(--inv,1));cursor:pointer;pointer-events:all;transition:fill-opacity .15s}
 .regp:hover{fill-opacity:.2;stroke-opacity:1;stroke-dasharray:none}
-.regp.on{fill-opacity:.08;stroke-opacity:1;stroke-width:3.2;stroke-dasharray:none;filter:drop-shadow(0 0 5px var(--c))}
+.regp.on{fill-opacity:.08;stroke-opacity:1;stroke-width:calc(3.2px * var(--inv,1));stroke-dasharray:none;filter:drop-shadow(0 0 5px var(--c))}
 .stage.adding .regp,.stage.drawing .regp{pointer-events:none}
-.drawline{fill:none;stroke:#fff;stroke-width:2;stroke-dasharray:6 4;vector-effect:non-scaling-stroke;pointer-events:none}
+.drawline{fill:none;stroke:#fff;stroke-width:calc(2px * var(--inv,1));stroke-dasharray:calc(6px * var(--inv,1)) calc(4px * var(--inv,1));pointer-events:none}
 .vh{position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid var(--wine2);transform:translate(-50%,-50%) scale(var(--inv,1));cursor:grab;box-shadow:0 1px 4px #0008}
 .vh.first{background:var(--gold2)}
 .lockhint{font-size:.88rem;color:var(--mute);margin:6px 0}
@@ -1738,6 +1739,8 @@ route(/^\/mappe$/, async () => {
 route(/^\/mappe\/(.+)$/, async ([id], q) => {
   const m = mapById(id); if (!m) return setView(`<div class="empty"><h2>Mappa non trovata</h2><a href="#/mappe">Torna alle mappe</a></div>`);
   const [rec, pins0] = await Promise.all([dbGet('blobs', id), dbIdx('pins', 'mapId', id)]);
+  // il livello della mappa resta entro 2048 px: sui telefoni un livello più grande perde dei pezzi (zone nere) mentre lo si sposta
+  const LF = Math.min(1, 2048 / Math.max(m.w, m.h)), MW = m.w * LF, MH = m.h * LF, KMAX = 8 / LF;
   let pins = pins0; let regs = [...M.regions.values()].filter(r => r.mapId === id); const url = rec ? URL.createObjectURL(rec.blob) : null; onCleanup(() => url && URL.revokeObjectURL(url));
   const st = { k: 1, x: 0, y: 0, players: false, edit: false, add: false, sel: q.get('pin') || null, reg: q.get('reg') || null, regs: pref('mapRegs', true), draw: null, vedit: false, labels: pref('mapLabels', true) };
   const lock = m.locked === true;
@@ -1748,7 +1751,7 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
       <span class="seg" id="seg"><button data-act="vdm" class="on">DM</button><button data-act="vpl">Giocatori</button></span>
       <button class="btn sm" data-act="edit" id="b-edit">Modifica</button><button class="btn sm primary" data-act="addpin" id="b-add" style="display:none">+ Segnaposto</button><button class="btn sm primary" data-act="addreg" id="b-addreg" style="display:none">+ Regione</button><span id="drawbar" style="display:none" class="row"><button class="btn sm primary" data-act="drawok">✓ Chiudi regione</button><button class="btn sm" data-act="drawundo">↶ Togli punto</button><button class="btn sm" data-act="drawcancel">Annulla</button></span>
       <button class="btn sm" data-act="fs" title="Schermo intero">⛶</button></div>
-    <div class="stage" id="stage"><div class="layer" id="layer" style="width:${m.w}px;height:${m.h}px">${url ? `<img src="${url}" width="${m.w}" height="${m.h}" alt="${esc(m.name)}" draggable="false">` : ''}<svg id="regsvg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg><div id="pinsbox" style="position:absolute;inset:0"></div></div>
+    <div class="stage" id="stage"><div class="layer" id="layer" style="width:${MW}px;height:${MH}px">${url ? `<img src="${url}" width="${MW}" height="${MH}" alt="${esc(m.name)}" draggable="false">` : ''}<svg id="regsvg" viewBox="0 0 ${MW} ${MH}" preserveAspectRatio="none"></svg><div id="pinsbox" style="position:absolute;inset:0"></div></div>
       ${url ? '' : `<div class="noimg"><div><p>L'immagine di questa mappa non è presente (forse hai ripristinato un backup «solo dati»).</p><button class="btn" data-act="reimg">Carica di nuovo l'immagine</button></div></div>`}<div class="hud" id="hud"></div></div></div>
     <aside class="mapside" id="mside"></aside></div>`, 'raw');
   const stage = $('#stage'), layer = $('#layer'), box = $('#pinsbox'), mv = $('#mv');
@@ -1775,16 +1778,16 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
   };
   onCleanup(() => cancelAnimationFrame(dcRaf));
   const apply = () => { layer.style.transform = `translate(${st.x}px,${st.y}px) scale(${st.k})`; layer.style.setProperty('--inv', (1 / st.k).toFixed(4)); declutter(); };
-  const fitK = () => { const r = stage.getBoundingClientRect(); return Math.min(r.width / m.w, r.height / m.h) * 0.98; };
-  const fit = () => { const r = stage.getBoundingClientRect(); st.k = fitK(); st.x = (r.width - m.w * st.k) / 2; st.y = (r.height - m.h * st.k) / 2; apply(); };
-  const zoomAt = (cx, cy, f) => { const nk = clamp(st.k * f, fitK() * 0.6, 8); const g = nk / st.k; st.x = cx - (cx - st.x) * g; st.y = cy - (cy - st.y) * g; st.k = nk; apply(); };
-  const center = (p, zoom) => { const r = stage.getBoundingClientRect(); if (zoom) st.k = Math.max(st.k, Math.min(8, fitK() * zoom)); st.x = r.width / 2 - (p.x / 100 * m.w) * st.k; st.y = r.height / 2 - (p.y / 100 * m.h) * st.k; apply(); };
-  const toPct = (cx, cy) => { const r = stage.getBoundingClientRect(); return { x: clamp(((cx - r.left - st.x) / st.k) / m.w * 100, 0, 100), y: clamp(((cy - r.top - st.y) / st.k) / m.h * 100, 0, 100) }; };
+  const fitK = () => { const r = stage.getBoundingClientRect(); return Math.min(r.width / MW, r.height / MH) * 0.98; };
+  const fit = () => { const r = stage.getBoundingClientRect(); st.k = fitK(); st.x = (r.width - MW * st.k) / 2; st.y = (r.height - MH * st.k) / 2; apply(); };
+  const zoomAt = (cx, cy, f) => { const nk = clamp(st.k * f, fitK() * 0.6, KMAX); const g = nk / st.k; st.x = cx - (cx - st.x) * g; st.y = cy - (cy - st.y) * g; st.k = nk; apply(); };
+  const center = (p, zoom) => { const r = stage.getBoundingClientRect(); if (zoom) st.k = Math.max(st.k, Math.min(KMAX, fitK() * zoom)); st.x = r.width / 2 - (p.x / 100 * MW) * st.k; st.y = r.height / 2 - (p.y / 100 * MH) * st.k; apply(); };
+  const toPct = (cx, cy) => { const r = stage.getBoundingClientRect(); return { x: clamp(((cx - r.left - st.x) / st.k) / MW * 100, 0, 100), y: clamp(((cy - r.top - st.y) / st.k) / MH * 100, 0, 100) }; };
 
   const regEnt = r => S.ents.get(r.entityId);
   const regName = r => regEnt(r)?.name || r.label || 'Regione';
   const regVisible = r => !(regEnt(r) && regEnt(r).discovered === false);
-  const ptsPath = pts => 'M' + pts.map(q => q[0] + ' ' + q[1]).join(' L') + ' Z';
+  const px = q => (q[0] * MW / 100).toFixed(1) + ',' + (q[1] * MH / 100).toFixed(1), ptsPath = pts => 'M' + pts.map(px).join(' L') + ' Z';
   const inPoly = (p, pts) => { let c = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) { const [xi, yi] = pts[i], [xj, yj] = pts[j]; if ((yi > p.y) !== (yj > p.y) && p.x < (xj - xi) * (p.y - yi) / (yj - yi) + xi) c = !c; } return c; };
   const curReg = () => regs.find(r => r.id === st.reg);
   // regioni che contengono il segnaposto aperto (quando non è stata scelta a mano una regione)
@@ -1792,10 +1795,10 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
   function renderRegs() {
     const svg = $('#regsvg'); if (!svg) return; let h = '';
     const sel = curReg();
-    if (st.regs && sel && !(st.players && !regVisible(sel))) h += `<path d="M0 0H100V100H0Z ${ptsPath(sel.points)}" fill="rgba(8,6,4,.6)" fill-rule="evenodd" style="pointer-events:none"/>`;
+    if (st.regs && sel && !(st.players && !regVisible(sel))) h += `<path d="M0 0H${MW}V${MH}H0Z ${ptsPath(sel.points)}" fill="rgba(8,6,4,.6)" fill-rule="evenodd" style="pointer-events:none"/>`;
     const home = homeRegs().map(r => r.id);
-    if (st.regs) for (const r of regs) { if (st.players && !regVisible(r)) continue; h += `<polygon class="regp ${r.id === st.reg || home.includes(r.id) ? 'on' : ''}" data-reg="${esc(r.id)}" style="--c:${esc(r.color || '#d4b06a')}" points="${r.points.map(q => q.join(',')).join(' ')}"><title>${esc(regName(r))}</title></polygon>`; }
-    if (st.draw && st.draw.pts.length) h += `<polyline class="drawline" points="${st.draw.pts.map(q => q.join(',')).join(' ')}"/>`;
+    if (st.regs) for (const r of regs) { if (st.players && !regVisible(r)) continue; h += `<polygon class="regp ${r.id === st.reg || home.includes(r.id) ? 'on' : ''}" data-reg="${esc(r.id)}" style="--c:${esc(r.color || '#d4b06a')}" points="${r.points.map(px).join(' ')}"><title>${esc(regName(r))}</title></polygon>`; }
+    if (st.draw && st.draw.pts.length) h += `<polyline class="drawline" points="${st.draw.pts.map(px).join(' ')}"/>`;
     svg.innerHTML = h;
   }
   const vhHtml = () => {
@@ -1804,7 +1807,7 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
     return '';
   };
   const saveReg = async r => { await runBatch(['regions'], '', async t => t.put('regions', r), { reload: false }); regs = [...M.regions.values()].filter(x => x.mapId === id); };
-  const fitRegion = r => { const xs = r.points.map(q => q[0]), ys = r.points.map(q => q[1]); const bx = (Math.max(...xs) - Math.min(...xs)) / 100 * m.w, by = (Math.max(...ys) - Math.min(...ys)) / 100 * m.h; const rc = stage.getBoundingClientRect(); st.k = clamp(Math.min(rc.width / bx, rc.height / by) * 0.75, fitK() * 0.6, 8); center({ x: (Math.max(...xs) + Math.min(...xs)) / 2, y: (Math.max(...ys) + Math.min(...ys)) / 2 }); };
+  const fitRegion = r => { const xs = r.points.map(q => q[0]), ys = r.points.map(q => q[1]); const bx = (Math.max(...xs) - Math.min(...xs)) / 100 * MW, by = (Math.max(...ys) - Math.min(...ys)) / 100 * MH; const rc = stage.getBoundingClientRect(); st.k = clamp(Math.min(rc.width / bx, rc.height / by) * 0.75, fitK() * 0.6, 8); center({ x: (Math.max(...xs) + Math.min(...xs)) / 2, y: (Math.max(...ys) + Math.min(...ys)) / 2 }); };
 
   function pinHtml(p) {
     const e = entOf(p), vis = visible(p); if (st.players && !vis) return '';
