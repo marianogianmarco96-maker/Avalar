@@ -20,8 +20,8 @@
 .man-card .acts{display:flex;gap:8px;flex-wrap:wrap}
 .man-full{position:fixed;left:0;right:0;z-index:30;display:flex;flex-direction:column;background:var(--bg)}
 .man-bar{display:flex;align-items:center;gap:10px;padding:6px max(10px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line2);background:var(--paper)}
-.man-bar .back{white-space:nowrap;text-decoration:none}
-.man-bar b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--display);color:var(--wine)}
+.man-bar b{flex:1;min-width:0;font-family:var(--display);color:var(--wine);line-height:1.2;overflow-wrap:anywhere}
+@media (max-width:620px){.man-bar b{font-size:.85rem}.man-bar .btn{padding:6px 9px;font-size:.68rem}}
 .man-bar .btn{white-space:nowrap}
 .man-full iframe{flex:1;width:100%;border:0;background:#222}
 html.man-open #tools{display:none}`;
@@ -47,7 +47,7 @@ html.man-open #tools{display:none}`;
     const m = visibili().find(x => x.id === id);
     if (!m) { setView(`<div class="empty"><h2>Manuale non trovato</h2><p><a href="#/manuali">Torna ai manuali</a></p></div>`); return; }
     setView(`<h1 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">${esc(m.title)}</h1>
-      <div class="man-full"><div class="man-bar"><a class="back" href="#/manuali">← Manuali</a><b>${esc(m.title)}</b>${anyflip(m)}</div>
+      <div class="man-full"><div class="man-bar"><b>${esc(m.title)}</b>${anyflip(m)}</div>
       <iframe src="${esc(m.url)}" title="${esc(m.title)}" allowfullscreen allow="fullscreen" referrerpolicy="no-referrer-when-downgrade"></iframe></div>`);
     const fit = () => {
       const f = $('.man-full'); if (!f) return;
