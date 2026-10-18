@@ -548,6 +548,16 @@ details.older[open]>summary{display:none}
   .top.srchopen #qres{position:static;width:100%;max-width:none;max-height:none;margin-top:12px;box-shadow:none}
   .top.srchopen #qres a{min-height:50px;font-size:1.02rem;padding:10px 14px}
 }
+/* mappa: il pannello sotto la mappa finisce sopra la barra in basso, con un fregio che segna la fine */
+.mapside::after{content:"❦";display:block;text-align:center;color:var(--gold);font-size:1.3rem;margin-top:18px;padding-top:10px;border-top:1px solid var(--line)}
+@media (max-width:1280px){
+  .mapview{height:calc(100dvh - 58px - 70px - env(safe-area-inset-bottom,0px))}
+  .mapside{padding-bottom:28px}
+}
+@media (max-width:900px){
+  .mapview{height:auto}
+  .mapside{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 
 </style>
