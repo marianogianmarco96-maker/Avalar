@@ -242,6 +242,7 @@
     document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
     const up = mk('⟳', 'Verifica aggiornamento', 'Verifica se c\'è una versione più recente del sito e caricala subito', () => checkUpdate(up), 'upbtn');
     if (adm) mk('✎', 'Chiedi a Claude', 'Chiedi una modifica a Claude', () => { setOpen(false); askClaude(); });
+    if (adm) { mk('⇪', 'Importa', 'Importa una sessione o dei dati', () => { setOpen(false); location.hash = '#/import'; }); mk('⛁', 'Backup', 'Scarica o ripristina un backup', () => { setOpen(false); location.hash = '#/backup'; }); }
     theme.className = 'tbtn'; list.append(theme);
     const out = mk('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M16 8l4 4-4 4"/><path d="M20 12H9"/></svg>', 'Esci', 'Esci e torna alla schermata di accesso', async () => { out.disabled = true; ls.del('cdnd_remember'); if (DB) { try { const t = DB.transaction('kv', 'readwrite'); t.objectStore('kv').delete('key'); await done(t); } catch { } } location.reload(); });
     box.append(tog, list); top.append(box);
