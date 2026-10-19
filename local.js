@@ -131,15 +131,15 @@
   /* ---------- schermata di accesso ---------- */
   const LOGIN_CSS = `#login{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at 50% 20%,#7d2530cc 0%,#561820e6 55%,#2d0d12 100%),url(login-mappa.jpg) center/cover #2d0d12;color:#f5e6c4;font-family:'Crimson Pro',Georgia,serif}
 #login .grp{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 18px}
-#login .grp button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;font-family:'Cinzel',Georgia,serif;font-size:.78rem;letter-spacing:.04em;color:#561820}
+#login .grp button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;font-family:'Cinzel',Georgia,serif;font-size:.9rem;font-weight:700;letter-spacing:.04em;color:#561820}
 #login .grp span{display:block;width:100%;aspect-ratio:3/4;border-radius:6px;border:2px solid #a98334;background:url(login-gruppo.jpg) 0 0/400% 100% no-repeat #2b1d14;box-shadow:0 2px 8px #0004;transition:transform .15s,box-shadow .15s}
 #login .grp button:nth-child(2) span{background-position:33.333% 0}#login .grp button:nth-child(3) span{background-position:66.666% 0}#login .grp button:nth-child(4) span{background-position:100% 0}
 #login .grp button:hover span,#login .grp button:focus-visible span{transform:translateY(-2px);box-shadow:0 4px 12px #0006}
 #login .grp button[aria-pressed=true] span{border-color:#7d2530;box-shadow:0 0 0 3px #7d253066,0 4px 12px #0006}
-#login .grp button[aria-pressed=true]{font-weight:700}
-#login .pick{text-align:center;margin:0 0 8px;color:#5a4636}
-#login .lnk{all:unset;cursor:pointer;display:block;margin:14px auto 0;text-align:center;color:#7d2530;text-decoration:underline;font-size:.95rem}
-@media (prefers-color-scheme:dark){#login .box{background:#241b16;color:#ecdfc6;border-color:#55402f}#login h1{color:#e0c071}#login .sub,#login small,#login .or{color:#94806a}#login label{color:#c5b193}#login .btn{background:#2b211b;color:#e0c071;border-color:#55402f}#login .btn.p{background:#8c2c38;color:#fbeccb;border-color:#c4494f}#login input[type=password]{background:#1c1511;color:#ecdfc6;border-color:#55402f}#login .or:before,#login .or:after{border-color:#3a2d24}#login .grp button,#login .lnk{color:#e0c071}#login .pick{color:#c5b193}}
+#login .grp button[aria-pressed=true]{color:#7d2530;text-decoration:underline;text-underline-offset:3px}
+#login .pick{text-align:center;margin:0 0 8px;color:#3b2a1e;font-size:1.05rem}
+#login .lnk{all:unset;cursor:pointer;display:block;margin:14px auto 0;text-align:center;color:#561820;font-weight:700;text-decoration:underline;text-underline-offset:3px;font-size:1.05rem}
+@media (prefers-color-scheme:dark){#login .box{background:#241b16;color:#ecdfc6;border-color:#55402f}#login h1{color:#e0c071}#login .sub,#login small,#login .or{color:#94806a}#login label{color:#c5b193}#login .btn{background:#2b211b;color:#e0c071;border-color:#55402f}#login .btn.p{background:#8c2c38;color:#fbeccb;border-color:#c4494f}#login input[type=password]{background:#1c1511;color:#ecdfc6;border-color:#55402f}#login .or:before,#login .or:after{border-color:#3a2d24}}
 #login .box{width:min(420px,100%);background:#fbf5e3;color:#2b1d14;border:1px solid #d4b06a;border-radius:12px;padding:28px 26px;box-shadow:0 12px 40px #0008}
 #login h1{margin:0 0 2px;font-family:'Cinzel',Georgia,serif;font-size:1.35rem;letter-spacing:.06em;color:#561820;text-align:center}
 #login .sub{text-align:center;color:#8a7560;margin:0 0 20px}
