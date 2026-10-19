@@ -16,6 +16,8 @@
   let ROLE = null, DB = null, MEM = {}, BLOBMAP = {}, RAW = null;
   // modifiche non ancora inviate: chiavi 'raccolta/id' dei documenti e id delle immagini caricate
   let PEND = new Set(), PFILES = new Set(), DROPPED = false;
+  // segnalazioni per Claude: note sui testi (modalità revisione) ed errori del sito, con le loro foto
+  let NOTES = [], BUGS = [];
   const store = (s, m = 'readonly') => DB.transaction(s, m).objectStore(s);
   const kvGet = k => rq(store('kv').get(k));
   const kvSet = async (k, v) => { const t = DB.transaction('kv', 'readwrite'); t.objectStore('kv').put(v, k); await done(t); };
@@ -43,7 +45,7 @@
   async function seedAdmin(payload, raw) {
     const t = DB.transaction(['docs', 'kv'], 'readwrite'); const d = t.objectStore('docs'); d.clear();
     for (const [c, docs] of Object.entries(payload.stores)) for (const [id, v] of Object.entries(docs)) d.put(v, c + '/' + id);
-    t.objectStore('kv').put(payload.dataVersion, 'dataVersion'); t.objectStore('kv').put(payload.blobmap, 'blobmap'); t.objectStore('kv').put(false, 'dirty'); t.objectStore('kv').put([], 'pending'); t.objectStore('kv').put([], 'pfiles');
+    t.objectStore('kv').put(payload.dataVersion, 'dataVersion'); t.objectStore('kv').put(payload.blobmap, 'blobmap'); t.objectStore('kv').put(false, 'dirty'); t.objectStore('kv').put([], 'pending'); t.objectStore('kv').put([], 'pfiles'); t.objectStore('kv').put([], 'notes'); t.objectStore('kv').put([], 'bugs');
     await done(t);
     // immagini riservate (cifrate): le decifro e le tengo nel browser
     const key = await aesKey(raw); const types = {};
@@ -73,18 +75,19 @@
     if (payload && !have) await seedAdmin(payload, raw);
     else if (payload) {
       // i dati pubblicati comandano: se sono cambiati li riprendo, rimettendo sopra solo le modifiche ancora da inviare
-      const pend = (await kvGet('pending')) || [], pfiles = (await kvGet('pfiles')) || [], dirty = await kvGet('dirty');
-      if (dirty && !pend.length && !pfiles.length) { await seedAdmin(payload, raw); DROPPED = true; } // modifiche vecchie, mai inviate
+      const pend = (await kvGet('pending')) || [], pfiles = (await kvGet('pfiles')) || [], notes = (await kvGet('notes')) || [], bugs = (await kvGet('bugs')) || [], dirty = await kvGet('dirty');
+      if (dirty && !pend.length && !pfiles.length && !notes.length && !bugs.length) { await seedAdmin(payload, raw); DROPPED = true; } // modifiche vecchie, mai inviate
       else if (payload.dataVersion !== await kvGet('dataVersion')) {
         const keep = await Promise.all(pend.map(async k => [k, await rq(store('docs').get(k))]));
         await seedAdmin(payload, raw);
         const t = DB.transaction(['docs', 'kv'], 'readwrite');
         for (const [k, v] of keep) v === undefined ? t.objectStore('docs').delete(k) : t.objectStore('docs').put(v, k);
-        t.objectStore('kv').put(pend, 'pending'); t.objectStore('kv').put(pfiles, 'pfiles'); t.objectStore('kv').put(pend.length + pfiles.length > 0, 'dirty');
+        t.objectStore('kv').put(pend, 'pending'); t.objectStore('kv').put(pfiles, 'pfiles'); t.objectStore('kv').put(notes, 'notes'); t.objectStore('kv').put(bugs, 'bugs'); t.objectStore('kv').put(pend.length + pfiles.length + notes.length + bugs.length > 0, 'dirty');
         await done(t);
       }
     }
     PEND = new Set((await kvGet('pending')) || []); PFILES = new Set((await kvGet('pfiles')) || []);
+    NOTES = (await kvGet('notes')) || []; BUGS = (await kvGet('bugs')) || [];
     if (remember) { await kvSet('key', raw); ls.set('cdnd_remember', 'admin'); }
     const ks = await rq(store('docs').getAllKeys()), vs = await rq(store('docs').getAll()); MEM = {};
     ks.forEach((k, i) => { const j = k.indexOf('/'); const c = k.slice(0, j); (MEM[c] = MEM[c] || new Map()).set(k.slice(j + 1), vs[i]); });
@@ -146,7 +149,7 @@
       catch (x) { ls.del('cdnd_remember'); await loginUI(x.message === 'nokey' ? 'Accedi di nuovo con il codice.' : ''); }
     } else await loginUI();
     applyRoleUI();
-    if (ROLE === 'admin') { outbox(); if (DROPPED) setTimeout(() => notice('Ho tolto da questo browser le modifiche vecchie mai inviate: ora vedi i dati pubblicati.'), 800); }
+    if (ROLE === 'admin') { outbox(); if (ls.get('cdnd_review')) setReview(true); if (DROPPED) setTimeout(() => notice('Ho tolto da questo browser le modifiche vecchie mai inviate: ora vedi i dati pubblicati.'), 800); }
   })();
 
   /* ---------- database (stessa interfaccia usata dall'app) ---------- */
@@ -172,8 +175,12 @@
   const LOCAL_ONLY = new Set(['meta/lastBackup']);
   function changed(k) {
     if (k && !LOCAL_ONLY.has(k)) PEND.add(k);
+    IDX = null; saveState();
+  }
+  const anyPending = () => PEND.size + PFILES.size + NOTES.length + BUGS.length > 0;
+  function saveState() {
     const t = DB.transaction('kv', 'readwrite'); const o = t.objectStore('kv');
-    o.put([...PEND], 'pending'); o.put([...PFILES], 'pfiles'); o.put(PEND.size + PFILES.size > 0, 'dirty');
+    o.put([...PEND], 'pending'); o.put([...PFILES], 'pfiles'); o.put(NOTES, 'notes'); o.put(BUGS, 'bugs'); o.put(anyPending(), 'dirty');
     done(t).catch(() => { }); outbox();
   }
   const newId = () => Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join('');
@@ -241,7 +248,7 @@
     document.addEventListener('click', e => { if (!box.contains(e.target)) setOpen(false); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
     const up = mk('⟳', 'Verifica aggiornamento', 'Verifica se c\'è una versione più recente del sito e caricala subito', () => checkUpdate(up), 'upbtn');
-    if (adm) mk('✎', 'Chiedi a Claude', 'Chiedi una modifica a Claude', () => { setOpen(false); askClaude(); });
+    if (adm) mk('✎', 'Segnala a Claude', 'Segnala un errore o correggi i contenuti del sito', () => { setOpen(false); reportDlg(); });
     if (adm) { mk('⇪', 'Importa', 'Importa una sessione o dei dati', () => { setOpen(false); location.hash = '#/import'; }); mk('⛁', 'Backup', 'Scarica o ripristina un backup', () => { setOpen(false); location.hash = '#/backup'; }); }
     theme.className = 'tbtn'; list.append(theme);
     const out = mk('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M16 8l4 4-4 4"/><path d="M20 12H9"/></svg>', 'Esci', 'Esci e torna alla schermata di accesso', async () => { out.disabled = true; ls.del('cdnd_remember'); if (DB) { try { const t = DB.transaction('kv', 'readwrite'); t.objectStore('kv').delete('key'); await done(t); } catch { } } location.reload(); });
@@ -330,6 +337,8 @@
     for (const [cs, one, many] of GROUPS) { const u = new Set(); for (const c of cs) for (const id of ids[c] || []) u.add(id.replace(/^portrait-/, '')); if (u.size) out.push(u.size + ' ' + (u.size === 1 ? one : many)); }
     const other = Object.keys(ids).filter(c => !GROUPS.some(g => g[0].includes(c))); if (other.length) out.push('altro');
     if (!out.length && PFILES.size) out.push(PFILES.size + (PFILES.size === 1 ? ' immagine' : ' immagini'));
+    if (NOTES.length) out.push(NOTES.length + (NOTES.length === 1 ? ' nota' : ' note'));
+    if (BUGS.length) out.push(BUGS.length + (BUGS.length === 1 ? ' errore' : ' errori'));
     return out.join(', ');
   }
   // dati pubblicati, per mandare solo i campi cambiati (le schede contengono anche il ritratto, troppo grande da rimandare)
@@ -352,7 +361,9 @@
     }
     const files = {};
     for (const aid of PFILES) { const f = await rq(store('files').get(aid)); if (f) files[aid] = { type: f.type || f.blob.type, b64: b64e(new Uint8Array(await f.blob.arrayBuffer())) }; }
-    let bytes = new TextEncoder().encode(JSON.stringify({ v: 1, base: await kvGet('dataVersion'), at: new Date().toISOString(), ops, files }));
+    const bugfiles = {};
+    for (const b of BUGS) for (const aid of b.photos || []) { const f = await rq(store('files').get(aid)); if (f) bugfiles[aid] = { type: f.type || f.blob.type, b64: b64e(new Uint8Array(await f.blob.arrayBuffer())) }; }
+    let bytes = new TextEncoder().encode(JSON.stringify({ v: 1, base: await kvGet('dataVersion'), at: new Date().toISOString(), ops, files, notes: NOTES, bugs: BUGS, bugfiles }));
     if ('CompressionStream' in window) bytes = new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer());
     const iv = crypto.getRandomValues(new Uint8Array(12));
     const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await aesKey(RAW), bytes));
@@ -372,7 +383,7 @@
     try {
       const enc = await (await fetch('data.enc', { cache: 'no-cache' })).json();
       const payload = JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64d(enc.iv) }, await aesKey(RAW), b64d(enc.ct))));
-      const t = DB.transaction('files', 'readwrite'); for (const aid of PFILES) t.objectStore('files').delete(aid); await done(t);
+      const t = DB.transaction('files', 'readwrite'); for (const aid of PFILES) t.objectStore('files').delete(aid); for (const b of BUGS) for (const aid of b.photos || []) t.objectStore('files').delete(aid); await done(t);
       await seedAdmin(payload, RAW); location.reload();
     } catch { if (btn) btn.disabled = false; notice('Non riesco a scaricare i dati pubblicati: controlla la connessione e riprova.'); }
   }
@@ -384,7 +395,7 @@
   let OB = null, PREP = null, PREPV = 0, SENT = false;
   function outbox() {
     if (ROLE !== 'admin' || !document.body) return;
-    if (!PEND.size && !PFILES.size) { if (OB) OB.remove(); OB = null; return; }
+    if (!anyPending()) { if (OB) OB.remove(); OB = null; return; }
     if (!OB) { const st = document.createElement('style'); st.textContent = OB_CSS; document.head.append(st); OB = document.createElement('div'); OB.id = 'outbox'; OB.setAttribute('role', 'status'); document.body.append(OB); }
     SENT = false; PREP = null; const v = ++PREPV; drawOutbox();
     clearTimeout(outbox.t); outbox.t = setTimeout(() => buildRequest().then(r => { if (v === PREPV) { PREP = r; drawOutbox(); } }, () => { if (v === PREPV) { PREP = { err: true }; drawOutbox(); } }), 400);
@@ -399,6 +410,7 @@
     }
     msg.innerHTML = '<b>Da inviare a Claude:</b> ' + summary() + '. Finché non le invii valgono solo su questo browser.';
     const go = mk(PREP ? (PREP.err ? 'Errore, riprova' : 'Invia a Claude') : 'Preparo…', () => PREP && !PREP.err ? send() : outbox(), true); if (!PREP) go.disabled = true;
+    mk('Rivedi elenco', () => reviewList());
     mk('Scarta', b => { if (confirm('Scartare le modifiche non inviate? Il sito torna ai dati pubblicati.')) resetToServer(b); });
   }
   function send() {
@@ -406,5 +418,293 @@
     if (r.file) { const u = URL.createObjectURL(r.file), a = document.createElement('a'); a.href = u; a.download = 'modifiche-avalar.txt'; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 60000); }
     window.open(r.url, '_blank', 'noopener'); SENT = true; drawOutbox();
   }
+  /* ---------- Segnala a Claude (amministratore) ----------
+     Due strade: «Segnala un bug» raccoglie uno o più errori del sito, ognuno con una foto facoltativa;
+     «Modifica il contenuto» accende la modalità revisione: si tocca un testo qualsiasi, lo si corregge sul posto
+     (o si lascia una nota) e tutto si accumula nel riquadro in basso, da inviare a Claude con un tasto. */
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  const H3 = 'margin:0 0 6px;font-family:Cinzel,Georgia,serif;color:#561820';
+  const SEG_CSS = `.segdlg{border:1px solid #a98334;border-radius:12px;background:#fbf5e3;color:#2b1d14;padding:20px;width:min(560px,92vw);max-height:88vh;font:16px/1.4 Georgia,serif}
+.segdlg .sd{color:#5a4636}
+.segc{display:flex;gap:14px;align-items:flex-start;width:100%;text-align:left;padding:14px;border-radius:10px;border:1px solid #c4ae80;background:#fffdf4;margin-top:10px;font:inherit;color:inherit;cursor:pointer}
+.segc:hover,.segc:focus-visible{border-color:#561820;background:#fff7e0;outline:none}
+.segc .si{flex:none;width:40px;height:40px;border-radius:50%;background:#561820;color:#f5e6c4;display:grid;place-items:center;font-size:20px}
+.seglink{border:0;background:none;padding:0;color:#7d2530;text-decoration:underline;font:inherit;font-size:.92rem;cursor:pointer}
+.segta{width:100%;box-sizing:border-box;border:1px solid #c4ae80;border-radius:8px;padding:8px 10px;font:inherit;background:#fffdf4;color:#2b1d14}
+.bugi{border:1px solid #d9c79c;border-radius:10px;padding:10px;margin-top:10px;background:#fffaf0}
+.bugi .bh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.bugi .bh b{color:#561820}
+.bugi .ph{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px}.bugi .ph img{width:84px;height:56px;object-fit:cover;border-radius:6px;border:1px solid #c4ae80}
+.segx{border:0;background:none;color:#8a6d4a;cursor:pointer;font:inherit;font-size:.9rem;padding:2px 4px}
+html.review main{padding-top:40px}
+html.review .toc{top:calc(98px + env(safe-area-inset-top,0px))}
+html.review #view :is(p,li,h1,h2,h3,h4,h5,dd,dt,td,th,figcaption,blockquote):hover{outline:1px dashed #b89a5a;outline-offset:3px;border-radius:3px;cursor:text}
+#revbar{position:fixed;left:0;right:0;top:calc(58px + env(safe-area-inset-top,0px));z-index:29;min-height:40px;box-sizing:border-box;background:#3f6b46;color:#f5f0dc;padding:6px max(16px,env(safe-area-inset-right,0px)) 6px max(16px,env(safe-area-inset-left,0px));font:15px/1.3 Georgia,serif;display:flex;gap:12px;align-items:center;box-shadow:0 2px 8px #0004}
+#revbar span{flex:1;min-width:0}#revbar button{flex:none;padding:5px 12px;border-radius:7px;border:1px solid #f5f0dc99;background:#00000030;color:inherit;cursor:pointer;font:inherit}
+@media (max-width:620px){#revbar .rh{display:none}}
+.revbox{border:2px solid #561820;border-radius:8px;padding:10px;background:#fffdf4;color:#2b1d14;margin:10px 0;font:16px/1.45 Georgia,serif;list-style:none;text-align:left;text-transform:none;letter-spacing:normal}
+.revbox .rl{font-size:.85rem;color:#7a5c12;margin-bottom:6px}.revbox .rhint{font-size:.85rem;color:#8a7560;margin:4px 0 0}
+.revbox .rb{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.revbox .rc{display:block;width:100%;text-align:left;margin-top:6px}
+.rvl{margin-top:10px;overflow:auto;max-height:62vh}.rvl .it{border-top:1px solid #dccaa0;padding:10px 0}.rvl .it:first-child{border-top:0}
+.rvl .ih{display:flex;gap:8px;align-items:baseline}.rvl .ih b{flex:1;color:#561820}
+.rvl .df{white-space:pre-wrap;font-size:.95rem;margin:4px 0 0;color:#3b2a1e}.rvl .df i{color:#8a7560;font-style:normal;font-size:.85rem;display:block}
+.rvl del{background:#f4c7c3;color:#7d1f1a}.rvl ins{background:#cfe8c9;color:#1f5a26;text-decoration:none}`;
+  const segCss = () => { if (!document.getElementById('segcss')) { const st = document.createElement('style'); st.id = 'segcss'; st.textContent = SEG_CSS; document.head.append(st); } };
+  function dlg(id, html) {
+    segCss(); let d = document.getElementById(id); if (d) d.remove();
+    d = document.createElement('dialog'); d.id = id; d.className = 'segdlg'; d.innerHTML = html; document.body.append(d); d.showModal();
+    d.addEventListener('close', () => d.remove()); d.querySelectorAll('[data-a=close]').forEach(b => b.onclick = () => d.close()); return d;
+  }
+  const pageName = () => (document.title || '').replace(/ · Campagna D&D.*$/, '');
+
+  function reportDlg() {
+    const on = document.documentElement.classList.contains('review');
+    const d = dlg('segdlg', `<h3 style="${H3}">Segnala a Claude</h3><p class="sd" style="margin:0 0 4px">Cosa vuoi segnalare?</p>
+      <button type="button" class="segc" data-a="bug"><span class="si">🐞</span><span><b>Segnala un bug</b><br><span class="sd">Qualcosa non funziona o si vede male. Puoi descrivere più errori insieme e aggiungere una foto per ognuno.</span></span></button>
+      <button type="button" class="segc" data-a="rev"><span class="si">✎</span><span><b>Modifica il contenuto</b><br><span class="sd">${on ? 'Sei già in modalità revisione: tocca qui per uscire.' : 'Entri in modalità revisione: leggi il sito e correggi i testi dove li trovi. Alla fine invii tutte le correzioni con un tasto.'}</span></span></button>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:14px"><button type="button" class="seglink" data-a="ask">Altra richiesta a Claude</button><button type="button" class="btn ghost" style="margin-left:auto" data-a="close">Chiudi</button></div>`);
+    d.querySelector('[data-a=bug]').onclick = () => { d.close(); bugDlg(); };
+    d.querySelector('[data-a=rev]').onclick = () => { d.close(); setReview(!on); if (!on) notice('Modalità revisione: tocca un testo per correggerlo o per lasciare una nota a Claude.'); };
+    d.querySelector('[data-a=ask]').onclick = () => { d.close(); askClaude(); };
+  }
+
+  // foto ridotte (lato lungo 1600 px) per non appesantire la richiesta
+  async function shrink(file) {
+    try {
+      const bm = await createImageBitmap(file), k = Math.min(1, 1600 / Math.max(bm.width, bm.height));
+      const c = document.createElement('canvas'); c.width = Math.round(bm.width * k); c.height = Math.round(bm.height * k); c.getContext('2d').drawImage(bm, 0, 0, c.width, c.height);
+      return (await new Promise(r => c.toBlob(r, 'image/jpeg', .82))) || file;
+    } catch { return file; }
+  }
+  function bugDlg() {
+    const items = [{ text: '', photos: [] }];
+    const d = dlg('bugdlg', `<h3 style="${H3}">Segnala un bug</h3><p class="sd" style="margin:0">Descrivi cosa succede. Il sito aggiunge da solo la pagina in cui ti trovi e il dispositivo che usi.</p>
+      <div class="bl" style="overflow:auto;max-height:55vh"></div><button type="button" class="btn" data-a="add" style="margin-top:10px">+ Aggiungi un altro errore</button>
+      <div style="display:flex;gap:8px;margin-top:14px"><button type="button" class="btn primary" data-a="send"></button><button type="button" class="btn ghost" style="margin-left:auto" data-a="close">Chiudi</button></div><p class="m" style="min-height:1.2em;color:#a3262f;margin:8px 0 0"></p>`);
+    d.addEventListener('close', () => items.forEach(it => it.photos.forEach(p => URL.revokeObjectURL(p.url))));
+    const list = d.querySelector('.bl'), go = d.querySelector('[data-a=send]');
+    const used = () => items.filter(it => it.text.trim() || it.photos.length);
+    const label = () => { const n = used().length; go.textContent = n > 1 ? 'Aggiungi ' + n + ' errori' : 'Aggiungi l\'errore'; };
+    const draw = () => {
+      list.innerHTML = '';
+      items.forEach((it, i) => {
+        const w = document.createElement('div'); w.className = 'bugi';
+        w.innerHTML = `<div class="bh"><b>Errore ${i + 1}</b>${items.length > 1 ? '<button type="button" class="segx" data-x>✕ Togli</button>' : ''}</div><textarea class="segta" rows="3" placeholder="Es.: sul telefono, nella mappa, il riquadro della regione copre il pulsante per chiuderlo."></textarea><div class="ph"></div>`;
+        const ta = w.querySelector('textarea'); ta.value = it.text; ta.oninput = () => { it.text = ta.value; label(); };
+        const x = w.querySelector('[data-x]'); if (x) x.onclick = () => { it.photos.forEach(p => URL.revokeObjectURL(p.url)); items.splice(i, 1); draw(); };
+        const ph = w.querySelector('.ph');
+        it.photos.forEach((p, j) => { const s = document.createElement('span'); s.style.cssText = 'display:inline-flex;align-items:center;gap:4px'; s.innerHTML = `<img alt="Foto ${j + 1}" src="${p.url}"><button type="button" class="segx" title="Togli la foto">✕</button>`; s.querySelector('button').onclick = () => { URL.revokeObjectURL(p.url); it.photos.splice(j, 1); draw(); }; ph.append(s); });
+        const lb = document.createElement('label'); lb.className = 'btn sm'; lb.style.cursor = 'pointer'; lb.innerHTML = '📷 ' + (it.photos.length ? 'Un\'altra foto' : 'Aggiungi foto') + '<input type="file" accept="image/*" hidden>';
+        lb.querySelector('input').onchange = async e => { const f = e.target.files[0]; if (!f) return; const blob = await shrink(f); it.photos.push({ blob, url: URL.createObjectURL(blob) }); draw(); };
+        ph.append(lb); list.append(w);
+      });
+      label();
+    };
+    d.querySelector('[data-a=add]').onclick = () => { items.push({ text: '', photos: [] }); draw(); list.lastElementChild?.querySelector('textarea')?.focus(); };
+    go.onclick = async () => {
+      const ok = used(); if (!ok.length) { d.querySelector('.m').textContent = 'Descrivi almeno un errore.'; return; }
+      go.disabled = true;
+      try {
+        const device = navigator.userAgent + ' · finestra ' + innerWidth + '×' + innerHeight;
+        for (const it of ok) {
+          const ids = [];
+          for (const p of it.photos) { const id = 'B' + newId(); const t = DB.transaction('files', 'readwrite'); t.objectStore('files').put({ blob: p.blob, type: p.blob.type || 'image/jpeg' }, id); await done(t); ids.push(id); }
+          BUGS.push({ text: it.text.trim(), photos: ids, page: pageName(), hash: location.hash, device, at: new Date().toISOString() });
+        }
+        saveState(); d.close();
+        notice((ok.length > 1 ? 'Errori aggiunti' : 'Errore aggiunto') + ': premi «Invia a Claude» nel riquadro in basso per mandarli.');
+      } catch { go.disabled = false; d.querySelector('.m').textContent = 'Non sono riuscito a salvare la segnalazione: riprova.'; }
+    };
+    draw(); list.querySelector('textarea').focus();
+  }
+
+  /* modalità revisione: ogni testo mostrato viene cercato tra i dati (tutte le raccolte, tutti i campi di testo)
+     e corretto direttamente nel campo da cui viene; ciò che il sito genera da solo si segnala con una nota */
+  let IDX = null;
+  function setReview(on) {
+    segCss(); document.documentElement.classList.toggle('review', on);
+    if (on) ls.set('cdnd_review', '1'); else ls.del('cdnd_review');
+    let bar = document.getElementById('revbar');
+    if (!on) { if (bar) bar.remove(); document.querySelectorAll('.revbox').forEach(closeBox); return; }
+    if (!bar) {
+      bar = document.createElement('div'); bar.id = 'revbar'; bar.setAttribute('role', 'status');
+      bar.innerHTML = '<b>✎ Modalità revisione</b><span><span class="rh">Tocca un testo per correggerlo o per lasciare una nota a Claude.</span></span><button type="button">Esci</button>';
+      bar.querySelector('button').onclick = () => setReview(false); document.body.append(bar);
+    }
+  }
+  const SKIPK = new Set(['id', 'aid', 'k', 'type', 'color', 'thumb', 'from', 'to', 'mapId', 'entityId', 'parent', 'arc', 'ents', 'sessions', 'upd', 'ts', 'points', 'cat', 'imp', 'shape']);
+  const nl = s => String(s).replace(/\*/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+  const rline = s => s.replace(/^#{1,4}\s+/, '').replace(/^\s*[-*•]\s+/, '').replace(/\[\[([^\]|]+?)(?:\|([^\]]+?))?\]\]/g, (m, a, b) => b || (MEM.entities && MEM.entities.get(a) && MEM.entities.get(a).name) || a);
+  function strings(v, path, cb) {
+    if (typeof v === 'string') { if (!v.startsWith('data:') && /\p{L}/u.test(v)) cb(path, v); }
+    else if (Array.isArray(v)) v.forEach((x, i) => strings(x, path.concat(i), cb));
+    else if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) if (!SKIPK.has(k)) strings(x, path.concat(k), cb);
+  }
+  function buildIdx() {
+    const m = new Map();
+    for (const [c, docs] of Object.entries(MEM)) for (const [id, v] of docs) strings(v, [], (path, s) => s.split('\n').forEach((l, i) => { const k = nl(rline(l)); if (k) { if (!m.has(k)) m.set(k, []); m.get(k).push({ c, id, path, i }); } }));
+    return m;
+  }
+  const getAt = (v, path) => path.reduce((o, k) => o == null ? o : o[k], v);
+  // le righe di testo mostrate da un elemento: quelle intere, oppure solo il suo testo diretto (es. titoli con un numero davanti)
+  function findHits(el) {
+    IDX = IDX || buildIdx();
+    const tries = [el.innerText.split('\n').map(nl).filter(Boolean), [nl([...el.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join(' '))].filter(Boolean)];
+    for (const L of tries) {
+      if (!L.length) continue; const out = new Map();
+      for (const h of IDX.get(L[0]) || []) {
+        const lines = getAt(MEM[h.c].get(h.id), h.path).split('\n'); let j = h.i, ok = true;
+        for (let q = 1; q < L.length && ok; q++) { do j++; while (j < lines.length && !nl(rline(lines[j]))); ok = j < lines.length && nl(rline(lines[j])) === L[q]; }
+        if (ok) out.set(h.c + '|' + h.id + '|' + h.path.join('.') + '|' + h.i, { c: h.c, id: h.id, path: h.path, a: h.i, b: j });
+      }
+      if (out.size) return [...out.values()];
+    }
+    return [];
+  }
+  function routePref(list) {
+    const h = decodeURIComponent(location.hash), val = x => MEM[x.c].get(x.id) || {}; let m, f = null;
+    if ((m = h.match(/^#\/sessioni\/(\d+)/))) f = x => ['sessions', 'sbodies', 'events'].includes(x.c) && String(val(x).n) === m[1];
+    else if ((m = h.match(/^#\/scheda\/([^/?]+)/))) f = x => ['entities', 'bodies'].includes(x.c) && val(x).id === m[1];
+    else if ((m = h.match(/^#\/mappe\/([^/?]+)/))) f = x => (x.c === 'maps' && val(x).id === m[1]) || val(x).mapId === m[1];
+    const p = f ? list.filter(f) : []; return p.length ? p : list;
+  }
+  const FIELD = { summary: 'riassunto', text: 'testo', title: 'titolo', name: 'nome', brief: 'descrizione breve', short: 'titolo breve', alias: 'altri nomi', label: 'etichetta', desc: 'descrizione', description: 'descrizione', gameDate: 'data', status: 'stato', notes: 'note' };
+  function recLabel(c, v) {
+    v = v || {}; const ent = id => (MEM.entities && [...MEM.entities.values()].find(e => e.id === id) || {}).name || id;
+    if (c === 'entities') return 'Scheda · ' + (v.name || v.id); if (c === 'bodies') return 'Scheda · ' + ent(v.id);
+    if (c === 'sessions' || c === 'sbodies') { const s = MEM.sessions && [...MEM.sessions.values()].find(x => x.n === v.n); return 'Sessione ' + v.n + (s && s.title ? ' · ' + s.title : ''); }
+    if (c === 'events') return 'Evento · ' + (v.title || ''); if (c === 'maps') return 'Mappa · ' + (v.name || '');
+    if (c === 'pins') return 'Segnalino · ' + (v.label || v.name || ''); if (c === 'regions') return 'Regione · ' + (v.name || v.label || '');
+    if (c === 'links') return 'Collegamento'; if (c === 'blobs') return 'Immagine'; if (c === 'meta') return 'Impostazioni';
+    return c;
+  }
+  function pathLabel(v, path) {
+    const out = []; let o = v;
+    path.forEach((k, i) => {
+      const nx = o == null ? o : o[k];
+      if (k === 'sections' || k === 'entries' || k === 'docs') { } else if (typeof k === 'number') { const t = nx && (nx.title || nx.name); if (t && path[i - 1] !== 'entries') out.push('«' + t + '»'); }
+      else out.push(FIELD[k] || k);
+      o = nx;
+    });
+    return out.join(' › ');
+  }
+  function closeBox(b) { if (b.__host) b.__host.style.display = b.__disp; b.remove(); }
+  const BLK = 'p,li,h1,h2,h3,h4,h5,dd,dt,td,th,figcaption,blockquote';
+  document.addEventListener('click', e => {
+    if (ROLE !== 'admin' || !document.documentElement.classList.contains('review')) return;
+    const view = document.getElementById('view'), t = e.target;
+    if (!view || !(t instanceof Element) || !view.contains(t) || t.closest('.revbox,button,input,textarea,select,summary,label,[data-act],dialog')) return;
+    const a = t.closest('a'); if (a && !(a.classList.contains('xref') && a.closest('.prose'))) return;
+    let el = t.closest(BLK) || t, hits = [];
+    for (let up = 0; el && el !== view && up < 7; up++, el = el.parentElement) { if ((el.innerText || '').trim()) { hits = findHits(el); if (hits.length) break; } }
+    if (!el || el === view) el = t.closest(BLK) || t;
+    e.preventDefault(); e.stopPropagation();
+    openRev(el, routePref(hits));
+  }, true);
+  function openRev(host, hits) {
+    document.querySelectorAll('.revbox').forEach(closeBox);
+    const box = document.createElement(host.tagName === 'LI' ? 'li' : 'div'); box.className = 'revbox'; box.__host = host; box.__disp = host.style.display;
+    host.style.display = 'none'; host.after(box); box.scrollIntoView({ block: 'nearest' });
+    const quote = host.innerText.trim().slice(0, 300);
+    const noteUI = (where, intro) => {
+      box.innerHTML = `<div class="rl">${esc(intro)}</div><textarea class="segta" rows="3" placeholder="Cosa va cambiato? Claude leggerà la nota insieme a questo testo."></textarea><div class="rb"><button type="button" class="btn primary sm">Aggiungi la nota</button><button type="button" class="btn ghost sm">Annulla</button></div>`;
+      const ta = box.querySelector('textarea'); ta.focus();
+      const [ok, no] = box.querySelectorAll('button');
+      no.onclick = () => closeBox(box);
+      ok.onclick = () => { const note = ta.value.trim(); if (!note) { ta.focus(); return; } NOTES.push({ page: pageName(), hash: location.hash, where, quote, note, at: new Date().toISOString() }); saveState(); closeBox(box); notice('Nota aggiunta: la trovi in «Rivedi elenco».'); };
+    };
+    const edit = h => {
+      const v = MEM[h.c].get(h.id), where = recLabel(h.c, v) + (pathLabel(v, h.path) ? ' · ' + pathLabel(v, h.path) : '');
+      const lines = getAt(v, h.path).split('\n'), cur = lines.slice(h.a, h.b + 1).join('\n');
+      box.innerHTML = `<div class="rl">${esc(where)}</div><textarea class="segta" rows="${Math.min(14, Math.max(2, Math.ceil(cur.length / 60) + (h.b - h.a)))}"></textarea>${/\[\[/.test(cur) ? '<p class="rhint">I collegamenti sono scritti come [[scheda|testo mostrato]]: correggi il testo dopo la barra.</p>' : ''}<div class="rb"><button type="button" class="btn primary sm">Salva correzione</button><button type="button" class="btn sm">💬 Nota per Claude</button><button type="button" class="btn ghost sm">Annulla</button></div>`;
+      const ta = box.querySelector('textarea'); ta.value = cur; ta.focus();
+      const [sv, nt, no] = box.querySelectorAll('button');
+      no.onclick = () => closeBox(box); nt.onclick = () => noteUI(where, where);
+      sv.onclick = async () => {
+        const nv = ta.value.replace(/\r/g, ''); if (nv === cur) { closeBox(box); return; }
+        sv.disabled = true;
+        try {
+          const rec = clone(v), path = h.path, o = getAt(rec, path.slice(0, -1)), ls2 = o[path[path.length - 1]].split('\n');
+          ls2.splice(h.a, h.b - h.a + 1, ...nv.split('\n')); o[path[path.length - 1]] = ls2.join('\n');
+          await window.__cronache.runBatch([h.c], 'Revisione', b => b.put(h.c, rec));
+          closeBox(box); await window.__cronache.rerender();
+          notice('Correzione salvata. Quando hai finito di rivedere premi «Invia a Claude» nel riquadro in basso.');
+        } catch (x) { sv.disabled = false; notice('Non sono riuscito a salvare: ' + (x && x.message || 'riprova.')); }
+      };
+    };
+    if (!hits.length) return noteUI(pageName() + ' (' + location.hash + ')', 'Questo testo lo compone il sito da solo, quindi non si corregge qui: lascia una nota a Claude.');
+    if (hits.length === 1) return edit(hits[0]);
+    box.innerHTML = '<div class="rl">Questo testo compare in più punti: quale vuoi correggere?</div>';
+    hits.slice(0, 12).forEach(h => { const v = MEM[h.c].get(h.id), b = document.createElement('button'); b.type = 'button'; b.className = 'btn sm rc'; b.textContent = recLabel(h.c, v) + (pathLabel(v, h.path) ? ' · ' + pathLabel(v, h.path) : ''); b.onclick = () => edit(h); box.append(b); });
+    const no = document.createElement('button'); no.type = 'button'; no.className = 'btn ghost sm rc'; no.textContent = 'Annulla'; no.onclick = () => closeBox(box); box.append(no);
+  }
+
+  // differenze parola per parola, con poche parole di contesto attorno
+  function wdiff(a, b) {
+    const A = a.split(/(\s+)/), B = b.split(/(\s+)/); let p = 0, s = 0;
+    while (p < A.length && p < B.length && A[p] === B[p]) p++;
+    while (s < A.length - p && s < B.length - p && A[A.length - 1 - s] === B[B.length - 1 - s]) s++;
+    const a2 = A.slice(p, A.length - s), b2 = B.slice(p, B.length - s), ops = [];
+    if (a2.length * b2.length > 1e6) { ops.push(['-', a2.join('')], ['+', b2.join('')]); }
+    else {
+      const L = Array.from({ length: a2.length + 1 }, () => new Uint32Array(b2.length + 1));
+      for (let i = a2.length - 1; i >= 0; i--) for (let j = b2.length - 1; j >= 0; j--) L[i][j] = a2[i] === b2[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+      let i = 0, j = 0;
+      while (i < a2.length || j < b2.length) {
+        if (i < a2.length && j < b2.length && a2[i] === b2[j]) { ops.push(['=', a2[i]]); i++; j++; }
+        else if (j < b2.length && (i >= a2.length || L[i][j + 1] >= L[i + 1][j])) { ops.push(['+', b2[j]]); j++; }
+        else { ops.push(['-', a2[i]]); i++; }
+      }
+    }
+    const ctx = (t, end) => { if (t.length <= 8) return esc(t.join('')); return end ? '…' + esc(t.slice(-8).join('')) : esc(t.slice(0, 8).join('')) + '…'; };
+    let h = ctx(A.slice(0, p), true), run = [];
+    const flushEq = last => { if (run.length > 16 && !last) h += esc(run.slice(0, 8).join('')) + ' … ' + esc(run.slice(-8).join('')); else h += esc(run.join('')); run = []; };
+    let del = '', ins = '';
+    const flushCh = () => { if (del) h += '<del>' + esc(del) + '</del>'; if (ins) h += '<ins>' + esc(ins) + '</ins>'; del = ins = ''; };
+    for (const [o, t] of ops) { if (o === '=') { flushCh(); run.push(t); continue; } flushEq(); if (o === '-') del += t; else ins += t; }
+    flushCh(); flushEq(); return h + ctx(A.slice(A.length - s), false);
+  }
+  const KEYF = { meta: 'k', entities: 'id', bodies: 'id', sessions: 'n', sbodies: 'n', events: 'id', maps: 'id', blobs: 'id', pins: 'id', links: 'k', regions: 'id' };
+  async function reviewList() {
+    const d = dlg('revlist', `<h3 style="${H3}">Da inviare a Claude</h3><div class="rvl">Carico…</div><div style="display:flex;margin-top:12px"><button type="button" class="btn ghost" style="margin-left:auto" data-a="close">Chiudi</button></div>`);
+    const body = d.querySelector('.rvl'); let base = {};
+    if (PEND.size) { try { base = (await serverData()).stores; } catch { body.textContent = 'Non riesco a leggere i dati pubblicati per il confronto: controlla la connessione e riprova.'; return; } }
+    const draw = () => {
+      body.innerHTML = '';
+      const item = (title, html, undo) => {
+        const w = document.createElement('div'); w.className = 'it';
+        w.innerHTML = `<div class="ih"><b>${esc(title)}</b></div>${html}`;
+        if (undo) { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn sm'; b.textContent = undo[0]; b.onclick = async () => { b.disabled = true; try { await undo[1](); } catch { b.disabled = false; notice('Non sono riuscito ad annullare: riprova.'); return; } draw(); }; w.querySelector('.ih').append(b); }
+        body.append(w);
+      };
+      for (const k of PEND) {
+        const j = k.indexOf('/'), c = k.slice(0, j), id = k.slice(j + 1), cur = MEM[c] && MEM[c].get(id), old = base[c] && base[c][id];
+        let html = '';
+        if (cur === undefined && old === undefined) continue;
+        if (cur === undefined) html = '<div class="df"><i>Eliminato</i></div>';
+        else if (old === undefined) html = '<div class="df"><i>Nuovo</i></div>';
+        else {
+          const so = new Map(), sn = new Map(); strings(old, [], (p, s) => so.set(JSON.stringify(p), s)); strings(cur, [], (p, s) => sn.set(JSON.stringify(p), s));
+          for (const [p, s] of sn) { const o = so.get(p) || ''; if (o !== s) html += `<div class="df"><i>${esc(pathLabel(cur, JSON.parse(p)) || 'testo')}</i>${wdiff(o, s)}</div>`; }
+          for (const [p, s] of so) if (!sn.has(p)) html += `<div class="df"><i>${esc(pathLabel(old, JSON.parse(p)) || 'testo')}</i><del>${esc(s)}</del></div>`;
+          const strip = v => { const x = clone(v); strings(x, [], p => { const o = getAt(x, p.slice(0, -1)); if (o) o[p[p.length - 1]] = ''; }); return JSON.stringify(x); };
+          if (strip(cur) !== strip(old)) html += '<div class="df"><i>Altre modifiche (immagini, collegamenti o impostazioni)</i></div>';
+          if (!html) html = '<div class="df"><i>Nessuna differenza visibile</i></div>';
+        }
+        item(recLabel(c, cur || old), html, c === 'blobs' ? null : ['Annulla', async () => {
+          await window.__cronache.runBatch([c], 'Annulla', b => old === undefined ? b.del(c, cur[KEYF[c]]) : b.put(c, clone(old)));
+          PEND.delete(k); saveState(); await window.__cronache.rerender();
+        }]);
+      }
+      if (PFILES.size) item(PFILES.size + (PFILES.size === 1 ? ' immagine nuova' : ' immagini nuove'), '');
+      NOTES.forEach((n, i) => item('Nota · ' + n.where, `<div class="df"><i>Sul testo: «${esc(n.quote.slice(0, 160))}${n.quote.length > 160 ? '…' : ''}»</i>${esc(n.note)}</div>`, ['Togli', async () => { NOTES.splice(i, 1); saveState(); }]));
+      BUGS.forEach((g, i) => item('Errore · ' + (g.page || g.hash), `<div class="df">${esc(g.text)}${g.photos.length ? '<i>' + g.photos.length + (g.photos.length === 1 ? ' foto' : ' foto') + '</i>' : ''}</div>`, ['Togli', async () => {
+        const t = DB.transaction('files', 'readwrite'); for (const aid of g.photos) t.objectStore('files').delete(aid); await done(t); BUGS.splice(i, 1); saveState();
+      }]));
+      if (!body.children.length) body.innerHTML = '<p class="sd">Non c\'è più nulla da inviare.</p>';
+    };
+    draw();
+  }
+
   if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => { }));
 })();

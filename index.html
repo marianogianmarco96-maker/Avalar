@@ -185,6 +185,7 @@ label.chk input{width:auto}
 :root[data-theme=dark] .arc>summary{color:var(--gold2)}
 .arc>summary::-webkit-details-marker{display:none}
 .arc>summary small{font-family:var(--body);margin-left:8px}
+.arc>summary{overflow-wrap:anywhere}
 
 /* ---------- import ---------- */
 textarea.big{min-height:260px;font-family:ui-monospace,Consolas,monospace;font-size:.85rem}
@@ -2155,7 +2156,7 @@ async function checkAccess(PERM) {
     setView(`<div class="card"><h2>Impossibile aprire i dati</h2><p>${esc(e.message || e)}</p><p class="hint">Ricarica la pagina; se il problema resta, apri il sito almeno una volta con internet attivo.</p></div>`); return;
   }
   setupQuickSearch(); addEventListener('hashchange', navigate); navigate();
-  window.__cronache = { S, planImport, applyImport, buildContext, runBatch, dbAll, dbGet, loadCaches, processImage };
+  window.__cronache = { S, planImport, applyImport, buildContext, runBatch, dbAll, dbGet, loadCaches, processImage, rerender };
 })();
 
 </script>
