@@ -100,6 +100,14 @@ textarea{resize:vertical;line-height:1.5}
 input:focus,select:focus,textarea:focus{border-color:var(--wine2);box-shadow:0 0 0 2px #a7343b33}
 label.f{display:block;margin:0 0 12px}
 label.f>span{display:block;font-family:var(--display);font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink2);margin-bottom:4px}
+.fdrop{border:2px dashed var(--line2);border-radius:6px;padding:10px;background:var(--paper2)}
+.fdrop input{width:100%}.fdrop .dz{display:block;margin-top:4px;color:var(--ink2)}
+@media (hover:none){.fdrop{border:0;padding:0;background:none}.fdrop .dz{display:none}}
+.dropping{position:relative;outline:3px dashed var(--gold);outline-offset:-3px}
+.dropping::after{content:attr(data-drop);position:absolute;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;background:#2b1d14cc;color:#fbeccb;font-family:var(--display);font-size:1.05rem;letter-spacing:.05em;pointer-events:none;border-radius:inherit}
+.dropping.dropfull::after{position:fixed}
+.dropping.dropbar::after{inset:0 0 auto;padding:12px 18px;background:#2b1d14e6;border-radius:0}
+.pin.droptgt{z-index:6;filter:drop-shadow(0 0 8px #ffd76a) drop-shadow(0 0 3px #ffd76a)}
 label.chk{display:flex;gap:8px;align-items:center;margin:0 0 12px;cursor:pointer}
 label.chk input{width:auto}
 .seg{display:inline-flex;border:1px solid var(--line2);border-radius:4px;overflow:hidden}
@@ -696,7 +704,7 @@ function formDlg({ title, fields, ok = 'Salva', wide = false, intro = '' }) {
       let ctl;
       if (f.type === 'textarea') ctl = `<textarea id="${id}" rows="${f.rows || 5}" ${req} placeholder="${esc(f.placeholder || '')}">${esc(v)}</textarea>`;
       else if (f.type === 'select') ctl = `<select id="${id}">${f.options.map(([ov, ol]) => `<option value="${esc(ov)}" ${String(ov) === String(v) ? 'selected' : ''}>${esc(ol)}</option>`).join('')}</select>`;
-      else if (f.type === 'file') ctl = `<input type="file" id="${id}" accept="${esc(f.accept || '')}" ${req} ${f.multiple ? 'multiple' : ''}>`;
+      else if (f.type === 'file') ctl = /^image/.test(f.accept || '') ? `<div class="fdrop"><input type="file" id="${id}" accept="${esc(f.accept)}" ${req} ${f.multiple ? 'multiple' : ''}><small class="dz">oppure trascina qui ${f.multiple ? 'le immagini' : 'l\'immagine'}</small></div>` : `<input type="file" id="${id}" accept="${esc(f.accept || '')}" ${req} ${f.multiple ? 'multiple' : ''}>`;
       else ctl = `<input type="${f.type === 'number' ? 'number' : 'text'}" id="${id}" value="${esc(v)}" ${req} ${f.list ? `list="${f.list}"` : ''} placeholder="${esc(f.placeholder || '')}" ${f.step ? `step="${f.step}"` : ''} autocomplete="off">`;
       return `<label class="f"><span>${esc(f.label)}</span>${ctl}${hint}</label>`;
     }).join('');
@@ -711,8 +719,49 @@ function formDlg({ title, fields, ok = 'Salva', wide = false, intro = '' }) {
       res(o);
     });
     for (const f of fields) if (f.dm) dmTool($('#ff-' + f.k, d));
+    // immagini trascinate su tutta la finestra: vanno nel primo campo immagine (in aggiunta, se ne accetta più di una)
+    const imgF = fields.find(f => f.type === 'file' && /^image/.test(f.accept || ''));
+    if (imgF) {
+      const inp = $('#ff-' + imgF.k, d);
+      const setFiles = fs => { const dt = new DataTransfer(); for (const x of [...(imgF.multiple ? inp.files : []), ...(imgF.multiple ? fs : fs.slice(0, 1))]) dt.items.add(x); inp.files = dt.files; inp.dispatchEvent(new Event('change', { bubbles: true })); };
+      if (imgF.files?.length) setFiles(imgF.files);
+      dropImages($('form', d), imgF.multiple ? 'Rilascia per aggiungere le immagini' : 'Rilascia per usare questa immagine', fs => { setFiles(fs); if (!imgF.multiple && fs.length > 1) toast('Qui serve una sola immagine: uso la prima'); });
+    }
     const first = $('input:not([type=checkbox]),textarea,select', d); if (first) setTimeout(() => first.focus(), 30);
   });
+}
+/* ---------- immagini trascinate dal computer (sul telefono resta il pulsante per scegliere il file) ---------- */
+let dragInside = false; // trascinamenti partiti dalla pagina stessa (link, testo): non sono immagini da caricare
+addEventListener('dragstart', () => { dragInside = true; }); addEventListener('dragend', () => { dragInside = false; });
+const dragHasFiles = e => !dragInside && [...(e.dataTransfer?.types || [])].some(t => t === 'Files' || t === 'text/uri-list');
+// un'immagine lasciata fuori da una zona di rilascio non deve aprirsi al posto del sito
+addEventListener('dragover', e => { if (dragHasFiles(e)) { e.preventDefault(); e.dataTransfer.dropEffect = 'none'; } });
+addEventListener('drop', e => { if (dragHasFiles(e)) e.preventDefault(); });
+async function droppedImages(dt) {
+  const all = [...(dt.files || [])];
+  if (all.length) return all.filter(f => /^image\//.test(f.type) || /\.(png|jpe?g|jfif|webp|gif|bmp)$/i.test(f.name));
+  const u = (dt.getData('text/uri-list') || '').split(/\r?\n/).map(x => x.trim()).find(x => /^https?:/i.test(x)); if (!u) return [];
+  try { // immagine trascinata da un'altra pagina web: si scarica, se quel sito lo permette
+    const r = await fetch(u); if (!r.ok) throw 0; const b = await r.blob(); if (!/^image\//.test(b.type)) throw 0;
+    return [new File([b], decodeURIComponent(u.split('/').pop().split('?')[0]) || 'immagine', { type: b.type })];
+  } catch { throw new Error('Non riesco a prendere l\'immagine da quella pagina: salvala sul computer e trascina il file.'); }
+}
+// el diventa una zona di rilascio: durante il trascinamento mostra label (testo, o funzione dell'evento), al rilascio chiama onFiles(files, evento)
+function dropImages(el, label, onFiles, cls = '') {
+  let n = 0;
+  const lab = e => typeof label === 'function' ? label(e) : label;
+  const off = () => { n = 0; el.classList.remove('dropping'); if (cls) el.classList.remove(cls); };
+  const enter = e => { if (!dragHasFiles(e)) return; e.preventDefault(); if (n++ === 0) { el.dataset.drop = lab(e); el.classList.add('dropping'); if (cls) el.classList.add(cls); } };
+  const over = e => { if (!dragHasFiles(e)) return; e.preventDefault(); e.stopPropagation(); e.dataTransfer.dropEffect = 'copy'; if (typeof label === 'function') el.dataset.drop = lab(e); };
+  const leave = () => { if (n && --n === 0) off(); };
+  const drop = async e => {
+    if (!dragHasFiles(e)) return; e.preventDefault(); e.stopPropagation(); off();
+    try { const fs = await droppedImages(e.dataTransfer); if (!fs.length) return toast('Trascina un\'immagine (PNG, JPG o WebP)', 'err'); await onFiles(fs, e); }
+    catch (x) { toast(x.message || String(x), 'err'); }
+  };
+  const ev = [['dragenter', enter], ['dragover', over], ['dragleave', leave], ['drop', drop]];
+  for (const [k, f] of ev) el.addEventListener(k, f);
+  return () => { off(); for (const [k, f] of ev) el.removeEventListener(k, f); };
 }
 // evidenziatore: chiude tra [DM] e [/DM] il testo selezionato (o lo riapre se il cursore è già dentro una parte nascosta)
 function dmToggle(ta) {
@@ -1633,6 +1682,16 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
     const onScr = () => { const y = innerHeight * .3; let cur = marks[0]; for (const m of marks) if (m.getBoundingClientRect().top < y) cur = m; tocEl.querySelectorAll('button').forEach(x => { const on = x.dataset.to === cur?.id; if (on && !x.classList.contains('on')) x.scrollIntoView({ block: 'nearest', inline: 'center' }); x.classList.toggle('on', on); }); };
     addEventListener('scroll', onScr, { passive: true }); onCleanup(() => removeEventListener('scroll', onScr)); onScr();
   }
+  const savePortrait = async f => {
+    toast('Elaboro l\'immagine…'); const im = await processImage(f, 900);
+    await runBatch(['entities', 'blobs'], '', async t => { await t.put('blobs', { id: 'portrait-' + id, blob: im.blob, type: im.blob.type }); await t.put('entities', { ...e, portrait: { id: 'portrait-' + id, thumb: im.thumb }, upd: Date.now() }); }); rerender();
+  };
+  // DM: un'immagine trascinata sulla scheda diventa il suo ritratto
+  if (!window.__RO) onCleanup(dropImages($('#view .page'), e.portrait ? `Rilascia per cambiare il ritratto di ${e.name}` : `Rilascia per usarla come ritratto di ${e.name}`, async fs => {
+    if (e.portrait && !await ask(`Sostituire il ritratto di **${e.name}** con «${fs[0].name}»?`, { ok: 'Sostituisci' })) return;
+    if (fs.length > 1) toast('Una scheda ha un solo ritratto: uso la prima immagine');
+    await savePortrait(fs[0]);
+  }, 'dropfull'));
   const edEntry = async (a, add) => {
     const si = +a.dataset.si, ei = add ? -1 : +a.dataset.ei; const cur = add ? null : b.sections[si].entries[ei];
     const r = await formDlg({ title: add ? `Nuova voce in «${b.sections[si].title}»` : 'Modifica voce', wide: true, fields: [{ k: 'text', label: 'Testo', type: 'textarea', rows: 10, value: cur?.text || '', req: true, dm: true }, { k: 'n', label: 'Sessione (vuoto = nessuna)', type: 'number', value: add ? lastSessionN() : cur.n }, { k: 'dm', label: '🔒 Solo per DM: tutta la voce è nascosta ai giocatori', type: 'check', value: !!cur?.dm }] });
@@ -1647,8 +1706,7 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
     portrait: async () => {
       const r = await formDlg({ title: 'Ritratto di ' + e.name, fields: [{ k: 'f', label: 'Immagine (PNG, JPG, WebP)', type: 'file', accept: 'image/*' }, ...(e.portrait ? [{ k: 'rm', label: 'Rimuovi il ritratto attuale', type: 'check', value: false }] : [])] }); if (!r) return;
       if (r.rm) { await runBatch(['entities', 'blobs'], '', async t => { await t.del('blobs', e.portrait.id); const c = { ...e, upd: Date.now() }; delete c.portrait; await t.put('entities', c); }); return rerender(); }
-      if (!r.f) return; toast('Elaboro l\'immagine…'); const im = await processImage(r.f, 900);
-      await runBatch(['entities', 'blobs'], '', async t => { await t.put('blobs', { id: 'portrait-' + id, blob: im.blob, type: im.blob.type }); await t.put('entities', { ...e, portrait: { id: 'portrait-' + id, thumb: im.thumb }, upd: Date.now() }); }); rerender();
+      if (r.f) await savePortrait(r.f);
     },
     toggleDisc: async a => { await runBatch(['entities'], '', async t => t.put('entities', { ...e, discovered: !a.checked, upd: Date.now() })); rerender(); },
     copyEnt: async () => copyText(await buildEntityText(id), 'Scheda copiata'),
@@ -1751,7 +1809,7 @@ const PIN_PATH = 'M14 35C14 35 2 21 2 13a12 12 0 0 1 24 0c0 8-12 22-12 22z';
 async function uploadMapDlg(pre = {}) {
   const r = await formDlg({
     title: 'Carica una mappa', intro: 'PNG, JPG o WebP. Se è molto grande la riduco (lato lungo max 4096 px) per tenere l\'app veloce.',
-    fields: [{ k: 'f', label: 'Immagine', type: 'file', accept: 'image/*', req: true }, { k: 'name', label: 'Nome della mappa', req: true, placeholder: 'Il Continente, Valdoro, Faro Spezzato…' }, { k: 'desc', label: 'Descrizione (aiuta Claude a capirla)', type: 'textarea', rows: 3, placeholder: 'es. Mappa del continente, il nord è in alto.' },
+    fields: [{ k: 'f', label: 'Immagine', type: 'file', accept: 'image/*', req: true, files: pre.files }, { k: 'name', label: 'Nome della mappa', req: true, value: pre.name || '', placeholder: 'Il Continente, Valdoro, Faro Spezzato…' }, { k: 'desc', label: 'Descrizione (aiuta Claude a capirla)', type: 'textarea', rows: 3, placeholder: 'es. Mappa del continente, il nord è in alto.' },
     { k: 'parent', label: 'Mappa madre (di cui questa è un dettaglio)', type: 'select', value: pre.parent || '', options: [['', '— nessuna (mappa principale) —'], ...S.maps.map(m => [m.id, m.name])] }, { k: 'disc', label: 'Scoperta dai giocatori', type: 'check', value: true }]
   });
   if (!r) return null;
@@ -1771,7 +1829,9 @@ route(/^\/mappe$/, async () => {
   setView(`<div class="pagehead"><h1>Mappe</h1><div class="acts"><button class="btn primary" data-act="up">+ Carica mappa</button></div></div>
     ${ordered.length ? `<div class="maplist">${ordered.map(({ m, depth }) => `<a class="mapcard" href="#/mappe/${encodeURIComponent(m.id)}"><div class="im" style="background-image:url('${m.thumb || ''}')"></div><div class="tx"><b>${esc(m.name)}</b><p>${m.parent ? '↳ ' + esc(mapById(m.parent)?.name || '') + ' · ' : ''}${pinCount[m.id] || 0} segnaposto${m.discovered === false ? ' · <i>non scoperta</i>' : ''}</p>${m.desc ? `<p class="clamp2 mute">${esc(m.desc)}</p>` : ''}</div></a>`).join('')}</div>`
       : `<div class="card empty"><h2>Nessuna mappa</h2><p>Carica la mappa generale del mondo e poi, se vuoi, quelle più piccole (regioni, città, dungeon) indicando di quale mappa sono un dettaglio. I luoghi scoperti compariranno come segnaposto.</p><button class="btn primary" data-act="up">+ Carica la prima mappa</button></div>`}`);
-  setActs({ up: async () => { const id = await uploadMapDlg(); if (id) location.hash = '#/mappe/' + encodeURIComponent(id); } });
+  const upload = async pre => { const id = await uploadMapDlg(pre); if (id) location.hash = '#/mappe/' + encodeURIComponent(id); };
+  setActs({ up: () => upload() });
+  if (!window.__RO) onCleanup(dropImages($('#view .page'), 'Rilascia per caricare una nuova mappa', fs => { if (fs.length > 1) toast('Carico una mappa alla volta: uso la prima immagine'); return upload({ files: fs.slice(0, 1), name: fs[0].name.replace(/\.[a-z0-9]+$/i, '').replace(/[-_]+/g, ' ') }); }, 'dropfull'));
 });
 
 route(/^\/mappe\/(.+)$/, async ([id], q) => {
@@ -1916,6 +1976,9 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
     for (const f of files || []) { try { const im = await processImage(f, 1600); const pid = 'pinimg-' + uid(); blobs.push({ id: pid, blob: im.blob, type: im.blob.type }); metas.push({ id: pid, thumb: im.thumb, name: f.name, w: im.w, h: im.h }); } catch (e) { errors.push((f.name || 'foto') + ': ' + (e.message || e)); } }
     return { blobs, metas, errors, asked: files?.length || 0 };
   };
+  const addPhotos = async (p, files) => {
+    const ph = await prepPhotos(files); photoReport(ph); if (!ph.metas.length) return; const np = { ...p, photos: [...(p.photos || []), ...ph.metas] }; await savePin(np, ph.blobs); pins = pins.map(x => x.id === p.id ? np : x); if (st.sel === p.id) renderSide(); else selectPin(p.id); toast(ph.metas.length + ' foto aggiunte');
+  };
   const photoReport = ph => { if (ph.errors.length) showInfo('Alcune foto non sono state aggiunte', '<ul>' + ph.errors.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul><p class="hint">Formati accettati: PNG, JPG, WebP (le foto HEIC/HEIF dell\'iPhone vanno prima convertite in JPG).</p>'); };
   const COLORS = [['#d9b13c', 'Oro'], ['#6f9fd0', 'Azzurro'], ['#4a9a5a', 'Verde'], ['#2f6f6a', 'Verde scuro'], ['#9a7a5a', 'Marrone'], ['#c9853a', 'Arancio'], ['#d96a3a', 'Rosso fuoco'], ['#9b5fb0', 'Viola'], ['#5a7fa0', 'Blu acciaio'], ['#cc4455', 'Rosso']];
   const regDlg = async r => {
@@ -1926,13 +1989,13 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
     if (!ent) { entityId = await createEntity({ type: 'luogo', name: f.ent.trim() }); await dbPut('entities', { ...S.ents.get(entityId), cat: 'regione' }); await loadCaches(); }
     return { entityId, color: f.color };
   };
-  const pinDlg = async (p, pos) => {
+  const pinDlg = async (p, pos, files) => {
     ensureEntList(); const e = p ? entOf(p) : null;
     const r = await formDlg({
       title: p ? 'Modifica segnaposto' : 'Nuovo segnaposto', fields: [
         { k: 'ent', label: 'Scheda collegata (digita il nome)', list: 'dl-ents', value: e ? `${e.name} (${TYPES[e.type]})` : '', hint: 'Scegli dai suggerimenti, oppure scrivi un nome nuovo.' },
         { k: 'label', label: 'Etichetta (solo se non c\'è una scheda)', value: p?.label || '' },
-        { k: 'photos', label: 'Foto del luogo (facoltative, anche più di una)', type: 'file', accept: 'image/*', multiple: true },
+        { k: 'photos', label: 'Foto del luogo (facoltative, anche più di una)', type: 'file', accept: 'image/*', multiple: true, files },
         { k: 'target', label: 'Apre la mappa di dettaglio', type: 'select', value: p?.targetMapId || '', options: [['', '— nessuna —'], ...S.maps.filter(x => x.id !== m.id).map(x => [x.id, x.name])] },
         { k: 'create', label: 'Se la scheda non esiste, creala come nuovo Luogo', type: 'check', value: true }, { k: 'visited', label: 'Visitato dal party', type: 'check', value: p ? p.visited !== false : true }, { k: 'disc', label: 'Visibile ai giocatori (scoperto)', type: 'check', value: p ? p.discovered !== false : true }]
     });
@@ -2029,7 +2092,7 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
     editpin: () => pinDlg(pins.find(p => p.id === st.sel)),
     addphotos: async () => {
       const p = pins.find(x => x.id === st.sel); const r = await formDlg({ title: `Aggiungi foto a «${pname(p)}»`, ok: 'Aggiungi', fields: [{ k: 'photos', label: 'Foto (puoi sceglierne più di una)', type: 'file', accept: 'image/*', multiple: true, req: true }] }); if (!r) return;
-      const ph = await prepPhotos(r.photos); photoReport(ph); if (!ph.metas.length) return; const np = { ...p, photos: [...(p.photos || []), ...ph.metas] }; await savePin(np, ph.blobs); pins = pins.map(x => x.id === p.id ? np : x); renderSide(); toast(ph.metas.length + ' foto aggiunte');
+      await addPhotos(p, r.photos);
     },
     delphoto: async a => { const p = pins.find(x => x.id === st.sel), i = +a.dataset.i; if (!await ask('Rimuovere questa foto?', { danger: true, ok: 'Rimuovi' })) return; const gone = p.photos[i]; const np = { ...p, photos: p.photos.filter((_, k) => k !== i) }; await savePin(np, [], [gone.id]); pins = pins.map(x => x.id === p.id ? np : x); renderSide(); },
     viewphoto: a => {
@@ -2046,12 +2109,12 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
       const r = await formDlg({ title: 'Modifica mappa', fields: [{ k: 'name', label: 'Nome', value: m.name, req: true }, { k: 'desc', label: 'Descrizione', type: 'textarea', rows: 4, value: m.desc }, { k: 'parent', label: 'Mappa madre', type: 'select', value: m.parent || '', options: [['', '— nessuna —'], ...S.maps.filter(x => x.id !== m.id).map(x => [x.id, x.name])] }, { k: 'disc', label: 'Scoperta dai giocatori', type: 'check', value: m.discovered !== false }] });
       if (!r) return; await runBatch(['maps'], '', async t => t.put('maps', { ...m, name: r.name.trim(), desc: r.desc.trim(), parent: r.parent || null, discovered: r.disc })); rerender();
     },
-    reimg: async () => {
-      const r = await formDlg({ title: 'Sostituisci l\'immagine', intro: 'I segnaposto sono memorizzati in percentuale: se la nuova immagine ha la stessa proporzione restano al loro posto.', fields: [{ k: 'f', label: 'Nuova immagine', type: 'file', accept: 'image/*', req: true }] }); if (!r) return;
+    reimg: async (a, ev, files) => {
+      const r = await formDlg({ title: 'Sostituisci l\'immagine', intro: 'I segnaposto sono memorizzati in percentuale: se la nuova immagine ha la stessa proporzione restano al loro posto.', fields: [{ k: 'f', label: 'Nuova immagine', type: 'file', accept: 'image/*', req: true, files }] }); if (!r) return;
       const im = await processImage(r.f); if (Math.abs(im.w / im.h - m.w / m.h) > 0.02 && !await ask('La proporzione della nuova immagine è diversa: i segnaposto potrebbero risultare spostati. Continuare?', { ok: 'Continua' })) return;
       await runBatch(['maps', 'blobs'], '', async t => { await t.put('blobs', { id, blob: im.blob, type: im.blob.type }); await t.put('maps', { ...m, w: im.w, h: im.h, thumb: im.thumb }); }); rerender();
     },
-    subup: async () => { const nid = await uploadMapDlg({ parent: m.id }); if (nid) location.hash = '#/mappe/' + encodeURIComponent(nid); },
+    subup: async (a, ev, files) => { const nid = await uploadMapDlg({ parent: m.id, files }); if (nid) location.hash = '#/mappe/' + encodeURIComponent(nid); },
     delmap: async () => {
       if (!await ask(`Eliminare la mappa **${m.name}** con i suoi ${pins.length} segnaposto? Le schede restano.`, { danger: true, ok: 'Elimina' })) return;
       const all = await dbAll('pins');
@@ -2059,6 +2122,26 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
       location.hash = '#/mappe';
     }
   });
+  // DM: immagini trascinate sulla mappa. Su un segnaposto (o sul pannello del segnaposto aperto) diventano sue foto; altrove si sceglie cosa farne
+  if (!window.__RO) {
+    let tgt = null;
+    const pinAt = e => { if (st.players) return null; const el = e.target.closest?.('.pin[data-pin]'); if (el) return pins.find(p => p.id === el.dataset.pin) || null; return (e.target.closest?.('#mside') && pins.find(p => p.id === st.sel)) || null; };
+    const mark = p => { if (tgt === p) return; tgt = p; $$('.pin.droptgt', box).forEach(x => x.classList.remove('droptgt')); if (p) box.querySelector(`.pin[data-pin="${CSS.escape(p.id)}"]`)?.classList.add('droptgt'); };
+    onCleanup(dropImages(mv, e => {
+      if (st.players) return 'Passa alla vista DM per aggiungere immagini';
+      const p = pinAt(e); mark(p); return p ? `Rilascia per aggiungere le foto a «${pname(p)}»` : 'Rilascia su un segnaposto per dargli le foto, oppure qui per scegliere cosa farne';
+    }, async (fs, e) => {
+      mark(null); if (st.players) return toast('Passa alla vista DM per aggiungere immagini', 'err');
+      const p = pinAt(e); if (p) return addPhotos(p, fs);
+      const pos = e.target.closest('#stage') && url ? toPct(e.clientX, e.clientY) : null, one = fs.slice(0, 1);
+      const d = openDlg(`<form method="dialog"><h3>${fs.length > 1 ? fs.length + ' immagini' : '«' + esc(fs[0].name) + '»'}: cosa ne faccio?</h3><div style="display:grid;gap:8px">${pos ? `<button value="pin" class="btn primary">Nuovo segnaposto in questo punto, con ${fs.length > 1 ? 'queste foto' : 'questa foto'}</button>` : ''}<button value="sub" class="btn">Nuova mappa di dettaglio di «${esc(m.name)}»</button>${lock ? '' : '<button value="reimg" class="btn">Sostituisci l\'immagine di questa mappa</button>'}</div>${fs.length > 1 ? '<p class="hint">Per una mappa uso solo la prima immagine.</p>' : ''}<p class="hint">Per aggiungere foto a un luogo già segnato, rilasciale sopra il suo segnaposto.</p><menu><button value="cancel" class="btn ghost">Annulla</button></menu></form>`);
+      const v = await new Promise(r => d.addEventListener('close', () => r(d.returnValue)));
+      if (v === 'pin') { if (!st.edit) { st.edit = true; refresh(); syncUI(); } await pinDlg(null, pos, fs); }
+      else if (v === 'sub') await acts.subup(null, null, one);
+      else if (v === 'reimg') await acts.reimg(null, null, one);
+    }, 'dropbar'));
+    mv.addEventListener('dragleave', () => { if (!mv.classList.contains('dropping')) mark(null); });
+  }
   refresh(); syncUI(); requestAnimationFrame(() => { fit(); if (st.sel && pins.some(p => p.id === st.sel)) center(pins.find(p => p.id === st.sel), 2.2); else if (st.reg && curReg()) fitRegion(curReg()); });
   addEventListener('resize', fit); onCleanup(() => removeEventListener('resize', fit));
 });
