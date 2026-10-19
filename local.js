@@ -15,7 +15,7 @@
   const clone = v => JSON.parse(JSON.stringify(v));
   const ROERR = () => new Error('Sola lettura: accedi come Dungeon Master per modificare.');
 
-  let ROLE = null, DB = null, MEM = {}, BLOBMAP = {}, RAW = null, PLAYER = null, BLOBKEYS = {};
+  let ROLE = null, DB = null, MEM = {}, BLOBMAP = {}, RAW = null, PLAYER = null, BLOBKEYS = {}, PRAW = null;
   // account dei giocatori, nell'ordine dei ritratti di login-gruppo.jpg
   const PLAYERS = [['livion', 'Livion'], ['mungus', 'Mungus'], ['sam', 'Sam'], ['violet', 'Violet']];
   // modifiche non ancora inviate: chiavi 'raccolta/id' dei documenti e id delle immagini caricate
@@ -61,7 +61,7 @@
     else { const k = ls.get('cdnd_pkey'); if (!k) throw new Error('nokey'); raw = b64d(k); }
     let d; try { d = await openEnc(enc, raw); } catch { throw new Error(code != null ? 'Password non corretta.' : 'nokey'); }
     MEM = {}; for (const [c, docs] of Object.entries(d.stores)) MEM[c] = new Map(Object.entries(docs));
-    BLOBMAP = d.blobmap || {}; BLOBKEYS = d.blobkeys || {}; PLAYER = d.player || { id, name: id }; ROLE = 'player';
+    BLOBMAP = d.blobmap || {}; BLOBKEYS = d.blobkeys || {}; PLAYER = d.player || { id, name: id }; ROLE = 'player'; PRAW = raw;
     if (remember) { ls.set('cdnd_remember', 'player:' + id); ls.set('cdnd_pkey', b64e(raw)); }
   }
   async function seedAdmin(payload, raw) {
@@ -270,7 +270,7 @@
 
   /* ---------- interfaccia per ruolo ---------- */
   const HIDE_ACTS = ['selmode', 'selall', 'selnone', 'selmove', 'edit', 'up', 'rensess', 'reimg', 'delRel', 'dmRel', 'del', 'copyctx', 'wipe', 'vedit', 'vdm', 'vpl', 'undo', 'toggleDisc', 'subup', 'rename', 'renSec', 'redraw', 'portrait', 'newsess', 'newent', 'merge', 'histgen', 'editreg', 'editpin', 'editmap', 'editgen', 'editEntry', 'drawundo', 'drawok', 'drawcancel', 'delreg', 'delpin', 'delphoto', 'delmap', 'delSec', 'delEntry', 'delDoc', 'cpDoc', 'copyEnt', 'bkFull', 'bkData', 'attach', 'analyze', 'addreg', 'addpin', 'addphotos', 'addSec', 'addRel', 'addEntry', 'demo'];
-  const GUEST_CSS = HIDE_ACTS.map(a => `html.ro [data-act="${a}"]`).join(',') + `,html.ro a[href="#/import"],html.ro a[href="#/backup"],html.ro #b-edit,html.ro #b-add,html.ro #b-addreg,html.ro #seg,html.ro #access,html.ro input[type=file],html.ro label:has(input[type=file]){display:none!important}`;
+  const GUEST_CSS = HIDE_ACTS.map(a => `html.ro [data-act="${a}"]`).join(',') + `,html.ro a[href="#/import"],html.ro a[href="#/backup"],html.ro #b-edit,html.ro #b-add,html.ro #b-addreg,html.ro #seg,html.ro #access,html.ro input[type=file]:not(.segdlg *),html.ro label:has(input[type=file]):not(.segdlg *){display:none!important}`;
   // strumenti: un ingranaggio nella barra in alto, accanto alla ricerca, con il menu a tendina (non copre più il testo)
   const ROLE_CSS = `#tools{position:relative;flex:none;z-index:45;font:600 .7rem/1 Georgia,serif}
 #tools .tlist{display:none;position:absolute;right:0;top:calc(100% + 12px);flex-direction:column;align-items:stretch;gap:6px;padding:8px;border-radius:12px;background:var(--wine-d,#561820);border:1px solid #e7cf9a80;box-shadow:0 6px 20px #0007;min-width:210px}
@@ -310,6 +310,7 @@
     document.addEventListener('click', e => { if (!box.contains(e.target)) setOpen(false); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
     const up = mk('⟳', 'Verifica aggiornamento', 'Verifica se c\'è una versione più recente del sito e caricala subito', () => checkUpdate(up), 'upbtn');
+    if (PLAYER) { mk('🐞', 'Segnala un bug', 'Qualcosa non funziona o si vede male: avvisa il DM', () => { setOpen(false); playerDlg('bug'); }); mk('💡', 'Proponi una miglioria', 'Un\'idea per migliorare il sito: proponila al DM', () => { setOpen(false); playerDlg('idea'); }); }
     if (adm) mk('✎', 'Segnala a Claude', 'Segnala un errore o correggi i contenuti del sito', () => { setOpen(false); reportDlg(); });
     if (adm) mk('👥', 'Account giocatori', 'Password dei giocatori: vederle o cambiarle', () => { setOpen(false); accountsDlg(); });
     if (adm) { mk('⇪', 'Importa', 'Importa una sessione o dei dati', () => { setOpen(false); location.hash = '#/import'; }); mk('⛁', 'Backup', 'Scarica o ripristina un backup', () => { setOpen(false); location.hash = '#/backup'; }); }
@@ -604,6 +605,59 @@ html.review #view :is(p,li,h1,h2,h3,h4,h5,dd,dt,td,th,figcaption,blockquote):hov
       } catch { go.disabled = false; d.querySelector('.m').textContent = 'Non sono riuscito a salvare la segnalazione: riprova.'; }
     };
     draw(); list.querySelector('textarea').focus();
+  }
+
+  /* ---------- Segnala un bug / Proponi una miglioria (giocatori) ----------
+     Come «Segnala a Claude», ma non si applica da sola: arriva al DM e a Claude, che la valutano prima di fare qualcosa.
+     Il testo e le foto viaggiano cifrati con la chiave del giocatore (solo il DM, che conosce le password, li apre). */
+  const PKIND = { bug: ['🐞', 'Segnala un bug', 'Descrivi cosa non funziona o si vede male. Il sito aggiunge da solo la pagina in cui ti trovi e il dispositivo che usi.', 'Es.: sul telefono il menu delle sessioni copre il titolo.', 'segnala un bug'], idea: ['💡', 'Proponi una miglioria', 'Descrivi la tua idea per migliorare il sito.', 'Es.: sarebbe comodo vedere nella scheda del mio PG gli oggetti che porto.', 'propone una miglioria'] };
+  async function playerRequest(kind, text, photos) {
+    const ph = {};
+    for (const [i, p] of photos.entries()) ph['F' + (i + 1)] = { type: p.blob.type || 'image/jpeg', b64: b64e(new Uint8Array(await p.blob.arrayBuffer())) };
+    let bytes = new TextEncoder().encode(JSON.stringify({ v: 1, kind, player: PLAYER, text, page: pageName(), hash: location.hash, device: navigator.userAgent + ' · finestra ' + innerWidth + '×' + innerHeight, at: new Date().toISOString(), photos: ph }));
+    if ('CompressionStream' in window) bytes = new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer());
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await aesKey(PRAW), bytes));
+    const all = new Uint8Array(12 + ct.length); all.set(iv); all.set(ct, 12);
+    const block = 'AVALAR-GIOCATORE-1 ' + PLAYER.id + '\n' + b64e(all).replace(/.{76}/g, '$&\n').trim() + '\nFINE';
+    const title = '[Giocatore] ' + PLAYER.name + ' ' + PKIND[kind][4];
+    const intro = PLAYER.name + ' ' + PKIND[kind][4] + ' dal sito. Il testo è cifrato: lo leggono solo il DM e Claude.\n\n'
+      + 'Per Claude: NON applicarla da solo. Leggila con `python3 strumenti/leggi_segnalazione.py CODICE file.txt`, valutala e proponi al DM cosa fare: si procede solo dopo il suo ok.\n\n';
+    const url = b => ASK_REPO + '/issues/new?title=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(b);
+    const inl = url(intro + '```\n' + block + '\n```\n');
+    if (inl.length < 7000) return { url: inl };
+    return { url: url(intro + '**Il testo e le foto sono nel file «segnalazione-avalar.txt» che il sito ha appena scaricato: allegalo qui sotto (trascinalo in questo riquadro o tocca «Paste, drop, or click to add files») prima di premere «Create».**\n'), file: new Blob([block + '\n'], { type: 'text/plain' }) };
+  }
+  function playerDlg(kind) {
+    const [ic, tit, sub, ph] = PKIND[kind], photos = [];
+    const d = dlg('pldlg', `<h3 style="${H3}">${ic} ${tit}</h3><p class="sd" style="margin:0">${sub}</p>
+      <div class="bugi"><textarea class="segta" rows="5" placeholder="${esc(ph)}"></textarea><div class="ph"></div></div>
+      <p class="sd" style="margin:10px 0 0;font-size:.92rem">Arriva al DM e a Claude, che la valutano prima di cambiare qualcosa. Premendo «Invia» si apre GitHub (serve un account, anche gratuito): lì premi «Create».</p>
+      <div style="display:flex;gap:8px;margin-top:12px"><button type="button" class="btn primary" data-a="send">Invia</button><button type="button" class="btn ghost" style="margin-left:auto" data-a="close">Chiudi</button></div><p class="m" style="min-height:1.2em;color:#a3262f;margin:8px 0 0"></p>`);
+    d.addEventListener('close', () => photos.forEach(p => URL.revokeObjectURL(p.url)));
+    const ta = d.querySelector('textarea'), box = d.querySelector('.ph'), go = d.querySelector('[data-a=send]'), m = d.querySelector('.m');
+    const draw = () => {
+      box.innerHTML = '';
+      photos.forEach((p, j) => { const s = document.createElement('span'); s.style.cssText = 'display:inline-flex;align-items:center;gap:4px'; s.innerHTML = `<img alt="Foto ${j + 1}" src="${p.url}"><button type="button" class="segx" title="Togli la foto">✕</button>`; s.querySelector('button').onclick = () => { URL.revokeObjectURL(p.url); photos.splice(j, 1); draw(); }; box.append(s); });
+      const lb = document.createElement('label'); lb.className = 'btn sm'; lb.style.cursor = 'pointer'; lb.innerHTML = '📷 ' + (photos.length ? 'Un\'altra immagine' : 'Aggiungi un\'immagine (facoltativa)') + '<input type="file" accept="image/*" hidden>';
+      lb.querySelector('input').onchange = async e => { const f = e.target.files[0]; if (!f) return; const blob = await shrink(f); photos.push({ blob, url: URL.createObjectURL(blob) }); draw(); };
+      box.append(lb);
+    };
+    let sent = null;
+    go.onclick = async () => {
+      if (sent) { window.open(sent.url, '_blank', 'noopener'); return; }
+      const text = ta.value.trim(); if (!text) { m.textContent = 'Scrivi prima cosa vuoi segnalare.'; ta.focus(); return; }
+      go.disabled = true; m.textContent = '';
+      try {
+        sent = await playerRequest(kind, text, photos);
+        if (sent.file) { const u = URL.createObjectURL(sent.file), a = document.createElement('a'); a.href = u; a.download = 'segnalazione-avalar.txt'; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 60000); }
+        window.open(sent.url, '_blank', 'noopener');
+        ta.disabled = true; box.querySelectorAll('button,input').forEach(x => x.disabled = true); go.textContent = 'Riapri GitHub';
+        m.style.color = '#3f6b46'; m.textContent = sent.file ? 'Su GitHub allega il file «segnalazione-avalar.txt» e premi «Create». Grazie!' : 'Su GitHub premi «Create» per inviarla. Grazie!';
+      } catch { m.textContent = 'Non sono riuscito a preparare la segnalazione: riprova.'; }
+      go.disabled = false;
+    };
+    draw(); ta.focus();
   }
 
   /* modalità revisione: ogni testo mostrato viene cercato tra i dati (tutte le raccolte, tutti i campi di testo)
