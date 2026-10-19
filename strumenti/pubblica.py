@@ -6,7 +6,8 @@ Uso:
 
 La copia per i giocatori toglie: schede non scoperte (con collegamenti, ritratti e menzioni,
 che restano come testo semplice), sezioni del DM (titolo con «DM»), voci e note ricavate dalla scaletta del DM,
-voci, eventi e paragrafi che iniziano con «*(Solo DM)*», documenti allegati alle sessioni, cronologia del riassunto e immagini riservate (priv/).
+voci, eventi e paragrafi che iniziano con «*(Solo DM)*», sezioni, voci ed eventi segnati «Solo per DM» (dm: true),
+testi evidenziati con [DM]…[/DM], documenti allegati alle sessioni, cronologia del riassunto e immagini riservate (priv/).
 Le immagini in priv/ sono cifrate con la stessa chiave dei dati.
 """
 import base64
@@ -24,6 +25,8 @@ NOTA_DM = re.compile(r'\s*\*\(Dalla scaletta del DM: da integrare con il resocon
 VOCE_DM = re.compile(r'^(\*Dalla scaletta del DM\.\*|Secondo la scaletta|\*\(Solo DM\)\*)')
 # paragrafo di un riassunto che solo il DM deve vedere
 PARAGRAFO_DM = re.compile(r'^\*\(Solo DM\)\*[^\n]*(\n\n|\n|$)', re.M)
+# frase evidenziata dal DM: [DM]…[/DM] (senza chiusura arriva fino in fondo)
+SPAN_DM = re.compile(r'\[DM\][\s\S]*?(?:\[/DM\]|$)')
 NOTA_DM_SESSIONE = re.compile(r'^\*Riassunto ricavato dalla scaletta del DM[^*\n]*\*\s*', re.M)
 
 
@@ -39,18 +42,19 @@ def apri(codice, out):
 
 def copia_ospite(d):
     S = d['stores']
-    E = {k: e for k, e in S['entities'].items() if e.get('discovered') is not False}
+    pulisci = lambda o, campi: {**o, **{c: SPAN_DM.sub('', o[c]).strip() for c in campi if isinstance(o.get(c), str)}}
+    E = {k: pulisci(e, ('brief', 'status')) for k, e in S['entities'].items() if e.get('discovered') is not False}
     nascoste = {k: e['name'] for k, e in S['entities'].items() if k not in E}
 
     def testo(t):
         t = re.sub(r'\[\[([^\]|]+?)(?:\|([^\]]+?))?\]\]', lambda m: (m.group(2) or nascoste[m.group(1)]) if m.group(1) in nascoste else m.group(0), t)
-        return NOTA_DM.sub('', t)
+        return SPAN_DM.sub('', NOTA_DM.sub('', t))
 
     bodies = {}
     for k in E:
         b = S['bodies'][k]
-        bodies[k] = {**b, 'sections': [{**s, 'entries': [{**e, 'text': testo(e['text'])} for e in s['entries'] if not VOCE_DM.match(e['text'])]}
-                                       for s in b['sections'] if not SEZIONE_DM.search(s['title'])]}
+        bodies[k] = {**b, 'sections': [{**s, 'entries': [{**e, 'text': testo(e['text'])} for e in s['entries'] if not e.get('dm') and not VOCE_DM.match(e['text'])]}
+                                       for s in b['sections'] if not s.get('dm') and not SEZIONE_DM.search(s['title'])]}
     mappe = {k: m for k, m in S['maps'].items() if m.get('discovered') is not False}
     pins = {k: p for k, p in S['pins'].items() if p.get('discovered') is not False and p.get('entityId', None) not in nascoste and p['mapId'] in mappe}
     usati = {'portrait-' + k for k, e in E.items() if e.get('portrait')} | set(mappe) | {ph['id'] for p in pins.values() for ph in p.get('photos', [])}
@@ -59,9 +63,9 @@ def copia_ospite(d):
     stores = {
         'entities': E,
         'bodies': bodies,
-        'sessions': S['sessions'],
+        'sessions': {k: pulisci(v, ('brief', 'short')) for k, v in S['sessions'].items()},
         'sbodies': {k: {**b, 'summary': PARAGRAFO_DM.sub('', NOTA_DM_SESSIONE.sub('', testo(b['summary']))).strip(), 'docs': []} for k, b in S['sbodies'].items()},
-        'events': {k: {**v, 'text': testo(v['text']), 'ents': [x for x in v['ents'] if x in E]} for k, v in S['events'].items() if not VOCE_DM.match(v['text'])},
+        'events': {k: {**v, 'text': testo(v['text']), 'ents': [x for x in v['ents'] if x in E]} for k, v in S['events'].items() if not v.get('dm') and not VOCE_DM.match(v['text'])},
         'links': {k: l for k, l in S['links'].items() if l['from'] in E and l['to'] in E},
         'maps': mappe,
         'pins': pins,
