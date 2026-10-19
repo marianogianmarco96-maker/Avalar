@@ -537,7 +537,8 @@ html.ro .moreacts{display:none}
 :root[data-theme=dark] .relc .noav{color:#16100c}
 .relc b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-weight:600;line-height:1.2;overflow:hidden}
 .relc small{display:block;font-size:.82rem;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.relc .icb{flex:none;margin-right:4px}
+.relc .icb{flex:none;margin-right:4px}.relc .rdm{margin-right:0;opacity:.55}.relc.dment .rdm{opacity:1}
+.relc.dment{border-style:dashed;border-color:#7a4fa0;background:repeating-linear-gradient(135deg,transparent 0 8px,rgba(122,79,160,.07) 8px 16px),var(--paper2)}
 details.older>summary{list-style:none}
 details.older>summary::-webkit-details-marker{display:none}
 details.older[open]>summary{display:none}
@@ -1678,7 +1679,7 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
     const rows = [...outs.map(l => ({ l, x: S.ents.get(l.to), lab: l.label || 'collegata a' })), ...ins.map(l => ({ l, x: S.ents.get(l.from), lab: (l.label || 'collegata a') + ' questa scheda' }))].filter(r => r.x);
     const grp = [['Persone', ['pg', 'png']], ['Luoghi', ['luogo']], ['Oggetti', ['oggetto']], ['Fazioni e missioni', ['fazione', 'missione']], ['Altro', ['lore']]];
     const known = grp.flatMap(g => g[1]);
-    return grp.map(([t, ty]) => [t, rows.filter(r => ty.includes(r.x.type) || (t === 'Altro' && !known.includes(r.x.type)))]).filter(g => g[1].length).map(([t, l]) => `<h4 class="relh">${t}</h4><div class="relcards">${l.map(({ l: k, x, lab }) => `<div class="relc"><a href="#/scheda/${encodeURIComponent(x.id)}">${x.portrait ? `<img class="av" src="${x.portrait.thumb}" alt="">` : `<span class="av noav t-${x.type}">${esc(x.name[0])}</span>`}<span><b>${esc(x.name)}</b><small>${esc(lab)}</small></span></a><button class="icb" data-act="delRel" data-k="${esc(k.k)}" title="Togli il collegamento">✕</button></div>`).join('')}</div>`).join('');
+    return grp.map(([t, ty]) => [t, rows.filter(r => ty.includes(r.x.type) || (t === 'Altro' && !known.includes(r.x.type)))]).filter(g => g[1].length).map(([t, l]) => `<h4 class="relh">${t}</h4><div class="relcards">${l.map(({ l: k, x, lab }) => `<div class="relc${k.dm ? ' dment' : ''}"><a href="#/scheda/${encodeURIComponent(x.id)}">${x.portrait ? `<img class="av" src="${x.portrait.thumb}" alt="">` : `<span class="av noav t-${x.type}">${esc(x.name[0])}</span>`}<span><b>${esc(x.name)}</b><small>${k.dm ? '🔒 solo DM · ' : ''}${esc(lab)}</small></span></a><button class="icb rdm" data-act="dmRel" data-k="${esc(k.k)}" aria-pressed="${!!k.dm}" title="${k.dm ? 'Solo per DM: premi per mostrarlo ai giocatori' : 'Visibile ai giocatori: premi per renderlo solo per DM'}">${k.dm ? '🔒' : '🔓'}</button><button class="icb" data-act="delRel" data-k="${esc(k.k)}" title="Togli il collegamento">✕</button></div>`).join('')}</div>`).join('');
   };
   const photos = e.photos || [];
   const toc = [...b.sections.map((sc, i) => [sc.title.replace(/\s*\(.*\)$/, ''), 'sec-' + i]), ...(photos.length ? [['Foto', 'sec-foto']] : []), ['Collegamenti', 'sec-rel'], ...(evs.length ? [['Eventi', 'sec-ev']] : [])];
@@ -1759,7 +1760,8 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
     unfold: a => { a.previousElementSibling?.classList.remove('fold'); a.remove(); },
     addEntry: a => edEntry(a, true), editEntry: a => edEntry(a, false),
     delEntry: async a => { if (!await ask('Eliminare questa voce?', { danger: true, ok: 'Elimina' })) return; await mutBody(id, bd => { bd.sections[+a.dataset.si].entries.splice(+a.dataset.ei, 1); }); rerender(); },
-    addRel: async () => { ensureEntList(); const r = await formDlg({ title: 'Nuovo collegamento', fields: [{ k: 'to', label: 'Con la scheda', list: 'dl-ents', req: true }, { k: 'label', label: 'Tipo di relazione', placeholder: 'alleato di, vive a, possiede…' }] }); if (!r) return; const t = pickEntity(r.to); if (!t || t.id === id) { toast('Scheda non trovata', 'err'); return; } const lab = r.label.trim(); await runBatch(['links'], '', async x => x.put('links', { k: id + '|' + t.id + '|' + norm(lab), from: id, to: t.id, label: lab })); rerender(); },
+    addRel: async () => { ensureEntList(); const r = await formDlg({ title: 'Nuovo collegamento', fields: [{ k: 'to', label: 'Con la scheda', list: 'dl-ents', req: true }, { k: 'label', label: 'Tipo di relazione', placeholder: 'alleato di, vive a, possiede…' }, { k: 'dm', label: '🔒 Solo per DM: i giocatori non vedono questo collegamento', type: 'check', value: false }] }); if (!r) return; const t = pickEntity(r.to); if (!t || t.id === id) { toast('Scheda non trovata', 'err'); return; } const lab = r.label.trim(); await runBatch(['links'], '', async x => x.put('links', { k: id + '|' + t.id + '|' + norm(lab), from: id, to: t.id, label: lab, ...(r.dm ? { dm: true } : {}) })); rerender(); },
+    dmRel: async a => { const l = [...outL, ...inL].find(x => x.k === a.dataset.k); if (!l) return; const n = { ...l }; if (n.dm) delete n.dm; else n.dm = true; await runBatch(['links'], '', async x => x.put('links', n)); rerender(); },
     delRel: async a => { await runBatch(['links'], '', async x => x.del('links', a.dataset.k)); rerender(); }
   });
 });
