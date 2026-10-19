@@ -534,7 +534,7 @@ html.review #view :is(p,li,h1,h2,h3,h4,h5,dd,dt,td,th,figcaption,blockquote):hov
   }
   const SKIPK = new Set(['id', 'aid', 'k', 'type', 'color', 'thumb', 'from', 'to', 'mapId', 'entityId', 'parent', 'arc', 'ents', 'sessions', 'upd', 'ts', 'points', 'cat', 'imp', 'shape']);
   const nl = s => String(s).replace(/\*/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
-  const rline = s => s.replace(/^#{1,4}\s+/, '').replace(/^\s*[-*•]\s+/, '').replace(/\[\[([^\]|]+?)(?:\|([^\]]+?))?\]\]/g, (m, a, b) => b || (MEM.entities && MEM.entities.get(a) && MEM.entities.get(a).name) || a);
+  const rline = s => s.replace(/\[\/?DM\]/g, '').replace(/^#{1,4}\s+/, '').replace(/^\s*[-*•]\s+/, '').replace(/\[\[([^\]|]+?)(?:\|([^\]]+?))?\]\]/g, (m, a, b) => b || (MEM.entities && MEM.entities.get(a) && MEM.entities.get(a).name) || a);
   function strings(v, path, cb) {
     if (typeof v === 'string') { if (!v.startsWith('data:') && /\p{L}/u.test(v)) cb(path, v); }
     else if (Array.isArray(v)) v.forEach((x, i) => strings(x, path.concat(i), cb));
@@ -617,8 +617,8 @@ html.review #view :is(p,li,h1,h2,h3,h4,h5,dd,dt,td,th,figcaption,blockquote):hov
       const v = MEM[h.c].get(h.id), where = recLabel(h.c, v) + (pathLabel(v, h.path) ? ' · ' + pathLabel(v, h.path) : '');
       const lines = getAt(v, h.path).split('\n'), cur = lines.slice(h.a, h.b + 1).join('\n');
       box.innerHTML = `<div class="rl">${esc(where)}</div><textarea class="segta" rows="${Math.min(14, Math.max(2, Math.ceil(cur.length / 60) + (h.b - h.a)))}"></textarea>${/\[\[/.test(cur) ? '<p class="rhint">I collegamenti sono scritti come [[scheda|testo mostrato]]: correggi il testo dopo la barra.</p>' : ''}<div class="rb"><button type="button" class="btn primary sm">Salva correzione</button><button type="button" class="btn sm">💬 Nota per Claude</button><button type="button" class="btn ghost sm">Annulla</button></div>`;
-      const ta = box.querySelector('textarea'); ta.value = cur; ta.focus();
-      const [sv, nt, no] = box.querySelectorAll('button');
+      const ta = box.querySelector('textarea'); ta.value = cur; ta.focus(); if (window.__cronache.dmTool) window.__cronache.dmTool(ta);
+      const [sv, nt, no] = box.querySelectorAll('.rb button');
       no.onclick = () => closeBox(box); nt.onclick = () => noteUI(where, where);
       sv.onclick = async () => {
         const nv = ta.value.replace(/\r/g, ''); if (nv === cur) { closeBox(box); return; }
