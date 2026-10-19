@@ -102,7 +102,8 @@ label.f{display:block;margin:0 0 12px}
 label.f>span{display:block;font-family:var(--display);font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink2);margin-bottom:4px}
 .fdrop{border:2px dashed var(--line2);border-radius:6px;padding:10px;background:var(--paper2)}
 .fdrop input{width:100%}.fdrop .dz{display:block;margin-top:4px;color:var(--ink2)}
-@media (hover:none){.fdrop{border:0;padding:0;background:none}.fdrop .dz{display:none}}
+@media (hover:none){.fdrop{border:0;padding:0;background:none}.dz{display:none!important}}
+.gallery.big{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
 .dropping{position:relative;outline:3px dashed var(--gold);outline-offset:-3px}
 .dropping::after{content:attr(data-drop);position:absolute;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;background:#2b1d14cc;color:#fbeccb;font-family:var(--display);font-size:1.05rem;letter-spacing:.05em;pointer-events:none;border-radius:inherit}
 .dropping.dropfull::after{position:fixed}
@@ -729,6 +730,22 @@ function formDlg({ title, fields, ok = 'Salva', wide = false, intro = '' }) {
     }
     const first = $('input:not([type=checkbox]),textarea,select', d); if (first) setTimeout(() => first.focus(), 30);
   });
+}
+/* ---------- foto (schede e segnaposto): elaborazione e visore ---------- */
+async function prepPhotos(files, prefix) {
+  const blobs = [], metas = [], errors = []; if (files?.length) toast('Elaboro ' + files.length + ' foto…');
+  for (const f of files || []) { try { const im = await processImage(f, 1600); const pid = prefix + uid(); blobs.push({ id: pid, blob: im.blob, type: im.blob.type }); metas.push({ id: pid, thumb: im.thumb, name: f.name, w: im.w, h: im.h }); } catch (e) { errors.push((f.name || 'foto') + ': ' + (e.message || e)); } }
+  return { blobs, metas, errors, asked: files?.length || 0 };
+}
+function photoReport(ph) { if (ph.errors.length) showInfo('Alcune foto non sono state aggiunte', '<ul>' + ph.errors.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul><p class="hint">Formati accettati: PNG, JPG, WebP (le foto HEIC/HEIF dell\'iPhone vanno prima convertite in JPG).</p>'); }
+function showPhotos(title, list, i) {
+  let url = null;
+  const d = openDlg(`<form method="dialog" style="padding:12px 16px"><div class="spread" style="margin-bottom:8px"><b id="lbt"></b><button class="btn sm" value="x">Chiudi</button></div><div class="lb"><button type="button" class="btn" id="lbp">‹</button><img id="lbi" alt=""><button type="button" class="btn" id="lbn">›</button></div></form>`, 'wide lbdlg');
+  const img = $('#lbi', d);
+  const show = async () => { const rec = await dbGet('blobs', list[i].id); if (url) URL.revokeObjectURL(url); url = rec ? URL.createObjectURL(rec.blob) : list[i].thumb; img.src = url; $('#lbt', d).textContent = `${title} · foto ${i + 1}/${list.length}`; $('#lbp', d).style.visibility = $('#lbn', d).style.visibility = list.length > 1 ? 'visible' : 'hidden'; };
+  $('#lbp', d).onclick = () => { i = (i - 1 + list.length) % list.length; show(); }; $('#lbn', d).onclick = () => { i = (i + 1) % list.length; show(); };
+  d.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') $('#lbp', d).click(); else if (e.key === 'ArrowRight') $('#lbn', d).click(); });
+  d.addEventListener('close', () => url && url.startsWith('blob:') && URL.revokeObjectURL(url)); show();
 }
 /* ---------- immagini trascinate dal computer (sul telefono resta il pulsante per scegliere il file) ---------- */
 let dragInside = false; // trascinamenti partiti dalla pagina stessa (link, testo): non sono immagini da caricare
@@ -1663,12 +1680,16 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
     const known = grp.flatMap(g => g[1]);
     return grp.map(([t, ty]) => [t, rows.filter(r => ty.includes(r.x.type) || (t === 'Altro' && !known.includes(r.x.type)))]).filter(g => g[1].length).map(([t, l]) => `<h4 class="relh">${t}</h4><div class="relcards">${l.map(({ l: k, x, lab }) => `<div class="relc"><a href="#/scheda/${encodeURIComponent(x.id)}">${x.portrait ? `<img class="av" src="${x.portrait.thumb}" alt="">` : `<span class="av noav t-${x.type}">${esc(x.name[0])}</span>`}<span><b>${esc(x.name)}</b><small>${esc(lab)}</small></span></a><button class="icb" data-act="delRel" data-k="${esc(k.k)}" title="Togli il collegamento">✕</button></div>`).join('')}</div>`).join('');
   };
-  const toc = [...b.sections.map((sc, i) => [sc.title.replace(/\s*\(.*\)$/, ''), 'sec-' + i]), ['Collegamenti', 'sec-rel'], ...(evs.length ? [['Eventi', 'sec-ev']] : [])];
+  const photos = e.photos || [];
+  const toc = [...b.sections.map((sc, i) => [sc.title.replace(/\s*\(.*\)$/, ''), 'sec-' + i]), ...(photos.length ? [['Foto', 'sec-foto']] : []), ['Collegamenti', 'sec-rel'], ...(evs.length ? [['Eventi', 'sec-ev']] : [])];
   setView(`<div class="card ehead ${e.portrait ? 'hasp' : ''}">${e.portrait ? `<img class="portrait" src="${e.portrait.thumb}" data-act="viewportrait" alt="${esc(e.name)}" title="Ingrandisci">` : ''}<div class="ehb"><div class="meta">${badge(e.type)}${e.status ? `<span class="pill">${esc(e.status)}</span>` : ''}${catPills(e)}${e.discovered === false ? '<span class="pill dm">🔒 solo DM · nascosta ai giocatori</span>' : ''}<span class="hint">${esc(rangeTxt(e.sessions))}</span></div>
       <h1>${esc(e.name)}</h1>${e.alias?.length ? `<div class="hint">Detto anche: ${e.alias.map(esc).join(', ')}</div>` : ''}${e.brief ? `<div class="brief">${inl(e.brief)}</div>` : ''}
       </div><div class="row eheadacts"><button class="btn sm" data-act="edit">Modifica dati</button>${[...M.regions.values()].filter(r => r.entityId === id).map(r => `<a class="btn sm" href="#/mappe/${encodeURIComponent(r.mapId)}?reg=${encodeURIComponent(r.id)}">Vedi sulla mappa</a>`).join('')}${moreActs(`<button class="btn sm" data-act="addSec">+ Sezione</button><button class="btn sm" data-act="portrait">${e.portrait ? 'Cambia ritratto' : '+ Ritratto'}</button><button class="btn sm ghost" data-act="copyEnt">Copia per Claude</button><button class="btn sm ghost" data-act="merge">Unisci in un'altra scheda</button><button class="btn sm danger" data-act="del">Elimina</button>`)}</div></div>
     ${toc.length > 2 ? `<nav class="toc" aria-label="Sezioni della scheda">${toc.map(([t, k]) => `<button type="button" data-act="goto" data-to="${k}">${esc(t)}</button>`).join('')}</nav>` : ''}
     <div class="card">${b.sections.length ? b.sections.map((s, i) => entrySecHtml(s, i)).join('') : `<p class="empty">${window.__RO ? 'Nessuna informazione su questa scheda, per ora.' : 'Nessun contenuto ancora. Verrà riempita dalle importazioni, oppure aggiungi una sezione a mano.'}</p>`}</div>
+    ${photos.length || !window.__RO ? `<div class="card" id="sec-foto"><div class="spread"><h2>Foto${photos.length ? ` <small>(${photos.length})</small>` : ''}</h2><button class="btn sm" data-act="addphotos">+ Aggiungi foto</button></div>
+      ${photos.length ? `<div class="gallery big">${photos.map((ph, i) => `<div class="gph"><img src="${ph.thumb}" data-act="viewphoto" data-i="${i}" alt="${esc(ph.name ? ph.name.replace(/\.[a-z0-9]+$/i, '') : 'Foto di ' + e.name)}" title="Ingrandisci">${window.__RO ? '' : `<button class="x" data-act="delphoto" data-i="${i}" title="Rimuovi foto">✕</button>`}</div>`).join('')}</div>` : ''}
+      ${window.__RO ? '' : `<p class="hint">${photos.length ? '' : 'Nessuna foto, per ora. '}<span class="dz">Trascina qui una o più immagini dal computer, oppure usa «+ Aggiungi foto».</span></p>`}</div>` : ''}
     <div class="grid2"><div class="card" id="sec-rel"><div class="spread"><h2>Collegamenti</h2><button class="btn sm" data-act="addRel">+ Collega</button></div>
       ${outL.length || inL.length ? relCards(outL, inL) : '<p class="hint">Nessun collegamento.</p>'}</div>
       <div class="card"><h2>Apparizioni</h2>${sessChips(e.sessions)}
@@ -1686,8 +1707,14 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
     toast('Elaboro l\'immagine…'); const im = await processImage(f, 900);
     await runBatch(['entities', 'blobs'], '', async t => { await t.put('blobs', { id: 'portrait-' + id, blob: im.blob, type: im.blob.type }); await t.put('entities', { ...e, portrait: { id: 'portrait-' + id, thumb: im.thumb }, upd: Date.now() }); }); rerender();
   };
-  // DM: un'immagine trascinata sulla scheda diventa il suo ritratto
-  if (!window.__RO) onCleanup(dropImages($('#view .page'), e.portrait ? `Rilascia per cambiare il ritratto di ${e.name}` : `Rilascia per usarla come ritratto di ${e.name}`, async fs => {
+  const addEntPhotos = async files => {
+    const ph = await prepPhotos(files, 'entimg-'); photoReport(ph); if (!ph.metas.length) return;
+    await runBatch(['entities', 'blobs'], '', async t => { for (const x of ph.blobs) await t.put('blobs', x); await t.put('entities', { ...e, photos: [...photos, ...ph.metas], upd: Date.now() }); });
+    toast(ph.metas.length === 1 ? 'Foto aggiunta' : ph.metas.length + ' foto aggiunte'); rerender();
+  };
+  // DM: immagini trascinate sulla scheda. Sull'intestazione diventano il ritratto, altrove si aggiungono alle foto
+  if (!window.__RO) onCleanup(dropImages($('#view .page'), ev => ev.target.closest?.('.ehead') ? (e.portrait ? `Rilascia per cambiare il ritratto di ${e.name}` : `Rilascia per usarla come ritratto di ${e.name}`) : `Rilascia per aggiungere le foto a ${e.name}`, async (fs, ev) => {
+    if (!ev.target.closest('.ehead')) return addEntPhotos(fs);
     if (e.portrait && !await ask(`Sostituire il ritratto di **${e.name}** con «${fs[0].name}»?`, { ok: 'Sostituisci' })) return;
     if (fs.length > 1) toast('Una scheda ha un solo ritratto: uso la prima immagine');
     await savePortrait(fs[0]);
@@ -1707,6 +1734,12 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
       const r = await formDlg({ title: 'Ritratto di ' + e.name, fields: [{ k: 'f', label: 'Immagine (PNG, JPG, WebP)', type: 'file', accept: 'image/*' }, ...(e.portrait ? [{ k: 'rm', label: 'Rimuovi il ritratto attuale', type: 'check', value: false }] : [])] }); if (!r) return;
       if (r.rm) { await runBatch(['entities', 'blobs'], '', async t => { await t.del('blobs', e.portrait.id); const c = { ...e, upd: Date.now() }; delete c.portrait; await t.put('entities', c); }); return rerender(); }
       if (r.f) await savePortrait(r.f);
+    },
+    addphotos: async () => { const r = await formDlg({ title: `Aggiungi foto a «${e.name}»`, ok: 'Aggiungi', fields: [{ k: 'photos', label: 'Foto (puoi sceglierne più di una)', type: 'file', accept: 'image/*', multiple: true, req: true }] }); if (r) await addEntPhotos(r.photos); },
+    viewphoto: a => showPhotos(e.name, photos, +a.dataset.i),
+    delphoto: async a => {
+      const gone = photos[+a.dataset.i]; if (!gone || !await ask('Rimuovere questa foto dalla scheda?', { danger: true, ok: 'Rimuovi' })) return;
+      await runBatch(['entities', 'blobs'], '', async t => { await t.del('blobs', gone.id); await t.put('entities', { ...e, photos: photos.filter(x => x.id !== gone.id), upd: Date.now() }); }); rerender();
     },
     toggleDisc: async a => { await runBatch(['entities'], '', async t => t.put('entities', { ...e, discovered: !a.checked, upd: Date.now() })); rerender(); },
     copyEnt: async () => copyText(await buildEntityText(id), 'Scheda copiata'),
@@ -1732,8 +1765,10 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
 });
 async function deleteEntity(id) {
   const [outL, inL, evs, pins] = await Promise.all([dbIdx('links', 'from', id), dbIdx('links', 'to', id), dbIdx('events', 'ents', id), dbIdx('pins', 'entityId', id)]);
+  const photos = S.ents.get(id)?.photos || [];
   await runBatch(['entities', 'bodies', 'links', 'events', 'pins', 'blobs'], '', async t => {
     await t.del('entities', id); await t.del('bodies', id); await t.del('blobs', 'portrait-' + id);
+    for (const ph of photos) await t.del('blobs', ph.id);
     for (const l of [...outL, ...inL]) await t.del('links', l.k);
     for (const p of pins) { await t.del('pins', p.id); for (const ph of p.photos || []) await t.del('blobs', ph.id); }
     for (const v of evs) await t.put('events', { ...v, ents: v.ents.filter(x => x !== id) });
@@ -1745,7 +1780,7 @@ async function mergeEntity(src, dst) {
   const nb = clone(db_ || { id: dst, sections: [] });
   for (const sec of sb?.sections || []) { let t = nb.sections.find(x => norm(x.title) === norm(sec.title)); if (!t) { t = { title: sec.title, entries: [] }; nb.sections.push(t); } for (const en of sec.entries) if (!t.entries.some(x => norm(x.text) === norm(en.text))) t.entries.push(en); t.entries.sort((a, b) => (a.n ?? -1) - (b.n ?? -1)); }
   const alias = [...new Set([...(d.alias || []), s.name, ...(s.alias || [])])].filter(a => norm(a) !== norm(d.name));
-  const light = { ...d, alias, brief: d.brief || s.brief, status: d.status || s.status, sessions: [...new Set([...(d.sessions || []), ...(s.sessions || [])])].sort((a, b) => a - b), discovered: d.discovered !== false || s.discovered !== false, upd: Date.now() };
+  const light = { ...d, alias, brief: d.brief || s.brief, status: d.status || s.status, sessions: [...new Set([...(d.sessions || []), ...(s.sessions || [])])].sort((a, b) => a - b), ...(s.photos?.length ? { photos: [...(d.photos || []), ...s.photos] } : {}), discovered: d.discovered !== false || s.discovered !== false, upd: Date.now() };
   const srcPortrait = s.portrait && !d.portrait ? await dbGet('blobs', s.portrait.id) : null;
   if (srcPortrait) light.portrait = { id: 'portrait-' + dst, thumb: s.portrait.thumb };
   await runBatch(['entities', 'bodies', 'links', 'events', 'pins', 'blobs'], '', async t => {
@@ -1971,15 +2006,9 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
 
   /* ----- salvataggio segnaposto ----- */
   const savePin = async (p, newBlobs = [], delIds = []) => { await runBatch(['pins', 'blobs'], '', async t => { for (const b of newBlobs) await t.put('blobs', b); for (const d of delIds) await t.del('blobs', d); await t.put('pins', p); }, { reload: false }); };
-  const prepPhotos = async files => {
-    const blobs = [], metas = [], errors = []; if (files?.length) toast('Elaboro ' + files.length + ' foto…');
-    for (const f of files || []) { try { const im = await processImage(f, 1600); const pid = 'pinimg-' + uid(); blobs.push({ id: pid, blob: im.blob, type: im.blob.type }); metas.push({ id: pid, thumb: im.thumb, name: f.name, w: im.w, h: im.h }); } catch (e) { errors.push((f.name || 'foto') + ': ' + (e.message || e)); } }
-    return { blobs, metas, errors, asked: files?.length || 0 };
-  };
   const addPhotos = async (p, files) => {
-    const ph = await prepPhotos(files); photoReport(ph); if (!ph.metas.length) return; const np = { ...p, photos: [...(p.photos || []), ...ph.metas] }; await savePin(np, ph.blobs); pins = pins.map(x => x.id === p.id ? np : x); if (st.sel === p.id) renderSide(); else selectPin(p.id); toast(ph.metas.length + ' foto aggiunte');
+    const ph = await prepPhotos(files, 'pinimg-'); photoReport(ph); if (!ph.metas.length) return; const np = { ...p, photos: [...(p.photos || []), ...ph.metas] }; await savePin(np, ph.blobs); pins = pins.map(x => x.id === p.id ? np : x); if (st.sel === p.id) renderSide(); else selectPin(p.id); toast(ph.metas.length + ' foto aggiunte');
   };
-  const photoReport = ph => { if (ph.errors.length) showInfo('Alcune foto non sono state aggiunte', '<ul>' + ph.errors.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul><p class="hint">Formati accettati: PNG, JPG, WebP (le foto HEIC/HEIF dell\'iPhone vanno prima convertite in JPG).</p>'); };
   const COLORS = [['#d9b13c', 'Oro'], ['#6f9fd0', 'Azzurro'], ['#4a9a5a', 'Verde'], ['#2f6f6a', 'Verde scuro'], ['#9a7a5a', 'Marrone'], ['#c9853a', 'Arancio'], ['#d96a3a', 'Rosso fuoco'], ['#9b5fb0', 'Viola'], ['#5a7fa0', 'Blu acciaio'], ['#cc4455', 'Rosso']];
   const regDlg = async r => {
     ensureEntList(); const e = r ? regEnt(r) : null;
@@ -2003,7 +2032,7 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
     let ent = pickEntity(r.ent), entityId = ent?.id || null, label = r.label.trim() || null;
     if (!ent && r.ent.trim()) { if (r.create) { entityId = await createEntity({ type: 'luogo', name: r.ent.trim() }); label = null; } else label = r.ent.trim(); }
     if (!entityId && !label) { toast('Serve una scheda o un\'etichetta', 'err'); return; }
-    const ph = await prepPhotos(r.photos);
+    const ph = await prepPhotos(r.photos, 'pinimg-');
     const np = p ? { ...p, entityId, label, targetMapId: r.target || null, discovered: r.disc, visited: r.visited, photos: [...(p.photos || []), ...ph.metas] } : { id: 'pin-' + uid(), mapId: m.id, entityId, label, x: pos.x, y: pos.y, targetMapId: r.target || null, discovered: r.disc, visited: r.visited, photos: ph.metas };
     try { await savePin(np, ph.blobs); }
     catch (e) { // le foto non si sono caricate: salva comunque il segnaposto, senza foto, e dillo chiaramente
@@ -2095,15 +2124,7 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
       await addPhotos(p, r.photos);
     },
     delphoto: async a => { const p = pins.find(x => x.id === st.sel), i = +a.dataset.i; if (!await ask('Rimuovere questa foto?', { danger: true, ok: 'Rimuovi' })) return; const gone = p.photos[i]; const np = { ...p, photos: p.photos.filter((_, k) => k !== i) }; await savePin(np, [], [gone.id]); pins = pins.map(x => x.id === p.id ? np : x); renderSide(); },
-    viewphoto: a => {
-      const p = pins.find(x => x.id === st.sel), list = p.photos || []; let i = +a.dataset.i, url = null;
-      const d = openDlg(`<form method="dialog" style="padding:12px 16px"><div class="spread" style="margin-bottom:8px"><b id="lbt"></b><button class="btn sm" value="x">Chiudi</button></div><div class="lb"><button type="button" class="btn" id="lbp">‹</button><img id="lbi" alt=""><button type="button" class="btn" id="lbn">›</button></div></form>`, 'wide lbdlg');
-      const img = $('#lbi', d);
-      const show = async () => { const rec = await dbGet('blobs', list[i].id); if (url) URL.revokeObjectURL(url); url = rec ? URL.createObjectURL(rec.blob) : ''; img.src = url; $('#lbt', d).textContent = `${pname(p)} · foto ${i + 1}/${list.length}`; $('#lbp', d).style.visibility = $('#lbn', d).style.visibility = list.length > 1 ? 'visible' : 'hidden'; };
-      $('#lbp', d).onclick = () => { i = (i - 1 + list.length) % list.length; show(); }; $('#lbn', d).onclick = () => { i = (i + 1) % list.length; show(); };
-      d.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') $('#lbp', d).click(); else if (e.key === 'ArrowRight') $('#lbn', d).click(); });
-      d.addEventListener('close', () => url && URL.revokeObjectURL(url)); show();
-    },
+    viewphoto: a => { const p = pins.find(x => x.id === st.sel); showPhotos(pname(p), p.photos || [], +a.dataset.i); },
     delpin: async () => { const p = pins.find(x => x.id === st.sel); if (!await ask(`Eliminare il segnaposto «${pname(p)}»? (la scheda resta)`, { danger: true, ok: 'Elimina' })) return; await runBatch(['pins', 'blobs'], '', async t => { await t.del('pins', p.id); for (const ph of p.photos || []) await t.del('blobs', ph.id); }, { reload: false }); pins = pins.filter(x => x.id !== p.id); selectPin(null); },
     editmap: async () => {
       const r = await formDlg({ title: 'Modifica mappa', fields: [{ k: 'name', label: 'Nome', value: m.name, req: true }, { k: 'desc', label: 'Descrizione', type: 'textarea', rows: 4, value: m.desc }, { k: 'parent', label: 'Mappa madre', type: 'select', value: m.parent || '', options: [['', '— nessuna —'], ...S.maps.filter(x => x.id !== m.id).map(x => [x.id, x.name])] }, { k: 'disc', label: 'Scoperta dai giocatori', type: 'check', value: m.discovered !== false }] });
