@@ -13,6 +13,9 @@
   const ls = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch { } }, del: k => { try { localStorage.removeItem(k); } catch { } } };
   const domReady = () => document.readyState === 'loading' ? new Promise(r => addEventListener('DOMContentLoaded', r, { once: true })) : Promise.resolve();
   const clone = v => JSON.parse(JSON.stringify(v));
+  // stesso contenuto, anche con i campi in un altro ordine
+  const sortK = v => Array.isArray(v) ? v.map(sortK) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map(k => [k, sortK(v[k])])) : v;
+  const same = (a, b) => JSON.stringify(sortK(a)) === JSON.stringify(sortK(b));
   const ROERR = () => new Error('Sola lettura: accedi come Dungeon Master per modificare.');
 
   let ROLE = null, DB = null, MEM = {}, BLOBMAP = {}, RAW = null, PLAYER = null, BLOBKEYS = {}, PRAW = null;
@@ -20,6 +23,8 @@
   const PLAYERS = [['livion', 'Livion'], ['mungus', 'Mungus'], ['sam', 'Sam'], ['violet', 'Violet']];
   // modifiche non ancora inviate: chiavi 'raccolta/id' dei documenti e id delle immagini caricate
   let PEND = new Set(), PFILES = new Set(), DROPPED = false;
+  // SENT: le modifiche in sospeso sono già state inviate a Claude e restano visibili qui finché non vengono pubblicate
+  let SENT = false;
   // segnalazioni per Claude: note sui testi (modalità revisione) ed errori del sito, con le loro foto
   let NOTES = [], BUGS = [];
   const store = (s, m = 'readonly') => DB.transaction(s, m).objectStore(s);
@@ -98,19 +103,25 @@
     if (payload && !have) await seedAdmin(payload, raw);
     else if (payload) {
       // i dati pubblicati comandano: se sono cambiati li riprendo, rimettendo sopra solo le modifiche ancora da inviare
-      const pend = (await kvGet('pending')) || [], pfiles = (await kvGet('pfiles')) || [], notes = (await kvGet('notes')) || [], bugs = (await kvGet('bugs')) || [], dirty = await kvGet('dirty');
+      let pend = (await kvGet('pending')) || [], pfiles = (await kvGet('pfiles')) || [], notes = (await kvGet('notes')) || [], bugs = (await kvGet('bugs')) || [], dirty = await kvGet('dirty');
       if (dirty && !pend.length && !pfiles.length && !notes.length && !bugs.length) { await seedAdmin(payload, raw); DROPPED = true; } // modifiche vecchie, mai inviate
       else if (payload.dataVersion !== await kvGet('dataVersion')) {
-        const keep = await Promise.all(pend.map(async k => [k, await rq(store('docs').get(k))]));
+        let keep = await Promise.all(pend.map(async k => [k, await rq(store('docs').get(k))]));
+        // quelle già pubblicate (uguali ai dati nuovi) non sono più da inviare: le tolgo, così il riquadro si svuota da solo
+        const pub = k => { const j = k.indexOf('/'); return (payload.stores[k.slice(0, j)] || {})[k.slice(j + 1)]; };
+        keep = keep.filter(([k, v]) => !same(v, pub(k)));
+        pend = keep.map(([k]) => k); pfiles = pfiles.filter(aid => !(aid in (payload.blobmap || {})));
+        if (await kvGet('sent')) { notes = []; bugs = []; } // note ed errori inviati: sono già su GitHub
         await seedAdmin(payload, raw);
         const t = DB.transaction(['docs', 'kv'], 'readwrite');
         for (const [k, v] of keep) v === undefined ? t.objectStore('docs').delete(k) : t.objectStore('docs').put(v, k);
         t.objectStore('kv').put(pend, 'pending'); t.objectStore('kv').put(pfiles, 'pfiles'); t.objectStore('kv').put(notes, 'notes'); t.objectStore('kv').put(bugs, 'bugs'); t.objectStore('kv').put(pend.length + pfiles.length + notes.length + bugs.length > 0, 'dirty');
+        if (!pend.length && !pfiles.length && !notes.length && !bugs.length) t.objectStore('kv').put(false, 'sent');
         await done(t);
       }
     }
     PEND = new Set((await kvGet('pending')) || []); PFILES = new Set((await kvGet('pfiles')) || []);
-    NOTES = (await kvGet('notes')) || []; BUGS = (await kvGet('bugs')) || [];
+    NOTES = (await kvGet('notes')) || []; BUGS = (await kvGet('bugs')) || []; SENT = !!(await kvGet('sent'));
     if (remember) { await kvSet('key', raw); ls.set('cdnd_remember', 'admin'); }
     const ks = await rq(store('docs').getAllKeys()), vs = await rq(store('docs').getAll()); MEM = {};
     ks.forEach((k, i) => { const j = k.indexOf('/'); const c = k.slice(0, j); (MEM[c] = MEM[c] || new Map()).set(k.slice(j + 1), vs[i]); });
@@ -229,6 +240,7 @@
   function saveState() {
     const t = DB.transaction('kv', 'readwrite'); const o = t.objectStore('kv');
     o.put([...PEND], 'pending'); o.put([...PFILES], 'pfiles'); o.put(NOTES, 'notes'); o.put(BUGS, 'bugs'); o.put(anyPending(), 'dirty');
+    SENT = false; o.put(false, 'sent'); // c'è qualcosa di nuovo: va inviato di nuovo
     done(t).catch(() => { }); outbox();
   }
   const newId = () => Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join('');
@@ -456,12 +468,12 @@
 #outbox button{padding:7px 12px;border-radius:7px;border:1px solid #f5e6c488;background:#00000030;color:inherit;cursor:pointer;font:inherit}
 #outbox button.p{background:#e7cf9a;color:#561820;border-color:#e7cf9a;font-weight:600}#outbox button:disabled{opacity:.6;cursor:wait}
 @media (max-width:1280px){#outbox{bottom:calc(74px + env(safe-area-inset-bottom,0px))}}`;
-  let OB = null, PREP = null, PREPV = 0, SENT = false;
+  let OB = null, PREP = null, PREPV = 0, JUST = false;
   function outbox() {
     if (ROLE !== 'admin' || !document.body) return;
     if (!anyPending()) { if (OB) OB.remove(); OB = null; return; }
     if (!OB) { const st = document.createElement('style'); st.textContent = OB_CSS; document.head.append(st); OB = document.createElement('div'); OB.id = 'outbox'; OB.setAttribute('role', 'status'); document.body.append(OB); }
-    SENT = false; PREP = null; const v = ++PREPV; drawOutbox();
+    PREP = null; const v = ++PREPV; drawOutbox();
     clearTimeout(outbox.t); outbox.t = setTimeout(() => buildRequest().then(r => { if (v === PREPV) { PREP = r; drawOutbox(); } }, () => { if (v === PREPV) { PREP = { err: true }; drawOutbox(); } }), 400);
   }
   function drawOutbox() {
@@ -469,8 +481,11 @@
     const msg = document.createElement('div'); msg.className = 'om'; OB.append(msg);
     const mk = (t, f, p) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = t; if (p) b.className = 'p'; b.onclick = () => f(b); OB.append(b); return b; };
     if (SENT) {
-      msg.innerHTML = PREP && PREP.file ? '<b>Su GitHub allega il file «modifiche-avalar.txt» e premi «Create».</b> Quando hai finito, togli le modifiche da questo browser: le vedrai sul sito dopo che avrai approvato la modifica di Claude.' : '<b>Su GitHub premi «Create» per inviare la richiesta.</b> Quando hai finito, togli le modifiche da questo browser: le vedrai sul sito dopo che avrai approvato la modifica di Claude.';
-      mk('Fatto, togli dal browser', b => resetToServer(b), true); mk('Riapri GitHub', () => send()); return;
+      const how = JUST ? (PREP && PREP.file ? '<b>Su GitHub allega il file «modifiche-avalar.txt» e premi «Create».</b> ' : '<b>Su GitHub premi «Create» per inviare la richiesta.</b> ') : '<b>Inviate a Claude:</b> ' + summary() + '. ';
+      msg.innerHTML = how + 'Restano visibili su questo browser finché non approvi la modifica di Claude; quando è pubblicata questo riquadro sparisce da solo.';
+      if (JUST) mk('Fatto', () => { JUST = false; drawOutbox(); }, true);
+      mk('Riapri GitHub', () => send(), !JUST); if (!PREP || PREP.err) OB.lastChild.disabled = true;
+      mk('Scarta', b => { if (confirm('Togliere da questo browser le modifiche inviate? Le rivedrai quando saranno pubblicate.')) resetToServer(b); }); return;
     }
     msg.innerHTML = '<b>Da inviare a Claude:</b> ' + summary() + '. Finché non le invii valgono solo su questo browser.';
     const go = mk(PREP ? (PREP.err ? 'Errore, riprova' : 'Invia a Claude') : 'Preparo…', () => PREP && !PREP.err ? send() : outbox(), true); if (!PREP) go.disabled = true;
@@ -480,7 +495,7 @@
   function send() {
     const r = PREP; if (!r || r.err) return;
     if (r.file) { const u = URL.createObjectURL(r.file), a = document.createElement('a'); a.href = u; a.download = 'modifiche-avalar.txt'; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 60000); }
-    window.open(r.url, '_blank', 'noopener'); SENT = true; drawOutbox();
+    window.open(r.url, '_blank', 'noopener'); SENT = true; JUST = true; kvSet('sent', true).catch(() => { }); drawOutbox();
   }
   /* ---------- Segnala a Claude (amministratore) ----------
      Due strade: «Segnala un bug» raccoglie uno o più errori del sito, ognuno con una foto facoltativa;
