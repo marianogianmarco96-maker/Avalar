@@ -6,7 +6,7 @@ Uso:
 
 La copia per i giocatori toglie: schede non scoperte (con collegamenti, ritratti e menzioni,
 che restano come testo semplice), sezioni del DM (titolo con «DM»), voci e note ricavate dalla scaletta del DM,
-voci, eventi e paragrafi che iniziano con «*(Solo DM)*», sezioni, voci ed eventi segnati «Solo per DM» (dm: true),
+voci, eventi e paragrafi che iniziano con «*(Solo DM)*», sezioni, voci, eventi e collegamenti segnati «Solo per DM» (dm: true),
 testi evidenziati con [DM]…[/DM], documenti allegati alle sessioni, cronologia del riassunto e immagini riservate (priv/).
 Le immagini in priv/ sono cifrate con la stessa chiave dei dati.
 """
@@ -67,7 +67,7 @@ def copia_ospite(d):
         'sessions': {k: pulisci(v, ('brief', 'short')) for k, v in S['sessions'].items()},
         'sbodies': {k: {**b, 'summary': PARAGRAFO_DM.sub('', NOTA_DM_SESSIONE.sub('', testo(b['summary']))).strip(), 'docs': []} for k, b in S['sbodies'].items()},
         'events': {k: {**v, 'text': testo(v['text']), 'ents': [x for x in v['ents'] if x in E]} for k, v in S['events'].items() if not v.get('dm') and not VOCE_DM.match(v['text'])},
-        'links': {k: l for k, l in S['links'].items() if l['from'] in E and l['to'] in E},
+        'links': {k: l for k, l in S['links'].items() if l['from'] in E and l['to'] in E and not l.get('dm')},
         'maps': mappe,
         'pins': pins,
         'regions': {k: r for k, r in S['regions'].items() if r['mapId'] in mappe and r.get('entityId') not in nascoste},
