@@ -149,7 +149,8 @@ def account(codice, src):
 
 def immagini_riservate(d, k):
     """Le immagini che gli ospiti non vedono passano in priv/ (cifrate col DM); quelle che vede qualche giocatore
-    ricevono una chiave propria, così la copia di quel giocatore le può aprire senza conoscere la chiave del DM."""
+    ricevono una chiave propria, così la copia di quel giocatore le può aprire senza conoscere la chiave del DM.
+    Vale per ritratti e foto delle schede, foto dei segnaposto e mappe: un'immagine resta in chiaro solo se la vede un ospite."""
     bm = d['blobmap']
     pubbliche = set(copia(d)['blobmap'])
     per_path = {}
@@ -185,6 +186,11 @@ def immagini_riservate(d, k):
     for p in nuovi:
         if p not in bm.values():
             os.remove(p)
+    # file in blobs/ e priv/ che nessuna immagine usa più (vecchie versioni): via, così non restano scaricabili
+    for p in glob.glob('blobs/*') + glob.glob('priv/*'):
+        if p not in set(bm.values()):
+            os.remove(p)
+            print('  tolto file non usato', p)
 
 
 def salva(codice, src):
