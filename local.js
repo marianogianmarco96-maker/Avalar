@@ -1,5 +1,7 @@
 /* Campagna D&D — accesso e archiviazione locale.
-   - Ospite: legge una copia pubblica (data.json), solo lettura, nulla viene salvato.
+   - Ospite: legge una copia pubblica (data.json), solo lettura, nulla viene salvato: solo ciò che sanno tutti i giocatori.
+   - Giocatore (Livion, Sam, Violet, Mungus): la sua password decifra giocatori/<id>.enc, la copia preparata per lui
+     (solo ciò che il DM gli mostra con «Mostra a:»), in sola lettura. Le altre copie non le può aprire.
    - Amministratore: il codice decifra data.enc (dati completi), tenuti in IndexedDB. Le modifiche fatte sul sito
      restano qui solo finché non vengono inviate a Claude (una richiesta cifrata su GitHub) o scartate:
      i dati veri sono sempre quelli pubblicati. Il codice non viene mai salvato in chiaro. */
@@ -13,7 +15,9 @@
   const clone = v => JSON.parse(JSON.stringify(v));
   const ROERR = () => new Error('Sola lettura: accedi come Dungeon Master per modificare.');
 
-  let ROLE = null, DB = null, MEM = {}, BLOBMAP = {}, RAW = null;
+  let ROLE = null, DB = null, MEM = {}, BLOBMAP = {}, RAW = null, PLAYER = null, BLOBKEYS = {};
+  // account dei giocatori, nell'ordine dei ritratti di login-gruppo.jpg
+  const PLAYERS = [['livion', 'Livion'], ['mungus', 'Mungus'], ['sam', 'Sam'], ['violet', 'Violet']];
   // modifiche non ancora inviate: chiavi 'raccolta/id' dei documenti e id delle immagini caricate
   let PEND = new Set(), PFILES = new Set(), DROPPED = false;
   // segnalazioni per Claude: note sui testi (modalità revisione) ed errori del sito, con le loro foto
@@ -34,6 +38,12 @@
   }
   const aesKey = raw => crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt', 'decrypt']);
 
+  async function openEnc(enc, raw) {
+    let pt = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64d(enc.iv) }, await aesKey(raw), b64d(enc.ct)));
+    if (enc.z) pt = new Uint8Array(await new Response(new Blob([pt]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
+    return JSON.parse(new TextDecoder().decode(pt));
+  }
+
   /* ---------- aperture ---------- */
   async function guestOpen() {
     const r = await fetch('data.json', { cache: 'no-cache' });
@@ -42,19 +52,32 @@
     for (const [c, docs] of Object.entries(d.stores)) MEM[c] = new Map(Object.entries(docs));
     BLOBMAP = d.blobmap || {}; ROLE = 'guest';
   }
+  async function playerOpen(id, code, remember) {
+    let r; try { r = await fetch('giocatori/' + id + '.enc', { cache: 'no-cache' }); } catch { throw new Error('Per il primo accesso serve internet.'); }
+    if (!r.ok) throw new Error(r.status === 404 ? 'Questo account non è ancora attivo: chiedi al DM.' : 'Impossibile caricare i dati (' + r.status + ').');
+    const enc = await r.json();
+    let raw;
+    if (code != null) raw = await deriveRaw(code, b64d(enc.salt), enc.it);
+    else { const k = ls.get('cdnd_pkey'); if (!k) throw new Error('nokey'); raw = b64d(k); }
+    let d; try { d = await openEnc(enc, raw); } catch { throw new Error(code != null ? 'Password non corretta.' : 'nokey'); }
+    MEM = {}; for (const [c, docs] of Object.entries(d.stores)) MEM[c] = new Map(Object.entries(docs));
+    BLOBMAP = d.blobmap || {}; BLOBKEYS = d.blobkeys || {}; PLAYER = d.player || { id, name: id }; ROLE = 'player';
+    if (remember) { ls.set('cdnd_remember', 'player:' + id); ls.set('cdnd_pkey', b64e(raw)); }
+  }
   async function seedAdmin(payload, raw) {
     const t = DB.transaction(['docs', 'kv'], 'readwrite'); const d = t.objectStore('docs'); d.clear();
     for (const [c, docs] of Object.entries(payload.stores)) for (const [id, v] of Object.entries(docs)) d.put(v, c + '/' + id);
     t.objectStore('kv').put(payload.dataVersion, 'dataVersion'); t.objectStore('kv').put(payload.blobmap, 'blobmap'); t.objectStore('kv').put(false, 'dirty'); t.objectStore('kv').put([], 'pending'); t.objectStore('kv').put([], 'pfiles'); t.objectStore('kv').put([], 'notes'); t.objectStore('kv').put([], 'bugs');
     await done(t);
     // immagini riservate (cifrate): le decifro e le tengo nel browser
-    const key = await aesKey(raw); const types = {};
+    // (quelle che vede anche qualche giocatore hanno una chiave propria, in blobkeys)
+    const key = await aesKey(raw), keys = payload.blobkeys || {}, types = {};
     for (const b of Object.values(payload.stores.blobs || {})) types[b.aid] = b.type;
     for (const [aid, path] of Object.entries(payload.blobmap)) {
       if (!path.startsWith('priv/')) continue;
       try {
         const buf = new Uint8Array(await (await fetch(path)).arrayBuffer());
-        const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: buf.slice(0, 12) }, key, buf.slice(12));
+        const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: buf.slice(0, 12) }, keys[aid] ? await aesKey(b64d(keys[aid])) : key, buf.slice(12));
         const t2 = DB.transaction('files', 'readwrite'); t2.objectStore('files').put({ blob: new Blob([plain], { type: types[aid] || 'image/jpeg' }), type: types[aid] }, aid); await done(t2);
       } catch { }
     }
@@ -97,9 +120,15 @@
   /* ---------- schermata di accesso ---------- */
   const LOGIN_CSS = `#login{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at 50% 20%,#7d2530cc 0%,#561820e6 55%,#2d0d12 100%),url(login-mappa.jpg) center/cover #2d0d12;color:#f5e6c4;font-family:'Crimson Pro',Georgia,serif}
 #login .grp{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 18px}
-#login .grp span{aspect-ratio:3/4;border-radius:6px;border:2px solid #a98334;background:url(login-gruppo.jpg) 0 0/400% 100% no-repeat #2b1d14;box-shadow:0 2px 8px #0004}
-#login .grp span:nth-child(2){background-position:33.333% 0}#login .grp span:nth-child(3){background-position:66.666% 0}#login .grp span:nth-child(4){background-position:100% 0}
-@media (prefers-color-scheme:dark){#login .box{background:#241b16;color:#ecdfc6;border-color:#55402f}#login h1{color:#e0c071}#login .sub,#login small,#login .or{color:#94806a}#login label{color:#c5b193}#login .btn{background:#2b211b;color:#e0c071;border-color:#55402f}#login .btn.p{background:#8c2c38;color:#fbeccb;border-color:#c4494f}#login input[type=password]{background:#1c1511;color:#ecdfc6;border-color:#55402f}#login .or:before,#login .or:after{border-color:#3a2d24}}
+#login .grp button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;font-family:'Cinzel',Georgia,serif;font-size:.78rem;letter-spacing:.04em;color:#561820}
+#login .grp span{display:block;width:100%;aspect-ratio:3/4;border-radius:6px;border:2px solid #a98334;background:url(login-gruppo.jpg) 0 0/400% 100% no-repeat #2b1d14;box-shadow:0 2px 8px #0004;transition:transform .15s,box-shadow .15s}
+#login .grp button:nth-child(2) span{background-position:33.333% 0}#login .grp button:nth-child(3) span{background-position:66.666% 0}#login .grp button:nth-child(4) span{background-position:100% 0}
+#login .grp button:hover span,#login .grp button:focus-visible span{transform:translateY(-2px);box-shadow:0 4px 12px #0006}
+#login .grp button[aria-pressed=true] span{border-color:#7d2530;box-shadow:0 0 0 3px #7d253066,0 4px 12px #0006}
+#login .grp button[aria-pressed=true]{font-weight:700}
+#login .pick{text-align:center;margin:0 0 8px;color:#5a4636}
+#login .lnk{all:unset;cursor:pointer;display:block;margin:14px auto 0;text-align:center;color:#7d2530;text-decoration:underline;font-size:.95rem}
+@media (prefers-color-scheme:dark){#login .box{background:#241b16;color:#ecdfc6;border-color:#55402f}#login h1{color:#e0c071}#login .sub,#login small,#login .or{color:#94806a}#login label{color:#c5b193}#login .btn{background:#2b211b;color:#e0c071;border-color:#55402f}#login .btn.p{background:#8c2c38;color:#fbeccb;border-color:#c4494f}#login input[type=password]{background:#1c1511;color:#ecdfc6;border-color:#55402f}#login .or:before,#login .or:after{border-color:#3a2d24}#login .grp button,#login .lnk{color:#e0c071}#login .pick{color:#c5b193}}
 #login .box{width:min(420px,100%);background:#fbf5e3;color:#2b1d14;border:1px solid #d4b06a;border-radius:12px;padding:28px 26px;box-shadow:0 12px 40px #0008}
 #login h1{margin:0 0 2px;font-family:'Cinzel',Georgia,serif;font-size:1.35rem;letter-spacing:.06em;color:#561820;text-align:center}
 #login .sub{text-align:center;color:#8a7560;margin:0 0 20px}
@@ -116,13 +145,16 @@
     return new Promise(resolve => {
       const st = document.createElement('style'); st.textContent = LOGIN_CSS; document.head.append(st);
       const el = document.createElement('div'); el.id = 'login';
-      el.innerHTML = `<div class="box"><h1>CAMPAGNA D&amp;D</h1><p class="sub">Diario di campagna di Avalar</p><div class="grp" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-        <button class="btn p" id="lg-guest">Entra come Giocatore</button><small style="text-align:center">Sola lettura, nessuna modifica possibile.</small>
+      el.innerHTML = `<div class="box"><h1>CAMPAGNA D&amp;D</h1><p class="sub">Diario di campagna di Avalar</p><p class="pick">Chi sei?</p>
+        <div class="grp">${PLAYERS.map(([id, n]) => `<button type="button" data-pl="${id}" aria-pressed="false"><span></span>${n}</button>`).join('')}</div>
+        <form id="lg-pl" autocomplete="off" hidden><input type="password" id="lg-pcode" autocomplete="current-password" spellcheck="false">
+        <label><input type="checkbox" id="lg-prem" checked> Ricordami su questo dispositivo</label>
+        <button class="btn p" id="lg-pgo" type="submit">Entra</button></form>
         <div class="or">oppure</div>
         <form id="lg-form" autocomplete="off"><input type="password" id="lg-code" placeholder="Codice del Dungeon Master" autocomplete="current-password" spellcheck="false">
         <label><input type="checkbox" id="lg-rem" checked> Ricordami su questo dispositivo</label>
         <button class="btn" id="lg-adm" type="submit">Entra come Dungeon Master</button></form>
-        <p class="err" id="lg-err">${msg || ''}</p></div>`;
+        <p class="err" id="lg-err">${msg || ''}</p><button type="button" class="lnk" id="lg-guest">Entra come ospite</button><small style="text-align:center">Vede solo ciò che sanno tutti i giocatori, senza password.</small></div>`;
       document.body.append(el);
       const err = t => { el.querySelector('#lg-err').textContent = t || ''; };
       const finish = () => { el.remove(); st.remove(); resolve(); };
@@ -130,13 +162,25 @@
         e.target.disabled = true; err('');
         try { await guestOpen(); ls.set('cdnd_remember', 'guest'); finish(); } catch (x) { e.target.disabled = false; err(x.message || String(x)); }
       };
+      // giocatore: si tocca il proprio ritratto e si scrive la propria password
+      let who = null; const pf = el.querySelector('#lg-pl'), pc = el.querySelector('#lg-pcode'), pg = el.querySelector('#lg-pgo');
+      el.querySelectorAll('[data-pl]').forEach(b => b.onclick = () => {
+        who = b.dataset.pl; const n = PLAYERS.find(p => p[0] === who)[1];
+        el.querySelectorAll('[data-pl]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+        pf.hidden = false; pc.placeholder = 'Password di ' + n; pg.textContent = 'Entra come ' + n; err(''); pc.focus();
+      });
+      pf.onsubmit = async e => {
+        e.preventDefault(); if (!who) return; const code = pc.value; if (!code) { err('Inserisci la password.'); return; }
+        const t = pg.textContent; pg.disabled = true; pg.textContent = 'Verifico…'; err('');
+        try { await playerOpen(who, code, el.querySelector('#lg-prem').checked); finish(); }
+        catch (x) { pg.disabled = false; pg.textContent = t; err(x.message || String(x)); }
+      };
       el.querySelector('#lg-form').onsubmit = async e => {
         e.preventDefault(); const code = el.querySelector('#lg-code').value; if (!code) { err('Inserisci il codice.'); return; }
         const b = el.querySelector('#lg-adm'); b.disabled = true; b.textContent = 'Verifico…'; err('');
         try { await adminOpen(code, el.querySelector('#lg-rem').checked); finish(); }
         catch (x) { b.disabled = false; b.textContent = 'Entra come Dungeon Master'; err(x.message === 'nokey' ? 'Accesso non riuscito.' : (x.message || String(x))); }
       };
-      el.querySelector('#lg-code').focus();
     });
   }
 
@@ -144,6 +188,10 @@
     await domReady();
     const rem = ls.get('cdnd_remember');
     if (rem === 'guest') { try { await guestOpen(); } catch { await loginUI(); } }
+    else if (rem && rem.startsWith('player:')) {
+      try { await playerOpen(rem.slice(7), null, false); }
+      catch (x) { ls.del('cdnd_remember'); ls.del('cdnd_pkey'); await loginUI(x.message === 'nokey' ? 'La password è cambiata: accedi di nuovo.' : (x.message || '')); }
+    }
     else if (rem === 'admin') {
       try { await adminOpen(null, true); }
       catch (x) { ls.del('cdnd_remember'); await loginUI(x.message === 'nokey' ? 'Accedi di nuovo con il codice.' : ''); }
@@ -202,10 +250,23 @@
   window.__blobFetch = async aid => {
     await ready;
     if (DB) { const f = await rq(store('files').get(aid)); if (f) return { ok: true, blob: async () => f.blob }; }
-    const p = BLOBMAP[aid]; if (!p || p.startsWith('priv/')) return { ok: false, status: 404 };
+    const p = BLOBMAP[aid];
+    if (p && p.startsWith('priv/') && BLOBKEYS[aid]) { try { const b = await playerBlob(aid, p); return { ok: true, blob: async () => b }; } catch { return { ok: false, status: 404 }; } }
+    if (!p || p.startsWith('priv/')) return { ok: false, status: 404 };
     return fetch(p);
   };
   window.__blobHref = aid => { const p = BLOBMAP[aid]; return p && !p.startsWith('priv/') ? p : ''; };
+  // giocatore: le immagini riservate che può vedere arrivano cifrate con una chiave propria, che c'è solo nella sua copia
+  const PLAIN = new Map();
+  async function playerBlob(aid, p) {
+    if (!PLAIN.has(aid)) PLAIN.set(aid, (async () => {
+      const r = await fetch(p); if (!r.ok) throw new Error(r.status);
+      const buf = new Uint8Array(await r.arrayBuffer()), t = [...(MEM.blobs?.values() || [])].find(b => b.aid === aid)?.type;
+      return new Blob([await crypto.subtle.decrypt({ name: 'AES-GCM', iv: buf.slice(0, 12) }, await aesKey(b64d(BLOBKEYS[aid])), buf.slice(12))], { type: t || 'image/jpeg' });
+    })().catch(x => { PLAIN.delete(aid); throw x; }));
+    return PLAIN.get(aid);
+  }
+  window.__player = () => PLAYER && { ...PLAYER };
 
   /* ---------- interfaccia per ruolo ---------- */
   const HIDE_ACTS = ['selmode', 'selall', 'selnone', 'selmove', 'edit', 'up', 'rensess', 'reimg', 'delRel', 'dmRel', 'del', 'copyctx', 'wipe', 'vedit', 'vdm', 'vpl', 'undo', 'toggleDisc', 'subup', 'rename', 'renSec', 'redraw', 'portrait', 'newsess', 'newent', 'merge', 'histgen', 'editreg', 'editpin', 'editmap', 'editgen', 'editEntry', 'drawundo', 'drawok', 'drawcancel', 'delreg', 'delpin', 'delphoto', 'delmap', 'delSec', 'delEntry', 'delDoc', 'cpDoc', 'copyEnt', 'bkFull', 'bkData', 'attach', 'analyze', 'addreg', 'addpin', 'addphotos', 'addSec', 'addRel', 'addEntry', 'demo'];
@@ -238,10 +299,11 @@
     const adm = ROLE === 'admin';
     const box = document.createElement('aside'); box.id = 'tools'; box.setAttribute('aria-label', 'Strumenti');
     const tog = document.createElement('button'); tog.type = 'button'; tog.className = 'tbtn ttog'; tog.setAttribute('aria-expanded', 'false');
-    tog.innerHTML = `<span class="ti" aria-hidden="true">⚙</span><span class="tl">Strumenti</span><span class="tr">${adm ? 'DM' : 'Giocatore'}</span>`;
-    tog.title = 'Strumenti · ' + (adm ? 'Dungeon Master' : 'Giocatore');
+    const chi = adm ? 'DM' : PLAYER ? PLAYER.name : 'Ospite';
+    tog.innerHTML = `<span class="ti" aria-hidden="true">⚙</span><span class="tl">Strumenti</span><span class="tr">${esc(chi)}</span>`;
+    tog.title = 'Strumenti · ' + (adm ? 'Dungeon Master' : PLAYER ? PLAYER.name : 'Ospite');
     const list = document.createElement('div'); list.className = 'tlist';
-    const role = document.createElement('div'); role.className = 'trole'; role.textContent = adm ? 'Dungeon Master' : 'Giocatore · sola lettura'; list.append(role);
+    const role = document.createElement('div'); role.className = 'trole'; role.textContent = adm ? 'Dungeon Master' : PLAYER ? PLAYER.name + ' · sola lettura' : 'Ospite · sola lettura'; list.append(role);
     const mk = (icon, label, title, fn, id) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'tbtn'; if (id) b.id = id; b.title = title; b.innerHTML = `<span class="ti" aria-hidden="true">${icon}</span><span class="tl">${label}</span>`; b.onclick = fn; list.append(b); return b; };
     const setOpen = o => { box.classList.toggle('open', o); tog.setAttribute('aria-expanded', String(o)); };
     tog.onclick = () => setOpen(!box.classList.contains('open'));
@@ -249,9 +311,10 @@
     document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
     const up = mk('⟳', 'Verifica aggiornamento', 'Verifica se c\'è una versione più recente del sito e caricala subito', () => checkUpdate(up), 'upbtn');
     if (adm) mk('✎', 'Segnala a Claude', 'Segnala un errore o correggi i contenuti del sito', () => { setOpen(false); reportDlg(); });
+    if (adm) mk('👥', 'Account giocatori', 'Password dei giocatori: vederle o cambiarle', () => { setOpen(false); accountsDlg(); });
     if (adm) { mk('⇪', 'Importa', 'Importa una sessione o dei dati', () => { setOpen(false); location.hash = '#/import'; }); mk('⛁', 'Backup', 'Scarica o ripristina un backup', () => { setOpen(false); location.hash = '#/backup'; }); }
     theme.className = 'tbtn'; list.append(theme);
-    const out = mk('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M16 8l4 4-4 4"/><path d="M20 12H9"/></svg>', 'Esci', 'Esci e torna alla schermata di accesso', async () => { out.disabled = true; ls.del('cdnd_remember'); if (DB) { try { const t = DB.transaction('kv', 'readwrite'); t.objectStore('kv').delete('key'); await done(t); } catch { } } location.reload(); });
+    const out = mk('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M16 8l4 4-4 4"/><path d="M20 12H9"/></svg>', 'Esci', 'Esci e torna alla schermata di accesso', async () => { out.disabled = true; ls.del('cdnd_remember'); ls.del('cdnd_pkey'); if (DB) { try { const t = DB.transaction('kv', 'readwrite'); t.objectStore('kv').delete('key'); await done(t); } catch { } } location.reload(); });
     box.append(tog, list); top.append(box);
     // il tema mostra anche la scritta, l'app cambia solo l'icona
     const tl = () => { if (!theme.querySelector('.tl')) { const ic = theme.textContent; theme.innerHTML = `<span class="ti" aria-hidden="true">${ic}</span><span class="tl">${ic === '☀' ? 'Tema chiaro' : 'Tema scuro'}</span>`; } };
@@ -301,7 +364,7 @@
   async function checkUpdate(btn) {
     btn.disabled = true; btn.classList.add('spin');
     try {
-      const files = ['index.html', 'local.js', 'sw.js', ROLE === 'admin' ? 'data.enc' : 'data.json'];
+      const files = ['index.html', 'local.js', 'sw.js', ROLE === 'admin' ? 'data.enc' : PLAYER ? 'giocatori/' + PLAYER.id + '.enc' : 'data.json'];
       const fresh = await Promise.all(files.map(async f => { const r = await fetch(f + '?v=' + Date.now(), { cache: 'reload' }); if (!r.ok) throw new Error(); return r.text(); }));
       const reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : null;
       if (reg) await reg.update().catch(() => { });
@@ -456,6 +519,31 @@ html.review #view :is(p,li,h1,h2,h3,h4,h5,dd,dt,td,th,figcaption,blockquote):hov
     d.addEventListener('close', () => d.remove()); d.querySelectorAll('[data-a=close]').forEach(b => b.onclick = () => d.close()); return d;
   }
   const pageName = () => (document.title || '').replace(/ · Campagna D&D.*$/, '');
+
+  /* ---------- account dei giocatori (amministratore) ----------
+     Le password stanno nei dati del DM (meta «giocatori»), mai nelle copie dei giocatori. Una password nuova è una
+     modifica come le altre: vale dopo che Claude l'ha pubblicata, e da lì chi la usava prima deve rientrare. */
+  function accountsDlg() {
+    const cur = () => (MEM.meta?.get('giocatori')?.v || []);
+    const d = dlg('accdlg', `<h3 style="${H3}">Account dei giocatori</h3>
+      <p class="sd" style="margin:0 0 8px">Ogni giocatore entra toccando il suo ritratto e scrivendo la sua password. Vede solo le schede e le parti in cui il suo nome è spuntato in «Mostra a:».</p>
+      <div id="acc-l"></div><p class="sd" id="acc-m" style="min-height:1.2em;margin:8px 0 0;font-size:.92rem"></p>
+      <div style="display:flex;justify-content:flex-end;margin-top:10px"><button class="btn" data-a="close">Chiudi</button></div>`);
+    const draw = () => {
+      const G = cur();
+      d.querySelector('#acc-l').innerHTML = G.length ? G.map((g, i) => `<div class="bugi" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><b style="color:#561820;min-width:70px">${esc(g.name)}</b><code style="flex:1;font-size:1.05rem;letter-spacing:.06em">${esc(g.code)}</code><button class="btn sm" data-c="${i}">Copia</button><button class="btn sm" data-n="${i}">Nuova password</button></div>`).join('')
+        : '<p class="sd">Gli account non sono ancora stati creati: chiedilo a Claude.</p>';
+      d.querySelectorAll('[data-c]').forEach(b => b.onclick = async () => { try { await navigator.clipboard.writeText(cur()[+b.dataset.c].code); d.querySelector('#acc-m').textContent = 'Password copiata.'; } catch { } });
+      d.querySelectorAll('[data-n]').forEach(b => b.onclick = async () => {
+        const G2 = clone(cur()), g = G2[+b.dataset.n]; if (!confirm('Dare a ' + g.name + ' una password nuova? Quella vecchia smette di funzionare quando la modifica viene pubblicata.')) return;
+        const abc = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789', r = crypto.getRandomValues(new Uint8Array(8));
+        g.code = Array.from(r, x => abc[x % abc.length]).join('');
+        await col('meta').doc('giocatori').set({ k: 'giocatori', v: G2 }); draw();
+        d.querySelector('#acc-m').textContent = 'Nuova password per ' + g.name + ': inviala a Claude dal riquadro in basso per renderla valida.';
+      });
+    };
+    draw();
+  }
 
   function reportDlg() {
     const on = document.documentElement.classList.contains('review');

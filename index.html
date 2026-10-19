@@ -126,6 +126,13 @@ label.chk input{width:auto}
 .dmonly::before{content:'🔒';font-size:.75em;margin-right:2px}
 .sec.dmsec>summary,.entry.dment .tx{opacity:.82}
 .dmtool{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:4px 0 0}.dmtool small{color:var(--ink2)}
+/* «Mostra a:» — parti che vedono solo alcuni giocatori */
+.pill.vis{color:#2f6b5e;border-color:#2f6b5e88;background:#2f6b5e14;font-family:var(--body);font-size:.75rem;letter-spacing:0;text-transform:none}
+.plonly{background:repeating-linear-gradient(135deg,#2f6b5e1c 0 6px,#2f6b5e0d 6px 12px);box-shadow:inset 0 -1px 0 #2f6b5e99;border-radius:3px;padding:0 2px}
+.plonly::before{content:'👁';font-size:.75em;margin-right:2px}
+fieldset.visf{border:1px solid var(--line2);border-radius:8px;padding:6px 10px 2px;margin:0 0 12px}fieldset.visf legend{padding:0 4px;color:var(--ink2);font-size:.9rem}
+.visrow{display:flex;gap:4px 14px;flex-wrap:wrap;align-items:center}.visrow label{display:flex;gap:5px;align-items:center;cursor:pointer;margin:0 0 6px}
+.dmtool .visrow{flex-basis:100%;padding:6px 8px;border:1px dashed #2f6b5e88;border-radius:8px}.dmtool .visrow b{font-weight:600;color:#2f6b5e;margin-bottom:6px}
 .chip{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border:1px solid var(--line2);border-radius:14px;background:var(--paper2);color:var(--ink);font-size:.92rem;text-decoration:none!important;cursor:pointer}
 .chip:hover{border-color:var(--gold);background:var(--paper)}
 .chip.on{background:var(--wine);color:#fbeccb;border-color:var(--wine-d)}
@@ -643,8 +650,17 @@ function findEnt(ref) {
 const DM_SPAN = /\[DM\][\s\S]*?(?:\[\/DM\]|$)/g;
 const dmLines = t => t.replace(/\[DM\]([\s\S]*?)(?:\[\/DM\]|$)/g, (m, x) => x.split('\n').map(l => l.trim() ? '[DM]' + l + '[/DM]' : l).join('\n'));
 const DM_NOTE = /\s*\*\((?:Dalla scaletta del DM|Nota del DM)[^)]*\)\*|^\*Riassunto ricavato dalla scaletta del DM[^*\n]*\*\s*|^\*\(Solo DM\)\*[^\n]*/gm;
+// «Mostra a:» — giocatori (dagli account del DM) e parti visibili solo ad alcuni di loro
+const PLAYERS = () => { const g = getMeta('giocatori', null); return g?.length ? g.map(x => [x.id, x.name]) : [['livion', 'Livion'], ['mungus', 'Mungus'], ['sam', 'Sam'], ['violet', 'Violet']]; };
+const visNames = v => v.length ? v.map(id => PLAYERS().find(p => p[0] === id)?.[1] || id).join(', ') : 'nessun giocatore';
+const visPill = o => !window.__RO && Array.isArray(o?.vis) ? ` <span class="pill vis" title="Mostra a: ${esc(visNames(o.vis))}">👁 ${esc(visNames(o.vis))}</span>` : '';
+const setVis = (o, v) => { if (v) o.vis = v; else delete o.vis; return o; };
+// [PER Sam, Violet]testo[/PER]: frase che vedono solo i giocatori nominati (le copie dei giocatori arrivano già filtrate)
+const PER_RE = /\[PER ([^\]]*)\]([\s\S]*?)(?:\[\/PER\]|$)/g;
+const perLines = t => t.replace(PER_RE, (m, w, x) => x.split('\n').map(l => l.trim() ? '[PER ' + w + ']' + l + '[/PER]' : l).join('\n'));
+const perRO = t => t.replace(PER_RE, (m, w, x) => { const me = window.__player?.(); return me && w.split(',').some(n => norm(n) === norm(me.name) || n.trim() === me.id) ? x : ''; });
 function inl(s) {
-  if (window.__RO) s = String(s ?? '').replace(DM_SPAN, '').replace(DM_NOTE, '');
+  if (window.__RO) s = perRO(String(s ?? '').replace(DM_SPAN, '').replace(DM_NOTE, ''));
   let h = esc(s);
   h = h.replace(/\[\[([^\]|]+?)(?:\|([^\]]+?))?\]\]/g, (m, a, b) => {
     const e = findEnt(unesc(a));
@@ -652,12 +668,13 @@ function inl(s) {
     return e ? `<a class="xref" href="#/scheda/${encodeURIComponent(e.id)}">${t}</a>` : `<span class="xref dead">${t}</span>`;
   });
   h = h.replace(/\[DM\]([\s\S]*?)(?:\[\/DM\]|$)/g, '<span class="dmonly" title="Solo per DM: i giocatori non lo vedono">$1</span>');
+  h = h.replace(/\[PER ([^\]]*)\]([\s\S]*?)(?:\[\/PER\]|$)/g, '<span class="plonly" title="Mostra a: $1">$2</span>');
   h = h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/(^|[\s(])\*([^*\s][^*]*?)\*(?=[\s).,;:!?]|$)/g, '$1<em>$2</em>');
   return h;
 }
 function md(t) {
   t = String(t ?? '').replace(/\r/g, '');
-  t = window.__RO ? t.replace(DM_SPAN, '').replace(DM_NOTE, '') : dmLines(t);
+  t = window.__RO ? perRO(t.replace(DM_SPAN, '').replace(DM_NOTE, '')) : perLines(dmLines(t));
   t = t.trim();
   if (!t) return '';
   const out = [];
@@ -703,6 +720,7 @@ function formDlg({ title, fields, ok = 'Salva', wide = false, intro = '' }) {
       const id = 'ff-' + f.k, v = f.value ?? '', req = f.req ? 'required' : '';
       const hint = f.hint ? `<small class="hint">${f.hint}</small>` : '';
       if (f.type === 'check') return `<label class="chk"><input type="checkbox" id="${id}" ${f.value ? 'checked' : ''}> <span>${esc(f.label)}</span></label>`;
+      if (f.type === 'players') return `<fieldset class="visf" id="${id}"><legend>${esc(f.label || 'Mostra a:')}</legend><div class="visrow">${PLAYERS().map(([pid, pn]) => `<label><input type="checkbox" value="${esc(pid)}" ${!Array.isArray(f.value) || f.value.includes(pid) ? 'checked' : ''}> ${esc(pn)}</label>`).join('')}</div>${f.hint ? `<small class="hint">${f.hint}</small>` : ''}</fieldset>`;
       let ctl;
       if (f.type === 'textarea') ctl = `<textarea id="${id}" rows="${f.rows || 5}" ${req} placeholder="${esc(f.placeholder || '')}">${esc(v)}</textarea>`;
       else if (f.type === 'select') ctl = `<select id="${id}">${f.options.map(([ov, ol]) => `<option value="${esc(ov)}" ${String(ov) === String(v) ? 'selected' : ''}>${esc(ol)}</option>`).join('')}</select>`;
@@ -716,6 +734,7 @@ function formDlg({ title, fields, ok = 'Salva', wide = false, intro = '' }) {
       const o = {};
       for (const f of fields) {
         const el = $('#ff-' + f.k, d);
+        if (f.type === 'players') { const on = [...el.querySelectorAll('input:checked')].map(x => x.value); o[f.k] = on.length === el.querySelectorAll('input').length ? null : on; continue; }
         o[f.k] = f.type === 'check' ? el.checked : f.type === 'file' ? (f.multiple ? [...el.files] : el.files[0]) : f.type === 'number' ? (el.value === '' ? null : Number(el.value)) : el.value;
       }
       res(o);
@@ -793,10 +812,29 @@ function dmToggle(ta) {
 function dmTool(ta) {
   if (!ta || window.__RO) return;
   const w = document.createElement('div'); w.className = 'dmtool';
-  w.innerHTML = '<button type="button" class="btn sm">🔒 Solo per DM</button><small>Seleziona una frase e premi: i giocatori non la vedranno. Premi di nuovo dentro la frase per mostrarla.</small>';
+  w.innerHTML = '<button type="button" class="btn sm">🔒 Solo per DM</button><small>Seleziona una frase e premi: i giocatori non la vedranno. Premi di nuovo dentro la frase per mostrarla. Con «Mostra a…» la vedono solo i giocatori che scegli.</small>';
   const bt = w.querySelector('button'), msg = w.querySelector('small');
   bt.addEventListener('mousedown', e => e.preventDefault());
   bt.onclick = () => { const r = dmToggle(ta); ta.focus(); msg.textContent = r === 'empty' ? 'Prima seleziona il testo da nascondere.' : r === 'hidden' ? 'Fatto: la frase è tra [DM] e [/DM], i giocatori non la vedranno.' : 'Fatto: la frase è di nuovo visibile ai giocatori.'; };
+  // «Mostra a…»: la frase selezionata la vedono solo i giocatori spuntati
+  const pb = document.createElement('button'); pb.type = 'button'; pb.className = 'btn sm'; pb.textContent = '👁 Mostra a…'; bt.after(pb);
+  const row = document.createElement('div'); row.className = 'visrow'; row.hidden = true;
+  row.innerHTML = '<b>Mostra a:</b>' + PLAYERS().map(([pid, pn]) => `<label><input type="checkbox" value="${esc(pn)}"> ${esc(pn)}</label>`).join('') + '<button type="button" class="btn sm">Applica alla frase</button>';
+  w.append(row);
+  let sel = [0, 0];
+  pb.addEventListener('mousedown', e => { e.preventDefault(); sel = [ta.selectionStart, ta.selectionEnd]; });
+  pb.onclick = () => {
+    const v = ta.value, [a] = sel; let m; PER_RE.lastIndex = 0;
+    while ((m = PER_RE.exec(v))) if (a >= m.index && a <= m.index + m[0].length && m[0]) { ta.value = v.slice(0, m.index) + m[2] + v.slice(m.index + m[0].length); ta.setSelectionRange(m.index, m.index + m[2].length); ta.dispatchEvent(new Event('input', { bubbles: true })); row.hidden = true; msg.textContent = 'Fatto: la frase è di nuovo visibile a tutti i giocatori.'; return; }
+    if (sel[0] === sel[1]) { msg.textContent = 'Prima seleziona la frase da mostrare solo ad alcuni giocatori.'; return; }
+    row.hidden = !row.hidden; msg.textContent = row.hidden ? '' : 'Spunta chi può leggere la frase selezionata, poi premi «Applica».';
+  };
+  row.querySelector('button').onclick = () => {
+    const who = [...row.querySelectorAll('input:checked')].map(x => x.value); if (!who.length) { msg.textContent = 'Spunta almeno un giocatore (per nasconderla a tutti usa «Solo per DM»).'; return; }
+    const [a, b] = sel, v = ta.value, txt = v.slice(a, b).replace(/\[PER [^\]]*\]|\[\/PER\]/g, '');
+    ta.value = v.slice(0, a) + '[PER ' + who.join(', ') + ']' + txt + '[/PER]' + v.slice(b); ta.focus(); ta.dispatchEvent(new Event('input', { bubbles: true }));
+    row.hidden = true; row.querySelectorAll('input').forEach(x => x.checked = false); msg.textContent = 'Fatto: la frase la vedono solo ' + who.join(', ') + '. Premi «Mostra a…» dentro la frase per renderla di nuovo visibile a tutti.';
+  };
   ta.after(w);
 }
 function ensureEntList() {
@@ -1550,7 +1588,7 @@ route(/^\/sessioni\/(\d+)$/, async ([ns]) => {
       <div class="acts"><button class="btn" data-act="edit">Modifica</button>${moreActs('<button class="btn" data-act="rensess" data-n="' + n + '">Rinomina</button><button class="btn danger" data-act="del">Elimina</button>')}</div></div><div class="orn"></div>
     ${b.summary && evs.length ? `<div class="stabs" role="tablist"><button type="button" role="tab" data-act="stab" data-t="racc" class="on" aria-selected="true">Racconto</button><button type="button" role="tab" data-act="stab" data-t="mom" aria-selected="false">Momenti chiave</button></div>` : ''}
     <div class="card cap" data-tab="racc"><h2>Riassunto</h2>${b.summary ? prose(b.summary) : '<p class="empty">Nessun riassunto.</p>'}</div>
-    ${evs.length ? `<div class="card tl" data-tab="mom"${b.summary ? ' hidden' : ''}><h2>Momenti chiave</h2>${evs.map(e => `<div class="entry${e.dm ? ' dment' : ''}"><div class="tag" data-n="${e.idx + 1}">${e.idx + 1}</div><div class="tx"><b>${esc(e.title)}</b>${e.dm ? ' <span class="pill dm">🔒 solo DM</span>' : ''}${e.gameDate ? ` <small>${esc(e.gameDate)}</small>` : ''}${prose(e.text)}${e.ents?.length ? `<div class="chips">${e.ents.filter(i => S.ents.has(i)).map(i => `<a class="chip" href="#/scheda/${encodeURIComponent(i)}">${esc(S.ents.get(i).name)}</a>`).join('')}</div>` : ''}</div></div>`).join('')}</div>` : ''}
+    ${evs.length ? `<div class="card tl" data-tab="mom"${b.summary ? ' hidden' : ''}><h2>Momenti chiave</h2>${evs.map(e => `<div class="entry${e.dm ? ' dment' : ''}"><div class="tag" data-n="${e.idx + 1}">${e.idx + 1}</div><div class="tx"><b>${esc(e.title)}</b>${e.dm ? ' <span class="pill dm">🔒 solo DM</span>' : ''}${visPill(e)}${e.gameDate ? ` <small>${esc(e.gameDate)}</small>` : ''}${prose(e.text)}${e.ents?.length ? `<div class="chips">${e.ents.filter(i => S.ents.has(i)).map(i => `<a class="chip" href="#/scheda/${encodeURIComponent(i)}">${esc(S.ents.get(i).name)}</a>`).join('')}</div>` : ''}</div></div>`).join('')}</div>` : ''}
     ${grp.length ? `<div class="card"><h2>Schede di questa sessione</h2>${grp.map(([t, l]) => `<p>${badge(t)} <span class="chips" style="display:inline-flex">${l.map(e => `<a class="chip" href="#/scheda/${encodeURIComponent(e.id)}">${esc(e.name)}</a>`).join('')}</span></p>`).join('')}</div>` : ''}
     ${!window.__RO || b.docs?.length ? `<div class="card"><div class="spread"><h2>Documenti allegati</h2><button class="btn sm" data-act="attach">+ Allega testo</button></div>
       ${b.docs?.length ? b.docs.map((d, i) => `<details class="arc"><summary>${esc(d.name)}<small>${fmtSize(d.text.length)}</small></summary><div class="row" style="margin:6px 0"><button class="btn sm" data-act="delDoc" data-i="${i}">Rimuovi</button><button class="btn sm ghost" data-act="cpDoc" data-i="${i}">Copia testo</button></div><div class="prose"><p style="white-space:pre-wrap">${esc(d.text.length > 20000 ? d.text.slice(0, 20000) + '\n\n[… testo troncato nella visualizzazione: ' + d.text.length + ' caratteri totali]' : d.text)}</p></div></details>`).join('') : '<p class="hint">Qui puoi tenere il testo originale della sessione (.txt, .md, .docx, oppure incollato) come riferimento. I PDF vanno copiati e incollati.</p>'}</div>` : ''}
@@ -1653,11 +1691,11 @@ async function createEntity({ type, name, brief = '', status = '', discovered = 
 /* ================= SCHEDA: dettaglio ================= */
 function entrySecHtml(sec, si, editable = true) {
   const n = sec.entries.length, KEEP = 8;
-  const ent = (en, ei) => `<div class="entry${en.dm ? ' dment' : ''}"><div class="tag${en.n != null ? '' : ' dot'}">${en.n != null ? sessLink(en.n) : '·'}</div><div class="tx">${en.dm ? '<span class="pill dm">🔒 solo DM</span>' : ''}${en.text.length > 1400 ? `<div class="fold">${prose(en.text)}</div><button type="button" class="more" data-act="unfold">Leggi tutto</button>` : prose(en.text)}</div><div class="eacts"><button class="icb" data-act="editEntry" data-si="${si}" data-ei="${ei}" title="Modifica">✎</button><button class="icb" data-act="delEntry" data-si="${si}" data-ei="${ei}" title="Elimina">✕</button></div></div>`;
+  const ent = (en, ei) => `<div class="entry${en.dm ? ' dment' : ''}"><div class="tag${en.n != null ? '' : ' dot'}">${en.n != null ? sessLink(en.n) : '·'}</div><div class="tx">${en.dm ? '<span class="pill dm">🔒 solo DM</span>' : ''}${visPill(en)}${en.text.length > 1400 ? `<div class="fold">${prose(en.text)}</div><button type="button" class="more" data-act="unfold">Leggi tutto</button>` : prose(en.text)}</div><div class="eacts"><button class="icb" data-act="editEntry" data-si="${si}" data-ei="${ei}" title="Modifica">✎</button><button class="icb" data-act="delEntry" data-si="${si}" data-ei="${ei}" title="Elimina">✕</button></div></div>`;
   let body;
   if (n > KEEP + 2) body = `<details class="older"><summary class="hint" style="cursor:pointer;margin:4px 0 8px">Mostra le ${n - KEEP} voci precedenti</summary>${sec.entries.slice(0, n - KEEP).map((e, i) => ent(e, i)).join('')}</details>${sec.entries.slice(n - KEEP).map((e, i) => ent(e, n - KEEP + i)).join('')}`;
   else body = sec.entries.map(ent).join('') || '<p class="hint">Sezione vuota.</p>';
-  return `<details class="sec${sec.dm ? ' dmsec' : ''}" open id="sec-${si}"><summary>${esc(sec.title)}${sec.dm ? ' <span class="pill dm">🔒 solo DM</span>' : ''} <span class="cnt">${n > 1 ? n + ' voci' : ''}</span><span class="sp"></span><button class="icb" data-act="addEntry" data-si="${si}" title="Aggiungi voce">＋</button><button class="icb" data-act="renSec" data-si="${si}" title="Modifica sezione">✎</button><button class="icb" data-act="delSec" data-si="${si}" title="Elimina sezione">✕</button></summary>${body}</details>`;
+  return `<details class="sec${sec.dm ? ' dmsec' : ''}" open id="sec-${si}"><summary>${esc(sec.title)}${sec.dm ? ' <span class="pill dm">🔒 solo DM</span>' : ''}${visPill(sec)} <span class="cnt">${n > 1 ? n + ' voci' : ''}</span><span class="sp"></span><button class="icb" data-act="addEntry" data-si="${si}" title="Aggiungi voce">＋</button><button class="icb" data-act="renSec" data-si="${si}" title="Modifica sezione">✎</button><button class="icb" data-act="delSec" data-si="${si}" title="Elimina sezione">✕</button></summary>${body}</details>`;
 }
 async function mutBody(id, fn) {
   await runBatch(['bodies', 'entities'], '', async t => {
@@ -1679,11 +1717,11 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
     const rows = [...outs.map(l => ({ l, x: S.ents.get(l.to), lab: l.label || 'collegata a' })), ...ins.map(l => ({ l, x: S.ents.get(l.from), lab: (l.label || 'collegata a') + ' questa scheda' }))].filter(r => r.x);
     const grp = [['Persone', ['pg', 'png']], ['Luoghi', ['luogo']], ['Oggetti', ['oggetto']], ['Fazioni e missioni', ['fazione', 'missione']], ['Altro', ['lore']]];
     const known = grp.flatMap(g => g[1]);
-    return grp.map(([t, ty]) => [t, rows.filter(r => ty.includes(r.x.type) || (t === 'Altro' && !known.includes(r.x.type)))]).filter(g => g[1].length).map(([t, l]) => `<h4 class="relh">${t}</h4><div class="relcards">${l.map(({ l: k, x, lab }) => `<div class="relc${k.dm ? ' dment' : ''}"><a href="#/scheda/${encodeURIComponent(x.id)}">${x.portrait ? `<img class="av" src="${x.portrait.thumb}" alt="">` : `<span class="av noav t-${x.type}">${esc(x.name[0])}</span>`}<span><b>${esc(x.name)}</b><small>${k.dm ? '🔒 solo DM · ' : ''}${esc(lab)}</small></span></a><button class="icb rdm" data-act="dmRel" data-k="${esc(k.k)}" aria-pressed="${!!k.dm}" title="${k.dm ? 'Solo per DM: premi per mostrarlo ai giocatori' : 'Visibile ai giocatori: premi per renderlo solo per DM'}">${k.dm ? '🔒' : '🔓'}</button><button class="icb" data-act="delRel" data-k="${esc(k.k)}" title="Togli il collegamento">✕</button></div>`).join('')}</div>`).join('');
+    return grp.map(([t, ty]) => [t, rows.filter(r => ty.includes(r.x.type) || (t === 'Altro' && !known.includes(r.x.type)))]).filter(g => g[1].length).map(([t, l]) => `<h4 class="relh">${t}</h4><div class="relcards">${l.map(({ l: k, x, lab }) => `<div class="relc${k.dm ? ' dment' : ''}"><a href="#/scheda/${encodeURIComponent(x.id)}">${x.portrait ? `<img class="av" src="${x.portrait.thumb}" alt="">` : `<span class="av noav t-${x.type}">${esc(x.name[0])}</span>`}<span><b>${esc(x.name)}</b><small>${k.dm ? '🔒 solo DM · ' : ''}${!window.__RO && Array.isArray(k.vis) ? '👁 ' + esc(visNames(k.vis)) + ' · ' : ''}${esc(lab)}</small></span></a><button class="icb rdm" data-act="dmRel" data-k="${esc(k.k)}" aria-pressed="${!!k.dm}" title="${k.dm ? 'Solo per DM: premi per mostrarlo ai giocatori' : 'Visibile ai giocatori: premi per renderlo solo per DM'}">${k.dm ? '🔒' : '🔓'}</button><button class="icb" data-act="delRel" data-k="${esc(k.k)}" title="Togli il collegamento">✕</button></div>`).join('')}</div>`).join('');
   };
   const photos = e.photos || [];
   const toc = [...b.sections.map((sc, i) => [sc.title.replace(/\s*\(.*\)$/, ''), 'sec-' + i]), ...(photos.length ? [['Foto', 'sec-foto']] : []), ['Collegamenti', 'sec-rel'], ...(evs.length ? [['Eventi', 'sec-ev']] : [])];
-  setView(`<div class="card ehead ${e.portrait ? 'hasp' : ''}">${e.portrait ? `<img class="portrait" src="${e.portrait.thumb}" data-act="viewportrait" alt="${esc(e.name)}" title="Ingrandisci">` : ''}<div class="ehb"><div class="meta">${badge(e.type)}${e.status ? `<span class="pill">${esc(e.status)}</span>` : ''}${catPills(e)}${e.discovered === false ? '<span class="pill dm">🔒 solo DM · nascosta ai giocatori</span>' : ''}<span class="hint">${esc(rangeTxt(e.sessions))}</span></div>
+  setView(`<div class="card ehead ${e.portrait ? 'hasp' : ''}">${e.portrait ? `<img class="portrait" src="${e.portrait.thumb}" data-act="viewportrait" alt="${esc(e.name)}" title="Ingrandisci">` : ''}<div class="ehb"><div class="meta">${badge(e.type)}${e.status ? `<span class="pill">${esc(e.status)}</span>` : ''}${catPills(e)}${e.discovered === false ? '<span class="pill dm">🔒 solo DM · nascosta ai giocatori</span>' : ''}${visPill(e)}<span class="hint">${esc(rangeTxt(e.sessions))}</span></div>
       <h1>${esc(e.name)}</h1>${e.alias?.length ? `<div class="hint">Detto anche: ${e.alias.map(esc).join(', ')}</div>` : ''}${e.brief ? `<div class="brief">${inl(e.brief)}</div>` : ''}
       </div><div class="row eheadacts"><button class="btn sm" data-act="edit">Modifica dati</button>${[...M.regions.values()].filter(r => r.entityId === id).map(r => `<a class="btn sm" href="#/mappe/${encodeURIComponent(r.mapId)}?reg=${encodeURIComponent(r.id)}">Vedi sulla mappa</a>`).join('')}${moreActs(`<button class="btn sm" data-act="addSec">+ Sezione</button><button class="btn sm" data-act="portrait">${e.portrait ? 'Cambia ritratto' : '+ Ritratto'}</button><button class="btn sm ghost" data-act="copyEnt">Copia per Claude</button><button class="btn sm ghost" data-act="merge">Unisci in un'altra scheda</button><button class="btn sm danger" data-act="del">Elimina</button>`)}</div></div>
     ${toc.length > 2 ? `<nav class="toc" aria-label="Sezioni della scheda">${toc.map(([t, k]) => `<button type="button" data-act="goto" data-to="${k}">${esc(t)}</button>`).join('')}</nav>` : ''}
@@ -1695,7 +1733,8 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
       ${outL.length || inL.length ? relCards(outL, inL) : '<p class="hint">Nessun collegamento.</p>'}</div>
       <div class="card"><h2>Apparizioni</h2>${sessChips(e.sessions)}
       ${mapsOf.length ? `<h2 style="margin-top:14px">Sulle mappe</h2><div class="chips">${mapsOf.map(({ p, m }) => `<a class="chip" href="#/mappe/${encodeURIComponent(m.id)}?pin=${encodeURIComponent(p.id)}">${esc(m.name)}</a>`).join('')}</div>${mapsOf.some(x => x.p.photos?.length) ? `<div class="gallery" style="margin-top:10px">${mapsOf.flatMap(({ p, m }) => (p.photos || []).map(ph => `<a class="gph" href="#/mappe/${encodeURIComponent(m.id)}?pin=${encodeURIComponent(p.id)}" title="Vedi sulla mappa «${esc(m.name)}»"><img src="${ph.thumb}" alt="${esc(ph.name ? ph.name.replace(/\.[a-z0-9]+$/i, '') : 'Foto di ' + e.name)}"></a>`)).join('')}</div>` : ''}` : ''}
-      <div style="margin-top:14px"><label class="chk"><input type="checkbox" data-act="toggleDisc" ${e.discovered === false ? 'checked' : ''}> 🔒 Solo per DM (scheda nascosta ai giocatori)</label></div></div></div>
+      <div style="margin-top:14px"><label class="chk"><input type="checkbox" data-act="toggleDisc" ${e.discovered === false ? 'checked' : ''}> 🔒 Solo per DM (scheda nascosta ai giocatori)</label>
+      ${window.__RO ? '' : `<fieldset class="visf"${e.discovered === false ? ' disabled' : ''}><legend>Mostra a:</legend><div class="visrow">${PLAYERS().map(([pid, pn]) => `<label><input type="checkbox" data-act="visEnt" value="${esc(pid)}" ${!Array.isArray(e.vis) || e.vis.includes(pid) ? 'checked' : ''}> ${esc(pn)}</label>`).join('')}</div></fieldset>`}</div></div></div>
     ${evs.length ? `<div class="card" id="sec-ev"><h2>Eventi</h2>${(() => { const ev = v => `<div class="entry"><div class="tag">${sessLink(v.n)}</div><div class="tx"><b>${esc(v.title)}</b>${prose(v.text)}</div></div>`, K = 5; return evs.length > K + 1 ? `<details class="older"><summary class="more">Mostra i ${evs.length - K} eventi precedenti</summary>${evs.slice(0, -K).map(ev).join('')}</details>${evs.slice(-K).map(ev).join('')}` : evs.map(ev).join(''); })()}</div>` : ''}`);
   if (e.portrait) dbGet('blobs', e.portrait.id).then(rec => { const im = $('.ehead .portrait'); if (!rec?.blob || !im) return; const u = URL.createObjectURL(rec.blob); im.onload = () => im.closest('.ehead')?.classList.add('sharp'); im.src = u; onCleanup(() => URL.revokeObjectURL(u)); }).catch(() => { });
   const tocEl = $('.toc');
@@ -1722,13 +1761,13 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
   }, 'dropfull'));
   const edEntry = async (a, add) => {
     const si = +a.dataset.si, ei = add ? -1 : +a.dataset.ei; const cur = add ? null : b.sections[si].entries[ei];
-    const r = await formDlg({ title: add ? `Nuova voce in «${b.sections[si].title}»` : 'Modifica voce', wide: true, fields: [{ k: 'text', label: 'Testo', type: 'textarea', rows: 10, value: cur?.text || '', req: true, dm: true }, { k: 'n', label: 'Sessione (vuoto = nessuna)', type: 'number', value: add ? lastSessionN() : cur.n }, { k: 'dm', label: '🔒 Solo per DM: tutta la voce è nascosta ai giocatori', type: 'check', value: !!cur?.dm }] });
-    if (!r) return; const en = { n: r.n, text: r.text.trim(), ...(r.dm ? { dm: true } : {}) }; await mutBody(id, bd => { if (add) bd.sections[si].entries.push(en); else bd.sections[si].entries[ei] = en; }); rerender();
+    const r = await formDlg({ title: add ? `Nuova voce in «${b.sections[si].title}»` : 'Modifica voce', wide: true, fields: [{ k: 'text', label: 'Testo', type: 'textarea', rows: 10, value: cur?.text || '', req: true, dm: true }, { k: 'n', label: 'Sessione (vuoto = nessuna)', type: 'number', value: add ? lastSessionN() : cur.n }, { k: 'dm', label: '🔒 Solo per DM: tutta la voce è nascosta ai giocatori', type: 'check', value: !!cur?.dm }, { k: 'vis', type: 'players', value: cur?.vis }] });
+    if (!r) return; const en = setVis({ n: r.n, text: r.text.trim(), ...(r.dm ? { dm: true } : {}) }, r.vis); await mutBody(id, bd => { if (add) bd.sections[si].entries.push(en); else bd.sections[si].entries[ei] = en; }); rerender();
   };
   setActs({
     edit: async () => {
-      const r = await formDlg({ title: 'Dati della scheda', fields: [{ k: 'type', label: 'Tipo', type: 'select', value: e.type, options: TYPE_ORDER.map(t => [t, TYPES[t]]) }, { k: 'name', label: 'Nome', value: e.name, req: true }, { k: 'brief', label: 'Riga breve', value: e.brief }, { k: 'status', label: 'Stato', value: e.status }, ...(e.type === 'png' ? [{ k: 'cat', label: 'Atteggiamento', type: 'select', value: e.cat || '', options: [['', '— non assegnato —'], ...Object.entries(PNG_ATT)] }, { k: 'imp', label: 'Importanza', type: 'select', value: e.imp || '', options: [['', '— non assegnata —'], ...Object.entries(PNG_IMP)] }] : e.type === 'luogo' ? [{ k: 'cat', label: 'Categoria del luogo', type: 'select', value: e.cat || '', options: [['', '— non assegnata —'], ...Object.entries(LUOGO_CAT)] }] : []), { k: 'alias', label: 'Alias (separati da virgola)', value: (e.alias || []).join(', ') }, { k: 'dm', label: '🔒 Solo per DM (scheda nascosta ai giocatori)', type: 'check', value: e.discovered === false }] });
-      if (!r) return; await runBatch(['entities'], '', async t => t.put('entities', { ...e, type: r.type, name: r.name.trim(), brief: r.brief.trim(), status: r.status.trim(), alias: r.alias.split(',').map(x => x.trim()).filter(Boolean), discovered: !r.dm, ...('cat' in r ? { cat: r.cat } : {}), ...('imp' in r ? { imp: r.imp } : {}), upd: Date.now() })); rerender();
+      const r = await formDlg({ title: 'Dati della scheda', fields: [{ k: 'type', label: 'Tipo', type: 'select', value: e.type, options: TYPE_ORDER.map(t => [t, TYPES[t]]) }, { k: 'name', label: 'Nome', value: e.name, req: true }, { k: 'brief', label: 'Riga breve', value: e.brief }, { k: 'status', label: 'Stato', value: e.status }, ...(e.type === 'png' ? [{ k: 'cat', label: 'Atteggiamento', type: 'select', value: e.cat || '', options: [['', '— non assegnato —'], ...Object.entries(PNG_ATT)] }, { k: 'imp', label: 'Importanza', type: 'select', value: e.imp || '', options: [['', '— non assegnata —'], ...Object.entries(PNG_IMP)] }] : e.type === 'luogo' ? [{ k: 'cat', label: 'Categoria del luogo', type: 'select', value: e.cat || '', options: [['', '— non assegnata —'], ...Object.entries(LUOGO_CAT)] }] : []), { k: 'alias', label: 'Alias (separati da virgola)', value: (e.alias || []).join(', ') }, { k: 'dm', label: '🔒 Solo per DM (scheda nascosta ai giocatori)', type: 'check', value: e.discovered === false }, { k: 'vis', type: 'players', value: e.vis }] });
+      if (!r) return; await runBatch(['entities'], '', async t => t.put('entities', { ...setVis({ ...e }, r.vis), type: r.type, name: r.name.trim(), brief: r.brief.trim(), status: r.status.trim(), alias: r.alias.split(',').map(x => x.trim()).filter(Boolean), discovered: !r.dm, ...('cat' in r ? { cat: r.cat } : {}), ...('imp' in r ? { imp: r.imp } : {}), upd: Date.now() })); rerender();
     },
     viewportrait: async () => { const rec = await dbGet('blobs', e.portrait.id); if (!rec) return; const url = URL.createObjectURL(rec.blob); const d = openDlg(`<form method="dialog" style="padding:12px 16px"><div class="spread" style="margin-bottom:8px"><b>${esc(e.name)}</b><button class="btn sm" value="x">Chiudi</button></div><div class="lb"><img src="${url}" alt=""></div></form>`, 'wide lbdlg'); d.addEventListener('close', () => URL.revokeObjectURL(url)); },
     portrait: async () => {
@@ -1742,6 +1781,7 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
       const gone = photos[+a.dataset.i]; if (!gone || !await ask('Rimuovere questa foto dalla scheda?', { danger: true, ok: 'Rimuovi' })) return;
       await runBatch(['entities', 'blobs'], '', async t => { await t.del('blobs', gone.id); await t.put('entities', { ...e, photos: photos.filter(x => x.id !== gone.id), upd: Date.now() }); }); rerender();
     },
+    visEnt: async a => { const all = [...a.closest('.visrow').querySelectorAll('input')], on = all.filter(x => x.checked).map(x => x.value); await runBatch(['entities'], '', async t => t.put('entities', setVis({ ...e, upd: Date.now() }, on.length === all.length ? null : on))); rerender(); },
     toggleDisc: async a => { await runBatch(['entities'], '', async t => t.put('entities', { ...e, discovered: !a.checked, upd: Date.now() })); rerender(); },
     copyEnt: async () => copyText(await buildEntityText(id), 'Scheda copiata'),
     del: async () => {
@@ -1753,14 +1793,14 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
       if (!r) return; const dst = pickEntity(r.to); if (!dst || dst.id === id) { toast('Scheda di destinazione non valida', 'err'); return; }
       if (!await ask(`Unire **${e.name}** dentro **${dst.name}**?`, { ok: 'Unisci' })) return; await mergeEntity(id, dst.id); location.hash = '#/scheda/' + encodeURIComponent(dst.id);
     },
-    addSec: async () => { const r = await formDlg({ title: 'Nuova sezione', wide: true, fields: [{ k: 'title', label: 'Titolo', req: true, placeholder: 'Background, Storia personale…' }, { k: 'text', label: 'Testo', type: 'textarea', rows: 8, dm: true }, { k: 'n', label: 'Sessione (vuoto = nessuna)', type: 'number', value: null }, { k: 'dm', label: '🔒 Solo per DM: tutta la sezione è nascosta ai giocatori', type: 'check', value: false }] }); if (!r) return; await mutBody(id, bd => { bd.sections.push({ title: r.title.trim(), ...(r.dm ? { dm: true } : {}), entries: r.text.trim() ? [{ n: r.n, text: r.text.trim() }] : [] }); }); rerender(); },
-    renSec: async a => { const si = +a.dataset.si; const r = await formDlg({ title: 'Modifica sezione', fields: [{ k: 't', label: 'Titolo', value: b.sections[si].title, req: true }, { k: 'dm', label: '🔒 Solo per DM: tutta la sezione è nascosta ai giocatori', type: 'check', value: !!b.sections[si].dm }] }); if (!r) return; await mutBody(id, bd => { const sc = bd.sections[si]; sc.title = r.t.trim(); if (r.dm) sc.dm = true; else delete sc.dm; }); rerender(); },
+    addSec: async () => { const r = await formDlg({ title: 'Nuova sezione', wide: true, fields: [{ k: 'title', label: 'Titolo', req: true, placeholder: 'Background, Storia personale…' }, { k: 'text', label: 'Testo', type: 'textarea', rows: 8, dm: true }, { k: 'n', label: 'Sessione (vuoto = nessuna)', type: 'number', value: null }, { k: 'dm', label: '🔒 Solo per DM: tutta la sezione è nascosta ai giocatori', type: 'check', value: false }, { k: 'vis', type: 'players', value: null }] }); if (!r) return; await mutBody(id, bd => { bd.sections.push(setVis({ title: r.title.trim(), ...(r.dm ? { dm: true } : {}), entries: r.text.trim() ? [{ n: r.n, text: r.text.trim() }] : [] }, r.vis)); }); rerender(); },
+    renSec: async a => { const si = +a.dataset.si; const r = await formDlg({ title: 'Modifica sezione', fields: [{ k: 't', label: 'Titolo', value: b.sections[si].title, req: true }, { k: 'dm', label: '🔒 Solo per DM: tutta la sezione è nascosta ai giocatori', type: 'check', value: !!b.sections[si].dm }, { k: 'vis', type: 'players', value: b.sections[si].vis }] }); if (!r) return; await mutBody(id, bd => { const sc = bd.sections[si]; sc.title = r.t.trim(); if (r.dm) sc.dm = true; else delete sc.dm; setVis(sc, r.vis); }); rerender(); },
     delSec: async a => { const si = +a.dataset.si; if (!await ask(`Eliminare la sezione **${b.sections[si].title}** e le sue ${b.sections[si].entries.length} voci?`, { danger: true, ok: 'Elimina' })) return; await mutBody(id, bd => { bd.sections.splice(si, 1); }); rerender(); },
     goto: a => document.getElementById(a.dataset.to)?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
     unfold: a => { a.previousElementSibling?.classList.remove('fold'); a.remove(); },
     addEntry: a => edEntry(a, true), editEntry: a => edEntry(a, false),
     delEntry: async a => { if (!await ask('Eliminare questa voce?', { danger: true, ok: 'Elimina' })) return; await mutBody(id, bd => { bd.sections[+a.dataset.si].entries.splice(+a.dataset.ei, 1); }); rerender(); },
-    addRel: async () => { ensureEntList(); const r = await formDlg({ title: 'Nuovo collegamento', fields: [{ k: 'to', label: 'Con la scheda', list: 'dl-ents', req: true }, { k: 'label', label: 'Tipo di relazione', placeholder: 'alleato di, vive a, possiede…' }, { k: 'dm', label: '🔒 Solo per DM: i giocatori non vedono questo collegamento', type: 'check', value: false }] }); if (!r) return; const t = pickEntity(r.to); if (!t || t.id === id) { toast('Scheda non trovata', 'err'); return; } const lab = r.label.trim(); await runBatch(['links'], '', async x => x.put('links', { k: id + '|' + t.id + '|' + norm(lab), from: id, to: t.id, label: lab, ...(r.dm ? { dm: true } : {}) })); rerender(); },
+    addRel: async () => { ensureEntList(); const r = await formDlg({ title: 'Nuovo collegamento', fields: [{ k: 'to', label: 'Con la scheda', list: 'dl-ents', req: true }, { k: 'label', label: 'Tipo di relazione', placeholder: 'alleato di, vive a, possiede…' }, { k: 'dm', label: '🔒 Solo per DM: i giocatori non vedono questo collegamento', type: 'check', value: false }, { k: 'vis', type: 'players', value: null }] }); if (!r) return; const t = pickEntity(r.to); if (!t || t.id === id) { toast('Scheda non trovata', 'err'); return; } const lab = r.label.trim(); await runBatch(['links'], '', async x => x.put('links', setVis({ k: id + '|' + t.id + '|' + norm(lab), from: id, to: t.id, label: lab, ...(r.dm ? { dm: true } : {}) }, r.vis))); rerender(); },
     dmRel: async a => { const l = [...outL, ...inL].find(x => x.k === a.dataset.k); if (!l) return; const n = { ...l }; if (n.dm) delete n.dm; else n.dm = true; await runBatch(['links'], '', async x => x.put('links', n)); rerender(); },
     delRel: async a => { await runBatch(['links'], '', async x => x.del('links', a.dataset.k)); rerender(); }
   });
