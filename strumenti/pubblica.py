@@ -57,7 +57,8 @@ def copia_ospite(d):
                                        for s in b['sections'] if not s.get('dm') and not SEZIONE_DM.search(s['title'])]}
     mappe = {k: m for k, m in S['maps'].items() if m.get('discovered') is not False}
     pins = {k: p for k, p in S['pins'].items() if p.get('discovered') is not False and p.get('entityId', None) not in nascoste and p['mapId'] in mappe}
-    usati = {'portrait-' + k for k, e in E.items() if e.get('portrait')} | set(mappe) | {ph['id'] for p in pins.values() for ph in p.get('photos', [])}
+    usati = {'portrait-' + k for k, e in E.items() if e.get('portrait')} | {ph['id'] for e in E.values() for ph in e.get('photos', [])} \
+        | set(mappe) | {ph['id'] for p in pins.values() for ph in p.get('photos', [])}
     blobs = {k: b for k, b in S['blobs'].items() if k in usati and d['blobmap'].get(b['aid'], 'priv/').startswith('blobs/')}
     g = {**S['meta']['general'], 'v': {**S['meta']['general']['v'], 'text': testo(S['meta']['general']['v']['text'])}}
     stores = {
