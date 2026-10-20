@@ -108,7 +108,7 @@ def copia(d, chi=None):
         'maps': mappe,
         'pins': pins,
         'regions': {k: r for k, r in S['regions'].items() if r['mapId'] in mappe and r.get('entityId') not in nascoste},
-        'meta': {k: (g if k == 'general' else v) for k, v in S['meta'].items() if k not in ('generalHist', 'giocatori')},
+        'meta': {k: (g if k == 'general' else v) for k, v in S['meta'].items() if k not in ('generalHist', 'giocatori', 'segnalazioni')},
         'blobs': blobs,
     }
     out = {'dataVersion': d['dataVersion'], 'stores': {k: stores[k] for k in ORDINE}, 'blobmap': {b['aid']: d['blobmap'][b['aid']] for b in blobs.values()}}
@@ -116,6 +116,9 @@ def copia(d, chi=None):
         gi = next(x for x in G if x['id'] == chi)
         out['player'] = {'id': chi, 'name': gi['name'], 'pg': gi.get('pg')}
         out['blobkeys'] = {b['aid']: chiavi[b['aid']] for b in blobs.values() if b['aid'] in chiavi}
+        token = (S['meta'].get('segnalazioni') or {}).get('v', {}).get('token')
+        if token:  # chiave GitHub per aprire le segnalazioni senza account: solo nei dati cifrati dei giocatori
+            out['segnalazioni'] = token
     return out
 
 
