@@ -754,8 +754,29 @@ function formDlg({ title, fields, ok = 'Salva', wide = false, intro = '' }) {
 /* ---------- foto (schede e segnaposto): elaborazione e visore ---------- */
 async function prepPhotos(files, prefix) {
   const blobs = [], metas = [], errors = []; if (files?.length) toast('Elaboro ' + files.length + ' foto…');
-  for (const f of files || []) { try { const im = await processImage(f, 1600); const pid = prefix + uid(); blobs.push({ id: pid, blob: im.blob, type: im.blob.type }); metas.push({ id: pid, thumb: im.thumb, name: f.name, w: im.w, h: im.h }); } catch (e) { errors.push((f.name || 'foto') + ': ' + (e.message || e)); } }
+  for (const f of files || []) { try { const im = await processImage(f, 1600); const pid = prefix + uid(); blobs.push({ id: pid, blob: im.blob, type: im.blob.type }, { id: pid + '-t', blob: dataURLtoBlob(im.thumb), type: 'image/jpeg' }); metas.push({ id: pid, tid: pid + '-t', name: f.name, w: im.w, h: im.h }); } catch (e) { errors.push((f.name || 'foto') + ': ' + (e.message || e)); } }
   return { blobs, metas, errors, asked: files?.length || 0 };
+}
+/* le miniature delle foto stanno in immagini a parte (tid): dentro la scheda o il segnaposto ogni miniatura pesava
+   20-60 KB e dopo 6-8 foto il documento superava il massimo di 250 KB. Le foto vecchie hanno ancora la miniatura dentro (thumb). */
+const phIds = ph => ph.tid ? [ph.id, ph.tid] : [ph.id];
+const BLANK = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+const phImg = (ph, attrs) => `<img src="${ph.thumb || BLANK}"${ph.tid && !ph.thumb ? ` data-tid="${esc(ph.tid)}"` : ''} ${attrs}>`;
+const THUMBS = new Map(); // tid -> URL della miniatura, per tutta la visita (sono piccole)
+function loadThumbs(root = document) {
+  for (const im of root.querySelectorAll('img[data-tid]')) {
+    const tid = im.dataset.tid; im.removeAttribute('data-tid');
+    if (THUMBS.has(tid)) { im.src = THUMBS.get(tid); continue; }
+    dbGet('blobs', tid).then(rec => { if (!rec?.blob) return; if (!THUMBS.has(tid)) THUMBS.set(tid, URL.createObjectURL(rec.blob)); im.src = THUMBS.get(tid); }).catch(() => { });
+  }
+}
+let thumbsQ = false; // carica le miniature appena compaiono nella pagina (schede, pannello della mappa, finestre)
+new MutationObserver(() => { if (thumbsQ) return; thumbsQ = true; queueMicrotask(() => { thumbsQ = false; loadThumbs(); }); }).observe(document.documentElement, { childList: true, subtree: true });
+// porta fuori dal documento le miniature delle foto vecchie, così c'è di nuovo posto per altre foto
+async function slimPhotos(list, t) {
+  const out = [];
+  for (const ph of list) { if (!ph.thumb) { out.push(ph); continue; } const { thumb, ...rest } = ph; const tid = ph.id + '-t'; await t.put('blobs', { id: tid, blob: dataURLtoBlob(thumb), type: 'image/jpeg' }); out.push({ ...rest, tid }); }
+  return out;
 }
 function photoReport(ph) { if (ph.errors.length) showInfo('Alcune foto non sono state aggiunte', '<ul>' + ph.errors.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul><p class="hint">Formati accettati: PNG, JPG, WebP (le foto HEIC/HEIF dell\'iPhone vanno prima convertite in JPG).</p>'); }
 function showPhotos(title, list, i) {
@@ -1401,17 +1422,25 @@ const canvasBlob = (c, type, q) => new Promise(r => c.toBlob(r, type, q));
 async function processImage(file, MAX = 4096) {
   if (!file.type) { const x = (file.name || '').toLowerCase().split('.').pop(); const t = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', jfif: 'image/jpeg', webp: 'image/webp', gif: 'image/gif', bmp: 'image/bmp' }[x]; if (t) file = new File([file], file.name, { type: t }); }
   if (!/^image\/(png|jpe?g|webp|gif|bmp)$/i.test(file.type)) throw new Error('Formato non supportato: usa PNG, JPG o WebP.');
-  const bmp = await loadBitmap(file); const w = bmp.width, h = bmp.height;
-  let blob = file, W = w, H = h;
-  const keep = file.size <= 5 * 1048576 && Math.max(w, h) <= MAX && /^image\/(png|jpe?g|webp)$/i.test(file.type);
-  if (!keep) {
-    const s = Math.min(1, MAX / Math.max(w, h)); W = Math.round(w * s); H = Math.round(h * s);
-    const c = document.createElement('canvas'); c.width = W; c.height = H; c.getContext('2d').drawImage(bmp, 0, 0, W, H);
-    blob = await canvasBlob(c, 'image/webp', 0.92); if (!blob || blob.type !== 'image/webp') blob = await canvasBlob(c, 'image/jpeg', 0.9);
-  }
-  const ts = 360 / Math.max(W, 1), tc = document.createElement('canvas'); tc.width = Math.min(360, W); tc.height = Math.max(1, Math.round(H * Math.min(1, ts)));
-  tc.getContext('2d').drawImage(bmp, 0, 0, tc.width, tc.height);
-  return { blob, w: W, h: H, thumb: tc.toDataURL('image/jpeg', 0.7), shrunk: !keep };
+  // la memoria delle immagini decodificate e delle tele va liberata subito: su iPhone/iPad il limite è basso
+  // e, se si accumula, dopo poche foto il browser smette di elaborarle
+  const bmp = await loadBitmap(file), free = c => { c.width = c.height = 0; };
+  try {
+    const w = bmp.width, h = bmp.height;
+    let blob = file, W = w, H = h;
+    const keep = file.size <= 5 * 1048576 && Math.max(w, h) <= MAX && /^image\/(png|jpe?g|webp)$/i.test(file.type);
+    if (!keep) {
+      const s = Math.min(1, MAX / Math.max(w, h)); W = Math.round(w * s); H = Math.round(h * s);
+      const c = document.createElement('canvas'); c.width = W; c.height = H; c.getContext('2d').drawImage(bmp, 0, 0, W, H);
+      blob = await canvasBlob(c, 'image/webp', 0.92); if (!blob || blob.type !== 'image/webp') blob = await canvasBlob(c, 'image/jpeg', 0.9);
+      free(c);
+      if (!blob) throw new Error('Il browser non è riuscito a elaborare l\'immagine: ricarica la pagina e riprova.');
+    }
+    const ts = 360 / Math.max(W, 1), tc = document.createElement('canvas'); tc.width = Math.min(360, W); tc.height = Math.max(1, Math.round(H * Math.min(1, ts)));
+    tc.getContext('2d').drawImage(bmp, 0, 0, tc.width, tc.height);
+    const thumb = tc.toDataURL('image/jpeg', 0.7); free(tc);
+    return { blob, w: W, h: H, thumb, shrunk: !keep };
+  } finally { if (bmp.close) bmp.close(); else if (bmp.src) URL.revokeObjectURL(bmp.src); }
 }
 
 /* ---------- lettura .docx (zip + deflate nativo, offline) ---------- */
@@ -1727,12 +1756,12 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
     ${toc.length > 2 ? `<nav class="toc" aria-label="Sezioni della scheda">${toc.map(([t, k]) => `<button type="button" data-act="goto" data-to="${k}">${esc(t)}</button>`).join('')}</nav>` : ''}
     <div class="card">${b.sections.length ? b.sections.map((s, i) => entrySecHtml(s, i)).join('') : `<p class="empty">${window.__RO ? 'Nessuna informazione su questa scheda, per ora.' : 'Nessun contenuto ancora. Verrà riempita dalle importazioni, oppure aggiungi una sezione a mano.'}</p>`}</div>
     ${photos.length || !window.__RO ? `<div class="card" id="sec-foto"><div class="spread"><h2>Foto${photos.length ? ` <small>(${photos.length})</small>` : ''}</h2><button class="btn sm" data-act="addphotos">+ Aggiungi foto</button></div>
-      ${photos.length ? `<div class="gallery big">${photos.map((ph, i) => `<div class="gph"><img src="${ph.thumb}" data-act="viewphoto" data-i="${i}" alt="${esc(ph.name ? ph.name.replace(/\.[a-z0-9]+$/i, '') : 'Foto di ' + e.name)}" title="Ingrandisci">${window.__RO ? '' : `<button class="x" data-act="delphoto" data-i="${i}" title="Rimuovi foto">✕</button>`}</div>`).join('')}</div>` : ''}
+      ${photos.length ? `<div class="gallery big">${photos.map((ph, i) => `<div class="gph">${phImg(ph, `data-act="viewphoto" data-i="${i}" alt="${esc(ph.name ? ph.name.replace(/\.[a-z0-9]+$/i, '') : 'Foto di ' + e.name)}" title="Ingrandisci"`)}${window.__RO ? '' : `<button class="x" data-act="delphoto" data-i="${i}" title="Rimuovi foto">✕</button>`}</div>`).join('')}</div>` : ''}
       ${window.__RO ? '' : `<p class="hint">${photos.length ? '' : 'Nessuna foto, per ora. '}<span class="dz">Trascina qui una o più immagini dal computer, oppure usa «+ Aggiungi foto».</span></p>`}</div>` : ''}
     <div class="grid2"><div class="card" id="sec-rel"><div class="spread"><h2>Collegamenti</h2><button class="btn sm" data-act="addRel">+ Collega</button></div>
       ${outL.length || inL.length ? relCards(outL, inL) : '<p class="hint">Nessun collegamento.</p>'}</div>
       <div class="card"><h2>Apparizioni</h2>${sessChips(e.sessions)}
-      ${mapsOf.length ? `<h2 style="margin-top:14px">Sulle mappe</h2><div class="chips">${mapsOf.map(({ p, m }) => `<a class="chip" href="#/mappe/${encodeURIComponent(m.id)}?pin=${encodeURIComponent(p.id)}">${esc(m.name)}</a>`).join('')}</div>${mapsOf.some(x => x.p.photos?.length) ? `<div class="gallery" style="margin-top:10px">${mapsOf.flatMap(({ p, m }) => (p.photos || []).map(ph => `<a class="gph" href="#/mappe/${encodeURIComponent(m.id)}?pin=${encodeURIComponent(p.id)}" title="Vedi sulla mappa «${esc(m.name)}»"><img src="${ph.thumb}" alt="${esc(ph.name ? ph.name.replace(/\.[a-z0-9]+$/i, '') : 'Foto di ' + e.name)}"></a>`)).join('')}</div>` : ''}` : ''}
+      ${mapsOf.length ? `<h2 style="margin-top:14px">Sulle mappe</h2><div class="chips">${mapsOf.map(({ p, m }) => `<a class="chip" href="#/mappe/${encodeURIComponent(m.id)}?pin=${encodeURIComponent(p.id)}">${esc(m.name)}</a>`).join('')}</div>${mapsOf.some(x => x.p.photos?.length) ? `<div class="gallery" style="margin-top:10px">${mapsOf.flatMap(({ p, m }) => (p.photos || []).map(ph => `<a class="gph" href="#/mappe/${encodeURIComponent(m.id)}?pin=${encodeURIComponent(p.id)}" title="Vedi sulla mappa «${esc(m.name)}»">${phImg(ph, `alt="${esc(ph.name ? ph.name.replace(/\.[a-z0-9]+$/i, '') : 'Foto di ' + e.name)}"`)}</a>`)).join('')}</div>` : ''}` : ''}
       <div style="margin-top:14px"><label class="chk"><input type="checkbox" data-act="toggleDisc" ${e.discovered === false ? 'checked' : ''}> 🔒 Solo per DM (scheda nascosta ai giocatori)</label>
       ${window.__RO ? '' : `<fieldset class="visf"${e.discovered === false ? ' disabled' : ''}><legend>Mostra a:</legend><div class="visrow">${PLAYERS().map(([pid, pn]) => `<label><input type="checkbox" data-act="visEnt" value="${esc(pid)}" ${!Array.isArray(e.vis) || e.vis.includes(pid) ? 'checked' : ''}> ${esc(pn)}</label>`).join('')}</div></fieldset>`}</div></div></div>
     ${evs.length ? `<div class="card" id="sec-ev"><h2>Eventi</h2>${(() => { const ev = v => `<div class="entry"><div class="tag">${sessLink(v.n)}</div><div class="tx"><b>${esc(v.title)}</b>${prose(v.text)}</div></div>`, K = 5; return evs.length > K + 1 ? `<details class="older"><summary class="more">Mostra i ${evs.length - K} eventi precedenti</summary>${evs.slice(0, -K).map(ev).join('')}</details>${evs.slice(-K).map(ev).join('')}` : evs.map(ev).join(''); })()}</div>` : ''}`);
@@ -1749,7 +1778,7 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
   };
   const addEntPhotos = async files => {
     const ph = await prepPhotos(files, 'entimg-'); photoReport(ph); if (!ph.metas.length) return;
-    await runBatch(['entities', 'blobs'], '', async t => { for (const x of ph.blobs) await t.put('blobs', x); await t.put('entities', { ...e, photos: [...photos, ...ph.metas], upd: Date.now() }); });
+    await runBatch(['entities', 'blobs'], '', async t => { for (const x of ph.blobs) await t.put('blobs', x); await t.put('entities', { ...e, photos: [...await slimPhotos(photos, t), ...ph.metas], upd: Date.now() }); });
     toast(ph.metas.length === 1 ? 'Foto aggiunta' : ph.metas.length + ' foto aggiunte'); rerender();
   };
   // DM: immagini trascinate sulla scheda. Sull'intestazione diventano il ritratto, altrove si aggiungono alle foto
@@ -1779,7 +1808,7 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
     viewphoto: a => showPhotos(e.name, photos, +a.dataset.i),
     delphoto: async a => {
       const gone = photos[+a.dataset.i]; if (!gone || !await ask('Rimuovere questa foto dalla scheda?', { danger: true, ok: 'Rimuovi' })) return;
-      await runBatch(['entities', 'blobs'], '', async t => { await t.del('blobs', gone.id); await t.put('entities', { ...e, photos: photos.filter(x => x.id !== gone.id), upd: Date.now() }); }); rerender();
+      await runBatch(['entities', 'blobs'], '', async t => { for (const x of phIds(gone)) await t.del('blobs', x); await t.put('entities', { ...e, photos: await slimPhotos(photos.filter(x => x.id !== gone.id), t), upd: Date.now() }); }); rerender();
     },
     visEnt: async a => { const all = [...a.closest('.visrow').querySelectorAll('input')], on = all.filter(x => x.checked).map(x => x.value); await runBatch(['entities'], '', async t => t.put('entities', setVis({ ...e, upd: Date.now() }, on.length === all.length ? null : on))); rerender(); },
     toggleDisc: async a => { await runBatch(['entities'], '', async t => t.put('entities', { ...e, discovered: !a.checked, upd: Date.now() })); rerender(); },
@@ -1810,9 +1839,9 @@ async function deleteEntity(id) {
   const photos = S.ents.get(id)?.photos || [];
   await runBatch(['entities', 'bodies', 'links', 'events', 'pins', 'blobs'], '', async t => {
     await t.del('entities', id); await t.del('bodies', id); await t.del('blobs', 'portrait-' + id);
-    for (const ph of photos) await t.del('blobs', ph.id);
+    for (const ph of photos) for (const x of phIds(ph)) await t.del('blobs', x);
     for (const l of [...outL, ...inL]) await t.del('links', l.k);
-    for (const p of pins) { await t.del('pins', p.id); for (const ph of p.photos || []) await t.del('blobs', ph.id); }
+    for (const p of pins) { await t.del('pins', p.id); for (const ph of p.photos || []) for (const x of phIds(ph)) await t.del('blobs', x); }
     for (const v of evs) await t.put('events', { ...v, ents: v.ents.filter(x => x !== id) });
   });
 }
@@ -1999,7 +2028,7 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
       const e = entOf(sel), tm = sel.targetMapId ? mapById(sel.targetMapId) : null;
       h += `<div class="spread"><h2>${esc(pname(sel))}</h2><button class="icb" data-act="desel" title="Chiudi">✕</button></div>${e && !st.players ? badge(e.type) : ''} ${!visible(sel) ? '<span class="pill warn">non scoperto</span>' : ''}
         ${e && !st.players ? `${e.brief ? `<p><i>${inl(e.brief)}</i></p>` : ''}${e.status ? `<p class="hint">Stato: ${esc(e.status)}</p>` : ''}` : ''}
-        ${sel.photos?.length ? `<div class="gallery">${sel.photos.map((ph, i) => `<div class="gph"><img src="${ph.thumb}" data-act="viewphoto" data-i="${i}" alt="${esc(ph.name || '')}" title="Ingrandisci">${st.edit && !st.players ? `<button class="x" data-act="delphoto" data-i="${i}" title="Rimuovi foto">✕</button>` : ''}</div>`).join('')}</div>` : ''}
+        ${sel.photos?.length ? `<div class="gallery">${sel.photos.map((ph, i) => `<div class="gph">${phImg(ph, `data-act="viewphoto" data-i="${i}" alt="${esc(ph.name || '')}" title="Ingrandisci"`)}${st.edit && !st.players ? `<button class="x" data-act="delphoto" data-i="${i}" title="Rimuovi foto">✕</button>` : ''}</div>`).join('')}</div>` : ''}
         ${st.edit && !st.players ? '<button class="btn sm" data-act="addphotos" style="margin-top:6px">+ Aggiungi foto</button>' : ''}
         <div class="row" style="margin:10px 0">${e && !st.players ? `<a class="btn sm" href="#/scheda/${encodeURIComponent(e.id)}">Apri scheda</a>` : ''}${tm && (!st.players || tm.discovered !== false) ? `<a class="btn sm primary" href="#/mappe/${encodeURIComponent(tm.id)}">Apri «${esc(tm.name)}»</a>` : ''}</div>
         ${st.edit && !st.players ? `<div class="row"><button class="btn sm" data-act="editpin">Modifica segnaposto</button><button class="btn sm danger" data-act="delpin">Elimina</button></div><p class="hint">Trascina il segnaposto sulla mappa per spostarlo.</p>` : ''}<div class="orn"></div>`;
@@ -2047,7 +2076,7 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
   };
 
   /* ----- salvataggio segnaposto ----- */
-  const savePin = async (p, newBlobs = [], delIds = []) => { await runBatch(['pins', 'blobs'], '', async t => { for (const b of newBlobs) await t.put('blobs', b); for (const d of delIds) await t.del('blobs', d); await t.put('pins', p); }, { reload: false }); };
+  const savePin = async (p, newBlobs = [], delIds = []) => { await runBatch(['pins', 'blobs'], '', async t => { for (const b of newBlobs) await t.put('blobs', b); for (const d of delIds) await t.del('blobs', d); p.photos = await slimPhotos(p.photos || [], t); await t.put('pins', p); }, { reload: false }); };
   const addPhotos = async (p, files) => {
     const ph = await prepPhotos(files, 'pinimg-'); photoReport(ph); if (!ph.metas.length) return; const np = { ...p, photos: [...(p.photos || []), ...ph.metas] }; await savePin(np, ph.blobs); pins = pins.map(x => x.id === p.id ? np : x); if (st.sel === p.id) renderSide(); else selectPin(p.id); toast(ph.metas.length + ' foto aggiunte');
   };
@@ -2165,9 +2194,9 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
       const p = pins.find(x => x.id === st.sel); const r = await formDlg({ title: `Aggiungi foto a «${pname(p)}»`, ok: 'Aggiungi', fields: [{ k: 'photos', label: 'Foto (puoi sceglierne più di una)', type: 'file', accept: 'image/*', multiple: true, req: true }] }); if (!r) return;
       await addPhotos(p, r.photos);
     },
-    delphoto: async a => { const p = pins.find(x => x.id === st.sel), i = +a.dataset.i; if (!await ask('Rimuovere questa foto?', { danger: true, ok: 'Rimuovi' })) return; const gone = p.photos[i]; const np = { ...p, photos: p.photos.filter((_, k) => k !== i) }; await savePin(np, [], [gone.id]); pins = pins.map(x => x.id === p.id ? np : x); renderSide(); },
+    delphoto: async a => { const p = pins.find(x => x.id === st.sel), i = +a.dataset.i; if (!await ask('Rimuovere questa foto?', { danger: true, ok: 'Rimuovi' })) return; const gone = p.photos[i]; const np = { ...p, photos: p.photos.filter((_, k) => k !== i) }; await savePin(np, [], phIds(gone)); pins = pins.map(x => x.id === p.id ? np : x); renderSide(); },
     viewphoto: a => { const p = pins.find(x => x.id === st.sel); showPhotos(pname(p), p.photos || [], +a.dataset.i); },
-    delpin: async () => { const p = pins.find(x => x.id === st.sel); if (!await ask(`Eliminare il segnaposto «${pname(p)}»? (la scheda resta)`, { danger: true, ok: 'Elimina' })) return; await runBatch(['pins', 'blobs'], '', async t => { await t.del('pins', p.id); for (const ph of p.photos || []) await t.del('blobs', ph.id); }, { reload: false }); pins = pins.filter(x => x.id !== p.id); selectPin(null); },
+    delpin: async () => { const p = pins.find(x => x.id === st.sel); if (!await ask(`Eliminare il segnaposto «${pname(p)}»? (la scheda resta)`, { danger: true, ok: 'Elimina' })) return; await runBatch(['pins', 'blobs'], '', async t => { await t.del('pins', p.id); for (const ph of p.photos || []) for (const x of phIds(ph)) await t.del('blobs', x); }, { reload: false }); pins = pins.filter(x => x.id !== p.id); selectPin(null); },
     editmap: async () => {
       const r = await formDlg({ title: 'Modifica mappa', fields: [{ k: 'name', label: 'Nome', value: m.name, req: true }, { k: 'desc', label: 'Descrizione', type: 'textarea', rows: 4, value: m.desc }, { k: 'parent', label: 'Mappa madre', type: 'select', value: m.parent || '', options: [['', '— nessuna —'], ...S.maps.filter(x => x.id !== m.id).map(x => [x.id, x.name])] }, { k: 'disc', label: 'Scoperta dai giocatori', type: 'check', value: m.discovered !== false }] });
       if (!r) return; await runBatch(['maps'], '', async t => t.put('maps', { ...m, name: r.name.trim(), desc: r.desc.trim(), parent: r.parent || null, discovered: r.disc })); rerender();
@@ -2181,7 +2210,7 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
     delmap: async () => {
       if (!await ask(`Eliminare la mappa **${m.name}** con i suoi ${pins.length} segnaposto? Le schede restano.`, { danger: true, ok: 'Elimina' })) return;
       const all = await dbAll('pins');
-      await runBatch(['maps', 'blobs', 'pins'], '', async t => { await t.del('maps', id); await t.del('blobs', id); for (const p of all) { if (p.mapId === id) { await t.del('pins', p.id); for (const ph of p.photos || []) await t.del('blobs', ph.id); } else if (p.targetMapId === id) await t.put('pins', { ...p, targetMapId: null }); } for (const c of S.maps.filter(x => x.parent === id)) await t.put('maps', { ...c, parent: m.parent || null }); });
+      await runBatch(['maps', 'blobs', 'pins'], '', async t => { await t.del('maps', id); await t.del('blobs', id); for (const p of all) { if (p.mapId === id) { await t.del('pins', p.id); for (const ph of p.photos || []) for (const x of phIds(ph)) await t.del('blobs', x); } else if (p.targetMapId === id) await t.put('pins', { ...p, targetMapId: null }); } for (const c of S.maps.filter(x => x.parent === id)) await t.put('maps', { ...c, parent: m.parent || null }); });
       location.hash = '#/mappe';
     }
   });

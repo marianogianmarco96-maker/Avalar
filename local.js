@@ -419,7 +419,7 @@
   function summary() {
     const ids = {}; for (const k of PEND) { const j = k.indexOf('/'); (ids[k.slice(0, j)] = ids[k.slice(0, j)] || new Set()).add(k.slice(j + 1)); }
     const out = [];
-    for (const [cs, one, many] of GROUPS) { const u = new Set(); for (const c of cs) for (const id of ids[c] || []) u.add(id.replace(/^portrait-/, '')); if (u.size) out.push(u.size + ' ' + (u.size === 1 ? one : many)); }
+    for (const [cs, one, many] of GROUPS) { const u = new Set(); for (const c of cs) for (const id of ids[c] || []) if (!/-t$/.test(id)) u.add(id.replace(/^portrait-/, '')) /* le miniature non contano come immagini a parte */; if (u.size) out.push(u.size + ' ' + (u.size === 1 ? one : many)); }
     const other = Object.keys(ids).filter(c => !GROUPS.some(g => g[0].includes(c))); if (other.length) out.push('altro');
     if (!out.length && PFILES.size) out.push(PFILES.size + (PFILES.size === 1 ? ' immagine' : ' immagini'));
     if (NOTES.length) out.push(NOTES.length + (NOTES.length === 1 ? ' nota' : ' note'));
@@ -585,8 +585,8 @@ html.review #view :is(p,li,h1,h2,h3,h4,h5,dd,dt,td,th,figcaption,blockquote):hov
   async function shrink(file) {
     try {
       const bm = await createImageBitmap(file), k = Math.min(1, 1600 / Math.max(bm.width, bm.height));
-      const c = document.createElement('canvas'); c.width = Math.round(bm.width * k); c.height = Math.round(bm.height * k); c.getContext('2d').drawImage(bm, 0, 0, c.width, c.height);
-      return (await new Promise(r => c.toBlob(r, 'image/jpeg', .82))) || file;
+      const c = document.createElement('canvas'); c.width = Math.round(bm.width * k); c.height = Math.round(bm.height * k); c.getContext('2d').drawImage(bm, 0, 0, c.width, c.height); bm.close();
+      const b = await new Promise(r => c.toBlob(r, 'image/jpeg', .82)); c.width = c.height = 0; return b || file;
     } catch { return file; }
   }
   function bugDlg() {

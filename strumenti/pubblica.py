@@ -92,8 +92,8 @@ def copia(d, chi=None):
                                        for s in b['sections'] if not s.get('dm') and vede(s) and not SEZIONE_DM.search(s['title'])]}
     mappe = {k: m for k, m in S['maps'].items() if m.get('discovered') is not False}
     pins = {k: p for k, p in S['pins'].items() if p.get('discovered') is not False and p.get('entityId', None) not in nascoste and p['mapId'] in mappe}
-    usati = {'portrait-' + k for k, e in E.items() if e.get('portrait')} | {ph['id'] for e in E.values() for ph in e.get('photos', [])} \
-        | set(mappe) | {ph['id'] for p in pins.values() for ph in p.get('photos', [])}
+    usati = {'portrait-' + k for k, e in E.items() if e.get('portrait')} | {x for e in E.values() for ph in e.get('photos', []) for x in (ph['id'], ph.get('tid')) if x} \
+        | set(mappe) | {x for p in pins.values() for ph in p.get('photos', []) for x in (ph['id'], ph.get('tid')) if x}
     chiavi = d.get('blobkeys', {})
     leggibile = lambda aid: d['blobmap'].get(aid, 'priv/').startswith('blobs/') or (chi and aid in chiavi)
     blobs = {k: b for k, b in S['blobs'].items() if k in usati and leggibile(b['aid'])}
