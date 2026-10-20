@@ -1,4 +1,4 @@
-const VERSION = '1792478700';
+const VERSION = '1792477622';
 const CORE = ['./', 'index.html', 'local.js', 'idee.js', 'manuali.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'data.json', 'data.enc'];
 const CACHE = 'campagna-' + VERSION, FONTS = 'campagna-fonts';
 self.addEventListener('install', e => {
