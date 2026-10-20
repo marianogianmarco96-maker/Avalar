@@ -245,8 +245,6 @@ dialog.dlg menu{display:flex;justify-content:flex-end;gap:8px;padding:0;margin:1
 .mapview{display:grid;grid-template-columns:1fr 330px;height:calc(100vh - 58px);height:calc(100dvh - 58px)}
 .mapmain{display:flex;flex-direction:column;min-width:0;min-height:0}
 .maptools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:8px 12px;background:var(--paper2);border-bottom:1px solid var(--line2)}
-.maptools .crumb{font-family:var(--display);font-size:.8rem;letter-spacing:.05em;margin-right:auto}
-.maptools .crumb span{color:var(--mute)}
 .stage{position:relative;flex:1;overflow:hidden;background:#1b1511;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
 .stage.panning{cursor:grabbing}
 .stage.adding{cursor:crosshair}
@@ -585,6 +583,73 @@ details.older[open]>summary{display:none}
 @media (max-width:900px){
   .mapview{height:auto}
   .mapside{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+}
+/* ---------- navigazione tra le mappe ---------- */
+.mapnav{display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--paper);border-bottom:1px solid var(--line2);min-width:0;position:relative;z-index:20}
+.mth{flex:none;display:inline-block;width:26px;height:20px;border-radius:3px;border:1px solid var(--line2);background:#2a2018 center/cover no-repeat;vertical-align:middle}
+.mn-path{display:flex;align-items:center;gap:6px;min-width:0;flex:1;overflow-x:auto;scrollbar-width:none;font-family:var(--display);font-size:.84rem;letter-spacing:.04em;white-space:nowrap}
+.mn-path::-webkit-scrollbar{display:none}
+.mn-path a,.mn-path b{display:inline-flex;align-items:center;gap:7px;padding:3px 10px 3px 4px;border-radius:16px;text-decoration:none!important}
+.mn-path a{color:var(--ink2)}.mn-path a:hover{background:var(--paper2);color:var(--wine)}
+.mn-path b{background:var(--wine);color:#fbeccb;font-weight:600}.mn-path b .mth{border-color:#e9cf9a88}
+.mn-path .sep{color:var(--gold);font-size:1rem}
+.mn-back{display:none}
+.mn-tree{position:relative;flex:none}
+.mn-all{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);background:var(--paper2);color:var(--ink);border-radius:16px;padding:4px 12px;font:inherit;font-size:.86rem;cursor:pointer}
+.mn-all:hover,.mn-all[aria-expanded=true]{border-color:var(--gold)}
+.mn-all svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
+.mt-pop{position:absolute;right:0;top:calc(100% + 6px);width:min(340px,calc(100vw - 24px));max-height:min(70vh,520px);overflow:auto;background:var(--paper);border:1px solid var(--line2);border-radius:6px;box-shadow:0 10px 30px #0004;padding:10px 8px;animation:mtin .15s ease-out}
+.mt-pop h4{margin:2px 8px 8px}
+@keyframes mtin{from{opacity:0;transform:translateY(-4px)}}
+.mt-row{display:flex;align-items:center;gap:9px;padding:6px 8px 6px calc(8px + var(--d) * 22px);border-radius:4px;color:var(--ink);text-decoration:none!important;position:relative}
+.mt-row:hover{background:var(--paper2)}
+.mt-row.cur{background:var(--paper2);box-shadow:inset 3px 0 0 var(--wine2)}
+.mt-row .mth{width:44px;height:32px}
+.mt-row .mt-n{flex:1;min-width:0;font-family:var(--display);font-size:.88rem;letter-spacing:.03em}
+.mt-row small{color:var(--mute);font-size:.76rem;white-space:nowrap}
+.mt-row .mt-here{color:var(--wine2);font-weight:600}
+.mt-br{position:absolute;left:calc(var(--d) * 22px - 6px);top:0;bottom:50%;width:9px;border-left:1.5px solid var(--gold);border-bottom:1.5px solid var(--gold);border-bottom-left-radius:5px;opacity:.7}
+.mlinks{display:grid;gap:8px;margin-bottom:6px}
+.mlink{display:flex;align-items:center;gap:10px;padding:6px;border:1px solid var(--line2);border-radius:6px;background:var(--paper2);color:var(--ink);text-decoration:none!important;transition:border-color .15s,transform .15s}
+.mlink:hover{border-color:var(--gold);transform:translateX(2px)}
+.mlink .ml-im{flex:none;width:74px;height:52px;border-radius:4px;background:#2a2018 center/cover no-repeat}
+.mlink .ml-tx{flex:1;min-width:0;display:flex;flex-direction:column}
+.mlink small{color:var(--mute);font-size:.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mlink b{font-family:var(--display);font-size:.92rem;color:var(--wine);letter-spacing:.03em}
+:root[data-theme=dark] .mlink b{color:var(--gold2)}
+.mlink .ml-go{flex:none;font-size:.8rem;color:var(--wine2);padding-right:4px}
+.mlink.up{background:transparent;border-style:dashed}.mlink.up .ml-im{width:52px;height:38px;opacity:.85}
+.mportal{display:block;margin:8px 0 12px;border:1px solid var(--gold);border-radius:6px;overflow:hidden;background:var(--paper2);color:var(--ink);text-decoration:none!important;box-shadow:0 2px 8px #0002}
+.mportal .mp-im{display:block;height:120px;background:#2a2018 center/cover no-repeat;transition:transform .3s}
+.mportal:hover .mp-im{transform:scale(1.04)}
+.mportal .mp-tx{display:flex;flex-direction:column;gap:2px;padding:9px 12px 12px;position:relative;background:var(--paper2)}
+.mportal small{color:var(--mute);font-size:.75rem;font-variant:small-caps;letter-spacing:.06em}
+.mportal b{font-family:var(--display);color:var(--wine);font-size:1rem}
+:root[data-theme=dark] .mportal b{color:var(--gold2)}
+.mportal .btn{align-self:flex-start;margin-top:6px}
+.mgo{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);display:flex;align-items:center;gap:9px;max-width:calc(100% - 24px);padding:6px 16px 6px 6px;border-radius:24px;background:var(--wine);color:#fbeccb;border:1px solid #e9cf9a88;box-shadow:0 6px 18px #0007;text-decoration:none!important;font-size:.95rem;white-space:nowrap;z-index:8;animation:mgoin .25s ease-out}
+.mgo[hidden]{display:none}
+.mgo .mth{width:34px;height:26px;border-radius:14px;border-color:#e9cf9a88}
+.mgo span:not(.arr){overflow:hidden;text-overflow:ellipsis}.mgo b{font-family:var(--display);letter-spacing:.03em}
+.mgo .arr{font-size:1.3rem;line-height:1;color:var(--gold2)}
+.mgo:hover{background:var(--wine2)}
+@keyframes mgoin{from{opacity:0;transform:translate(-50%,8px)}}
+.pin.via{z-index:7;transform:translate(-50%,-100%) scale(calc(var(--inv,1) * 1.3));filter:drop-shadow(0 0 7px #ffd76a) drop-shadow(0 0 2px #ffd76a);animation:pvia 1s ease-in-out infinite alternate}
+@keyframes pvia{to{filter:drop-shadow(0 0 2px #ffd76a) drop-shadow(0 2px 2px #0008)}}
+.zwrap{position:absolute;inset:0}
+.mz-in .zwrap{animation:mzin .45s cubic-bezier(.2,.7,.3,1)}
+.mz-out .zwrap{animation:mzout .45s cubic-bezier(.2,.7,.3,1)}
+.mz-fade .zwrap{animation:mzfade .3s ease-out}
+@keyframes mzin{from{opacity:0;transform:scale(.82)}}
+@keyframes mzout{from{opacity:0;transform:scale(1.18)}}
+@keyframes mzfade{from{opacity:0}}
+@media (max-width:900px){
+  .mapnav{gap:8px;padding:6px 10px}
+  .mn-back{display:inline-flex;align-items:center;flex:none;height:32px;min-width:32px;justify-content:center;border:1px solid var(--line2);border-radius:16px;background:var(--paper2);color:var(--ink);font-size:1.3rem;line-height:1;text-decoration:none!important;padding:0 8px}
+  .mn-back span{display:none}
+  .mn-path a,.mn-path .sep{display:none}
+  .mn-path b{overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .mn-all span{display:none}.mn-all{padding:6px 10px}
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 
@@ -930,7 +995,7 @@ async function navigate() {
 }
 function setTitle(path) {
   const base = 'Campagna D&D', camp = getMeta('campaign', null)?.name;
-  const h = path === '/' ? '' : ($('#view h1')?.textContent || $('#view .crumb b')?.textContent || '').trim();
+  const h = path === '/' ? '' : ($('#view h1')?.textContent || $('#view .mn-cur')?.textContent || '').trim();
   document.title = h ? `${h} · ${base}` : camp ? `${base} · ${camp}` : base;
 }
 function markNav(path) {
@@ -1916,6 +1981,11 @@ route(/^\/cerca$/, async (_, q) => {
    ===================================================================== */
 const mapById = id => S.maps.find(m => m.id === id);
 const mapPath = m => { const p = []; let c = m, g = 0; while (c && g++ < 20) { p.unshift(c); c = c.parent ? mapById(c.parent) : null; } return p; };
+/* navigazione tra le mappe: percorso in alto, elenco a albero, mappe collegate nel pannello */
+const mapKids = (id, pl) => S.maps.filter(c => (c.parent || null) === id && (!(pl || window.__RO) || c.discovered !== false));
+const mapThumb = (x, cls = 'mth') => `<i class="${cls}" style="background-image:url('${x.thumb || ''}')"></i>`;
+const mapTree = cur => { const walk = (pid, d) => mapKids(pid).map(x => { const k = mapKids(x.id).length; return `<a class="mt-row ${x.id === cur.id ? 'cur' : ''}" style="--d:${d}" href="#/mappe/${encodeURIComponent(x.id)}">${d ? '<span class="mt-br"></span>' : ''}${mapThumb(x)}<span class="mt-n">${esc(x.name)}${x.discovered === false ? ' <small>non scoperta</small>' : ''}</span>${x.id === cur.id ? '<small class="mt-here">sei qui</small>' : k ? `<small>${k} ${k === 1 ? 'dettaglio' : 'dettagli'}</small>` : ''}</a>` + walk(x.id, d + 1); }).join(''); return walk(null, 0); };
+let lastMap = null; // da quale mappa arrivo, per l'animazione (entro in un dettaglio o torno su)
 const PIN_PATH = 'M14 35C14 35 2 21 2 13a12 12 0 0 1 24 0c0 8-12 22-12 22z';
 
 async function uploadMapDlg(pre = {}) {
@@ -1954,17 +2024,25 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
   let pins = pins0; let regs = [...M.regions.values()].filter(r => r.mapId === id); const url = rec ? URL.createObjectURL(rec.blob) : null; onCleanup(() => url && URL.revokeObjectURL(url));
   const st = { k: 1, x: 0, y: 0, players: false, edit: false, add: false, sel: q.get('pin') || null, reg: q.get('reg') || null, regs: pref('mapRegs', true), draw: null, vedit: false, labels: pref('mapLabels', true) };
   const lock = m.locked === true;
-  const crumb = mapPath(m).map((x, i, a) => i === a.length - 1 ? `<b>${esc(x.name)}</b>` : `<a href="#/mappe/${encodeURIComponent(x.id)}">${esc(x.name)}</a>`).join(' <span>›</span> ');
-  setView(`<div class="mapview" id="mv"><div class="mapmain"><div class="maptools"><span class="crumb"><a href="#/mappe">Mappe</a> <span>›</span> ${crumb}</span>
+  const path = mapPath(m), par = path.length > 1 ? path[path.length - 2] : null;
+  const crumb = path.map((x, i, a) => i === a.length - 1 ? `<b class="mn-cur">${mapThumb(x)}${esc(x.name)}</b>` : `<a href="#/mappe/${encodeURIComponent(x.id)}">${mapThumb(x)}${esc(x.name)}</a><span class="sep">›</span>`).join('');
+  const came = lastMap && Date.now() - lastMap.t < 2500 ? mapById(lastMap.id) : null, zdir = came ? (came.parent === m.id ? 'out' : m.parent === came.id ? 'in' : 'fade') : '';
+  onCleanup(() => { lastMap = { id: m.id, t: Date.now() }; });
+  setView(`<div class="mapview" id="mv"><div class="mapmain"><div class="mapnav">${par ? `<a class="mn-back" href="#/mappe/${encodeURIComponent(par.id)}" title="Torna a «${esc(par.name)}»">‹<span> ${esc(par.name)}</span></a>` : ''}<nav class="mn-path">${crumb}</nav>
+      <div class="mn-tree"><button class="mn-all" data-act="mtree" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg><span>Tutte le mappe</span> ▾</button><div class="mt-pop" id="mtpop" hidden><h4>Mappe della campagna</h4>${mapTree(m)}</div></div></div>
+    <div class="maptools">
       <button class="btn sm" data-act="zout" title="Riduci">−</button><button class="btn sm" data-act="zin" title="Ingrandisci">+</button><button class="btn sm" data-act="fit">Adatta</button>
       <button class="btn sm" data-act="labels" id="b-lab">Nomi</button><button class="btn sm" data-act="regs" id="b-reg">Regioni</button>
       <span class="seg" id="seg"><button data-act="vdm" class="on">DM</button><button data-act="vpl">Giocatori</button></span>
       <button class="btn sm" data-act="edit" id="b-edit">Modifica</button><button class="btn sm primary" data-act="addpin" id="b-add" style="display:none">+ Segnaposto</button><button class="btn sm primary" data-act="addreg" id="b-addreg" style="display:none">+ Regione</button><span id="drawbar" style="display:none" class="row"><button class="btn sm primary" data-act="drawok">✓ Chiudi regione</button><button class="btn sm" data-act="drawundo">↶ Togli punto</button><button class="btn sm" data-act="drawcancel">Annulla</button></span>
       <button class="btn sm" data-act="fs" title="Schermo intero">⛶</button></div>
-    <div class="stage" id="stage"><div class="layer" id="layer" style="width:${MW}px;height:${MH}px">${url ? `<img src="${url}" width="${MW}" height="${MH}" alt="${esc(m.name)}" draggable="false">` : ''}<svg id="regsvg" viewBox="0 0 ${MW} ${MH}" preserveAspectRatio="none"></svg><div id="pinsbox" style="position:absolute;inset:0"></div></div>
-      ${url ? '' : `<div class="noimg"><div><p>L'immagine di questa mappa non è presente (forse hai ripristinato un backup «solo dati»).</p><button class="btn" data-act="reimg">Carica di nuovo l'immagine</button></div></div>`}<div class="hud" id="hud"></div></div></div>
+    <div class="stage${zdir ? ' mz-' + zdir : ''}" id="stage"><div class="zwrap"><div class="layer" id="layer" style="width:${MW}px;height:${MH}px">${url ? `<img src="${url}" width="${MW}" height="${MH}" alt="${esc(m.name)}" draggable="false">` : ''}<svg id="regsvg" viewBox="0 0 ${MW} ${MH}" preserveAspectRatio="none"></svg><div id="pinsbox" style="position:absolute;inset:0"></div></div></div>
+      ${url ? '' : `<div class="noimg"><div><p>L'immagine di questa mappa non è presente (forse hai ripristinato un backup «solo dati»).</p><button class="btn" data-act="reimg">Carica di nuovo l'immagine</button></div></div>`}<div class="hud" id="hud"></div><a class="mgo" id="mgo" hidden></a></div></div>
     <aside class="mapside" id="mside"></aside></div>`, 'raw');
   const stage = $('#stage'), layer = $('#layer'), box = $('#pinsbox'), mv = $('#mv');
+  // passando sopra una mappa collegata si illumina il segnaposto che la apre
+  $('#mside').addEventListener('mouseover', e => { const l = e.target.closest('.mlink[data-via]'); $$('.pin.via', box).forEach(x => x.classList.remove('via')); if (l) box.querySelector(`.pin[data-pin="${CSS.escape(l.dataset.via)}"]`)?.classList.add('via'); });
+  $('#mside').addEventListener('mouseleave', () => $$('.pin.via', box).forEach(x => x.classList.remove('via')));
   const entOf = p => p.entityId ? S.ents.get(p.entityId) : null;
   const visible = p => !(p.discovered === false || (entOf(p) && entOf(p).discovered === false));
   const pname = p => entOf(p)?.name || p.label || '(senza nome)';
@@ -2027,6 +2105,7 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
   const renderPins = () => { box.innerHTML = pins.map(pinHtml).join('') + vhHtml(); stage.classList.toggle('nolabels', !st.labels); declutter(); };
   function renderSide() {
     const sel = pins.find(p => p.id === st.sel && (!st.players || visible(p)));
+    { const tm = sel?.targetMapId ? mapById(sel.targetMapId) : null, go = $('#mgo'), ok = tm && (!st.players || tm.discovered !== false); go.hidden = !ok; if (ok) { go.href = '#/mappe/' + encodeURIComponent(tm.id); go.innerHTML = `${mapThumb(tm)}<span>Entra in <b>${esc(tm.name)}</b></span><span class="arr">›</span>`; } }
     const children = S.maps.filter(c => c.parent === m.id && (!st.players || c.discovered !== false));
     const vis = pins.filter(p => !st.players || visible(p)).sort((a, b) => pname(a).localeCompare(pname(b), 'it'));
     let h = '';
@@ -2036,7 +2115,8 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
         ${e && !st.players ? `${e.brief ? `<p><i>${inl(e.brief)}</i></p>` : ''}${e.status ? `<p class="hint">Stato: ${esc(e.status)}</p>` : ''}` : ''}
         ${sel.photos?.length ? `<div class="gallery">${sel.photos.map((ph, i) => `<div class="gph">${phImg(ph, `data-act="viewphoto" data-i="${i}" alt="${esc(ph.name || '')}" title="Ingrandisci"`)}${st.edit && !st.players ? `<button class="x" data-act="delphoto" data-i="${i}" title="Rimuovi foto">✕</button>` : ''}</div>`).join('')}</div>` : ''}
         ${st.edit && !st.players ? '<button class="btn sm" data-act="addphotos" style="margin-top:6px">+ Aggiungi foto</button>' : ''}
-        <div class="row" style="margin:10px 0">${e && !st.players ? `<a class="btn sm" href="#/scheda/${encodeURIComponent(e.id)}">Apri scheda</a>` : ''}${tm && (!st.players || tm.discovered !== false) ? `<a class="btn sm primary" href="#/mappe/${encodeURIComponent(tm.id)}">Apri «${esc(tm.name)}»</a>` : ''}</div>
+        <div class="row" style="margin:10px 0">${e && !st.players ? `<a class="btn sm" href="#/scheda/${encodeURIComponent(e.id)}">Apri scheda</a>` : ''}</div>
+        ${tm && (!st.players || tm.discovered !== false) ? `<a class="mportal" href="#/mappe/${encodeURIComponent(tm.id)}">${mapThumb(tm, 'mp-im')}<span class="mp-tx"><small>Mappa di dettaglio</small><b>${esc(tm.name)}</b><span class="btn sm primary">Entra nella mappa ›</span></span></a>` : ''}
         ${st.edit && !st.players ? `<div class="row"><button class="btn sm" data-act="editpin">Modifica segnaposto</button><button class="btn sm danger" data-act="delpin">Elimina</button></div><p class="hint">Trascina il segnaposto sulla mappa per spostarlo.</p>` : ''}<div class="orn"></div>`;
       if (!curReg()) { // segnaposto aperto: solo la regione in cui si trova, non l'elenco di tutta la mappa
         const home = homeRegs();
@@ -2066,7 +2146,8 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
     if (st.edit && !st.players) h += `<div class="row" style="margin:8px 0">${lock ? '' : '<button class="btn sm" data-act="editmap">Modifica mappa</button><button class="btn sm" data-act="reimg">Sostituisci immagine</button>'}<button class="btn sm" data-act="subup">+ Mappa di dettaglio</button>${lock ? '' : '<button class="btn sm danger" data-act="delmap">Elimina mappa</button>'}</div>${lock ? '<p class="lockhint">La mappa principale è protetta: puoi aggiungere segnalibri e regioni, non cambiarla.</p>' : ''}`;
     const vr = regs.filter(r => !st.players || regVisible(r)).sort((a, b) => regName(a).localeCompare(regName(b), 'it'));
     if (vr.length && st.regs) h += `<h4>Regioni <small>(${vr.length})</small></h4><div class="chips">${vr.map(r => `<a class="chip ${r.id === st.reg ? 'on' : ''}" data-act="selreg" data-id="${esc(r.id)}"><span class="dot" style="width:9px;height:9px;border-radius:50%;background:${esc(r.color || '#d4b06a')};display:inline-block"></span>${esc(regName(r))}</a>`).join('')}</div>`;
-    if (children.length) h += `<h4>Mappe di dettaglio</h4><div class="chips">${children.map(c => `<a class="chip" href="#/mappe/${encodeURIComponent(c.id)}">${esc(c.name)}</a>`).join('')}</div>`;
+    const up = m.parent ? mapById(m.parent) : null;
+    if (children.length || up) h += `<h4>Mappe collegate</h4><div class="mlinks">${children.map(c => { const via = pins.find(p => p.targetMapId === c.id); return `<a class="mlink" href="#/mappe/${encodeURIComponent(c.id)}" ${via ? `data-via="${esc(via.id)}"` : ''}>${mapThumb(c, 'ml-im')}<span class="ml-tx"><small>Dettaglio${via && pname(via) !== c.name ? ' · da «' + esc(pname(via)) + '»' : ''}</small><b>${esc(c.name)}</b></span><span class="ml-go">Entra ›</span></a>`; }).join('')}${up ? `<a class="mlink up" href="#/mappe/${encodeURIComponent(up.id)}">${mapThumb(up, 'ml-im')}<span class="ml-tx"><small>Fa parte di</small><b>${esc(up.name)}</b></span><span class="ml-go">‹ Torna</span></a>` : ''}</div>`;
     h += `<h4>Luoghi sulla mappa <small>(${vis.length})</small></h4>${vis.length ? vis.map(p => `<div class="pinrow ${st.sel === p.id ? 'sel' : ''}" data-act="selpin" data-id="${esc(p.id)}"><span class="dot" style="background:${entOf(p) ? TYPE_COLOR[entOf(p).type] : '#a7343b'}"></span>${esc(pname(p))}${visible(p) ? '' : '<small>nascosto</small>'}${p.targetMapId ? '<small>↳ mappa</small>' : ''}</div>`).join('') : '<p class="hint">Nessun segnaposto.</p>'}`;
     $('#mside').innerHTML = h;
   }
@@ -2194,6 +2275,7 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
     edit: () => { if (st.players) { st.players = false; } st.edit = !st.edit; st.add = false; refresh(); syncUI(); },
     addpin: () => { st.add = true; syncUI(); },
     fs: () => { if (document.fullscreenElement) document.exitFullscreen(); else mv.requestFullscreen?.().catch(() => toast('Schermo intero non disponibile', 'err')); },
+    mtree: a => { const pop = $('#mtpop'), open = pop.hidden; pop.hidden = !open; a.setAttribute('aria-expanded', open); if (open) { const off = e => { if (!e.target.closest('.mn-tree')) { pop.hidden = true; a.setAttribute('aria-expanded', false); document.removeEventListener('pointerdown', off); } }; setTimeout(() => document.addEventListener('pointerdown', off)); onCleanup(() => document.removeEventListener('pointerdown', off)); } },
     selpin: a => selectPin(a.dataset.id, true), desel: () => selectPin(null),
     editpin: () => pinDlg(pins.find(p => p.id === st.sel)),
     addphotos: async () => {
