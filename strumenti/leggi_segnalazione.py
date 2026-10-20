@@ -4,7 +4,7 @@ Il sito la cifra con la chiave del giocatore (quella della sua password); il DM 
 quindi con il codice del DM si apre data.enc, si prende la password del giocatore e si decifra il blocco.
 
 Uso:
-  python3 strumenti/leggi_segnalazione.py CODICE segnalazione.txt   # segnalazione.txt: testo della richiesta o file allegato
+  python3 strumenti/leggi_segnalazione.py CODICE segnalazione.txt   # testo della segnalazione (con i commenti «Parte N di M», in ordine) o file allegato
 
 Scrive «segnalazione-<giocatore>-<data>.md» (più le immagini) nella cartella del file, fuori dal repository.
 Le segnalazioni dei giocatori NON si applicano da sole: si valutano e si propone al DM cosa fare.
@@ -27,10 +27,12 @@ TIPI = {'bug': 'Bug', 'idea': 'Miglioria'}
 
 
 def leggi(codice, richiesta):
-    m = re.search(r'AVALAR-GIOCATORE-1 ([a-z0-9_-]+)\s*\n([A-Za-z0-9+/=\s]+?)\n\s*FINE', open(richiesta, encoding='utf-8').read())
+    # il blocco può continuare nei commenti della segnalazione («Parte 2 di 3», …): si tengono solo le righe in base64
+    m = re.search(r'AVALAR-GIOCATORE-1 ([a-z0-9_-]+)\s*\n(.*?)\n\s*FINE', open(richiesta, encoding='utf-8').read(), re.S)
     if not m:
         sys.exit('Nessun blocco AVALAR-GIOCATORE-1 nel file.')
-    gid, dati = m.group(1), base64.b64decode(re.sub(r'\s+', '', m.group(2)))
+    righe = (r.strip() for r in m.group(2).splitlines())
+    gid, dati = m.group(1), base64.b64decode(''.join(r for r in righe if re.fullmatch(r'[A-Za-z0-9+/=]+', r)))
     enc = json.load(open('data.enc'))
     d = json.loads(AESGCM(chiave(codice, enc)).decrypt(base64.b64decode(enc['iv']), base64.b64decode(enc['ct']), None))
     g = next((g for g in giocatori(d) if g['id'] == gid), None)

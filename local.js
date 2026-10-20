@@ -18,7 +18,7 @@
   const same = (a, b) => JSON.stringify(sortK(a)) === JSON.stringify(sortK(b));
   const ROERR = () => new Error('Sola lettura: accedi come Dungeon Master per modificare.');
 
-  let ROLE = null, DB = null, MEM = {}, BLOBMAP = {}, RAW = null, PLAYER = null, BLOBKEYS = {}, PRAW = null;
+  let ROLE = null, DB = null, MEM = {}, BLOBMAP = {}, RAW = null, PLAYER = null, BLOBKEYS = {}, PRAW = null, PTOKEN = null;
   // account dei giocatori, nell'ordine dei ritratti di login-gruppo.jpg
   const PLAYERS = [['livion', 'Livion'], ['mungus', 'Mungus'], ['sam', 'Sam'], ['violet', 'Violet']];
   // modifiche non ancora inviate: chiavi 'raccolta/id' dei documenti e id delle immagini caricate
@@ -66,7 +66,7 @@
     else { const k = ls.get('cdnd_pkey'); if (!k) throw new Error('nokey'); raw = b64d(k); }
     let d; try { d = await openEnc(enc, raw); } catch { throw new Error(code != null ? 'Password non corretta.' : 'nokey'); }
     MEM = {}; for (const [c, docs] of Object.entries(d.stores)) MEM[c] = new Map(Object.entries(docs));
-    BLOBMAP = d.blobmap || {}; BLOBKEYS = d.blobkeys || {}; PLAYER = d.player || { id, name: id }; ROLE = 'player'; PRAW = raw;
+    BLOBMAP = d.blobmap || {}; BLOBKEYS = d.blobkeys || {}; PLAYER = d.player || { id, name: id }; ROLE = 'player'; PRAW = raw; PTOKEN = d.segnalazioni || null;
     if (remember) { ls.set('cdnd_remember', 'player:' + id); ls.set('cdnd_pkey', b64e(raw)); }
   }
   async function seedAdmin(payload, raw) {
@@ -338,12 +338,21 @@
   /* ---------- amministratore: richiesta a Claude ---------- */
   const ASK_REPO = 'https://github.com/marianogianmarco96-maker/Avalar';
   // apre GitHub con una richiesta per Claude già compilata (solo per il DM)
-  window.__sendRequest = (title, body) => {
+  // la firma (cifrata con la chiave del DM) dimostra a Claude che la richiesta viene davvero dal DM:
+  // si controlla con strumenti/verifica_richiesta.py
+  async function firma(txt) {
+    const h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt.replace(/\r/g, '').trim()));
+    const iv = crypto.getRandomValues(new Uint8Array(12)), ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await aesKey(RAW), h));
+    const all = new Uint8Array(12 + ct.length); all.set(iv); all.set(ct, 12); return b64e(all);
+  }
+  window.__sendRequest = async (title, body) => {
     if (ROLE !== 'admin') return;
-    const page = (document.title || '').replace(/ · Campagna D&D.*$/, '');
+    const w = window.open('', '_blank'), page = (document.title || '').replace(/ · Campagna D&D.*$/, '');
     const t = '[Richiesta] ' + (title.length > 70 ? title.slice(0, 67) + '…' : title);
-    const txt = body.slice(0, 6000) + '\n\n---\nInviata dal sito, pagina: ' + page + ' (' + location.hash + ')';
-    window.open(ASK_REPO + '/issues/new?title=' + encodeURIComponent(t) + '&body=' + encodeURIComponent(txt), '_blank', 'noopener');
+    let txt = body.slice(0, 6000) + '\n\n---\nInviata dal sito, pagina: ' + page + ' (' + location.hash + ')';
+    txt += '\n\nFirma DM: ' + await firma(txt);
+    const url = ASK_REPO + '/issues/new?title=' + encodeURIComponent(t) + '&body=' + encodeURIComponent(txt);
+    if (w) { w.opener = null; w.location = url; } else window.open(url, '_blank', 'noopener');
   };
   function askClaude() {
     let d = document.getElementById('askdlg'); if (d) d.remove();
@@ -638,16 +647,29 @@ html.review #view :is(p,li,h1,h2,h3,h4,h5,dd,dt,td,th,figcaption,blockquote):hov
     const title = '[Giocatore] ' + PLAYER.name + ' ' + PKIND[kind][4];
     const intro = PLAYER.name + ' ' + PKIND[kind][4] + ' dal sito. Il testo è cifrato: lo leggono solo il DM e Claude.\n\n'
       + 'Per Claude: NON applicarla da solo. Leggila con `python3 strumenti/leggi_segnalazione.py CODICE file.txt`, valutala e proponi al DM cosa fare: si procede solo dopo il suo ok.\n\n';
+    if (PTOKEN) try { return { done: await apiIssue(title, intro, block) }; } catch { /* se GitHub rifiuta la chiave si passa al link qui sotto */ }
     const url = b => ASK_REPO + '/issues/new?title=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(b);
     const inl = url(intro + '```\n' + block + '\n```\n');
     if (inl.length < 7000) return { url: inl };
     return { url: url(intro + '**Il testo e le foto sono nel file «segnalazione-avalar.txt» che il sito ha appena scaricato: allegalo qui sotto (trascinalo in questo riquadro o tocca «Paste, drop, or click to add files») prima di premere «Create».**\n'), file: new Blob([block + '\n'], { type: 'text/plain' }) };
   }
+  /* con la chiave GitHub del DM (nei dati cifrati dei giocatori) la segnalazione si apre direttamente, senza account:
+     se è troppo lunga per una segnalazione, il blocco continua nei commenti («Parte 2 di 3», …) */
+  async function apiIssue(title, intro, block) {
+    const api = (path, body) => fetch(ASK_REPO.replace('https://github.com/', 'https://api.github.com/repos/') + path, { method: 'POST', headers: { Authorization: 'Bearer ' + PTOKEN, Accept: 'application/vnd.github+json' }, body: JSON.stringify(body) })
+      .then(r => { if (!r.ok) throw new Error('GitHub ' + r.status); return r.json(); });
+    const parts = [[]];
+    for (const l of block.split('\n')) { if (parts[parts.length - 1].join('\n').length > 60000) parts.push([]); parts[parts.length - 1].push(l); }
+    const n = parts.length, fence = (p, i) => (n > 1 ? 'Parte ' + (i + 1) + ' di ' + n + '\n' : '') + '```\n' + p.join('\n') + '\n```\n';
+    const issue = await api('/issues', { title, body: intro + fence(parts[0], 0) });
+    for (let i = 1; i < n; i++) await api('/issues/' + issue.number + '/comments', { body: fence(parts[i], i) });
+    return issue.number;
+  }
   function playerDlg(kind) {
     const [ic, tit, sub, ph] = PKIND[kind], photos = [];
     const d = dlg('pldlg', `<h3 style="${H3}">${ic} ${tit}</h3><p class="sd" style="margin:0">${sub}</p>
       <div class="bugi"><textarea class="segta" rows="5" placeholder="${esc(ph)}"></textarea><div class="ph"></div></div>
-      <p class="sd" style="margin:10px 0 0;font-size:.92rem">Arriva al DM e a Claude, che la valutano prima di cambiare qualcosa. Premendo «Invia» si apre GitHub (serve un account, anche gratuito): lì premi «Create».</p>
+      <p class="sd" style="margin:10px 0 0;font-size:.92rem">Arriva al DM e a Claude, che la valutano prima di cambiare qualcosa. ${PTOKEN ? 'Basta premere «Invia».' : 'Premendo «Invia» si apre GitHub (serve un account, anche gratuito): lì premi «Create».'}</p>
       <div style="display:flex;gap:8px;margin-top:12px"><button type="button" class="btn primary" data-a="send">Invia</button><button type="button" class="btn ghost" style="margin-left:auto" data-a="close">Chiudi</button></div><p class="m" style="min-height:1.2em;color:#a3262f;margin:8px 0 0"></p>`);
     d.addEventListener('close', () => photos.forEach(p => URL.revokeObjectURL(p.url)));
     const ta = d.querySelector('textarea'), box = d.querySelector('.ph'), go = d.querySelector('[data-a=send]'), m = d.querySelector('.m');
@@ -665,6 +687,10 @@ html.review #view :is(p,li,h1,h2,h3,h4,h5,dd,dt,td,th,figcaption,blockquote):hov
       go.disabled = true; m.textContent = '';
       try {
         sent = await playerRequest(kind, text, photos);
+        if (sent.done) {
+          ta.disabled = true; box.querySelectorAll('button,input').forEach(x => x.disabled = true); go.remove();
+          m.style.color = '#3f6b46'; m.textContent = 'Inviata al DM. Grazie!'; return;
+        }
         if (sent.file) { const u = URL.createObjectURL(sent.file), a = document.createElement('a'); a.href = u; a.download = 'segnalazione-avalar.txt'; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 60000); }
         window.open(sent.url, '_blank', 'noopener');
         ta.disabled = true; box.querySelectorAll('button,input').forEach(x => x.disabled = true); go.textContent = 'Riapri GitHub';
