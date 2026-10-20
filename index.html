@@ -2271,7 +2271,8 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
   const ptr = new Map(); let drag = null;
   const dist = () => { const [a, b] = [...ptr.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
   stage.addEventListener('pointerdown', e => {
-    if (e.button > 0) return; try { stage.setPointerCapture(e.pointerId); } catch { }
+    if (e.button > 0 || e.target.closest('.mgo,.noimg button')) return; // i tasti sopra la mappa non devono diventare un trascinamento
+    try { stage.setPointerCapture(e.pointerId); } catch { }
     ptr.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (ptr.size === 2) { drag = { type: 'pinch', d0: dist(), k0: st.k }; return; }
     const vh = e.target.closest('.vh[data-vh]');
