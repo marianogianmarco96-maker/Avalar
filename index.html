@@ -145,7 +145,7 @@ fieldset.visf{border:1px solid var(--line2);border-radius:8px;padding:6px 10px 2
 .prose ul{margin:.5em 0;padding-left:1.4em}
 .prose h4{color:var(--wine)}
 .prose .xref{border-bottom:1px dotted var(--wine2)}
-.prose .xref.dead{border-bottom:0;color:var(--ink2);font-style:italic}
+.prose .xref.dead{border-bottom:0;color:var(--ink2);font-style:italic}.prose .xref.dead.ro{color:inherit;font-style:normal}
 .clamp2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .lead{font-size:1.08rem}
 
@@ -475,7 +475,7 @@ body{min-width:0}
 :root{--mute:#75614d}
 :root[data-theme=dark]{--bg:#1c1511;--bg2:#221a15;--tex:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .9 0 0 0 0 .75 0 0 0 .035 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 :root[data-theme=dark] body::before{background:radial-gradient(ellipse at 15% 0%,#7d25301c 0,transparent 55%),var(--tex)}
-.prose .xref{border-bottom:0}
+.prose .xref{border-bottom:0;font-weight:600}
 .prose .xref:hover{text-decoration:underline}
 .num{font-family:var(--body);font-variant-numeric:lining-nums;font-weight:600}
 .statline b,.card.tl .entry .tag::before,.sessfab a{font-family:var(--body);font-weight:600}
@@ -750,20 +750,49 @@ const setVis = (o, v) => { if (v) o.vis = v; else delete o.vis; return o; };
 const PER_RE = /\[PER ([^\]]*)\]([\s\S]*?)(?:\[\/PER\]|$)/g;
 const perLines = t => t.replace(PER_RE, (m, w, x) => x.split('\n').map(l => l.trim() ? '[PER ' + w + ']' + l + '[/PER]' : l).join('\n'));
 const perRO = t => t.replace(PER_RE, (m, w, x) => { const me = window.__player?.(); return me && w.split(',').some(n => norm(n) === norm(me.name) || n.trim() === me.id) ? x : ''; });
+// nomi delle schede scritti nel testo («Mungus», «Rocciacava»): diventano collegamenti da soli, la prima volta che compaiono in ogni testo.
+// Solo nomi e alias con l'iniziale maiuscola, scritti uguali (così «la prigione» non diventa «La Prigione»); i più lunghi vincono
+// («Laboratorio di Mungus» prima di «Mungus»). I giocatori hanno solo le schede che possono vedere: le altre restano testo normale.
+let AUTO = null, AUTO_SELF = null; // AUTO: schede già collegate nel testo in corso (false: niente collegamenti automatici); AUTO_SELF: la scheda aperta
+let NAMES = null;
+function nameIdx() {
+  if (NAMES?.src === S.ents) return NAMES;
+  const ids = new Map(), all = [...S.ents.values()];
+  for (const n of [...all.map(e => [e.name, e.id]), ...all.flatMap(e => (e.alias || []).map(a => [a, e.id]))]) {
+    const k = esc(String(n[0] || '').trim().replace(/\s+/g, ' ')); if (k.length >= 3 && /^\p{Lu}/u.test(k) && !ids.has(k)) ids.set(k, n[1]);
+  }
+  const alt = [...ids.keys()].sort((a, b) => b.length - a.length).map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+')).join('|');
+  NAMES = { src: S.ents, ids, rx: alt ? new RegExp(`(?<![\\p{L}\\p{N}_&])(?:${alt})(?![\\p{L}\\p{N}_])`, 'gu') : null };
+  return NAMES;
+}
+function autoLinks(h, seen) {
+  const N = nameIdx(); if (!N.rx) return h;
+  // fuori dai collegamenti già fatti con [[…]] e dall'intestazione [PER …]
+  return h.split(/(<a\b[\s\S]*?<\/a>|<span class="xref dead">[\s\S]*?<\/span>|\[PER [^\]]*\])/).map((p, i) => i % 2 ? p : p.replace(N.rx, m => {
+    const id = N.ids.get(m.replace(/\s+/g, ' ')); if (!id || id === AUTO_SELF || seen.has(id)) return m;
+    seen.add(id); return `<a class="xref auto" href="#/scheda/${encodeURIComponent(id)}">${m}</a>`;
+  })).join('');
+}
 function inl(s) {
   if (window.__RO) s = perRO(String(s ?? '').replace(DM_SPAN, '').replace(DM_NOTE, ''));
-  let h = esc(s);
+  let h = esc(s); const seen = AUTO || new Set();
   h = h.replace(/\[\[([^\]|]+?)(?:\|([^\]]+?))?\]\]/g, (m, a, b) => {
     const e = findEnt(unesc(a));
     const t = b || (e ? esc(e.name) : a);
-    return e ? `<a class="xref" href="#/scheda/${encodeURIComponent(e.id)}">${t}</a>` : `<span class="xref dead">${t}</span>`;
+    if (e) seen.add(e.id);
+    return e ? `<a class="xref" href="#/scheda/${encodeURIComponent(e.id)}">${t}</a>` : window.__RO ? `<span class="xref dead ro">${t}</span>` : `<span class="xref dead">${t}</span>`;
   });
+  if (AUTO !== false) h = autoLinks(h, seen);
   h = h.replace(/\[DM\]([\s\S]*?)(?:\[\/DM\]|$)/g, '<span class="dmonly" title="Solo per DM: i giocatori non lo vedono">$1</span>');
   h = h.replace(/\[PER ([^\]]*)\]([\s\S]*?)(?:\[\/PER\]|$)/g, '<span class="plonly" title="Mostra a: $1">$2</span>');
   h = h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/(^|[\s(])\*([^*\s][^*]*?)\*(?=[\s).,;:!?]|$)/g, '$1<em>$2</em>');
   return h;
 }
-function md(t) {
+function md(t, { auto = true } = {}) {
+  const prev = AUTO; AUTO = auto ? new Set() : false;
+  try { return mdBody(t); } finally { AUTO = prev; }
+}
+function mdBody(t) {
   t = String(t ?? '').replace(/\r/g, '');
   t = window.__RO ? perRO(t.replace(DM_SPAN, '').replace(DM_NOTE, '')) : perLines(dmLines(t));
   t = t.trim();
@@ -796,7 +825,7 @@ function openDlg(html, cls = '') {
 }
 function ask(msg, { ok = 'Conferma', danger = false, title = 'Conferma' } = {}) {
   return new Promise(res => {
-    const d = openDlg(`<form method="dialog"><h3>${esc(title)}</h3><div class="prose">${md(msg)}</div><menu><button value="cancel" class="btn ghost">Annulla</button><button value="ok" class="btn ${danger ? 'danger' : 'primary'}" autofocus>${esc(ok)}</button></menu></form>`);
+    const d = openDlg(`<form method="dialog"><h3>${esc(title)}</h3><div class="prose">${md(msg, { auto: false })}</div><menu><button value="cancel" class="btn ghost">Annulla</button><button value="ok" class="btn ${danger ? 'danger' : 'primary'}" autofocus>${esc(ok)}</button></menu></form>`);
     d.addEventListener('close', () => res(d.returnValue === 'ok'));
   });
 }
@@ -924,7 +953,7 @@ function dmToggle(ta) {
 function dmTool(ta) {
   if (!ta || window.__RO) return;
   const w = document.createElement('div'); w.className = 'dmtool';
-  w.innerHTML = '<button type="button" class="btn sm">🔒 Solo per DM</button><small>Seleziona una frase e premi: i giocatori non la vedranno. Premi di nuovo dentro la frase per mostrarla. Con «Mostra a…» la vedono solo i giocatori che scegli.</small>';
+  w.innerHTML = '<button type="button" class="btn sm">🔒 Solo per DM</button><small>Seleziona una frase e premi: i giocatori non la vedranno. Premi di nuovo dentro la frase per mostrarla. Con «Mostra a…» la vedono solo i giocatori che scegli. I nomi delle schede (es. Mungus) diventano collegamenti da soli; con «🔗 Collega» colleghi parole diverse.</small>';
   const bt = w.querySelector('button'), msg = w.querySelector('small');
   bt.addEventListener('mousedown', e => e.preventDefault());
   bt.onclick = () => { const r = dmToggle(ta); ta.focus(); msg.textContent = r === 'empty' ? 'Prima seleziona il testo da nascondere.' : r === 'hidden' ? 'Fatto: la frase è tra [DM] e [/DM], i giocatori non la vedranno.' : 'Fatto: la frase è di nuovo visibile ai giocatori.'; };
@@ -933,6 +962,21 @@ function dmTool(ta) {
   const row = document.createElement('div'); row.className = 'visrow'; row.hidden = true;
   row.innerHTML = '<b>Mostra a:</b>' + PLAYERS().map(([pid, pn]) => `<label><input type="checkbox" value="${esc(pn)}"> ${esc(pn)}</label>`).join('') + '<button type="button" class="btn sm">Applica alla frase</button>';
   w.append(row);
+  // «Collega»: la parola selezionata diventa un collegamento a una scheda ([[nome]] o [[id|parola]]); dentro un collegamento lo toglie
+  const lb = document.createElement('button'); lb.type = 'button'; lb.className = 'btn sm'; lb.textContent = '🔗 Collega'; pb.after(lb);
+  let lsel = [0, 0];
+  lb.addEventListener('mousedown', e => { e.preventDefault(); lsel = [ta.selectionStart, ta.selectionEnd]; });
+  lb.onclick = async () => {
+    const v = ta.value, [a, b] = lsel, put = (x, y, t) => { ta.value = v.slice(0, x) + t + v.slice(y); ta.focus(); ta.setSelectionRange(x, x + t.length); ta.dispatchEvent(new Event('input', { bubbles: true })); };
+    const re = /\[\[([^\]|]+?)(?:\|([^\]]+?))?\]\]/g; let m;
+    while ((m = re.exec(v))) if (a >= m.index && b <= m.index + m[0].length && (a > m.index || b > a)) { const e = findEnt(m[1]); put(m.index, m.index + m[0].length, m[2] || e?.name || m[1]); msg.textContent = 'Fatto: il collegamento è stato tolto (il nome di una scheda scritto uguale resta comunque collegato).'; return; }
+    const txt = v.slice(a, b).trim(), hit = txt && findEnt(txt);
+    if (hit) { put(a, b, '[[' + txt + ']]'); msg.textContent = `Fatto: «${txt}» porta alla scheda ${hit.name}.`; return; }
+    ensureEntList(); const r = await formDlg({ title: '🔗 Collega a una scheda', intro: txt ? `«${esc(txt)}» porterà alla scheda che scegli.` : 'Il nome della scheda viene scritto nel testo come collegamento.', fields: [{ k: 'to', label: 'Scheda (digita il nome)', list: 'dl-ents', req: true }] });
+    if (!r) { ta.focus(); return; }
+    const t = pickEntity(r.to); if (!t) { msg.textContent = 'Scheda non trovata: scegli un nome dall\'elenco.'; ta.focus(); return; }
+    put(a, b, txt ? `[[${t.id}|${txt}]]` : findEnt(t.name) === t ? `[[${t.name}]]` : `[[${t.id}|${t.name}]]`); msg.textContent = `Fatto: ${txt ? '«' + txt + '»' : 'il nome'} porta alla scheda ${t.name}.`;
+  };
   let sel = [0, 0];
   pb.addEventListener('mousedown', e => { e.preventDefault(); sel = [ta.selectionStart, ta.selectionEnd]; });
   pb.onclick = () => {
@@ -1004,7 +1048,7 @@ async function navigate() {
   const h = location.hash.slice(1) || '/';
   const [path, qs] = h.split('?'); const q = new URLSearchParams(qs || '');
   for (const f of cleanups) { try { f(); } catch { } } cleanups = []; acts = {};
-  document.documentElement.classList.remove('nofs');
+  document.documentElement.classList.remove('nofs'); AUTO_SELF = null;
   for (const [re, fn] of routes) {
     const m = path.match(re);
     if (m) {
@@ -1851,7 +1895,7 @@ async function mutBody(id, fn) {
 route(/^\/scheda\/(.+)$/, async ([id]) => {
   const moved = !S.ents.has(id) && [...S.ents.values()].find(x => (x.alias || []).some(a => x.type + '-' + slug(a) === id)); // scheda unita in un'altra
   if (moved) { location.replace('#/scheda/' + encodeURIComponent(moved.id)); return; }
-  const e = S.ents.get(id); if (!e) return setView(`<div class="empty"><h2>Scheda non trovata</h2><p>«${esc(id)}» non esiste (forse è stata eliminata o unita).</p><a href="#/schede">Vai all'elenco</a></div>`);
+  const e = S.ents.get(id); AUTO_SELF = id; if (!e) return setView(`<div class="empty"><h2>Scheda non trovata</h2><p>«${esc(id)}» non esiste (forse è stata eliminata o unita).</p><a href="#/schede">Vai all'elenco</a></div>`);
   const [body, outL, inL, evs, pins] = await Promise.all([dbGet('bodies', id), dbIdx('links', 'from', id), dbIdx('links', 'to', id), dbIdx('events', 'ents', id), dbIdx('pins', 'entityId', id)]);
   const b = body || { id, sections: [] };
   evs.sort((a, c) => a.n - c.n || a.idx - c.idx);
