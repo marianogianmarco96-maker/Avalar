@@ -1,5 +1,4 @@
 /* Campagna D&D — accesso e archiviazione locale.
-   - Ospite: legge una copia pubblica (data.json), solo lettura, nulla viene salvato: solo ciò che sanno tutti i giocatori.
    - Giocatore (Livion, Sam, Violet, Mungus): la sua password decifra giocatori/<id>.enc, la copia preparata per lui
      (solo ciò che il DM gli mostra con «Mostra a:»), in sola lettura. Le altre copie non le può aprire.
    - Amministratore: il codice decifra data.enc (dati completi), tenuti in IndexedDB. Le modifiche fatte sul sito
@@ -50,13 +49,6 @@
   }
 
   /* ---------- aperture ---------- */
-  async function guestOpen() {
-    const r = await fetch('data.json', { cache: 'no-cache' });
-    if (!r.ok) throw new Error('Impossibile caricare i dati (' + r.status + ').');
-    const d = await r.json(); MEM = {};
-    for (const [c, docs] of Object.entries(d.stores)) MEM[c] = new Map(Object.entries(docs));
-    BLOBMAP = d.blobmap || {}; ROLE = 'guest';
-  }
   async function playerOpen(id, code, remember) {
     let r; try { r = await fetch('giocatori/' + id + '.enc', { cache: 'no-cache' }); } catch { throw new Error('Per il primo accesso serve internet.'); }
     if (!r.ok) throw new Error(r.status === 404 ? 'Questo account non è ancora attivo: chiedi al DM.' : 'Impossibile caricare i dati (' + r.status + ').');
@@ -138,8 +130,7 @@
 #login .grp button[aria-pressed=true] span{border-color:#7d2530;box-shadow:0 0 0 3px #7d253066,0 4px 12px #0006}
 #login .grp button[aria-pressed=true]{color:#7d2530;text-decoration:underline;text-underline-offset:3px}
 #login .pick{text-align:center;margin:0 0 8px;color:#3b2a1e;font-size:1.05rem}
-#login .lnk{all:unset;cursor:pointer;display:block;margin:14px auto 0;text-align:center;color:#561820;font-weight:700;text-decoration:underline;text-underline-offset:3px;font-size:1.05rem}
-@media (prefers-color-scheme:dark){#login .box{background:#241b16;color:#ecdfc6;border-color:#55402f}#login h1{color:#e0c071}#login .sub,#login small,#login .or{color:#94806a}#login label{color:#c5b193}#login .btn{background:#2b211b;color:#e0c071;border-color:#55402f}#login .btn.p{background:#8c2c38;color:#fbeccb;border-color:#c4494f}#login input[type=password]{background:#1c1511;color:#ecdfc6;border-color:#55402f}#login .or:before,#login .or:after{border-color:#3a2d24}}
+@media (prefers-color-scheme:dark){#login .box{background:#241b16;color:#ecdfc6;border-color:#55402f}#login h1{color:#e0c071}#login .sub,#login small,#login .or{color:#94806a}#login label{color:#c5b193}#login .btn{background:#2b211b;color:#e0c071;border-color:#55402f}#login .btn.p{background:#8c2c38;color:#fbeccb;border-color:#c4494f}#login .or:before,#login .or:after{border-color:#3a2d24}}
 #login .box{width:min(420px,100%);background:#fbf5e3;color:#2b1d14;border:1px solid #d4b06a;border-radius:12px;padding:28px 26px;box-shadow:0 12px 40px #0008}
 #login h1{margin:0 0 2px;font-family:'Cinzel',Georgia,serif;font-size:1.35rem;letter-spacing:.06em;color:#561820;text-align:center}
 #login .sub{text-align:center;color:#8a7560;margin:0 0 20px}
@@ -147,7 +138,9 @@
 #login .btn{cursor:pointer;border:1px solid #a98334;background:#f3e8cc;color:#561820;font-family:'Cinzel',Georgia,serif;letter-spacing:.05em;font-size:.9rem}
 #login .btn.p{background:#7d2530;color:#fbf5e3;border-color:#561820}
 #login .btn:disabled{opacity:.6;cursor:wait}
-#login input[type=password]{border:1px solid #c4ae80;background:#fffdf4;margin-bottom:8px}
+#login input[type=password]{border:1px solid #a98334;background:#fffdf4;color:#2b1d14;margin-bottom:8px}
+#login input[type=password]:not(:placeholder-shown){font-family:Verdana,sans-serif;font-size:1.3rem;letter-spacing:.18em;padding:7px 14px}
+#login input[type=password]::placeholder{color:#7a6550;opacity:1}
 #login .or{display:flex;align-items:center;gap:10px;color:#8a7560;margin:16px 0;font-size:.9rem}#login .or:before,#login .or:after{content:"";flex:1;border-top:1px solid #dccaa0}
 #login label{display:flex;align-items:center;gap:8px;font-size:.95rem;color:#5a4636;margin:2px 0 10px}
 #login .err{color:#a3262f;min-height:1.2em;margin:6px 0 0;font-size:.95rem}
@@ -165,14 +158,10 @@
         <form id="lg-form" autocomplete="off"><input type="password" id="lg-code" placeholder="Codice del Dungeon Master" autocomplete="current-password" spellcheck="false">
         <label><input type="checkbox" id="lg-rem" checked> Ricordami su questo dispositivo</label>
         <button class="btn" id="lg-adm" type="submit">Entra come Dungeon Master</button></form>
-        <p class="err" id="lg-err">${msg || ''}</p><button type="button" class="lnk" id="lg-guest">Entra come ospite</button><small style="text-align:center">Vede solo ciò che sanno tutti i giocatori, senza password.</small></div>`;
+        <p class="err" id="lg-err">${msg || ''}</p></div>`;
       document.body.append(el);
       const err = t => { el.querySelector('#lg-err').textContent = t || ''; };
       const finish = () => { el.remove(); st.remove(); resolve(); };
-      el.querySelector('#lg-guest').onclick = async e => {
-        e.target.disabled = true; err('');
-        try { await guestOpen(); ls.set('cdnd_remember', 'guest'); finish(); } catch (x) { e.target.disabled = false; err(x.message || String(x)); }
-      };
       // giocatore: si tocca il proprio ritratto e si scrive la propria password
       let who = null; const pf = el.querySelector('#lg-pl'), pc = el.querySelector('#lg-pcode'), pg = el.querySelector('#lg-pgo');
       el.querySelectorAll('[data-pl]').forEach(b => b.onclick = () => {
@@ -198,7 +187,8 @@
   const ready = (async () => {
     await domReady();
     const rem = ls.get('cdnd_remember');
-    if (rem === 'guest') { try { await guestOpen(); } catch { await loginUI(); } }
+    // l'accesso come ospite è stato tolto: chi lo aveva scelto torna alla schermata di accesso
+    if (rem === 'guest') { ls.del('cdnd_remember'); await loginUI(); }
     else if (rem && rem.startsWith('player:')) {
       try { await playerOpen(rem.slice(7), null, false); }
       catch (x) { ls.del('cdnd_remember'); ls.del('cdnd_pkey'); await loginUI(x.message === 'nokey' ? 'La password è cambiata: accedi di nuovo.' : (x.message || '')); }
