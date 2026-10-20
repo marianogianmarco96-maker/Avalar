@@ -651,6 +651,28 @@ details.older[open]>summary{display:none}
   .mn-path b{overflow:hidden;text-overflow:ellipsis;max-width:100%}
   .mn-all span{display:none}.mn-all{padding:6px 10px}
 }
+/* ---------- simboli dei segnalini e luoghi dentro un segnalino ---------- */
+.pin svg{overflow:visible}
+.pin.nv .gl{opacity:.55}
+.pin .pl em{font-style:normal;color:var(--gold2,#e9cf9a);margin-left:2px}
+.pin .pcount{position:absolute;right:-7px;top:-6px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:#fbf1d6;color:#2b1d14;border:1.5px solid #d4b06a;font:700 10px/13px var(--body);text-align:center;box-shadow:0 1px 2px #0006}
+.pk{flex:none;width:20px;height:20px;display:inline-block;vertical-align:middle}
+.pinrow .pk{width:18px;height:18px}
+.pinrow.child{padding-left:26px;font-size:.93rem;color:var(--ink2);position:relative;border-top:0}
+.pinrow.child .br{position:absolute;left:12px;top:0;height:55%;width:9px;border-left:1.5px solid var(--gold);border-bottom:1.5px solid var(--gold);border-bottom-left-radius:5px;opacity:.7}
+.sublist{display:grid;gap:6px;margin:6px 0 10px}
+.subrow{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line2);border-radius:6px;background:var(--paper2);cursor:pointer;transition:border-color .15s,transform .15s}
+.subrow:hover{border-color:var(--gold);transform:translateX(2px)}
+.subrow .pk{width:26px;height:26px}
+.subrow .sx{flex:1;min-width:0;display:flex;flex-direction:column}
+.subrow b{font-family:var(--display);font-size:.9rem;color:var(--wine);letter-spacing:.03em;font-weight:600}
+:root[data-theme=dark] .subrow b{color:var(--gold2)}
+.subrow small{color:var(--ink2);font-size:.82rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.subrow em{font-style:normal;font-size:.78rem;color:var(--mute)}
+.subrow .go{color:var(--wine2);font-size:1.2rem}
+.subtrail{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:.85rem;margin-bottom:6px;color:var(--mute)}
+.subtrail a{color:var(--ink2)}.subtrail b{color:var(--wine2);font-weight:600}
+.subh{display:flex;align-items:center;gap:8px}.subh .pk{width:26px;height:26px}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 
 </style>
@@ -1987,6 +2009,32 @@ const mapThumb = (x, cls = 'mth') => `<i class="${cls}" style="background-image:
 const mapTree = cur => { const walk = (pid, d) => mapKids(pid).map(x => { const k = mapKids(x.id).length; return `<a class="mt-row ${x.id === cur.id ? 'cur' : ''}" style="--d:${d}" href="#/mappe/${encodeURIComponent(x.id)}">${d ? '<span class="mt-br"></span>' : ''}${mapThumb(x)}<span class="mt-n">${esc(x.name)}${x.discovered === false ? ' <small>non scoperta</small>' : ''}</span>${x.id === cur.id ? '<small class="mt-here">sei qui</small>' : k ? `<small>${k} ${k === 1 ? 'dettaglio' : 'dettagli'}</small>` : ''}</a>` + walk(x.id, d + 1); }).join(''); return walk(null, 0); };
 let lastMap = null; // da quale mappa arrivo, per l'animazione (entro in un dettaglio o torno su)
 const PIN_PATH = 'M14 35C14 35 2 21 2 13a12 12 0 0 1 24 0c0 8-12 22-12 22z';
+/* simboli dei segnalini: il DM lo sceglie nel segnaposto, altrimenti lo deduco dal luogo */
+const PIN_KINDS = {
+  citta: ['Città', '#8f2d3a', '<path d="M8 18.5v-7h2.2v1.8h1.6V9.5h4.4v3.8h1.6v-1.8H20v7z" fill="#fbf1d6"/>'],
+  edificio: ['Edificio', '#6e4b2c', '<path d="M8 18.5v-5.3L14 8l6 5.2v5.3h-4.2v-3.4h-3.6v3.4z" fill="#fbf1d6"/>'],
+  taverna: ['Taverna o locanda', '#a8761c', '<path d="M9 9.3h6.6v9H9z" fill="#fbf1d6"/><path d="M15.6 11.2h1.7a1.9 1.9 0 0 1 0 3.8h-1.7" fill="none" stroke="#fbf1d6" stroke-width="1.6"/>'],
+  mercato: ['Mercato o negozio', '#b4541c', '<path d="M7.5 12.5L14 8l6.5 4.5z" fill="#fbf1d6"/><path d="M9.2 12.5v6M18.8 12.5v6M8 18.5h12" stroke="#fbf1d6" stroke-width="1.6" fill="none"/>'],
+  dungeon: ['Dungeon o caverna', '#3b3a44', '<path d="M14 7.8a4.8 4.8 0 0 0-4.8 4.8c0 1.7.8 2.8 1.8 3.4v2.3h6V16c1-.6 1.8-1.7 1.8-3.4A4.8 4.8 0 0 0 14 7.8z" fill="#fbf1d6"/><circle cx="12.2" cy="12.8" r="1.2" fill="#3b3a44"/><circle cx="15.8" cy="12.8" r="1.2" fill="#3b3a44"/>'],
+  regione: ['Regione o natura', '#3f7a4a', '<path d="M6.5 18.5l4.6-8 2.8 4.2 2-3 5.6 6.8z" fill="#fbf1d6"/>'],
+  prigione: ['Prigione', '#4b5260', '<path d="M8.5 8.5h11v10h-11z" fill="none" stroke="#fbf1d6" stroke-width="1.6"/><path d="M11.8 8.5v10M14 8.5v10M16.2 8.5v10" stroke="#fbf1d6" stroke-width="1.4"/>'],
+  acqua: ['Acqua, fogne, condotti', '#2f6f8f', '<path d="M14 7.5c3 4 4.6 6.1 4.6 8.1a4.6 4.6 0 0 1-9.2 0c0-2 1.6-4.1 4.6-8.1z" fill="#fbf1d6"/>'],
+  porto: ['Porto', '#2d5687', '<path d="M14 9.8v8.7M11 12h6M8.8 14.4a5.2 5.2 0 0 0 10.4 0" fill="none" stroke="#fbf1d6" stroke-width="1.7" stroke-linecap="round"/><circle cx="14" cy="8.6" r="1.4" fill="none" stroke="#fbf1d6" stroke-width="1.4"/>'],
+  tempio: ['Tempio', '#6f4f98', '<path d="M7.5 11.2L14 7.8l6.5 3.4z" fill="#fbf1d6"/><path d="M9.5 12v5.2M12.5 12v5.2M15.5 12v5.2M18.5 12v5.2M8 18.3h12" stroke="#fbf1d6" stroke-width="1.5"/>'],
+  pericolo: ['Pericolo', '#a7343b', '<path d="M14 8v6.4" stroke="#fbf1d6" stroke-width="2.6" stroke-linecap="round"/><circle cx="14" cy="17.6" r="1.6" fill="#fbf1d6"/>'],
+  punto: ['Punto semplice', null, '<circle cx="14" cy="13" r="4.6" fill="#fbf1d6"/>']
+};
+const KIND_RX = [['taverna', /tavern|locand|bettol|osteri|birrer/], ['mercato', /mercat|bazar|negoz|bottega|empori/], ['prigione', /prigion|carcer|segrete/], ['acqua', /pompaggio|condott|fogn|cistern|pozz|acquedott/], ['porto', /\bporto\b|molo|darsena/], ['tempio', /tempi|santuari|cappell|chiesa|altare/], ['dungeon', /grott|cavern|cripta|minier|rovin/]];
+const pinKind = (p, e) => {
+  if (p?.icon && PIN_KINDS[p.icon]) return p.icon;
+  if (!e || e.type !== 'luogo') return 'punto';
+  const nm = e.name.toLowerCase(); for (const [k, rx] of KIND_RX) if (rx.test(nm)) return k;
+  if (KIND_RX[0][1].test((e.brief || '').slice(0, 40).toLowerCase())) return 'taverna'; // «Taverna su una strada…», «Locanda dei Sobborghi…»
+  return { citta: 'citta', edificio: 'edificio', dungeon: 'dungeon', regione: 'regione' }[e.cat] || 'punto';
+};
+const kindCol = (k, e) => PIN_KINDS[k][1] || (e ? TYPE_COLOR[e.type] : '#a7343b');
+const kindIcon = (k, e) => `<svg class="pk" viewBox="4 3 20 20" aria-hidden="true"><circle cx="14" cy="13" r="10" fill="${kindCol(k, e)}"/>${PIN_KINDS[k][2]}</svg>`;
+const IN_RX = /^(comprende|contiene|include)$/i;
 
 async function uploadMapDlg(pre = {}) {
   const r = await formDlg({
@@ -2022,7 +2070,7 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
   // il livello della mappa resta entro 2048 px: sui telefoni un livello più grande perde dei pezzi (zone nere) mentre lo si sposta
   const LF = Math.min(1, 2048 / Math.max(m.w, m.h)), MW = m.w * LF, MH = m.h * LF, KMAX = 8 / LF;
   let pins = pins0; let regs = [...M.regions.values()].filter(r => r.mapId === id); const url = rec ? URL.createObjectURL(rec.blob) : null; onCleanup(() => url && URL.revokeObjectURL(url));
-  const st = { k: 1, x: 0, y: 0, players: false, edit: false, add: false, sel: q.get('pin') || null, reg: q.get('reg') || null, regs: pref('mapRegs', true), draw: null, vedit: false, labels: pref('mapLabels', true) };
+  const st = { k: 1, x: 0, y: 0, players: false, edit: false, add: false, sel: q.get('pin') || null, reg: q.get('reg') || null, sub: [], regs: pref('mapRegs', true), draw: null, vedit: false, labels: pref('mapLabels', true) };
   const lock = m.locked === true;
   const path = mapPath(m), par = path.length > 1 ? path[path.length - 2] : null;
   const crumb = path.map((x, i, a) => i === a.length - 1 ? `<b class="mn-cur">${mapThumb(x)}${esc(x.name)}</b>` : `<a href="#/mappe/${encodeURIComponent(x.id)}">${mapThumb(x)}${esc(x.name)}</a><span class="sep">›</span>`).join('');
@@ -2097,10 +2145,13 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
   const saveReg = async r => { await runBatch(['regions'], '', async t => t.put('regions', r), { reload: false }); regs = [...M.regions.values()].filter(x => x.mapId === id); };
   const fitRegion = r => { const xs = r.points.map(q => q[0]), ys = r.points.map(q => q[1]); const bx = (Math.max(...xs) - Math.min(...xs)) / 100 * MW, by = (Math.max(...ys) - Math.min(...ys)) / 100 * MH; const rc = stage.getBoundingClientRect(); st.k = clamp(Math.min(rc.width / bx, rc.height / by) * 0.75, fitK() * 0.6, 8); center({ x: (Math.max(...xs) + Math.min(...xs)) / 2, y: (Math.max(...ys) + Math.min(...ys)) / 2 }); };
 
+  // luoghi che stanno dentro un luogo (collegamento «comprende» tra le schede)
+  const inside = eid => [...M.links.values()].filter(l => l.from === eid && IN_RX.test(l.label || '') && S.ents.has(l.to) && (!st.players || (!l.dm && S.ents.get(l.to).discovered !== false))).map(l => ({ e: S.ents.get(l.to), k: l.k })).sort((a, b) => a.e.name.localeCompare(b.e.name, 'it'));
   function pinHtml(p) {
     const e = entOf(p), vis = visible(p); if (st.players && !vis) return '';
-    const col = e ? TYPE_COLOR[e.type] : '#a7343b';
-    return `<div class="pin ${vis ? '' : 'ghost'} ${st.sel === p.id ? 'sel' : ''}" data-pin="${esc(p.id)}" style="left:${p.x}%;top:${p.y}%"><svg viewBox="0 0 28 36"><path d="${PIN_PATH}" fill="${col}" stroke="#fff" stroke-width="1.6"/>${p.targetMapId ? '<path d="M8.5 13h9m-3.5-4.2l4.2 4.2-4.2 4.2" stroke="#fff" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>' : (p.visited === false ? '<circle cx="14" cy="13" r="4.2" fill="none" stroke="#fbf1d6" stroke-width="2"/>' : '<circle cx="14" cy="13" r="4.6" fill="#fbf1d6"/>')}</svg><span class="pl">${esc(pname(p))}</span></div>`;
+    const kind = pinKind(p, e), col = kindCol(kind, e), n = e ? inside(e.id).length : 0;
+    const gl = p.targetMapId ? '<path d="M8.5 13h9m-3.5-4.2l4.2 4.2-4.2 4.2" stroke="#fff" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>' : PIN_KINDS[kind][2];
+    return `<div class="pin ${vis ? '' : 'ghost'} ${p.visited === false ? 'nv' : ''} ${n ? 'grp' : ''} ${st.sel === p.id ? 'sel' : ''}" data-pin="${esc(p.id)}" style="left:${p.x}%;top:${p.y}%"><svg viewBox="0 0 28 36">${n ? `<path d="${PIN_PATH}" transform="translate(7 3) scale(.78)" fill="${col}" stroke="#fff" stroke-width="1.8" opacity=".8"/>` : ''}<path d="${PIN_PATH}" fill="${col}" stroke="#fff" stroke-width="1.6"/><g class="gl">${gl}</g></svg>${n ? `<span class="pcount">${n}</span>` : ''}<span class="pl">${esc(pname(p))}${n ? ` <em>+${n}</em>` : ''}</span></div>`;
   }
   const renderPins = () => { box.innerHTML = pins.map(pinHtml).join('') + vhHtml(); stage.classList.toggle('nolabels', !st.labels); declutter(); };
   function renderSide() {
@@ -2109,6 +2160,20 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
     const children = S.maps.filter(c => c.parent === m.id && (!st.players || c.discovered !== false));
     const vis = pins.filter(p => !st.players || visible(p)).sort((a, b) => pname(a).localeCompare(pname(b), 'it'));
     let h = '';
+    const edit = st.edit && !st.players;
+    const subList = eid => { const kids = inside(eid); return kids.length || edit ? `<h4>Qui dentro <small>(${kids.length})</small></h4><div class="sublist">${kids.map(({ e: k, k: lk }) => { const nn = inside(k.id).length; return `<div class="subrow" data-act="subin" data-id="${esc(k.id)}">${kindIcon(pinKind(null, k), k)}<span class="sx"><b>${esc(k.name)}</b>${k.brief && !st.players ? `<small>${inl(k.brief)}</small>` : ''}</span>${nn ? `<em>+${nn}</em>` : ''}${edit ? `<button class="icb" data-act="subdel" data-k="${esc(lk)}" title="Togli da qui">✕</button>` : '<span class="go">›</span>'}</div>`; }).join('')}</div>${edit ? `<button class="btn sm" data-act="subadd" data-id="${esc(eid)}">+ Metti un luogo qui dentro</button>` : ''}` : ''; };
+    if (sel && st.sub.length && entOf(sel)) { // dentro un segnalino: un luogo che ne fa parte
+      const trail = [entOf(sel), ...st.sub.map(i => S.ents.get(i))]; const se = trail[trail.length - 1];
+      if (se) {
+        h += `<nav class="subtrail"><button class="icb" data-act="subback" title="Indietro">‹</button>${trail.slice(0, -1).map((x, i) => `<a href="#" data-act="subto" data-i="${i}">${esc(x.name)}</a><span>›</span>`).join('')}<b>${esc(se.name)}</b></nav>
+          <div class="spread"><h2 class="subh">${kindIcon(pinKind(null, se), se)}${esc(se.name)}</h2><button class="icb" data-act="desel" title="Chiudi">✕</button></div>
+          <p class="hint">Fa parte di «${esc(trail[trail.length - 2].name)}»: sulla mappa è nello stesso segnalino.</p>
+          ${!st.players ? `${se.brief ? `<p><i>${inl(se.brief)}</i></p>` : ''}${se.status ? `<p class="hint">Stato: ${esc(se.status)}</p>` : ''}<div class="row" style="margin:10px 0"><a class="btn sm" href="#/scheda/${encodeURIComponent(se.id)}">Apri scheda</a></div>` : ''}
+          ${subList(se.id)}<div class="orn"></div>`;
+        $('#mside').innerHTML = h; return;
+      }
+      st.sub = [];
+    }
     if (sel) {
       const e = entOf(sel), tm = sel.targetMapId ? mapById(sel.targetMapId) : null;
       h += `<div class="spread"><h2>${esc(pname(sel))}</h2><button class="icb" data-act="desel" title="Chiudi">✕</button></div>${e && !st.players ? badge(e.type) : ''} ${!visible(sel) ? '<span class="pill warn">non scoperto</span>' : ''}
@@ -2117,6 +2182,7 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
         ${st.edit && !st.players ? '<button class="btn sm" data-act="addphotos" style="margin-top:6px">+ Aggiungi foto</button>' : ''}
         <div class="row" style="margin:10px 0">${e && !st.players ? `<a class="btn sm" href="#/scheda/${encodeURIComponent(e.id)}">Apri scheda</a>` : ''}</div>
         ${tm && (!st.players || tm.discovered !== false) ? `<a class="mportal" href="#/mappe/${encodeURIComponent(tm.id)}">${mapThumb(tm, 'mp-im')}<span class="mp-tx"><small>Mappa di dettaglio</small><b>${esc(tm.name)}</b><span class="btn sm primary">Entra nella mappa ›</span></span></a>` : ''}
+        ${e ? subList(e.id) : ''}
         ${st.edit && !st.players ? `<div class="row"><button class="btn sm" data-act="editpin">Modifica segnaposto</button><button class="btn sm danger" data-act="delpin">Elimina</button></div><p class="hint">Trascina il segnaposto sulla mappa per spostarlo.</p>` : ''}<div class="orn"></div>`;
       if (!curReg()) { // segnaposto aperto: solo la regione in cui si trova, non l'elenco di tutta la mappa
         const home = homeRegs();
@@ -2148,13 +2214,13 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
     if (vr.length && st.regs) h += `<h4>Regioni <small>(${vr.length})</small></h4><div class="chips">${vr.map(r => `<a class="chip ${r.id === st.reg ? 'on' : ''}" data-act="selreg" data-id="${esc(r.id)}"><span class="dot" style="width:9px;height:9px;border-radius:50%;background:${esc(r.color || '#d4b06a')};display:inline-block"></span>${esc(regName(r))}</a>`).join('')}</div>`;
     const up = m.parent ? mapById(m.parent) : null;
     if (children.length || up) h += `<h4>Mappe collegate</h4><div class="mlinks">${children.map(c => { const via = pins.find(p => p.targetMapId === c.id); return `<a class="mlink" href="#/mappe/${encodeURIComponent(c.id)}" ${via ? `data-via="${esc(via.id)}"` : ''}>${mapThumb(c, 'ml-im')}<span class="ml-tx"><small>Dettaglio${via && pname(via) !== c.name ? ' · da «' + esc(pname(via)) + '»' : ''}</small><b>${esc(c.name)}</b></span><span class="ml-go">Entra ›</span></a>`; }).join('')}${up ? `<a class="mlink up" href="#/mappe/${encodeURIComponent(up.id)}">${mapThumb(up, 'ml-im')}<span class="ml-tx"><small>Fa parte di</small><b>${esc(up.name)}</b></span><span class="ml-go">‹ Torna</span></a>` : ''}</div>`;
-    h += `<h4>Luoghi sulla mappa <small>(${vis.length})</small></h4>${vis.length ? vis.map(p => `<div class="pinrow ${st.sel === p.id ? 'sel' : ''}" data-act="selpin" data-id="${esc(p.id)}"><span class="dot" style="background:${entOf(p) ? TYPE_COLOR[entOf(p).type] : '#a7343b'}"></span>${esc(pname(p))}${visible(p) ? '' : '<small>nascosto</small>'}${p.targetMapId ? '<small>↳ mappa</small>' : ''}</div>`).join('') : '<p class="hint">Nessun segnaposto.</p>'}`;
+    h += `<h4>Luoghi sulla mappa <small>(${vis.length})</small></h4>${vis.length ? vis.map(p => { const pe = entOf(p), kids = pe ? inside(pe.id) : []; return `<div class="pinrow ${st.sel === p.id ? 'sel' : ''}" data-act="selpin" data-id="${esc(p.id)}">${kindIcon(pinKind(p, pe), pe)}${esc(pname(p))}${visible(p) ? '' : '<small>nascosto</small>'}${p.targetMapId ? '<small>↳ mappa</small>' : kids.length ? `<small>${kids.length} dentro</small>` : ''}</div>` + kids.map(({ e: k }) => `<div class="pinrow child" data-act="subpin" data-pin="${esc(p.id)}" data-id="${esc(k.id)}"><span class="br"></span>${kindIcon(pinKind(null, k), k)}${esc(k.name)}</div>`).join(''); }).join('') : '<p class="hint">Nessun segnaposto.</p>'}`;
     $('#mside').innerHTML = h;
   }
   const refresh = () => { renderPins(); renderRegs(); renderSide(); };
   // aprendo una regione si chiude il segnaposto aperto, così resta evidenziata solo lei
   const selectReg = (rid, ctr) => { st.reg = rid; if (rid) st.sel = null; st.vedit = false; refresh(); syncUI(); if (rid && ctr) { const r = curReg(); if (r) fitRegion(r); } };
-  const selectPin = (pid, ctr) => { st.sel = pid; refresh(); if (ctr && pid) center(pins.find(p => p.id === pid), 2.2); };
+  const selectPin = (pid, ctr) => { st.sel = pid; st.sub = []; refresh(); if (ctr && pid) center(pins.find(p => p.id === pid), 2.2); };
   const syncUI = () => {
     $('#b-edit').classList.toggle('on', st.edit); $('#b-add').style.display = st.edit && !st.players && !st.draw ? '' : 'none'; $('#b-addreg').style.display = st.edit && !st.players && !st.draw ? '' : 'none'; $('#drawbar').style.display = st.draw ? '' : 'none'; $('#b-lab').classList.toggle('on', st.labels); $('#b-reg').classList.toggle('on', st.regs);
     stage.classList.toggle('drawing', !!st.draw);
@@ -2183,6 +2249,7 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
         { k: 'ent', label: 'Scheda collegata (digita il nome)', list: 'dl-ents', value: e ? `${e.name} (${TYPES[e.type]})` : '', hint: 'Scegli dai suggerimenti, oppure scrivi un nome nuovo.' },
         { k: 'label', label: 'Etichetta (solo se non c\'è una scheda)', value: p?.label || '' },
         { k: 'photos', label: 'Foto del luogo (facoltative, anche più di una)', type: 'file', accept: 'image/*', multiple: true, files },
+        { k: 'icon', label: 'Simbolo sulla mappa', type: 'select', value: p?.icon || '', options: [['', 'Automatico (dal tipo di luogo)'], ...Object.entries(PIN_KINDS).map(([k, v]) => [k, v[0]])] },
         { k: 'target', label: 'Apre la mappa di dettaglio', type: 'select', value: p?.targetMapId || '', options: [['', '— nessuna —'], ...S.maps.filter(x => x.id !== m.id).map(x => [x.id, x.name])] },
         { k: 'create', label: 'Se la scheda non esiste, creala come nuovo Luogo', type: 'check', value: true }, { k: 'visited', label: 'Visitato dal party', type: 'check', value: p ? p.visited !== false : true }, { k: 'disc', label: 'Visibile ai giocatori (scoperto)', type: 'check', value: p ? p.discovered !== false : true }]
     });
@@ -2191,7 +2258,7 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
     if (!ent && r.ent.trim()) { if (r.create) { entityId = await createEntity({ type: 'luogo', name: r.ent.trim() }); label = null; } else label = r.ent.trim(); }
     if (!entityId && !label) { toast('Serve una scheda o un\'etichetta', 'err'); return; }
     const ph = await prepPhotos(r.photos, 'pinimg-');
-    const np = p ? { ...p, entityId, label, targetMapId: r.target || null, discovered: r.disc, visited: r.visited, photos: [...(p.photos || []), ...ph.metas] } : { id: 'pin-' + uid(), mapId: m.id, entityId, label, x: pos.x, y: pos.y, targetMapId: r.target || null, discovered: r.disc, visited: r.visited, photos: ph.metas };
+    const np = p ? { ...p, entityId, label, icon: r.icon || null, targetMapId: r.target || null, discovered: r.disc, visited: r.visited, photos: [...(p.photos || []), ...ph.metas] } : { id: 'pin-' + uid(), mapId: m.id, entityId, label, icon: r.icon || null, x: pos.x, y: pos.y, targetMapId: r.target || null, discovered: r.disc, visited: r.visited, photos: ph.metas };
     try { await savePin(np, ph.blobs); }
     catch (e) { // le foto non si sono caricate: salva comunque il segnaposto, senza foto, e dillo chiaramente
       if (ph.blobs.length) { const np2 = { ...np, photos: p ? (p.photos || []) : [] }; await savePin(np2); pins = p ? pins.map(x => x.id === p.id ? np2 : x) : [...pins, np2]; selectPin(np2.id); showInfo('Segnaposto salvato, ma senza foto', '<p>Il caricamento delle immagini non è riuscito: <b>' + esc(e.message || String(e)) + '</b></p><p class="hint">Controlla il banner dei permessi in alto o riprova con «Aggiungi foto».</p>'); return; }
@@ -2275,6 +2342,11 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
     edit: () => { if (st.players) { st.players = false; } st.edit = !st.edit; st.add = false; refresh(); syncUI(); },
     addpin: () => { st.add = true; syncUI(); },
     fs: () => { if (document.fullscreenElement) document.exitFullscreen(); else mv.requestFullscreen?.().catch(() => toast('Schermo intero non disponibile', 'err')); },
+    subin: (a, ev) => { if (ev.target.closest('[data-act="subdel"]')) return; st.sub.push(a.dataset.id); renderSide(); $('#mside').scrollTop = 0; },
+    subback: () => { st.sub.pop(); renderSide(); }, subto: (a, ev) => { ev.preventDefault(); st.sub = st.sub.slice(0, +a.dataset.i); renderSide(); },
+    subpin: a => { selectPin(a.dataset.pin, true); st.sub = [a.dataset.id]; renderSide(); },
+    subadd: async a => { ensureEntList(); const r = await formDlg({ title: 'Metti un luogo qui dentro', intro: 'Il luogo resta una scheda a sé, ma sulla mappa sta dentro questo segnalino: così la mappa non si riempie.', fields: [{ k: 'to', label: 'Luogo (digita il nome)', list: 'dl-ents', req: true }] }); if (!r) return; const t = pickEntity(r.to), from = a.dataset.id; if (!t || t.id === from) { toast('Scheda non trovata', 'err'); return; } await runBatch(['links'], '', async x => x.put('links', { k: from + '|' + t.id + '|comprende', from, to: t.id, label: 'comprende' })); refresh(); },
+    subdel: async a => { await runBatch(['links'], '', async x => x.del('links', a.dataset.k)); refresh(); },
     mtree: a => { const pop = $('#mtpop'), open = pop.hidden; pop.hidden = !open; a.setAttribute('aria-expanded', open); if (open) { const off = e => { if (!e.target.closest('.mn-tree')) { pop.hidden = true; a.setAttribute('aria-expanded', false); document.removeEventListener('pointerdown', off); } }; setTimeout(() => document.addEventListener('pointerdown', off)); onCleanup(() => document.removeEventListener('pointerdown', off)); } },
     selpin: a => selectPin(a.dataset.id, true), desel: () => selectPin(null),
     editpin: () => pinDlg(pins.find(p => p.id === st.sel)),
