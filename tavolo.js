@@ -12,23 +12,34 @@
   const DADI = [4, 6, 8, 10, 12, 20, 100];
   const COLORI = ['#7d2530', '#3b5f8a', '#3f7a4a', '#b0802a', '#6a4a8c', '#b4541c', '#2b1d14', '#5b6670'];
 
-  const CSS = `.tv{position:fixed;left:0;right:0;z-index:30;display:flex;flex-direction:column;background:var(--bg)}
-.tv-bar{display:flex;align-items:center;gap:6px;padding:6px max(8px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line2);background:var(--paper);overflow-x:auto;scrollbar-width:none;flex:none}
-.tv-bar::-webkit-scrollbar{display:none}
-.tv-bar .btn{white-space:nowrap;flex:none}
-.tv-bar select{font:inherit;font-family:var(--display);font-size:.78rem;max-width:200px;padding:5px 8px;border-radius:4px;border:1px solid var(--line2);background:var(--paper2);color:var(--ink);flex:none}
-.tv-scena{font-family:var(--display);color:var(--wine);font-weight:600;white-space:nowrap;padding:0 6px;flex:none}
-:root[data-theme=dark] .tv-scena{color:var(--gold2)}
-.tv-sep{width:1px;align-self:stretch;background:var(--line2);margin:2px 2px;flex:none}
-.tv-sp{flex:1;min-width:4px}
-.tv-on{display:flex;align-items:center;gap:4px;flex:none;font-size:.85rem;color:var(--mute);white-space:nowrap}
-.tv-on i{width:8px;height:8px;border-radius:50%;background:#999;display:inline-block}
-.tv-on.ok i{background:#3f9a4a}.tv-on.ko i{background:#c0392b}
-.tv-main{flex:1;display:flex;min-height:0;position:relative}
-.tv-stage{flex:1;position:relative;overflow:hidden;touch-action:none;background:#2b211b radial-gradient(ellipse at 50% 40%,#3a2d24,#1a1310);cursor:grab;user-select:none;-webkit-user-select:none}
-.tv-stage.pan{cursor:grabbing}.tv-stage.rul{cursor:crosshair}
+  const CSS = `.tv{position:fixed;left:0;right:0;z-index:30;display:flex;background:#1a1310;--rail:#211a16;--rail2:#2e2520;--rail-ink:#e9dcc0}
+.tv-rail{width:50px;flex:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 8px;background:var(--rail);border-right:1px solid #000;overflow-y:auto;scrollbar-width:none;z-index:9}
+.tv-rail::-webkit-scrollbar{display:none}
+.tv-rail button{all:unset;box-sizing:border-box;position:relative;width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--rail-ink);cursor:pointer;flex:none}
+.tv-rail button svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tv-rail button:hover{background:var(--rail2)}
+.tv-rail button.on{background:var(--wine);color:#fff;box-shadow:inset 0 0 0 1px #e7cf9a66}
+.tv-rail button:focus-visible{outline:2px solid var(--gold2)}
+.tv-rail hr{width:26px;border:0;border-top:1px solid #ffffff22;margin:6px 0}
+.tv-rail .lbl{font:600 .55rem/1 var(--display);letter-spacing:.08em;color:#a8957a;text-transform:uppercase;margin:6px 0 2px}
+.tv-rail .sp{flex:1;min-height:8px}
+.tv-tip{position:fixed;z-index:60;pointer-events:none;background:#000d;color:#fff;font:600 .82rem/1.2 var(--body);padding:5px 9px;border-radius:5px;white-space:nowrap}
+.tv-on{width:12px;height:12px;border-radius:50%;background:#888;flex:none;margin:6px 0 2px;box-shadow:0 0 0 3px #0005}
+.tv-on.ok{background:#3f9a4a}.tv-on.ko{background:#c0392b}
+.tv-cnt{font:700 .7rem/1 var(--body);color:#c9b89a}
+.tv-wrap{flex:1;position:relative;min-width:0;display:flex}
+.tv-stage{flex:1;position:relative;overflow:hidden;touch-action:none;background:#6b5442 radial-gradient(ellipse at 50% 40%,#7a614d,#4f3d30);cursor:default;user-select:none;-webkit-user-select:none}
+.tv-stage.mano{cursor:grab}.tv-stage.pan{cursor:grabbing}.tv-stage.rul{cursor:crosshair}
+.tv-top{position:absolute;top:10px;right:10px;left:10px;display:flex;justify-content:flex-end;align-items:flex-start;gap:8px;z-index:7;pointer-events:none}
+.tv-top>*{pointer-events:auto}
+.tv-chip{display:flex;align-items:center;gap:8px;background:#211a16e6;color:#f1e4c8;border:1px solid #e7cf9a44;border-radius:8px;padding:5px 6px 5px 10px;font:600 .9rem/1.2 var(--body);box-shadow:0 2px 10px #0006;min-width:0}
+.tv-chip b{font-family:var(--display);font-weight:600;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:40vw}
+.tv-chip .btn{flex:none}
+.tv-pgbtn{all:unset;pointer-events:auto;cursor:pointer;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:#fbf5e3;color:#2b1d14;box-shadow:0 2px 10px #0008;flex:none}
+.tv-pgbtn svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
+.tv-pgbtn:hover{background:#fff}
 .tv-world{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
-.tv-map{position:absolute;left:0;top:0;max-width:none;pointer-events:none;-webkit-user-drag:none;box-shadow:0 0 0 2px #0006,0 10px 40px #000a;background:#e8dcc0}
+.tv-map{position:absolute;left:0;top:0;max-width:none;pointer-events:none;-webkit-user-drag:none;box-shadow:0 0 0 1px #0008,0 10px 40px #0009;background:#e8dcc0}
 .tv-grid{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
 .tv-tok{position:absolute;border-radius:50%;box-sizing:border-box;background:var(--c) center/cover no-repeat;border:3px solid var(--c);box-shadow:0 2px 6px #000a;transition:left .12s,top .12s}
 .tv-tok.mine,.tv-tok.dm{cursor:grab}
@@ -44,13 +55,15 @@
 .tv-empty div{max-width:440px;background:#00000066;border:1px solid #e7cf9a55;border-radius:10px;padding:22px 24px;line-height:1.45;font-size:1.05rem}
 .tv-empty h2{font-family:var(--display);color:var(--gold2)!important;margin:0 0 8px;font-size:1.25rem}
 .tv-empty code{background:#0006;padding:1px 5px;border-radius:4px}
-.tv-zoom{position:absolute;right:10px;bottom:10px;display:flex;flex-direction:column;gap:6px;z-index:6}
-.tv-zoom button{width:38px;height:38px;border-radius:50%;border:1px solid #e7cf9a88;background:#2b1d14d9;color:#f5e6c4;font:600 1.2rem/1 var(--display);cursor:pointer;box-shadow:0 2px 8px #0008}
-.tv-dice{width:300px;flex:none;display:flex;flex-direction:column;border-left:1px solid var(--line2);background:var(--paper);min-height:0}
-.tv-dice[hidden]{display:none!important}
-.tv-dh{display:flex;align-items:center;justify-content:space-between;padding:8px 10px 4px;font-family:var(--display);color:var(--wine);font-weight:600}
+.tv-zoom{position:absolute;right:12px;top:62px;display:flex;flex-direction:column;align-items:center;gap:4px;z-index:6;background:#211a16d9;border:1px solid #e7cf9a33;border-radius:20px;padding:5px 0;box-shadow:0 2px 10px #0006}
+.tv-zoom button{all:unset;cursor:pointer;width:32px;height:30px;display:flex;align-items:center;justify-content:center;color:#f1e4c8;font:600 1.15rem/1 var(--display)}
+.tv-zoom button:hover{color:#fff;background:#ffffff14}
+.tv-zoom small{font:600 .68rem/1 var(--body);color:#c9b89a}
+.tv-chat{width:310px;flex:none;display:flex;flex-direction:column;border-left:1px solid #000;background:var(--paper);min-height:0;z-index:8}
+.tv-chat[hidden]{display:none!important}
+.tv-dh{display:flex;align-items:center;justify-content:space-between;padding:8px 10px 6px;font-family:var(--display);color:var(--wine);font-weight:600;border-bottom:1px solid var(--line)}
 :root[data-theme=dark] .tv-dh{color:var(--gold2)}
-.tv-log{flex:1;overflow-y:auto;padding:4px 10px;display:flex;flex-direction:column;gap:6px;min-height:60px}
+.tv-log{flex:1;overflow-y:auto;padding:8px 10px;display:flex;flex-direction:column;gap:6px;min-height:60px}
 .tv-roll{border:1px solid var(--line);border-radius:6px;padding:6px 8px;background:var(--paper2);font-size:.95rem;line-height:1.3}
 .tv-roll .h{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
 .tv-roll .h span{font-weight:600}
@@ -68,6 +81,33 @@
 .tv-dk .row .btn{flex:1 1 0;justify-content:center;padding:7px 4px;min-width:40px}
 .tv-dk input[type=text],.tv-dk input[type=number]{font:inherit;padding:6px 8px;border-radius:4px;border:1px solid var(--line2);background:var(--paper2);color:var(--ink);min-width:0}
 .tv-dk label{display:flex;align-items:center;gap:6px;font-size:.92rem;color:var(--ink2)}
+.tv-dk .hint{margin:0;font-size:.82rem}
+.tv-pages{position:absolute;left:0;right:0;top:0;z-index:20;max-height:78%;display:flex;flex-direction:column;background:#1d1714f7;color:#f1e4c8;border-bottom:2px solid var(--gold2);box-shadow:0 12px 40px #000c}
+.tv-pages[hidden]{display:none!important}
+.tv-ph{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #ffffff1a;flex-wrap:wrap}
+.tv-ph .cur{display:flex;align-items:center;gap:10px;min-width:0}
+.tv-ph .cur img,.tv-ph .cur span.ph{width:52px;height:34px;border-radius:4px;object-fit:cover;background:#3a2d24;flex:none}
+.tv-ph .cur b{font-family:var(--display);color:var(--gold2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tv-ph button.lnk{all:unset;cursor:pointer;color:#d9b8ff;font-weight:600;font-size:.92rem;white-space:nowrap}
+.tv-ph button.lnk:hover{text-decoration:underline}
+.tv-ph input[type=search]{flex:1;min-width:140px;font:inherit;padding:7px 10px;border-radius:6px;border:1px solid #ffffff2a;background:#0005;color:#f1e4c8}
+.tv-ph label{display:flex;align-items:center;gap:6px;font-size:.92rem;white-space:nowrap}
+.tv-ph .x{all:unset;cursor:pointer;font-size:1.3rem;line-height:1;padding:4px 8px;border-radius:6px}
+.tv-ph .x:hover{background:#ffffff1a}
+.tv-pgrid{overflow-y:auto;padding:12px 14px 16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.tv-card{position:relative;background:#2b221d;border:2px solid transparent;border-radius:8px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;box-shadow:0 2px 8px #0007;text-align:left;color:inherit;font:inherit;padding:0}
+.tv-card:hover{border-color:#e7cf9a77}
+.tv-card.cur{border-color:#b98cff}
+.tv-card .im{aspect-ratio:16/10;background:#3a2d24 center/cover no-repeat;display:block}
+.tv-card .nm{padding:7px 9px 9px;font-weight:600;font-size:.93rem;line-height:1.2;overflow-wrap:anywhere}
+.tv-card .seg{position:absolute;left:8px;top:-2px;width:20px;height:28px;background:#f2b51d;clip-path:polygon(0 0,100% 0,100% 100%,50% 75%,0 100%);filter:drop-shadow(0 1px 2px #000a)}
+.tv-card .acts{position:absolute;right:6px;top:6px;display:flex;gap:4px;opacity:0;transition:opacity .15s}
+.tv-card:hover .acts,.tv-card:focus-within .acts{opacity:1}
+.tv-card .acts button{all:unset;cursor:pointer;width:28px;height:28px;border-radius:6px;background:#000b;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.9rem}
+.tv-card .acts button:hover{background:#7d2530}
+.tv-card.nuova{border:2px dashed #e7cf9a55;background:transparent;align-items:center;justify-content:center;min-height:120px;color:#e7cf9a;font-family:var(--display);gap:6px}
+.tv-card.nuova span{font-size:1.8rem;line-height:1}
+@media (hover:none){.tv-card .acts{opacity:1}}
 .tv-pop{position:absolute;z-index:8;background:var(--paper);color:var(--ink);border:1px solid var(--gold);border-radius:8px;box-shadow:0 10px 30px #000a;padding:8px;display:flex;flex-direction:column;gap:5px;min-width:190px}
 .tv-pop b{font-family:var(--display);color:var(--wine);padding:2px 4px 4px}
 :root[data-theme=dark] .tv-pop b{color:var(--gold2)}
@@ -92,10 +132,11 @@ dialog.dlg.tv-gd{margin:auto 12px 12px auto;width:min(420px,94vw)}
 dialog.dlg.tv-gd::backdrop{background:transparent}
 .tv-tabs{display:flex;gap:4px;margin:4px 0 10px;flex-wrap:wrap}
 @media (max-width:820px){
-  .tv-dice{position:absolute;right:0;bottom:0;left:0;width:auto;max-height:72%;z-index:7;border-left:0;border-top:2px solid var(--gold);box-shadow:0 -8px 24px #0008;border-radius:12px 12px 0 0}
-  .tv-bar .tl{display:none}
-  .tv-on span{display:none}
-  .tv-zoom{bottom:12px}
+  .tv-rail{width:44px}.tv-rail button{width:34px;height:34px}
+  .tv-chat{position:absolute;right:0;bottom:0;left:0;width:auto;max-height:62%;z-index:12;border-left:0;border-top:2px solid var(--gold);box-shadow:0 -8px 24px #0008;border-radius:12px 12px 0 0}
+  .tv-chip b{max-width:34vw}
+  .tv-pgrid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+}
 }`;
   let cssDone = false;
   const css = () => { if (cssDone) return; cssDone = true; const s = document.createElement('style'); s.textContent = CSS; document.head.append(s); };
@@ -187,7 +228,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
   }
 
   /* ---------- stato ---------- */
-  const T = { me: null, info: null, stato: null, scene: new Map(), tok: new Map(), tiri: [], vista: null, view: { x: 0, y: 0, z: 1 }, tool: 'muovi', ch: null, rulers: new Map(), live: false, url: new Map(), online: [] };
+  const T = { mini: new Map(), me: null, info: null, stato: null, scene: new Map(), tok: new Map(), tiri: [], vista: null, view: { x: 0, y: 0, z: 1 }, tool: 'muovi', ch: null, rulers: new Map(), live: false, url: new Map(), online: [] };
   const isDM = () => T.me?.ruolo === 'dm';
   const scena = () => T.scene.get(T.vista) || null;
   const puoMuovere = t => isDM() || (t.giocatore && t.giocatore === T.me.giocatore);
@@ -196,11 +237,12 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
   /* ---------- pagina ---------- */
   route(/^\/tavolo$/, async () => {
     await claude.use('db'); css();
-    T.diceInit = false; T.drag = null; T.online = []; T.live = false;
+    T.diceInit = false; T.drag = null; T.online = []; T.live = false; T.tool = 'muovi';
     setView(`<h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Tavolo</h1>
-      <div class="tv"><div class="tv-bar" id="tv-bar"><span class="tv-scena">Tavolo</span><span class="tv-sp"></span><span class="tv-on" id="tv-on"><i></i><span>Connessione…</span></span></div>
-      <div class="tv-main"><div class="tv-stage" id="tv-stage"><div class="tv-empty"><div><p>Apro il tavolo…</p></div></div></div>
-      <aside class="tv-dice" id="tv-dice" hidden></aside></div></div>`);
+      <div class="tv"><nav class="tv-rail" id="tv-rail" aria-label="Strumenti del tavolo"><span class="sp"></span><span class="tv-on" id="tv-on" title="Connessione…"></span></nav>
+      <div class="tv-wrap"><div class="tv-stage" id="tv-stage"><div class="tv-empty"><div><p>Apro il tavolo…</p></div></div></div><div class="tv-top" id="tv-top"></div></div>
+      <aside class="tv-chat" id="tv-dice" hidden></aside><div class="tv-pages" id="tv-pages" hidden></div></div>`);
+    suggerimenti($('.tv'));
     const fit = () => {
       const f = $('.tv'); if (!f) return;
       const top = $('header.top'), nav = $('#nav');
@@ -209,7 +251,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     };
     fit(); scrollTo(0, 0); addEventListener('resize', fit);
     let vivo = true;
-    onCleanup(() => { vivo = false; removeEventListener('resize', fit); esci(); });
+    onCleanup(() => { vivo = false; removeEventListener('resize', fit); esci(); document.querySelectorAll('.tv-tip').forEach(x => x.remove()); });
     const info = await window.__tavolo?.();
     T.info = info;
     try {
@@ -235,7 +277,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     T.live = false; T.rulers.clear(); clearTimeout(T.rt);
     removeEventListener('keydown', tasti);
   }
-  function stato(cls, txt) { const o = $('#tv-on'); if (!o) return; o.className = 'tv-on ' + cls; o.querySelector('span').textContent = txt; }
+  function stato(cls, txt) { const o = $('#tv-on'); if (!o) return; o.className = 'tv-on ' + cls; o.title = txt; }
 
   async function carica() {
     const [st, sc, tk, tr, mb] = await Promise.all([
@@ -266,6 +308,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
       if (p.eventType === 'DELETE') { T.scene.delete(p.old.id); if (T.vista === p.old.id) T.vista = T.stato.scena; }
       else { const prima = T.scene.get(p.new.id); T.scene.set(p.new.id, p.new); if (prima?.mappa !== p.new.mappa) T.url.delete(prima?.mappa); }
       disegnaBarra(); if (p.eventType === 'DELETE' || p.new.id === T.vista) mostraScena(p.eventType !== 'UPDATE');
+      if (isDM() && !$('#tv-pages')?.hidden) pannelloMappe(true);
     });
     pg('tavolo_stato', async p => {
       const prima = T.stato.scena; T.stato = p.new;
@@ -290,8 +333,8 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     });
     ch.on('presence', { event: 'sync' }, () => {
       T.online = Object.values(ch.presenceState()).map(a => a[0]?.nome).filter(Boolean);
-      if (T.live) stato('ok', T.online.length > 1 ? T.online.length + ' al tavolo' : 'Collegato');
-      const o = $('#tv-on'); if (o) o.title = 'Al tavolo ora: ' + T.online.join(', ');
+      if (T.live) stato('ok', 'Al tavolo ora: ' + T.online.join(', '));
+      const c = $('#tv-cnt'); if (c) c.textContent = T.online.length > 1 ? T.online.length : '';
     });
     let primo = true;
     ch.subscribe(async s => {
@@ -306,36 +349,142 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
   }
   const manda = (event, payload) => { if (T.ch) T.ch.send({ type: 'broadcast', event, payload }).catch(() => { }); };
 
-  /* ---------- barra ---------- */
-  function disegnaBarra() {
-    const bar = $('#tv-bar'); if (!bar) return;
-    const sc = scena(), att = T.stato?.scena;
-    const ico = (i, l, act, on, title) => `<button class="btn sm ${on ? 'on' : ''}" data-act="${act}" title="${esc(title || l)}"><span aria-hidden="true">${i}</span><span class="tl">${esc(l)}</span></button>`;
-    let h = '';
-    if (isDM()) {
-      const opts = [...T.scene.values()].map(s => `<option value="${s.id}" ${s.id === T.vista ? 'selected' : ''}>${s.id === att ? '● ' : ''}${esc(s.nome)}</option>`).join('');
-      h += T.scene.size ? `<select id="tv-sel" aria-label="Scena da guardare">${opts}</select>` : '';
-      if (sc && sc.id !== att) h += `<button class="btn sm primary" data-act="tv-porta" title="Mostra questa scena ai giocatori">Porta qui i giocatori</button>`;
-      h += ico('🗺', 'Scene', 'tv-scene', false, 'Crea e gestisci le scene');
-    } else h += `<span class="tv-scena">${esc(sc ? sc.nome : 'Tavolo')}</span>`;
-    h += '<span class="tv-sep"></span>' + ico('✋', 'Muovi', 'tv-muovi', T.tool === 'muovi', 'Sposta la mappa e i token') + ico('📏', 'Righello', 'tv-righello', T.tool === 'righello', 'Misura una distanza (R)');
-    if (isDM() && sc) h += ico('＋', 'Token', 'tv-token', false, 'Aggiungi un token') + ico('▦', 'Griglia', 'tv-griglia', false, 'Regola la griglia della mappa');
-    h += ico('🎲', 'Dadi', 'tv-dadi', !$('#tv-dice')?.hidden, 'Tira i dadi') + `<span class="tv-sp"></span><span class="tv-on ${T.live ? 'ok' : ''}" id="tv-on" title="Al tavolo ora: ${esc(T.online.join(', '))}"><i></i><span>${T.live ? (T.online.length > 1 ? T.online.length + ' al tavolo' : 'Collegato') : 'Connessione…'}</span></span>`;
-    bar.innerHTML = h;
-    const sel = $('#tv-sel'); if (sel) sel.onchange = () => { T.vista = sel.value; disegnaBarra(); mostraScena(true); };
-    setActs({
-      'tv-muovi': () => strumento('muovi'), 'tv-righello': () => strumento(T.tool === 'righello' ? 'muovi' : 'righello'),
-      'tv-dadi': () => { const d = $('#tv-dice'); d.hidden = !d.hidden; disegnaBarra(); if (!d.hidden) $('.tv-log', d).scrollTop = 1e9; },
-      'tv-porta': async () => { chk(await SB.from('tavolo_stato').update({ scena: T.vista }).eq('id', 1)); T.stato.scena = T.vista; disegnaBarra(); toast('I giocatori ora vedono: ' + scena().nome); },
-      'tv-scene': () => dlgScene(), 'tv-token': () => dlgToken(), 'tv-griglia': () => dlgGriglia(),
-      ...dadiActs()
-    });
+  /* ---------- strumenti (a sinistra) e mappe (in alto a destra), come su Roll20 ---------- */
+  const ICO = {
+    sel: '<path d="M5 3l14 7.5-6.2 1.7L10.5 19z"/>',
+    mano: '<path d="M8 13V6a1.5 1.5 0 0 1 3 0v5.5M11 11V4.5a1.5 1.5 0 0 1 3 0V11M14 11V6a1.5 1.5 0 0 1 3 0v6M17 10a1.5 1.5 0 0 1 3 0v5a6 6 0 0 1-6 6h-1.6a6 6 0 0 1-4.7-2.3l-3.2-4a1.5 1.5 0 0 1 2.3-1.9L8 14.5"/>',
+    rig: '<path d="M3 16.5L16.5 3 21 7.5 7.5 21z"/><path d="M7 12.5l2 2M10 9.5l2.5 2.5M13 6.5l2 2"/>',
+    dado: '<path d="M12 2.5l8.2 4.75v9.5L12 21.5l-8.2-4.75v-9.5z"/><path d="M12 7.5l4.3 7.5H7.7z"/>',
+    tok: '<circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/>',
+    gri: '<path d="M4 4h16v16H4zM4 9.33h16M4 14.67h16M9.33 4v16M14.67 4v16"/>',
+    pag: '<rect x="3" y="7" width="13" height="13" rx="1.5"/><path d="M7 4h12.5A1.5 1.5 0 0 1 21 5.5V17"/><path d="M5.5 17l3.5-4 2.5 2.5 1.5-1.5 2 3"/>'
+  };
+  const svg = k => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICO[k]}</svg>`;
+  function disegnaBarra() { disegnaRail(); disegnaTop(); setActs(azioni()); }
+  function disegnaRail() {
+    const r = $('#tv-rail'); if (!r) return;
+    const b = (act, tip, k, on) => `<button type="button" data-act="${act}" data-tip="${esc(tip)}" aria-label="${esc(tip)}" class="${on ? 'on' : ''}">${svg(k)}</button>`;
+    let h = b('tv-sel', 'Seleziona e sposta i token (S)', 'sel', T.tool === 'muovi') + b('tv-mano', 'Sposta la mappa (M)', 'mano', T.tool === 'mano')
+      + b('tv-righello', 'Righello (R)', 'rig', T.tool === 'righello') + b('tv-dadi', 'Dadi e chat', 'dado', !$('#tv-dice')?.hidden);
+    if (isDM() && scena()) h += '<hr><span class="lbl">DM</span>' + b('tv-token', 'Aggiungi un token', 'tok') + b('tv-griglia', 'Impostazioni della pagina', 'gri');
+    h += `<span class="sp"></span><span class="tv-cnt" id="tv-cnt">${T.online.length > 1 ? T.online.length : ''}</span><span class="tv-on ${T.live ? 'ok' : ''}" id="tv-on" title="${T.live ? esc('Al tavolo ora: ' + T.online.join(', ')) : 'Connessione…'}"></span>`;
+    r.innerHTML = h;
   }
-  function strumento(t) { T.tool = t; const st = $('#tv-stage'); if (st) st.classList.toggle('rul', t === 'righello'); disegnaBarra(); }
+  function disegnaTop() {
+    const t = $('#tv-top'); if (!t) return;
+    const sc = scena(), att = T.stato?.scena;
+    let h = '';
+    if (sc) h += `<div class="tv-chip"><b>${esc(sc.nome)}</b>${isDM() ? (sc.id === att ? '<span title="I giocatori sono su questa mappa" aria-label="I giocatori sono qui">🔖</span>' : '<button type="button" class="btn sm primary" data-act="tv-porta">Porta qui i giocatori</button>') : ''}</div>`;
+    if (isDM()) h += `<button type="button" class="tv-pgbtn" data-act="tv-pagine" data-tip="Mappe" aria-label="Mappe">${svg('pag')}</button>`;
+    t.innerHTML = h;
+  }
+  function azioni() {
+    return {
+      'tv-sel': () => strumento('muovi'), 'tv-mano': () => strumento('mano'), 'tv-righello': () => strumento(T.tool === 'righello' ? 'muovi' : 'righello'),
+      'tv-dadi': () => { const d = $('#tv-dice'); d.hidden = !d.hidden; disegnaRail(); if (!d.hidden) $('.tv-log', d).scrollTop = 1e9; },
+      'tv-porta': () => porta(T.vista),
+      'tv-pagine': () => pannelloMappe($('#tv-pages').hidden), 'tv-nuova': () => dlgNuovaScena(),
+      'tv-token': () => dlgToken(), 'tv-griglia': () => dlgGriglia(),
+      ...dadiActs()
+    };
+  }
+  function strumento(t) { T.tool = t; const st = $('#tv-stage'); if (st) { st.classList.toggle('rul', t === 'righello'); st.classList.toggle('mano', t === 'mano'); } disegnaRail(); }
   function tasti(e) {
     if (e.target.closest('input,textarea,select,[contenteditable]') || e.ctrlKey || e.metaKey || e.altKey || document.querySelector('dialog[open]')) return;
-    if (e.key === 'r' || e.key === 'R') strumento(T.tool === 'righello' ? 'muovi' : 'righello');
-    else if (e.key === 'Escape') { strumento('muovi'); chiudiPop(); }
+    const k = e.key.toLowerCase();
+    if (k === 'r') strumento(T.tool === 'righello' ? 'muovi' : 'righello');
+    else if (k === 's') strumento('muovi');
+    else if (k === 'm') strumento('mano');
+    else if (e.key === 'Escape') { strumento('muovi'); chiudiPop(); pannelloMappe(false); }
+  }
+  // etichette dei pulsanti al passaggio del mouse
+  function suggerimenti(root) {
+    let tip = null;
+    const via = () => { tip?.remove(); tip = null; };
+    root.addEventListener('pointerover', e => {
+      const b = e.target.closest('[data-tip]'); if (!b || e.pointerType !== 'mouse') return;
+      via(); tip = document.createElement('div'); tip.className = 'tv-tip'; tip.textContent = b.dataset.tip; document.body.append(tip);
+      const r = b.getBoundingClientRect(), dx = r.left > innerWidth / 2;
+      tip.style.top = (r.top + r.height / 2 - tip.offsetHeight / 2) + 'px';
+      tip.style.left = (dx ? r.left - tip.offsetWidth - 8 : r.right + 8) + 'px';
+    });
+    root.addEventListener('pointerout', e => { if (e.target.closest('[data-tip]')) via(); });
+    root.addEventListener('pointerdown', via);
+  }
+  async function porta(id) {
+    const s = T.scene.get(id); if (!s) return;
+    chk(await SB.from('tavolo_stato').update({ scena: id }).eq('id', 1));
+    T.stato.scena = id; disegnaTop(); if (!$('#tv-pages').hidden) pannelloMappe(true);
+    toast('I giocatori ora vedono: ' + s.nome);
+  }
+
+  /* ---------- pannello delle mappe (DM): si preparano prima e si cambia al volo ---------- */
+  const SEGUI = 'tavolo-segui';
+  const segue = () => { try { return localStorage.getItem(SEGUI) !== '0'; } catch { return true; } };
+  const miniPath = path => path.replace(/\.[^./]+$/, '') + '-mini.jpg';
+  const dataBlob = async u => (await fetch(u)).blob();
+  async function miniUrl(s) {
+    if (!s.mappa) return null;
+    const c = T.mini.get(s.mappa); if (c) return c;
+    const p = (async () => {
+      try { return await urlMappa(miniPath(s.mappa)); } catch { }
+      // mappe caricate prima delle anteprime: la ricavo dall'immagine intera e la salvo per le prossime volte
+      const blob = await dataBlob(await urlMappa(s.mappa)), bmp = await loadBitmap(blob);
+      const k = Math.min(1, 400 / Math.max(bmp.width, bmp.height)), c2 = document.createElement('canvas');
+      c2.width = Math.max(1, Math.round(bmp.width * k)); c2.height = Math.max(1, Math.round(bmp.height * k));
+      c2.getContext('2d').drawImage(bmp, 0, 0, c2.width, c2.height); if (bmp.close) bmp.close();
+      const mini = await new Promise(r => c2.toBlob(r, 'image/jpeg', 0.75));
+      SB.storage.from(BUCKET).upload(miniPath(s.mappa), mini, { contentType: 'image/jpeg', upsert: true }).catch(() => { });
+      return URL.createObjectURL(mini);
+    })();
+    T.mini.set(s.mappa, p); p.catch(() => T.mini.delete(s.mappa));
+    return p;
+  }
+  function pannelloMappe(apri) {
+    const p = $('#tv-pages'); if (!p) return;
+    if (!apri) { p.hidden = true; return; }
+    chiudiPop();
+    const sc = scena(), att = T.stato.scena, q = p.querySelector('input[type=search]')?.value || '';
+    const card = s => `<div class="tv-card ${s.id === T.vista ? 'cur' : ''}" role="button" tabindex="0" data-id="${s.id}"><span class="im" data-mini="${s.id}"></span>${s.id === att ? '<span class="seg" title="I giocatori sono qui"></span>' : ''}
+      <span class="nm">${esc(s.nome)}</span><span class="acts">${s.id === att ? '' : '<button type="button" data-k="porta" title="Porta qui i giocatori" aria-label="Porta qui i giocatori">🔖</button>'}<button type="button" data-k="nome" title="Rinomina" aria-label="Rinomina">✎</button><button type="button" data-k="via" title="Elimina" aria-label="Elimina">✕</button></span></div>`;
+    p.innerHTML = `<div class="tv-ph"><div class="cur">${sc ? `<span class="ph" data-mini="${sc.id}"></span><b>${esc(sc.nome)}</b><button type="button" class="lnk" data-k="imp">⚙ Impostazioni della pagina</button>` : '<b>Mappe</b>'}</div>
+      <input type="search" placeholder="Cerca…" aria-label="Cerca una mappa" value="${esc(q)}">
+      <label title="Se è spuntato, quando apri una mappa ci vanno anche i giocatori"><input type="checkbox" data-k="segui" ${segue() ? 'checked' : ''}> I giocatori mi seguono</label>
+      <button type="button" class="btn primary" data-k="nuova">+ Crea pagina</button><button type="button" class="x" data-k="chiudi" aria-label="Chiudi">✕</button></div>
+      <div class="tv-pgrid">${[...T.scene.values()].map(card).join('')}<button type="button" class="tv-card nuova" data-k="nuova"><span>+</span>Nuova mappa</button></div>`;
+    p.hidden = false;
+    p.querySelectorAll('[data-mini]').forEach(el => { const s = T.scene.get(el.dataset.mini); if (s) miniUrl(s).then(u => { if (u) el.style.backgroundImage = `url("${u}")`; el.style.backgroundSize = 'cover'; el.style.backgroundPosition = 'center'; }).catch(() => { }); });
+    const cerca = p.querySelector('input[type=search]');
+    const filtra = () => { const t = norm(cerca.value); p.querySelectorAll('.tv-card[data-id]').forEach(c => c.hidden = !!t && !norm(T.scene.get(c.dataset.id)?.nome).includes(t)); };
+    cerca.oninput = filtra; filtra();
+    p.querySelector('[data-k=segui]').onchange = e => { try { localStorage.setItem(SEGUI, e.target.checked ? '1' : '0'); } catch { } };
+    p.querySelectorAll('[data-k=nuova]').forEach(b => b.onclick = () => dlgNuovaScena());
+    p.querySelector('[data-k=chiudi]').onclick = () => pannelloMappe(false);
+    const imp = p.querySelector('[data-k=imp]'); if (imp) imp.onclick = () => { pannelloMappe(false); dlgGriglia(); };
+    p.querySelectorAll('.tv-card[data-id]').forEach(c => {
+      const s = T.scene.get(c.dataset.id);
+      const apriMappa = async () => {
+        T.vista = s.id; pannelloMappe(false); disegnaBarra(); mostraScena(true);
+        if (segue() && T.stato.scena !== s.id) await porta(s.id).catch(e => toast(e.message, 'err'));
+      };
+      c.onclick = e => { if (!e.target.closest('.acts')) apriMappa(); };
+      c.onkeydown = e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === c) { e.preventDefault(); apriMappa(); } };
+      const pt = c.querySelector('[data-k=porta]'); if (pt) pt.onclick = () => porta(s.id).catch(e => toast(e.message, 'err'));
+      c.querySelector('[data-k=nome]').onclick = async () => {
+        const n = prompt('Nome della mappa', s.nome); if (!n?.trim()) return;
+        const r = await SB.from('tavolo_scene').update({ nome: n.trim().slice(0, 80) }).eq('id', s.id).select().single(); if (r.error) return toast(r.error.message, 'err');
+        T.scene.set(s.id, r.data); pannelloMappe(true); disegnaTop();
+      };
+      c.querySelector('[data-k=via]').onclick = async () => {
+        if (!await ask(`Eliminare la mappa **${s.nome}** con tutti i suoi token?`, { ok: 'Elimina', danger: true, title: 'Elimina mappa' })) return;
+        const r = await SB.from('tavolo_scene').delete().eq('id', s.id); if (r.error) return toast(r.error.message, 'err');
+        if (s.mappa) SB.storage.from(BUCKET).remove([s.mappa, miniPath(s.mappa)]).catch(() => { });
+        T.scene.delete(s.id); for (const t of [...T.tok.values()]) if (t.scena === s.id) T.tok.delete(t.id);
+        if (T.stato.scena === s.id) T.stato.scena = null;
+        if (T.vista === s.id) { T.vista = T.stato.scena || [...T.scene.keys()][0] || null; mostraScena(true); }
+        pannelloMappe(true); disegnaBarra();
+      };
+    });
   }
 
   /* ---------- scena ---------- */
@@ -351,12 +500,12 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     chiudiPop();
     const sc = scena();
     if (!sc) {
-      st.innerHTML = `<div class="tv-empty"><div>${isDM() ? (T.scene.size ? '<h2>Nessuna scena scelta</h2><p>Scegline una dall\'elenco in alto.</p>' : '<h2>Il tavolo è pronto</h2><p>Crea la prima scena: carica la mappa del combattimento o del luogo, poi aggiungi i token.</p><p><button class="btn primary" data-act="tv-scene">Crea una scena</button></p>') : '<h2>Il tavolo è vuoto</h2><p>Aspetta che il DM vi porti in una scena: apparirà qui da sola.</p>'}</div></div>`;
+      st.innerHTML = `<div class="tv-empty"><div>${isDM() ? (T.scene.size ? '<h2>Nessuna mappa aperta</h2><p>Scegline una dal pannello delle mappe, in alto a destra.</p><p><button class="btn primary" data-act="tv-pagine">Apri le mappe</button></p>' : '<h2>Il tavolo è pronto</h2><p>Crea la prima mappa: carica l\'immagine del combattimento o del luogo, poi aggiungi i token.</p><p><button class="btn primary" data-act="tv-nuova">Crea una mappa</button></p>') : '<h2>Il tavolo è vuoto</h2><p>Aspetta che il DM vi porti in una scena: apparirà qui da sola.</p>'}</div></div>`;
       return;
     }
     st.innerHTML = `<div class="tv-world" id="tv-world"><img class="tv-map" id="tv-map" alt="" draggable="false" width="${sc.larghezza}" height="${sc.altezza}" style="width:${sc.larghezza}px;height:${sc.altezza}px">
       <svg class="tv-grid" id="tv-grid" width="${sc.larghezza}" height="${sc.altezza}"></svg><div id="tv-toks"></div></div>
-      <svg class="tv-ov" id="tv-ov"></svg><div class="tv-zoom"><button type="button" data-z="1.25" title="Ingrandisci">+</button><button type="button" data-z="0.8" title="Rimpicciolisci">−</button><button type="button" data-z="0" title="Mostra tutta la mappa">⤢</button></div>`;
+      <svg class="tv-ov" id="tv-ov"></svg><div class="tv-zoom"><button type="button" data-z="1.25" data-tip="Ingrandisci" aria-label="Ingrandisci">+</button><small id="tv-zp"></small><button type="button" data-z="0.8" data-tip="Rimpicciolisci" aria-label="Rimpicciolisci">−</button><button type="button" data-z="0" data-tip="Mostra tutta la mappa" aria-label="Mostra tutta la mappa">⤢</button></div>`;
     st.querySelectorAll('[data-z]').forEach(b => b.onclick = () => { const z = +b.dataset.z; if (!z) adatta(); else { const r = st.getBoundingClientRect(); zoom(z, r.width / 2, r.height / 2); } });
     const img = $('#tv-map');
     if (sc.mappa) urlMappa(sc.mappa).then(u => { if (img.isConnected) img.src = u; }).catch(e => toast('Mappa non caricata: ' + e.message, 'err'));
@@ -376,6 +525,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
   }
   function applicaVista() {
     const w = $('#tv-world'); if (w) w.style.transform = `translate(${T.view.x}px,${T.view.y}px) scale(${T.view.z})`;
+    const zp = $('#tv-zp'); if (zp) zp.textContent = Math.round(T.view.z * 100) + '%';
     disegnaRighelli(); chiudiPop();
   }
   function zoom(f, cx, cy) {
@@ -426,8 +576,8 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
       if (punti.size > 2) return;
       const p = mondo(st, e), el = e.target.closest('.tv-tok'), t = el && T.tok.get(el.dataset.id);
       if (T.tool === 'righello') { const sc = scena(); const a = { x: centroCasella(p.x, sc.griglia_x), y: centroCasella(p.y, sc.griglia_y) }; rul = { pts: [a, a] }; mostraRighello(rul.pts); return; }
-      if (t && puoMuovere(t)) { T.drag = { id: t.id, dx: p.x - t.x, dy: p.y - t.y, x0: t.x, y0: t.y, sx: e.clientX, sy: e.clientY, mosso: false }; el.classList.add('drag'); return; }
-      if (t && isDM()) T.clic = { id: t.id, sx: e.clientX, sy: e.clientY };
+      if (t && T.tool !== 'mano' && puoMuovere(t)) { T.drag = { id: t.id, dx: p.x - t.x, dy: p.y - t.y, x0: t.x, y0: t.y, sx: e.clientX, sy: e.clientY, mosso: false }; el.classList.add('drag'); return; }
+      if (t && T.tool !== 'mano' && isDM()) T.clic = { id: t.id, sx: e.clientX, sy: e.clientY };
       pan = { sx: e.clientX, sy: e.clientY, x: T.view.x, y: T.view.y }; st.classList.add('pan');
     });
     st.addEventListener('pointermove', e => {
@@ -575,51 +725,28 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
   }
 
   /* ---------- scene (DM) ---------- */
-  function dlgScene() {
-    const d = openDlg(`<form method="dialog"><h3>Scene</h3><p class="hint" style="margin-top:0">Una scena è una mappa con i suoi token. I giocatori vedono solo quella segnata ●, le altre le prepari in anticipo.</p>
-      <div id="tv-scl"></div>
-      <h4 style="margin:16px 0 4px">Nuova scena</h4>
-      <div class="tv-f"><label>Nome</label><input name="nome" maxlength="80" placeholder="Es. Agguato sulla strada">
+  function dlgNuovaScena() {
+    const d = openDlg(`<form method="dialog"><h3>Nuova mappa</h3><p class="hint" style="margin-top:0">Preparala prima della sessione: i giocatori la vedono solo quando ce li porti.</p>
+      <div class="tv-f"><label>Nome</label><input name="nome" maxlength="80" placeholder="Es. Taverna interno" autofocus>
         <label>Mappa</label><select name="src"><option value="file">Carica un'immagine</option>${S.maps.length ? '<option value="sito">Una mappa del sito</option>' : ''}<option value="vuota">Nessuna (solo griglia)</option></select>
         <label data-s="file">File</label><input data-s="file" type="file" name="file" accept="image/*">
         <label data-s="sito" hidden>Mappa</label><select data-s="sito" name="mappa" hidden>${S.maps.map(m => `<option value="${esc(m.id)}">${esc(m.name)}</option>`).join('')}</select>
         <label data-s="vuota" hidden>Caselle</label><span data-s="vuota" hidden><input type="number" name="cw" value="30" min="5" max="200" style="width:70px"> × <input type="number" name="ch" value="20" min="5" max="200" style="width:70px"></span></div>
       <p class="hint" id="tv-scm"></p>
-      <menu><button value="cancel" class="btn ghost">Chiudi</button><button type="button" class="btn primary" data-k="crea">Crea la scena</button></menu></form>`, 'wide');
+      <menu><button value="cancel" class="btn ghost">Annulla</button><button type="button" class="btn primary" data-k="crea">Crea la mappa</button></menu></form>`);
     const src = d.querySelector('[name=src]');
     src.onchange = () => d.querySelectorAll('[data-s]').forEach(x => x.hidden = x.dataset.s !== src.value);
-    const lista = () => {
-      const att = T.stato.scena;
-      d.querySelector('#tv-scl').innerHTML = [...T.scene.values()].map(s => `<div class="tv-sc" data-id="${s.id}">${s.mappa ? '<img alt="">' : '<span class="ph"></span>'}<div><b>${s.id === att ? '● ' : ''}${esc(s.nome)}</b><small>${s.id === att ? 'La vedono i giocatori' : 'In preparazione'} · ${[...T.tok.values()].filter(t => t.scena === s.id).length} token</small></div>
-        <button type="button" class="btn sm" data-k="apri">Apri</button>${s.id === att ? '' : '<button type="button" class="btn sm" data-k="porta">Porta qui i giocatori</button>'}<button type="button" class="btn sm" data-k="nome" title="Rinomina">✎</button><button type="button" class="btn sm danger" data-k="via" title="Elimina">✕</button></div>`).join('') || '<p class="hint">Nessuna scena ancora.</p>';
-      d.querySelectorAll('.tv-sc').forEach(row => {
-        const s = T.scene.get(row.dataset.id), im = row.querySelector('img');
-        if (im) urlMappa(s.mappa).then(u => im.src = u).catch(() => { });
-        row.querySelector('[data-k=apri]').onclick = () => { T.vista = s.id; d.close(); disegnaBarra(); mostraScena(true); };
-        const porta = row.querySelector('[data-k=porta]');
-        if (porta) porta.onclick = async () => { chk(await SB.from('tavolo_stato').update({ scena: s.id }).eq('id', 1)); T.stato.scena = s.id; T.vista = s.id; lista(); disegnaBarra(); mostraScena(true); toast('I giocatori ora vedono: ' + s.nome); };
-        row.querySelector('[data-k=nome]').onclick = async () => { const n = prompt('Nome della scena', s.nome); if (!n?.trim()) return; const r = await SB.from('tavolo_scene').update({ nome: n.trim() }).eq('id', s.id).select().single(); if (r.error) return toast(r.error.message, 'err'); T.scene.set(s.id, r.data); lista(); disegnaBarra(); };
-        row.querySelector('[data-k=via]').onclick = async () => {
-          if (!await ask(`Eliminare la scena **${s.nome}** con tutti i suoi token?`, { ok: 'Elimina', danger: true, title: 'Elimina scena' })) return;
-          const r = await SB.from('tavolo_scene').delete().eq('id', s.id); if (r.error) return toast(r.error.message, 'err');
-          if (s.mappa) SB.storage.from(BUCKET).remove([s.mappa]).catch(() => { });
-          T.scene.delete(s.id); for (const t of [...T.tok.values()]) if (t.scena === s.id) T.tok.delete(t.id);
-          if (T.stato.scena === s.id) T.stato.scena = null;
-          if (T.vista === s.id) { T.vista = T.stato.scena || [...T.scene.keys()][0] || null; mostraScena(true); }
-          lista(); disegnaBarra();
-        };
-      });
-    };
-    lista();
     d.querySelector('[data-k=crea]').onclick = async ev => {
       const b = ev.currentTarget, msg = d.querySelector('#tv-scm'), nome = d.querySelector('[name=nome]').value.trim();
-      if (!nome) { msg.textContent = 'Dai un nome alla scena.'; return; }
-      b.disabled = true; msg.textContent = 'Preparo la scena…';
+      if (!nome) { msg.textContent = 'Dai un nome alla mappa.'; return; }
+      b.disabled = true; msg.textContent = 'Preparo la mappa…';
       try {
+        // una casella ogni ~70 px è la misura più comune delle mappe da combattimento
         const row = { nome, griglia: 70 };
         let blob = null;
-        if (src.value === 'file') { const f = d.querySelector('[name=file]').files[0]; if (!f) throw new Error('Scegli l\'immagine della mappa.'); const im = await processImage(f, 6000); blob = im.blob; row.larghezza = im.w; row.altezza = im.h; }
-        else if (src.value === 'sito') { const m = S.maps.find(x => x.id === d.querySelector('[name=mappa]').value); const rec = await dbGet('blobs', m.id); if (!rec?.blob) throw new Error('Immagine della mappa non trovata.'); blob = rec.blob; row.larghezza = +m.w || 2000; row.altezza = +m.h || 1400; }
+        let mini = null;
+        if (src.value === 'file') { const f = d.querySelector('[name=file]').files[0]; if (!f) throw new Error('Scegli l\'immagine della mappa.'); const im = await processImage(f, 6000); blob = im.blob; mini = im.thumb; row.larghezza = im.w; row.altezza = im.h; }
+        else if (src.value === 'sito') { const m = S.maps.find(x => x.id === d.querySelector('[name=mappa]').value); const rec = await dbGet('blobs', m.id); if (!rec?.blob) throw new Error('Immagine della mappa non trovata.'); blob = rec.blob; mini = m.thumb || null; row.larghezza = +m.w || 2000; row.altezza = +m.h || 1400; }
         else { row.larghezza = clamp(+d.querySelector('[name=cw]').value || 30, 5, 200) * 70; row.altezza = clamp(+d.querySelector('[name=ch]').value || 20, 5, 200) * 70; }
         if (blob) {
           msg.textContent = 'Carico la mappa (' + fmtSize(blob.size) + ')…';
@@ -627,14 +754,17 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
           const up = await SB.storage.from(BUCKET).upload(path, blob, { contentType: blob.type || 'image/jpeg' });
           if (up.error) throw new Error(up.error.message);
           row.mappa = path;
-          // una casella ogni ~70 px è la misura più comune delle mappe da combattimento; si regola dopo da «Griglia»
+          // l'anteprima per il pannello delle mappe (se manca la ricava il pannello)
+          if (mini) await SB.storage.from(BUCKET).upload(miniPath(path), await dataBlob(mini), { contentType: 'image/jpeg', upsert: true }).catch(() => { });
         }
         const r = await SB.from('tavolo_scene').insert(row).select().single();
         if (r.error) throw new Error(r.error.message);
         T.scene.set(r.data.id, r.data);
         if (!T.stato.scena) { chk(await SB.from('tavolo_stato').update({ scena: r.data.id }).eq('id', 1)); T.stato.scena = r.data.id; }
-        T.vista = r.data.id; d.close(); disegnaBarra(); mostraScena(true);
-        toast('Scena creata: regola la griglia se non combacia con la mappa.');
+        d.close();
+        if (!$('#tv-pages').hidden) pannelloMappe(true);
+        else { T.vista = r.data.id; disegnaBarra(); mostraScena(true); }
+        toast('Mappa creata: regola la griglia da «Impostazioni della pagina» se non combacia.');
       } catch (e) { msg.textContent = e.tv ? ERR[e.tv][0] : e.message; b.disabled = false; }
     };
   }
@@ -643,8 +773,9 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
   function dlgGriglia() {
     const sc = scena(); if (!sc) return;
     const prima = { ...sc };
-    const d = openDlg(`<form method="dialog"><h3>Griglia</h3><p class="hint" style="margin-top:0">Cambia i valori guardando la mappa: la griglia si aggiorna subito. Fai combaciare una casella con un quadretto della mappa.</p>
-      <div class="tv-f"><label>Casella (px)</label><span style="display:flex;gap:8px;align-items:center"><input type="range" name="g" min="10" max="300" step="0.5" value="${sc.griglia}" style="flex:1"><input type="number" name="gn" min="8" max="600" step="0.5" value="${sc.griglia}" style="width:80px"></span>
+    const d = openDlg(`<form method="dialog"><h3>Impostazioni della pagina</h3><p class="hint" style="margin-top:0">Cambia i valori guardando la mappa: la griglia si aggiorna subito. Fai combaciare una casella con un quadretto della mappa.</p>
+      <div class="tv-f"><label>Nome</label><input name="nome" maxlength="80" value="${esc(sc.nome)}">
+        <label>Casella (px)</label><span style="display:flex;gap:8px;align-items:center"><input type="range" name="g" min="10" max="300" step="0.5" value="${sc.griglia}" style="flex:1"><input type="number" name="gn" min="8" max="600" step="0.5" value="${sc.griglia}" style="width:80px"></span>
         <label>Sposta ↔</label><input type="range" name="gx" min="0" max="${sc.griglia}" step="0.5" value="${((sc.griglia_x % sc.griglia) + sc.griglia) % sc.griglia}">
         <label>Sposta ↕</label><input type="range" name="gy" min="0" max="${sc.griglia}" step="0.5" value="${((sc.griglia_y % sc.griglia) + sc.griglia) % sc.griglia}">
         <label>Metri per casella</label><input type="number" name="m" min="0.1" max="1000" step="0.1" value="${sc.metri}">
@@ -660,14 +791,14 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     ['gx', 'gy', 'm', 'vis'].forEach(n => v(n).oninput = prova);
     d.addEventListener('close', async () => {
       if (d.returnValue !== 'ok') { Object.assign(sc, prima); disegnaGriglia(); disegnaToken(); return; }
-      const ch = { griglia: sc.griglia, griglia_x: sc.griglia_x, griglia_y: sc.griglia_y, metri: sc.metri, griglia_visibile: sc.griglia_visibile };
+      const ch = { nome: v('nome').value.trim().slice(0, 80) || prima.nome, griglia: sc.griglia, griglia_x: sc.griglia_x, griglia_y: sc.griglia_y, metri: sc.metri, griglia_visibile: sc.griglia_visibile };
       const r = await SB.from('tavolo_scene').update(ch).eq('id', sc.id).select().single();
       if (r.error) { Object.assign(sc, prima); disegnaGriglia(); disegnaToken(); return toast(r.error.message, 'err'); }
       T.scene.set(sc.id, r.data);
       // i token restano sulle loro caselle anche con la griglia nuova
       const sposta = [...T.tok.values()].filter(t => t.scena === sc.id).map(t => ({ t, x: aggancia(t.x, sc.griglia_x, t.misura), y: aggancia(t.y, sc.griglia_y, t.misura) })).filter(o => o.x !== o.t.x || o.y !== o.t.y);
       for (const o of sposta) { o.t.x = o.x; o.t.y = o.y; SB.from('tavolo_token').update({ x: o.x, y: o.y }).eq('id', o.t.id).then(() => { }); }
-      disegnaToken(); toast('Griglia salvata.');
+      disegnaToken(); disegnaTop(); toast('Impostazioni salvate.');
     });
   }
 
@@ -676,13 +807,13 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     const box = $('#tv-dice'); if (!box) return;
     if (matchMedia('(min-width:821px)').matches && box.hidden && !T.diceInit) box.hidden = false;
     T.diceInit = true;
-    box.innerHTML = `<div class="tv-dh"><span>Dadi</span><button class="btn sm ghost" data-act="tv-dadi" title="Chiudi">✕</button></div><div class="tv-log" id="tv-log"></div>
+    box.innerHTML = `<div class="tv-dh"><span>Chat</span><button class="btn sm ghost" data-act="tv-dadi" title="Chiudi">✕</button></div><div class="tv-log" id="tv-log"></div>
       <div class="tv-dk"><div class="row">${DADI.map(n => `<button class="btn sm" data-act="tv-d" data-n="${n}">d${n}</button>`).join('')}</div>
       <div class="row"><input type="number" id="tv-mod" placeholder="Mod." style="width:64px" aria-label="Modificatore"><button class="btn sm" data-act="tv-vant" title="2d20, tiene il più alto">Vantaggio</button><button class="btn sm" data-act="tv-svant" title="2d20, tiene il più basso">Svantaggio</button></div>
-      <div class="row"><input type="text" id="tv-f" placeholder="Es. 2d6+3 o 4d6kh3" style="flex:1" autocomplete="off" aria-label="Formula"><button class="btn sm primary" data-act="tv-tira" style="flex:none">Tira</button></div>
       <div class="row"><input type="text" id="tv-mot" placeholder="Per cosa? (facoltativo)" style="flex:1" maxlength="80" aria-label="Motivo"></div>
-      ${isDM() ? '<label><input type="checkbox" id="tv-priv"> Tiro nascosto (solo io)</label>' : ''}</div>`;
-    $('#tv-f').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); tira($('#tv-f').value); } };
+      <label><input type="checkbox" id="tv-priv"> ${isDM() ? 'Tiro nascosto (solo io)' : 'Tiro segreto (solo io e il DM)'}</label>
+      <div class="row"><input type="text" id="tv-f" placeholder="/r 1d20+5  ·  /gr per un tiro segreto" style="flex:1" autocomplete="off" aria-label="Scrivi un tiro"><button class="btn sm primary" data-act="tv-tira" style="flex:none">Invia</button></div></div>`;
+    $('#tv-f').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); scrivi(); } };
     disegnaBarra(); disegnaLog();
   }
   const conMod = f => { const m = Math.trunc(+$('#tv-mod')?.value || 0); return m ? f + (m > 0 ? '+' : '') + m : f; };
@@ -690,17 +821,25 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     return {
       'tv-d': b => tira(conMod('1d' + b.dataset.n)),
       'tv-vant': () => tira(conMod('2d20kh1'), 'vantaggio'), 'tv-svant': () => tira(conMod('2d20kl1'), 'svantaggio'),
-      'tv-tira': () => tira($('#tv-f').value)
+      'tv-tira': () => scrivi()
     };
   }
-  async function tira(formula, extra) {
-    formula = String(formula || '').trim(); if (!formula) return;
+  // la riga in fondo alla chat, come su Roll20: /r 1d20+5, /gr (o /gmroll) per un tiro segreto, oppure solo la formula
+  async function scrivi() {
+    const f = $('#tv-f'), t = f.value.trim(); if (!t) return;
+    const m = t.match(/^\/(r|roll|gr|gmroll)\s+(.+)$/i), formula = m ? m[2] : t, segreto = m ? /^g/i.test(m[1]) : undefined;
+    if (!/^[\sd\d+\-khl]+$/i.test(formula)) { toast('Per ora la chat accetta i tiri: scrivi per esempio /r 1d20+5', 'err'); return; }
+    if (await tira(formula, null, segreto)) f.value = '';
+  }
+  async function tira(formula, extra, segreto) {
+    formula = String(formula || '').trim(); if (!formula) return false;
     const mot = [$('#tv-mot')?.value.trim(), extra].filter(Boolean).join(' · ');
-    const r = await SB.rpc('tavolo_tira', { p_formula: formula, p_motivo: mot || null, p_privato: !!$('#tv-priv')?.checked });
-    if (r.error) return toast(r.error.message, 'err');
+    const r = await SB.rpc('tavolo_tira', { p_formula: formula, p_motivo: mot || null, p_privato: segreto ?? !!$('#tv-priv')?.checked });
+    if (r.error) { toast(r.error.message, 'err'); return false; }
     const t = Array.isArray(r.data) ? r.data[0] : r.data;
     if ($('#tv-mot')) $('#tv-mot').value = '';
     if (t && !T.tiri.some(x => x.id === t.id)) { T.tiri.push(t); nuovoTiro(t); }
+    return true;
   }
   // 20 o 1 naturale su un tiro di d20
   function esito(t) {
