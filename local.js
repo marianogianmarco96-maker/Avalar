@@ -18,6 +18,8 @@
   const ROERR = () => new Error('Sola lettura: accedi come Dungeon Master per modificare.');
 
   let ROLE = null, DB = null, MEM = {}, BLOBMAP = {}, RAW = null, PLAYER = null, BLOBKEYS = {}, PRAW = null, PTOKEN = null;
+  // iterazioni della chiave (da data.enc): servono al tavolo per ricavare gli accessi dei giocatori
+  let ITER = null;
   // account dei giocatori, nell'ordine dei ritratti di login-gruppo.jpg
   const PLAYERS = [['livion', 'Livion'], ['mungus', 'Mungus'], ['sam', 'Sam'], ['violet', 'Violet']];
   // modifiche non ancora inviate: chiavi 'raccolta/id' dei documenti e id delle immagini caricate
@@ -91,7 +93,7 @@
       try { payload = JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64d(enc.iv) }, await aesKey(raw), b64d(enc.ct)))); }
       catch { throw new Error(code != null ? 'Codice non corretto.' : 'nokey'); }
     } else if (!have) throw new Error('Impossibile aprire i dati: serve internet al primo accesso.');
-    RAW = raw;
+    RAW = raw; ITER = enc ? enc.it : null;
     if (payload && !have) await seedAdmin(payload, raw);
     else if (payload) {
       // i dati pubblicati comandano: se sono cambiati li riprendo, rimettendo sopra solo le modifiche ancora da inviare
@@ -269,6 +271,14 @@
     return PLAIN.get(aid);
   }
   window.__player = () => PLAYER && { ...PLAYER };
+  /* tavolo virtuale: chi sei e la chiave del tuo accesso (da cui il tavolo ricava il tuo account Supabase, senza nuove password).
+     Il DM riceve anche gli account dei giocatori, per prepararli. */
+  window.__tavolo = async () => {
+    await ready;
+    if (ROLE === 'admin') return { ruolo: 'dm', raw: RAW, it: ITER, giocatori: clone(MEM.meta?.get('giocatori')?.v || []) };
+    if (ROLE === 'player') return { ruolo: 'giocatore', id: PLAYER.id, nome: PLAYER.name, pg: PLAYER.pg || null, raw: PRAW };
+    return null;
+  };
 
   /* ---------- interfaccia per ruolo ---------- */
   const HIDE_ACTS = ['selmode', 'selall', 'selnone', 'selmove', 'edit', 'up', 'rensess', 'reimg', 'delRel', 'dmRel', 'del', 'copyctx', 'wipe', 'vedit', 'vdm', 'vpl', 'undo', 'toggleDisc', 'subup', 'rename', 'renSec', 'redraw', 'portrait', 'newsess', 'newent', 'merge', 'histgen', 'editreg', 'editpin', 'editmap', 'editgen', 'editEntry', 'drawundo', 'drawok', 'drawcancel', 'delreg', 'delpin', 'delphoto', 'delmap', 'delSec', 'delEntry', 'delDoc', 'cpDoc', 'copyEnt', 'bkFull', 'bkData', 'attach', 'analyze', 'addreg', 'addpin', 'addphotos', 'addSec', 'addRel', 'addEntry', 'addEv', 'editEv', 'delEv', 'demo'];
