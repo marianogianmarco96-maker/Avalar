@@ -1,5 +1,6 @@
 /* Campagna D&D — «Tavolo»: il tavolo virtuale condiviso, in tempo reale (Supabase).
    Tappa 1: mappa con griglia, token che i giocatori muovono dal vivo, dadi tirati dal server e visibili a tutti, righello.
+   Tappa 2: maschera, ordine del turno, chat (tavolo/tappa-2.sql e tappa-2b.sql).
    Nessuna nuova password: l'account Supabase di ognuno è ricavato dalla chiave con cui è entrato nel sito
    (codice del DM o password del giocatore). Il DM, aprendo il tavolo, prepara anche gli account dei giocatori.
    Le tabelle e i permessi sono in tavolo/tappa-1.sql. Usa le funzioni della pagina principale (route, setView, esc…). */
@@ -163,15 +164,39 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
 .tv-mbar label{display:flex;align-items:center;gap:5px;font-size:.85rem;white-space:nowrap}
 .tv-mbar .sep{width:1px;align-self:stretch;background:#ffffff22}
 .tv-mbar input[type=range]{width:90px}
-.tv-msg{border-left:3px solid var(--line2);padding:3px 8px;font-size:.98rem;line-height:1.35;overflow-wrap:anywhere}
-.tv-msg b{color:var(--wine)}
-:root[data-theme=dark] .tv-msg b{color:var(--gold2)}
-.tv-msg small{color:var(--mute);margin-left:4px}
-.tv-msg.w{border-left-color:#8a5cc7;background:#8a5cc714;font-style:italic}
+.tv-roll .h .who{display:flex;align-items:baseline;gap:5px;min-width:0;flex-wrap:wrap}
+.tv-roll .h .who em{font-weight:400;font-size:.8rem;color:var(--mute)}
+.tv-roll .h .dx{display:flex;align-items:center;gap:4px;flex:none}
+.tv-roll .del{all:unset;cursor:pointer;color:var(--mute);font-size:.8rem;line-height:1;padding:2px 4px;border-radius:4px;opacity:0;transition:opacity .12s}
+.tv-roll:hover .del,.tv-roll .del:focus-visible{opacity:1}
+.tv-roll .del:hover{color:#fff;background:#b3261e}
+@media (hover:none){.tv-roll .del{opacity:.7}}
+.tv-msg .tx{overflow-wrap:anywhere;white-space:pre-wrap}
+.tv-msg.w{border-color:#8a5cc7;background:#8a5cc714}
+.tv-msg.w .tx{font-style:italic}
+.tv-ctab{all:unset;box-sizing:border-box;position:absolute;right:0;top:50%;transform:translateY(-50%);z-index:13;width:20px;height:64px;border-radius:9px 0 0 9px;background:var(--paper);color:var(--wine);border:1px solid #0008;border-right:0;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:-3px 0 10px #0006;font:700 1rem/1 var(--body)}
+.tv-ctab:hover{background:var(--paper2)}
+.tv-ctab.nuovo::after{content:"";position:absolute;top:6px;left:5px;width:9px;height:9px;border-radius:50%;background:#c0392b;box-shadow:0 0 0 2px var(--paper)}
+:root[data-theme=dark] .tv-ctab{color:var(--gold2)}
+.tv-foto{position:fixed;inset:0;z-index:200;background:#0b0807ee;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;cursor:zoom-out;animation:tvfoto .18s ease-out}
+@keyframes tvfoto{from{opacity:0}}
+.tv-foto img{max-width:94vw;max-height:calc(100vh - 110px);object-fit:contain;border-radius:8px;box-shadow:0 10px 50px #000}
+.tv-foto p{margin:0;color:#f1e4c8;font:600 1.15rem/1.3 var(--display);text-align:center}
+.tv-foto p small{display:block;font:400 .85rem var(--body);color:#c9b89a}
+.tv-foto button{all:unset;position:absolute;top:12px;right:14px;cursor:pointer;color:#fff;font-size:1.6rem;line-height:1;padding:6px 10px;border-radius:8px;background:#ffffff1a}
+dialog.dlg.tv-side{position:fixed;inset:66px auto auto 62px;margin:0;width:min(380px,calc(100vw - 80px));max-height:calc(100vh - 150px);overflow-y:auto;z-index:50}
+dialog.dlg.tv-side form{padding:14px 16px}
+dialog.dlg.tv-side .tv-pick{grid-template-columns:repeat(auto-fill,minmax(70px,1fr));max-height:32vh;gap:4px}
+dialog.dlg.tv-side .tv-pick i{width:44px;height:44px;font-size:1rem}
+dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
+.tv-f input[type=color]{padding:0 2px;height:30px;width:52px}
 @media (max-width:820px){
   .tv-turno{width:min(250px,calc(100% - 20px));max-height:45%}
   .tv-rail{width:44px}.tv-rail button{width:34px;height:34px}
   .tv-chat{position:absolute;right:0;bottom:0;left:0;width:auto;max-height:62%;z-index:12;border-left:0;border-top:2px solid var(--gold);box-shadow:0 -8px 24px #0008;border-radius:12px 12px 0 0}
+  .tv-ctab{top:auto;bottom:calc(62% + 8px);transform:none;width:40px;height:34px;border-radius:9px 0 0 9px}
+  .tv-ctab.chiusa{bottom:12px}
+  dialog.dlg.tv-side{inset:auto 8px 8px 8px;width:auto;max-height:58vh}
   .tv-chip b{max-width:34vw}
   .tv-pgrid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
 }
@@ -280,7 +305,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     T.diceInit = false; T.drag = null; T.online = []; T.live = false; T.tool = 'muovi';
     setView(`<h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Tavolo</h1>
       <div class="tv"><nav class="tv-rail" id="tv-rail" aria-label="Strumenti del tavolo"><span class="sp"></span><span class="tv-on" id="tv-on" title="Connessione…"></span></nav>
-      <div class="tv-wrap"><div class="tv-stage" id="tv-stage"><div class="tv-empty"><div><p>Apro il tavolo…</p></div></div></div><div class="tv-top" id="tv-top"></div><div class="tv-mbar" id="tv-mbar" hidden></div><div class="tv-turno" id="tv-turno" hidden></div></div>
+      <div class="tv-wrap"><div class="tv-stage" id="tv-stage"><div class="tv-empty"><div><p>Apro il tavolo…</p></div></div></div><div class="tv-top" id="tv-top"></div><div class="tv-mbar" id="tv-mbar" hidden></div><div class="tv-turno" id="tv-turno" hidden></div><button type="button" class="tv-ctab" id="tv-ctab" data-act="tv-dadi"></button></div>
       <aside class="tv-chat" id="tv-dice" hidden></aside><div class="tv-pages" id="tv-pages" hidden></div></div>`);
     suggerimenti($('.tv'));
     const fit = () => {
@@ -347,7 +372,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     const pg = (table, f, event = '*') => ch.on('postgres_changes', { event, schema: 'public', table }, f);
     pg('tavolo_token', p => {
       if (p.eventType === 'DELETE') { T.tok.delete(p.old.id); disegnaToken(); return; }
-      const t = p.new; if (T.drag?.id === t.id) return; T.tok.set(t.id, t); disegnaToken();
+      const t = completa(T.tok.get(p.new.id), p.new); if (T.drag?.id === t.id) return; T.tok.set(t.id, t); disegnaToken();
     });
     pg('tavolo_scene', p => {
       if (p.eventType === 'DELETE') { T.scene.delete(p.old.id); if (T.vista === p.old.id) T.vista = T.stato.scena; }
@@ -367,6 +392,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     pg('tavolo_tiri', p => { if (T.tiri.some(x => x.id === p.new.id)) return; T.tiri.push(p.new); if (T.tiri.length > 120) T.tiri.shift(); nuovoTiro(p.new); }, 'INSERT');
     pg('tavolo_tiri', p => { T.tiri = T.tiri.filter(x => x.id !== p.old.id); disegnaLog(); }, 'DELETE');
     pg('tavolo_chat', p => { if (T.chat.some(x => x.id === p.new.id)) return; T.chat.push(p.new); if (T.chat.length > 120) T.chat.shift(); nuovoMsg(p.new); }, 'INSERT');
+    pg('tavolo_chat', p => { T.chat = T.chat.filter(x => x.id !== p.old.id); disegnaLog(); }, 'DELETE');
     pg('tavolo_maschera', p => {
       if (p.eventType === 'DELETE') T.mask = T.mask.filter(m => m.id !== p.old.id);
       else if (!T.mask.some(m => m.id === p.new.id)) T.mask.push(p.new);
@@ -375,7 +401,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     pg('tavolo_turno', p => {
       if (!T.turno.length && p.eventType === 'INSERT') apriTurno(true);
       if (p.eventType === 'DELETE') T.turno = T.turno.filter(x => x.id !== p.old.id);
-      else { const i = T.turno.findIndex(x => x.id === p.new.id); if (i >= 0) T.turno[i] = p.new; else T.turno.push(p.new); }
+      else { const i = T.turno.findIndex(x => x.id === p.new.id); if (i >= 0) T.turno[i] = completa(T.turno[i], p.new); else T.turno.push(p.new); }
       disegnaTurno(); disegnaToken();
     });
     // voci dell'ordine del turno che il DM ha appena nascosto o mostrato: i giocatori ricaricano l'elenco
@@ -386,6 +412,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
       const t = T.tok.get(m.id), el = tokEl(m.id); if (!t || !el || T.drag?.id === m.id) return;
       el.classList.add('live'); el.style.left = m.x + 'px'; el.style.top = m.y + 'px';
     });
+    ch.on('broadcast', { event: 'foto' }, ({ payload: f }) => { if (!isDM()) apriFoto(f, true); });
     ch.on('broadcast', { event: 'righello' }, ({ payload: m }) => {
       if (m.pts) T.rulers.set(m.uid, m); else T.rulers.delete(m.uid);
       disegnaRighelli();
@@ -409,6 +436,8 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     });
     addEventListener('keydown', tasti);
   }
+  // Postgres non rimanda i valori lunghi rimasti uguali (come l'immagine del token): li tengo da prima
+  const completa = (prima, nuovo) => { const o = { ...(prima || {}), ...nuovo }; if (prima?.immagine && !nuovo.immagine) o.immagine = prima.immagine; return o; };
   const manda = (event, payload) => { if (T.ch) T.ch.send({ type: 'broadcast', event, payload }).catch(() => { }); };
 
   /* ---------- strumenti (a sinistra) e mappe (in alto a destra), come su Roll20 ---------- */
@@ -429,7 +458,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     const r = $('#tv-rail'); if (!r) return;
     const b = (act, tip, k, on) => `<button type="button" data-act="${act}" data-tip="${esc(tip)}" aria-label="${esc(tip)}" class="${on ? 'on' : ''}">${svg(k)}</button>`;
     let h = b('tv-sel', 'Seleziona e sposta i token (S)', 'sel', T.tool === 'muovi') + b('tv-mano', 'Sposta la mappa (M)', 'mano', T.tool === 'mano')
-      + b('tv-righello', 'Righello (R)', 'rig', T.tool === 'righello') + b('tv-dadi', 'Dadi e chat', 'dado', !$('#tv-dice')?.hidden)
+      + b('tv-righello', 'Righello (R)', 'rig', T.tool === 'righello')
       + b('tv-turno', 'Ordine del turno', 'tur', !$('#tv-turno')?.hidden);
     if (isDM() && scena()) h += '<hr><span class="lbl">DM</span>' + b('tv-maschera', 'Maschera: nascondi e svela la mappa', 'mas', T.tool === 'maschera') + b('tv-token', 'Aggiungi un token', 'tok') + b('tv-griglia', 'Impostazioni della pagina', 'gri');
     h += `<span class="sp"></span><span class="tv-cnt" id="tv-cnt">${T.online.length > 1 ? T.online.length : ''}</span><span class="tv-on ${T.live ? 'ok' : ''}" id="tv-on" title="${T.live ? esc('Al tavolo ora: ' + T.online.join(', ')) : 'Connessione…'}"></span>`;
@@ -446,7 +475,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
   function azioni() {
     return {
       'tv-sel': () => strumento('muovi'), 'tv-mano': () => strumento('mano'), 'tv-righello': () => strumento(T.tool === 'righello' ? 'muovi' : 'righello'),
-      'tv-dadi': () => { const d = $('#tv-dice'); d.hidden = !d.hidden; disegnaRail(); if (!d.hidden) $('.tv-log', d).scrollTop = 1e9; },
+      'tv-dadi': () => apriChat($('#tv-dice').hidden, true),
       'tv-porta': () => porta(T.vista),
       'tv-pagine': () => pannelloMappe($('#tv-pages').hidden), 'tv-nuova': () => dlgNuovaScena(),
       'tv-token': () => dlgToken(), 'tv-griglia': () => dlgGriglia(),
@@ -582,7 +611,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
   function disegnaGriglia() {
     const sc = scena(), g = $('#tv-grid'); if (!sc || !g) return;
     const s = sc.griglia, ox = ((sc.griglia_x % s) + s) % s, oy = ((sc.griglia_y % s) + s) % s;
-    g.innerHTML = sc.griglia_visibile ? `<defs><pattern id="tv-pat" width="${s}" height="${s}" x="${ox}" y="${oy}" patternUnits="userSpaceOnUse"><path d="M${s} 0H0V${s}" fill="none" stroke="#000" stroke-opacity=".38" stroke-width="1" vector-effect="non-scaling-stroke"/></pattern></defs><rect width="100%" height="100%" fill="url(#tv-pat)"/>` : '';
+    g.innerHTML = sc.griglia_visibile ? `<defs><pattern id="tv-pat" width="${s}" height="${s}" x="${ox}" y="${oy}" patternUnits="userSpaceOnUse"><path d="M${s} 0H0V${s}" fill="none" stroke="${esc(sc.griglia_colore || '#000000')}" stroke-opacity="${(sc.griglia_opacita ?? 38) / 100}" stroke-width="1" vector-effect="non-scaling-stroke"/></pattern></defs><rect width="100%" height="100%" fill="url(#tv-pat)"/>` : '';
   }
   function adatta() {
     const st = $('#tv-stage'), sc = scena(); if (!st || !sc) return;
@@ -647,7 +676,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
       if (T.tool === 'maschera' && isDM()) { mas = inizioMaschera(p); return; }
       if (T.tool === 'righello') { const sc = scena(); const a = { x: centroCasella(p.x, sc.griglia_x), y: centroCasella(p.y, sc.griglia_y) }; rul = { pts: [a, a] }; mostraRighello(rul.pts); return; }
       if (t && T.tool !== 'mano' && puoMuovere(t)) { T.drag = { id: t.id, dx: p.x - t.x, dy: p.y - t.y, x0: t.x, y0: t.y, sx: e.clientX, sy: e.clientY, mosso: false }; el.classList.add('drag'); return; }
-      if (t && T.tool !== 'mano' && isDM()) T.clic = { id: t.id, sx: e.clientX, sy: e.clientY };
+      if (t && T.tool !== 'mano') T.clic = { id: t.id, sx: e.clientX, sy: e.clientY };
       pan = { sx: e.clientX, sy: e.clientY, x: T.view.x, y: T.view.y }; st.classList.add('pan');
     });
     st.addEventListener('pointermove', e => {
@@ -694,6 +723,13 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
       }
     };
     st.addEventListener('pointerup', su); st.addEventListener('pointercancel', su);
+    // il cerchio del pennello della maschera segue il mouse
+    st.addEventListener('pointermove', e => {
+      const on = isDM() && T.tool === 'maschera' && T.mforma === 'pennello' && e.pointerType === 'mouse';
+      if (!on && !T.pcur) return;
+      T.pcur = on ? mondo(st, e) : null; disegnaRighelli();
+    });
+    st.addEventListener('pointerleave', () => { if (T.pcur) { T.pcur = null; disegnaRighelli(); } });
     function annullaDrag() { const d = T.drag; if (!d) return; T.drag = null; const t = T.tok.get(d.id); if (t) { disegnaToken(); manda('trascina', { id: t.id, x: t.x, y: t.y }); } }
     function fineRighello(r, subito) {
       if (!r) return null;
@@ -714,7 +750,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
       return `<line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="#000a" stroke-width="7" stroke-linecap="round"/><line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="${col}" stroke-width="3" stroke-dasharray="10 6" stroke-linecap="round"/>
         <circle cx="${ax}" cy="${ay}" r="5" fill="${col}" stroke="#000" stroke-width="1.5"/><circle cx="${bx}" cy="${by}" r="6" fill="${col}" stroke="#000" stroke-width="1.5"/>
         <text x="${bx + 12}" y="${by - 12}">${esc(lbl)}</text>`;
-    }).join('');
+    }).join('') + (T.pcur && T.tool === 'maschera' && T.mforma === 'pennello' ? `<circle cx="${v.x + T.pcur.x * v.z}" cy="${v.y + T.pcur.y * v.z}" r="${(T.mraggio || sc.griglia) * v.z}" fill="none" stroke="#f2b51d" stroke-width="2" stroke-dasharray="6 4"/>` : '');
   }
 
   /* ---------- menu del token (DM) ---------- */
@@ -724,12 +760,15 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     chiudiPop();
     const r = st.getBoundingClientRect(), pop = document.createElement('div'); pop.className = 'tv-pop';
     const ini = `<div class="row"><span>Iniziativa</span><input type="number" data-k="imod" placeholder="mod" style="width:56px;font:inherit;padding:3px 5px;border-radius:4px;border:1px solid var(--line2);background:var(--paper2);color:var(--ink)"><button class="btn sm" data-k="ini" title="Tira 1d20 + modificatore e aggiungi all'ordine del turno">🎲 Tira</button></div>`;
+    const ft = haFoto(t);
     if (!isDM()) {
-      // il giocatore, sul proprio token, può solo tirare l'iniziativa
-      pop.innerHTML = `<b>${esc(t.nome || 'Token')}</b>${ini}`;
+      // il giocatore apre la foto (solo per sé) e, sul proprio token, tira l'iniziativa
+      const mio = puoMuovere(t); if (!ft && !mio) return;
+      pop.innerHTML = `<b>${esc(t.nome || 'Token')}</b>${ft ? '<button class="btn sm" data-k="foto">🖼 Apri la foto</button>' : ''}${mio ? ini : ''}`;
       st.append(pop);
       pop.style.left = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6) + 'px'; pop.style.top = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6) + 'px';
-      pop.querySelector('[data-k=ini]').onclick = () => { chiudiPop(); iniziativa(t, pop.querySelector('[data-k=imod]').value); };
+      if (ft) pop.querySelector('[data-k=foto]').onclick = () => { chiudiPop(); apriFoto(fotoDi(t)); };
+      if (mio) pop.querySelector('[data-k=ini]').onclick = () => { chiudiPop(); iniziativa(t, pop.querySelector('[data-k=imod]').value); };
       return;
     }
     const gioc = (T.info.giocatori || []).map(g => `<option value="${esc(g.id)}" ${t.giocatore === g.id ? 'selected' : ''}>${esc(g.name)}</option>`).join('');
@@ -737,6 +776,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
       <button class="btn sm" data-k="nasc">${t.nascosto ? '👁 Mostra ai giocatori' : '🙈 Nascondi ai giocatori'}</button>
       <div class="row"><span>Misura</span><button class="btn sm" data-k="meno">−</button><span>${t.misura.toLocaleString('it-IT')}</span><button class="btn sm" data-k="piu">+</button></div>
       <div class="row"><span>Lo muove</span><select data-k="gioc"><option value="">solo il DM</option>${gioc}</select></div>
+      ${ft ? '<div class="row"><span>Foto</span><button class="btn sm" data-k="foto" title="Solo sul tuo schermo">🖼 Apri</button><button class="btn sm" data-k="mostra" title="Si apre a schermo intero a tutti i giocatori">📣 Mostra a tutti</button></div>' : ''}
       ${ini}<button class="btn sm" data-k="nome">✎ Rinomina</button><button class="btn sm danger" data-k="via">Elimina</button>`;
     st.append(pop);
     const x = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6), y = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6);
@@ -746,6 +786,10 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
       if (r2.error) { toast(r2.error.message, 'err'); return; }
       T.tok.set(id, r2.data); disegnaToken(); chiudiPop();
     };
+    if (ft) {
+      pop.querySelector('[data-k=foto]').onclick = () => { chiudiPop(); apriFoto(fotoDi(t)); };
+      pop.querySelector('[data-k=mostra]').onclick = () => { chiudiPop(); const f = fotoDi(t); manda('foto', f); apriFoto(f); toast('Foto mostrata ai giocatori.'); };
+    }
     pop.querySelector('[data-k=nasc]').onclick = async () => { await salva({ nascosto: !t.nascosto }); if (!t.nascosto) manda('nascosto', { id }); };
     pop.querySelector('[data-k=meno]').onclick = () => salva({ misura: t.misura > 1 ? t.misura - 1 : 0.5 });
     pop.querySelector('[data-k=piu]').onclick = () => salva({ misura: t.misura < 1 ? 1 : Math.min(10, t.misura + 1) });
@@ -759,6 +803,25 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     };
   }
 
+  /* ---------- foto del token a schermo intero ---------- */
+  const ritratto = t => { const e = t.scheda && S.ents?.get(t.scheda); return e?.portrait || null; };
+  const haFoto = t => !!(t.immagine || ritratto(t));
+  const fotoDi = t => ({ nome: t.nome || '', scheda: t.scheda || null, immagine: t.immagine || null });
+  function apriFoto(f, dalDM) {
+    document.querySelectorAll('.tv-foto').forEach(x => x.remove());
+    const e = f.scheda && S.ents?.get(f.scheda), prima = f.immagine || e?.portrait?.thumb;
+    if (!prima && !e?.portrait) return;
+    const o = document.createElement('div'); o.className = 'tv-foto'; o.setAttribute('role', 'dialog'); o.setAttribute('aria-label', 'Foto di ' + (f.nome || 'token'));
+    o.innerHTML = `<button type="button" aria-label="Chiudi">✕</button><img alt="${esc(f.nome)}" ${prima ? `src="${esc(prima)}"` : ''}><p>${esc(f.nome)}${dalDM ? '<small>Ve la mostra il DM · tocca per chiudere</small>' : ''}</p>`;
+    document.body.append(o);
+    let url = null;
+    const chiudi = () => { o.remove(); removeEventListener('keydown', esc_); if (url) URL.revokeObjectURL(url); };
+    const esc_ = ev => { if (ev.key === 'Escape') chiudi(); };
+    o.onclick = chiudi; addEventListener('keydown', esc_); onCleanup(chiudi);
+    // il ritratto a piena risoluzione, se la scheda è nel sito
+    if (e?.portrait) dbGet('blobs', e.portrait.id).then(rec => { if (!rec?.blob || !o.isConnected) return; url = URL.createObjectURL(rec.blob); o.querySelector('img').src = url; }).catch(() => { });
+  }
+
   /* ---------- aggiungi token (DM) ---------- */
   async function immagineToken(file) {
     const bmp = await loadBitmap(file), L = 200, c = document.createElement('canvas'); c.width = c.height = L;
@@ -766,13 +829,22 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     c.getContext('2d').drawImage(bmp, (L - w * s) / 2, (L - h * s) / 2, w * s, h * s); if (bmp.close) bmp.close();
     let u = c.toDataURL('image/webp', 0.85); if (!u.startsWith('data:image/webp')) u = c.toDataURL('image/jpeg', 0.85); return u;
   }
+  // finestra di lato che lascia usare la mappa (si vedono i token mentre si aggiungono)
+  function finestra(html, cls) {
+    const d = document.createElement('dialog'); d.className = 'dlg ' + cls; d.innerHTML = html;
+    document.body.append(d); d.addEventListener('close', () => setTimeout(() => d.remove(), 60));
+    d.addEventListener('keydown', e => { if (e.key === 'Escape') d.close(); });
+    onCleanup(() => { if (d.open) d.close(); });
+    d.show(); return d;
+  }
   function dlgToken() {
     const sc = scena(); if (!sc) return;
     const pg = (T.info.giocatori || []).map(g => { const e = S.ents.get(g.pg); return { nome: e?.name || g.name, img: e?.portrait?.thumb || null, giocatore: g.id, scheda: g.pg, colore: '#7d2530' }; });
     const png = [...S.ents.values()].filter(e => e.type === 'png').sort((a, b) => a.name.localeCompare(b.name)).map(e => ({ nome: e.name, img: e.portrait?.thumb || null, scheda: e.id, colore: e.cat === 'nemico' ? '#7d2530' : e.cat === 'alleato' ? '#3f7a4a' : '#3b5f8a' }));
     const cella = x => `<button type="button" data-i="${x.i}"><i style="--c:${x.colore};${x.img ? `background-image:url('${x.img}')` : ''}">${x.img ? '' : esc(iniziali(x.nome))}</i>${esc(x.nome)}</button>`;
     const tutti = [...pg, ...png]; tutti.forEach((x, i) => x.i = i);
-    const d = openDlg(`<form method="dialog"><h3>Aggiungi un token</h3>
+    if ($('dialog.tv-side[open]')) return;
+    const d = finestra(`<form method="dialog"><h3>Aggiungi un token</h3>
       <div class="tv-tabs"><button type="button" class="btn sm on" data-tab="pg">Personaggi</button><button type="button" class="btn sm" data-tab="png">PNG del sito</button><button type="button" class="btn sm" data-tab="nuovo">Nuovo</button></div>
       <div data-p="pg"><div class="tv-pick">${pg.map(cella).join('')}</div><p class="hint">Il token di un personaggio lo può muovere il suo giocatore.</p></div>
       <div data-p="png" hidden><input type="search" placeholder="Cerca un PNG…" style="width:100%;margin-bottom:8px;font:inherit;padding:6px 8px;border-radius:4px;border:1px solid var(--line2);background:var(--paper2);color:var(--ink)"><div class="tv-pick">${png.map(cella).join('') || '<p class="hint">Nessun PNG nel sito.</p>'}</div></div>
@@ -782,7 +854,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
         <button type="button" class="btn primary" data-k="crea">Aggiungi</button></div>
       <div class="tv-f" style="margin-top:12px"><label>Misura</label><select name="mis"><option value="0.5">Minuscola (½ casella)</option><option value="1" selected>Media (1 casella)</option><option value="2">Grande (2×2)</option><option value="3">Enorme (3×3)</option><option value="4">Mastodontica (4×4)</option></select>
         <label>Nascosto</label><label style="justify-content:flex-start"><input type="checkbox" name="nasc"> visibile solo a me</label></div>
-      <menu><button value="cancel" class="btn ghost">Chiudi</button></menu></form>`, 'wide');
+      <menu><button value="cancel" class="btn ghost">Chiudi</button></menu></form>`, 'tv-side', true);
     d.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { d.querySelectorAll('[data-tab]').forEach(x => x.classList.toggle('on', x === b)); d.querySelectorAll('[data-p]').forEach(p => p.hidden = p.dataset.p !== b.dataset.tab); });
     const q = d.querySelector('[data-p=png] input'); q.oninput = () => { const s = norm(q.value); d.querySelectorAll('[data-p=png] [data-i]').forEach(b => b.hidden = !!s && !norm(b.textContent).includes(s)); };
     let colore = COLORI[0];
@@ -861,21 +933,27 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
         <label>Sposta ↔</label><input type="range" name="gx" min="0" max="${sc.griglia}" step="0.5" value="${((sc.griglia_x % sc.griglia) + sc.griglia) % sc.griglia}">
         <label>Sposta ↕</label><input type="range" name="gy" min="0" max="${sc.griglia}" step="0.5" value="${((sc.griglia_y % sc.griglia) + sc.griglia) % sc.griglia}">
         <label>Metri per casella</label><input type="number" name="m" min="0.1" max="1000" step="0.1" value="${sc.metri}">
-        <label>Mostra la griglia</label><label style="justify-content:flex-start"><input type="checkbox" name="vis" ${sc.griglia_visibile ? 'checked' : ''}> sì</label></div>
+        <label>Mostra la griglia</label><label style="justify-content:flex-start"><input type="checkbox" name="vis" ${sc.griglia_visibile ? 'checked' : ''}> sì</label>
+        <label>Colore</label><input type="color" name="gc" value="${esc(sc.griglia_colore || '#000000')}">
+        <label>Opacità</label><span style="display:flex;gap:8px;align-items:center"><input type="range" name="go" min="0" max="100" step="1" value="${sc.griglia_opacita ?? 38}" style="flex:1"><output name="gov" style="width:42px;text-align:right">${sc.griglia_opacita ?? 38}%</output></span></div>
       <menu><button value="cancel" class="btn ghost">Annulla</button><button value="ok" class="btn primary">Salva</button></menu></form>`, 'tv-gd');
     const v = n => d.querySelector(`[name=${n}]`);
     const prova = () => {
       sc.griglia = clamp(+v('gn').value || sc.griglia, 8, 600); sc.griglia_x = +v('gx').value; sc.griglia_y = +v('gy').value; sc.metri = +v('m').value || 1.5; sc.griglia_visibile = v('vis').checked;
+      sc.griglia_colore = v('gc').value; sc.griglia_opacita = +v('go').value; v('gov').value = sc.griglia_opacita + '%';
       v('gx').max = v('gy').max = sc.griglia; disegnaGriglia(); disegnaToken();
     };
     v('g').oninput = () => { v('gn').value = v('g').value; prova(); };
     v('gn').oninput = () => { v('g').value = v('gn').value; prova(); };
-    ['gx', 'gy', 'm', 'vis'].forEach(n => v(n).oninput = prova);
+    ['gx', 'gy', 'm', 'vis', 'gc', 'go'].forEach(n => v(n).oninput = prova);
     d.addEventListener('close', async () => {
       if (d.returnValue !== 'ok') { Object.assign(sc, prima); disegnaGriglia(); disegnaToken(); return; }
       const ch = { nome: v('nome').value.trim().slice(0, 80) || prima.nome, griglia: sc.griglia, griglia_x: sc.griglia_x, griglia_y: sc.griglia_y, metri: sc.metri, griglia_visibile: sc.griglia_visibile };
+      // colore e opacità solo se cambiati: servono le colonne di tappa-2b.sql
+      if (sc.griglia_colore !== (prima.griglia_colore || '#000000')) ch.griglia_colore = sc.griglia_colore;
+      if (sc.griglia_opacita !== (prima.griglia_opacita ?? 38)) ch.griglia_opacita = sc.griglia_opacita;
       const r = await SB.from('tavolo_scene').update(ch).eq('id', sc.id).select().single();
-      if (r.error) { Object.assign(sc, prima); disegnaGriglia(); disegnaToken(); return toast(r.error.message, 'err'); }
+      if (r.error) { Object.assign(sc, prima); disegnaGriglia(); disegnaToken(); return toast(sqlMancante(r.error) ? 'Per colore e opacità della griglia esegui tavolo/tappa-2b.sql in Supabase.' : r.error.message, 'err'); }
       T.scene.set(sc.id, r.data);
       // i token restano sulle loro caselle anche con la griglia nuova
       const sposta = [...T.tok.values()].filter(t => t.scena === sc.id).map(t => ({ t, x: aggancia(t.x, sc.griglia_x, t.misura), y: aggancia(t.y, sc.griglia_y, t.misura) })).filter(o => o.x !== o.t.x || o.y !== o.t.y);
@@ -885,17 +963,27 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
   }
 
   /* ---------- dadi ---------- */
+  // la chat resta aperta; la linguetta sul bordo la chiude e la riapre (si ricorda la scelta)
+  const CHAT = 'tavolo-chat';
+  function apriChat(apri, salva) {
+    const box = $('#tv-dice'), tab = $('#tv-ctab'); if (!box) return;
+    box.hidden = !apri;
+    if (salva) try { localStorage.setItem(CHAT, apri ? '1' : '0'); } catch { }
+    if (tab) { const tel = matchMedia('(max-width:820px)').matches; tab.textContent = tel ? (apri ? '⌄' : '💬') : apri ? '›' : '‹'; tab.classList.toggle('chiusa', !apri); tab.dataset.tip = apri ? 'Chiudi la chat' : 'Apri la chat'; tab.setAttribute('aria-label', tab.dataset.tip); if (apri) tab.classList.remove('nuovo'); }
+    if (apri) { const l = $('#tv-log'); if (l) l.scrollTop = 1e9; }
+  }
   function disegnaDadi() {
     const box = $('#tv-dice'); if (!box) return;
-    if (matchMedia('(min-width:821px)').matches && box.hidden && !T.diceInit) box.hidden = false;
+    if (!T.diceInit) { let v = null; try { v = localStorage.getItem(CHAT); } catch { } apriChat(v ? v === '1' : matchMedia('(min-width:821px)').matches); }
     T.diceInit = true;
-    box.innerHTML = `<div class="tv-dh"><span>Chat</span><button class="btn sm ghost" data-act="tv-dadi" title="Chiudi">✕</button></div><div class="tv-log" id="tv-log"></div>
+    box.innerHTML = `<div class="tv-dh"><span>Chat</span></div><div class="tv-log" id="tv-log"></div>
       <div class="tv-dk"><div class="row">${DADI.map(n => `<button class="btn sm" data-act="tv-d" data-n="${n}">d${n}</button>`).join('')}</div>
       <div class="row"><input type="number" id="tv-mod" placeholder="Mod." style="width:64px" aria-label="Modificatore"><button class="btn sm" data-act="tv-vant" title="2d20, tiene il più alto">Vantaggio</button><button class="btn sm" data-act="tv-svant" title="2d20, tiene il più basso">Svantaggio</button></div>
       <div class="row"><input type="text" id="tv-mot" placeholder="Per cosa? (facoltativo)" style="flex:1" maxlength="80" aria-label="Motivo"></div>
       <label><input type="checkbox" id="tv-priv"> ${isDM() ? 'Tiro nascosto (solo io)' : 'Tiro segreto (solo io e il DM)'}</label>
       <div class="row"><input type="text" id="tv-f" placeholder="Scrivi… /r 1d20+5 · /gr · /w nome" style="flex:1" autocomplete="off" aria-label="Scrivi un tiro"><button class="btn sm primary" data-act="tv-tira" style="flex:none">Invia</button></div></div>`;
     $('#tv-f').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); scrivi(); } };
+    $('#tv-log').onclick = e => { const b = e.target.closest('[data-del]'); if (b) cancella(b.dataset.del).catch(err => toast(err.message, 'err')); };
     disegnaBarra(); disegnaLog();
   }
   const conMod = f => { const m = Math.trunc(+$('#tv-mod')?.value || 0); return m ? f + (m > 0 ? '+' : '') + m : f; };
@@ -940,10 +1028,20 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     const m = String(t.dettaglio).match(/^(?:\dd20(?:k[hl]1)?) \[(?:[^\]]*→ )?(\d+)\]/);
     return m ? (m[1] === '20' ? 'crit' : m[1] === '1' ? 'fail' : '') : '';
   }
-  const rigaTiro = t => `<div class="tv-roll ${esito(t)} ${t.privato ? 'priv' : ''} ${t.autore === T.me.uid ? 'me' : ''}"><div class="h"><span>${esc(t.nome)}${t.privato ? ' 🙈' : ''}</span><small>${new Date(t.creato).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</small></div>
+  const ora = d => new Date(d).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+  const via = (k, x) => isDM() || x.autore === T.me.uid ? `<button type="button" class="del" data-del="${k}:${x.id}" title="Elimina il messaggio" aria-label="Elimina il messaggio">✕</button>` : '';
+  const rigaTiro = t => `<div class="tv-roll ${esito(t)} ${t.privato ? 'priv' : ''} ${t.autore === T.me.uid ? 'me' : ''}"><div class="h"><span>${esc(t.nome)}${t.privato ? ' 🙈' : ''}</span><span class="dx"><small>${ora(t.creato)}</small>${via('t', t)}</span></div>
     ${t.motivo ? `<div class="m">${esc(t.motivo)}</div>` : ''}<div class="r"><span class="d">${esc(t.formula)} → ${esc(t.dettaglio)}</span><span class="t">${t.totale}</span></div></div>`;
   const nomeGioc = id => id === 'dm' ? 'DM' : T.membri.find(x => x.giocatore === id)?.nome || id;
-  const rigaMsg = m => `<div class="tv-msg ${m.per ? 'w' : ''}"><b>${esc(m.nome)}</b>${m.per ? `<small>${m.autore === T.me.uid ? 'sussurra a ' + esc(nomeGioc(m.per)) : 'ti sussurra'}</small>` : ''}: ${esc(m.testo)}</div>`;
+  const rigaMsg = m => `<div class="tv-roll tv-msg ${m.per ? 'w' : ''} ${m.autore === T.me.uid ? 'me' : ''}"><div class="h"><span class="who">${esc(m.nome)}${m.per ? `<em>${m.autore === T.me.uid ? 'sussurra a ' + esc(nomeGioc(m.per)) : 'ti sussurra'}</em>` : ''}</span><span class="dx"><small>${ora(m.creato)}</small>${via('c', m)}</span></div><div class="tx">${esc(m.testo)}</div></div>`;
+  async function cancella(k) {
+    const [tipo, id] = k.split(':'), tab = tipo === 't' ? 'tavolo_tiri' : 'tavolo_chat';
+    const r = await SB.from(tab).delete().eq('id', +id).select('id');
+    if (r.error) throw new Error(sqlMancante(r.error) ? 'Esegui tavolo/tappa-2b.sql in Supabase.' : r.error.message);
+    if (!r.data?.length) throw new Error('Non puoi cancellare questo messaggio: esegui tavolo/tappa-2b.sql in Supabase.');
+    if (tipo === 't') T.tiri = T.tiri.filter(x => x.id !== +id); else T.chat = T.chat.filter(x => x.id !== +id);
+    disegnaLog();
+  }
   function disegnaLog() {
     const l = $('#tv-log'); if (!l) return;
     const tutto = [...T.tiri.map(t => [t.creato, rigaTiro(t)]), ...(T.chat || []).map(m => [m.creato, rigaMsg(m)])].sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
@@ -952,14 +1050,16 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
   }
   function nuovoMsg(m) {
     disegnaLog();
-    if ($('#tv-dice')?.hidden && m.autore !== T.me.uid) toast(`${m.nome}${m.per ? ' (sussurro)' : ''}: ${m.testo.slice(0, 120)}`);
+    if ($('#tv-dice')?.hidden && m.autore !== T.me.uid) { $('#tv-ctab')?.classList.add('nuovo'); toast(`${m.nome}${m.per ? ' (sussurro)' : ''}: ${m.testo.slice(0, 120)}`); }
   }
   function nuovoTiro(t) {
     disegnaLog();
-    if ($('#tv-dice')?.hidden) toast(`${t.nome}${t.motivo ? ' (' + t.motivo + ')' : ''}: ${t.formula} = ${t.totale}`);
+    if ($('#tv-dice')?.hidden) { $('#tv-ctab')?.classList.add('nuovo'); toast(`${t.nome}${t.motivo ? ' (' + t.motivo + ')' : ''}: ${t.formula} = ${t.totale}`); }
   }
   /* ---------- maschera (DM): la mappa coperta che si svela a pezzi, come la nebbia di Roll20 ---------- */
-  const NERO = '#0b0807', FOG_MAX = 2048;
+  const NERO = '#0b0807', FOG_MAX = 2048, TONO = 'tavolo-tono';
+  // quanto il DM vede scura la maschera (solo sul suo schermo: i giocatori la vedono sempre nera)
+  const tono = () => { try { const v = parseFloat(localStorage.getItem(TONO)); return v >= 0.1 && v <= 0.95 ? v : 0.5; } catch { return 0.5; } };
   function applica(g, o) {
     g.globalCompositeOperation = o.svela ? 'destination-out' : 'source-over';
     g.fillStyle = g.strokeStyle = NERO;
@@ -981,7 +1081,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, W, H);
     g.setTransform(k, 0, 0, k, 0, 0); g.fillStyle = NERO; g.fillRect(0, 0, sc.larghezza, sc.altezza);
     for (const o of T.mask.filter(m => m.scena === sc.id).sort((a, b) => a.id - b.id)) applica(g, o);
-    c.hidden = false; c.style.opacity = isDM() ? 0.5 : 1; T.fogK = k;
+    c.hidden = false; c.style.opacity = isDM() ? tono() : 1; T.fogK = k;
   }
   function coperto(x, y) {
     const sc = scena(), c = $('#tv-fog'); if (!sc?.maschera || !c || c.hidden) return false;
@@ -997,8 +1097,9 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     b.innerHTML = `<label title="Con la maschera attiva la mappa parte tutta coperta per i giocatori"><input type="checkbox" data-m="attiva" ${on ? 'checked' : ''}> Maschera attiva</label><span class="sep"></span>
       ${bt('svela', '👁 Svela', T.mmodo === 'svela', 'Togli la maschera dove trascini')}${bt('copri', '◼ Copri', T.mmodo === 'copri', 'Rimetti la maschera dove trascini')}<span class="sep"></span>
       ${bt('rett', '▭ Rettangolo', T.mforma === 'rett')}${bt('pennello', '🖌 Pennello', T.mforma === 'pennello')}
-      ${T.mforma === 'pennello' ? `<label>Misura <input type="range" data-m="raggio" min="0.25" max="4" step="0.25" value="${T.mraggio / sc.griglia}" ${dis}></label>` : ''}<span class="sep"></span>
-      ${bt('annulla', '↶ Annulla', false, 'Annulla l\'ultima modifica')}${bt('tutto', 'Svela tutto', false)}${bt('niente', 'Copri tutto', false)}`;
+      ${T.mforma === 'pennello' ? `<label title="Grandezza del pennello, in caselle">Grandezza <input type="range" data-m="raggio" min="0.25" max="10" step="0.25" value="${T.mraggio / sc.griglia}" ${dis}><output data-m="rv">${fmtCas(T.mraggio / sc.griglia)}</output></label>` : ''}<span class="sep"></span>
+      ${bt('annulla', '↶ Annulla', false, 'Annulla l\'ultima modifica')}${bt('tutto', 'Svela tutto', false)}${bt('niente', 'Copri tutto', false)}<span class="sep"></span>
+      <label title="Solo per te: i giocatori la vedono sempre nera">Tonalità <input type="range" data-m="tono" min="0.1" max="0.95" step="0.05" value="${tono()}" ${dis}></label>`;
     b.hidden = false;
     b.querySelector('[data-m=attiva]').onchange = async e => {
       const r = await SB.from('tavolo_scene').update({ maschera: e.target.checked }).eq('id', sc.id).select().single();
@@ -1006,8 +1107,10 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
       T.scene.set(sc.id, r.data); programmaMaschera(); barraMaschera();
     };
     b.querySelectorAll('button[data-m]').forEach(x => x.onclick = () => azioneMaschera(x.dataset.m).catch(err => toast(err.message, 'err')));
-    const rg = b.querySelector('[data-m=raggio]'); if (rg) rg.oninput = () => { T.mraggio = +rg.value * sc.griglia; };
+    const rg = b.querySelector('[data-m=raggio]'); if (rg) rg.oninput = () => { T.mraggio = +rg.value * sc.griglia; b.querySelector('[data-m=rv]').value = fmtCas(+rg.value); };
+    const tn = b.querySelector('[data-m=tono]'); tn.oninput = () => { try { localStorage.setItem(TONO, tn.value); } catch { } const c = $('#tv-fog'); if (c) c.style.opacity = tn.value; };
   }
+  const fmtCas = n => n.toLocaleString('it-IT') + (n === 1 ? ' casella' : ' caselle');
   async function azioneMaschera(k) {
     const sc = scena(); if (!sc) return;
     if (k === 'svela' || k === 'copri') T.mmodo = k;
