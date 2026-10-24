@@ -39,7 +39,7 @@
 .tv-pgbtn{all:unset;pointer-events:auto;cursor:pointer;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:#fbf5e3;color:#2b1d14;box-shadow:0 2px 10px #0008;flex:none}
 .tv-pgbtn svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
 .tv-pgbtn:hover{background:#fff}
-.tv-world{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+.tv-world{position:absolute;left:0;top:0;transform-origin:0 0}
 .tv-map{position:absolute;left:0;top:0;max-width:none;pointer-events:none;-webkit-user-drag:none;box-shadow:0 0 0 1px #0008,0 10px 40px #0009;background:#e8dcc0}
 .tv-grid{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
 .tv-tok{position:absolute;border-radius:50%;box-sizing:border-box;background:var(--c) center/cover no-repeat;border:3px solid var(--c);box-shadow:0 2px 6px #000a;transition:left .12s,top .12s}
@@ -68,6 +68,9 @@
 .tv-tdp td button:hover{background:#7d2530}
 .tv-tdp td:first-child button{text-align:left;padding-left:8px;font-family:var(--display);color:var(--gold2)}
 .tv-tdp td+td{border-left:1px solid #ffffff14}
+.tv-tdp .vs{display:flex;gap:6px;margin:0 10px 8px}
+.tv-tdp .vs button{all:unset;flex:1;text-align:center;cursor:pointer;padding:6px 4px;border-radius:6px;background:#ffffff14;font-size:.82rem}
+.tv-tdp .vs button:hover{background:#7d2530}
 .tv-tdp .ft{padding:0 12px 9px;font-weight:400;font-size:.78rem;color:#c9b89a}
 .tv-d3{position:absolute;inset:0;pointer-events:none;z-index:6;overflow:hidden}
 .tv-d3 .dd{position:absolute;left:0;top:0;width:78px;height:78px;margin:-39px 0 0 -39px;filter:drop-shadow(0 6px 6px #0009)}
@@ -84,7 +87,7 @@
 .tv-ab{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .tv-ab input[type=number]{width:56px}
 .tv-tok.mine{box-shadow:0 0 0 3px #e7cf9a,0 2px 6px #000a}
-.tv-tok b{position:absolute;left:50%;top:100%;transform:translateX(-50%);margin-top:2px;white-space:nowrap;font:600 var(--fs,13px)/1.15 var(--body);color:#fff;background:#000a;padding:1px 6px;border-radius:8px;pointer-events:none;max-width:240px;overflow:hidden;text-overflow:ellipsis}
+.tv-tok b{-webkit-font-smoothing:antialiased;text-rendering:geometricPrecision;position:absolute;left:50%;top:100%;transform:translateX(-50%);margin-top:2px;white-space:nowrap;font:600 var(--fs,13px)/1.15 var(--body);color:#fff;background:#000a;padding:1px 6px;border-radius:8px;pointer-events:none;max-width:240px;overflow:hidden;text-overflow:ellipsis}
 .tv-tok .ini{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:700 calc(var(--fs,13px)*1.6)/1 var(--display);color:#fff;text-shadow:0 1px 2px #000}
 .tv-ov{position:absolute;inset:0;pointer-events:none;overflow:visible}
 .tv-ov text{font:700 15px var(--body);paint-order:stroke;stroke:#000c;stroke-width:4px;fill:#fff}
@@ -95,7 +98,8 @@
 .tv-zoom{position:absolute;right:12px;top:62px;display:flex;flex-direction:column;align-items:center;gap:4px;z-index:6;background:#211a16d9;border:1px solid #e7cf9a33;border-radius:20px;padding:5px 0;box-shadow:0 2px 10px #0006}
 .tv-zoom button{all:unset;cursor:pointer;width:32px;height:30px;display:flex;align-items:center;justify-content:center;color:#f1e4c8;font:600 1.15rem/1 var(--display)}
 .tv-zoom button:hover{color:#fff;background:#ffffff14}
-.tv-zoom small{font:600 .68rem/1 var(--body);color:#c9b89a}
+.tv-zoom .zp{font:600 .68rem/1 var(--body);color:#c9b89a;height:22px;width:40px}
+.tv-zoom input[type=range]{writing-mode:vertical-lr;direction:rtl;width:22px;height:130px;margin:2px 0;accent-color:#e7cf9a;cursor:pointer}
 .tv-chat{width:310px;flex:none;display:flex;flex-direction:column;border-left:1px solid #000;background:var(--paper);min-height:0;z-index:8}
 .tv-chat[hidden]{display:none!important}
 .tv-dh{display:flex;align-items:center;justify-content:space-between;padding:8px 10px 6px;font-family:var(--display);color:var(--wine);font-weight:600;border-bottom:1px solid var(--line)}
@@ -149,6 +153,9 @@
 .tv-pop b{font-family:var(--display);color:var(--wine);padding:2px 4px 4px}
 :root[data-theme=dark] .tv-pop b{color:var(--gold2)}
 .tv-pop .btn{justify-content:flex-start}
+.tv-pnome{font:600 1rem var(--display);color:var(--wine);background:transparent;border:0;border-bottom:1px dashed var(--line2);padding:2px 4px 4px;margin-bottom:2px}
+.tv-pnome:focus{outline:none;border-bottom:1px solid var(--wine);background:var(--paper2)}
+:root[data-theme=dark] .tv-pnome{color:var(--gold2)}
 .tv-pop .row{display:flex;gap:5px;align-items:center}
 .tv-pop select{font:inherit;flex:1;padding:4px;border-radius:4px;border:1px solid var(--line2);background:var(--paper2);color:var(--ink)}
 .tv-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:8px;max-height:46vh;overflow-y:auto;padding:2px}
@@ -228,6 +235,43 @@ dialog.dlg.tv-side .tv-pick{grid-template-columns:repeat(auto-fill,minmax(70px,1
 dialog.dlg.tv-side .tv-pick i{width:44px;height:44px;font-size:1rem}
 dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
 .tv-f input[type=color]{padding:0 2px;height:30px;width:52px}
+.tv-pcond{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.tv-pcond button{all:unset;cursor:pointer;background:#7d2530;color:#fff;border-radius:10px;padding:1px 8px;font-size:.78rem;font-weight:600}
+.tv-pcond select{flex:1;min-width:120px}
+.tv-tok .cnd{position:absolute;right:-14%;top:-8%;display:flex;flex-direction:column;gap:2px;pointer-events:none;font-size:calc(var(--fs,13px)*1.05);z-index:2}
+.tv-tok .cnd i{font-style:normal;width:1.55em;height:1.55em;border-radius:50%;background:#140e0bdd;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 1px #ffffff66,0 1px 3px #000a;line-height:1}
+.tv-tok .fxs{position:absolute;inset:0;pointer-events:none}
+.tv-tok .fx{position:absolute;inset:-14%;border-radius:50%;pointer-events:none}
+.tv-tok .fx::after{position:absolute;left:50%;top:50%;font-size:calc(var(--fs,13px)*1.5);line-height:1;transform:translate(-50%,-50%)}
+@keyframes tvfx-pulsa{0%,100%{opacity:.55;transform:scale(.96)}50%{opacity:1;transform:scale(1.06)}}
+@keyframes tvfx-gira{to{transform:rotate(360deg)}}
+@keyframes tvfx-sale{0%{transform:translate(-50%,10%) scale(.6);opacity:0}25%{opacity:1}100%{transform:translate(-50%,-160%) scale(1.1);opacity:0}}
+@keyframes tvfx-trema{0%,100%{translate:0 0}20%{translate:-2px 1px}40%{translate:2px -1px}60%{translate:-1px -1px}80%{translate:1px 1px}}
+@keyframes tvfx-lampo{0%,100%{opacity:.2}10%,30%{opacity:1}20%{opacity:.4}}
+.f-affascinato{box-shadow:0 0 0 3px #ff5fa2,0 0 22px 8px #ff5fa2aa;animation:tvfx-pulsa 1.8s ease-in-out infinite}
+.f-affascinato::after{content:"💗";animation:tvfx-sale 2.2s ease-out infinite}
+.f-avvelenato{background:radial-gradient(circle,#5fd35f00 55%,#4caf50aa 72%,#4caf5000 80%);box-shadow:0 0 20px 6px #4caf5099;animation:tvfx-pulsa 2.4s ease-in-out infinite}
+.f-avvelenato::after{content:"🫧";animation:tvfx-sale 2.8s ease-out infinite}
+.f-spaventato{box-shadow:0 0 0 3px #8e44ad,0 0 20px 6px #8e44ad99}
+.tv-tok.c-spaventato{animation:tvfx-trema .35s linear infinite}
+.f-stordito{border:3px dotted #f2c94c;animation:tvfx-gira 2.5s linear infinite}
+.f-stordito::after{content:"💫";top:-6%}
+.f-paralizzato{border:3px dashed #ffe14d;box-shadow:0 0 18px 6px #ffe14daa;animation:tvfx-lampo 1.2s steps(1) infinite}
+.f-prono{inset:auto -10% -18% -10%;height:28%;border-radius:50%;background:radial-gradient(ellipse,#3b2a1acc,#3b2a1a00 70%)}
+.tv-tok.c-prono{transform:rotate(-80deg) scale(.92)}
+.tv-tok.c-prono b,.tv-tok.c-prono .cnd,.tv-tok.c-prono .pf{rotate:80deg}
+.tv-tok.c-invisibile{opacity:.4}
+.f-invisibile{box-shadow:0 0 0 2px #9fd8ffaa,0 0 24px 8px #9fd8ff66;animation:tvfx-pulsa 3s ease-in-out infinite}
+.f-accecato{inset:34% -6% auto -6%;height:24%;border-radius:4px;background:#111;box-shadow:0 2px 4px #000a}
+.f-assordato{box-shadow:0 0 0 3px #95a5a6}
+.f-afferrato,.f-trattenuto{border:4px dashed #8a6a3c;animation:tvfx-gira 9s linear infinite}
+.f-trattenuto{border-style:double;border-width:5px}
+.tv-tok.c-incapacitato,.tv-tok.c-svenuto{filter:grayscale(.85) brightness(.85)}
+.f-incapacitato{box-shadow:0 0 0 3px #7f8c8d}
+.tv-tok.c-pietrificato{filter:grayscale(1) contrast(1.25) brightness(.95)}
+.f-pietrificato{box-shadow:0 0 0 4px #8d8d8d,inset 0 0 12px #000a}
+.f-svenuto::after{content:"💤";animation:tvfx-sale 2.6s ease-out infinite}
+.f-concentrazione{inset:-20%;border:3px dashed #4aa3ff;box-shadow:0 0 14px 2px #4aa3ff88;animation:tvfx-gira 6s linear infinite}
 .tv-tok .pf{position:absolute;left:10%;right:10%;top:-10px;height:6px;border-radius:3px;background:#000b;overflow:hidden;pointer-events:none;box-shadow:0 0 0 1px #0008}
 .tv-tok .pf s{display:block;height:100%;background:var(--b,#3f9a4a);transition:width .3s}
 .tv-tok .pf[hidden]{display:none}
@@ -244,91 +288,130 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
 .tv-sp .r .s:hover{background:#ffffff1a;color:#fff}
 .tv-sp input[type=search]{margin:8px 10px 0;font:inherit;padding:5px 8px;border-radius:6px;border:1px solid #ffffff2a;background:#0005;color:#f1e4c8}
 .tv-sp code{background:#0006;padding:1px 4px;border-radius:4px}
-dialog.dlg.tv-side.tv-sw{width:min(560px,calc(100vw - 80px));inset:56px auto auto 62px;max-height:calc(100vh - 80px)}
-.tv-sch{padding:12px 14px 14px;font-size:.92rem;line-height:1.3}
-.tv-sch .hint{margin:4px 0;font-size:.82rem}
-.tv-sch .hd{display:flex;gap:10px;align-items:center}
-.tv-sch .hd .ft{width:58px;height:58px;border-radius:50%;flex:none;background:var(--c,#5b6670) center/cover no-repeat;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font:700 1.2rem var(--display);font-style:normal;color:#fff;box-shadow:0 2px 6px #0005}
-.tv-sch .tt{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
-.tv-sch .nm{font:600 1.25rem/1.2 var(--display);color:var(--wine)}
-:root[data-theme=dark] .tv-sch .nm,:root[data-theme=dark] .tv-sch h4{color:var(--gold2)}
-.tv-sch input,.tv-sch select,.tv-sch textarea{font:inherit;padding:3px 6px;border-radius:4px;border:1px solid var(--line2);background:var(--paper2);color:var(--ink);min-width:0;box-sizing:border-box}
-.tv-sch input:disabled,.tv-sch select:disabled,.tv-sch textarea:disabled{border-color:transparent;background:transparent;opacity:1;color:var(--ink);-webkit-text-fill-color:var(--ink)}
-.tv-sch input.nm{width:100%}
-.tv-sch input[type=number]{-moz-appearance:textfield}
+dialog.dlg.tv-side.tv-sw{width:min(940px,calc(100vw - 80px));inset:56px auto auto 62px;max-height:calc(100vh - 80px);padding:0;background:#fdfbf6;color:#1c1a17;border:1px solid #2b2620;box-shadow:0 18px 50px #000b}
+.tv-sch{--k:#1c1a17;--k2:#4a443b;--lin:#2b2620;--gr:#e9e5dc;--pp:#fdfbf6;font:400 .9rem/1.3 var(--body);color:var(--k);padding:0 12px 12px}
+.tv-sch input,.tv-sch select,.tv-sch textarea{font:inherit;color:var(--k);background:transparent;border:0;border-bottom:1px solid #b9b2a5;border-radius:0;padding:2px 3px;min-width:0;box-sizing:border-box;width:100%}
+.tv-sch input:focus,.tv-sch select:focus,.tv-sch textarea:focus{outline:2px solid #7d253055;outline-offset:1px;background:#fff}
+.tv-sch input:disabled,.tv-sch select:disabled,.tv-sch textarea:disabled{opacity:1;color:var(--k);-webkit-text-fill-color:var(--k);border-color:transparent}
+.tv-sch input[type=number]{-moz-appearance:textfield;text-align:center}
 .tv-sch input[type=number]::-webkit-inner-spin-button{display:none}
-.tv-sch .sub{display:flex;flex-wrap:wrap;gap:4px;align-items:center;color:var(--mute);font-size:.85rem}
-.tv-sch .sub .w{flex:1 1 80px}
-.tv-sch .sub .n{flex:0 0 52px;text-align:center}
-.tv-sch .x{all:unset;cursor:pointer;align-self:flex-start;font-size:1.2rem;padding:2px 8px;border-radius:6px}
-.tv-sch .x:hover{background:var(--paper2)}
-.tv-sch .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin:10px 0 2px}
-.tv-sch .bar label{display:flex;align-items:center;gap:5px;font-size:.85rem}
-.tv-sch .seg3{display:flex;background:var(--paper2);border:1px solid var(--line2);border-radius:7px;padding:2px;gap:2px}
-.tv-sch .seg3 button{all:unset;cursor:pointer;padding:3px 9px;border-radius:5px;font-size:.8rem;font-weight:600}
-.tv-sch .seg3 button.on{background:var(--wine);color:#fff}
-.tv-sch .big{display:grid;grid-template-columns:1fr 2fr 1fr 1fr 1fr;gap:6px;margin-top:8px}
-.tv-sch .bx{border:1px solid var(--line2);border-radius:8px;padding:5px 4px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:var(--paper2);min-width:0}
-.tv-sch .bx small{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--mute);font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tv-sch .bx input{width:100%;text-align:center;font-weight:700;font-size:1.05rem;background:var(--paper)}
-.tv-sch .bx>b{font:700 1.15rem/1.4 var(--display)}
-.tv-sch .pfv{display:flex;align-items:center;gap:3px}
-.tv-sch .pfv input{width:58px}
-.tv-sch .q{display:flex;gap:3px;align-items:center}
-.tv-sch .q input{width:46px;font-size:.85rem;font-weight:400;padding:2px 4px}
-.tv-sch .q .btn{padding:1px 9px;min-width:0}
-.tv-sch .tmp{display:flex;align-items:center;gap:4px;font-size:.75rem;color:var(--mute)}
-.tv-sch .tmp input{width:44px;font-size:.85rem;padding:1px 4px}
-.tv-sch .rb{all:unset;box-sizing:border-box;cursor:pointer;border-radius:6px;padding:1px 8px;font:700 1.15rem/1.4 var(--display);text-align:center}
-.tv-sch .rb:hover:not(:disabled),.tv-sch .lk:hover:not(:disabled){background:var(--wine);color:#fff}
-.tv-sch .rb:disabled,.tv-sch .lk:disabled{cursor:default}
-.tv-sch .cond{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:8px}
-.tv-sch .cond .ch{all:unset;cursor:pointer;background:#7d2530;color:#fff;border-radius:10px;padding:2px 9px;font-size:.78rem;font-weight:600}
-.tv-sch .cond select{font-size:.8rem;padding:2px 4px}
-.tv-sch .tabs{display:flex;gap:2px;border-bottom:1px solid var(--line2);margin:10px 0 8px}
-.tv-sch .tabs button{all:unset;cursor:pointer;padding:6px 10px;font-weight:600;font-size:.88rem;border-bottom:2px solid transparent;margin-bottom:-1px;color:var(--ink2)}
-.tv-sch .tabs button.on{border-bottom-color:var(--wine);color:var(--ink)}
-.tv-sch h4{font:600 .74rem/1.2 var(--display);text-transform:uppercase;letter-spacing:.06em;color:var(--wine);margin:10px 0 4px}
-.tv-sch .car{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
-.tv-sch .c{border:1px solid var(--line2);border-radius:8px;padding:4px;display:flex;flex-direction:column;align-items:center;gap:3px;background:var(--paper2)}
-.tv-sch .c .cb{display:flex;flex-direction:column;align-items:center;width:100%}
-.tv-sch .c .cb small{font:700 .68rem var(--body);letter-spacing:.05em;color:var(--mute)}
-.tv-sch .c .cb:hover small{color:#fff}
-.tv-sch .c input{width:52px;text-align:center;padding:1px 2px;font-size:.85rem;background:var(--paper)}
-.tv-sch .cols{display:grid;grid-template-columns:1fr 1.25fr;gap:4px 16px}
-.tv-sch .r{display:flex;align-items:center;gap:6px;min-height:24px}
-.tv-sch .r .lk{all:unset;cursor:pointer;flex:1;min-width:0;border-radius:4px;padding:1px 4px;margin-left:-4px}
-.tv-sch span.lk{cursor:default}
-.tv-sch .r .lk small{color:var(--mute)}
-.tv-sch .r .lk:hover small{color:#fffc}
-.tv-sch .r em{font-style:normal;font-weight:700;min-width:28px;text-align:right}
-.tv-sch .pr{all:unset;cursor:pointer;width:16px;text-align:center;color:var(--mute);font-size:.85rem}
-.tv-sch .pr.on{color:var(--wine)}
+.tv-sch input[type=checkbox]{width:auto;accent-color:#7d2530}
+.tv-sch textarea{resize:vertical;border:0;line-height:1.35;background:repeating-linear-gradient(transparent 0 1.3em,#0000000f 1.3em calc(1.3em + 1px))}
+.tv-sch small,.tv-sch h6{font:700 .58rem/1.15 var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--k2)}
+.tv-sch h6{margin:6px 0 0;text-align:center}
+.tv-sch .vuoto{color:#8a8172;font-size:.8rem;font-style:italic;margin:2px 0}
+.tv-sch .tbar{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:8px;margin:0 -12px 8px;padding:6px 8px 6px 10px;background:#2b2620;color:#f1e4c8;cursor:move;user-select:none;-webkit-user-select:none;flex-wrap:wrap}
+.tv-sch .tbar .grip{opacity:.6;font-size:1rem}
+.tv-sch .tbar .tt{flex:1;font:600 .82rem var(--display);letter-spacing:.06em;text-transform:uppercase;min-width:110px}
+.tv-sch .tbar .sg{display:flex;align-items:center;gap:4px;font-size:.8rem;cursor:pointer}
+.tv-sch .seg3{display:flex;background:#0005;border-radius:6px;padding:2px;gap:2px}
+.tv-sch .seg3:empty{display:none}
+.tv-sch .seg3 button{all:unset;cursor:pointer;padding:2px 8px;border-radius:4px;font-size:.76rem;font-weight:600}
+.tv-sch .seg3 button.on{background:#7d2530;color:#fff}
+.tv-sch .x{all:unset;cursor:pointer;font-size:1.1rem;line-height:1;padding:3px 7px;border-radius:5px}
+.tv-sch .x:hover{background:#ffffff22}
+.tv-sch .testa{display:grid;grid-template-columns:minmax(220px,1fr) 2fr;gap:10px;align-items:stretch}
+.tv-sch .nome{display:flex;align-items:center;gap:10px;border:2px solid var(--lin);border-radius:40px 8px 8px 40px;padding:6px 10px 6px 6px;background:#fff}
+.tv-sch .ft{width:64px;height:64px;border-radius:50%;flex:none;background:var(--c,#5b6670) center/cover no-repeat;border:2px solid var(--lin);display:flex;align-items:center;justify-content:center;font:700 1.25rem var(--display);font-style:normal;color:#fff}
+.tv-sch label.ft.cambia{cursor:pointer;position:relative}
+.tv-sch label.ft.cambia:hover{box-shadow:0 0 0 3px #7d2530}
+.tv-sch label.ft.cambia:hover::after{content:"📷";position:absolute;right:-4px;bottom:-4px;font-size:.9rem;background:#fff;border-radius:50%;padding:2px;border:1px solid var(--lin)}
+.tv-sch .ft .piu{display:flex;flex-direction:column;align-items:center;font-size:1.2rem;line-height:1}
+.tv-sch .ft .piu small{color:#fff;font-size:.5rem;margin-top:2px}
+.tv-sch .ban{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.tv-sch .nm{font:600 1.3rem/1.2 var(--display);color:var(--k);text-align:left;overflow:hidden;text-overflow:ellipsis}
+.tv-sch .info{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 12px;border:2px solid var(--lin);border-radius:8px;padding:6px 10px;background:#fff}
+.tv-sch .li{display:flex;flex-direction:column;justify-content:flex-end;min-width:0}
+.tv-sch .li .ro{padding:2px 3px;border-bottom:1px solid #b9b2a5;min-height:1.3em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tv-sch .cl{display:flex;gap:4px}.tv-sch .cl .lv{width:40px;flex:none}
+.tv-sch .tabs{display:flex;gap:4px;margin:10px 0 8px;border-bottom:2px solid var(--lin)}
+.tv-sch .tabs button{all:unset;cursor:pointer;padding:5px 12px;font:600 .8rem var(--display);letter-spacing:.05em;text-transform:uppercase;border:2px solid transparent;border-bottom:0;border-radius:6px 6px 0 0;margin-bottom:-2px;color:var(--k2)}
+.tv-sch .tabs button.on{border-color:var(--lin);background:var(--pp);color:var(--k)}
+.tv-sch .p1{display:grid;grid-template-columns:repeat(auto-fit,minmax(265px,1fr));gap:10px;align-items:start}
+.tv-sch .colA,.tv-sch .colB,.tv-sch .colC{display:flex;flex-direction:column;gap:8px;min-width:0}
+.tv-sch .dueA{display:grid;grid-template-columns:78px 1fr;gap:8px;background:var(--gr);border-radius:10px;padding:6px}
+.tv-sch .carcol{display:flex;flex-direction:column;gap:7px}
+.tv-sch .cbox{position:relative;border:2px solid var(--lin);border-radius:9px;background:#fff;text-align:center;padding:4px 2px 16px;display:flex;flex-direction:column;align-items:center}
+.tv-sch .cbox small{font-size:.52rem}
+.tv-sch .cbox .mod{font:700 1.5rem/1.2 var(--display);width:100%}
+.tv-sch .cbox .ov{position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);width:38px;height:22px;border:2px solid var(--lin);border-radius:50%;background:#fff;font-size:.8rem;padding:0}
+.tv-sch .altA{display:flex;flex-direction:column;gap:7px;min-width:0}
+.tv-sch .pill{display:flex;align-items:center;gap:8px;border:2px solid var(--lin);border-radius:8px;background:#fff;padding:3px 8px 3px 3px}
+.tv-sch .pill span{font:700 .6rem/1.15 var(--body);letter-spacing:.05em;text-transform:uppercase}
+.tv-sch .pill .pv{width:32px;height:28px;flex:none;border:2px solid var(--lin);border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 .95rem var(--display)}
+.tv-sch .pill.largo{border-radius:20px}
+.tv-sch .sez{border:2px solid var(--lin);border-radius:8px;background:#fff;padding:6px 7px 5px;min-width:0}
+.tv-sch .lista .r{display:flex;align-items:center;gap:5px;min-height:20px}
+.tv-sch .lista em{font-style:normal;font-weight:700;width:26px;text-align:center;border-bottom:1px solid var(--lin);font-size:.82rem}
+.tv-sch .lista .lk{all:unset;cursor:pointer;flex:1;min-width:0;font-size:.82rem;border-radius:3px;padding:0 3px}
+.tv-sch .lista .lk small{font-size:.66rem;text-transform:none;letter-spacing:0;font-weight:400}
+.tv-sch .pr{all:unset;cursor:pointer;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--lin);box-sizing:border-box;font-size:0;flex:none;position:relative}
+.tv-sch .pr.on{background:var(--k)}
+.tv-sch .pr.on[title^=Maestria]{background:#7d2530;border-color:#7d2530;box-shadow:0 0 0 2px #fff,0 0 0 3px #7d2530}
 .tv-sch .pr:disabled{cursor:default}
-.tv-sch .full{width:100%;margin-bottom:4px}
-.tv-sch .dv{width:96px}
+.tv-sch .rb{all:unset;box-sizing:border-box;cursor:pointer;border-radius:6px;text-align:center}
+.tv-sch .rb:hover:not(:disabled),.tv-sch .lk:hover:not(:disabled){background:#7d2530;color:#fff}
+.tv-sch .rb:hover:not(:disabled) small{color:#fff}
+.tv-sch .rb:disabled,.tv-sch .lk:disabled{cursor:default}
+.tv-sch .grigio{background:var(--gr);border-radius:10px;padding:7px;display:flex;flex-direction:column;gap:7px}
+.tv-sch .tre{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.tv-sch .tre>div{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:#fff;border:2px solid var(--lin);padding:5px 3px;min-height:64px;text-align:center}
+.tv-sch .scudo{border-radius:6px 6px 50% 50% / 6px 6px 30% 30%}
+.tv-sch .qq{border-radius:8px}
+.tv-sch .tre input{font:700 1.35rem var(--display);border:0;text-align:center}
+.tv-sch .tre .qq input{font-size:1rem}
+.tv-sch .tre .rb{font:700 1.35rem var(--display);width:100%}
+.tv-sch .tre small{font-size:.52rem}
+.tv-sch .pf{text-align:center}
+.tv-sch .pfmax{display:flex;align-items:center;gap:6px;font-size:.66rem;color:var(--k2);text-transform:uppercase;letter-spacing:.04em;font-weight:700;border-bottom:1px solid #b9b2a5;padding-bottom:3px}
+.tv-sch .pfmax input{width:60px;border:0;font-weight:700;font-size:.9rem}
+.tv-sch .pfa{font:700 1.7rem var(--display);border:0;text-align:center;padding:4px 0}
+.tv-sch .pfa.piccolo{font-size:1.15rem;padding:0}
+.tv-sch .q{display:flex;gap:4px;justify-content:center;align-items:center}
+.tv-sch .q input{width:48px;border:1px solid #b9b2a5;border-radius:4px}
+.tv-sch .q button,.tv-sch .mini{all:unset;box-sizing:border-box;cursor:pointer;font:600 .74rem var(--body);padding:3px 8px;border-radius:5px;border:1px solid var(--lin);background:#fff;white-space:nowrap;text-align:center}
+.tv-sch .q button:hover,.tv-sch .mini:hover{background:#7d2530;color:#fff;border-color:#7d2530}
+.tv-sch .mini:disabled{opacity:.4;cursor:default}
+.tv-sch .due{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.tv-sch .dvt{display:flex;align-items:center;gap:4px;font-size:.66rem;font-weight:700;color:var(--k2);text-transform:uppercase}
+.tv-sch .morte .r{display:flex;align-items:center;justify-content:space-between;gap:4px;font-size:.62rem;font-weight:700;text-transform:uppercase;color:var(--k2);margin-bottom:3px}
+.tv-sch .morte .mini{display:block;margin:2px auto 0;padding:1px 8px}
 .tv-sch .dots{display:inline-flex;gap:3px;flex-wrap:wrap}
-.tv-sch .dots button{all:unset;cursor:pointer;width:13px;height:13px;border-radius:50%;border:2px solid var(--wine);box-sizing:border-box}
-.tv-sch .dots button.on{background:var(--wine)}
-.tv-sch .dots.ko button{border-color:#b3261e}.tv-sch .dots.ko button.on{background:#b3261e}
+.tv-sch .dots button{all:unset;cursor:pointer;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--lin);box-sizing:border-box}
+.tv-sch .dots button.on{background:var(--k)}
+.tv-sch .dots.ko button.on{background:#b3261e;border-color:#b3261e}
 .tv-sch .dots button:disabled{cursor:default}
-.tv-sch .atts{display:flex;flex-direction:column;gap:8px;margin-bottom:8px}
-.tv-sch .at{display:grid;grid-template-columns:1fr auto auto;gap:5px 8px;align-items:center;border:1px solid var(--line2);border-radius:8px;padding:7px 8px;background:var(--paper2)}
-.tv-sch .at label{display:flex;align-items:center;gap:4px;font-size:.8rem;color:var(--mute)}
+.tv-sch .atts .th{display:grid;grid-template-columns:1fr 44px 74px;gap:4px;font:700 .56rem var(--body);text-transform:uppercase;letter-spacing:.05em;color:var(--k2);padding:0 2px}
+.tv-sch .at{background:var(--gr);border-radius:5px;padding:3px 4px;margin:3px 0}
+.tv-sch .at .riga{display:grid;grid-template-columns:1fr 44px 74px;gap:4px;align-items:center}
+.tv-sch .at .riga+.riga{grid-template-columns:1fr auto auto auto auto;margin-top:2px}
+.tv-sch .at input{background:#fff;border:0;border-radius:3px}
 .tv-sch .at .an{font-weight:700}
-.tv-sch .at .ac{width:52px;text-align:center}
-.tv-sch .at .ad{width:96px}
-.tv-sch .at .full{grid-column:1/-1;margin:0;font-size:.85rem}
-.tv-sch .at .ab{grid-column:1/-1;display:flex;gap:5px;flex-wrap:wrap;align-items:center}
-.tv-sch .at .ab .sp{flex:1}
-.tv-sch textarea{width:100%;resize:vertical;min-height:80px}
-.tv-sch .incs{flex-wrap:wrap;gap:10px}
-.tv-sch .incs label{display:flex;align-items:center;gap:5px}
-.tv-sch .slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 12px;margin-bottom:8px}
-.tv-sch .sl{display:flex;align-items:center;gap:6px}
-.tv-sch .sl small{font-weight:700;min-width:20px}
-.tv-sch .sl input{width:40px;text-align:center;padding:1px 2px}
-.tv-sch .fd{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.tv-sch .at .tp{font-size:.78rem;background:transparent}
+.tv-sch .at .mini{padding:1px 6px}
+.tv-sch .at .via{border-color:transparent;background:transparent}
+.tv-sch .agg{margin:4px 0 6px}
+.tv-sch .eq{display:grid;grid-template-columns:62px 1fr;gap:8px}
+.tv-sch .eq h6{grid-column:1/-1}
+.tv-sch .mon{display:flex;flex-direction:column;gap:4px}
+.tv-sch .mon label{display:flex;align-items:center;border:1.5px solid var(--lin);border-radius:6px;overflow:hidden}
+.tv-sch .mon span{font:700 .6rem var(--body);width:24px;text-align:center;background:var(--gr);align-self:stretch;display:flex;align-items:center;justify-content:center}
+.tv-sch .mon input{border:0;font-size:.82rem;padding:2px}
+.tv-sch .tratti{gap:6px}
+.tv-sch .cnd{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;min-height:20px}
+.tv-sch .cnd .ch{all:unset;cursor:pointer;background:#7d2530;color:#fff;border-radius:10px;padding:1px 8px;font-size:.72rem;font-weight:600}
+.tv-sch .sez select,.tv-sch .selc{margin-top:4px;font-size:.8rem;border:1px solid #b9b2a5;border-radius:4px}
+.tv-sch .incT{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;border:2px solid var(--lin);border-radius:8px;padding:8px 10px;background:#fff;margin-bottom:8px}
+.tv-sch .li.grande b,.tv-sch .li.grande .rb{font:700 1.3rem var(--display);text-align:center;padding:2px 0}
+.tv-sch .li.grande small{text-align:center}
+.tv-sch .incG{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:8px;margin-top:4px}
+.tv-sch .lv .lt{display:flex;align-items:center;gap:6px;font:700 .62rem var(--body);text-transform:uppercase;color:var(--k2);border-bottom:2px solid var(--lin);padding-bottom:4px;margin-bottom:3px}
+.tv-sch .lv .lt b{width:26px;height:26px;border:2px solid var(--lin);border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 .95rem var(--display);color:var(--k)}
+.tv-sch .lv .sn{width:38px;border:1px solid #b9b2a5;border-radius:4px}
+.tv-sch .bgT{display:grid;grid-template-columns:repeat(6,1fr);gap:4px 10px;border:2px solid var(--lin);border-radius:8px;padding:6px 10px;background:#fff;margin-bottom:8px}
+.tv-sch .bgG{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px;margin-bottom:8px}
+.tv-sch .fd{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid #b9b2a5}
+:root[data-theme=dark] .tv-sch .nm,:root[data-theme=dark] .tv-sch h4{color:var(--gold2)}
 .tv-pick button small{color:var(--mute);font-size:.75rem}
 @media (max-width:820px){
   .tv-turno{width:min(250px,calc(100% - 20px));max-height:45%}
@@ -337,10 +420,11 @@ dialog.dlg.tv-side.tv-sw{width:min(560px,calc(100vw - 80px));inset:56px auto aut
   .tv-ctab{top:auto;bottom:calc(62% + 8px);transform:none;width:40px;height:34px;border-radius:9px 0 0 9px}
   .tv-ctab.chiusa{bottom:12px}
   dialog.dlg.tv-side{inset:auto 8px 8px 8px;width:auto;max-height:58vh}
-  dialog.dlg.tv-side.tv-sw{inset:auto 0 0 0;width:auto;max-height:88vh;border-radius:12px 12px 0 0}
-  .tv-sch .big{grid-template-columns:repeat(4,1fr)}.tv-sch .bx.pf{grid-column:1/-1;order:-1;flex-direction:row;flex-wrap:wrap;justify-content:center;gap:8px}
-  .tv-sch .car{grid-template-columns:repeat(3,1fr)}
-  .tv-sch .cols{grid-template-columns:1fr}
+  dialog.dlg.tv-side.tv-sw{inset:auto 0 0 0;width:auto;max-height:90vh;border-radius:12px 12px 0 0}
+  .tv-sch .testa{grid-template-columns:1fr}.tv-sch .info{grid-template-columns:repeat(2,1fr)}
+  .tv-sch .bgT{grid-template-columns:repeat(3,1fr)}
+  .tv-sch .tbar{cursor:default}.tv-sch .tbar .tt,.tv-sch .tbar .grip{display:none}.tv-sch .tbar .x{margin-left:auto}
+  .tv-sch .tabs{overflow-x:auto;scrollbar-width:none}.tv-sch .tabs button{white-space:nowrap;padding:5px 8px;font-size:.72rem}
   .tv-chip b{max-width:34vw}
   .tv-pgrid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
 }
@@ -647,14 +731,14 @@ dialog.dlg.tv-side.tv-sw{width:min(560px,calc(100vw - 80px));inset:56px auto aut
       'tv-pagine': () => pannelloMappe($('#tv-pages').hidden), 'tv-nuova': () => dlgNuovaScena(),
       'tv-token': () => dlgToken(), 'tv-griglia': () => dlgGriglia(),
       'tv-turno': () => apriTurno($('#tv-turno').hidden), 'tv-schede': () => apriSchede($('#tv-sp').hidden),
-      'tv-tiradadi': () => { const p = $('#tv-tdp'); p.hidden = !p.hidden; if (!p.hidden) { disegnaTdp(); $('#tv-sp').hidden = true; } disegnaRail(); },
+      'tv-tiradadi': () => { const p = $('#tv-tdp'); p.hidden = !p.hidden; if (!p.hidden) { disegnaTdp(); $('#tv-sp').hidden = true; if (matchMedia('(max-width:820px)').matches) apriChat(false); } disegnaRail(); },
       'tv-liv-seg': () => livello('segnalini'), 'tv-liv-mas': () => livello('master'), 'tv-maschera': () => strumento(T.tool === 'maschera' ? 'muovi' : 'maschera'),
       ...dadiActs()
     };
   }
   // livelli come su Roll20: Segnalini (li vedono tutti) e Master (solo il DM). Si lavora su uno alla volta
   function livello(l) { T.livello = l; chiudiPop(); const sl = document.querySelector('dialog.tv-side [name=liv]'); if (sl) sl.value = l; disegnaRail(); disegnaTop(); disegnaToken(); }
-  function strumento(t) { T.tool = t; const st = $('#tv-stage'); if (st) { st.classList.toggle('rul', t === 'righello' || t === 'maschera' || t === 'allinea'); st.classList.toggle('mano', t === 'mano'); } disegnaRail(); barraMaschera(); }
+  function strumento(t) { T.tool = t; if (t === 'maschera' || t === 'allinea') { const p = $('#tv-tdp'); if (p) p.hidden = true; } const st = $('#tv-stage'); if (st) { st.classList.toggle('rul', t === 'righello' || t === 'maschera' || t === 'allinea'); st.classList.toggle('mano', t === 'mano'); } disegnaRail(); barraMaschera(); }
   function tasti(e) {
     if (e.target.closest('input,textarea,select,[contenteditable]') || e.ctrlKey || e.metaKey || e.altKey || document.querySelector('dialog[open]')) return;
     const k = e.key.toLowerCase();
@@ -771,8 +855,10 @@ dialog.dlg.tv-side.tv-sw{width:min(560px,calc(100vw - 80px));inset:56px auto aut
     }
     st.innerHTML = `<div class="tv-world" id="tv-world"><img class="tv-map" id="tv-map" alt="" draggable="false" width="${sc.larghezza}" height="${sc.altezza}" style="width:${sc.larghezza}px;height:${sc.altezza}px">
       <svg class="tv-grid" id="tv-grid" width="${sc.larghezza}" height="${sc.altezza}"></svg><div id="tv-toks"></div><canvas class="tv-fog" id="tv-fog" style="width:${sc.larghezza}px;height:${sc.altezza}px"></canvas></div>
-      <svg class="tv-ov" id="tv-ov"></svg><div class="tv-zoom"><button type="button" data-z="1.25" data-tip="Ingrandisci" aria-label="Ingrandisci">+</button><small id="tv-zp"></small><button type="button" data-z="0.8" data-tip="Rimpicciolisci" aria-label="Rimpicciolisci">−</button><button type="button" data-z="0" data-tip="Mostra tutta la mappa" aria-label="Mostra tutta la mappa">⤢</button></div>`;
-    st.querySelectorAll('[data-z]').forEach(b => b.onclick = () => { const z = +b.dataset.z; if (!z) adatta(); else { const r = st.getBoundingClientRect(); zoom(z, r.width / 2, r.height / 2); } });
+      <svg class="tv-ov" id="tv-ov"></svg><div class="tv-zoom"><button type="button" data-z="1.25" data-tip="Ingrandisci" aria-label="Ingrandisci">+</button><input type="range" id="tv-zr" min="${Z_MIN}" max="${Z_MAX}" step="0.001" aria-label="Zoom" data-tip="Trascina per lo zoom"><button type="button" data-z="0.8" data-tip="Rimpicciolisci" aria-label="Rimpicciolisci">−</button><button type="button" data-z="0" data-tip="Mostra tutta la mappa" aria-label="Mostra tutta la mappa">⤢</button><button type="button" class="zp" id="tv-zp" data-z="1" data-tip="Torna al 100%" aria-label="Torna al 100%"></button></div>`;
+    st.querySelectorAll('[data-z]').forEach(b => b.onclick = () => { const z = b.id === 'tv-zp' ? 1 / T.view.z : +b.dataset.z; if (!z) adatta(); else { const r = st.getBoundingClientRect(); zoom(z, r.width / 2, r.height / 2); } });
+    // il cursore va in scala logaritmica: ogni tratto ingrandisce della stessa proporzione
+    const zr = $('#tv-zr'); zr.oninput = () => { const r = st.getBoundingClientRect(); zoom(Math.exp(+zr.value) / T.view.z, r.width / 2, r.height / 2); };
     const img = $('#tv-map');
     if (sc.mappa) urlMappa(sc.mappa).then(u => { if (img.isConnected) img.src = u; }).catch(e => toast('Mappa non caricata: ' + e.message, 'err'));
     else img.removeAttribute('src');
@@ -792,8 +878,10 @@ dialog.dlg.tv-side.tv-sw{width:min(560px,calc(100vw - 80px));inset:56px auto aut
   function applicaVista() {
     const w = $('#tv-world'); if (w) w.style.transform = `translate(${T.view.x}px,${T.view.y}px) scale(${T.view.z})`;
     const zp = $('#tv-zp'); if (zp) zp.textContent = Math.round(T.view.z * 100) + '%';
+    const zr = $('#tv-zr'); if (zr && document.activeElement !== zr) zr.value = Math.log(T.view.z);
     disegnaRighelli(); chiudiPop();
   }
+  const Z_MIN = Math.log(0.05), Z_MAX = Math.log(6);
   function zoom(f, cx, cy) {
     const z = clamp(T.view.z * f, 0.05, 6), k = z / T.view.z;
     T.view = { z, x: cx - (cx - T.view.x) * k, y: cy - (cy - T.view.y) * k }; applicaVista();
@@ -812,7 +900,7 @@ dialog.dlg.tv-side.tv-sw{width:min(560px,calc(100vw - 80px));inset:56px auto aut
     box.querySelectorAll('.tv-tok').forEach(el => { if (!vivi.has(el.dataset.id)) el.remove(); });
     lista.forEach((t, i) => {
       let el = tokEl(t.id);
-      if (!el) { el = document.createElement('div'); el.className = 'tv-tok'; el.dataset.id = t.id; el.innerHTML = '<span class="ini"></span><b></b><i class="pf"><s></s></i>'; }
+      if (!el) { el = document.createElement('div'); el.className = 'tv-tok'; el.dataset.id = t.id; el.innerHTML = '<span class="fxs"></span><span class="ini"></span><b></b><i class="pf"><s></s></i><span class="cnd"></span>'; }
       const lato = t.misura * sc.griglia;
       el.style.cssText = `left:${t.x}px;top:${t.y}px;width:${lato}px;height:${lato}px;--c:${t.colore};--fs:${Math.max(11, sc.griglia * 0.22)}px;z-index:${i + 1}${t.immagine ? `;background-image:url("${t.immagine.replace(/"/g, '%22')}")` : ''}`;
       if (T.drag?.id !== t.id) el.classList.remove('live');
@@ -826,6 +914,14 @@ dialog.dlg.tv-side.tv-sw{width:min(560px,calc(100vw - 80px));inset:56px auto aut
       el.querySelector('b').textContent = t.nome + (t.nascosto ? ' (nascosto)' : '');
       el.querySelector('b').hidden = !t.nome;
       el.title = t.nome || '';
+      const cl = condTok(t).filter(c => COND_FX[c]), ck = cl.join('|');
+      if (el.dataset.cnd !== ck) { // ridisegno gli effetti solo se cambiano, così le animazioni non ripartono
+        el.dataset.cnd = ck;
+        Object.values(COND_FX).forEach(([, c]) => el.classList.remove('c-' + c)); cl.forEach(c => el.classList.add('c-' + COND_FX[c][1]));
+        el.querySelector('.fxs').innerHTML = cl.map(c => `<span class="fx f-${COND_FX[c][1]}"></span>`).join('');
+        el.querySelector('.cnd').innerHTML = cl.map(c => `<i title="${c}">${COND_FX[c][0]}</i>`).join('');
+      }
+      if (cl.length) el.title += ' · ' + cl.join(', ');
       // la barra dei punti ferita: il DM la vede su tutti, il giocatore sul suo
       const pf = (isDM() || (!!t.giocatore && t.giocatore === T.me.giocatore)) && pfDi(t), bar = el.querySelector('.pf');
       bar.hidden = !pf;
@@ -834,11 +930,27 @@ dialog.dlg.tv-side.tv-sw{width:min(560px,calc(100vw - 80px));inset:56px auto aut
     });
   }
 
+  // i token dei personaggi non si sovrappongono: se la casella è occupata da un altro personaggio, va nella libera più vicina
+  function postoLibero(t, x, y) {
+    if (!t.giocatore) return { x, y };
+    const sc = scena(), lato = t.misura * sc.griglia, passo = t.misura < 1 ? sc.griglia / 2 : sc.griglia;
+    const altri = [...T.tok.values()].filter(o => o.id !== t.id && o.scena === sc.id && o.giocatore && (isDM() || !o.nascosto));
+    const occupa = (px, py) => altri.some(o => { const l = o.misura * sc.griglia, m = 0.5; return px < o.x + l - m && px + lato > o.x + m && py < o.y + l - m && py + lato > o.y + m; });
+    let best = null;
+    for (let r = 0; r <= 6 && !best; r++) for (let i = -r; i <= r; i++) for (let j = -r; j <= r; j++) {
+      if (Math.max(Math.abs(i), Math.abs(j)) !== r) continue;
+      const px = x + i * passo, py = y + j * passo;
+      if (px < -1 || py < -1 || px + lato > sc.larghezza + 1 || py + lato > sc.altezza + 1 || occupa(px, py)) continue;
+      const dd = i * i + j * j; if (!best || dd < best.dd) best = { x: px, y: py, dd };
+    }
+    return best;
+  }
+
   /* ---------- trascinamenti, righello, zoom ---------- */
   function interazioni(st) {
     if (st.__tv) return; st.__tv = true;
     const punti = new Map(); let pan = null, pinch = null, rul = null, mas = null, ultimo = 0;
-    st.addEventListener('wheel', e => { e.preventDefault(); const r = st.getBoundingClientRect(); zoom(Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0015)), e.clientX - r.left, e.clientY - r.top); }, { passive: false });
+    st.addEventListener('wheel', e => { e.preventDefault(); const r = st.getBoundingClientRect(); const dy = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY; zoom(Math.exp(-(e.ctrlKey ? dy * 0.01 : clamp(dy, -100, 100) * 0.0005)), e.clientX - r.left, e.clientY - r.top); }, { passive: false });
     st.addEventListener('pointerdown', e => {
       if (e.button > 0 || !scena() || e.target.closest('.tv-zoom,.tv-pop')) return;
       chiudiPop();
@@ -896,7 +1008,9 @@ dialog.dlg.tv-side.tv-sw{width:min(560px,calc(100vw - 80px));inset:56px auto aut
         if (el) el.classList.remove('drag');
         if (!t) return;
         if (!d.mosso) { if (e.type === 'pointerup') menuToken(t.id, e); return; }
-        const sc = scena(), x = aggancia(d.x, sc.griglia_x, t.misura), y = aggancia(d.y, sc.griglia_y, t.misura);
+        const sc = scena(); let x = aggancia(d.x, sc.griglia_x, t.misura), y = aggancia(d.y, sc.griglia_y, t.misura);
+        const lib = postoLibero(t, x, y); if (!lib) { t.x = d.x0; t.y = d.y0; disegnaToken(); manda('trascina', { id: t.id, x: d.x0, y: d.y0 }); return; }
+        x = lib.x; y = lib.y;
         t.x = x; t.y = y; disegnaToken(); manda('trascina', { id: t.id, x, y });
         const r = await SB.from('tavolo_token').update({ x, y }).eq('id', t.id).select().maybeSingle();
         if (r.error || !r.data) { t.x = d.x0; t.y = d.y0; disegnaToken(); manda('trascina', { id: t.id, x: d.x0, y: d.y0 }); toast(r.error?.message || 'Non puoi muovere questo token.', 'err'); }
@@ -943,7 +1057,12 @@ dialog.dlg.tv-side.tv-sw{width:min(560px,calc(100vw - 80px));inset:56px auto aut
     const ft = haFoto(t), sch = schedaDi(t), pf = (isDM() || puoMuovere(t)) && pfDi(t);
     const rpf = pf ? `<div class="row"><span>PF ${pf.pf}/${pf.max}</span><input type="number" data-k="pfq" value="1" min="1" aria-label="Quanti punti" style="width:52px;font:inherit;padding:3px 5px;border-radius:4px;border:1px solid var(--line2);background:var(--paper2);color:var(--ink)"><button class="btn sm" data-k="pfm" title="Danni">−</button><button class="btn sm" data-k="pfp" title="Cura">+</button></div>` : '';
     const bsch = sch ? `<button class="btn sm" data-k="sch">📜 ${sch.giocatore && sch.giocatore === T.me.giocatore ? 'La mia scheda' : 'Scheda'}</button>` : isDM() && T.schede ? '<button class="btn sm" data-k="sch">📜 Crea la scheda</button>' : '';
+    const cnow = condTok(t), pcond = isDM() || puoMuovere(t);
+    const rcond = pcond ? `<div class="tv-pcond">${cnow.map(c => `<button type="button" data-tc="${esc(c)}" title="Togli">${COND_FX[c]?.[0] || ''} ${esc(c)} ✕</button>`).join('')}<select data-k="tcond" aria-label="Aggiungi una condizione"><option value="">+ Condizione</option>${CONDIZIONI.filter(c => !cnow.includes(c)).map(c => `<option>${c}</option>`).join('')}</select></div>` : '';
     const extra = () => {
+      const metti = async lista => { chiudiPop(); const s = t.giocatore ? schedaDi(t) : null; if (s && puoScrivere(s)) await cambiaCond(s, null, lista); else await condSuToken(t, lista); };
+      pop.querySelectorAll('[data-tc]').forEach(b => b.onclick = () => metti(cnow.filter(c => c !== b.dataset.tc)));
+      const sc = pop.querySelector('[data-k=tcond]'); if (sc) sc.onchange = () => { if (sc.value) metti([...cnow, sc.value]); };
       pop.querySelector('[data-k=sch]')?.addEventListener('click', async () => {
         chiudiPop(); let s = schedaDi(t);
         if (!s) {
@@ -962,7 +1081,7 @@ dialog.dlg.tv-side.tv-sw{width:min(560px,calc(100vw - 80px));inset:56px auto aut
     if (!isDM()) {
       // il giocatore apre la foto (solo per sé) e, sul proprio token, tira l'iniziativa
       const mio = puoMuovere(t); if (!ft && !mio && !sch) return;
-      pop.innerHTML = `<b>${esc(t.nome || 'Token')}</b>${bsch}${ft ? '<button class="btn sm" data-k="foto">🖼 Apri la foto</button>' : ''}${mio ? rpf + ini : ''}`;
+      pop.innerHTML = `<b>${esc(t.nome || 'Token')}</b>${bsch}${ft ? '<button class="btn sm" data-k="foto">🖼 Apri la foto</button>' : ''}${mio ? rpf + rcond + ini : ''}`;
       st.append(pop); extra();
       pop.style.left = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6) + 'px'; pop.style.top = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6) + 'px';
       if (ft) pop.querySelector('[data-k=foto]').onclick = () => { chiudiPop(); apriFoto(fotoDi(t)); };
@@ -970,12 +1089,12 @@ dialog.dlg.tv-side.tv-sw{width:min(560px,calc(100vw - 80px));inset:56px auto aut
       return;
     }
     const gioc = (T.info.giocatori || []).map(g => `<option value="${esc(g.id)}" ${t.giocatore === g.id ? 'selected' : ''}>${esc(g.name)}</option>`).join('');
-    pop.innerHTML = `<b>${esc(t.nome || 'Token')}</b>${bsch}${rpf}
+    pop.innerHTML = `<input class="tv-pnome" data-k="rin" value="${esc(t.nome || '')}" maxlength="60" placeholder="Nome del token" aria-label="Nome del token" title="Scrivi per rinominare il token, Invio per salvare">${bsch}${rpf}${rcond}
       <button class="btn sm" data-k="nasc">${t.nascosto ? '⬆ Sposta nei Segnalini (lo vedono tutti)' : '👑 Sposta nel livello Master (solo tu)'}</button>
       <div class="row"><span>Misura</span><button class="btn sm" data-k="meno">−</button><span>${t.misura.toLocaleString('it-IT')}</span><button class="btn sm" data-k="piu">+</button></div>
       <div class="row"><span>Lo muove</span><select data-k="gioc"><option value="">solo il DM</option>${gioc}</select></div>
       ${ft ? '<div class="row"><span>Foto</span><button class="btn sm" data-k="foto" title="Solo sul tuo schermo">🖼 Apri</button><button class="btn sm" data-k="mostra" title="Si apre a schermo intero a tutti i giocatori">📣 Mostra a tutti</button></div>' : ''}
-      ${ini}<button class="btn sm" data-k="nome">✎ Rinomina</button><button class="btn sm danger" data-k="via">Elimina</button>`;
+      ${ini}<button class="btn sm danger" data-k="via">Elimina</button>`;
     st.append(pop); extra();
     const x = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6), y = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6);
     pop.style.left = x + 'px'; pop.style.top = y + 'px';
@@ -993,7 +1112,10 @@ dialog.dlg.tv-side.tv-sw{width:min(560px,calc(100vw - 80px));inset:56px auto aut
     pop.querySelector('[data-k=piu]').onclick = () => salva({ misura: t.misura < 1 ? 1 : Math.min(10, t.misura + 1) });
     pop.querySelector('[data-k=gioc]').onchange = ev => salva({ giocatore: ev.target.value || null });
     pop.querySelector('[data-k=ini]').onclick = () => { chiudiPop(); iniziativa(t, pop.querySelector('[data-k=imod]').value); };
-    pop.querySelector('[data-k=nome]').onclick = () => { const n = prompt('Nome del token', t.nome); if (n != null) salva({ nome: n.trim().slice(0, 60) }); };
+    const rin = pop.querySelector('[data-k=rin]');
+    const rinomina = () => { const n = rin.value.trim().slice(0, 60); if (n !== (t.nome || '')) salva({ nome: n }); };
+    rin.onkeydown = ev => { if (ev.key === 'Enter') { ev.preventDefault(); rinomina(); } else if (ev.key === 'Escape') chiudiPop(); };
+    rin.onchange = rinomina;
     pop.querySelector('[data-k=via]').onclick = async () => {
       chiudiPop(); if (!await ask(`Eliminare il token **${t.nome || 'senza nome'}**?`, { ok: 'Elimina', danger: true, title: 'Elimina token' })) return;
       const r2 = await SB.from('tavolo_token').delete().eq('id', id); if (r2.error) return toast(r2.error.message, 'err');
@@ -1079,6 +1201,7 @@ dialog.dlg.tv-side.tv-sw{width:min(560px,calc(100vw - 80px));inset:56px auto aut
     const row = { scena: sc.id, nome: gia ? `${o.nome} ${gia + 1}` : o.nome, immagine: o.img || null, colore: o.colore, misura: mis, giocatore: o.giocatore || null, scheda: o.scheda || null, nascosto: !!master,
       x: aggancia(clamp(cx, 0, sc.larghezza - lato), sc.griglia_x, mis), y: aggancia(clamp(cy, 0, sc.altezza - lato), sc.griglia_y, mis) };
     if (max != null) { row.pf = max; row.pf_max = max; }
+    if (row.giocatore) { const l = postoLibero({ ...row, id: null }, row.x, row.y); if (l) { row.x = l.x; row.y = l.y; } }
     const r = await SB.from('tavolo_token').insert(row).select().single();
     if (r.error) { toast(r.error.message, 'err'); return null; }
     T.tok.set(r.data.id, r.data); disegnaToken(); toast('Token aggiunto: ' + (row.nome || 'senza nome'));
@@ -1139,26 +1262,35 @@ dialog.dlg.tv-side.tv-sw{width:min(560px,calc(100vw - 80px));inset:56px auto aut
   function dlgGriglia() {
     const sc = scena(); if (!sc) return;
     const prima = { ...sc };
-    const d = openDlg(`<form method="dialog"><h3>Impostazioni della pagina</h3><p class="hint" style="margin-top:0">Cambia i valori guardando la mappa: la griglia si aggiorna subito. Fai combaciare una casella con un quadretto della mappa.</p>
+    const off = n => +(((n % sc.griglia) + sc.griglia) % sc.griglia).toFixed(2);
+    const d = openDlg(`<form method="dialog" novalidate><h3>Impostazioni della pagina</h3><p class="hint" style="margin-top:0">Cambia i valori guardando la mappa: la griglia si aggiorna subito. Fai combaciare una casella con un quadretto della mappa.</p>
       <div class="tv-f"><label>Nome</label><input name="nome" maxlength="80" value="${esc(sc.nome)}">
-        <label>Casella (px)</label><span style="display:flex;gap:8px;align-items:center"><input type="range" name="g" min="10" max="300" step="0.5" value="${sc.griglia}" style="flex:1"><input type="number" name="gn" min="8" max="600" step="0.5" value="${sc.griglia}" style="width:80px"></span>
-        <label>Sposta ↔</label><input type="range" name="gx" min="0" max="${sc.griglia}" step="0.5" value="${((sc.griglia_x % sc.griglia) + sc.griglia) % sc.griglia}">
-        <label>Sposta ↕</label><input type="range" name="gy" min="0" max="${sc.griglia}" step="0.5" value="${((sc.griglia_y % sc.griglia) + sc.griglia) % sc.griglia}">
+        <label>Casella (px)</label><span style="display:flex;gap:8px;align-items:center"><input type="range" name="g" min="10" max="300" step="0.01" value="${sc.griglia}" style="flex:1"><input type="number" name="gn" min="8" max="600" step="any" value="${sc.griglia}" style="width:84px"></span>
+        <label>Sposta ↔</label><span style="display:flex;gap:8px;align-items:center"><input type="range" name="gx" min="0" max="${sc.griglia}" step="0.01" value="${off(sc.griglia_x)}" style="flex:1"><input type="number" name="gxn" step="any" value="${off(sc.griglia_x)}" style="width:84px"></span>
+        <label>Sposta ↕</label><span style="display:flex;gap:8px;align-items:center"><input type="range" name="gy" min="0" max="${sc.griglia}" step="0.01" value="${off(sc.griglia_y)}" style="flex:1"><input type="number" name="gyn" step="any" value="${off(sc.griglia_y)}" style="width:84px"></span>
+        <label></label><small class="hint" style="margin:0">Accetta i decimali (es. 55,45). Con le frecce ↑↓ nei riquadri: un pixel; con Maiusc tenuto, un decimo.</small>
         <label></label><button type="button" class="btn sm" data-k="allinea" style="justify-self:start">📐 Allinea alla griglia disegnata sulla mappa</button>
-        <label>Metri per casella</label><input type="number" name="m" min="0.1" max="1000" step="0.1" value="${sc.metri}">
+        <label>Metri per casella</label><input type="number" name="m" min="0.1" max="1000" step="any" value="${sc.metri}">
         <label>Mostra la griglia</label><label style="justify-content:flex-start"><input type="checkbox" name="vis" ${sc.griglia_visibile ? 'checked' : ''}> sì</label>
         <label>Colore</label><input type="color" name="gc" value="${esc(sc.griglia_colore || '#000000')}">
         <label>Opacità</label><span style="display:flex;gap:8px;align-items:center"><input type="range" name="go" min="0" max="100" step="1" value="${sc.griglia_opacita ?? 38}" style="flex:1"><output name="gov" style="width:42px;text-align:right">${sc.griglia_opacita ?? 38}%</output></span></div>
-      <menu><button value="cancel" class="btn ghost">Annulla</button><button value="ok" class="btn primary">Salva</button></menu></form>`, 'tv-gd');
+      <menu><button value="cancel" class="btn ghost" formnovalidate>Annulla</button><button value="ok" class="btn primary">Salva</button></menu></form>`, 'tv-gd');
     const v = n => d.querySelector(`[name=${n}]`);
     const prova = () => {
-      sc.griglia = clamp(+v('gn').value || sc.griglia, 8, 600); sc.griglia_x = +v('gx').value; sc.griglia_y = +v('gy').value; sc.metri = +v('m').value || 1.5; sc.griglia_visibile = v('vis').checked;
+      sc.griglia = clamp(+v('gn').value || sc.griglia, 8, 600); sc.griglia_x = +v('gxn').value || 0; sc.griglia_y = +v('gyn').value || 0; sc.metri = +v('m').value || 1.5; sc.griglia_visibile = v('vis').checked;
       sc.griglia_colore = v('gc').value; sc.griglia_opacita = +v('go').value; v('gov').value = sc.griglia_opacita + '%';
       v('gx').max = v('gy').max = sc.griglia; disegnaGriglia(); disegnaToken();
     };
     v('g').oninput = () => { v('gn').value = v('g').value; prova(); };
     v('gn').oninput = () => { v('g').value = v('gn').value; prova(); };
-    ['gx', 'gy', 'm', 'vis', 'gc', 'go'].forEach(n => v(n).oninput = prova);
+    v('gx').oninput = () => { v('gxn').value = v('gx').value; prova(); }; v('gxn').oninput = () => { v('gx').value = v('gxn').value; prova(); };
+    v('gy').oninput = () => { v('gyn').value = v('gy').value; prova(); }; v('gyn').oninput = () => { v('gy').value = v('gyn').value; prova(); };
+    ['m', 'vis', 'gc', 'go'].forEach(n => v(n).oninput = prova);
+    // frecce nei riquadri: un pixel alla volta, un decimo con Maiusc (il browser col passo «any» andrebbe di 1 senza decimi)
+    ['gn', 'gxn', 'gyn'].forEach(n => v(n).addEventListener('keydown', e => {
+      if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return; e.preventDefault();
+      const el = v(n); el.value = +((+el.value || 0) + (e.key === 'ArrowUp' ? 1 : -1) * (e.shiftKey ? 0.1 : 1)).toFixed(2); el.dispatchEvent(new Event('input'));
+    }));
     d.querySelector('[data-k=allinea]').onclick = () => { d.close('cancel'); setTimeout(() => { strumento('allinea'); toast('Disegna un riquadro su alcune caselle della mappa.'); }, 80); };
     d.addEventListener('close', async () => {
       if (d.returnValue !== 'ok') { Object.assign(sc, prima); disegnaGriglia(); disegnaToken(); return; }
@@ -1182,8 +1314,13 @@ dialog.dlg.tv-side.tv-sw{width:min(560px,calc(100vw - 80px));inset:56px auto aut
       <div class="tabs"><button type="button" data-v="0" class="${T.tdpriv ? '' : 'on'}">Tutti</button><button type="button" data-v="1" class="${T.tdpriv ? 'on' : ''}">${isDM() ? 'Solo io' : 'Solo al DM'}</button></div>
       <div class="mods"><input type="number" data-k="mod" placeholder="Mod" style="width:64px" aria-label="Modificatore" value="${esc(mod)}"><input type="text" data-k="mot" placeholder="Per cosa? (facoltativo)" style="flex:1" maxlength="80" value="${esc(mot)}"></div>
       <table>${DADI.map(f => `<tr><td><button type="button" data-n="1" data-f="${f}">D${f}</button></td>${[2, 3, 4, 5, 6].map(n => `<td><button type="button" data-n="${n}" data-f="${f}" aria-label="${n}d${f}">${n}</button></td>`).join('')}</tr>`).join('')}</table>
+      <div class="vs"><button type="button" data-v2="kh1" title="2d20, tiene il più alto">D20 con vantaggio</button><button type="button" data-v2="kl1" title="2d20, tiene il più basso">D20 con svantaggio</button></div>
       <p class="ft">Clicca il dado per tirarne uno, o un numero per tirarne di più.</p>`;
     p.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { T.tdpriv = b.dataset.v === '1'; disegnaTdp(); });
+    p.querySelectorAll('[data-v2]').forEach(b => b.onclick = async () => {
+      const m = Math.trunc(+p.querySelector('[data-k=mod]').value || 0), mt = p.querySelector('[data-k=mot]');
+      if (await tira('2d20' + b.dataset.v2 + (m ? (m > 0 ? '+' : '') + m : ''), b.dataset.v2 === 'kh1' ? 'vantaggio' : 'svantaggio', T.tdpriv, mt.value.trim())) mt.value = '';
+    });
     p.querySelectorAll('td button').forEach(b => b.onclick = async () => {
       const m = Math.trunc(+p.querySelector('[data-k=mod]').value || 0), f = b.dataset.n + 'd' + b.dataset.f + (m ? (m > 0 ? '+' : '') + m : '');
       const mt = p.querySelector('[data-k=mot]');
@@ -1205,29 +1342,20 @@ dialog.dlg.tv-side.tv-sw{width:min(560px,calc(100vw - 80px));inset:56px auto aut
     if (!T.diceInit) { let v = null; try { v = localStorage.getItem(CHAT); } catch { } apriChat(v ? v === '1' : matchMedia('(min-width:821px)').matches); }
     T.diceInit = true;
     box.innerHTML = `<div class="tv-dh"><span>Chat</span></div><div class="tv-log" id="tv-log"></div>
-      <div class="tv-dk"><div class="row">${DADI.map(n => `<button class="btn sm" data-act="tv-d" data-n="${n}">d${n}</button>`).join('')}</div>
-      <div class="row"><input type="number" id="tv-mod" placeholder="Mod." style="width:64px" aria-label="Modificatore"><button class="btn sm" data-act="tv-vant" title="2d20, tiene il più alto">Vantaggio</button><button class="btn sm" data-act="tv-svant" title="2d20, tiene il più basso">Svantaggio</button></div>
-      <div class="row"><input type="text" id="tv-mot" placeholder="Per cosa? (facoltativo)" style="flex:1" maxlength="80" aria-label="Motivo"></div>
-      <label><input type="checkbox" id="tv-priv"> ${isDM() ? 'Tiro nascosto (solo io)' : 'Tiro segreto (solo io e il DM)'}</label>
-      <div class="row"><input type="text" id="tv-f" placeholder="Scrivi… /r 1d20+5 · /gr · /w nome" style="flex:1" autocomplete="off" aria-label="Scrivi un tiro"><button class="btn sm primary" data-act="tv-tira" style="flex:none">Invia</button></div></div>`;
+      <div class="tv-dk"><div class="row"><input type="text" id="tv-f" placeholder="Scrivi un messaggio… (/w nome per sussurrare)" style="flex:1" autocomplete="off" aria-label="Scrivi un messaggio"><button class="btn sm primary" data-act="tv-tira" style="flex:none">Invia</button></div>
+      <p class="hint">I dadi si tirano dal Tiradadi, nella barra a sinistra.</p></div>`;
     $('#tv-f').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); scrivi(); } };
     $('#tv-log').onclick = e => { const b = e.target.closest('[data-del]'); if (b) cancella(b.dataset.del).catch(err => toast(err.message, 'err')); };
     disegnaBarra(); disegnaLog();
   }
-  const conMod = f => { const m = Math.trunc(+$('#tv-mod')?.value || 0); return m ? f + (m > 0 ? '+' : '') + m : f; };
   function dadiActs() {
-    return {
-      'tv-d': b => tira(conMod('1d' + b.dataset.n)),
-      'tv-vant': () => tira(conMod('2d20kh1'), 'vantaggio'), 'tv-svant': () => tira(conMod('2d20kl1'), 'svantaggio'),
-      'tv-tira': () => scrivi()
-    };
+    return { 'tv-tira': () => scrivi() };
   }
-  // la riga in fondo alla chat, come su Roll20: /r 1d20+5, /gr (o /gmroll) per un tiro segreto, oppure solo la formula
-  // /w nome testo (o /w dm testo) sussurra; il resto è un messaggio per tutti, oppure un tiro se è solo una formula
+  // la riga in fondo alla chat: /w nome testo (o /w dm testo) sussurra, il resto è un messaggio per tutti.
+  // i dadi si tirano solo dal Tiradadi
   async function scrivi() {
     const f = $('#tv-f'), t = f.value.trim(); if (!t) return;
-    const m = t.match(/^\/(r|roll|gr|gmroll)\s+(.+)$/i);
-    if (m || /^\d*d\d+[\sd\d+\-khl]*$/i.test(t)) { if (await tira(m ? m[2] : t, null, m ? /^g/i.test(m[1]) : undefined)) f.value = ''; return; }
+    if (/^\/(r|roll|gr|gmroll)\b/i.test(t)) { toast('I dadi si tirano dal Tiradadi, nella barra a sinistra.', 'err'); return; }
     let testo = t, per = null;
     const w = t.match(/^\/w\s+(\S+)\s+([\s\S]+)$/i);
     if (w) {
@@ -1235,7 +1363,7 @@ dialog.dlg.tv-side.tv-sw{width:min(560px,calc(100vw - 80px));inset:56px auto aut
       if (chi === 'dm' || chi === 'gm') per = 'dm';
       else { const g = T.membri.find(x => x.giocatore && (norm(x.nome) === chi || x.giocatore === chi)); if (!g) { toast('Nessun giocatore si chiama «' + w[1] + '»', 'err'); return; } per = g.giocatore; }
       testo = w[2];
-    } else if (/^\//.test(t)) { toast('Comandi: /r 1d20+5 · /gr 1d20 (segreto) · /w nome messaggio', 'err'); return; }
+    } else if (/^\//.test(t)) { toast('Per sussurrare: /w nome messaggio (oppure /w dm messaggio)', 'err'); return; }
     const r = await SB.rpc('tavolo_scrivi', { p_testo: testo, p_per: per });
     if (r.error) { toast(r.error.message, 'err'); return; }
     f.value = ''; const row = Array.isArray(r.data) ? r.data[0] : r.data;
@@ -1605,6 +1733,21 @@ dialog.dlg.tv-side.tv-sw{width:min(560px,calc(100vw - 80px));inset:56px auto aut
   const puoScrivere = s => isDM() || (!!s.giocatore && s.giocatore === T.me.giocatore);
   const fotoScheda = s => s.immagine || S.ents?.get(s.entita)?.portrait?.thumb || null;
   const completaS = (prima, nuovo) => { const o = completa(prima, nuovo); if (prima?.dati && !nuovo.dati) o.dati = prima.dati; return o; };
+  // condizioni sui token, con un effetto che vedono tutti
+  const COND_FX = { Accecato: ['🙈', 'accecato'], Affascinato: ['💗', 'affascinato'], Afferrato: ['✊', 'afferrato'], Assordato: ['🔇', 'assordato'], Avvelenato: ['🤢', 'avvelenato'], Incapacitato: ['⛔', 'incapacitato'], Invisibile: ['👻', 'invisibile'], Paralizzato: ['⚡', 'paralizzato'], Pietrificato: ['🗿', 'pietrificato'], Prono: ['🛌', 'prono'], Spaventato: ['😱', 'spaventato'], Stordito: ['💫', 'stordito'], Svenuto: ['💤', 'svenuto'], Trattenuto: ['⛓️', 'trattenuto'], Concentrazione: ['🔮', 'concentrazione'] };
+  const condTok = t => Array.isArray(t?.condizioni) ? t.condizioni : [];
+  async function condSuToken(t, lista) {
+    const r = await SB.from('tavolo_token').update({ condizioni: lista }).eq('id', t.id).select().single();
+    if (r.error) { toast(sqlMancante(r.error) ? 'Per vedere le condizioni sui token esegui tavolo/tappa-3b.sql in Supabase.' : r.error.message, 'err'); return false; }
+    T.tok.set(t.id, completa(T.tok.get(t.id), r.data)); disegnaToken(); return true;
+  }
+  // un PNG aperto da un token cambia solo quel token; un personaggio cambia la scheda e i suoi token
+  async function cambiaCond(s, tk, lista) {
+    lista = [...new Set(lista)];
+    if (tk) return condSuToken(tk, lista);
+    if (s) await salvaScheda(s.id, { condizioni: lista }, true);
+    if (s?.giocatore) for (const t of [...T.tok.values()].filter(t => t.giocatore === s.giocatore && puoMuovere(t))) await condSuToken(t, lista);
+  }
   // i punti ferita di un token: i suoi (ogni PNG ha i propri) o quelli della scheda del personaggio
   function pfDi(t) {
     if (t.pf_max != null) return { pf: t.pf ?? t.pf_max, max: t.pf_max, tok: true };
@@ -1768,13 +1911,25 @@ dialog.dlg.tv-side.tv-sw{width:min(560px,calc(100vw - 80px));inset:56px auto aut
     box.addEventListener('input', e => { const el = e.target.closest('[data-f]'); if (el && el.type !== 'checkbox' && el.tagName !== 'SELECT') campo(el); });
     box.addEventListener('change', e => { const el = e.target.closest('[data-f]'); if (el && (el.type === 'checkbox' || el.tagName === 'SELECT')) campo(el); else if (e.target.dataset.k) azioneScheda(e.target); });
     box.addEventListener('click', e => { const b = e.target.closest('button'); if (b && box.contains(b)) azioneScheda(b); });
+    // si sposta trascinandola dalla barra scura in alto; la posizione resta per le prossime volte
+    box.addEventListener('pointerdown', e => {
+      const bar = e.target.closest('.tbar'); if (!bar || e.button || e.target.closest('button,input,label') || innerWidth <= 820) return;
+      e.preventDefault(); const r = d.getBoundingClientRect(), dx = e.clientX - r.left, dy = e.clientY - r.top;
+      bar.setPointerCapture(e.pointerId);
+      const muovi = ev => { d.style.left = clamp(ev.clientX - dx, 0, Math.max(0, innerWidth - d.offsetWidth)) + 'px'; d.style.top = clamp(ev.clientY - dy, 0, innerHeight - 50) + 'px'; d.style.maxHeight = innerHeight - parseFloat(d.style.top) - 8 + 'px'; };
+      const fine = () => { bar.removeEventListener('pointermove', muovi); bar.removeEventListener('pointerup', fine); bar.removeEventListener('pointercancel', fine); try { localStorage.setItem(POS, JSON.stringify({ x: parseFloat(d.style.left), y: parseFloat(d.style.top) })); } catch { } };
+      bar.addEventListener('pointermove', muovi); bar.addEventListener('pointerup', fine); bar.addEventListener('pointercancel', fine);
+    });
     disegnaScheda();
   }
   // con l'elenco aperto la scheda gli sta accanto, se c'è posto
+  const POS = 'tavolo-scheda-pos';
   function posizionaScheda() {
     const d = T.sv?.d, p = $('#tv-sp'); if (!d) return;
+    let pos = null; try { pos = JSON.parse(localStorage.getItem(POS)); } catch { }
+    if (pos && innerWidth > 820) { const y = clamp(pos.y, 0, innerHeight - 120); d.style.left = clamp(pos.x, 0, Math.max(0, innerWidth - d.offsetWidth)) + 'px'; d.style.top = y + 'px'; d.style.maxHeight = innerHeight - y - 8 + 'px'; return; }
     const r = p && !p.hidden ? p.getBoundingClientRect() : null;
-    d.style.left = r && innerWidth > 820 && r.right + 10 + 420 < innerWidth ? r.right + 10 + 'px' : '';
+    d.style.left = r && innerWidth > 820 && r.right + 10 + Math.min(940, innerWidth - 80) < innerWidth ? r.right + 10 + 'px' : '';
     // resta dentro il tavolo, senza coprire le barre del sito
     const tv = $('.tv')?.getBoundingClientRect(); if (tv && innerWidth > 820) { d.style.top = tv.top + 6 + 'px'; d.style.maxHeight = tv.height - 12 + 'px'; }
   }
@@ -1815,49 +1970,82 @@ dialog.dlg.tv-side.tv-sw{width:min(560px,calc(100vw - 80px));inset:56px auto aut
     const d = s.dati, w = puoScrivere(s), dis = w ? '' : ' disabled', pg = s.tipo === 'pg', foto = fotoScheda(s), tk = tokScheda();
     const inp = (f, ph = '', cls = '', type = 'text', extra = '') => `<input type="${type}" data-f="${f}" class="${cls}" placeholder="${esc(ph)}" aria-label="${esc(ph)}"${extra}${dis}>`;
     const n = (f, ph, cls = '') => inp(f, ph, cls, 'number', ' step="1"');
-    const area = (f, ph) => `<textarea data-f="${f}" placeholder="${esc(ph)}" aria-label="${esc(ph)}" rows="4"${dis}></textarea>`;
-    const rb = (r, c, tip) => `<button type="button" class="rb" data-roll="${r}" ${c ? `data-c="${c}"` : ''} title="${esc(tip)}"${dis}></button>`;
-    const cond = (d.condizioni || []).map(c => `<button type="button" class="ch" data-cond="${esc(c)}" title="${w ? 'Togli' : ''}"${dis}>${esc(c)}${w ? ' ✕' : ''}</button>`).join('');
-    const sub = pg ? `${inp('classe', 'Classe', 'w')}${n('livello', 'Liv.', 'n')}${inp('razza', 'Razza', 'w')}` : `${inp('taglia_tipo', 'Taglia e tipo', 'w')}<span>GS</span>${inp('gs', 'GS', 'n')}`;
+    const area = (f, ph, rows = 4) => `<textarea data-f="${f}" placeholder="${esc(ph)}" aria-label="${esc(ph)}" rows="${rows}"${dis}></textarea>`;
+    const cella = (dentro, et) => `<div class="li">${dentro}<small>${et}</small></div>`;
+    const box = (dentro, et, cls = '') => `<div class="sez ${cls}">${dentro}<h6>${et}</h6></div>`;
+    // testata, come il riquadro in alto della scheda ufficiale
+    const info = pg
+      ? cella(`<span class="cl">${inp('classe', 'Classe')}${n('livello', 'Liv.', 'lv')}</span>`, 'Classe e livello') + cella(inp('background', 'Background'), 'Background') + cella(`<span class="ro">${esc(nomeGioc(s.giocatore))}</span>`, 'Nome del giocatore')
+        + cella(inp('razza', 'Razza'), 'Razza') + cella(inp('allineamento', 'Allineamento'), 'Allineamento') + cella(n('pe', '0'), 'Punti esperienza')
+      : cella(inp('taglia_tipo', 'Taglia e tipo'), 'Taglia e tipo') + cella(inp('gs', 'GS'), 'Grado di sfida') + cella(inp('allineamento', 'Allineamento'), 'Allineamento')
+        + cella(inp('sensi', 'Scurovisione 18 m'), 'Sensi') + cella(inp('linguaggi', 'Comune'), 'Linguaggi') + cella(inp('difese', '—'), 'Resistenze e immunità');
+    const conds = !pg && tk ? condTok(tk) : d.condizioni || [];
+    const cond = conds.map(c => `<button type="button" class="ch" data-cond="${esc(c)}" title="${w ? 'Togli' : ''}"${dis}>${esc(c)}${w ? ' ✕' : ''}</button>`).join('');
     let corpo = '';
     if (sv.tab === 'pri') {
-      corpo = `<div class="car">${CAR.map(([k, l, nome]) => `<div class="c"><button type="button" class="rb cb" data-roll="car:${k}" title="Prova di ${nome}"${dis}><small>${l}</small><b data-c="m:${k}"></b></button>${n(k, nome)}</div>`).join('')}</div>
-      <div class="cols"><div>
-        <h4>Tiri salvezza</h4>${CAR.map(([k, , nome]) => `<div class="r"><button type="button" class="pr" data-prof="ts_${k}"${dis}></button><button type="button" class="lk" data-roll="ts:${k}"${dis}>${nome}</button><em data-c="ts:${k}"></em></div>`).join('')}
-        <h4>Sensi</h4><div class="r"><span class="lk">Percezione passiva</span><em data-c="pp"></em></div>${pg ? '' : inp('sensi', 'Sensi (scurovisione…)', 'full')}
-        ${pg ? `<h4>Tiri contro la morte</h4><div class="r"><span class="lk">Successi</span><span class="dots" data-dots="morte_ok"></span></div><div class="r"><span class="lk">Fallimenti</span><span class="dots ko" data-dots="morte_ko"></span></div><button type="button" class="btn sm" data-roll="morte"${dis}>🎲 Tira contro la morte</button>
-        <h4>Altro</h4><label class="r"><input type="checkbox" data-f="ispirazione"${dis}> Ispirazione</label>${inp('background', 'Background', 'full')}${inp('allineamento', 'Allineamento', 'full')}`
-        : `<h4>Altro</h4>${inp('linguaggi', 'Linguaggi', 'full')}${inp('difese', 'Resistenze e immunità', 'full')}<div class="r"><span class="lk">Dadi vita</span>${inp('dadi_vita', 'es. 2d8+2', 'dv')}${isDM() ? '<button type="button" class="btn sm" data-k="tirapf" title="Tira i PF massimi con i dadi vita (tiro nascosto)">🎲</button>' : ''}</div>`}
-      </div><div>
-        <h4>Abilità</h4>${ABIL.map(([k, nome, c]) => `<div class="r"><button type="button" class="pr" data-prof="ab_${k}"${dis}></button><button type="button" class="lk" data-roll="ab:${k}"${dis}>${nome} <small>(${c.slice(0, 1).toUpperCase() + c.slice(1, 3)})</small></button><em data-c="ab:${k}"></em></div>`).join('')}
-      </div></div>`;
-    } else if (sv.tab === 'att') {
-      const a = d.attacchi || [];
-      corpo = `<div class="atts">${a.map((x, i) => `<div class="at">${inp(`att.${i}.nome`, 'Arma o attacco', 'an')}<label>Colpire ${inp(`att.${i}.colpire`, '+0', 'ac', 'number')}</label><label>Danni ${inp(`att.${i}.danni`, '1d6+1', 'ad')}</label>${inp(`att.${i}.tipo`, 'Tipo e note', 'full')}
-        <div class="ab"><button type="button" class="btn sm" data-roll="att:${i}"${dis}>🎲 Colpire</button><button type="button" class="btn sm" data-roll="dan:${i}"${dis}>💥 Danni</button><button type="button" class="btn sm" data-roll="cri:${i}"${dis} title="Colpo critico: dadi dei danni raddoppiati">💥 Critico</button>${w ? `<span class="sp"></span><button type="button" class="btn sm ghost" data-k="delatt" data-i="${i}" title="Togli l'attacco">✕</button>` : ''}</div></div>`).join('') || '<p class="hint">Nessun attacco.</p>'}</div>
-        ${w ? '<button type="button" class="btn sm" data-k="addatt">+ Aggiungi un attacco</button>' : ''}<h4>${pg ? 'Altre azioni' : 'Azioni e tratti'}</h4>${area('azioni', pg ? 'Azioni bonus, reazioni, attacchi speciali…' : 'Multiattacco, tratti speciali, reazioni…')}`;
+      const car = CAR.map(([k, , nome]) => `<div class="cbox"><small>${nome}</small><button type="button" class="rb mod" data-roll="car:${k}" data-c="m:${k}" title="Prova di ${nome}"${dis}></button>${n(k, '10', 'ov')}</div>`).join('');
+      const ts = CAR.map(([k, , nome]) => `<div class="r"><button type="button" class="pr" data-prof="ts_${k}"${dis}></button><em data-c="ts:${k}"></em><button type="button" class="lk" data-roll="ts:${k}"${dis}>${nome}</button></div>`).join('');
+      const ab = ABIL.map(([k, nome, c]) => `<div class="r"><button type="button" class="pr" data-prof="ab_${k}"${dis}></button><em data-c="ab:${k}"></em><button type="button" class="lk" data-roll="ab:${k}"${dis}>${nome} <small>(${c.slice(0, 1).toUpperCase() + c.slice(1, 3)})</small></button></div>`).join('');
+      const at = (d.attacchi || []).map((x, i) => `<div class="at"><div class="riga">${inp(`att.${i}.nome`, 'Arma', 'an')}${inp(`att.${i}.colpire`, '+0', 'ac', 'number')}${inp(`att.${i}.danni`, '1d6+1', 'ad')}</div>
+          <div class="riga">${inp(`att.${i}.tipo`, 'Tipo e note', 'tp')}<button type="button" class="mini" data-roll="att:${i}"${dis} title="Tiro per colpire">🎲</button><button type="button" class="mini" data-roll="dan:${i}"${dis} title="Danni">💥</button><button type="button" class="mini" data-roll="cri:${i}"${dis} title="Critico: dadi dei danni raddoppiati">✖2</button>${w ? `<button type="button" class="mini via" data-k="delatt" data-i="${i}" title="Togli l'attacco">✕</button>` : ''}</div></div>`).join('');
+      const pf = `<div class="pfmax"><span>Punti ferita massimi</span>${n(tk ? 'tok.pf_max' : 'pf_max', '—')}</div>${n(tk ? 'tok.pf' : 'pf', '—', 'pfa')}
+        ${w ? '<div class="q"><button type="button" data-k="pfm" title="Danni">− Danni</button><input type="number" data-k="pfq" value="1" min="1" aria-label="Quanti punti"><button type="button" data-k="pfp" title="Cura">+ Cura</button></div>' : ''}`;
+      corpo = `<div class="p1">
+        <div class="colA">
+          <div class="dueA"><div class="carcol">${car}</div>
+            <div class="altA">
+              ${pg ? `<div class="pill"><label class="pv"><input type="checkbox" data-f="ispirazione"${dis}></label><span>Ispirazione</span></div>` : ''}
+              <div class="pill"><b class="pv" data-c="comp"></b><span>Bonus di competenza</span></div>
+              ${box(ts, 'Tiri salvezza', 'lista')}${box(ab, 'Abilità', 'lista')}
+            </div></div>
+          <div class="pill largo"><b class="pv" data-c="pp"></b><span>Saggezza passiva (Percezione)</span></div>
+          ${box(area(pg ? 'lingue' : 'competenze', pg ? 'Armature, armi, strumenti, linguaggi…' : 'Altre competenze…', 5), pg ? 'Altre competenze e linguaggi' : 'Altre competenze')}
+        </div>
+        <div class="colB">
+          <div class="grigio">
+            <div class="tre"><div class="scudo">${n('ca', '10')}<small>Classe armatura</small></div>
+              <div class="qq"><button type="button" class="rb" data-roll="iniz" data-c="iniz" title="Tira l'iniziativa"${dis}></button><small>Iniziativa</small></div>
+              <div class="qq">${inp('velocita', '9 m')}<small>Velocità</small></div></div>
+            <div class="sez pf">${pf}<h6>${tk ? 'Punti ferita di ' + esc(tk.nome || 'questo token') : 'Punti ferita attuali'}</h6></div>
+            ${tk ? '' : box(n('pf_temp', '0', 'pfa piccolo'), 'Punti ferita temporanei', 'pf')}
+            <div class="due"><div class="sez"><div class="dvt"><span>Totale</span>${inp('dadi_vita', pg ? '5d10' : '2d8+2')}${isDM() && !pg ? '<button type="button" class="mini" data-k="tirapf" title="Tira i PF massimi con i dadi vita (tiro nascosto)">🎲</button>' : ''}</div>${pg ? n('dv_rest', '—', 'pfa piccolo') : ''}<h6>Dadi vita</h6></div>
+              <div class="sez morte">${pg ? `<div class="r"><span>Successi</span><span class="dots" data-dots="morte_ok"></span></div><div class="r"><span>Fallimenti</span><span class="dots ko" data-dots="morte_ko"></span></div><button type="button" class="mini" data-roll="morte"${dis}>🎲 Tira</button>` : `<div class="cnd">${cond || '<span class="vuoto">Nessuna</span>'}</div>`}<h6>${pg ? 'Tiri salvezza contro la morte' : 'Condizioni'}</h6></div></div>
+          </div>
+          <div class="sez atts"><div class="th"><span>Nome</span><span>Bonus</span><span>Danni</span></div>${at || '<p class="vuoto">Nessun attacco.</p>'}
+            ${w ? '<button type="button" class="mini agg" data-k="addatt">+ Aggiungi un attacco</button>' : ''}${area('azioni', pg ? 'Azioni bonus, reazioni, attacchi speciali…' : 'Multiattacco, reazioni, azioni speciali…', 3)}<h6>Attacchi e incantesimi</h6></div>
+          ${pg ? `<div class="sez eq"><div class="mon">${['mr', 'ma', 'me', 'mo', 'mp'].map(k => `<label><span>${k.toUpperCase()}</span>${n(k, '0')}</label>`).join('')}</div>${area('equip', 'Armi, armatura, oggetti…', 7)}<h6>Equipaggiamento</h6></div>` : ''}
+        </div>
+        <div class="colC">
+          ${pg ? `<div class="grigio tratti">${[['personalita', 'Tratti caratteriali'], ['ideali', 'Ideali'], ['legami', 'Legami'], ['difetti', 'Difetti']].map(([k, l]) => box(area(k, '', 3), l)).join('')}</div>` : ''}
+          ${box(area('tratti', pg ? 'Privilegi di classe, tratti della razza, talenti…' : 'Tratti speciali del PNG…', pg ? 14 : 10), 'Privilegi e tratti')}
+          ${pg ? `<div class="sez"><div class="cnd">${cond || '<span class="vuoto">Nessuna</span>'}</div>${w ? `<select data-k="cond" aria-label="Aggiungi una condizione"><option value="">+ Condizione</option>${CONDIZIONI.filter(c => !conds.includes(c)).map(c => `<option>${c}</option>`).join('')}</select>` : ''}<h6>Condizioni</h6></div>`
+            : w ? `<select data-k="cond" class="selc" aria-label="Aggiungi una condizione"><option value="">+ Condizione</option>${CONDIZIONI.filter(c => !conds.includes(c)).map(c => `<option>${c}</option>`).join('')}</select>` : ''}
+        </div></div>`;
     } else if (sv.tab === 'inc') {
-      corpo = `<div class="r incs"><label>Caratteristica <select data-f="car_inc"${dis}>${['int', 'sag', 'car'].map(k => `<option value="${k}">${CAR.find(x => x[0] === k)[2]}</option>`).join('')}</select></label><span>CD <b data-c="cd"></b></span><button type="button" class="btn sm" data-roll="inc" title="Tiro per colpire con un incantesimo"${dis}>🎲 Attacco <b data-c="inc"></b></button></div>
-        <h4>Slot incantesimo</h4><p class="hint">Scrivi quanti slot hai per livello; i pallini segnano quelli usati.</p><div class="slots">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => `<div class="sl"><small>${i}°</small>${n('slot_' + i, '0')}<span class="dots" data-dots="usati_${i}"></span></div>`).join('')}</div>
-        ${w ? '<button type="button" class="btn sm" data-k="riposo" title="Azzera gli slot usati">🌙 Riposo lungo</button>' : ''}<h4>Incantesimi conosciuti e preparati</h4>${area('incantesimi', 'Trucchetti e incantesimi…')}`;
+      const liv = i => `<div class="sez lv"><div class="lt"><b>${i || '0'}</b>${i ? `<span>Slot</span>${n('slot_' + i, '0', 'sn')}<span class="dots" data-dots="usati_${i}"></span>` : '<span>Trucchetti</span>'}</div>${area('inc_' + i, i ? 'Incantesimi di ' + i + '° livello' : 'Trucchetti', i ? 4 : 3)}</div>`;
+      corpo = `<div class="incT"><div class="li grande"><select data-f="car_inc"${dis}>${['int', 'sag', 'car'].map(k => `<option value="${k}">${CAR.find(x => x[0] === k)[2]}</option>`).join('')}</select><small>Caratteristica da incantatore</small></div>
+          <div class="li grande"><b data-c="cd"></b><small>CD tiro salvezza</small></div>
+          <div class="li grande"><button type="button" class="rb" data-roll="inc" data-c="inc" title="Tiro per colpire con un incantesimo"${dis}></button><small>Bonus di attacco</small></div></div>
+        ${w ? '<button type="button" class="mini agg" data-k="riposo" title="Azzera gli slot usati">🌙 Riposo lungo: azzera gli slot</button>' : ''}
+        <div class="incG">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(liv).join('')}</div>`;
     } else {
-      corpo = `<h4>Privilegi e tratti</h4>${area('tratti', 'Privilegi di classe, tratti della razza, talenti…')}<h4>Equipaggiamento</h4>${area('equip', 'Armi, armatura, oggetti, monete…')}<h4>Note</h4>${area('note', pg ? 'Legami, ideali, appunti…' : 'Note del DM…')}`;
+      corpo = pg ? `<div class="bgT">${[['eta', 'Età'], ['altezza', 'Altezza'], ['peso', 'Peso'], ['occhi', 'Occhi'], ['pelle', 'Pelle'], ['capelli', 'Capelli']].map(([k, l]) => cella(inp(k, ''), l)).join('')}</div>
+        <div class="bgG">${box(area('aspetto', 'Come appare il personaggio…', 6), 'Aspetto del personaggio')}${box(area('alleati', 'Gilde, ordini, amici e nemici…', 6), 'Alleati e organizzazioni')}
+          ${box(area('storia', 'La storia del personaggio…', 9), 'Storia del personaggio')}${box(area('tesoro', 'Gemme, oggetti di valore…', 9), 'Tesoro')}</div>${box(area('note', 'Appunti…', 5), 'Note')}`
+        : `${box(area('note', 'Note del DM: tattiche, motivazioni, bottino…', 12), 'Note del DM')}`;
     }
-    const box = sv.d.querySelector('.tv-sch');
-    box.innerHTML = `<div class="hd"><i class="ft" style="${foto ? `background-image:url('${esc(foto)}')` : `--c:${pg ? '#7d2530' : '#5b6670'}`}">${foto ? '' : esc(iniziali(s.nome))}</i>
-        <div class="tt">${isDM() ? inp('nome', 'Nome', 'nm') : `<b class="nm">${esc(s.nome)}</b>`}<div class="sub">${sub}</div></div>
+    const root = sv.d.querySelector('.tv-sch');
+    root.className = 'tv-sch ' + (pg ? 'pg' : 'png');
+    root.innerHTML = `<div class="tbar" title="Trascina per spostare la scheda"><span class="grip">⠿</span><span class="tt">${pg ? 'Scheda del personaggio' : 'Scheda del PNG'}</span>
+        <span class="seg3">${w ? '<button type="button" data-adv="0" title="Tiro normale">Normale</button><button type="button" data-adv="1">Vantaggio</button><button type="button" data-adv="2">Svantaggio</button>' : ''}</span>
+        ${w ? `<label class="sg"><input type="checkbox" data-k="seg" ${sv.seg ? 'checked' : ''}> ${isDM() ? 'Nascosti' : 'Segreti'}</label>` : ''}
         <button type="button" class="x" data-k="chiudi" aria-label="Chiudi la scheda">✕</button></div>
-      ${w ? `<div class="bar"><span class="seg3"><button type="button" data-adv="0">Normale</button><button type="button" data-adv="1">Vantaggio</button><button type="button" data-adv="2">Svantaggio</button></span><label><input type="checkbox" data-k="seg" ${sv.seg ? 'checked' : ''}> ${isDM() ? 'Tiri nascosti' : 'Tiri segreti (solo al DM)'}</label></div>` : ''}
-      <div class="big"><div class="bx"><small>CA</small>${n('ca', 'CA')}</div>
-        <div class="bx pf"><small>${tk ? 'PF di ' + esc(tk.nome || 'questo token') : 'Punti ferita'}</small><div class="pfv">${n(tk ? 'tok.pf' : 'pf', 'PF')}<span>/</span>${n(tk ? 'tok.pf_max' : 'pf_max', 'Max')}</div>
-          ${w ? '<div class="q"><button type="button" class="btn sm" data-k="pfm" title="Danni">−</button><input type="number" data-k="pfq" value="1" min="1" aria-label="Quanti punti"><button type="button" class="btn sm" data-k="pfp" title="Cura">+</button></div>' : ''}${tk ? '' : `<label class="tmp">Temp ${n('pf_temp', '0')}</label>`}</div>
-        <div class="bx"><small>Iniziativa</small>${rb('iniz', 'iniz', 'Tira l\'iniziativa')}</div>
-        <div class="bx"><small>Velocità</small>${inp('velocita', '9 m')}</div>
-        <div class="bx"><small>Competenza</small><b data-c="comp"></b></div></div>
-      <div class="cond">${cond}${w ? `<select data-k="cond" aria-label="Aggiungi una condizione"><option value="">+ Condizione</option>${CONDIZIONI.filter(c => !(d.condizioni || []).includes(c)).map(c => `<option>${c}</option>`).join('')}</select>` : ''}</div>
-      <div class="tabs" role="tablist">${[['pri', 'Principale'], ['att', 'Attacchi'], ['inc', 'Incantesimi'], ['not', 'Note']].map(([k, l]) => `<button type="button" role="tab" data-tab="${k}" aria-selected="${sv.tab === k}" class="${sv.tab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+      <div class="testa"><div class="nome">${isDM() ? '<label class="ft cambia" title="Clicca per scegliere la foto"' : '<i class="ft"'} style="${foto ? `background-image:url('${esc(foto)}')` : `--c:${pg ? '#7d2530' : '#5b6670'}`}">${foto ? '' : isDM() ? '<span class="piu">📷<small>Foto</small></span>' : esc(iniziali(s.nome))}${isDM() ? '<input type="file" accept="image/*" data-k="img" hidden></label>' : '</i>'}
+          <div class="ban">${isDM() ? inp('nome', 'Nome', 'nm') : `<b class="nm">${esc(s.nome)}</b>`}<small>${pg ? 'Nome del personaggio' : 'Nome del PNG'}</small></div></div>
+        <div class="info">${info}</div></div>
+      <div class="tabs" role="tablist">${[['pri', pg ? 'Personaggio' : 'Statistiche'], ['inc', 'Incantesimi'], ['bg', pg ? 'Background e note' : 'Note']].map(([k, l]) => `<button type="button" role="tab" data-tab="${k}" aria-selected="${sv.tab === k}" class="${sv.tab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
       <div class="corpo">${corpo}</div>
-      ${isDM() ? `<div class="fd">${s.tipo === 'png' ? `<button type="button" class="btn sm" data-k="vis">${s.nascosta ? '🙈 Nascosta ai giocatori' : '👁 La vedono i giocatori'}</button>${scena() ? '<button type="button" class="btn sm" data-k="metti">＋ Metti un token sulla mappa</button>' : ''}` : '<span class="hint">La compila anche il giocatore, dal vivo.</span>'}<label class="btn sm">🖼 Foto<input type="file" accept="image/*" data-k="img" hidden></label></div>` : (w ? '' : '<p class="hint fd">Scheda mostrata dal DM: puoi solo leggerla.</p>')}`;
+      ${isDM() ? `<div class="fd">${s.tipo === 'png' ? `<button type="button" class="mini" data-k="vis">${s.nascosta ? '🙈 Nascosta ai giocatori' : '👁 La vedono i giocatori'}</button>${scena() ? '<button type="button" class="mini" data-k="metti">＋ Metti un token sulla mappa</button>' : ''}` : '<span class="vuoto">La compila anche il giocatore, dal vivo.</span>'}</div>` : (w ? '' : '<p class="vuoto fd">Scheda mostrata dal DM: puoi solo leggerla.</p>')}`;
     riempi();
   }
   function campo(el) {
@@ -1911,9 +2099,12 @@ dialog.dlg.tv-side.tv-sw{width:min(560px,calc(100vw - 80px));inset:56px auto aut
     if (!w) return;
     if (b.dataset.prof) { const p = b.dataset.prof, v = num(d[p]) || (d[p] === true ? 1 : 0); return salvaScheda(s.id, { [p]: p.startsWith('ts_') ? !v : (v + 1) % 3 }); }
     if (b.dataset.dot) { const i = +b.dataset.i, v = num(d[b.dataset.dot]) || 0; return salvaScheda(s.id, { [b.dataset.dot]: v >= i ? i - 1 : i }); }
-    if (b.dataset.cond) { await salvaScheda(s.id, { condizioni: (d.condizioni || []).filter(c => c !== b.dataset.cond) }, true); return disegnaScheda(); }
-    if (k === 'cond') { if (!b.value) return; await salvaScheda(s.id, { condizioni: [...(d.condizioni || []), b.value] }, true); return disegnaScheda(); }
-    if (k === 'addatt') { await salvaScheda(s.id, { attacchi: [...(d.attacchi || []), { nome: '', colpire: null, danni: '', tipo: '' }] }, true); disegnaScheda(); sv.d.querySelector('.atts .at:last-child input')?.focus(); return; }
+    if (b.dataset.cond || k === 'cond') {
+      const tk = s.tipo === 'png' ? tokScheda() : null, ora = tk ? condTok(tk) : d.condizioni || [];
+      if (k === 'cond' && !b.value) return;
+      await cambiaCond(s, tk, b.dataset.cond ? ora.filter(c => c !== b.dataset.cond) : [...ora, b.value]); return disegnaScheda();
+    }
+    if (k === 'addatt') { await salvaScheda(s.id, { attacchi: [...(d.attacchi || []), { nome: '', colpire: null, danni: '', tipo: '' }] }, true); disegnaScheda(); sv.d.querySelector('.atts .at:last-of-type input')?.focus(); return; }
     if (k === 'delatt') { await salvaScheda(s.id, { attacchi: (d.attacchi || []).filter((_, i) => i !== +b.dataset.i) }, true); return disegnaScheda(); }
     if (k === 'riposo') { const p = {}; for (let i = 1; i <= 9; i++) if (num(d['usati_' + i])) p['usati_' + i] = 0; return salvaScheda(s.id, p, true); }
     if (k === 'pfm' || k === 'pfp') {
@@ -1934,7 +2125,14 @@ dialog.dlg.tv-side.tv-sw{width:min(560px,calc(100vw - 80px));inset:56px auto aut
     if (k === 'metti') { const t = await piazza({ nome: s.nome, img: fotoScheda(s), scheda: 'tv:' + s.id, colore: '#7d2530', sch: s }, num(d.misura) || 1, T.livello === 'master'); if (t) { sv.tok = t.id; disegnaScheda(); } return; }
     if (k === 'img') {
       const f = b.files?.[0]; if (!f) return;
-      try { const img = await immagineToken(f), r = await SB.from('tavolo_schede').update({ immagine: img }).eq('id', s.id).select().single(); if (r.error) throw new Error(r.error.message); arrivaScheda(r.data); }
+      try {
+        const img = await immagineToken(f), prima = s.immagine, r = await SB.from('tavolo_schede').update({ immagine: img }).eq('id', s.id).select().single(); if (r.error) throw new Error(r.error.message); arrivaScheda(r.data);
+        // anche i token di questa scheda che non hanno una foto loro prendono la nuova
+        for (const t of T.tok.values()) if (schedaDi(t)?.id === s.id && !t.giocatore && (!t.immagine || t.immagine === prima)) {
+          const u = await SB.from('tavolo_token').update({ immagine: img }).eq('id', t.id).select().single(); if (!u.error) T.tok.set(t.id, completa(t, u.data));
+        }
+        disegnaToken();
+      }
       catch (e) { toast(e.message, 'err'); }
     }
   }
