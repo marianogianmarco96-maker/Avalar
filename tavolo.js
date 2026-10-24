@@ -97,6 +97,8 @@
 .tv-empty code{background:#0006;padding:1px 5px;border-radius:4px}
 .tv-chat{width:310px;flex:none;display:flex;flex-direction:column;border-left:1px solid #000;background:var(--paper);min-height:0;z-index:8}
 .tv-chat[hidden]{display:none!important}
+.tv-cx{all:unset;cursor:pointer;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:600 .9rem var(--body);color:var(--ink2,#6b5a48)}
+.tv-cx:hover,.tv-cx:focus-visible{background:#0000000f}
 .tv-dh{display:flex;align-items:center;justify-content:space-between;padding:8px 10px 6px;font-family:var(--display);color:var(--wine);font-weight:600;border-bottom:1px solid var(--line)}
 :root[data-theme=dark] .tv-dh{color:var(--gold2)}
 .tv-log{flex:1;overflow-y:auto;padding:8px 10px;display:flex;flex-direction:column;gap:6px;min-height:60px}
@@ -171,6 +173,21 @@ dialog.dlg.tv-gd{margin:auto 12px 12px auto;width:min(420px,94vw)}
 dialog.dlg.tv-gd::backdrop{background:transparent}
 .tv-tabs{display:flex;gap:4px;margin:4px 0 10px;flex-wrap:wrap}
 .tv-fog{position:absolute;left:0;top:0;pointer-events:none}
+.tv-walls{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:99998}
+.tv-walls line{stroke-linecap:round;vector-effect:non-scaling-stroke}
+.tv-walls .mu{stroke:#ff5ad1;stroke-width:3;filter:drop-shadow(0 0 1.5px #000)}
+.tv-walls .po{stroke:#c98a3c;stroke-width:5;filter:drop-shadow(0 0 1.5px #000)}
+.tv-walls .po.ap{stroke:#e7cf9a;stroke-width:3;stroke-dasharray:5 6;opacity:.8}
+.tv-porte{position:absolute;left:0;top:0;z-index:99999}
+.tv-porta{all:unset;box-sizing:border-box;position:absolute;width:28px;height:28px;margin:-14px 0 0 -14px;transform:scale(calc(1 / var(--z,1)));border-radius:50%;display:grid;place-items:center;cursor:pointer;background:linear-gradient(#94622f,#5d3a19);border:1.5px solid #e7cf9a;box-shadow:0 2px 6px #000a;color:#fff3dc;transition:filter .12s}
+.tv-porta svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tv-porta.ap{background:#1d1814d9;color:#e7cf9a;border-style:dashed}
+.tv-porta.bl:not(.ap){background:linear-gradient(#8f2d39,#4d141b)}
+.tv-porta:hover,.tv-porta:focus-visible{filter:brightness(1.25)}
+.tv-stage.rul .tv-porta{pointer-events:none}
+.tv-stage.muri{cursor:crosshair}.tv-stage.gmano{cursor:move}
+.tv-mbar .tit{font:600 .86rem var(--display);color:var(--gold2);padding:0 6px;white-space:nowrap}
+.tv-mbar .avv{font:600 .82rem var(--body);padding:4px 8px;white-space:normal;max-width:460px}
 .tv-tok.turno{box-shadow:0 0 0 4px #f2b51d,0 0 18px 6px #f2b51daa}
 .tv-turno{position:absolute;left:10px;bottom:10px;z-index:8;width:270px;max-height:min(420px,70%);display:flex;flex-direction:column;background:#211a16f2;color:#f1e4c8;border:1px solid #e7cf9a44;border-radius:10px;box-shadow:0 6px 24px #000a}
 .tv-turno[hidden]{display:none!important}
@@ -523,12 +540,43 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
 :root[data-theme=dark] .tv-sch .tabs button.on{background:#1d1814}
 :root[data-theme=dark] .tv-sch .pr.on[title^=Maestria]{background:#c7505c;border-color:#c7505c;box-shadow:0 0 0 2px #241e19,0 0 0 3px #c7505c}
 :root[data-theme=dark] .tv-sch .dots button.on,:root[data-theme=dark] .tv-sch .pr.on{background:var(--k)}
+.tv-sch .sb{--sbr:#7a200d;--sbl:#922610;max-width:620px;margin:4px auto 0;padding:14px 16px 16px;background:var(--pp);border:1px solid var(--ul);border-top:4px solid #c9ad6a;border-bottom:4px solid #c9ad6a;box-shadow:0 2px 10px #0002;font:400 .93rem/1.42 var(--body);color:var(--k)}
+.tv-sch .sb .sbh{display:flex;align-items:flex-start;gap:10px;justify-content:space-between}
+.tv-sch .sb h3{margin:0;font:700 1.55rem/1.1 var(--display);font-variant:small-caps;letter-spacing:.02em;color:var(--sbr)}
+.tv-sch .sb .sbh i{display:block;font-size:.88rem;margin-top:2px}
+.tv-sch .sb hr{border:0;height:4px;margin:8px 0;background:linear-gradient(90deg,var(--sbl),var(--sbl) 70%,transparent);clip-path:polygon(0 0,100% 50%,0 100%)}
+.tv-sch .sb p{margin:3px 0}
+.tv-sch .sb .rosso{color:var(--sbr)}
+.tv-sch .sb .rosso hr{margin:8px 0}
+.tv-sch .sb h4{margin:12px 0 4px;font:600 1.12rem var(--display);font-variant:small-caps;color:var(--sbr);border-bottom:1px solid var(--sbl);padding-bottom:1px}
+.tv-sch .sb .sbc{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;text-align:center;color:var(--sbr)}
+.tv-sch .sb .sbc button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;padding:3px 0;border-radius:6px}
+.tv-sch .sb .sbc b{font-size:.84rem;letter-spacing:.04em}
+.tv-sch .sb .sbc span{font-size:.9rem;color:var(--k)}
+.tv-sch .sb .sbc button:hover:not(:disabled),.tv-sch .sb .dt:hover:not(:disabled),.tv-sch .sb .lk:hover:not(:disabled){background:#9226101a}
+.tv-sch .sb .dt,.tv-sch .sb .lk{all:unset;cursor:pointer;color:inherit;border-bottom:1px dotted currentColor;border-radius:3px;padding:0 1px}
+.tv-sch .sb .dt:disabled,.tv-sch .sb .lk:disabled,.tv-sch .sb .sbc button:disabled{cursor:default;border-bottom:0}
+.tv-sch .sb .pfr{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
+.tv-sch .sb .pfr .ora{display:inline-flex;align-items:center;gap:4px;margin-left:auto;font-weight:600;color:var(--k)}
+.tv-sch .sb .pfr .ora.ko{color:#b3261e}
+.tv-sch .sb .pfi{width:52px;font:inherit;font-weight:700;text-align:center;border:1px solid var(--ul);border-radius:5px;background:var(--box);color:inherit;padding:1px 2px}
+.tv-sch .sb .q{display:inline-flex;gap:3px;align-items:center}
+.tv-sch .sb .q button{all:unset;cursor:pointer;width:24px;height:24px;border-radius:6px;display:grid;place-items:center;background:var(--sbl);color:#fff;font-weight:700}
+.tv-sch .sb .q input{width:42px;font:inherit;text-align:center;border:1px solid var(--ul);border-radius:5px;background:var(--box);color:inherit;padding:1px}
+.tv-sch .sb .due{display:flex;flex-wrap:wrap;gap:2px 18px}
+.tv-sch .sb .iz{margin-top:8px}
+.tv-sch .sb .cnd{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.tv-sch .sb .vuoto{color:var(--k2);font-style:italic}
+.tv-sch .fine{display:block;margin:0 0 8px}
+:root[data-theme=dark] .tv-sch .sb{--sbr:#e59a7f;--sbl:#c4553a;border-top-color:#8a7240;border-bottom-color:#8a7240}
+@media (max-width:820px){.tv-sch .sb{padding:10px}.tv-sch .sb .sbc{grid-template-columns:repeat(3,1fr);row-gap:6px}}
 @media (max-width:820px){
   .tv-turno{width:min(250px,calc(100% - 20px));max-height:45%}
   .tv-rail{width:44px}.tv-rail button{width:34px;height:34px}
   .tv-chat{position:absolute;right:0;bottom:0;left:0;width:auto;max-height:62%;z-index:12;border-left:0;border-top:2px solid var(--gold);box-shadow:0 -8px 24px #0008;border-radius:12px 12px 0 0}
   .tv-ctab{top:auto;bottom:calc(62% + 8px);transform:none;width:40px;height:34px;border-radius:9px 0 0 9px}
-  .tv-ctab.chiusa{bottom:12px}
+  .tv-ctab.chiusa{bottom:12px}.tv-ctab:not(.chiusa){display:none}
+  .tv-cx{width:36px;height:36px;font-size:1.05rem;background:#0000000c}
   dialog.dlg.tv-side{inset:auto 8px 8px 8px;width:auto;max-height:58vh}
   dialog.dlg.tv-side.tv-sw{inset:auto 0 0 0;width:auto;max-height:90vh;border-radius:12px 12px 0 0}
   .tv-sch .testa{grid-template-columns:1fr}.tv-sch .info{grid-template-columns:repeat(2,1fr)}
@@ -636,7 +684,7 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
   }
 
   /* ---------- stato ---------- */
-  const T = { mask: [], turno: [], chat: [], mmodo: 'svela', mforma: 'rett', mraggio: 0, mini: new Map(), me: null, info: null, stato: null, scene: new Map(), tok: new Map(), tiri: [], vista: null, view: { x: 0, y: 0, z: 1 }, tool: 'muovi', livello: 'segnalini', tdpriv: false, allN: 3, schede: null, sv: null, ch: null, rulers: new Map(), live: false, url: new Map(), online: [] };
+  const T = { mask: [], turno: [], chat: [], mmodo: 'svela', mforma: 'rett', mraggio: 0, mini: new Map(), me: null, info: null, stato: null, scene: new Map(), tok: new Map(), tiri: [], vista: null, view: { x: 0, y: 0, z: 1 }, tool: 'muovi', livello: 'segnalini', tdpriv: false, allN: 3, muri: [], mtool: 'muro', mfatti: [], wver: 0, anteprima: false, schede: null, sv: null, ch: null, rulers: new Map(), live: false, url: new Map(), online: [] };
   const isDM = () => T.me?.ruolo === 'dm';
   const scena = () => T.scene.get(T.vista) || null;
   const puoMuovere = t => isDM() || (t.giocatore && t.giocatore === T.me.giocatore);
@@ -689,7 +737,7 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
   function stato(cls, txt) { const o = $('#tv-on'); if (!o) return; o.className = 'tv-on ' + cls; o.title = txt; }
 
   async function carica() {
-    const [st, sc, tk, tr, mb, ms, tu, ct, sh] = await Promise.all([
+    const [st, sc, tk, tr, mb, ms, tu, ct, sh, mu] = await Promise.all([
       SB.from('tavolo_stato').select('*').eq('id', 1).maybeSingle(),
       SB.from('tavolo_scene').select('*').order('creata'),
       SB.from('tavolo_token').select('*'),
@@ -698,7 +746,8 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
       SB.from('tavolo_maschera').select('*').order('id'),
       SB.from('tavolo_turno').select('*'),
       SB.from('tavolo_chat').select('*').order('id', { ascending: false }).limit(80),
-      SB.from('tavolo_schede').select('*')
+      SB.from('tavolo_schede').select('*'),
+      SB.from('tavolo_muri').select('*')
     ]);
     for (const r of [ms, tu, ct]) if (r.error && sqlMancante(r.error)) throw errore('sql2');
     T.stato = chk(st) || { scena: null, canale: 'avalar' };
@@ -709,6 +758,8 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
     T.mask = chk(ms); T.turno = chk(tu); T.chat = chk(ct).reverse();
     // senza tavolo/tappa-3.sql il tavolo funziona lo stesso, solo senza schede
     T.schede = sh.error ? null : new Map(sh.data.map(x => [x.id, x]));
+    // senza tavolo/tappa-4.sql niente muri né nebbia automatica
+    T.muri = mu.error ? null : mu.data; T.wver++;
     if (!isDM() || !T.scene.has(T.vista)) T.vista = T.stato.scena;
   }
 
@@ -753,6 +804,14 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
       else if (!T.mask.some(m => m.id === p.new.id)) T.mask.push(p.new);
       programmaMaschera();
     });
+    pg('tavolo_muri', p => {
+      if (!T.muri) return;
+      if (p.eventType === 'DELETE') T.muri = T.muri.filter(m => m.id !== p.old.id);
+      else { const i = T.muri.findIndex(m => m.id === p.new.id); if (i >= 0) T.muri[i] = { ...T.muri[i], ...p.new }; else T.muri.push(p.new); }
+      T.wver++; programmaMaschera(); if (T.tool === 'muri') barraMaschera();
+    });
+    // il DM ha fatto dimenticare le zone esplorate
+    ch.on('broadcast', { event: 'esplorato' }, ({ payload: m }) => { if (!isDM()) dimenticaEsplorato(m.scena); });
     pg('tavolo_turno', p => {
       if (!T.turno.length && p.eventType === 'INSERT') apriTurno(true);
       if (p.eventType === 'DELETE') T.turno = T.turno.filter(x => x.id !== p.old.id);
@@ -766,6 +825,8 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
     ch.on('broadcast', { event: 'trascina' }, ({ payload: m }) => {
       const t = T.tok.get(m.id), el = tokEl(m.id); if (!t || !el || T.drag?.id === m.id) return;
       el.classList.add('live'); el.style.left = m.x + 'px'; el.style.top = m.y + 'px';
+      // nel buio i token degli altri non si vedono nemmeno mentre si muovono
+      if (!isDM() && t.giocatore !== T.me.giocatore && scena()) { const l = t.misura * scena().griglia; el.hidden = coperto(m.x + l / 2, m.y + l / 2); }
     });
     ch.on('broadcast', { event: 'foto' }, ({ payload: f }) => { if (!isDM()) apriFoto(f, true); });
     ch.on('broadcast', { event: 'righello' }, ({ payload: m }) => {
@@ -817,6 +878,11 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
     undo: '<path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
     sole: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>',
     luna: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
+    muro: '<path d="M3 5h18v14H3zM3 9.7h18M3 14.3h18M9 5v4.7M15 5v4.7M6 9.7v4.6M12 9.7v4.6M18 9.7v4.6M9 14.3V19M15 14.3V19"/>',
+    porta: '<path d="M6 21V4.5L15 3v18M15 5h3.5V21M3.5 21h17"/><circle cx="12.3" cy="12.5" r=".6"/>',
+    portaAp: '<path d="M4.5 21V4h14v17M3 21h18"/><path d="M4.5 4L11 6.5V22l-6.5-1"/>',
+    gomma: '<path d="M9 20h11M4.6 14.4l9.2-9.2a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8L12 19H8.2l-3.6-3.6a.7.7 0 0 1 0-1z"/><path d="M9.5 9.5l5 5"/>',
+    lucc: '<rect x="5" y="11" width="14" height="10" rx="1.5"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/>',
     pag: '<rect x="3" y="7" width="13" height="13" rx="1.5"/><path d="M7 4h12.5A1.5 1.5 0 0 1 21 5.5V17"/><path d="M5.5 17l3.5-4 2.5 2.5 1.5-1.5 2 3"/>'
   };
   const svg = k => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICO[k]}</svg>`;
@@ -827,7 +893,7 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
     let h = b('tv-sel', 'Seleziona e sposta i token (S)', 'sel', T.tool === 'muovi') + b('tv-mano', 'Sposta la mappa (M)', 'mano', T.tool === 'mano')
       + b('tv-righello', 'Righello (R)', 'rig', T.tool === 'righello') + b('tv-tiradadi', 'Tiradadi', 'dado', !$('#tv-tdp')?.hidden)
       + b('tv-turno', 'Ordine del turno', 'tur', !$('#tv-turno')?.hidden) + b('tv-schede', 'Schede dei personaggi e dei PNG', 'sch', !$('#tv-sp')?.hidden);
-    if (isDM() && scena()) h += '<hr><span class="lbl">DM</span>' + b('tv-maschera', 'Maschera: nascondi e svela la mappa', 'mas', T.tool === 'maschera') + b('tv-token', 'Aggiungi un token', 'tok') + b('tv-griglia', 'Impostazioni della pagina', 'gri');
+    if (isDM() && scena()) h += '<hr><span class="lbl">DM</span>' + b('tv-maschera', 'Maschera: nascondi e svela la mappa', 'mas', T.tool === 'maschera') + b('tv-muri', 'Muri, porte e nebbia automatica', 'muro', T.tool === 'muri') + b('tv-token', 'Aggiungi un token', 'tok') + b('tv-griglia', 'Impostazioni della pagina', 'gri');
     h += '<span class="sp"></span>';
     if (isDM() && scena()) h += '<span class="lbl">Livelli</span>' + b('tv-liv-seg', 'Livello Segnalini: i token che vedono tutti', 'lseg', T.livello === 'segnalini').replace('class="', 'class="liv ') + b('tv-liv-mas', 'Livello Master: i token che vedi solo tu', 'lmas', T.livello === 'master').replace('class="', 'class="liv ');
     h += `<span class="tv-cnt" id="tv-cnt">${T.online.length > 1 ? T.online.length : ''}</span><span class="tv-on ${T.live ? 'ok' : ''}" id="tv-on" title="${T.live ? esc('Al tavolo ora: ' + T.online.join(', ')) : 'Connessione…'}"></span>`;
@@ -851,19 +917,30 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
       'tv-token': () => dlgToken(), 'tv-griglia': () => dlgGriglia(),
       'tv-turno': () => apriTurno($('#tv-turno').hidden), 'tv-schede': () => apriSchede($('#tv-sp').hidden),
       'tv-tiradadi': () => { const p = $('#tv-tdp'); p.hidden = !p.hidden; if (!p.hidden) { disegnaTdp(); $('#tv-sp').hidden = true; if (matchMedia('(max-width:820px)').matches) apriChat(false); } disegnaRail(); },
-      'tv-liv-seg': () => livello('segnalini'), 'tv-liv-mas': () => livello('master'), 'tv-maschera': () => strumento(T.tool === 'maschera' ? 'muovi' : 'maschera'),
+      'tv-liv-seg': () => livello('segnalini'), 'tv-liv-mas': () => livello('master'), 'tv-maschera': () => strumento(T.tool === 'maschera' ? 'muovi' : 'maschera'), 'tv-muri': () => strumento(T.tool === 'muri' ? 'muovi' : 'muri'),
       ...dadiActs()
     };
   }
   // livelli come su Roll20: Segnalini (li vedono tutti) e Master (solo il DM). Si lavora su uno alla volta
   function livello(l) { T.livello = l; chiudiPop(); const sl = document.querySelector('dialog.tv-side [name=liv]'); if (sl) sl.value = l; disegnaRail(); disegnaTop(); disegnaToken(); }
-  function strumento(t) { T.tool = t; if (t === 'maschera' || t === 'allinea') { const p = $('#tv-tdp'); if (p) p.hidden = true; } const st = $('#tv-stage'); if (st) { st.classList.toggle('rul', t === 'righello' || t === 'maschera' || t === 'allinea'); st.classList.toggle('mano', t === 'mano'); } disegnaRail(); barraMaschera(); }
+  function strumento(t) {
+    const prima = T.tool; T.tool = t;
+    // le barre degli strumenti del DM stanno in alto a sinistra: chiudo i pannelli che le coprirebbero
+    if (t === 'maschera' || t === 'allinea' || t === 'muri' || t === 'griglia') { const p = $('#tv-tdp'), sp = $('#tv-sp'); if (p) p.hidden = true; if (sp && !sp.hidden) apriSchede(false); }
+    const st = $('#tv-stage'); if (st) { st.classList.toggle('rul', ['righello', 'maschera', 'allinea', 'muri'].includes(t)); st.classList.toggle('mano', t === 'mano'); st.classList.toggle('muri', t === 'muri'); st.classList.toggle('gmano', t === 'griglia'); }
+    if (prima === 'griglia' && t !== 'griglia' && T.gm) annullaGriglia();
+    if (prima === 'muri' && t !== 'muri') { T.mu = T.mdown = T.mhov = T.mgom = null; if (T.anteprima) { T.anteprima = false; programmaMaschera(); } }
+    disegnaRail(); barraMaschera(); disegnaMuri(); disegnaRighelli();
+  }
   function tasti(e) {
     if (e.target.closest('input,textarea,select,[contenteditable]') || e.ctrlKey || e.metaKey || e.altKey || document.querySelector('dialog[open]')) return;
     const k = e.key.toLowerCase();
     if (k === 'r') strumento(T.tool === 'righello' ? 'muovi' : 'righello');
     else if (k === 's') strumento('muovi');
     else if (k === 'm') strumento('mano');
+    else if (T.tool === 'griglia' && /^Arrow/.test(e.key)) { e.preventDefault(); const q = e.shiftKey ? 0.1 : 1; spostaGriglia({ ArrowLeft: -q, ArrowRight: q }[e.key] || 0, { ArrowUp: -q, ArrowDown: q }[e.key] || 0); }
+    else if (T.tool === 'griglia' && e.key === 'Enter') salvaGriglia().catch(err => toast(err.message, 'err'));
+    else if ((e.key === 'Escape' || e.key === 'Enter') && T.tool === 'muri' && T.mu) { T.mu = null; disegnaRighelli(); }
     else if (e.key === 'Escape') { T.al = null; strumento('muovi'); chiudiPop(); pannelloMappe(false); }
   }
   // etichette dei pulsanti al passaggio del mouse
@@ -973,7 +1050,8 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
       return;
     }
     st.innerHTML = `<div class="tv-world" id="tv-world"><img class="tv-map" id="tv-map" alt="" draggable="false" width="${sc.larghezza}" height="${sc.altezza}" style="width:${sc.larghezza}px;height:${sc.altezza}px">
-      <svg class="tv-grid" id="tv-grid" width="${sc.larghezza}" height="${sc.altezza}"></svg><div id="tv-toks"></div><canvas class="tv-fog" id="tv-fog" style="width:${sc.larghezza}px;height:${sc.altezza}px"></canvas></div>
+      <svg class="tv-grid" id="tv-grid" width="${sc.larghezza}" height="${sc.altezza}"></svg><div id="tv-toks"></div><canvas class="tv-fog" id="tv-fog" style="width:${sc.larghezza}px;height:${sc.altezza}px"></canvas>
+      <svg class="tv-walls" id="tv-walls" width="${sc.larghezza}" height="${sc.altezza}"></svg><div class="tv-porte" id="tv-porte"></div></div>
       <svg class="tv-ov" id="tv-ov"></svg><div class="tv-zoom" role="group" aria-label="Zoom"><button type="button" data-z="1.25" data-tip="Ingrandisci" aria-label="Ingrandisci">${svg('piu')}</button>
         <div class="tv-zs" id="tv-zs" role="slider" tabindex="0" aria-label="Zoom" aria-valuemin="5" aria-valuemax="600" data-tip="Trascina per lo zoom"><span class="tr"><i></i></span>${[0.25, 0.5, 1, 2, 4].map(z => `<span class="tk ${z === 1 ? 'uno' : ''}" style="--q:${(Math.log(z) - Z_MIN) / (Z_MAX - Z_MIN)}"></span>`).join('')}<span class="kn"></span></div>
         <button type="button" data-z="0.8" data-tip="Rimpicciolisci" aria-label="Rimpicciolisci">${svg('meno')}</button><span class="sep"></span>
@@ -986,6 +1064,10 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
     zs.onpointermove = e => { if (zs.hasPointerCapture(e.pointerId)) daY(e); };
     zs.onpointerup = zs.onpointercancel = () => zs.classList.remove('on');
     zs.onkeydown = e => { const f = { ArrowUp: 1.1, ArrowRight: 1.1, ArrowDown: 1 / 1.1, ArrowLeft: 1 / 1.1 }[e.key]; if (f) { e.preventDefault(); aZoom(T.view.z * f); } };
+    const pb = $('#tv-porte');
+    pb.onclick = e => { const b = e.target.closest('.tv-porta'); if (b) apriPorta(b.dataset.id); };
+    pb.oncontextmenu = e => { const b = e.target.closest('.tv-porta'); if (!b || !isDM()) return; e.preventDefault(); menuPorta(b.dataset.id, e); };
+    T.fogKey = null;
     const img = $('#tv-map');
     if (sc.mappa) urlMappa(sc.mappa).then(u => { if (img.isConnected) img.src = u; }).catch(e => toast('Mappa non caricata: ' + e.message, 'err'));
     else img.removeAttribute('src');
@@ -1003,7 +1085,7 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
     T.view = { z, x: (r.width - sc.larghezza * z) / 2, y: (r.height - sc.altezza * z) / 2 }; T.viewOk = true; applicaVista();
   }
   function applicaVista() {
-    const w = $('#tv-world'); if (w) w.style.transform = `translate(${T.view.x}px,${T.view.y}px) scale(${T.view.z})`;
+    const w = $('#tv-world'); if (w) { w.style.transform = `translate(${T.view.x}px,${T.view.y}px) scale(${T.view.z})`; w.style.setProperty('--z', T.view.z); }
     const zp = $('#tv-zp'); if (zp) zp.textContent = Math.round(T.view.z * 100) + '%';
     const zs = $('#tv-zs'); if (zs) { zs.style.setProperty('--p', (Math.log(T.view.z) - Z_MIN) / (Z_MAX - Z_MIN)); zs.setAttribute('aria-valuenow', Math.round(T.view.z * 100)); }
     disegnaRighelli(); chiudiPop();
@@ -1026,14 +1108,16 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
   const tokEl = id => document.querySelector(`.tv-tok[data-id="${id}"]`);
   function disegnaToken() {
     const box = $('#tv-toks'), sc = scena(); if (!box || !sc) return;
+    // se i token che guardano si sono mossi, prima ricalcolo la nebbia
+    if (nebbiaQui(sc) && chiaveVista(sc) !== T.fogKey) disegnaMaschera();
     const lista = [...T.tok.values()].filter(t => t.scena === sc.id).sort((a, b) => b.misura - a.misura || (a.giocatore ? 1 : 0) - (b.giocatore ? 1 : 0));
     const vivi = new Set(lista.map(t => t.id)), att = T.turno?.find(x => x.id === T.stato?.turno);
     box.querySelectorAll('.tv-tok').forEach(el => { if (!vivi.has(el.dataset.id)) el.remove(); });
     lista.forEach((t, i) => {
       let el = tokEl(t.id);
       if (!el) { el = document.createElement('div'); el.className = 'tv-tok'; el.dataset.id = t.id; el.innerHTML = '<span class="fxs"></span><span class="ini"></span><b></b><i class="pf"><s></s></i><span class="cnd"></span>'; }
-      const lato = t.misura * sc.griglia;
-      el.style.cssText = `left:${t.x}px;top:${t.y}px;width:${lato}px;height:${lato}px;--c:${t.colore};--fs:${Math.max(11, sc.griglia * 0.22)}px;z-index:${i + 1}${t.immagine ? `;background-image:url("${t.immagine.replace(/"/g, '%22')}")` : ''}`;
+      const lato = t.misura * sc.griglia, pos = T.drag?.id === t.id && T.drag.mosso ? T.drag : t;
+      el.style.cssText = `left:${pos.x}px;top:${pos.y}px;width:${lato}px;height:${lato}px;--c:${t.colore};--fs:${Math.max(11, sc.griglia * 0.22)}px;z-index:${i + 1}${t.immagine ? `;background-image:url("${t.immagine.replace(/"/g, '%22')}")` : ''}`;
       if (T.drag?.id !== t.id) el.classList.remove('live');
       el.classList.toggle('turno', !!att && att.token === t.id);
       // i giocatori non vedono i token altrui sotto la maschera
@@ -1083,17 +1167,19 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
     const punti = new Map(); let pan = null, pinch = null, rul = null, mas = null, ultimo = 0;
     st.addEventListener('wheel', e => { e.preventDefault(); const r = st.getBoundingClientRect(); const dy = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY; zoom(Math.exp(-(e.ctrlKey ? dy * 0.01 : clamp(dy, -100, 100) * 0.0005)), e.clientX - r.left, e.clientY - r.top); }, { passive: false });
     st.addEventListener('pointerdown', e => {
-      if (e.button > 0 || !scena() || e.target.closest('.tv-zoom,.tv-pop')) return;
+      if (e.button > 0 || !scena() || e.target.closest('.tv-zoom,.tv-pop,.tv-porta')) return;
       chiudiPop();
       punti.set(e.pointerId, { x: e.clientX, y: e.clientY });
       try { st.setPointerCapture(e.pointerId); } catch { }
       if (punti.size === 2) { // due dita: ingrandimento, annullo il resto
-        annullaDrag(); rul = fineRighello(rul, true); pan = null; if (mas) { mas = null; disegnaMaschera(); disegnaRighelli(); }
+        annullaDrag(); rul = fineRighello(rul, true); pan = null; T.mdown = T.mgom = null; if (mas) { mas = null; disegnaMaschera(); disegnaRighelli(); }
         const [a, b] = [...punti.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), z: T.view.z, v: { ...T.view } }; return;
       }
       if (punti.size > 2) return;
       const p = mondo(st, e), el = e.target.closest('.tv-tok'), t = el && T.tok.get(el.dataset.id);
       if (T.tool === 'maschera' && isDM()) { mas = inizioMaschera(p); return; }
+      if (T.tool === 'muri' && isDM()) { inizioMuro(p, e); return; }
+      if (T.tool === 'griglia' && isDM()) { const sc = scena(); T.gd = { sx: e.clientX, sy: e.clientY, x: sc.griglia_x, y: sc.griglia_y }; return; }
       if (T.tool === 'allinea' && isDM()) { T.al = { a: p, b: p }; disegnaRighelli(); return; }
       if (T.tool === 'righello') { const sc = scena(); const a = { x: centroCasella(p.x, sc.griglia_x), y: centroCasella(p.y, sc.griglia_y) }; rul = { pts: [a, a] }; mostraRighello(rul.pts); return; }
       if (t && T.tool !== 'mano' && puoMuovere(t)) { T.drag = { id: t.id, dx: p.x - t.x, dy: p.y - t.y, x0: t.x, y0: t.y, sx: e.clientX, sy: e.clientY, mosso: false }; el.classList.add('drag'); return; }
@@ -1110,6 +1196,8 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
       }
       const p = mondo(st, e);
       if (mas) { muoviMaschera(mas, p); return; }
+      if (T.mdown || T.mgom) { muoviMuro(p, e); return; }
+      if (T.gd) { const sc = scena(); sc.griglia_x = T.gd.x; sc.griglia_y = T.gd.y; spostaGriglia((e.clientX - T.gd.sx) / T.view.z, (e.clientY - T.gd.sy) / T.view.z); return; }
       if (T.al) { T.al.b = p; disegnaRighelli(); return; }
       if (rul) {
         const sc = scena(); rul.pts[1] = { x: centroCasella(p.x, sc.griglia_x), y: centroCasella(p.y, sc.griglia_y) }; mostraRighello(rul.pts);
@@ -1120,6 +1208,7 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
         const d = T.drag, el = tokEl(d.id); if (!el) return;
         if (!d.mosso && Math.hypot(e.clientX - d.sx, e.clientY - d.sy) < 4) return;
         d.mosso = true; d.x = p.x - d.dx; d.y = p.y - d.dy; el.style.left = d.x + 'px'; el.style.top = d.y + 'px';
+        if (nebbiaQui(scena())) { cancelAnimationFrame(T.vraf); T.vraf = requestAnimationFrame(disegnaToken); }
         const now = Date.now(); if (now - ultimo > 50) { ultimo = now; manda('trascina', { id: d.id, x: d.x, y: d.y }); }
         return;
       }
@@ -1131,6 +1220,8 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
       if (pinch) { if (punti.size < 2) pinch = null; return; }
       st.classList.remove('pan'); pan = null;
       if (mas) { const m = mas; mas = null; fineMaschera(m); return; }
+      if (T.gd) { T.gd = null; return; }
+      if (T.mdown || T.mgom) { if (e.type === 'pointerup') fineMuro(mondo(st, e), e); else T.mdown = T.mgom = null; return; }
       if (T.al) { const a = T.al; T.al = null; fineAllinea(a).catch(err => toast(err.message, 'err')); return; }
       if (rul) { rul = fineRighello(rul); return; }
       if (T.clic) { const c = T.clic; T.clic = null; if (e.type === 'pointerup') menuToken(c.id, e); }
@@ -1142,6 +1233,9 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
         const sc = scena(); let x = aggancia(d.x, sc.griglia_x, t.misura), y = aggancia(d.y, sc.griglia_y, t.misura);
         const lib = postoLibero(t, x, y); if (!lib) { t.x = d.x0; t.y = d.y0; disegnaToken(); manda('trascina', { id: t.id, x: d.x0, y: d.y0 }); return; }
         x = lib.x; y = lib.y;
+        // con la nebbia automatica i giocatori non passano attraverso i muri (né le porte chiuse)
+        const l = t.misura * sc.griglia;
+        if (!isDM() && sc.visuale && attraversa(sc, d.x0 + l / 2, d.y0 + l / 2, x + l / 2, y + l / 2)) { t.x = d.x0; t.y = d.y0; disegnaToken(); manda('trascina', { id: t.id, x: d.x0, y: d.y0 }); toast('C\'è un muro in mezzo: fai il giro.', 'err'); return; }
         t.x = x; t.y = y; disegnaToken(); manda('trascina', { id: t.id, x, y });
         const r = await SB.from('tavolo_token').update({ x, y }).eq('id', t.id).select().maybeSingle();
         if (r.error || !r.data) { t.x = d.x0; t.y = d.y0; disegnaToken(); manda('trascina', { id: t.id, x: d.x0, y: d.y0 }); toast(r.error?.message || 'Non puoi muovere questo token.', 'err'); }
@@ -1154,7 +1248,10 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
       if (!on && !T.pcur) return;
       T.pcur = on ? mondo(st, e) : null; disegnaRighelli();
     });
-    st.addEventListener('pointerleave', () => { if (T.pcur) { T.pcur = null; disegnaRighelli(); } });
+    st.addEventListener('pointerleave', () => { if (T.pcur || T.mhov) { T.pcur = T.mhov = null; disegnaRighelli(); } });
+    // strumento dei muri: il punto agganciato segue il mouse; il tasto destro chiude la serie di muri
+    st.addEventListener('pointermove', e => { if (!isDM() || T.tool !== 'muri' || T.mdown || T.mgom || e.pointerType !== 'mouse' || !scena()) return; const p = mondo(st, e); T.mhov = T.mtool === 'gomma' ? p : punta(p, e); disegnaRighelli(); });
+    st.addEventListener('contextmenu', e => { if (T.tool === 'muri') { e.preventDefault(); T.mu = null; disegnaRighelli(); } });
     function annullaDrag() { const d = T.drag; if (!d) return; T.drag = null; const t = T.tok.get(d.id); if (t) { disegnaToken(); manda('trascina', { id: t.id, x: t.x, y: t.y }); } }
     function fineRighello(r, subito) {
       if (!r) return null;
@@ -1175,7 +1272,7 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
       return `<line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="#000a" stroke-width="7" stroke-linecap="round"/><line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="${col}" stroke-width="3" stroke-dasharray="10 6" stroke-linecap="round"/>
         <circle cx="${ax}" cy="${ay}" r="5" fill="${col}" stroke="#000" stroke-width="1.5"/><circle cx="${bx}" cy="${by}" r="6" fill="${col}" stroke="#000" stroke-width="1.5"/>
         <text x="${bx + 12}" y="${by - 12}">${esc(lbl)}</text>`;
-    }).join('') + (T.al ? quadroAllinea(T.al, v) : '') + (T.pcur && T.tool === 'maschera' && T.mforma === 'pennello' ? `<circle cx="${v.x + T.pcur.x * v.z}" cy="${v.y + T.pcur.y * v.z}" r="${(T.mraggio || sc.griglia) * v.z}" fill="none" stroke="#f2b51d" stroke-width="2" stroke-dasharray="6 4"/>` : '');
+    }).join('') + (T.al ? quadroAllinea(T.al, v) : '') + (T.pcur && T.tool === 'maschera' && T.mforma === 'pennello' ? `<circle cx="${v.x + T.pcur.x * v.z}" cy="${v.y + T.pcur.y * v.z}" r="${(T.mraggio || sc.griglia) * v.z}" fill="none" stroke="#f2b51d" stroke-width="2" stroke-dasharray="6 4"/>` : '') + (T.tool === 'muri' && isDM() ? anteprimaMuro(v) : '');
   }
 
   /* ---------- menu del token (DM) ---------- */
@@ -1224,6 +1321,7 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
       <button class="btn sm" data-k="nasc">${t.nascosto ? '⬆ Sposta nei Segnalini (lo vedono tutti)' : '👑 Sposta nel livello Master (solo tu)'}</button>
       <div class="row"><span>Misura</span><button class="btn sm" data-k="meno">−</button><span>${t.misura.toLocaleString('it-IT')}</span><button class="btn sm" data-k="piu">+</button></div>
       <div class="row"><span>Lo muove</span><select data-k="gioc"><option value="">solo il DM</option>${gioc}</select></div>
+      ${scena()?.visuale && t.giocatore ? `<div class="row" title="Con la nebbia automatica: fin dove vede questo personaggio (18 m è la scurovisione)"><span>Vede fino a</span><select data-k="vista"><option value="">senza limite</option>${[0, 1.5, 3, 6, 9, 12, 18, 24, 36].map(n => `<option value="${n}" ${t.vista != null && +t.vista === n ? 'selected' : ''}>${n ? n.toLocaleString('it-IT') + ' m' + (n === 18 ? ' (scurovisione)' : '') : 'non vede'}</option>`).join('')}</select></div>` : ''}
       ${ft ? '<div class="row"><span>Foto</span><button class="btn sm" data-k="foto" title="Solo sul tuo schermo">🖼 Apri</button><button class="btn sm" data-k="mostra" title="Si apre a schermo intero a tutti i giocatori">📣 Mostra a tutti</button></div>' : ''}
       ${ini}<button class="btn sm danger" data-k="via">Elimina</button>`;
     st.append(pop); extra();
@@ -1242,6 +1340,7 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
     pop.querySelector('[data-k=meno]').onclick = () => salva({ misura: t.misura > 1 ? t.misura - 1 : 0.5 });
     pop.querySelector('[data-k=piu]').onclick = () => salva({ misura: t.misura < 1 ? 1 : Math.min(10, t.misura + 1) });
     pop.querySelector('[data-k=gioc]').onchange = ev => salva({ giocatore: ev.target.value || null });
+    pop.querySelector('[data-k=vista]')?.addEventListener('change', ev => salva({ vista: ev.target.value === '' ? null : +ev.target.value }));
     pop.querySelector('[data-k=ini]').onclick = () => { chiudiPop(); iniziativa(t, pop.querySelector('[data-k=imod]').value); };
     const rin = pop.querySelector('[data-k=rin]');
     const rinomina = () => { const n = rin.value.trim().slice(0, 60); if (n !== (t.nome || '')) salva({ nome: n }); };
@@ -1400,7 +1499,7 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
         <label>Sposta ↔</label><span style="display:flex;gap:8px;align-items:center"><input type="range" class="tv-rg" name="gx" min="0" max="${sc.griglia}" step="0.01" value="${off(sc.griglia_x)}" style="flex:1"><input type="number" name="gxn" step="any" value="${off(sc.griglia_x)}" style="width:84px"></span>
         <label>Sposta ↕</label><span style="display:flex;gap:8px;align-items:center"><input type="range" class="tv-rg" name="gy" min="0" max="${sc.griglia}" step="0.01" value="${off(sc.griglia_y)}" style="flex:1"><input type="number" name="gyn" step="any" value="${off(sc.griglia_y)}" style="width:84px"></span>
         <label></label><small class="hint" style="margin:0">Accetta i decimali (es. 55,45). Con le frecce ↑↓ nei riquadri: un pixel; con Maiusc tenuto, un decimo.</small>
-        <label></label><button type="button" class="btn sm" data-k="allinea" style="justify-self:start">📐 Allinea alla griglia disegnata sulla mappa</button>
+        <label></label><span style="display:flex;flex-wrap:wrap;gap:6px"><button type="button" class="btn sm" data-k="allinea">📐 Allinea alla griglia disegnata sulla mappa</button><button type="button" class="btn sm" data-k="mano">✋ Sposta la griglia a mano</button></span>
         <label>Metri per casella</label><input type="number" name="m" min="0.1" max="1000" step="any" value="${sc.metri}">
         <label>Mostra la griglia</label><label style="justify-content:flex-start"><input type="checkbox" name="vis" ${sc.griglia_visibile ? 'checked' : ''}> sì</label>
         <label>Colore</label><input type="color" name="gc" value="${esc(sc.griglia_colore || '#000000')}">
@@ -1422,8 +1521,10 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
       if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return; e.preventDefault();
       const el = v(n); el.value = +((+el.value || 0) + (e.key === 'ArrowUp' ? 1 : -1) * (e.shiftKey ? 0.1 : 1)).toFixed(2); el.dispatchEvent(new Event('input'));
     }));
+    d.querySelector('[data-k=mano]').onclick = () => { prova(); T.gm = { prima }; d.close('mano'); setTimeout(() => strumento('griglia'), 80); };
     d.querySelector('[data-k=allinea]').onclick = () => { d.close('cancel'); setTimeout(() => { strumento('allinea'); toast('Disegna un riquadro su alcune caselle della mappa.'); }, 80); };
     d.addEventListener('close', async () => {
+      if (d.returnValue === 'mano') return; // la griglia resta com'è: si rifinisce trascinandola
       if (d.returnValue !== 'ok') { Object.assign(sc, prima); disegnaGriglia(); disegnaToken(); return; }
       const ch = { nome: v('nome').value.trim().slice(0, 80) || prima.nome, griglia: sc.griglia, griglia_x: sc.griglia_x, griglia_y: sc.griglia_y, metri: sc.metri, griglia_visibile: sc.griglia_visibile };
       // colore e opacità solo se cambiati: servono le colonne di tappa-2b.sql
@@ -1472,7 +1573,7 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
     const box = $('#tv-dice'); if (!box) return;
     if (!T.diceInit) { let v = null; try { v = localStorage.getItem(CHAT); } catch { } apriChat(v ? v === '1' : matchMedia('(min-width:821px)').matches); }
     T.diceInit = true;
-    box.innerHTML = `<div class="tv-dh"><span>Chat</span></div><div class="tv-log" id="tv-log"></div>
+    box.innerHTML = `<div class="tv-dh"><span>Chat</span><button type="button" class="tv-cx" data-act="tv-dadi" title="Chiudi la chat" aria-label="Chiudi la chat">✕</button></div><div class="tv-log" id="tv-log"></div>
       <div class="tv-dk"><div class="row"><input type="text" id="tv-f" placeholder="Scrivi un messaggio… (/w nome per sussurrare)" style="flex:1" autocomplete="off" aria-label="Scrivi un messaggio"><button class="btn sm primary" data-act="tv-tira" style="flex:none">Invia</button></div>
       <p class="hint">I dadi si tirano dal Tiradadi, nella barra a sinistra.</p></div>`;
     $('#tv-f').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); scrivi(); } };
@@ -1636,25 +1737,44 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
   }
   function disegnaMaschera() {
     const c = $('#tv-fog'), sc = scena(); if (!c || !sc) return;
-    if (!sc.maschera) { c.hidden = true; return; }
+    const nebbia = nebbiaQui(sc); T.fogKey = chiaveVista(sc);
+    if (!sc.maschera && !nebbia) { c.hidden = true; disegnaMuri(); return; }
     // la tela è più piccola della mappa (al massimo 2048 px di lato): basta per i bordi e pesa poco
     const k = Math.min(1, FOG_MAX / Math.max(sc.larghezza, sc.altezza)), W = Math.max(1, Math.round(sc.larghezza * k)), H = Math.max(1, Math.round(sc.altezza * k));
     if (c.width !== W || c.height !== H) { c.width = W; c.height = H; }
     const g = c.getContext('2d', { willReadFrequently: true });
     g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, W, H);
-    g.setTransform(k, 0, 0, k, 0, 0); g.fillStyle = NERO; g.fillRect(0, 0, sc.larghezza, sc.altezza);
-    for (const o of T.mask.filter(m => m.scena === sc.id).sort((a, b) => a.id - b.id)) applica(g, o);
+    g.setTransform(k, 0, 0, k, 0, 0);
+    if (nebbia) {
+      // nebbia automatica: tutto buio, tranne ciò che vedono i token (e, in penombra, ciò che hanno già visto)
+      g.fillStyle = NERO; g.fillRect(0, 0, sc.larghezza, sc.altezza);
+      const segs = muriScena(sc).filter(chiuso).map(m => m.punti), viste = occhi(sc).map(o => ({ ...o, pts: poligono(o, segs, sc) }));
+      g.globalCompositeOperation = 'destination-out';
+      if (!isDM() && sc.esplora !== false) {
+        const e = esplorato(sc); segnaEsplorato(e, viste);
+        g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 0.45; g.drawImage(e.c, 0, 0, W, H); g.globalAlpha = 1; g.setTransform(k, 0, 0, k, 0, 0);
+      }
+      viste.forEach(o => buca(g, o));
+      if (!isDM() && !viste.length && T.avvisato !== sc.id) { T.avvisato = sc.id; toast('Non hai un token su questa mappa: vedi solo i posti già esplorati.'); }
+    }
+    if (sc.maschera) {
+      // la maschera del DM si somma alla nebbia: la disegno a parte e la appoggio sopra
+      const m = T.mcan || (T.mcan = document.createElement('canvas')); m.width = W; m.height = H;
+      const h = m.getContext('2d'); h.setTransform(k, 0, 0, k, 0, 0); h.fillStyle = NERO; h.fillRect(0, 0, sc.larghezza, sc.altezza);
+      for (const o of T.mask.filter(x => x.scena === sc.id).sort((a, b) => a.id - b.id)) applica(h, o);
+      g.globalCompositeOperation = 'source-over'; g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(m, 0, 0); g.setTransform(k, 0, 0, k, 0, 0);
+    }
+    g.globalCompositeOperation = 'source-over';
     c.hidden = false; c.style.opacity = isDM() ? tono() : 1; T.fogK = k;
+    disegnaMuri();
   }
-  function coperto(x, y) {
-    const sc = scena(), c = $('#tv-fog'); if (!sc?.maschera || !c || c.hidden) return false;
-    const k = T.fogK || 1, d = c.getContext('2d', { willReadFrequently: true }).getImageData(clamp(Math.floor(x * k), 0, c.width - 1), clamp(Math.floor(y * k), 0, c.height - 1), 1, 1).data;
-    return d[3] > 128;
-  }
+  const coperto = (x, y) => alfa(x, y) > 128;
   function programmaMaschera() { cancelAnimationFrame(T.mraf); T.mraf = requestAnimationFrame(() => { disegnaMaschera(); disegnaToken(); }); }
   function barraMaschera() {
     const b = $('#tv-mbar'), sc = scena(); if (!b) return;
     if (T.tool === 'allinea' && isDM() && sc) return barraAllinea(b);
+    if (T.tool === 'muri' && isDM() && sc) return barraMuri(b);
+    if (T.tool === 'griglia' && isDM() && sc) return barraGriglia(b);
     if (T.tool !== 'maschera' || !isDM() || !sc) { b.hidden = true; disegnaRighelli(); return; }
     if (!T.mraggio) T.mraggio = sc.griglia;
     const on = sc.maschera, dis = on ? '' : 'disabled', bt = (k, ic, l, sel, tip) => `<button type="button" data-m="${k}" class="${sel ? 'on' : ''}" ${dis} title="${esc(tip || l)}">${ic ? svg(ic) : ''}<span>${l}</span></button>`;
@@ -1705,6 +1825,38 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
     strumento('muovi'); disegnaGriglia(); disegnaToken();
     toast(`Griglia allineata: casella di ${g} px. Rifinisci qui se serve.`);
     dlgGriglia();
+  }
+  // griglia a mano: si trascina sulla mappa (o con le frecce) finché combacia con quella disegnata
+  const fmtPx = n => (Math.round(n * 10) / 10).toLocaleString('it-IT') + ' px';
+  function spostaGriglia(dx, dy, dg) {
+    const sc = scena(); if (!sc) return;
+    if (dg) sc.griglia = clamp(Math.round((sc.griglia + dg) * 100) / 100, 8, 600);
+    sc.griglia_x = Math.round((sc.griglia_x + dx) * 100) / 100; sc.griglia_y = Math.round((sc.griglia_y + dy) * 100) / 100;
+    disegnaGriglia();
+    const b = $('#tv-mbar'), o = n => { const g = sc.griglia; return fmtPx(((n % g) + g) % g); };
+    if (b) { b.querySelector('[data-g=x]').value = o(sc.griglia_x); b.querySelector('[data-g=y]').value = o(sc.griglia_y); b.querySelector('[data-g=g]').value = fmtPx(sc.griglia); }
+  }
+  function barraGriglia(b) {
+    const sc = scena(), bt = (k, l, tip, cls) => `<button type="button" data-g="${k}" class="${cls || ''}" title="${esc(tip)}" aria-label="${esc(tip)}">${l}</button>`;
+    b.innerHTML = `<div class="g"><b class="tit">✋ Sposta la griglia</b></div>
+      <div class="g sl"><span>↔</span><output data-g="x"></output><span>↕</span><output data-g="y"></output></div>
+      <div class="g sl" title="Lato della casella: con Maiusc va di un pixel alla volta"><span>Casella</span>${bt('gm', svg('meno'), 'Casella più piccola')}<output data-g="g"></output>${bt('gp', svg('piu'), 'Casella più grande')}</div>
+      <div class="g"><span class="avv">Trascina sulla mappa; frecce: 1 px, con Maiusc 0,1 px</span></div>
+      <div class="g">${bt('ann', 'Annulla', 'Torna a com\'era')}${bt('ok', '✓ Salva', 'Salva la posizione della griglia', 'on')}</div>`;
+    b.classList.remove('spenta'); b.hidden = false; spostaGriglia(0, 0);
+    b.querySelector('[data-g=gm]').onclick = e => spostaGriglia(0, 0, e.shiftKey ? -1 : -0.1);
+    b.querySelector('[data-g=gp]').onclick = e => spostaGriglia(0, 0, e.shiftKey ? 1 : 0.1);
+    b.querySelector('[data-g=ann]').onclick = () => strumento('muovi');
+    b.querySelector('[data-g=ok]').onclick = () => salvaGriglia().catch(err => toast(err.message, 'err'));
+  }
+  function annullaGriglia() { const sc = scena(), g = T.gm; T.gm = T.gd = null; if (sc && g) { Object.assign(sc, g.prima); disegnaGriglia(); disegnaToken(); } }
+  async function salvaGriglia() {
+    const sc = scena(); if (!sc) return;
+    const g = sc.griglia, n = v => Math.round((((v % g) + g) % g) * 100) / 100;
+    const r = await SB.from('tavolo_scene').update({ griglia: g, griglia_x: n(sc.griglia_x), griglia_y: n(sc.griglia_y) }).eq('id', sc.id).select().single();
+    if (r.error) throw new Error(r.error.message);
+    T.gm = null; Object.assign(sc, r.data); T.scene.set(sc.id, sc); riaggancia(sc);
+    strumento('muovi'); disegnaGriglia(); disegnaToken(); toast('Griglia salvata.');
   }
   const fmtCas = n => n.toLocaleString('it-IT') + (n === 1 ? ' casella' : ' caselle');
   async function azioneMaschera(k) {
@@ -1759,6 +1911,236 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
       return salvaMaschera({ scena: sc.id, svela: m.svela, forma: 'rett', punti: [Math.round(x), Math.round(y), Math.round(w), Math.round(h)] });
     }
     return salvaMaschera({ scena: sc.id, svela: m.svela, forma: 'pennello', punti: m.punti, raggio: m.raggio });
+  }
+
+  /* ---------- muri, porte e nebbia automatica (tappa 4): ognuno vede solo ciò che vedono i suoi token ---------- */
+  const SNAP = 'tavolo-muri-griglia', ESP = 'tavolo-esplorato-';
+  const CIECO = ['Accecato', 'Svenuto', 'Morto', 'Pietrificato'];
+  const aggancioGriglia = () => { try { return localStorage.getItem(SNAP) === '1'; } catch { return false; } };
+  const muriScena = sc => (T.muri || []).filter(m => m.scena === sc.id);
+  const chiuso = m => !m.porta || !m.aperta;
+  const nebbiaQui = sc => !!sc?.visuale && !!T.muri && (!isDM() || T.anteprima);
+  function distSeg(px, py, s) {
+    const vx = s[2] - s[0], vy = s[3] - s[1], l2 = vx * vx + vy * vy, q = l2 ? clamp(((px - s[0]) * vx + (py - s[1]) * vy) / l2, 0, 1) : 0;
+    return Math.hypot(px - s[0] - q * vx, py - s[1] - q * vy);
+  }
+  // il tratto a→b attraversa il muro c→d?
+  function taglia(ax, ay, bx, by, [cx, cy, dx, dy]) {
+    const r1 = bx - ax, r2 = by - ay, s1 = dx - cx, s2 = dy - cy, den = r1 * s2 - r2 * s1;
+    if (Math.abs(den) < 1e-9) return false;
+    const t = ((cx - ax) * s2 - (cy - ay) * s1) / den, u = ((cx - ax) * r2 - (cy - ay) * r1) / den;
+    return t > 1e-6 && t < 1 - 1e-6 && u >= 0 && u <= 1;
+  }
+  const attraversa = (sc, ax, ay, bx, by) => muriScena(sc).some(m => chiuso(m) && taglia(ax, ay, bx, by, m.punti));
+  // chi guarda: per il giocatore i suoi token (con la vista di gruppo anche quelli dei compagni), per il DM tutti quelli dei giocatori
+  function occhi(sc) {
+    const tutti = isDM() || sc.vista_condivisa, d = T.drag;
+    return [...T.tok.values()].filter(t => t.scena === sc.id && t.giocatore && !t.nascosto && (tutti || t.giocatore === T.me.giocatore)).map(t => {
+      const l = t.misura * sc.griglia;
+      let x = t.x + l / 2, y = t.y + l / 2;
+      // mentre lo trascini vede dalla nuova posizione, ma non al di là di un muro
+      if (d?.id === t.id && d.mosso && (isDM() || !attraversa(sc, x, y, d.x + l / 2, d.y + l / 2))) { x = d.x + l / 2; y = d.y + l / 2; }
+      const cieco = condTok(t).some(c => CIECO.includes(c));
+      return { id: t.id, x: clamp(x, 0, sc.larghezza), y: clamp(y, 0, sc.altezza), r: cieco ? l / 2 : t.vista == null ? 0 : l / 2 + t.vista / (sc.metri || 1.5) * sc.griglia };
+    });
+  }
+  // la zona che si vede da un punto: un raggio verso ogni estremo dei muri, fermato dal muro più vicino
+  function poligono(o, segs, sc) {
+    const R = o.r || Infinity, x0 = Math.max(0, o.x - R), y0 = Math.max(0, o.y - R), x1 = Math.min(sc.larghezza, o.x + R), y1 = Math.min(sc.altezza, o.y + R);
+    const tutti = (o.r ? segs.filter(s => distSeg(o.x, o.y, s) < R) : segs).concat([[x0, y0, x1, y0], [x1, y0, x1, y1], [x1, y1, x0, y1], [x0, y1, x0, y0]]);
+    const ang = [];
+    for (const s of tutti) for (let i = 0; i < 4; i += 2) { const a = Math.atan2(s[i + 1] - o.y, s[i] - o.x); ang.push(a - 1e-5, a, a + 1e-5); }
+    ang.sort((a, b) => a - b);
+    const pts = []; let prima = null;
+    for (const a of ang) {
+      if (prima !== null && a - prima < 1e-7) continue; prima = a;
+      const dx = Math.cos(a), dy = Math.sin(a); let best = Infinity;
+      for (const s of tutti) {
+        const s1 = s[2] - s[0], s2 = s[3] - s[1], den = dx * s2 - dy * s1; if (Math.abs(den) < 1e-12) continue;
+        const t = ((s[0] - o.x) * s2 - (s[1] - o.y) * s1) / den, u = ((s[0] - o.x) * dy - (s[1] - o.y) * dx) / den;
+        if (t > 1e-9 && t < best && u >= -1e-9 && u <= 1 + 1e-9) best = t;
+      }
+      if (best < Infinity) pts.push(o.x + dx * best, o.y + dy * best);
+    }
+    return pts;
+  }
+  // toglie dalla tela la zona vista (con la vista limitata, sfumata verso il bordo)
+  function buca(g, o) {
+    if (o.pts.length < 6) return;
+    g.save(); g.beginPath(); g.moveTo(o.pts[0], o.pts[1]);
+    for (let i = 2; i < o.pts.length; i += 2) g.lineTo(o.pts[i], o.pts[i + 1]);
+    g.closePath();
+    if (o.r) {
+      g.clip(); const gr = g.createRadialGradient(o.x, o.y, o.r * 0.8, o.x, o.y, o.r); gr.addColorStop(0, '#000'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = gr; g.beginPath(); g.arc(o.x, o.y, o.r, 0, Math.PI * 2);
+    } else g.fillStyle = '#000';
+    g.fill(); g.restore();
+  }
+  const chiaveVista = sc => [sc.id, sc.visuale, sc.esplora, sc.vista_condivisa, sc.griglia, sc.metri, sc.larghezza, sc.altezza, T.anteprima, T.wver, isDM(), T.esp?.v, nebbiaQui(sc) ? occhi(sc).map(o => `${o.id}:${Math.round(o.x)}:${Math.round(o.y)}:${Math.round(o.r)}`).join() : ''].join('|');
+  // le zone già viste restano in penombra: le ricorda il browser di ogni giocatore
+  function esplorato(sc) {
+    if (T.esp?.id === sc.id) return T.esp;
+    const k = Math.min(1, 1024 / Math.max(sc.larghezza, sc.altezza)), c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(sc.larghezza * k)); c.height = Math.max(1, Math.round(sc.altezza * k));
+    const e = T.esp = { id: sc.id, c, k, v: 0 };
+    try {
+      const u = localStorage.getItem(ESP + sc.id);
+      if (u) { const im = new Image(); im.onload = () => { if (T.esp !== e) return; c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); e.v++; programmaMaschera(); }; im.src = u; }
+    } catch { }
+    return e;
+  }
+  function segnaEsplorato(e, viste) {
+    const g = e.c.getContext('2d'); g.setTransform(e.k, 0, 0, e.k, 0, 0); g.globalCompositeOperation = 'source-over';
+    viste.forEach(o => buca(g, o));
+    clearTimeout(T.espT); T.espT = setTimeout(() => { try { localStorage.setItem(ESP + e.id, e.c.toDataURL()); } catch { } }, 1500);
+  }
+  function dimenticaEsplorato(id) {
+    clearTimeout(T.espT); try { localStorage.removeItem(ESP + id); } catch { }
+    if (T.esp?.id === id) T.esp = null;
+    programmaMaschera();
+  }
+  // quanto è coperto un punto della mappa (0 = si vede, 255 = buio)
+  function alfa(x, y) {
+    const c = $('#tv-fog'); if (!c || c.hidden) return 0;
+    const k = T.fogK || 1;
+    return c.getContext('2d', { willReadFrequently: true }).getImageData(clamp(Math.floor(x * k), 0, c.width - 1), clamp(Math.floor(y * k), 0, c.height - 1), 1, 1).data[3];
+  }
+  // una porta si vede se è in vista o già esplorata da almeno un lato
+  function inVista(m) {
+    const [x1, y1, x2, y2] = m.punti, l = Math.hypot(x2 - x1, y2 - y1) || 1, mx = (x1 + x2) / 2, my = (y1 + y2) / 2, nx = -(y2 - y1) / l * 8, ny = (x2 - x1) / l * 8;
+    return alfa(mx + nx, my + ny) < 250 || alfa(mx - nx, my - ny) < 250;
+  }
+  function disegnaMuri() {
+    const w = $('#tv-walls'), pb = $('#tv-porte'), sc = scena(); if (!w || !pb || !sc) return;
+    const lista = muriScena(sc), edit = isDM() && T.tool === 'muri';
+    const porte = lista.filter(m => m.porta && (isDM() ? sc.visuale || edit : sc.visuale && inVista(m)));
+    const ln = (m, c) => `<line class="${c}" x1="${m.punti[0]}" y1="${m.punti[1]}" x2="${m.punti[2]}" y2="${m.punti[3]}"/>`;
+    w.innerHTML = (edit ? lista.filter(m => !m.porta).map(m => ln(m, 'mu')).join('') : '') + porte.map(m => ln(m, 'po' + (m.aperta ? ' ap' : ''))).join('');
+    pb.innerHTML = porte.map(m => {
+      const tip = m.bloccata && !isDM() ? 'Porta chiusa a chiave' : (m.aperta ? 'Chiudi la porta' : 'Apri la porta') + (isDM() ? ' · tasto destro: chiave o elimina' : '');
+      return `<button type="button" class="tv-porta ${m.aperta ? 'ap' : ''} ${m.bloccata ? 'bl' : ''}" data-id="${m.id}" style="left:${(m.punti[0] + m.punti[2]) / 2}px;top:${(m.punti[1] + m.punti[3]) / 2}px" data-tip="${tip}" aria-label="${tip}">${svg(m.bloccata && !m.aperta ? 'lucc' : m.aperta ? 'portaAp' : 'porta')}</button>`;
+    }).join('');
+  }
+  async function apriPorta(id) {
+    const m = T.muri?.find(x => x.id === id); if (!m) return;
+    if (m.bloccata && !isDM()) return toast('La porta è chiusa a chiave.', 'err');
+    const prima = m.aperta; m.aperta = !prima; T.wver++; programmaMaschera();
+    const r = await SB.rpc('tavolo_porta', { p_id: id, p_aperta: m.aperta });
+    if (r.error) { m.aperta = prima; T.wver++; programmaMaschera(); toast(r.error.message, 'err'); }
+  }
+  function menuPorta(id, e) {
+    const m = T.muri?.find(x => x.id === id), st = $('#tv-stage'); if (!m || !st) return;
+    chiudiPop();
+    const r = st.getBoundingClientRect(), pop = document.createElement('div'); pop.className = 'tv-pop';
+    pop.innerHTML = `<b>🚪 Porta</b><button class="btn sm" data-k="ap">${m.aperta ? 'Chiudi' : 'Apri'}</button><button class="btn sm" data-k="bl">${m.bloccata ? '🔓 Togli la chiave' : '🔒 Chiudi a chiave'}</button><button class="btn sm danger" data-k="via">Elimina la porta</button>`;
+    st.append(pop);
+    pop.style.left = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6) + 'px'; pop.style.top = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6) + 'px';
+    pop.querySelector('[data-k=ap]').onclick = () => { chiudiPop(); apriPorta(id); };
+    pop.querySelector('[data-k=bl]').onclick = async () => {
+      chiudiPop(); const ch = m.bloccata ? { bloccata: false } : { bloccata: true, aperta: false };
+      const r2 = await SB.from('tavolo_muri').update(ch).eq('id', id).select().single(); if (r2.error) return toast(r2.error.message, 'err');
+      Object.assign(m, r2.data); T.wver++; programmaMaschera();
+    };
+    pop.querySelector('[data-k=via]').onclick = () => { chiudiPop(); cancellaMuro(m); };
+  }
+  // punto del muro: si attacca agli estremi dei muri vicini (per chiudere le stanze) e, se scelto, agli angoli delle caselle
+  function punta(p, e) {
+    const sc = scena(), cand = muriScena(sc).flatMap(m => [[m.punti[0], m.punti[1]], [m.punti[2], m.punti[3]]]);
+    if (T.mu?.a) cand.push([T.mu.a.x, T.mu.a.y]);
+    let best = null, bd = 12 / T.view.z;
+    for (const [x, y] of cand) { const d = Math.hypot(x - p.x, y - p.y); if (d < bd) { bd = d; best = { x, y }; } }
+    if (best) return best;
+    if (aggancioGriglia() && !e?.altKey) { const s = sc.griglia; return { x: Math.round((sc.griglia_x + Math.round((p.x - sc.griglia_x) / s) * s) * 10) / 10, y: Math.round((sc.griglia_y + Math.round((p.y - sc.griglia_y) / s) * s) * 10) / 10 }; }
+    return { x: Math.round(p.x), y: Math.round(p.y) };
+  }
+  function muroVicino(p) {
+    let best = null, bd = 10 / T.view.z;
+    for (const m of muriScena(scena())) { const d = distSeg(p.x, p.y, m.punti); if (d < bd) { bd = d; best = m; } }
+    return best;
+  }
+  async function salvaMuro(a, b) {
+    const sc = scena(); if (!sc || Math.hypot(b.x - a.x, b.y - a.y) < 3) return;
+    const r = await SB.from('tavolo_muri').insert({ scena: sc.id, punti: [a.x, a.y, b.x, b.y], porta: T.mtool === 'porta' }).select().single();
+    if (r.error) return toast(sqlMancante(r.error) ? 'Per i muri esegui tavolo/tappa-4.sql in Supabase.' : r.error.message, 'err');
+    if (!T.muri.some(m => m.id === r.data.id)) T.muri.push(r.data);
+    T.mfatti.push(r.data.id); T.wver++; programmaMaschera(); barraMaschera();
+  }
+  async function cancellaMuro(m) {
+    T.muri = T.muri.filter(x => x.id !== m.id); T.wver++; programmaMaschera();
+    const r = await SB.from('tavolo_muri').delete().eq('id', m.id);
+    if (r.error) { T.muri.push(m); T.wver++; programmaMaschera(); toast(r.error.message, 'err'); }
+  }
+  function inizioMuro(p, e) {
+    if (!T.muri) { toast('Per i muri esegui tavolo/tappa-4.sql in Supabase.', 'err'); return; }
+    if (T.mtool === 'gomma') { T.mgom = new Set(); gomma(p); return; }
+    T.mdown = { a: punta(p, e), sx: e.clientX, sy: e.clientY };
+  }
+  function gomma(p) { const m = muroVicino(p); if (m && !T.mgom.has(m.id)) { T.mgom.add(m.id); cancellaMuro(m); } }
+  function muoviMuro(p, e) {
+    if (T.mgom) { T.mhov = p; gomma(p); disegnaRighelli(); return; }
+    T.mhov = punta(p, e); disegnaRighelli();
+  }
+  // trascinando si disegna un muro; cliccando si mettono i punti uno dopo l'altro (doppio clic, Invio o Esc per finire)
+  function fineMuro(p, e) {
+    if (T.mgom) { T.mgom = null; return; }
+    const d = T.mdown; T.mdown = null; if (!d) return;
+    const b = punta(p, e);
+    if (Math.hypot(e.clientX - d.sx, e.clientY - d.sy) > 6) { T.mu = null; salvaMuro(d.a, b); }
+    else if (!T.mu) T.mu = { a: d.a };
+    else if (Math.hypot(b.x - T.mu.a.x, b.y - T.mu.a.y) < 3) T.mu = null;
+    else { salvaMuro(T.mu.a, b); T.mu = T.mtool === 'porta' ? null : { a: b }; }
+    T.mhov = b; disegnaRighelli();
+  }
+  function anteprimaMuro(v) {
+    const S = p => [v.x + p.x * v.z, v.y + p.y * v.z], b = T.mhov; if (!b) return '';
+    if (T.mtool === 'gomma') {
+      const m = muroVicino(b); if (!m) return '';
+      const [ax, ay] = S({ x: m.punti[0], y: m.punti[1] }), [bx, by] = S({ x: m.punti[2], y: m.punti[3] });
+      return `<line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="#ff4d4d" stroke-width="7" stroke-linecap="round" opacity=".8"/>`;
+    }
+    const a = T.mdown?.a || T.mu?.a, [bx, by] = S(b), col = T.mtool === 'porta' ? '#f0a548' : '#ff5ad1';
+    let h = '';
+    if (a) { const [ax, ay] = S(a); h += `<line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="#000a" stroke-width="6" stroke-linecap="round"/><line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="${col}" stroke-width="3" stroke-dasharray="8 5" stroke-linecap="round"/><circle cx="${ax}" cy="${ay}" r="4" fill="${col}"/>`; }
+    return h + `<circle cx="${bx}" cy="${by}" r="5" fill="none" stroke="${col}" stroke-width="2"/>`;
+  }
+  function barraMuri(b) {
+    const sc = scena();
+    if (!T.muri) {
+      b.innerHTML = `<div class="g"><span class="avv">Per muri, porte e nebbia automatica esegui <b>tavolo/tappa-4.sql</b> nell'SQL Editor di Supabase, poi ricarica la pagina.</span></div>`;
+      b.hidden = false; return;
+    }
+    const sw = (k, on, l, tip) => `<label class="sw" title="${esc(tip)}"><input type="checkbox" data-w="${k}" ${on ? 'checked' : ''}><span class="tg" aria-hidden="true"></span>${l}</label>`;
+    const bt = (k, ic, l, sel, tip, dis) => `<button type="button" data-w="${k}" class="${sel ? 'on' : ''}" title="${esc(tip || l)}" aria-label="${esc(tip || l)}" ${dis ? 'disabled' : ''}>${ic ? svg(ic) : ''}${l ? `<span>${l}</span>` : ''}</button>`;
+    const n = muriScena(sc).length;
+    b.innerHTML = `<div class="g">${sw('visuale', sc.visuale, 'Nebbia automatica', 'I giocatori vedono solo ciò che vedono i loro token: i muri fermano la vista')}</div>
+      <div class="g seg">${bt('muro', 'muro', 'Muro', T.mtool === 'muro', 'Disegna i muri: trascina, oppure clicca punto per punto (doppio clic o Esc per finire)')}${bt('porta', 'porta', 'Porta', T.mtool === 'porta', 'Disegna una porta: si apre e si chiude con un clic')}${bt('gomma', 'gomma', 'Gomma', T.mtool === 'gomma', 'Clicca o passa sui muri per cancellarli')}</div>
+      <div class="g">${bt('griglia', 'gri', '', aggancioGriglia(), 'Aggancia i punti agli angoli delle caselle (tieni Alt per staccarli)')}${bt('annulla', 'undo', '', false, 'Annulla l\'ultimo muro', !T.mfatti.some(id => T.muri.some(m => m.id === id)))}</div>
+      <div class="g">${sw('esplora', sc.esplora !== false, 'Zone viste', 'I posti già visti restano in penombra')}${sw('vista_condivisa', !!sc.vista_condivisa, 'Vista di gruppo', 'Ogni giocatore vede anche ciò che vedono i compagni')}</div>
+      <div class="g">${bt('anteprima', 'occhio', 'Come i giocatori', T.anteprima, 'Mostra (solo a te) la nebbia che vedono i giocatori', !sc.visuale)}${bt('dimentica', '', 'Dimentica le zone viste', false, 'Le zone già esplorate tornano buie per tutti')}${bt('svuota', '', `Cancella i muri${n ? ` (${n})` : ''}`, false, 'Cancella tutti i muri e le porte di questa mappa', !n)}</div>`;
+    b.classList.remove('spenta'); b.hidden = false;
+    b.querySelectorAll('input[data-w]').forEach(x => x.onchange = async () => {
+      const r = await SB.from('tavolo_scene').update({ [x.dataset.w]: x.checked }).eq('id', sc.id).select().single();
+      if (r.error) { x.checked = !x.checked; return toast(sqlMancante(r.error) || /column/i.test(r.error.message) ? 'Esegui tavolo/tappa-4.sql in Supabase.' : r.error.message, 'err'); }
+      T.scene.set(sc.id, r.data); if (x.dataset.w === 'visuale' && !x.checked) T.anteprima = false;
+      programmaMaschera(); barraMaschera();
+      if (x.dataset.w === 'visuale' && x.checked && !occhi(r.data).length) toast('Nessun token è assegnato a un giocatore: dal menu del token scegli chi lo muove, così vedrà da lì.');
+    });
+    b.querySelectorAll('button[data-w]').forEach(x => x.onclick = async () => {
+      const k = x.dataset.w;
+      if (k === 'muro' || k === 'porta' || k === 'gomma') { T.mtool = k; T.mu = null; }
+      else if (k === 'griglia') { try { localStorage.setItem(SNAP, aggancioGriglia() ? '0' : '1'); } catch { } }
+      else if (k === 'anteprima') { T.anteprima = !T.anteprima; programmaMaschera(); }
+      else if (k === 'annulla') { const id = [...T.mfatti].reverse().find(i => T.muri.some(m => m.id === i)), m = T.muri.find(x => x.id === id); if (m) { T.mfatti = T.mfatti.filter(i => i !== id); await cancellaMuro(m); } }
+      else if (k === 'dimentica') {
+        if (!await ask('Le zone già esplorate tornano buie per tutti i giocatori. Continuare?', { ok: 'Dimentica', title: 'Zone viste' })) return;
+        manda('esplorato', { scena: sc.id }); toast('Fatto: i giocatori vedono di nuovo solo ciò che hanno davanti.');
+      } else if (k === 'svuota') {
+        if (!await ask(`Cancellare tutti i muri e le porte di **${sc.nome}**?`, { ok: 'Cancella', danger: true, title: 'Muri' })) return;
+        const r = await SB.from('tavolo_muri').delete().eq('scena', sc.id); if (r.error) return toast(r.error.message, 'err');
+        T.muri = T.muri.filter(m => m.scena !== sc.id); T.wver++; programmaMaschera();
+      }
+      barraMaschera(); disegnaRighelli();
+    });
   }
 
   /* ---------- ordine del turno ---------- */
@@ -2045,7 +2427,7 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
     const box = d.querySelector('.tv-sch');
     box.addEventListener('input', e => { const el = e.target.closest('[data-f]'); if (el && el.type !== 'checkbox' && el.tagName !== 'SELECT') campo(el); });
     box.addEventListener('change', e => { const el = e.target.closest('[data-f]'); if (el && (el.type === 'checkbox' || el.tagName === 'SELECT')) campo(el); else if (e.target.dataset.k) azioneScheda(e.target); });
-    box.addEventListener('click', e => { const b = e.target.closest('button'); if (b && box.contains(b)) azioneScheda(b); });
+    box.addEventListener('click', e => { const b = e.target.closest('button'); T.maiusc = e.shiftKey; if (b && box.contains(b)) azioneScheda(b); });
     // si sposta trascinandola dalla barra scura in alto; la posizione resta per le prossime volte
     box.addEventListener('pointerdown', e => {
       const bar = e.target.closest('.tbar'); if (!bar || e.button || e.target.closest('button,input,label') || innerWidth <= 820) return;
@@ -2100,6 +2482,48 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
     box.querySelectorAll('[data-dots]').forEach(el => el.innerHTML = puntini(s, el.dataset.dots, puoScrivere(s)));
     box.querySelectorAll('[data-adv]').forEach(el => el.classList.toggle('on', +el.dataset.adv === sv.adv));
   }
+  // la scheda di un PNG come nel Manuale dei Mostri: si legge a colpo d'occhio, si tira cliccando sui numeri
+  const PE = { '0': 10, '1/8': 25, '1/4': 50, '1/2': 100, 1: 200, 2: 450, 3: 700, 4: 1100, 5: 1800, 6: 2300, 7: 2900, 8: 3900, 9: 5000, 10: 5900, 11: 7200, 12: 8400, 13: 10000, 14: 11500, 15: 13000, 16: 15000, 17: 18000, 18: 20000, 19: 22000, 20: 25000, 21: 33000, 22: 41000, 23: 50000, 24: 62000, 25: 75000, 26: 90000, 27: 105000, 28: 120000, 29: 135000, 30: 155000 };
+  const media = f => { const m = String(f || '').replace(/\s+/g, '').match(/^(\d*)d(\d+)([+-]\d+)?$/i); return m ? Math.max(1, Math.floor((+m[1] || 1) * (+m[2] + 1) / 2 + (+m[3] || 0))) : null; };
+  // nei testi i dadi (2d6, 1d8 + 3) diventano pulsanti da tirare; «Nome. testo» mette il nome in grassetto corsivo
+  const dadiTesto = (t, dis) => esc(t).replace(/\b(\d*d\d+(?:\s*[+−-]\s*\d+)?)\b/gi, x => `<button type="button" class="dt" data-roll="txt:${x.replace(/\s+/g, '').replace('−', '-')}"${dis}>${x}</button>`);
+  const paragrafi = (t, dis) => String(t || '').split(/\n+/).map(r => r.trim()).filter(Boolean).map(r => { const m = r.match(/^([^.:]{2,60}?)\s*[.:]\s+(.+)$/); return `<p>${m ? `<b><i>${esc(m[1])}.</i></b> ${dadiTesto(m[2], dis)}` : dadiTesto(r, dis)}</p>`; }).join('');
+  function bloccoPng(s, tk, w, dis, cond, conds) {
+    const d = s.dati, pf = tk ? pfDi(tk) : { pf: num(d.pf), max: num(d.pf_max) };
+    const sotto = [d.taglia_tipo, d.allineamento].filter(Boolean).join(', ') || 'Taglia, tipo, allineamento';
+    const ts = CAR.filter(([k]) => d['ts_' + k]).map(([k, ab, nome]) => `<button type="button" class="lk" data-roll="ts:${k}" title="Tiro salvezza su ${nome}"${dis}>${ab[0] + ab.slice(1).toLowerCase()} ${segno(tsTot(s, k))}</button>`).join(', ');
+    const ab = ABIL.filter(([k]) => num(d['ab_' + k])).map(([k, nome]) => `<button type="button" class="lk" data-roll="ab:${k}"${dis}>${nome} ${segno(abTot(s, k))}</button>`).join(', ');
+    const riga = (et, v) => v ? `<p><b>${et}</b> ${v}</p>` : '';
+    const gs = String(d.gs ?? '').trim(), pe = PE[gs];
+    const atts = (d.attacchi || []).map((a, i) => {
+      const dist = /gittata|distanza/i.test(a.tipo || ''), mi = media(a.danni);
+      return `<p><b><i>${esc(a.nome || 'Attacco')}.</i></b> <i>Attacco con arma ${dist ? 'a distanza' : 'da mischia'}:</i> <button type="button" class="dt" data-roll="att:${i}" title="Tiro per colpire"${dis}>${segno(num(a.colpire) || 0)}</button> al colpire. <i>Colpito:</i> <button type="button" class="dt" data-roll="dan:${i}" title="Tira i danni (con Maiusc: critico)"${dis}>${mi != null ? `${mi} (${esc(a.danni)})` : esc(a.danni || '—')}</button> danni ${esc(a.tipo || '')}.</p>`;
+    }).join('');
+    return `<div class="sb">
+      <div class="sbh"><div><h3>${esc(s.nome)}</h3><i>${esc(sotto)}</i></div>${w ? '<button type="button" class="mini" data-k="modifica" title="Cambia i valori della scheda">✎ Modifica</button>' : ''}</div>
+      <hr><div class="rosso">
+      <p><b>Classe Armatura</b> ${esc(d.ca ?? '—')}</p>
+      <p class="pfr"><span><b>Punti Ferita</b> ${esc(d.pf_max ?? '—')}${d.dadi_vita ? ` (<button type="button" class="dt" data-roll="txt:${esc(String(d.dadi_vita).replace(/\s+/g, ''))}"${dis}>${esc(d.dadi_vita)}</button>)` : ''}</span>
+        ${pf && pf.max != null ? `<span class="ora ${pf.pf <= 0 ? 'ko' : ''}">ora ${n2(tk ? 'tok.pf' : 'pf', dis)} / ${pf.max}</span>` : ''}
+        ${w && pf ? '<span class="q"><button type="button" data-k="pfm" title="Danni">−</button><input type="number" data-k="pfq" value="1" min="1" aria-label="Quanti punti"><button type="button" data-k="pfp" title="Cura">+</button></span>' : ''}</p>
+      <p><b>Velocità</b> ${esc(d.velocita || '—')}</p>
+      <hr>
+      <div class="sbc">${CAR.map(([k, abb, nome]) => `<button type="button" data-roll="car:${k}" title="Prova di ${nome}"${dis}><b>${abb}</b><span>${num(d[k]) ?? 10} (${segno(modC(d[k]))})</span></button>`).join('')}</div>
+      <hr>
+      ${riga('Tiri salvezza', ts)}${riga('Abilità', ab)}${riga('Resistenze e immunità', esc(d.difese || ''))}
+      <p><b>Sensi</b> ${d.sensi ? esc(d.sensi) + ', ' : ''}Percezione passiva ${10 + abTot(s, 'percezione')}</p>
+      ${riga('Linguaggi', esc(d.linguaggi || '—'))}
+      <p class="due"><span><b>Sfida</b> ${esc(gs || '—')}${pe ? ` (${pe.toLocaleString('it-IT')} PE)` : ''}</span><span><b>Bonus di competenza</b> ${segno(comp(s))}</span></p>
+      </div><hr>
+      ${paragrafi(d.tratti, dis)}
+      <p class="iz"><button type="button" class="mini" data-roll="iniz"${dis}>🎲 Iniziativa ${segno(modC(d.des))}</button></p>
+      <h4>Azioni</h4>
+      ${atts || (d.azioni ? '' : '<p class="vuoto">Nessuna azione: premi Modifica per aggiungerne.</p>')}${paragrafi(d.azioni, dis)}
+      ${d.competenze ? `<h4>Altro</h4>${paragrafi(d.competenze, dis)}` : ''}
+      <h4>Condizioni</h4><div class="cnd">${cond || '<span class="vuoto">Nessuna</span>'}${w ? `<select data-k="cond" class="selc" aria-label="Aggiungi una condizione"><option value="">+ Condizione</option>${CONDIZIONI.filter(c => !conds.includes(c)).map(c => `<option>${c}</option>`).join('')}</select>` : ''}</div>
+    </div>`;
+  }
+  const n2 = (f, dis) => `<input type="number" data-f="${f}" class="pfi" step="1" aria-label="Punti ferita attuali"${dis}>`;
   function disegnaScheda() {
     const sv = T.sv; if (!sv) return; const s = T.schede.get(sv.id); if (!s) { sv.d.close(); return; }
     const d = s.dati, w = puoScrivere(s), dis = w ? '' : ' disabled', pg = s.tipo === 'pg', foto = fotoScheda(s), tk = tokScheda();
@@ -2117,7 +2541,8 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
     const conds = !pg && tk ? condTok(tk) : d.condizioni || [];
     const cond = conds.map(c => `<button type="button" class="ch" data-cond="${esc(c)}" title="${w ? 'Togli' : ''}"${dis}>${esc(c)}${w ? ' ✕' : ''}</button>`).join('');
     let corpo = '';
-    if (sv.tab === 'pri') {
+    if (sv.tab === 'pri' && !pg && !sv.edit) corpo = bloccoPng(s, tk, w, dis, cond, conds);
+    else if (sv.tab === 'pri') {
       const car = CAR.map(([k, , nome]) => `<div class="cbox"><small>${nome}</small><button type="button" class="rb mod" data-roll="car:${k}" data-c="m:${k}" title="Prova di ${nome}"${dis}></button>${n(k, '10', 'ov')}</div>`).join('');
       const ts = CAR.map(([k, , nome]) => `<div class="r"><button type="button" class="pr" data-prof="ts_${k}"${dis}></button><em data-c="ts:${k}"></em><button type="button" class="lk" data-roll="ts:${k}"${dis}>${nome}</button></div>`).join('');
       const ab = ABIL.map(([k, nome, c]) => `<div class="r"><button type="button" class="pr" data-prof="ab_${k}"${dis}></button><em data-c="ab:${k}"></em><button type="button" class="lk" data-roll="ab:${k}"${dis}>${nome} <small>(${c.slice(0, 1).toUpperCase() + c.slice(1, 3)})</small></button></div>`).join('');
@@ -2125,7 +2550,7 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
           <div class="riga">${inp(`att.${i}.tipo`, 'Tipo e note', 'tp')}<button type="button" class="mini" data-roll="att:${i}"${dis} title="Tiro per colpire">🎲</button><button type="button" class="mini" data-roll="dan:${i}"${dis} title="Danni">💥</button><button type="button" class="mini" data-roll="cri:${i}"${dis} title="Critico: dadi dei danni raddoppiati">✖2</button>${w ? `<button type="button" class="mini via" data-k="delatt" data-i="${i}" title="Togli l'attacco">✕</button>` : ''}</div></div>`).join('');
       const pf = `<div class="pfmax"><span>Punti ferita massimi</span>${n(tk ? 'tok.pf_max' : 'pf_max', '—')}</div>${n(tk ? 'tok.pf' : 'pf', '—', 'pfa')}
         ${w ? '<div class="q"><button type="button" data-k="pfm" title="Danni">− Danni</button><input type="number" data-k="pfq" value="1" min="1" aria-label="Quanti punti"><button type="button" data-k="pfp" title="Cura">+ Cura</button></div>' : ''}`;
-      corpo = `<div class="p1">
+      corpo = `${!pg ? '<button type="button" class="mini agg fine" data-k="fine">✓ Fatto: torna al blocco delle statistiche</button>' : ''}<div class="p1">
         <div class="colA">
           <div class="dueA"><div class="carcol">${car}</div>
             <div class="altA">
@@ -2215,6 +2640,7 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
     const sv = T.sv, s = sv && T.schede.get(sv.id); if (!s) return;
     const d = s.dati, w = puoScrivere(s), k = b.dataset.k;
     if (k === 'chiudi') return sv.d.close();
+    if (k === 'modifica' || k === 'fine') { sv.edit = k === 'modifica'; return disegnaScheda(); }
     if (b.dataset.tab) { sv.tab = b.dataset.tab; return disegnaScheda(); }
     if (b.dataset.adv) { sv.adv = +b.dataset.adv; return riempi(); }
     if (k === 'seg') { sv.seg = b.checked; return; }
@@ -2225,10 +2651,11 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
       if (r === 'ab') return tiroD20(s, abTot(s, a), ABIL.find(x => x[0] === a)[1]);
       if (r === 'iniz') return inizScheda(s);
       if (r === 'inc') return tiroD20(s, comp(s) + modC(d[carInc(s)]), 'Attacco con incantesimo');
+      if (r === 'txt') return tira(a, null, sv.seg, s.nome);
       if (r === 'morte') return tira('1d20', null, sv.seg, s.nome + ' · Tiro contro la morte');
       if (!at) return;
       if (r === 'att') return tiroD20(s, num(at.colpire) || 0, 'Attacco: ' + (at.nome || 'arma'));
-      if (r === 'dan' || r === 'cri') { if (!String(at.danni || '').trim()) return toast('Scrivi i danni dell\'attacco, per esempio 1d8+3', 'err'); return tira(r === 'cri' ? critico(at.danni) : at.danni, r === 'cri' ? 'critico' : null, sv.seg, `${s.nome} · Danni: ${at.nome || 'arma'}${at.tipo ? ' (' + at.tipo + ')' : ''}`); }
+      if (r === 'dan' || r === 'cri') { const cr = r === 'cri' || T.maiusc; if (!String(at.danni || '').trim()) return toast('Scrivi i danni dell\'attacco, per esempio 1d8+3', 'err'); return tira(cr ? critico(at.danni) : at.danni, cr ? 'critico' : null, sv.seg, `${s.nome} · Danni: ${at.nome || 'arma'}${at.tipo ? ' (' + at.tipo + ')' : ''}`); }
       return;
     }
     if (!w) return;
