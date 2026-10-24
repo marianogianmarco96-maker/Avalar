@@ -70,7 +70,7 @@
 .tv-tdp td+td{border-left:1px solid #ffffff14}
 .tv-tdp .ft{padding:0 12px 9px;font-weight:400;font-size:.78rem;color:#c9b89a}
 .tv-d3{position:absolute;inset:0;pointer-events:none;z-index:6;overflow:hidden}
-.tv-d3 .dd{position:absolute;left:0;top:0;width:54px;height:54px;margin:-27px 0 0 -27px;filter:drop-shadow(0 6px 6px #0009)}
+.tv-d3 .dd{position:absolute;left:0;top:0;width:78px;height:78px;margin:-39px 0 0 -39px;filter:drop-shadow(0 6px 6px #0009)}
 .tv-d3 .dd svg{width:100%;height:100%;overflow:visible}
 .tv-d3 .dd text{font:800 30px var(--body);fill:#fff;text-anchor:middle;dominant-baseline:central;paint-order:stroke;stroke:#0008;stroke-width:3px}
 .tv-d3 .dd.via{opacity:.45}
@@ -200,7 +200,9 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
 .tv-mbar label{display:flex;align-items:center;gap:5px;font-size:.85rem;white-space:nowrap}
 .tv-mbar .sep{width:1px;align-self:stretch;background:#ffffff22}
 .tv-mbar input[type=range]{width:90px}
-.tv-roll .h .who{display:flex;align-items:baseline;gap:5px;min-width:0;flex-wrap:wrap}
+.tv-roll .h .who{display:flex;align-items:center;gap:7px;min-width:0}
+.tv-roll .av{width:30px;height:30px;border-radius:50%;flex:none;background:var(--c,#5b6670) center/cover no-repeat;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font:700 .72rem var(--display);font-style:normal;color:#fff;box-shadow:0 1px 3px #0005}
+.tv-roll .av.dm{background:#3b1f4a;font-size:.95rem}
 .tv-roll .h .who em{font-weight:400;font-size:.8rem;color:var(--mute)}
 .tv-roll .h .dx{display:flex;align-items:center;gap:4px;flex:none}
 .tv-roll .del{all:unset;cursor:pointer;color:var(--mute);font-size:.8rem;line-height:1;padding:2px 4px;border-radius:4px;opacity:0;transition:opacity .12s}
@@ -325,7 +327,12 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
       if (u.error) falliti.push(g.name);
     }
     if (falliti.length) toast('Non sono riuscito a preparare il tavolo per: ' + falliti.join(', '), 'err');
-    const mb = await SB.from('tavolo_membri').select('user_id,nome,giocatore'); if (!mb.error) T.membri = mb.data;
+    // la foto del personaggio di ognuno, per la chat (serve tavolo/tappa-2c.sql; senza, si usa la foto del token)
+    for (const g of info.giocatori || []) {
+      const foto = S.ents?.get(g.pg)?.portrait?.thumb, m = membri.find(x => x.giocatore === g.id);
+      if (foto && m && m.immagine !== foto && 'immagine' in m) await SB.from('tavolo_membri').update({ immagine: foto }).eq('giocatore', g.id);
+    }
+    const mb = await SB.from('tavolo_membri').select('*'); if (!mb.error) { T.membri = mb.data; disegnaLog(); }
   }
 
   /* ---------- stato ---------- */
@@ -386,7 +393,7 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
       SB.from('tavolo_scene').select('*').order('creata'),
       SB.from('tavolo_token').select('*'),
       SB.from('tavolo_tiri').select('*').order('id', { ascending: false }).limit(80),
-      SB.from('tavolo_membri').select('user_id,nome,giocatore'),
+      SB.from('tavolo_membri').select('*'),
       SB.from('tavolo_maschera').select('*').order('id'),
       SB.from('tavolo_turno').select('*'),
       SB.from('tavolo_chat').select('*').order('id', { ascending: false }).limit(80)
@@ -1099,6 +1106,15 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
     const m = String(t.dettaglio).match(/^(?:\dd20(?:k[hl]1)?) \[(?:[^\]]*→ )?(\d+)\]/);
     return m ? (m[1] === '20' ? 'crit' : m[1] === '1' ? 'fail' : '') : '';
   }
+  // la foto di chi scrive: quella del suo personaggio, o del suo token; il DM ha la corona
+  function avatar(uid, nome) {
+    const m = (T.membri || []).find(x => x.user_id === uid);
+    if (m?.ruolo === 'dm') return '<i class="av dm" aria-hidden="true">👑</i>';
+    let img = m?.immagine || null;
+    if (!img && m?.giocatore) img = [...T.tok.values()].find(t => t.giocatore === m.giocatore && t.immagine)?.immagine || null;
+    if (!img && m?.giocatore) { const g = (T.info?.giocatori || []).find(x => x.id === m.giocatore); img = S.ents?.get(g?.pg || (m.giocatore === T.me.giocatore ? T.me.pg : null))?.portrait?.thumb || null; }
+    return img ? `<i class="av" style="background-image:url('${esc(img)}')" aria-hidden="true"></i>` : `<i class="av" style="--c:${coloreDi(uid)}" aria-hidden="true">${esc(iniziali(nome))}</i>`;
+  }
   const ora = d => new Date(d).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
   const via = (k, x) => isDM() || x.autore === T.me.uid ? `<button type="button" class="del" data-del="${k}:${x.id}" title="Elimina il messaggio" aria-label="Elimina il messaggio">✕</button>` : '';
   const tagTiro = t => !t.privato ? '' : `<div class="tag">🙈 Tiro nascosto · ${isDM() ? (t.autore === T.me.uid ? 'lo vedi solo tu' : 'lo vedete solo tu e ' + esc(t.nome)) : 'lo vedete solo tu e il DM'}</div>`;
@@ -1115,10 +1131,10 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
       }).join('');
     });
   }
-  const rigaTiro = t => `<div class="tv-roll ${esito(t)} ${t.privato ? 'priv' : ''} ${t.autore === T.me.uid ? 'me' : ''}">${tagTiro(t)}<div class="h"><span>${esc(t.nome)}</span><span class="dx"><small>${ora(t.creato)}</small>${via('t', t)}</span></div>
+  const rigaTiro = t => `<div class="tv-roll ${esito(t)} ${t.privato ? 'priv' : ''} ${t.autore === T.me.uid ? 'me' : ''}">${tagTiro(t)}<div class="h"><span class="who">${avatar(t.autore, t.nome)}${esc(t.nome)}</span><span class="dx"><small>${ora(t.creato)}</small>${via('t', t)}</span></div>
     ${t.motivo ? `<div class="m">${esc(t.motivo)}</div>` : ''}<div class="fo">tira ${esc(t.formula)}</div><div class="r"><span class="chips">${chips(t.dettaglio)}</span><span class="t">${t.totale}</span></div></div>`;
   const nomeGioc = id => id === 'dm' ? 'DM' : T.membri.find(x => x.giocatore === id)?.nome || id;
-  const rigaMsg = m => `<div class="tv-roll tv-msg ${m.per ? 'w' : ''} ${m.autore === T.me.uid ? 'me' : ''}">${tagMsg(m)}<div class="h"><span class="who">${esc(m.nome)}</span><span class="dx"><small>${ora(m.creato)}</small>${via('c', m)}</span></div><div class="tx">${esc(m.testo)}</div></div>`;
+  const rigaMsg = m => `<div class="tv-roll tv-msg ${m.per ? 'w' : ''} ${m.autore === T.me.uid ? 'me' : ''}">${tagMsg(m)}<div class="h"><span class="who">${avatar(m.autore, m.nome)}${esc(m.nome)}</span><span class="dx"><small>${ora(m.creato)}</small>${via('c', m)}</span></div><div class="tx">${esc(m.testo)}</div></div>`;
   async function cancella(k) {
     const [tipo, id] = k.split(':'), tab = tipo === 't' ? 'tavolo_tiri' : 'tavolo_chat';
     const r = await SB.from(tab).delete().eq('id', +id).select('id');
@@ -1176,9 +1192,9 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
     const da = { x: -40, y: H + 40 }, cx = W * (0.3 + Math.random() * 0.4), cy = H * (0.35 + Math.random() * 0.3);
     mostra.forEach((d, i) => {
       const el = document.createElement('div'); el.className = 'dd' + (d.via ? ' via' : ''); box.append(el);
-      const ang = (i / mostra.length) * Math.PI * 2 + Math.random(), r = mostra.length > 1 ? 40 + mostra.length * 6 : 0;
-      const x = clamp(cx + Math.cos(ang) * r, 40, W - 40), y = clamp(cy + Math.sin(ang) * r, 40, H - 40);
-      const mx = (da.x + x) / 2 + (Math.random() - 0.5) * 120, rot = 360 * (2 + Math.floor(Math.random() * 2)), fin = (Math.random() - 0.5) * 40, dur = 1100 + Math.random() * 300;
+      const ang = (i / mostra.length) * Math.PI * 2 + Math.random(), r = mostra.length > 1 ? 56 + mostra.length * 9 : 0;
+      const x = clamp(cx + Math.cos(ang) * r, 50, W - 50), y = clamp(cy + Math.sin(ang) * r, 50, H - 50);
+      const mx = (da.x + x) / 2 + (Math.random() - 0.5) * 120, rot = 360 * (2 + Math.floor(Math.random() * 2)), fin = (Math.random() - 0.5) * 40, dur = 2000 + Math.random() * 400;
       el.animate([
         { transform: `translate(${da.x}px,${da.y}px) rotate(0deg) scale(.6)` },
         { transform: `translate(${mx}px,${y - 140}px) rotate(${rot * 0.55}deg) scale(1.15)`, offset: 0.45 },
@@ -1187,10 +1203,10 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
         { transform: `translate(${x}px,${y}px) rotate(${rot + fin}deg) scale(1)` }
       ], { duration: dur, easing: 'cubic-bezier(.2,.7,.3,1)', fill: 'forwards' });
       // durante il volo le facce cambiano, poi resta il risultato
-      const gira = setInterval(() => { el.innerHTML = svgDado(d.f, 1 + Math.floor(Math.random() * d.f), col); }, 80);
+      const gira = setInterval(() => { el.innerHTML = svgDado(d.f, 1 + Math.floor(Math.random() * d.f), col); }, 110);
       el.innerHTML = svgDado(d.f, d.v, col);
       setTimeout(() => { clearInterval(gira); el.innerHTML = svgDado(d.f, d.v, col); }, dur * 0.8);
-      setTimeout(() => el.animate([{ opacity: d.via ? 0.45 : 1 }, { opacity: 0 }], { duration: 500, fill: 'forwards' }).onfinish = () => el.remove(), dur + 2600);
+      setTimeout(() => el.animate([{ opacity: d.via ? 0.45 : 1 }, { opacity: 0 }], { duration: 500, fill: 'forwards' }).onfinish = () => el.remove(), dur + 3200);
     });
   }
 
