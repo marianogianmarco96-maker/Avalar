@@ -47,6 +47,42 @@
 .tv-tok.drag{transition:none;z-index:5;box-shadow:0 8px 18px #000c;cursor:grabbing}
 .tv-tok.live{transition:left .06s linear,top .06s linear}
 .tv-tok.hid{opacity:.45;border-style:dashed}
+.tv-tok.altro{opacity:.35;pointer-events:none;filter:grayscale(.5)}
+.tv-tok.hid.qui{opacity:1}
+.tv-liv{display:flex;align-items:center;gap:6px;background:#3b1f4ae6;color:#f1e4c8;border:1px solid #b98cff88;border-radius:8px;padding:6px 10px;font:600 .85rem/1.2 var(--body);box-shadow:0 2px 10px #0006;white-space:nowrap}
+.tv-rail button.liv.on{background:#6a4a8c}
+.tv-tdp{position:absolute;left:10px;top:10px;z-index:9;width:min(300px,calc(100% - 20px));background:#211a16f5;color:#f1e4c8;border:1px solid #e7cf9a44;border-radius:10px;box-shadow:0 8px 30px #000b;font:600 .9rem/1.2 var(--body)}
+.tv-tdp[hidden]{display:none!important}
+.tv-tdp .hd{display:flex;align-items:center;justify-content:space-between;padding:8px 10px 6px 12px}
+.tv-tdp .hd b{font-family:var(--display);color:var(--gold2);letter-spacing:.04em}
+.tv-tdp .hd button{all:unset;cursor:pointer;padding:2px 7px;border-radius:6px;font-size:1rem}
+.tv-tdp .hd button:hover{background:#ffffff1a}
+.tv-tdp .tabs{display:flex;margin:0 10px 8px;background:#0005;border-radius:7px;padding:3px;gap:3px}
+.tv-tdp .tabs button{all:unset;flex:1;text-align:center;cursor:pointer;padding:5px 4px;border-radius:5px;font-size:.85rem}
+.tv-tdp .tabs button.on{background:#7d2530;box-shadow:inset 0 0 0 1px #e7cf9a66}
+.tv-tdp .mods{display:flex;gap:6px;margin:0 10px 8px}
+.tv-tdp .mods input{font:inherit;font-weight:400;padding:4px 7px;border-radius:5px;border:1px solid #ffffff33;background:#0005;color:#fff;min-width:0}
+.tv-tdp table{width:calc(100% - 12px);margin:0 6px 8px;border-collapse:collapse}
+.tv-tdp td{padding:0;text-align:center}
+.tv-tdp td button{all:unset;box-sizing:border-box;cursor:pointer;display:block;width:100%;padding:6px 2px;border-radius:5px}
+.tv-tdp td button:hover{background:#7d2530}
+.tv-tdp td:first-child button{text-align:left;padding-left:8px;font-family:var(--display);color:var(--gold2)}
+.tv-tdp td+td{border-left:1px solid #ffffff14}
+.tv-tdp .ft{padding:0 12px 9px;font-weight:400;font-size:.78rem;color:#c9b89a}
+.tv-d3{position:absolute;inset:0;pointer-events:none;z-index:6;overflow:hidden}
+.tv-d3 .dd{position:absolute;left:0;top:0;width:54px;height:54px;margin:-27px 0 0 -27px;filter:drop-shadow(0 6px 6px #0009)}
+.tv-d3 .dd svg{width:100%;height:100%;overflow:visible}
+.tv-d3 .dd text{font:800 30px var(--body);fill:#fff;text-anchor:middle;dominant-baseline:central;paint-order:stroke;stroke:#0008;stroke-width:3px}
+.tv-d3 .dd.via{opacity:.45}
+.tv-roll .tag{margin:-6px -8px 6px;padding:4px 8px;border-radius:5px 5px 0 0;background:#3b1f4a;color:#f1e4c8;font-size:.8rem;font-weight:600;letter-spacing:.01em}
+.tv-roll.priv,.tv-msg.w{background:#8a5cc71c;border-color:#8a5cc7;border-style:solid;opacity:1}
+.tv-roll .fo{font-size:.8rem;color:var(--mute)}
+.tv-roll .chips{display:flex;flex-wrap:wrap;gap:3px;align-items:center;flex:1;font-size:.85rem;color:var(--ink2)}
+.tv-roll .chips i{font-style:normal;font-weight:700;min-width:22px;padding:1px 5px;text-align:center;border-radius:4px;border:1px solid var(--line2);background:var(--paper)}
+.tv-roll .chips i.max{color:#2f8a3c;border-color:#2f8a3c}.tv-roll .chips i.min{color:#b3261e;border-color:#b3261e}
+.tv-roll .chips i.no{opacity:.45;text-decoration:line-through}
+.tv-ab{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.tv-ab input[type=number]{width:56px}
 .tv-tok.mine{box-shadow:0 0 0 3px #e7cf9a,0 2px 6px #000a}
 .tv-tok b{position:absolute;left:50%;top:100%;transform:translateX(-50%);margin-top:2px;white-space:nowrap;font:600 var(--fs,13px)/1.15 var(--body);color:#fff;background:#000a;padding:1px 6px;border-radius:8px;pointer-events:none;max-width:240px;overflow:hidden;text-overflow:ellipsis}
 .tv-tok .ini{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:700 calc(var(--fs,13px)*1.6)/1 var(--display);color:#fff;text-shadow:0 1px 2px #000}
@@ -293,7 +329,7 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
   }
 
   /* ---------- stato ---------- */
-  const T = { mask: [], turno: [], chat: [], mmodo: 'svela', mforma: 'rett', mraggio: 0, mini: new Map(), me: null, info: null, stato: null, scene: new Map(), tok: new Map(), tiri: [], vista: null, view: { x: 0, y: 0, z: 1 }, tool: 'muovi', ch: null, rulers: new Map(), live: false, url: new Map(), online: [] };
+  const T = { mask: [], turno: [], chat: [], mmodo: 'svela', mforma: 'rett', mraggio: 0, mini: new Map(), me: null, info: null, stato: null, scene: new Map(), tok: new Map(), tiri: [], vista: null, view: { x: 0, y: 0, z: 1 }, tool: 'muovi', livello: 'segnalini', tdpriv: false, allN: 3, ch: null, rulers: new Map(), live: false, url: new Map(), online: [] };
   const isDM = () => T.me?.ruolo === 'dm';
   const scena = () => T.scene.get(T.vista) || null;
   const puoMuovere = t => isDM() || (t.giocatore && t.giocatore === T.me.giocatore);
@@ -305,7 +341,7 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
     T.diceInit = false; T.drag = null; T.online = []; T.live = false; T.tool = 'muovi';
     setView(`<h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Tavolo</h1>
       <div class="tv"><nav class="tv-rail" id="tv-rail" aria-label="Strumenti del tavolo"><span class="sp"></span><span class="tv-on" id="tv-on" title="Connessione…"></span></nav>
-      <div class="tv-wrap"><div class="tv-stage" id="tv-stage"><div class="tv-empty"><div><p>Apro il tavolo…</p></div></div></div><div class="tv-top" id="tv-top"></div><div class="tv-mbar" id="tv-mbar" hidden></div><div class="tv-turno" id="tv-turno" hidden></div><button type="button" class="tv-ctab" id="tv-ctab" data-act="tv-dadi"></button></div>
+      <div class="tv-wrap"><div class="tv-stage" id="tv-stage"><div class="tv-empty"><div><p>Apro il tavolo…</p></div></div></div><div class="tv-top" id="tv-top"></div><div class="tv-mbar" id="tv-mbar" hidden></div><div class="tv-turno" id="tv-turno" hidden></div><div class="tv-tdp" id="tv-tdp" hidden></div><button type="button" class="tv-ctab" id="tv-ctab" data-act="tv-dadi"></button></div>
       <aside class="tv-chat" id="tv-dice" hidden></aside><div class="tv-pages" id="tv-pages" hidden></div></div>`);
     suggerimenti($('.tv'));
     const fit = () => {
@@ -450,6 +486,8 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
     mas: '<path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.5"/><path d="M4 20L20 4"/>',
     tok: '<circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/>',
     gri: '<path d="M4 4h16v16H4zM4 9.33h16M4 14.67h16M9.33 4v16M14.67 4v16"/>',
+    lseg: '<circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.8 3.6-6 7-6s6.2 2.2 7 6"/>',
+    lmas: '<path d="M4 18h16M5 18L3.5 8l5 3.5L12 5l3.5 6.5 5-3.5L19 18"/>',
     pag: '<rect x="3" y="7" width="13" height="13" rx="1.5"/><path d="M7 4h12.5A1.5 1.5 0 0 1 21 5.5V17"/><path d="M5.5 17l3.5-4 2.5 2.5 1.5-1.5 2 3"/>'
   };
   const svg = k => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICO[k]}</svg>`;
@@ -458,10 +496,12 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
     const r = $('#tv-rail'); if (!r) return;
     const b = (act, tip, k, on) => `<button type="button" data-act="${act}" data-tip="${esc(tip)}" aria-label="${esc(tip)}" class="${on ? 'on' : ''}">${svg(k)}</button>`;
     let h = b('tv-sel', 'Seleziona e sposta i token (S)', 'sel', T.tool === 'muovi') + b('tv-mano', 'Sposta la mappa (M)', 'mano', T.tool === 'mano')
-      + b('tv-righello', 'Righello (R)', 'rig', T.tool === 'righello')
+      + b('tv-righello', 'Righello (R)', 'rig', T.tool === 'righello') + b('tv-tiradadi', 'Tiradadi', 'dado', !$('#tv-tdp')?.hidden)
       + b('tv-turno', 'Ordine del turno', 'tur', !$('#tv-turno')?.hidden);
     if (isDM() && scena()) h += '<hr><span class="lbl">DM</span>' + b('tv-maschera', 'Maschera: nascondi e svela la mappa', 'mas', T.tool === 'maschera') + b('tv-token', 'Aggiungi un token', 'tok') + b('tv-griglia', 'Impostazioni della pagina', 'gri');
-    h += `<span class="sp"></span><span class="tv-cnt" id="tv-cnt">${T.online.length > 1 ? T.online.length : ''}</span><span class="tv-on ${T.live ? 'ok' : ''}" id="tv-on" title="${T.live ? esc('Al tavolo ora: ' + T.online.join(', ')) : 'Connessione…'}"></span>`;
+    h += '<span class="sp"></span>';
+    if (isDM() && scena()) h += '<span class="lbl">Livelli</span>' + b('tv-liv-seg', 'Livello Segnalini: i token che vedono tutti', 'lseg', T.livello === 'segnalini').replace('class="', 'class="liv ') + b('tv-liv-mas', 'Livello Master: i token che vedi solo tu', 'lmas', T.livello === 'master').replace('class="', 'class="liv ');
+    h += `<span class="tv-cnt" id="tv-cnt">${T.online.length > 1 ? T.online.length : ''}</span><span class="tv-on ${T.live ? 'ok' : ''}" id="tv-on" title="${T.live ? esc('Al tavolo ora: ' + T.online.join(', ')) : 'Connessione…'}"></span>`;
     r.innerHTML = h;
   }
   function disegnaTop() {
@@ -469,6 +509,7 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
     const sc = scena(), att = T.stato?.scena;
     let h = '';
     if (sc) h += `<div class="tv-chip"><b>${esc(sc.nome)}</b>${isDM() ? (sc.id === att ? '<span title="I giocatori sono su questa mappa" aria-label="I giocatori sono qui">🔖</span>' : '<button type="button" class="btn sm primary" data-act="tv-porta">Porta qui i giocatori</button>') : ''}</div>`;
+    if (isDM() && sc && T.livello === 'master') h = '<div class="tv-liv" title="I token che aggiungi e sposti ora li vedi solo tu">👑 Livello Master</div>' + h;
     if (isDM()) h += `<button type="button" class="tv-pgbtn" data-act="tv-pagine" data-tip="Mappe" aria-label="Mappe">${svg('pag')}</button>`;
     t.innerHTML = h;
   }
@@ -479,18 +520,22 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
       'tv-porta': () => porta(T.vista),
       'tv-pagine': () => pannelloMappe($('#tv-pages').hidden), 'tv-nuova': () => dlgNuovaScena(),
       'tv-token': () => dlgToken(), 'tv-griglia': () => dlgGriglia(),
-      'tv-turno': () => apriTurno($('#tv-turno').hidden), 'tv-maschera': () => strumento(T.tool === 'maschera' ? 'muovi' : 'maschera'),
+      'tv-turno': () => apriTurno($('#tv-turno').hidden),
+      'tv-tiradadi': () => { const p = $('#tv-tdp'); p.hidden = !p.hidden; if (!p.hidden) disegnaTdp(); disegnaRail(); },
+      'tv-liv-seg': () => livello('segnalini'), 'tv-liv-mas': () => livello('master'), 'tv-maschera': () => strumento(T.tool === 'maschera' ? 'muovi' : 'maschera'),
       ...dadiActs()
     };
   }
-  function strumento(t) { T.tool = t; const st = $('#tv-stage'); if (st) { st.classList.toggle('rul', t === 'righello' || t === 'maschera'); st.classList.toggle('mano', t === 'mano'); } disegnaRail(); barraMaschera(); }
+  // livelli come su Roll20: Segnalini (li vedono tutti) e Master (solo il DM). Si lavora su uno alla volta
+  function livello(l) { T.livello = l; chiudiPop(); const sl = document.querySelector('dialog.tv-side [name=liv]'); if (sl) sl.value = l; disegnaRail(); disegnaTop(); disegnaToken(); }
+  function strumento(t) { T.tool = t; const st = $('#tv-stage'); if (st) { st.classList.toggle('rul', t === 'righello' || t === 'maschera' || t === 'allinea'); st.classList.toggle('mano', t === 'mano'); } disegnaRail(); barraMaschera(); }
   function tasti(e) {
     if (e.target.closest('input,textarea,select,[contenteditable]') || e.ctrlKey || e.metaKey || e.altKey || document.querySelector('dialog[open]')) return;
     const k = e.key.toLowerCase();
     if (k === 'r') strumento(T.tool === 'righello' ? 'muovi' : 'righello');
     else if (k === 's') strumento('muovi');
     else if (k === 'm') strumento('mano');
-    else if (e.key === 'Escape') { strumento('muovi'); chiudiPop(); pannelloMappe(false); }
+    else if (e.key === 'Escape') { T.al = null; strumento('muovi'); chiudiPop(); pannelloMappe(false); }
   }
   // etichette dei pulsanti al passaggio del mouse
   function suggerimenti(root) {
@@ -648,7 +693,9 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
       el.classList.toggle('turno', !!att && att.token === t.id);
       // i giocatori non vedono i token altrui sotto la maschera
       el.hidden = !isDM() && t.giocatore !== T.me.giocatore && coperto(t.x + lato / 2, t.y + lato / 2);
-      el.classList.toggle('hid', !!t.nascosto); el.classList.toggle('mine', !!t.giocatore && t.giocatore === T.me.giocatore); el.classList.toggle('dm', isDM());
+      el.classList.toggle('hid', !!t.nascosto);
+      if (isDM()) { const qui = !!t.nascosto === (T.livello === 'master'); el.classList.toggle('altro', !qui); el.classList.toggle('qui', qui); }
+      el.classList.toggle('mine', !!t.giocatore && t.giocatore === T.me.giocatore); el.classList.toggle('dm', isDM());
       el.querySelector('.ini').textContent = t.immagine ? '' : iniziali(t.nome);
       el.querySelector('b').textContent = t.nome + (t.nascosto ? ' (nascosto)' : '');
       el.querySelector('b').hidden = !t.nome;
@@ -674,6 +721,7 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
       if (punti.size > 2) return;
       const p = mondo(st, e), el = e.target.closest('.tv-tok'), t = el && T.tok.get(el.dataset.id);
       if (T.tool === 'maschera' && isDM()) { mas = inizioMaschera(p); return; }
+      if (T.tool === 'allinea' && isDM()) { T.al = { a: p, b: p }; disegnaRighelli(); return; }
       if (T.tool === 'righello') { const sc = scena(); const a = { x: centroCasella(p.x, sc.griglia_x), y: centroCasella(p.y, sc.griglia_y) }; rul = { pts: [a, a] }; mostraRighello(rul.pts); return; }
       if (t && T.tool !== 'mano' && puoMuovere(t)) { T.drag = { id: t.id, dx: p.x - t.x, dy: p.y - t.y, x0: t.x, y0: t.y, sx: e.clientX, sy: e.clientY, mosso: false }; el.classList.add('drag'); return; }
       if (t && T.tool !== 'mano') T.clic = { id: t.id, sx: e.clientX, sy: e.clientY };
@@ -689,6 +737,7 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
       }
       const p = mondo(st, e);
       if (mas) { muoviMaschera(mas, p); return; }
+      if (T.al) { T.al.b = p; disegnaRighelli(); return; }
       if (rul) {
         const sc = scena(); rul.pts[1] = { x: centroCasella(p.x, sc.griglia_x), y: centroCasella(p.y, sc.griglia_y) }; mostraRighello(rul.pts);
         const now = Date.now(); if (now - ultimo > 60) { ultimo = now; manda('righello', { uid: T.me.uid, nome: T.me.nome, pts: rul.pts }); }
@@ -709,6 +758,7 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
       if (pinch) { if (punti.size < 2) pinch = null; return; }
       st.classList.remove('pan'); pan = null;
       if (mas) { const m = mas; mas = null; fineMaschera(m); return; }
+      if (T.al) { const a = T.al; T.al = null; fineAllinea(a).catch(err => toast(err.message, 'err')); return; }
       if (rul) { rul = fineRighello(rul); return; }
       if (T.clic) { const c = T.clic; T.clic = null; if (e.type === 'pointerup') menuToken(c.id, e); }
       if (T.drag) {
@@ -750,7 +800,7 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
       return `<line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="#000a" stroke-width="7" stroke-linecap="round"/><line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="${col}" stroke-width="3" stroke-dasharray="10 6" stroke-linecap="round"/>
         <circle cx="${ax}" cy="${ay}" r="5" fill="${col}" stroke="#000" stroke-width="1.5"/><circle cx="${bx}" cy="${by}" r="6" fill="${col}" stroke="#000" stroke-width="1.5"/>
         <text x="${bx + 12}" y="${by - 12}">${esc(lbl)}</text>`;
-    }).join('') + (T.pcur && T.tool === 'maschera' && T.mforma === 'pennello' ? `<circle cx="${v.x + T.pcur.x * v.z}" cy="${v.y + T.pcur.y * v.z}" r="${(T.mraggio || sc.griglia) * v.z}" fill="none" stroke="#f2b51d" stroke-width="2" stroke-dasharray="6 4"/>` : '');
+    }).join('') + (T.al ? quadroAllinea(T.al, v) : '') + (T.pcur && T.tool === 'maschera' && T.mforma === 'pennello' ? `<circle cx="${v.x + T.pcur.x * v.z}" cy="${v.y + T.pcur.y * v.z}" r="${(T.mraggio || sc.griglia) * v.z}" fill="none" stroke="#f2b51d" stroke-width="2" stroke-dasharray="6 4"/>` : '');
   }
 
   /* ---------- menu del token (DM) ---------- */
@@ -773,7 +823,7 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
     }
     const gioc = (T.info.giocatori || []).map(g => `<option value="${esc(g.id)}" ${t.giocatore === g.id ? 'selected' : ''}>${esc(g.name)}</option>`).join('');
     pop.innerHTML = `<b>${esc(t.nome || 'Token')}</b>
-      <button class="btn sm" data-k="nasc">${t.nascosto ? '👁 Mostra ai giocatori' : '🙈 Nascondi ai giocatori'}</button>
+      <button class="btn sm" data-k="nasc">${t.nascosto ? '⬆ Sposta nei Segnalini (lo vedono tutti)' : '👑 Sposta nel livello Master (solo tu)'}</button>
       <div class="row"><span>Misura</span><button class="btn sm" data-k="meno">−</button><span>${t.misura.toLocaleString('it-IT')}</span><button class="btn sm" data-k="piu">+</button></div>
       <div class="row"><span>Lo muove</span><select data-k="gioc"><option value="">solo il DM</option>${gioc}</select></div>
       ${ft ? '<div class="row"><span>Foto</span><button class="btn sm" data-k="foto" title="Solo sul tuo schermo">🖼 Apri</button><button class="btn sm" data-k="mostra" title="Si apre a schermo intero a tutti i giocatori">📣 Mostra a tutti</button></div>' : ''}
@@ -853,7 +903,7 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
         <label>Immagine</label><input type="file" name="img" accept="image/*"></div>
         <button type="button" class="btn primary" data-k="crea">Aggiungi</button></div>
       <div class="tv-f" style="margin-top:12px"><label>Misura</label><select name="mis"><option value="0.5">Minuscola (½ casella)</option><option value="1" selected>Media (1 casella)</option><option value="2">Grande (2×2)</option><option value="3">Enorme (3×3)</option><option value="4">Mastodontica (4×4)</option></select>
-        <label>Nascosto</label><label style="justify-content:flex-start"><input type="checkbox" name="nasc"> visibile solo a me</label></div>
+        <label>Livello</label><select name="liv"><option value="segnalini">Segnalini (lo vedono tutti)</option><option value="master" ${T.livello === 'master' ? 'selected' : ''}>Master (solo tu)</option></select></div>
       <menu><button value="cancel" class="btn ghost">Chiudi</button></menu></form>`, 'tv-side', true);
     d.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { d.querySelectorAll('[data-tab]').forEach(x => x.classList.toggle('on', x === b)); d.querySelectorAll('[data-p]').forEach(p => p.hidden = p.dataset.p !== b.dataset.tab); });
     const q = d.querySelector('[data-p=png] input'); q.oninput = () => { const s = norm(q.value); d.querySelectorAll('[data-p=png] [data-i]').forEach(b => b.hidden = !!s && !norm(b.textContent).includes(s)); };
@@ -864,7 +914,7 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
       // al centro di ciò che si sta guardando, un po' sfalsati se se ne aggiungono tanti
       const n = [...T.tok.values()].filter(t => t.scena === sc.id).length % 5;
       const cx = (st.width / 2 - T.view.x) / T.view.z - lato / 2 + n * sc.griglia * 0.5, cy = (st.height / 2 - T.view.y) / T.view.z - lato / 2;
-      const row = { scena: sc.id, nome: o.nome, immagine: o.img || null, colore: o.colore, misura: mis, giocatore: o.giocatore || null, scheda: o.scheda || null, nascosto: d.querySelector('[name=nasc]').checked,
+      const row = { scena: sc.id, nome: o.nome, immagine: o.img || null, colore: o.colore, misura: mis, giocatore: o.giocatore || null, scheda: o.scheda || null, nascosto: d.querySelector('[name=liv]').value === 'master',
         x: aggancia(clamp(cx, 0, sc.larghezza - lato), sc.griglia_x, mis), y: aggancia(clamp(cy, 0, sc.altezza - lato), sc.griglia_y, mis) };
       const r = await SB.from('tavolo_token').insert(row).select().single();
       if (r.error) return toast(r.error.message, 'err');
@@ -924,6 +974,11 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
   }
 
   /* ---------- griglia (DM) ---------- */
+  // i token restano sulle loro caselle anche con la griglia nuova
+  function riaggancia(sc) {
+    const sposta = [...T.tok.values()].filter(t => t.scena === sc.id).map(t => ({ t, x: aggancia(t.x, sc.griglia_x, t.misura), y: aggancia(t.y, sc.griglia_y, t.misura) })).filter(o => o.x !== o.t.x || o.y !== o.t.y);
+    for (const o of sposta) { o.t.x = o.x; o.t.y = o.y; SB.from('tavolo_token').update({ x: o.x, y: o.y }).eq('id', o.t.id).then(() => { }); }
+  }
   function dlgGriglia() {
     const sc = scena(); if (!sc) return;
     const prima = { ...sc };
@@ -932,6 +987,7 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
         <label>Casella (px)</label><span style="display:flex;gap:8px;align-items:center"><input type="range" name="g" min="10" max="300" step="0.5" value="${sc.griglia}" style="flex:1"><input type="number" name="gn" min="8" max="600" step="0.5" value="${sc.griglia}" style="width:80px"></span>
         <label>Sposta ↔</label><input type="range" name="gx" min="0" max="${sc.griglia}" step="0.5" value="${((sc.griglia_x % sc.griglia) + sc.griglia) % sc.griglia}">
         <label>Sposta ↕</label><input type="range" name="gy" min="0" max="${sc.griglia}" step="0.5" value="${((sc.griglia_y % sc.griglia) + sc.griglia) % sc.griglia}">
+        <label></label><button type="button" class="btn sm" data-k="allinea" style="justify-self:start">📐 Allinea alla griglia disegnata sulla mappa</button>
         <label>Metri per casella</label><input type="number" name="m" min="0.1" max="1000" step="0.1" value="${sc.metri}">
         <label>Mostra la griglia</label><label style="justify-content:flex-start"><input type="checkbox" name="vis" ${sc.griglia_visibile ? 'checked' : ''}> sì</label>
         <label>Colore</label><input type="color" name="gc" value="${esc(sc.griglia_colore || '#000000')}">
@@ -946,6 +1002,7 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
     v('g').oninput = () => { v('gn').value = v('g').value; prova(); };
     v('gn').oninput = () => { v('g').value = v('gn').value; prova(); };
     ['gx', 'gy', 'm', 'vis', 'gc', 'go'].forEach(n => v(n).oninput = prova);
+    d.querySelector('[data-k=allinea]').onclick = () => { d.close('cancel'); setTimeout(() => { strumento('allinea'); toast('Disegna un riquadro su alcune caselle della mappa.'); }, 80); };
     d.addEventListener('close', async () => {
       if (d.returnValue !== 'ok') { Object.assign(sc, prima); disegnaGriglia(); disegnaToken(); return; }
       const ch = { nome: v('nome').value.trim().slice(0, 80) || prima.nome, griglia: sc.griglia, griglia_x: sc.griglia_x, griglia_y: sc.griglia_y, metri: sc.metri, griglia_visibile: sc.griglia_visibile };
@@ -955,14 +1012,28 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
       const r = await SB.from('tavolo_scene').update(ch).eq('id', sc.id).select().single();
       if (r.error) { Object.assign(sc, prima); disegnaGriglia(); disegnaToken(); return toast(sqlMancante(r.error) ? 'Per colore e opacità della griglia esegui tavolo/tappa-2b.sql in Supabase.' : r.error.message, 'err'); }
       T.scene.set(sc.id, r.data);
-      // i token restano sulle loro caselle anche con la griglia nuova
-      const sposta = [...T.tok.values()].filter(t => t.scena === sc.id).map(t => ({ t, x: aggancia(t.x, sc.griglia_x, t.misura), y: aggancia(t.y, sc.griglia_y, t.misura) })).filter(o => o.x !== o.t.x || o.y !== o.t.y);
-      for (const o of sposta) { o.t.x = o.x; o.t.y = o.y; SB.from('tavolo_token').update({ x: o.x, y: o.y }).eq('id', o.t.id).then(() => { }); }
-      disegnaToken(); disegnaTop(); toast('Impostazioni salvate.');
+      riaggancia(sc); disegnaToken(); disegnaTop(); toast('Impostazioni salvate.');
     });
   }
 
   /* ---------- dadi ---------- */
+  /* ---------- tiradadi, come su Roll20: quanti dadi e di che tipo, con il modificatore ---------- */
+  function disegnaTdp() {
+    const p = $('#tv-tdp'); if (!p || p.hidden) return;
+    const mod = p.querySelector('[data-k=mod]')?.value || '', mot = p.querySelector('[data-k=mot]')?.value || '';
+    p.innerHTML = `<div class="hd"><b>Tiradadi</b><button type="button" data-act="tv-tiradadi" aria-label="Chiudi">✕</button></div>
+      <div class="tabs"><button type="button" data-v="0" class="${T.tdpriv ? '' : 'on'}">Tutti</button><button type="button" data-v="1" class="${T.tdpriv ? 'on' : ''}">${isDM() ? 'Solo io' : 'Solo al DM'}</button></div>
+      <div class="mods"><input type="number" data-k="mod" placeholder="Mod" style="width:64px" aria-label="Modificatore" value="${esc(mod)}"><input type="text" data-k="mot" placeholder="Per cosa? (facoltativo)" style="flex:1" maxlength="80" value="${esc(mot)}"></div>
+      <table>${DADI.map(f => `<tr><td><button type="button" data-n="1" data-f="${f}">D${f}</button></td>${[2, 3, 4, 5, 6].map(n => `<td><button type="button" data-n="${n}" data-f="${f}" aria-label="${n}d${f}">${n}</button></td>`).join('')}</tr>`).join('')}</table>
+      <p class="ft">Clicca il dado per tirarne uno, o un numero per tirarne di più.</p>`;
+    p.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { T.tdpriv = b.dataset.v === '1'; disegnaTdp(); });
+    p.querySelectorAll('td button').forEach(b => b.onclick = async () => {
+      const m = Math.trunc(+p.querySelector('[data-k=mod]').value || 0), f = b.dataset.n + 'd' + b.dataset.f + (m ? (m > 0 ? '+' : '') + m : '');
+      const mt = p.querySelector('[data-k=mot]');
+      if (await tira(f, null, T.tdpriv, mt.value.trim())) mt.value = '';
+    });
+  }
+
   // la chat resta aperta; la linguetta sul bordo la chiude e la riapre (si ricorda la scelta)
   const CHAT = 'tavolo-chat';
   function apriChat(apri, salva) {
@@ -1013,13 +1084,13 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
     f.value = ''; const row = Array.isArray(r.data) ? r.data[0] : r.data;
     if (row && !T.chat.some(x => x.id === row.id)) { T.chat.push(row); nuovoMsg(row); }
   }
-  async function tira(formula, extra, segreto) {
+  async function tira(formula, extra, segreto, motivo) {
     formula = String(formula || '').trim(); if (!formula) return false;
-    const mot = [$('#tv-mot')?.value.trim(), extra].filter(Boolean).join(' · ');
+    const mot = [motivo ?? $('#tv-mot')?.value.trim(), extra].filter(Boolean).join(' · ');
     const r = await SB.rpc('tavolo_tira', { p_formula: formula, p_motivo: mot || null, p_privato: segreto ?? !!$('#tv-priv')?.checked });
     if (r.error) { toast(r.error.message, 'err'); return false; }
     const t = Array.isArray(r.data) ? r.data[0] : r.data;
-    if ($('#tv-mot')) $('#tv-mot').value = '';
+    if (motivo == null && $('#tv-mot')) $('#tv-mot').value = '';
     if (t && !T.tiri.some(x => x.id === t.id)) { T.tiri.push(t); nuovoTiro(t); }
     return true;
   }
@@ -1030,10 +1101,24 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
   }
   const ora = d => new Date(d).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
   const via = (k, x) => isDM() || x.autore === T.me.uid ? `<button type="button" class="del" data-del="${k}:${x.id}" title="Elimina il messaggio" aria-label="Elimina il messaggio">✕</button>` : '';
-  const rigaTiro = t => `<div class="tv-roll ${esito(t)} ${t.privato ? 'priv' : ''} ${t.autore === T.me.uid ? 'me' : ''}"><div class="h"><span>${esc(t.nome)}${t.privato ? ' 🙈' : ''}</span><span class="dx"><small>${ora(t.creato)}</small>${via('t', t)}</span></div>
-    ${t.motivo ? `<div class="m">${esc(t.motivo)}</div>` : ''}<div class="r"><span class="d">${esc(t.formula)} → ${esc(t.dettaglio)}</span><span class="t">${t.totale}</span></div></div>`;
+  const tagTiro = t => !t.privato ? '' : `<div class="tag">🙈 Tiro nascosto · ${isDM() ? (t.autore === T.me.uid ? 'lo vedi solo tu' : 'lo vedete solo tu e ' + esc(t.nome)) : 'lo vedete solo tu e il DM'}</div>`;
+  const tagMsg = m => !m.per ? '' : `<div class="tag">🤫 Sussurro · ${m.autore === T.me.uid ? 'a ' + esc(nomeGioc(m.per)) : m.per === 'dm' && isDM() ? 'per te' : 'solo per te'}</div>`;
+  // «2d6 [4, 3] + 1d4 [2] − 1» → caselle per ogni dado e i modificatori
+  function chips(det) {
+    return esc(det).replace(/(\d+)d(\d+)(k[hl]\d+)? \[([^\]]*)\]/g, (_, n, f, k, lista) => {
+      const [tutti, tenuti] = lista.split(' → ');
+      const resto = tenuti ? tenuti.split(', ').map(Number) : null;
+      return tutti.split(', ').map(v => {
+        let cls = +v === +f ? 'max' : +v === 1 ? 'min' : '';
+        if (resto) { const i = resto.indexOf(+v); if (i < 0) cls = 'no'; else resto.splice(i, 1); }
+        return `<i class="${cls}" title="d${f}">${v}</i>`;
+      }).join('');
+    });
+  }
+  const rigaTiro = t => `<div class="tv-roll ${esito(t)} ${t.privato ? 'priv' : ''} ${t.autore === T.me.uid ? 'me' : ''}">${tagTiro(t)}<div class="h"><span>${esc(t.nome)}</span><span class="dx"><small>${ora(t.creato)}</small>${via('t', t)}</span></div>
+    ${t.motivo ? `<div class="m">${esc(t.motivo)}</div>` : ''}<div class="fo">tira ${esc(t.formula)}</div><div class="r"><span class="chips">${chips(t.dettaglio)}</span><span class="t">${t.totale}</span></div></div>`;
   const nomeGioc = id => id === 'dm' ? 'DM' : T.membri.find(x => x.giocatore === id)?.nome || id;
-  const rigaMsg = m => `<div class="tv-roll tv-msg ${m.per ? 'w' : ''} ${m.autore === T.me.uid ? 'me' : ''}"><div class="h"><span class="who">${esc(m.nome)}${m.per ? `<em>${m.autore === T.me.uid ? 'sussurra a ' + esc(nomeGioc(m.per)) : 'ti sussurra'}</em>` : ''}</span><span class="dx"><small>${ora(m.creato)}</small>${via('c', m)}</span></div><div class="tx">${esc(m.testo)}</div></div>`;
+  const rigaMsg = m => `<div class="tv-roll tv-msg ${m.per ? 'w' : ''} ${m.autore === T.me.uid ? 'me' : ''}">${tagMsg(m)}<div class="h"><span class="who">${esc(m.nome)}</span><span class="dx"><small>${ora(m.creato)}</small>${via('c', m)}</span></div><div class="tx">${esc(m.testo)}</div></div>`;
   async function cancella(k) {
     const [tipo, id] = k.split(':'), tab = tipo === 't' ? 'tavolo_tiri' : 'tavolo_chat';
     const r = await SB.from(tab).delete().eq('id', +id).select('id');
@@ -1053,9 +1138,62 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
     if ($('#tv-dice')?.hidden && m.autore !== T.me.uid) { $('#tv-ctab')?.classList.add('nuovo'); toast(`${m.nome}${m.per ? ' (sussurro)' : ''}: ${m.testo.slice(0, 120)}`); }
   }
   function nuovoTiro(t) {
-    disegnaLog();
+    disegnaLog(); lancia(t);
     if ($('#tv-dice')?.hidden) { $('#tv-ctab')?.classList.add('nuovo'); toast(`${t.nome}${t.motivo ? ' (' + t.motivo + ')' : ''}: ${t.formula} = ${t.totale}`); }
   }
+  /* ---------- dadi che rotolano sulla mappa ---------- */
+  const FORME = {
+    4: { p: '50,8 94,88 6,88', l: '', y: 64 },
+    6: { p: '12,12 88,12 88,88 12,88', l: '', y: 50 },
+    8: { p: '50,4 94,50 50,96 6,50', l: 'M6 50H94', y: 52 },
+    10: { p: '50,4 93,40 50,96 7,40', l: 'M7 40L50 58L93 40M50 58V96', y: 40 },
+    12: { p: '50,4 95,37 78,92 22,92 5,37', l: 'M50 22L72 38L64 66H36L28 38Z', y: 48 },
+    20: { p: '50,3 92,27 92,73 50,97 8,73 8,27', l: 'M50 22L78 68H22ZM50 3V22M8 27L50 22L92 27M8 73L22 68M92 73L78 68M22 68L50 97L78 68', y: 52 },
+    100: { p: '50,4 93,40 50,96 7,40', l: 'M7 40L50 58L93 40M50 58V96', y: 40 }
+  };
+  const COL_DADI = ['#3b5bdb', '#c2255c', '#2b8a3e', '#e8590c', '#7048e8', '#0b7285', '#a61e4d', '#5f3dc4'];
+  const coloreDi = uid => { let h = 0; for (const c of String(uid)) h = (h * 31 + c.charCodeAt(0)) | 0; return COL_DADI[Math.abs(h) % COL_DADI.length]; };
+  function svgDado(f, v, col) {
+    const s = FORME[f] || FORME[20], id = 'g' + Math.random().toString(36).slice(2, 8);
+    return `<svg viewBox="0 0 100 100"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient></defs>
+      ${f === 6 ? `<rect x="10" y="10" width="80" height="80" rx="14" fill="${col}" stroke="#0007" stroke-width="3"/><rect x="10" y="10" width="80" height="80" rx="14" fill="url(#${id})"/>` : `<polygon points="${s.p}" fill="${col}" stroke="#0007" stroke-width="3" stroke-linejoin="round"/><polygon points="${s.p}" fill="url(#${id})"/>`}
+      ${s.l ? `<path d="${s.l}" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="2"/>` : ''}<text x="50" y="${s.y}">${v}</text></svg>`;
+  }
+  // i dadi entrano da un angolo, rimbalzano e si fermano sul risultato vero (deciso dal server)
+  function lancia(t) {
+    const st = $('#tv-stage'); if (!st || !scena() || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const dadi = [];
+    String(t.dettaglio).replace(/(\d+)d(\d+)(k[hl]\d+)? \[([^\]]*)\]/g, (_, n, f, k, lista) => {
+      const [tutti, tenuti] = lista.split(' → '), resto = tenuti ? tenuti.split(', ').map(Number) : null;
+      for (const v of tutti.split(', ').map(Number)) {
+        let via = false; if (resto) { const i = resto.indexOf(v); if (i < 0) via = true; else resto.splice(i, 1); }
+        dadi.push({ f: +f, v, via });
+      }
+    });
+    if (!dadi.length) return;
+    let box = $('.tv-d3', st); if (!box) { box = document.createElement('div'); box.className = 'tv-d3'; st.append(box); }
+    const W = st.clientWidth, H = st.clientHeight, col = coloreDi(t.autore), mostra = dadi.slice(0, 20);
+    const da = { x: -40, y: H + 40 }, cx = W * (0.3 + Math.random() * 0.4), cy = H * (0.35 + Math.random() * 0.3);
+    mostra.forEach((d, i) => {
+      const el = document.createElement('div'); el.className = 'dd' + (d.via ? ' via' : ''); box.append(el);
+      const ang = (i / mostra.length) * Math.PI * 2 + Math.random(), r = mostra.length > 1 ? 40 + mostra.length * 6 : 0;
+      const x = clamp(cx + Math.cos(ang) * r, 40, W - 40), y = clamp(cy + Math.sin(ang) * r, 40, H - 40);
+      const mx = (da.x + x) / 2 + (Math.random() - 0.5) * 120, rot = 360 * (2 + Math.floor(Math.random() * 2)), fin = (Math.random() - 0.5) * 40, dur = 1100 + Math.random() * 300;
+      el.animate([
+        { transform: `translate(${da.x}px,${da.y}px) rotate(0deg) scale(.6)` },
+        { transform: `translate(${mx}px,${y - 140}px) rotate(${rot * 0.55}deg) scale(1.15)`, offset: 0.45 },
+        { transform: `translate(${x - 18}px,${y}px) rotate(${rot * 0.85}deg) scale(1)`, offset: 0.72 },
+        { transform: `translate(${x - 6}px,${y - 26}px) rotate(${rot * 0.95}deg) scale(1.05)`, offset: 0.84 },
+        { transform: `translate(${x}px,${y}px) rotate(${rot + fin}deg) scale(1)` }
+      ], { duration: dur, easing: 'cubic-bezier(.2,.7,.3,1)', fill: 'forwards' });
+      // durante il volo le facce cambiano, poi resta il risultato
+      const gira = setInterval(() => { el.innerHTML = svgDado(d.f, 1 + Math.floor(Math.random() * d.f), col); }, 80);
+      el.innerHTML = svgDado(d.f, d.v, col);
+      setTimeout(() => { clearInterval(gira); el.innerHTML = svgDado(d.f, d.v, col); }, dur * 0.8);
+      setTimeout(() => el.animate([{ opacity: d.via ? 0.45 : 1 }, { opacity: 0 }], { duration: 500, fill: 'forwards' }).onfinish = () => el.remove(), dur + 2600);
+    });
+  }
+
   /* ---------- maschera (DM): la mappa coperta che si svela a pezzi, come la nebbia di Roll20 ---------- */
   const NERO = '#0b0807', FOG_MAX = 2048, TONO = 'tavolo-tono';
   // quanto il DM vede scura la maschera (solo sul suo schermo: i giocatori la vedono sempre nera)
@@ -1091,6 +1229,7 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
   function programmaMaschera() { cancelAnimationFrame(T.mraf); T.mraf = requestAnimationFrame(() => { disegnaMaschera(); disegnaToken(); }); }
   function barraMaschera() {
     const b = $('#tv-mbar'), sc = scena(); if (!b) return;
+    if (T.tool === 'allinea' && isDM() && sc) return barraAllinea(b);
     if (T.tool !== 'maschera' || !isDM() || !sc) { b.hidden = true; disegnaRighelli(); return; }
     if (!T.mraggio) T.mraggio = sc.griglia;
     const on = sc.maschera, dis = on ? '' : 'disabled', bt = (k, l, sel, tip) => `<button type="button" data-m="${k}" class="${sel ? 'on' : ''}" ${k === 'attiva' ? '' : dis} title="${esc(tip || l)}">${l}</button>`;
@@ -1109,6 +1248,37 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
     b.querySelectorAll('button[data-m]').forEach(x => x.onclick = () => azioneMaschera(x.dataset.m).catch(err => toast(err.message, 'err')));
     const rg = b.querySelector('[data-m=raggio]'); if (rg) rg.oninput = () => { T.mraggio = +rg.value * sc.griglia; b.querySelector('[data-m=rv]').value = fmtCas(+rg.value); };
     const tn = b.querySelector('[data-m=tono]'); tn.oninput = () => { try { localStorage.setItem(TONO, tn.value); } catch { } const c = $('#tv-fog'); if (c) c.style.opacity = tn.value; };
+  }
+  // allineamento: si disegna un riquadro su N×N caselle della griglia stampata sulla mappa
+  function quadroAllinea(a, v) {
+    const n = T.allN, x = Math.min(a.a.x, a.b.x), y = Math.min(a.a.y, a.b.y), L = (Math.abs(a.b.x - a.a.x) + Math.abs(a.b.y - a.a.y)) / 2;
+    if (L < 2) return '';
+    const X = v.x + x * v.z, Y = v.y + y * v.z, S = L * v.z;
+    let h = `<rect x="${X}" y="${Y}" width="${S}" height="${S}" fill="#f2b51d22" stroke="#f2b51d" stroke-width="2"/>`;
+    for (let i = 1; i < n; i++) h += `<path d="M${X + S * i / n} ${Y}V${Y + S}M${X} ${Y + S * i / n}H${X + S}" stroke="#f2b51d" stroke-width="1" stroke-dasharray="4 3"/>`;
+    return h + `<text x="${X + S + 8}" y="${Y - 6}">${n}×${n} · ${(L / n).toFixed(1)} px</text>`;
+  }
+  function barraAllinea(b) {
+    b.innerHTML = `<b style="font-family:var(--display);color:var(--gold2)">📐 Allinea la griglia</b><span class="sep"></span>
+      <label>Riquadro di <select data-a="n" style="font:inherit;background:#0005;color:#fff;border:1px solid #ffffff33;border-radius:4px">${[1, 2, 3, 4, 5, 6, 8, 10].map(n => `<option value="${n}" ${n === T.allN ? 'selected' : ''}>${n}×${n}</option>`).join('')}</select> caselle</label>
+      <span style="font-size:.82rem;color:#c9b89a;white-space:normal;max-width:360px">Trascina partendo dall'angolo di una casella della mappa fino all'angolo opposto: più caselle prendi, più è preciso.</span>
+      <button type="button" data-a="esci">Annulla</button>`;
+    b.hidden = false;
+    b.querySelector('[data-a=n]').onchange = e => { T.allN = +e.target.value; };
+    b.querySelector('[data-a=esci]').onclick = () => { strumento('muovi'); dlgGriglia(); };
+  }
+  async function fineAllinea(a) {
+    const sc = scena(); disegnaRighelli(); if (!sc) return;
+    const L = (Math.abs(a.b.x - a.a.x) + Math.abs(a.b.y - a.a.y)) / 2; if (L < 8) return;
+    const g = Math.round(L / T.allN * 100) / 100, x0 = Math.min(a.a.x, a.b.x), y0 = Math.min(a.a.y, a.b.y);
+    if (g < 8) { toast('Riquadro troppo piccolo: ingrandisci la mappa e riprova.', 'err'); return; }
+    const ch = { griglia: g, griglia_x: Math.round((((x0 % g) + g) % g) * 10) / 10, griglia_y: Math.round((((y0 % g) + g) % g) * 10) / 10 };
+    const r = await SB.from('tavolo_scene').update(ch).eq('id', sc.id).select().single();
+    if (r.error) throw new Error(r.error.message);
+    Object.assign(sc, r.data); T.scene.set(sc.id, sc); riaggancia(sc);
+    strumento('muovi'); disegnaGriglia(); disegnaToken();
+    toast(`Griglia allineata: casella di ${g} px. Rifinisci qui se serve.`);
+    dlgGriglia();
   }
   const fmtCas = n => n.toLocaleString('it-IT') + (n === 1 ? ' casella' : ' caselle');
   async function azioneMaschera(k) {
