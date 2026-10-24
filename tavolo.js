@@ -95,11 +95,6 @@
 .tv-empty div{max-width:440px;background:#00000066;border:1px solid #e7cf9a55;border-radius:10px;padding:22px 24px;line-height:1.45;font-size:1.05rem}
 .tv-empty h2{font-family:var(--display);color:var(--gold2)!important;margin:0 0 8px;font-size:1.25rem}
 .tv-empty code{background:#0006;padding:1px 5px;border-radius:4px}
-.tv-zoom{position:absolute;right:12px;top:62px;display:flex;flex-direction:column;align-items:center;gap:4px;z-index:6;background:#211a16d9;border:1px solid #e7cf9a33;border-radius:20px;padding:5px 0;box-shadow:0 2px 10px #0006}
-.tv-zoom button{all:unset;cursor:pointer;width:32px;height:30px;display:flex;align-items:center;justify-content:center;color:#f1e4c8;font:600 1.15rem/1 var(--display)}
-.tv-zoom button:hover{color:#fff;background:#ffffff14}
-.tv-zoom .zp{font:600 .68rem/1 var(--body);color:#c9b89a;height:22px;width:40px}
-.tv-zoom input[type=range]{writing-mode:vertical-lr;direction:rtl;width:22px;height:130px;margin:2px 0;accent-color:#e7cf9a;cursor:pointer}
 .tv-chat{width:310px;flex:none;display:flex;flex-direction:column;border-left:1px solid #000;background:var(--paper);min-height:0;z-index:8}
 .tv-chat[hidden]{display:none!important}
 .tv-dh{display:flex;align-items:center;justify-content:space-between;padding:8px 10px 6px;font-family:var(--display);color:var(--wine);font-weight:600;border-bottom:1px solid var(--line)}
@@ -198,15 +193,6 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
 .tv-tf{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:7px 10px 9px;border-top:1px solid #ffffff1a}
 .tv-tf input{width:52px;font:inherit;padding:3px 6px;border-radius:4px;border:1px solid #ffffff33;background:#0005;color:#fff}
 .tv-tvuoto{padding:10px 12px;color:#c9b89a;font-size:.9rem}
-.tv-mbar{position:absolute;left:10px;top:10px;z-index:8;display:flex;flex-wrap:wrap;align-items:center;gap:6px;max-width:calc(100% - 250px);background:#211a16f2;color:#f1e4c8;border:1px solid #e7cf9a44;border-radius:10px;padding:6px 8px;box-shadow:0 6px 24px #000a}
-.tv-mbar[hidden]{display:none!important}
-.tv-mbar button{all:unset;cursor:pointer;padding:5px 9px;border-radius:6px;font:600 .82rem var(--body);background:#ffffff14;white-space:nowrap}
-.tv-mbar button:hover{background:#ffffff2a}
-.tv-mbar button.on{background:#7d2530;box-shadow:inset 0 0 0 1px #e7cf9a88}
-.tv-mbar button[disabled]{opacity:.4;pointer-events:none}
-.tv-mbar label{display:flex;align-items:center;gap:5px;font-size:.85rem;white-space:nowrap}
-.tv-mbar .sep{width:1px;align-self:stretch;background:#ffffff22}
-.tv-mbar input[type=range]{width:90px}
 .tv-roll .h .who{display:flex;align-items:center;gap:7px;min-width:0}
 .tv-roll .av{width:30px;height:30px;border-radius:50%;flex:none;background:var(--c,#5b6670) center/cover no-repeat;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font:700 .72rem var(--display);font-style:normal;color:#fff;box-shadow:0 1px 3px #0005}
 .tv-roll .av.dm{background:#3b1f4a;font-size:.95rem}
@@ -272,6 +258,11 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
 .f-pietrificato{box-shadow:0 0 0 4px #8d8d8d,inset 0 0 12px #000a}
 .f-svenuto::after{content:"💤";animation:tvfx-sale 2.6s ease-out infinite}
 .f-concentrazione{inset:-20%;border:3px dashed #4aa3ff;box-shadow:0 0 14px 2px #4aa3ff88;animation:tvfx-gira 6s linear infinite}
+.tv-tok.c-morto{filter:grayscale(1) brightness(.5) sepia(.25)}
+.tv-tok.c-morto b{text-decoration:line-through;text-decoration-color:#e04848;text-decoration-thickness:2px}
+.f-morto{inset:4%;border-radius:50%;background:linear-gradient(45deg,transparent 45%,#c0262bdd 45% 55%,transparent 55%),linear-gradient(-45deg,transparent 45%,#c0262bdd 45% 55%,transparent 55%);animation:tvfx-morto .5s ease-out}
+.f-morto::after{content:"💀";font-size:calc(var(--fs,13px)*2.2);filter:drop-shadow(0 2px 3px #000)}
+@keyframes tvfx-morto{from{transform:scale(1.6);opacity:0}}
 .tv-tok .pf{position:absolute;left:10%;right:10%;top:-10px;height:6px;border-radius:3px;background:#000b;overflow:hidden;pointer-events:none;box-shadow:0 0 0 1px #0008}
 .tv-tok .pf s{display:block;height:100%;background:var(--b,#3f9a4a);transition:width .3s}
 .tv-tok .pf[hidden]{display:none}
@@ -289,14 +280,14 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
 .tv-sp input[type=search]{margin:8px 10px 0;font:inherit;padding:5px 8px;border-radius:6px;border:1px solid #ffffff2a;background:#0005;color:#f1e4c8}
 .tv-sp code{background:#0006;padding:1px 4px;border-radius:4px}
 dialog.dlg.tv-side.tv-sw{width:min(940px,calc(100vw - 80px));inset:56px auto auto 62px;max-height:calc(100vh - 80px);padding:0;background:#fdfbf6;color:#1c1a17;border:1px solid #2b2620;box-shadow:0 18px 50px #000b}
-.tv-sch{--k:#1c1a17;--k2:#4a443b;--lin:#2b2620;--gr:#e9e5dc;--pp:#fdfbf6;font:400 .9rem/1.3 var(--body);color:var(--k);padding:0 12px 12px}
-.tv-sch input,.tv-sch select,.tv-sch textarea{font:inherit;color:var(--k);background:transparent;border:0;border-bottom:1px solid #b9b2a5;border-radius:0;padding:2px 3px;min-width:0;box-sizing:border-box;width:100%}
-.tv-sch input:focus,.tv-sch select:focus,.tv-sch textarea:focus{outline:2px solid #7d253055;outline-offset:1px;background:#fff}
+.tv-sch{--k:#1c1a17;--k2:#4a443b;--lin:#2b2620;--gr:#e9e5dc;--pp:#fdfbf6;--box:#fff;--ul:#b9b2a5;--rig:#0000000f;font:400 .9rem/1.3 var(--body);color:var(--k);padding:0 12px 12px}
+.tv-sch input,.tv-sch select,.tv-sch textarea{font:inherit;color:var(--k);background:transparent;border:0;border-bottom:1px solid var(--ul);border-radius:0;padding:2px 3px;min-width:0;box-sizing:border-box;width:100%}
+.tv-sch input:focus,.tv-sch select:focus,.tv-sch textarea:focus{outline:2px solid #7d253055;outline-offset:1px;background:var(--box)}
 .tv-sch input:disabled,.tv-sch select:disabled,.tv-sch textarea:disabled{opacity:1;color:var(--k);-webkit-text-fill-color:var(--k);border-color:transparent}
 .tv-sch input[type=number]{-moz-appearance:textfield;text-align:center}
 .tv-sch input[type=number]::-webkit-inner-spin-button{display:none}
 .tv-sch input[type=checkbox]{width:auto;accent-color:#7d2530}
-.tv-sch textarea{resize:vertical;border:0;line-height:1.35;background:repeating-linear-gradient(transparent 0 1.3em,#0000000f 1.3em calc(1.3em + 1px))}
+.tv-sch textarea{resize:vertical;border:0;line-height:1.35;background:repeating-linear-gradient(transparent 0 1.3em,var(--rig) 1.3em calc(1.3em + 1px))}
 .tv-sch small,.tv-sch h6{font:700 .58rem/1.15 var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--k2)}
 .tv-sch h6{margin:6px 0 0;text-align:center}
 .tv-sch .vuoto{color:#8a8172;font-size:.8rem;font-style:italic;margin:2px 0}
@@ -309,20 +300,20 @@ dialog.dlg.tv-side.tv-sw{width:min(940px,calc(100vw - 80px));inset:56px auto aut
 .tv-sch .seg3 button{all:unset;cursor:pointer;padding:2px 8px;border-radius:4px;font-size:.76rem;font-weight:600}
 .tv-sch .seg3 button.on{background:#7d2530;color:#fff}
 .tv-sch .x{all:unset;cursor:pointer;font-size:1.1rem;line-height:1;padding:3px 7px;border-radius:5px}
-.tv-sch .x:hover{background:#ffffff22}
+.tv-sch .x:hover{background:var(--box)fff22}
 .tv-sch .testa{display:grid;grid-template-columns:minmax(220px,1fr) 2fr;gap:10px;align-items:stretch}
-.tv-sch .nome{display:flex;align-items:center;gap:10px;border:2px solid var(--lin);border-radius:40px 8px 8px 40px;padding:6px 10px 6px 6px;background:#fff}
+.tv-sch .nome{display:flex;align-items:center;gap:10px;border:2px solid var(--lin);border-radius:40px 8px 8px 40px;padding:6px 10px 6px 6px;background:var(--box)}
 .tv-sch .ft{width:64px;height:64px;border-radius:50%;flex:none;background:var(--c,#5b6670) center/cover no-repeat;border:2px solid var(--lin);display:flex;align-items:center;justify-content:center;font:700 1.25rem var(--display);font-style:normal;color:#fff}
 .tv-sch label.ft.cambia{cursor:pointer;position:relative}
 .tv-sch label.ft.cambia:hover{box-shadow:0 0 0 3px #7d2530}
-.tv-sch label.ft.cambia:hover::after{content:"📷";position:absolute;right:-4px;bottom:-4px;font-size:.9rem;background:#fff;border-radius:50%;padding:2px;border:1px solid var(--lin)}
+.tv-sch label.ft.cambia:hover::after{content:"📷";position:absolute;right:-4px;bottom:-4px;font-size:.9rem;background:var(--box);border-radius:50%;padding:2px;border:1px solid var(--lin)}
 .tv-sch .ft .piu{display:flex;flex-direction:column;align-items:center;font-size:1.2rem;line-height:1}
 .tv-sch .ft .piu small{color:#fff;font-size:.5rem;margin-top:2px}
 .tv-sch .ban{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .tv-sch .nm{font:600 1.3rem/1.2 var(--display);color:var(--k);text-align:left;overflow:hidden;text-overflow:ellipsis}
-.tv-sch .info{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 12px;border:2px solid var(--lin);border-radius:8px;padding:6px 10px;background:#fff}
+.tv-sch .info{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 12px;border:2px solid var(--lin);border-radius:8px;padding:6px 10px;background:var(--box)}
 .tv-sch .li{display:flex;flex-direction:column;justify-content:flex-end;min-width:0}
-.tv-sch .li .ro{padding:2px 3px;border-bottom:1px solid #b9b2a5;min-height:1.3em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tv-sch .li .ro{padding:2px 3px;border-bottom:1px solid var(--ul);min-height:1.3em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tv-sch .cl{display:flex;gap:4px}.tv-sch .cl .lv{width:40px;flex:none}
 .tv-sch .tabs{display:flex;gap:4px;margin:10px 0 8px;border-bottom:2px solid var(--lin)}
 .tv-sch .tabs button{all:unset;cursor:pointer;padding:5px 12px;font:600 .8rem var(--display);letter-spacing:.05em;text-transform:uppercase;border:2px solid transparent;border-bottom:0;border-radius:6px 6px 0 0;margin-bottom:-2px;color:var(--k2)}
@@ -331,16 +322,16 @@ dialog.dlg.tv-side.tv-sw{width:min(940px,calc(100vw - 80px));inset:56px auto aut
 .tv-sch .colA,.tv-sch .colB,.tv-sch .colC{display:flex;flex-direction:column;gap:8px;min-width:0}
 .tv-sch .dueA{display:grid;grid-template-columns:78px 1fr;gap:8px;background:var(--gr);border-radius:10px;padding:6px}
 .tv-sch .carcol{display:flex;flex-direction:column;gap:7px}
-.tv-sch .cbox{position:relative;border:2px solid var(--lin);border-radius:9px;background:#fff;text-align:center;padding:4px 2px 16px;display:flex;flex-direction:column;align-items:center}
+.tv-sch .cbox{position:relative;border:2px solid var(--lin);border-radius:9px;background:var(--box);text-align:center;padding:4px 2px 16px;display:flex;flex-direction:column;align-items:center}
 .tv-sch .cbox small{font-size:.52rem}
 .tv-sch .cbox .mod{font:700 1.5rem/1.2 var(--display);width:100%}
-.tv-sch .cbox .ov{position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);width:38px;height:22px;border:2px solid var(--lin);border-radius:50%;background:#fff;font-size:.8rem;padding:0}
+.tv-sch .cbox .ov{position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);width:38px;height:22px;border:2px solid var(--lin);border-radius:50%;background:var(--box);font-size:.8rem;padding:0}
 .tv-sch .altA{display:flex;flex-direction:column;gap:7px;min-width:0}
-.tv-sch .pill{display:flex;align-items:center;gap:8px;border:2px solid var(--lin);border-radius:8px;background:#fff;padding:3px 8px 3px 3px}
+.tv-sch .pill{display:flex;align-items:center;gap:8px;border:2px solid var(--lin);border-radius:8px;background:var(--box);padding:3px 8px 3px 3px}
 .tv-sch .pill span{font:700 .6rem/1.15 var(--body);letter-spacing:.05em;text-transform:uppercase}
 .tv-sch .pill .pv{width:32px;height:28px;flex:none;border:2px solid var(--lin);border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 .95rem var(--display)}
 .tv-sch .pill.largo{border-radius:20px}
-.tv-sch .sez{border:2px solid var(--lin);border-radius:8px;background:#fff;padding:6px 7px 5px;min-width:0}
+.tv-sch .sez{border:2px solid var(--lin);border-radius:8px;background:var(--box);padding:6px 7px 5px;min-width:0}
 .tv-sch .lista .r{display:flex;align-items:center;gap:5px;min-height:20px}
 .tv-sch .lista em{font-style:normal;font-weight:700;width:26px;text-align:center;border-bottom:1px solid var(--lin);font-size:.82rem}
 .tv-sch .lista .lk{all:unset;cursor:pointer;flex:1;min-width:0;font-size:.82rem;border-radius:3px;padding:0 3px}
@@ -355,7 +346,7 @@ dialog.dlg.tv-side.tv-sw{width:min(940px,calc(100vw - 80px));inset:56px auto aut
 .tv-sch .rb:disabled,.tv-sch .lk:disabled{cursor:default}
 .tv-sch .grigio{background:var(--gr);border-radius:10px;padding:7px;display:flex;flex-direction:column;gap:7px}
 .tv-sch .tre{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
-.tv-sch .tre>div{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:#fff;border:2px solid var(--lin);padding:5px 3px;min-height:64px;text-align:center}
+.tv-sch .tre>div{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:var(--box);border:2px solid var(--lin);padding:5px 3px;min-height:64px;text-align:center}
 .tv-sch .scudo{border-radius:6px 6px 50% 50% / 6px 6px 30% 30%}
 .tv-sch .qq{border-radius:8px}
 .tv-sch .tre input{font:700 1.35rem var(--display);border:0;text-align:center}
@@ -363,13 +354,13 @@ dialog.dlg.tv-side.tv-sw{width:min(940px,calc(100vw - 80px));inset:56px auto aut
 .tv-sch .tre .rb{font:700 1.35rem var(--display);width:100%}
 .tv-sch .tre small{font-size:.52rem}
 .tv-sch .pf{text-align:center}
-.tv-sch .pfmax{display:flex;align-items:center;gap:6px;font-size:.66rem;color:var(--k2);text-transform:uppercase;letter-spacing:.04em;font-weight:700;border-bottom:1px solid #b9b2a5;padding-bottom:3px}
+.tv-sch .pfmax{display:flex;align-items:center;gap:6px;font-size:.66rem;color:var(--k2);text-transform:uppercase;letter-spacing:.04em;font-weight:700;border-bottom:1px solid var(--ul);padding-bottom:3px}
 .tv-sch .pfmax input{width:60px;border:0;font-weight:700;font-size:.9rem}
 .tv-sch .pfa{font:700 1.7rem var(--display);border:0;text-align:center;padding:4px 0}
 .tv-sch .pfa.piccolo{font-size:1.15rem;padding:0}
 .tv-sch .q{display:flex;gap:4px;justify-content:center;align-items:center}
-.tv-sch .q input{width:48px;border:1px solid #b9b2a5;border-radius:4px}
-.tv-sch .q button,.tv-sch .mini{all:unset;box-sizing:border-box;cursor:pointer;font:600 .74rem var(--body);padding:3px 8px;border-radius:5px;border:1px solid var(--lin);background:#fff;white-space:nowrap;text-align:center}
+.tv-sch .q input{width:48px;border:1px solid var(--ul);border-radius:4px}
+.tv-sch .q button,.tv-sch .mini{all:unset;box-sizing:border-box;cursor:pointer;font:600 .74rem var(--body);padding:3px 8px;border-radius:5px;border:1px solid var(--lin);background:var(--box);white-space:nowrap;text-align:center}
 .tv-sch .q button:hover,.tv-sch .mini:hover{background:#7d2530;color:#fff;border-color:#7d2530}
 .tv-sch .mini:disabled{opacity:.4;cursor:default}
 .tv-sch .due{display:grid;grid-template-columns:1fr 1fr;gap:7px}
@@ -385,7 +376,7 @@ dialog.dlg.tv-side.tv-sw{width:min(940px,calc(100vw - 80px));inset:56px auto aut
 .tv-sch .at{background:var(--gr);border-radius:5px;padding:3px 4px;margin:3px 0}
 .tv-sch .at .riga{display:grid;grid-template-columns:1fr 44px 74px;gap:4px;align-items:center}
 .tv-sch .at .riga+.riga{grid-template-columns:1fr auto auto auto auto;margin-top:2px}
-.tv-sch .at input{background:#fff;border:0;border-radius:3px}
+.tv-sch .at input{background:var(--box);border:0;border-radius:3px}
 .tv-sch .at .an{font-weight:700}
 .tv-sch .at .tp{font-size:.78rem;background:transparent}
 .tv-sch .at .mini{padding:1px 6px}
@@ -400,19 +391,138 @@ dialog.dlg.tv-side.tv-sw{width:min(940px,calc(100vw - 80px));inset:56px auto aut
 .tv-sch .tratti{gap:6px}
 .tv-sch .cnd{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;min-height:20px}
 .tv-sch .cnd .ch{all:unset;cursor:pointer;background:#7d2530;color:#fff;border-radius:10px;padding:1px 8px;font-size:.72rem;font-weight:600}
-.tv-sch .sez select,.tv-sch .selc{margin-top:4px;font-size:.8rem;border:1px solid #b9b2a5;border-radius:4px}
-.tv-sch .incT{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;border:2px solid var(--lin);border-radius:8px;padding:8px 10px;background:#fff;margin-bottom:8px}
+.tv-sch .sez select,.tv-sch .selc{margin-top:4px;font-size:.8rem;border:1px solid var(--ul);border-radius:4px}
+.tv-sch .incT{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;border:2px solid var(--lin);border-radius:8px;padding:8px 10px;background:var(--box);margin-bottom:8px}
 .tv-sch .li.grande b,.tv-sch .li.grande .rb{font:700 1.3rem var(--display);text-align:center;padding:2px 0}
 .tv-sch .li.grande small{text-align:center}
 .tv-sch .incG{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:8px;margin-top:4px}
 .tv-sch .lv .lt{display:flex;align-items:center;gap:6px;font:700 .62rem var(--body);text-transform:uppercase;color:var(--k2);border-bottom:2px solid var(--lin);padding-bottom:4px;margin-bottom:3px}
 .tv-sch .lv .lt b{width:26px;height:26px;border:2px solid var(--lin);border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 .95rem var(--display);color:var(--k)}
-.tv-sch .lv .sn{width:38px;border:1px solid #b9b2a5;border-radius:4px}
-.tv-sch .bgT{display:grid;grid-template-columns:repeat(6,1fr);gap:4px 10px;border:2px solid var(--lin);border-radius:8px;padding:6px 10px;background:#fff;margin-bottom:8px}
+.tv-sch .lv .sn{width:38px;border:1px solid var(--ul);border-radius:4px}
+.tv-sch .bgT{display:grid;grid-template-columns:repeat(6,1fr);gap:4px 10px;border:2px solid var(--lin);border-radius:8px;padding:6px 10px;background:var(--box);margin-bottom:8px}
 .tv-sch .bgG{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px;margin-bottom:8px}
-.tv-sch .fd{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid #b9b2a5}
+.tv-sch .fd{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--ul)}
 :root[data-theme=dark] .tv-sch .nm,:root[data-theme=dark] .tv-sch h4{color:var(--gold2)}
 .tv-pick button small{color:var(--mute);font-size:.75rem}
+/* ---- aspetto: pannelli di vetro scuro, cursori, zoom e barra della maschera ---- */
+.tv{--pan:#1b1512e6;--pan2:#2a211c;--pan-b:#e7cf9a2b;--pan-ink:#f1e4c8;--pan-mute:#b8a78a;--acc:#8e2a36;--acc2:#a8323f;--ombra:0 12px 32px #000000a6,inset 0 1px 0 #ffffff0f}
+.tv-tdp,.tv-turno,.tv-sp,.tv-mbar,.tv-zoom,.tv-chip,.tv-liv{background:var(--pan);border:1px solid var(--pan-b);box-shadow:var(--ombra);-webkit-backdrop-filter:blur(10px) saturate(1.1);backdrop-filter:blur(10px) saturate(1.1)}
+.tv-tdp,.tv-turno,.tv-sp{border-radius:14px;overflow:hidden}
+.tv-tdp .hd,.tv-th{background:linear-gradient(#ffffff0a,#ffffff00);border-bottom:1px solid #ffffff14}
+.tv-tdp .hd b,.tv-th b{font:600 .82rem/1.2 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--gold2)}
+.tv-tdp .hd button,.tv-th button[data-k=x],.tv-sp .tv-th button{all:unset;cursor:pointer;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--pan-mute);font-size:.9rem}
+.tv-tdp .hd button:hover,.tv-th button[data-k=x]:hover,.tv-sp .tv-th button:hover{background:#ffffff1a;color:#fff}
+.tv-th button.go{background:linear-gradient(var(--acc2),var(--acc));color:#fff;box-shadow:inset 0 1px 0 #ffffff26;border-radius:8px;padding:5px 11px}
+.tv-th button.go:hover{filter:brightness(1.12)}
+/* barra degli strumenti a sinistra */
+.tv-rail{background:linear-gradient(180deg,#241c18,#1a1411);border-right:1px solid #000;box-shadow:inset -1px 0 0 #ffffff0a}
+.tv-rail button{border-radius:10px;transition:background .15s,color .15s,transform .1s}
+.tv-rail button:hover{background:#ffffff12;color:#fff}
+.tv-rail button:active{transform:scale(.94)}
+.tv-rail button.on{background:linear-gradient(var(--acc2),var(--acc));box-shadow:inset 0 1px 0 #ffffff2e,0 2px 8px #0008;color:#fff}
+.tv-rail button.liv.on{background:linear-gradient(#7d5aa6,#5b3f80)}
+.tv-rail .lbl{color:#8f7f66}
+/* tiradadi */
+.tv-tdp .tabs,.tv-sch .seg3{background:#00000052;border-radius:9px;padding:3px;box-shadow:inset 0 1px 2px #0008}
+.tv-tdp .tabs button{border-radius:7px;transition:background .15s}
+.tv-tdp .tabs button.on{background:linear-gradient(var(--acc2),var(--acc));box-shadow:inset 0 1px 0 #ffffff26}
+.tv-tdp .mods input,.tv-tf input,.tv-tr input,.tv-sp input[type=search]{background:#00000059;border:1px solid #ffffff1f;border-radius:8px;color:#fff;padding:6px 9px}
+.tv-tdp .mods input:focus,.tv-tf input:focus,.tv-tr input:focus,.tv-sp input[type=search]:focus{outline:none;border-color:var(--gold2);box-shadow:0 0 0 3px #e7cf9a26}
+.tv-tdp table{border-collapse:separate;border-spacing:3px}
+.tv-tdp td+td{border-left:0}
+.tv-tdp td button{background:#ffffff0a;border-radius:7px;padding:7px 2px;transition:background .12s,transform .08s}
+.tv-tdp td button:hover{background:var(--acc)}
+.tv-tdp td button:active{transform:scale(.94)}
+.tv-tdp td:first-child button{background:#e7cf9a14;color:var(--gold2)}
+.tv-tdp .vs button{background:#ffffff0f;border:1px solid #ffffff14;border-radius:8px}
+/* ordine del turno */
+.tv-tr{margin:2px 6px;border-radius:9px;border-left:0;padding:5px 8px;transition:background .15s}
+.tv-tr:hover{background:#ffffff0a}
+.tv-tr.att{background:linear-gradient(90deg,#f2b51d33,#f2b51d0d);box-shadow:inset 3px 0 0 #f2b51d}
+.tv-tr input{width:46px;padding:3px 5px;text-align:center}
+.tv-tr em{color:var(--gold2)}
+.tv-tf{gap:6px;background:#00000026}
+.tv-tf input[data-k=nn]{flex:1 1 100%;min-width:0}
+.tv-tf input[data-k=nv]{width:48px;flex:none;text-align:center}
+.tv-tf button,.tv-th button:not(.go):not([data-k=x]){border-radius:8px;background:#ffffff14;border:1px solid #ffffff12}
+.tv-tvuoto{color:var(--pan-mute);line-height:1.4}
+/* elenco schede */
+.tv-sp .r{border-radius:9px;margin:1px 6px;padding:5px 6px}
+.tv-sp .r i{border-color:#e7cf9a66;box-shadow:0 1px 4px #0008}
+.tv-sp h5{color:#9a8a70}
+.tv-sp .tv-tf button{background:linear-gradient(var(--acc2),var(--acc));color:#fff;border:0;padding:6px 12px}
+/* in alto: nome della mappa e livello */
+.tv-chip{border-radius:12px;padding:5px 6px 5px 12px}
+.tv-liv{border-radius:12px;background:#2c1d3bdd;border-color:#b98cff55}
+.tv-pgbtn{border-radius:12px;background:var(--pan);color:var(--pan-ink);border:1px solid var(--pan-b);box-shadow:var(--ombra)}
+.tv-pgbtn:hover{background:#2a211c;color:#fff}
+/* menu del token */
+.tv-pop{border-radius:12px;border-color:#e7cf9a88;padding:10px;gap:6px;box-shadow:0 14px 36px #000b}
+.tv-pop .btn{border-radius:8px}
+.tv-pop .row{gap:6px}
+/* cursori del tavolo */
+input.tv-rg{-webkit-appearance:none;appearance:none;background:transparent;height:22px;cursor:pointer;--t:#ffffff26;--f:var(--gold2);--k:#fbf0d4;--kb:#8e2a36;padding:0;margin:0;min-width:0}
+input.tv-rg::-webkit-slider-runnable-track{height:5px;border-radius:3px;background:linear-gradient(to right,var(--f) var(--p,50%),var(--t) var(--p,50%))}
+input.tv-rg::-moz-range-track{height:5px;border-radius:3px;background:var(--t)}
+input.tv-rg::-moz-range-progress{height:5px;border-radius:3px;background:var(--f)}
+input.tv-rg::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;margin-top:-6px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,var(--k) 60%);border:2px solid var(--kb);box-shadow:0 1px 4px #000a;transition:transform .1s}
+input.tv-rg::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:var(--k);border:2px solid var(--kb);box-shadow:0 1px 4px #000a}
+input.tv-rg:hover::-webkit-slider-thumb,input.tv-rg:active::-webkit-slider-thumb{transform:scale(1.15)}
+input.tv-rg:focus-visible{outline:none}
+input.tv-rg:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 4px #e7cf9a40}
+input.tv-rg:disabled{opacity:.4;cursor:default}
+dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wine)}
+/* zoom */
+.tv-zoom{position:absolute;right:12px;top:62px;display:flex;flex-direction:column;align-items:center;gap:2px;z-index:6;border-radius:16px;padding:6px 5px}
+.tv-zoom button{all:unset;box-sizing:border-box;cursor:pointer;width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--pan-ink);transition:background .12s}
+.tv-zoom button svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tv-zoom button:hover{background:#ffffff17;color:#fff}
+.tv-zoom button:active{transform:scale(.92)}
+.tv-zoom .sep{width:20px;height:1px;background:#ffffff1f;margin:4px 0}
+.tv-zoom .zp{width:42px;height:22px;border-radius:7px;font:700 .68rem/1 var(--body);color:var(--gold2);background:#00000047;margin-top:2px}
+.tv-zs{position:relative;width:32px;height:150px;cursor:ns-resize;touch-action:none;outline:none;margin:2px 0}
+.tv-zs .tr{position:absolute;left:50%;top:7px;bottom:7px;width:5px;margin-left:-2.5px;border-radius:3px;background:#ffffff1c;box-shadow:inset 0 1px 2px #000a;overflow:hidden}
+.tv-zs .tr i{position:absolute;left:0;right:0;bottom:0;height:calc(var(--p,.5) * 100%);background:linear-gradient(to top,var(--acc),var(--gold2))}
+.tv-zs .tk{position:absolute;left:50%;width:12px;margin-left:-6px;height:1px;background:#ffffff40;bottom:calc(7px + (100% - 14px) * var(--q))}
+.tv-zs .tk.uno{width:16px;margin-left:-8px;background:var(--gold2)}
+.tv-zs .kn{position:absolute;left:50%;width:18px;height:18px;margin:0 0 -9px -9px;bottom:calc(7px + (100% - 14px) * var(--p,.5));border-radius:50%;background:radial-gradient(circle at 35% 30%,#fffaf0,#e7cf9a 55%,#a9853b);box-shadow:0 0 0 2px #1b1512,0 2px 8px #000c;transition:transform .12s}
+.tv-zs:hover .kn,.tv-zs.on .kn{transform:scale(1.18)}
+.tv-zs:focus-visible .kn{box-shadow:0 0 0 2px #1b1512,0 0 0 5px #e7cf9a66}
+/* barra della maschera */
+.tv-mbar{position:absolute;left:10px;top:10px;z-index:8;display:flex;flex-wrap:wrap;align-items:center;gap:6px;max-width:calc(100% - 250px);color:var(--pan-ink);border-radius:14px;padding:6px}
+.tv-mbar[hidden]{display:none!important}
+.tv-mbar .g{display:flex;align-items:center;gap:3px;padding:2px;border-radius:10px}
+.tv-mbar .g.seg{border:0;overflow:visible;background:#00000052;box-shadow:inset 0 1px 2px #0008;padding:3px}
+.tv-mbar .g.sl{gap:8px;padding:2px 8px;background:#ffffff0a;border-radius:10px;height:34px;box-sizing:border-box}
+.tv-mbar .g.sl>span{font:600 .76rem var(--body);color:var(--pan-mute)}
+.tv-mbar .g.sl>svg{width:16px;height:16px;fill:none;stroke:var(--pan-mute);stroke-width:2}
+.tv-mbar .g.sl input{width:92px}
+.tv-mbar output{font:700 .72rem var(--body);color:var(--gold2);min-width:54px;text-align:right;white-space:nowrap}
+.tv-mbar output[data-m=tv]{min-width:30px}
+.tv-mbar button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:8px;font:600 .8rem var(--body);white-space:nowrap;color:var(--pan-ink);transition:background .12s}
+.tv-mbar .g:not(.seg) button{background:#ffffff12;border:1px solid #ffffff12}
+.tv-mbar button svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tv-mbar button:hover{background:#ffffff22}
+.tv-mbar button.on{background:linear-gradient(var(--acc2),var(--acc));color:#fff;box-shadow:inset 0 1px 0 #ffffff2e,0 1px 4px #0008}
+.tv-mbar button[disabled]{opacity:.35;pointer-events:none}
+.tv-mbar.spenta .g:not(:first-child){opacity:.5}
+.tv-mbar .sw{display:flex;align-items:center;gap:8px;font:600 .82rem var(--body);cursor:pointer;padding:0 8px 0 4px;height:30px;white-space:nowrap}
+.tv-mbar .sw input{position:absolute;opacity:0;pointer-events:none}
+.tv-mbar .sw .tg{position:relative;width:36px;height:20px;border-radius:10px;background:#ffffff26;box-shadow:inset 0 1px 3px #000a;transition:background .2s}
+.tv-mbar .sw .tg::after{content:"";position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#f1e4c8;box-shadow:0 1px 3px #000a;transition:transform .2s}
+.tv-mbar .sw input:checked+.tg{background:linear-gradient(var(--acc2),var(--acc))}
+.tv-mbar .sw input:checked+.tg::after{transform:translateX(16px);background:#fff}
+.tv-mbar .sw input:focus-visible+.tg{box-shadow:0 0 0 3px #e7cf9a55}
+/* linguetta della chat */
+.tv-ctab{border-radius:10px 0 0 10px;box-shadow:-4px 0 14px #0007}
+:root[data-theme=dark] dialog.dlg.tv-side.tv-sw{background:#1d1814;color:#efe5d0;border-color:#5a4d3e}
+:root[data-theme=dark] .tv-sch{--k:#efe5d0;--k2:#bcae95;--lin:#8a7a60;--gr:#2b241e;--pp:#1d1814;--box:#241e19;--ul:#5e5244;--rig:#ffffff10}
+:root[data-theme=dark] .tv-sch .cbox .ov,:root[data-theme=dark] .tv-sch .lv .lt b{background:#1d1814}
+:root[data-theme=dark] .tv-sch input:focus,:root[data-theme=dark] .tv-sch textarea:focus,:root[data-theme=dark] .tv-sch select:focus{background:#2e2620}
+:root[data-theme=dark] .tv-sch select option{background:#241e19;color:#efe5d0}
+:root[data-theme=dark] .tv-sch .tabs button.on{background:#1d1814}
+:root[data-theme=dark] .tv-sch .pr.on[title^=Maestria]{background:#c7505c;border-color:#c7505c;box-shadow:0 0 0 2px #241e19,0 0 0 3px #c7505c}
+:root[data-theme=dark] .tv-sch .dots button.on,:root[data-theme=dark] .tv-sch .pr.on{background:var(--k)}
 @media (max-width:820px){
   .tv-turno{width:min(250px,calc(100% - 20px));max-height:45%}
   .tv-rail{width:44px}.tv-rail button{width:34px;height:34px}
@@ -698,6 +808,15 @@ dialog.dlg.tv-side.tv-sw{width:min(940px,calc(100vw - 80px));inset:56px auto aut
     lseg: '<circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.8 3.6-6 7-6s6.2 2.2 7 6"/>',
     lmas: '<path d="M4 18h16M5 18L3.5 8l5 3.5L12 5l3.5 6.5 5-3.5L19 18"/>',
     sch: '<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 11h7M9 14.5h7M9 18h4"/>',
+    piu: '<path d="M12 5v14M5 12h14"/>', meno: '<path d="M5 12h14"/>',
+    adatta: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+    occhio: '<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>',
+    velo: '<path d="M3 3l18 18"/><path d="M10.6 5.6A9.7 9.7 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a17 17 0 0 1-2.7 3.4M6.3 6.9C3.9 8.6 2.5 12 2.5 12S6 18.5 12 18.5c1.6 0 3-.4 4.3-1"/>',
+    rett: '<rect x="4" y="6" width="16" height="12" rx="1.5" stroke-dasharray="3 2.2"/>',
+    penn: '<path d="M14.5 4.5l5 5L9 20H4v-5z"/><path d="M12.5 6.5l5 5"/>',
+    undo: '<path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+    sole: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>',
+    luna: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
     pag: '<rect x="3" y="7" width="13" height="13" rx="1.5"/><path d="M7 4h12.5A1.5 1.5 0 0 1 21 5.5V17"/><path d="M5.5 17l3.5-4 2.5 2.5 1.5-1.5 2 3"/>'
   };
   const svg = k => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICO[k]}</svg>`;
@@ -855,10 +974,18 @@ dialog.dlg.tv-side.tv-sw{width:min(940px,calc(100vw - 80px));inset:56px auto aut
     }
     st.innerHTML = `<div class="tv-world" id="tv-world"><img class="tv-map" id="tv-map" alt="" draggable="false" width="${sc.larghezza}" height="${sc.altezza}" style="width:${sc.larghezza}px;height:${sc.altezza}px">
       <svg class="tv-grid" id="tv-grid" width="${sc.larghezza}" height="${sc.altezza}"></svg><div id="tv-toks"></div><canvas class="tv-fog" id="tv-fog" style="width:${sc.larghezza}px;height:${sc.altezza}px"></canvas></div>
-      <svg class="tv-ov" id="tv-ov"></svg><div class="tv-zoom"><button type="button" data-z="1.25" data-tip="Ingrandisci" aria-label="Ingrandisci">+</button><input type="range" id="tv-zr" min="${Z_MIN}" max="${Z_MAX}" step="0.001" aria-label="Zoom" data-tip="Trascina per lo zoom"><button type="button" data-z="0.8" data-tip="Rimpicciolisci" aria-label="Rimpicciolisci">−</button><button type="button" data-z="0" data-tip="Mostra tutta la mappa" aria-label="Mostra tutta la mappa">⤢</button><button type="button" class="zp" id="tv-zp" data-z="1" data-tip="Torna al 100%" aria-label="Torna al 100%"></button></div>`;
+      <svg class="tv-ov" id="tv-ov"></svg><div class="tv-zoom" role="group" aria-label="Zoom"><button type="button" data-z="1.25" data-tip="Ingrandisci" aria-label="Ingrandisci">${svg('piu')}</button>
+        <div class="tv-zs" id="tv-zs" role="slider" tabindex="0" aria-label="Zoom" aria-valuemin="5" aria-valuemax="600" data-tip="Trascina per lo zoom"><span class="tr"><i></i></span>${[0.25, 0.5, 1, 2, 4].map(z => `<span class="tk ${z === 1 ? 'uno' : ''}" style="--q:${(Math.log(z) - Z_MIN) / (Z_MAX - Z_MIN)}"></span>`).join('')}<span class="kn"></span></div>
+        <button type="button" data-z="0.8" data-tip="Rimpicciolisci" aria-label="Rimpicciolisci">${svg('meno')}</button><span class="sep"></span>
+        <button type="button" data-z="0" data-tip="Mostra tutta la mappa" aria-label="Mostra tutta la mappa">${svg('adatta')}</button><button type="button" class="zp" id="tv-zp" data-z="1" data-tip="Torna al 100%" aria-label="Torna al 100%"></button></div>`;
     st.querySelectorAll('[data-z]').forEach(b => b.onclick = () => { const z = b.id === 'tv-zp' ? 1 / T.view.z : +b.dataset.z; if (!z) adatta(); else { const r = st.getBoundingClientRect(); zoom(z, r.width / 2, r.height / 2); } });
     // il cursore va in scala logaritmica: ogni tratto ingrandisce della stessa proporzione
-    const zr = $('#tv-zr'); zr.oninput = () => { const r = st.getBoundingClientRect(); zoom(Math.exp(+zr.value) / T.view.z, r.width / 2, r.height / 2); };
+    const zs = $('#tv-zs'), aZoom = z => { const r = st.getBoundingClientRect(); zoom(z / T.view.z, r.width / 2, r.height / 2); };
+    const daY = e => { const r = zs.getBoundingClientRect(), q = clamp(1 - (e.clientY - r.top - 6) / (r.height - 12), 0, 1); aZoom(Math.exp(Z_MIN + q * (Z_MAX - Z_MIN))); };
+    zs.onpointerdown = e => { e.preventDefault(); e.stopPropagation(); zs.setPointerCapture(e.pointerId); zs.classList.add('on'); daY(e); };
+    zs.onpointermove = e => { if (zs.hasPointerCapture(e.pointerId)) daY(e); };
+    zs.onpointerup = zs.onpointercancel = () => zs.classList.remove('on');
+    zs.onkeydown = e => { const f = { ArrowUp: 1.1, ArrowRight: 1.1, ArrowDown: 1 / 1.1, ArrowLeft: 1 / 1.1 }[e.key]; if (f) { e.preventDefault(); aZoom(T.view.z * f); } };
     const img = $('#tv-map');
     if (sc.mappa) urlMappa(sc.mappa).then(u => { if (img.isConnected) img.src = u; }).catch(e => toast('Mappa non caricata: ' + e.message, 'err'));
     else img.removeAttribute('src');
@@ -878,7 +1005,7 @@ dialog.dlg.tv-side.tv-sw{width:min(940px,calc(100vw - 80px));inset:56px auto aut
   function applicaVista() {
     const w = $('#tv-world'); if (w) w.style.transform = `translate(${T.view.x}px,${T.view.y}px) scale(${T.view.z})`;
     const zp = $('#tv-zp'); if (zp) zp.textContent = Math.round(T.view.z * 100) + '%';
-    const zr = $('#tv-zr'); if (zr && document.activeElement !== zr) zr.value = Math.log(T.view.z);
+    const zs = $('#tv-zs'); if (zs) { zs.style.setProperty('--p', (Math.log(T.view.z) - Z_MIN) / (Z_MAX - Z_MIN)); zs.setAttribute('aria-valuenow', Math.round(T.view.z * 100)); }
     disegnaRighelli(); chiudiPop();
   }
   const Z_MIN = Math.log(0.05), Z_MAX = Math.log(6);
@@ -890,6 +1017,10 @@ dialog.dlg.tv-side.tv-sw{width:min(940px,calc(100vw - 80px));inset:56px auto aut
   // aggancio alla griglia: i token si fermano dentro una casella (mezza casella per i token piccoli)
   function aggancia(v, o, mis) { const sc = scena(), s = mis < 1 ? sc.griglia / 2 : sc.griglia; return o + Math.round((v - o) / s) * s; }
   const centroCasella = (v, o) => { const s = scena().griglia; return o + (Math.floor((v - o) / s) + 0.5) * s; };
+
+  // i cursori del tavolo mostrano la parte piena (il colore arriva fino al pallino)
+  const pRange = el => el.style.setProperty('--p', ((+el.value - +el.min) / ((+el.max - +el.min) || 1) * 100) + '%');
+  document.addEventListener('input', e => { if (e.target.matches?.('input.tv-rg')) pRange(e.target); });
 
   /* ---------- token ---------- */
   const tokEl = id => document.querySelector(`.tv-tok[data-id="${id}"]`);
@@ -1265,21 +1396,21 @@ dialog.dlg.tv-side.tv-sw{width:min(940px,calc(100vw - 80px));inset:56px auto aut
     const off = n => +(((n % sc.griglia) + sc.griglia) % sc.griglia).toFixed(2);
     const d = openDlg(`<form method="dialog" novalidate><h3>Impostazioni della pagina</h3><p class="hint" style="margin-top:0">Cambia i valori guardando la mappa: la griglia si aggiorna subito. Fai combaciare una casella con un quadretto della mappa.</p>
       <div class="tv-f"><label>Nome</label><input name="nome" maxlength="80" value="${esc(sc.nome)}">
-        <label>Casella (px)</label><span style="display:flex;gap:8px;align-items:center"><input type="range" name="g" min="10" max="300" step="0.01" value="${sc.griglia}" style="flex:1"><input type="number" name="gn" min="8" max="600" step="any" value="${sc.griglia}" style="width:84px"></span>
-        <label>Sposta ↔</label><span style="display:flex;gap:8px;align-items:center"><input type="range" name="gx" min="0" max="${sc.griglia}" step="0.01" value="${off(sc.griglia_x)}" style="flex:1"><input type="number" name="gxn" step="any" value="${off(sc.griglia_x)}" style="width:84px"></span>
-        <label>Sposta ↕</label><span style="display:flex;gap:8px;align-items:center"><input type="range" name="gy" min="0" max="${sc.griglia}" step="0.01" value="${off(sc.griglia_y)}" style="flex:1"><input type="number" name="gyn" step="any" value="${off(sc.griglia_y)}" style="width:84px"></span>
+        <label>Casella (px)</label><span style="display:flex;gap:8px;align-items:center"><input type="range" class="tv-rg" name="g" min="10" max="300" step="0.01" value="${sc.griglia}" style="flex:1"><input type="number" name="gn" min="8" max="600" step="any" value="${sc.griglia}" style="width:84px"></span>
+        <label>Sposta ↔</label><span style="display:flex;gap:8px;align-items:center"><input type="range" class="tv-rg" name="gx" min="0" max="${sc.griglia}" step="0.01" value="${off(sc.griglia_x)}" style="flex:1"><input type="number" name="gxn" step="any" value="${off(sc.griglia_x)}" style="width:84px"></span>
+        <label>Sposta ↕</label><span style="display:flex;gap:8px;align-items:center"><input type="range" class="tv-rg" name="gy" min="0" max="${sc.griglia}" step="0.01" value="${off(sc.griglia_y)}" style="flex:1"><input type="number" name="gyn" step="any" value="${off(sc.griglia_y)}" style="width:84px"></span>
         <label></label><small class="hint" style="margin:0">Accetta i decimali (es. 55,45). Con le frecce ↑↓ nei riquadri: un pixel; con Maiusc tenuto, un decimo.</small>
         <label></label><button type="button" class="btn sm" data-k="allinea" style="justify-self:start">📐 Allinea alla griglia disegnata sulla mappa</button>
         <label>Metri per casella</label><input type="number" name="m" min="0.1" max="1000" step="any" value="${sc.metri}">
         <label>Mostra la griglia</label><label style="justify-content:flex-start"><input type="checkbox" name="vis" ${sc.griglia_visibile ? 'checked' : ''}> sì</label>
         <label>Colore</label><input type="color" name="gc" value="${esc(sc.griglia_colore || '#000000')}">
-        <label>Opacità</label><span style="display:flex;gap:8px;align-items:center"><input type="range" name="go" min="0" max="100" step="1" value="${sc.griglia_opacita ?? 38}" style="flex:1"><output name="gov" style="width:42px;text-align:right">${sc.griglia_opacita ?? 38}%</output></span></div>
+        <label>Opacità</label><span style="display:flex;gap:8px;align-items:center"><input type="range" class="tv-rg" name="go" min="0" max="100" step="1" value="${sc.griglia_opacita ?? 38}" style="flex:1"><output name="gov" style="width:42px;text-align:right">${sc.griglia_opacita ?? 38}%</output></span></div>
       <menu><button value="cancel" class="btn ghost" formnovalidate>Annulla</button><button value="ok" class="btn primary">Salva</button></menu></form>`, 'tv-gd');
-    const v = n => d.querySelector(`[name=${n}]`);
+    const v = n => d.querySelector(`[name=${n}]`); d.querySelectorAll('.tv-rg').forEach(pRange);
     const prova = () => {
       sc.griglia = clamp(+v('gn').value || sc.griglia, 8, 600); sc.griglia_x = +v('gxn').value || 0; sc.griglia_y = +v('gyn').value || 0; sc.metri = +v('m').value || 1.5; sc.griglia_visibile = v('vis').checked;
       sc.griglia_colore = v('gc').value; sc.griglia_opacita = +v('go').value; v('gov').value = sc.griglia_opacita + '%';
-      v('gx').max = v('gy').max = sc.griglia; disegnaGriglia(); disegnaToken();
+      v('gx').max = v('gy').max = sc.griglia; disegnaGriglia(); disegnaToken(); d.querySelectorAll('.tv-rg').forEach(pRange);
     };
     v('g').oninput = () => { v('gn').value = v('g').value; prova(); };
     v('gn').oninput = () => { v('g').value = v('gn').value; prova(); };
@@ -1526,13 +1657,14 @@ dialog.dlg.tv-side.tv-sw{width:min(940px,calc(100vw - 80px));inset:56px auto aut
     if (T.tool === 'allinea' && isDM() && sc) return barraAllinea(b);
     if (T.tool !== 'maschera' || !isDM() || !sc) { b.hidden = true; disegnaRighelli(); return; }
     if (!T.mraggio) T.mraggio = sc.griglia;
-    const on = sc.maschera, dis = on ? '' : 'disabled', bt = (k, l, sel, tip) => `<button type="button" data-m="${k}" class="${sel ? 'on' : ''}" ${k === 'attiva' ? '' : dis} title="${esc(tip || l)}">${l}</button>`;
-    b.innerHTML = `<label title="Con la maschera attiva la mappa parte tutta coperta per i giocatori"><input type="checkbox" data-m="attiva" ${on ? 'checked' : ''}> Maschera attiva</label><span class="sep"></span>
-      ${bt('svela', '👁 Svela', T.mmodo === 'svela', 'Togli la maschera dove trascini')}${bt('copri', '◼ Copri', T.mmodo === 'copri', 'Rimetti la maschera dove trascini')}<span class="sep"></span>
-      ${bt('rett', '▭ Rettangolo', T.mforma === 'rett')}${bt('pennello', '🖌 Pennello', T.mforma === 'pennello')}
-      ${T.mforma === 'pennello' ? `<label title="Grandezza del pennello, in caselle">Grandezza <input type="range" data-m="raggio" min="0.25" max="10" step="0.25" value="${T.mraggio / sc.griglia}" ${dis}><output data-m="rv">${fmtCas(T.mraggio / sc.griglia)}</output></label>` : ''}<span class="sep"></span>
-      ${bt('annulla', '↶ Annulla', false, 'Annulla l\'ultima modifica')}${bt('tutto', 'Svela tutto', false)}${bt('niente', 'Copri tutto', false)}<span class="sep"></span>
-      <label title="Solo per te: i giocatori la vedono sempre nera">Tonalità <input type="range" data-m="tono" min="0.1" max="0.95" step="0.05" value="${tono()}" ${dis}></label>`;
+    const on = sc.maschera, dis = on ? '' : 'disabled', bt = (k, ic, l, sel, tip) => `<button type="button" data-m="${k}" class="${sel ? 'on' : ''}" ${dis} title="${esc(tip || l)}">${ic ? svg(ic) : ''}<span>${l}</span></button>`;
+    b.innerHTML = `<div class="g"><label class="sw" title="Con la maschera attiva la mappa parte tutta coperta per i giocatori"><input type="checkbox" data-m="attiva" ${on ? 'checked' : ''}><span class="tg" aria-hidden="true"></span>Maschera</label></div>
+      <div class="g seg">${bt('svela', 'occhio', 'Svela', T.mmodo === 'svela', 'Togli la maschera dove trascini')}${bt('copri', 'velo', 'Copri', T.mmodo === 'copri', 'Rimetti la maschera dove trascini')}</div>
+      <div class="g seg">${bt('rett', 'rett', 'Rettangolo', T.mforma === 'rett')}${bt('pennello', 'penn', 'Pennello', T.mforma === 'pennello')}</div>
+      ${T.mforma === 'pennello' ? `<div class="g sl" title="Grandezza del pennello, in caselle"><span>Pennello</span><input type="range" class="tv-rg" data-m="raggio" min="0.25" max="10" step="0.25" value="${T.mraggio / sc.griglia}" ${dis} aria-label="Grandezza del pennello"><output data-m="rv">${fmtCas(T.mraggio / sc.griglia)}</output></div>` : ''}
+      <div class="g">${bt('annulla', 'undo', '', false, 'Annulla l\'ultima modifica').replace('<span></span>', '')}${bt('tutto', '', 'Svela tutto', false)}${bt('niente', '', 'Copri tutto', false)}</div>
+      <div class="g sl" title="Solo per te: i giocatori la vedono sempre nera">${svg('luna')}<input type="range" class="tv-rg" data-m="tono" min="0.1" max="0.95" step="0.05" value="${tono()}" ${dis} aria-label="Tono della maschera (solo per te)"><output data-m="tv">${Math.round(tono() * 100)}%</output></div>`;
+    b.classList.toggle('spenta', !on); b.querySelectorAll('.tv-rg').forEach(pRange);
     b.hidden = false;
     b.querySelector('[data-m=attiva]').onchange = async e => {
       const r = await SB.from('tavolo_scene').update({ maschera: e.target.checked }).eq('id', sc.id).select().single();
@@ -1541,7 +1673,7 @@ dialog.dlg.tv-side.tv-sw{width:min(940px,calc(100vw - 80px));inset:56px auto aut
     };
     b.querySelectorAll('button[data-m]').forEach(x => x.onclick = () => azioneMaschera(x.dataset.m).catch(err => toast(err.message, 'err')));
     const rg = b.querySelector('[data-m=raggio]'); if (rg) rg.oninput = () => { T.mraggio = +rg.value * sc.griglia; b.querySelector('[data-m=rv]').value = fmtCas(+rg.value); };
-    const tn = b.querySelector('[data-m=tono]'); tn.oninput = () => { try { localStorage.setItem(TONO, tn.value); } catch { } const c = $('#tv-fog'); if (c) c.style.opacity = tn.value; };
+    const tn = b.querySelector('[data-m=tono]'); tn.oninput = () => { try { localStorage.setItem(TONO, tn.value); } catch { } const c = $('#tv-fog'); if (c) c.style.opacity = tn.value; b.querySelector('[data-m=tv]').value = Math.round(tn.value * 100) + '%'; };
   }
   // allineamento: si disegna un riquadro su N×N caselle della griglia stampata sulla mappa
   function quadroAllinea(a, v) {
@@ -1691,7 +1823,7 @@ dialog.dlg.tv-side.tv-sw{width:min(940px,calc(100vw - 80px));inset:56px auto aut
   // una scheda di 5e per personaggio e per PNG; il giocatore compila la sua, il DM tutte. Si aggiornano dal vivo.
   const CAR = [['for', 'FOR', 'Forza'], ['des', 'DES', 'Destrezza'], ['cos', 'COS', 'Costituzione'], ['int', 'INT', 'Intelligenza'], ['sag', 'SAG', 'Saggezza'], ['car', 'CAR', 'Carisma']];
   const ABIL = [['acrobazia', 'Acrobazia', 'des'], ['addestrare', 'Addestrare animali', 'sag'], ['arcano', 'Arcano', 'int'], ['atletica', 'Atletica', 'for'], ['furtivita', 'Furtività', 'des'], ['indagare', 'Indagare', 'int'], ['inganno', 'Inganno', 'car'], ['intimidire', 'Intimidire', 'car'], ['intrattenere', 'Intrattenere', 'car'], ['intuizione', 'Intuizione', 'sag'], ['medicina', 'Medicina', 'sag'], ['natura', 'Natura', 'int'], ['percezione', 'Percezione', 'sag'], ['persuasione', 'Persuasione', 'car'], ['rapidita', 'Rapidità di mano', 'des'], ['religione', 'Religione', 'int'], ['sopravvivenza', 'Sopravvivenza', 'sag'], ['storia', 'Storia', 'int']];
-  const CONDIZIONI = ['Accecato', 'Affascinato', 'Afferrato', 'Assordato', 'Avvelenato', 'Incapacitato', 'Invisibile', 'Paralizzato', 'Pietrificato', 'Prono', 'Spaventato', 'Stordito', 'Svenuto', 'Trattenuto', 'Concentrazione'];
+  const CONDIZIONI = ['Accecato', 'Affascinato', 'Afferrato', 'Assordato', 'Avvelenato', 'Incapacitato', 'Invisibile', 'Paralizzato', 'Pietrificato', 'Prono', 'Spaventato', 'Stordito', 'Svenuto', 'Trattenuto', 'Concentrazione', 'Morto'];
   const BASE = { for: 10, des: 10, cos: 10, int: 10, sag: 10, car: 10 };
   const num = v => v === '' || v == null || isNaN(+v) ? null : +v;
   const segno = n => (n < 0 ? '−' : '+') + Math.abs(n);
@@ -1734,7 +1866,7 @@ dialog.dlg.tv-side.tv-sw{width:min(940px,calc(100vw - 80px));inset:56px auto aut
   const fotoScheda = s => s.immagine || S.ents?.get(s.entita)?.portrait?.thumb || null;
   const completaS = (prima, nuovo) => { const o = completa(prima, nuovo); if (prima?.dati && !nuovo.dati) o.dati = prima.dati; return o; };
   // condizioni sui token, con un effetto che vedono tutti
-  const COND_FX = { Accecato: ['🙈', 'accecato'], Affascinato: ['💗', 'affascinato'], Afferrato: ['✊', 'afferrato'], Assordato: ['🔇', 'assordato'], Avvelenato: ['🤢', 'avvelenato'], Incapacitato: ['⛔', 'incapacitato'], Invisibile: ['👻', 'invisibile'], Paralizzato: ['⚡', 'paralizzato'], Pietrificato: ['🗿', 'pietrificato'], Prono: ['🛌', 'prono'], Spaventato: ['😱', 'spaventato'], Stordito: ['💫', 'stordito'], Svenuto: ['💤', 'svenuto'], Trattenuto: ['⛓️', 'trattenuto'], Concentrazione: ['🔮', 'concentrazione'] };
+  const COND_FX = { Accecato: ['🙈', 'accecato'], Affascinato: ['💗', 'affascinato'], Afferrato: ['✊', 'afferrato'], Assordato: ['🔇', 'assordato'], Avvelenato: ['🤢', 'avvelenato'], Incapacitato: ['⛔', 'incapacitato'], Invisibile: ['👻', 'invisibile'], Paralizzato: ['⚡', 'paralizzato'], Pietrificato: ['🗿', 'pietrificato'], Prono: ['🛌', 'prono'], Spaventato: ['😱', 'spaventato'], Stordito: ['💫', 'stordito'], Svenuto: ['💤', 'svenuto'], Trattenuto: ['⛓️', 'trattenuto'], Concentrazione: ['🔮', 'concentrazione'], Morto: ['💀', 'morto'] };
   const condTok = t => Array.isArray(t?.condizioni) ? t.condizioni : [];
   async function condSuToken(t, lista) {
     const r = await SB.from('tavolo_token').update({ condizioni: lista }).eq('id', t.id).select().single();
@@ -1757,7 +1889,10 @@ dialog.dlg.tv-side.tv-sw{width:min(940px,calc(100vw - 80px));inset:56px auto aut
   async function cambiaPF(t, delta) {
     const p = pfDi(t); if (!p || !delta) return;
     if (p.tok || (isDM() && p.s.tipo === 'png')) {
-      const r = await SB.from('tavolo_token').update({ pf: clamp(p.pf + delta, 0, p.max), pf_max: p.max }).eq('id', t.id).select().single();
+      const pf = clamp(p.pf + delta, 0, p.max), ch = { pf, pf_max: p.max }, cc = condTok(t);
+      // un nemico a 0 punti ferita è sconfitto: prende la condizione Morto, e la perde se lo si cura
+      if (!t.giocatore && 'condizioni' in t) { if (!pf && !cc.includes('Morto')) ch.condizioni = [...cc, 'Morto']; else if (pf && cc.includes('Morto')) ch.condizioni = cc.filter(c => c !== 'Morto'); }
+      const r = await SB.from('tavolo_token').update(ch).eq('id', t.id).select().single();
       if (r.error) return toast(r.error.message, 'err');
       T.tok.set(t.id, completa(T.tok.get(t.id), r.data)); disegnaToken(); aggiornaFinestra(); return;
     }
