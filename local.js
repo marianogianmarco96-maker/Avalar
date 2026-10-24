@@ -296,7 +296,7 @@
 #tools.open .ttog{background:#00000055;border-color:#e7cf9a}
 #tools .ttog .tr{font-size:.6rem;padding:3px 6px;border-radius:9px;border:1px solid #e7cf9a99;color:#f7e3ae;margin-left:2px}
 #tools .trole{padding:4px 6px 6px;color:#e7cf9a;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid #e7cf9a40;margin-bottom:2px}
-#tools #themeBtn{width:auto;height:36px;border-radius:18px;font-size:inherit;padding:0 12px 0 9px}
+#themeBtn{flex:none;font-size:1.05rem}
 @media (max-width:1280px){#tools .ttog .tl{display:none}}
 @media (max-width:620px){#tools .ttog{width:34px;padding:0;justify-content:center}#tools .ttog .tr{display:none}}`;
   function applyRoleUI() {
@@ -326,12 +326,11 @@
     if (adm) mk('✎', 'Segnala a Claude', 'Segnala un errore o correggi i contenuti del sito', () => { setOpen(false); reportDlg(); });
     if (adm) mk('👥', 'Account giocatori', 'Password dei giocatori: vederle o cambiarle', () => { setOpen(false); accountsDlg(); });
     if (adm) { mk('⇪', 'Importa', 'Importa una sessione o dei dati', () => { setOpen(false); location.hash = '#/import'; }); mk('⛁', 'Backup', 'Scarica o ripristina un backup', () => { setOpen(false); location.hash = '#/backup'; }); }
-    theme.className = 'tbtn'; list.append(theme);
     const out = mk('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M16 8l4 4-4 4"/><path d="M20 12H9"/></svg>', 'Esci', 'Esci e torna alla schermata di accesso', async () => { out.disabled = true; ls.del('cdnd_remember'); ls.del('cdnd_pkey'); if (DB) { try { const t = DB.transaction('kv', 'readwrite'); t.objectStore('kv').delete('key'); await done(t); } catch { } } location.reload(); });
     box.append(tog, list); top.append(box);
-    // il tema mostra anche la scritta, l'app cambia solo l'icona
-    const tl = () => { if (!theme.querySelector('.tl')) { const ic = theme.textContent; theme.innerHTML = `<span class="ti" aria-hidden="true">${ic}</span><span class="tl">${ic === '☀' ? 'Tema chiaro' : 'Tema scuro'}</span>`; } };
-    tl(); new MutationObserver(tl).observe(theme, { childList: true, characterData: true, subtree: true });
+    // il tasto del tema resta in vista nella barra in alto, accanto alla ricerca
+    const tt = () => { const sc = document.documentElement.dataset.theme === 'dark'; theme.title = theme.ariaLabel = sc ? 'Passa al tema chiaro' : 'Passa al tema scuro'; };
+    tt(); new MutationObserver(tt).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     const sp = document.createElement('span'); sp.style.cssText = 'flex:1 1 0;min-width:0'; sp.className = 'spacer-top'; top.insertBefore(sp, document.getElementById('srchBtn'));
   }
 
