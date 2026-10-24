@@ -131,7 +131,45 @@
 dialog.dlg.tv-gd{margin:auto 12px 12px auto;width:min(420px,94vw)}
 dialog.dlg.tv-gd::backdrop{background:transparent}
 .tv-tabs{display:flex;gap:4px;margin:4px 0 10px;flex-wrap:wrap}
+.tv-fog{position:absolute;left:0;top:0;pointer-events:none}
+.tv-tok.turno{box-shadow:0 0 0 4px #f2b51d,0 0 18px 6px #f2b51daa}
+.tv-turno{position:absolute;left:10px;bottom:10px;z-index:8;width:270px;max-height:min(420px,70%);display:flex;flex-direction:column;background:#211a16f2;color:#f1e4c8;border:1px solid #e7cf9a44;border-radius:10px;box-shadow:0 6px 24px #000a}
+.tv-turno[hidden]{display:none!important}
+.tv-th{display:flex;align-items:center;gap:6px;padding:8px 8px 6px 12px;border-bottom:1px solid #ffffff1a}
+.tv-th b{flex:1;font-family:var(--display);font-size:.85rem;letter-spacing:.05em;color:var(--gold2)}
+.tv-th small{color:#c9b89a;font-size:.8rem}
+.tv-th button,.tv-tf button{all:unset;cursor:pointer;padding:4px 8px;border-radius:6px;font:600 .82rem var(--body);color:#f1e4c8;background:#ffffff14}
+.tv-th button:hover,.tv-tf button:hover{background:#ffffff2a}
+.tv-th button.go{background:#7d2530}
+.tv-tl{overflow-y:auto;padding:4px 0;flex:1}
+.tv-tr{display:flex;align-items:center;gap:8px;padding:5px 10px;border-left:3px solid transparent}
+.tv-tr.att{background:#f2b51d26;border-left-color:#f2b51d}
+.tv-tr.hid{opacity:.6;font-style:italic}
+.tv-tr i{width:28px;height:28px;border-radius:50%;flex:none;background:var(--c,#7d2530) center/cover no-repeat;border:2px solid var(--c,#7d2530);display:flex;align-items:center;justify-content:center;font:700 .7rem var(--display);font-style:normal;color:#fff}
+.tv-tr span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tv-tr input{width:48px;font:inherit;text-align:right;padding:2px 4px;border-radius:4px;border:1px solid #ffffff33;background:#0005;color:#fff}
+.tv-tr em{font-style:normal;font-weight:700;min-width:30px;text-align:right}
+.tv-tr button{all:unset;cursor:pointer;color:#c9b89a;padding:0 3px}
+.tv-tr button:hover{color:#fff}
+.tv-tf{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:7px 10px 9px;border-top:1px solid #ffffff1a}
+.tv-tf input{width:52px;font:inherit;padding:3px 6px;border-radius:4px;border:1px solid #ffffff33;background:#0005;color:#fff}
+.tv-tvuoto{padding:10px 12px;color:#c9b89a;font-size:.9rem}
+.tv-mbar{position:absolute;left:10px;top:10px;z-index:8;display:flex;flex-wrap:wrap;align-items:center;gap:6px;max-width:calc(100% - 250px);background:#211a16f2;color:#f1e4c8;border:1px solid #e7cf9a44;border-radius:10px;padding:6px 8px;box-shadow:0 6px 24px #000a}
+.tv-mbar[hidden]{display:none!important}
+.tv-mbar button{all:unset;cursor:pointer;padding:5px 9px;border-radius:6px;font:600 .82rem var(--body);background:#ffffff14;white-space:nowrap}
+.tv-mbar button:hover{background:#ffffff2a}
+.tv-mbar button.on{background:#7d2530;box-shadow:inset 0 0 0 1px #e7cf9a88}
+.tv-mbar button[disabled]{opacity:.4;pointer-events:none}
+.tv-mbar label{display:flex;align-items:center;gap:5px;font-size:.85rem;white-space:nowrap}
+.tv-mbar .sep{width:1px;align-self:stretch;background:#ffffff22}
+.tv-mbar input[type=range]{width:90px}
+.tv-msg{border-left:3px solid var(--line2);padding:3px 8px;font-size:.98rem;line-height:1.35;overflow-wrap:anywhere}
+.tv-msg b{color:var(--wine)}
+:root[data-theme=dark] .tv-msg b{color:var(--gold2)}
+.tv-msg small{color:var(--mute);margin-left:4px}
+.tv-msg.w{border-left-color:#8a5cc7;background:#8a5cc714;font-style:italic}
 @media (max-width:820px){
+  .tv-turno{width:min(250px,calc(100% - 20px));max-height:45%}
   .tv-rail{width:44px}.tv-rail button{width:34px;height:34px}
   .tv-chat{position:absolute;right:0;bottom:0;left:0;width:auto;max-height:62%;z-index:12;border-left:0;border-top:2px solid var(--gold);box-shadow:0 -8px 24px #0008;border-radius:12px 12px 0 0}
   .tv-chip b{max-width:34vw}
@@ -168,6 +206,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
 
   const ERR = {
     offline: ['Serve internet', 'Il tavolo funziona solo online: controlla la connessione e riprova.'],
+    sql2: ['Manca l\'aggiornamento del database', 'Per la maschera, l\'ordine del turno e la chat va eseguito una volta lo script <code>tavolo/tappa-2.sql</code> nell\'SQL Editor di Supabase.'],
     sql: ['Manca la preparazione del database', 'Va eseguito una volta lo script <code>tavolo/tappa-1.sql</code> nell\'SQL Editor di Supabase.'],
     conferma: ['Manca un\'impostazione su Supabase', 'In Supabase apri <b>Authentication › Sign In / Providers › Email</b>, togli la spunta a <b>Confirm email</b> e salva. Poi ricarica questa pagina.'],
     nonpronto: ['Il tavolo non è ancora pronto per te', 'Il DM deve aprire il Tavolo una volta dal suo accesso: così prepara anche il tuo. Poi ricarica questa pagina.'],
@@ -225,10 +264,11 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
       if (u.error) falliti.push(g.name);
     }
     if (falliti.length) toast('Non sono riuscito a preparare il tavolo per: ' + falliti.join(', '), 'err');
+    const mb = await SB.from('tavolo_membri').select('user_id,nome,giocatore'); if (!mb.error) T.membri = mb.data;
   }
 
   /* ---------- stato ---------- */
-  const T = { mini: new Map(), me: null, info: null, stato: null, scene: new Map(), tok: new Map(), tiri: [], vista: null, view: { x: 0, y: 0, z: 1 }, tool: 'muovi', ch: null, rulers: new Map(), live: false, url: new Map(), online: [] };
+  const T = { mask: [], turno: [], chat: [], mmodo: 'svela', mforma: 'rett', mraggio: 0, mini: new Map(), me: null, info: null, stato: null, scene: new Map(), tok: new Map(), tiri: [], vista: null, view: { x: 0, y: 0, z: 1 }, tool: 'muovi', ch: null, rulers: new Map(), live: false, url: new Map(), online: [] };
   const isDM = () => T.me?.ruolo === 'dm';
   const scena = () => T.scene.get(T.vista) || null;
   const puoMuovere = t => isDM() || (t.giocatore && t.giocatore === T.me.giocatore);
@@ -240,7 +280,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     T.diceInit = false; T.drag = null; T.online = []; T.live = false; T.tool = 'muovi';
     setView(`<h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Tavolo</h1>
       <div class="tv"><nav class="tv-rail" id="tv-rail" aria-label="Strumenti del tavolo"><span class="sp"></span><span class="tv-on" id="tv-on" title="Connessione…"></span></nav>
-      <div class="tv-wrap"><div class="tv-stage" id="tv-stage"><div class="tv-empty"><div><p>Apro il tavolo…</p></div></div></div><div class="tv-top" id="tv-top"></div></div>
+      <div class="tv-wrap"><div class="tv-stage" id="tv-stage"><div class="tv-empty"><div><p>Apro il tavolo…</p></div></div></div><div class="tv-top" id="tv-top"></div><div class="tv-mbar" id="tv-mbar" hidden></div><div class="tv-turno" id="tv-turno" hidden></div></div>
       <aside class="tv-chat" id="tv-dice" hidden></aside><div class="tv-pages" id="tv-pages" hidden></div></div>`);
     suggerimenti($('.tv'));
     const fit = () => {
@@ -261,7 +301,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
       await carica();
       if (!vivo) return;
       collega();
-      disegnaBarra(); disegnaDadi(); mostraScena(true);
+      disegnaBarra(); disegnaDadi(); mostraScena(true); if (T.turno.length) apriTurno(true);
       if (isDM()) preparaGiocatori(info).catch(e => toast(e.tv ? ERR[e.tv][1].replace(/<[^>]+>/g, '') : e.message, 'err'));
     } catch (e) {
       console.error(e);
@@ -280,18 +320,23 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
   function stato(cls, txt) { const o = $('#tv-on'); if (!o) return; o.className = 'tv-on ' + cls; o.title = txt; }
 
   async function carica() {
-    const [st, sc, tk, tr, mb] = await Promise.all([
+    const [st, sc, tk, tr, mb, ms, tu, ct] = await Promise.all([
       SB.from('tavolo_stato').select('*').eq('id', 1).maybeSingle(),
       SB.from('tavolo_scene').select('*').order('creata'),
       SB.from('tavolo_token').select('*'),
       SB.from('tavolo_tiri').select('*').order('id', { ascending: false }).limit(80),
-      SB.from('tavolo_membri').select('user_id,nome,giocatore')
+      SB.from('tavolo_membri').select('user_id,nome,giocatore'),
+      SB.from('tavolo_maschera').select('*').order('id'),
+      SB.from('tavolo_turno').select('*'),
+      SB.from('tavolo_chat').select('*').order('id', { ascending: false }).limit(80)
     ]);
+    for (const r of [ms, tu, ct]) if (r.error && sqlMancante(r.error)) throw errore('sql2');
     T.stato = chk(st) || { scena: null, canale: 'avalar' };
     T.scene = new Map(chk(sc).map(s => [s.id, s]));
     T.tok = new Map(chk(tk).map(t => [t.id, t]));
     T.tiri = chk(tr).reverse();
     T.membri = chk(mb);
+    T.mask = chk(ms); T.turno = chk(tu); T.chat = chk(ct).reverse();
     if (!isDM() || !T.scene.has(T.vista)) T.vista = T.stato.scena;
   }
 
@@ -311,7 +356,8 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
       if (isDM() && !$('#tv-pages')?.hidden) pannelloMappe(true);
     });
     pg('tavolo_stato', async p => {
-      const prima = T.stato.scena; T.stato = p.new;
+      const prima = T.stato.scena, primoTurno = T.stato.turno; T.stato = p.new;
+      if (primoTurno !== T.stato.turno || p.old?.round !== p.new.round) { disegnaTurno(); disegnaToken(); }
       if (prima === T.stato.scena) return;
       if (isDM()) { disegnaBarra(); return; }
       // i giocatori seguono il DM nella nuova scena: scena e token arrivano solo ora che è attiva
@@ -320,6 +366,22 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     });
     pg('tavolo_tiri', p => { if (T.tiri.some(x => x.id === p.new.id)) return; T.tiri.push(p.new); if (T.tiri.length > 120) T.tiri.shift(); nuovoTiro(p.new); }, 'INSERT');
     pg('tavolo_tiri', p => { T.tiri = T.tiri.filter(x => x.id !== p.old.id); disegnaLog(); }, 'DELETE');
+    pg('tavolo_chat', p => { if (T.chat.some(x => x.id === p.new.id)) return; T.chat.push(p.new); if (T.chat.length > 120) T.chat.shift(); nuovoMsg(p.new); }, 'INSERT');
+    pg('tavolo_maschera', p => {
+      if (p.eventType === 'DELETE') T.mask = T.mask.filter(m => m.id !== p.old.id);
+      else if (!T.mask.some(m => m.id === p.new.id)) T.mask.push(p.new);
+      programmaMaschera();
+    });
+    pg('tavolo_turno', p => {
+      if (!T.turno.length && p.eventType === 'INSERT') apriTurno(true);
+      if (p.eventType === 'DELETE') T.turno = T.turno.filter(x => x.id !== p.old.id);
+      else { const i = T.turno.findIndex(x => x.id === p.new.id); if (i >= 0) T.turno[i] = p.new; else T.turno.push(p.new); }
+      disegnaTurno(); disegnaToken();
+    });
+    // voci dell'ordine del turno che il DM ha appena nascosto o mostrato: i giocatori ricaricano l'elenco
+    ch.on('broadcast', { event: 'turno' }, async () => {
+      if (isDM()) return; const r = await SB.from('tavolo_turno').select('*'); if (!r.error) { T.turno = r.data; disegnaTurno(); disegnaToken(); }
+    });
     ch.on('broadcast', { event: 'trascina' }, ({ payload: m }) => {
       const t = T.tok.get(m.id), el = tokEl(m.id); if (!t || !el || T.drag?.id === m.id) return;
       el.classList.add('live'); el.style.left = m.x + 'px'; el.style.top = m.y + 'px';
@@ -341,7 +403,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
       if (s === 'SUBSCRIBED') {
         T.live = true; stato('ok', 'Collegato'); ch.track({ nome: T.me.nome });
         // dopo un'interruzione riprendo tutto: nel frattempo qualcuno può aver mosso o tirato
-        if (!primo) { await carica().catch(() => { }); disegnaBarra(); mostraScena(false); disegnaLog(); }
+        if (!primo) { await carica().catch(() => { }); disegnaBarra(); mostraScena(false); disegnaLog(); disegnaTurno(); }
         primo = false;
       } else if (s === 'CHANNEL_ERROR' || s === 'TIMED_OUT' || s === 'CLOSED') { T.live = false; if (T.ch === ch) stato('ko', 'Riconnessione…'); }
     });
@@ -355,6 +417,8 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     mano: '<path d="M8 13V6a1.5 1.5 0 0 1 3 0v5.5M11 11V4.5a1.5 1.5 0 0 1 3 0V11M14 11V6a1.5 1.5 0 0 1 3 0v6M17 10a1.5 1.5 0 0 1 3 0v5a6 6 0 0 1-6 6h-1.6a6 6 0 0 1-4.7-2.3l-3.2-4a1.5 1.5 0 0 1 2.3-1.9L8 14.5"/>',
     rig: '<path d="M3 16.5L16.5 3 21 7.5 7.5 21z"/><path d="M7 12.5l2 2M10 9.5l2.5 2.5M13 6.5l2 2"/>',
     dado: '<path d="M12 2.5l8.2 4.75v9.5L12 21.5l-8.2-4.75v-9.5z"/><path d="M12 7.5l4.3 7.5H7.7z"/>',
+    tur: '<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 5l1.5-1v4M3.5 11.5c.4-.6 1-1 1.7-.9.8.1 1.1.9.7 1.5L3.5 14.5h2.6M3.6 17h1.6a.9.9 0 0 1 0 1.8H4.4h.8a.9.9 0 0 1 0 1.8H3.5"/>',
+    mas: '<path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.5"/><path d="M4 20L20 4"/>',
     tok: '<circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/>',
     gri: '<path d="M4 4h16v16H4zM4 9.33h16M4 14.67h16M9.33 4v16M14.67 4v16"/>',
     pag: '<rect x="3" y="7" width="13" height="13" rx="1.5"/><path d="M7 4h12.5A1.5 1.5 0 0 1 21 5.5V17"/><path d="M5.5 17l3.5-4 2.5 2.5 1.5-1.5 2 3"/>'
@@ -365,8 +429,9 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     const r = $('#tv-rail'); if (!r) return;
     const b = (act, tip, k, on) => `<button type="button" data-act="${act}" data-tip="${esc(tip)}" aria-label="${esc(tip)}" class="${on ? 'on' : ''}">${svg(k)}</button>`;
     let h = b('tv-sel', 'Seleziona e sposta i token (S)', 'sel', T.tool === 'muovi') + b('tv-mano', 'Sposta la mappa (M)', 'mano', T.tool === 'mano')
-      + b('tv-righello', 'Righello (R)', 'rig', T.tool === 'righello') + b('tv-dadi', 'Dadi e chat', 'dado', !$('#tv-dice')?.hidden);
-    if (isDM() && scena()) h += '<hr><span class="lbl">DM</span>' + b('tv-token', 'Aggiungi un token', 'tok') + b('tv-griglia', 'Impostazioni della pagina', 'gri');
+      + b('tv-righello', 'Righello (R)', 'rig', T.tool === 'righello') + b('tv-dadi', 'Dadi e chat', 'dado', !$('#tv-dice')?.hidden)
+      + b('tv-turno', 'Ordine del turno', 'tur', !$('#tv-turno')?.hidden);
+    if (isDM() && scena()) h += '<hr><span class="lbl">DM</span>' + b('tv-maschera', 'Maschera: nascondi e svela la mappa', 'mas', T.tool === 'maschera') + b('tv-token', 'Aggiungi un token', 'tok') + b('tv-griglia', 'Impostazioni della pagina', 'gri');
     h += `<span class="sp"></span><span class="tv-cnt" id="tv-cnt">${T.online.length > 1 ? T.online.length : ''}</span><span class="tv-on ${T.live ? 'ok' : ''}" id="tv-on" title="${T.live ? esc('Al tavolo ora: ' + T.online.join(', ')) : 'Connessione…'}"></span>`;
     r.innerHTML = h;
   }
@@ -385,10 +450,11 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
       'tv-porta': () => porta(T.vista),
       'tv-pagine': () => pannelloMappe($('#tv-pages').hidden), 'tv-nuova': () => dlgNuovaScena(),
       'tv-token': () => dlgToken(), 'tv-griglia': () => dlgGriglia(),
+      'tv-turno': () => apriTurno($('#tv-turno').hidden), 'tv-maschera': () => strumento(T.tool === 'maschera' ? 'muovi' : 'maschera'),
       ...dadiActs()
     };
   }
-  function strumento(t) { T.tool = t; const st = $('#tv-stage'); if (st) { st.classList.toggle('rul', t === 'righello'); st.classList.toggle('mano', t === 'mano'); } disegnaRail(); }
+  function strumento(t) { T.tool = t; const st = $('#tv-stage'); if (st) { st.classList.toggle('rul', t === 'righello' || t === 'maschera'); st.classList.toggle('mano', t === 'mano'); } disegnaRail(); barraMaschera(); }
   function tasti(e) {
     if (e.target.closest('input,textarea,select,[contenteditable]') || e.ctrlKey || e.metaKey || e.altKey || document.querySelector('dialog[open]')) return;
     const k = e.key.toLowerCase();
@@ -504,13 +570,13 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
       return;
     }
     st.innerHTML = `<div class="tv-world" id="tv-world"><img class="tv-map" id="tv-map" alt="" draggable="false" width="${sc.larghezza}" height="${sc.altezza}" style="width:${sc.larghezza}px;height:${sc.altezza}px">
-      <svg class="tv-grid" id="tv-grid" width="${sc.larghezza}" height="${sc.altezza}"></svg><div id="tv-toks"></div></div>
+      <svg class="tv-grid" id="tv-grid" width="${sc.larghezza}" height="${sc.altezza}"></svg><div id="tv-toks"></div><canvas class="tv-fog" id="tv-fog" style="width:${sc.larghezza}px;height:${sc.altezza}px"></canvas></div>
       <svg class="tv-ov" id="tv-ov"></svg><div class="tv-zoom"><button type="button" data-z="1.25" data-tip="Ingrandisci" aria-label="Ingrandisci">+</button><small id="tv-zp"></small><button type="button" data-z="0.8" data-tip="Rimpicciolisci" aria-label="Rimpicciolisci">−</button><button type="button" data-z="0" data-tip="Mostra tutta la mappa" aria-label="Mostra tutta la mappa">⤢</button></div>`;
     st.querySelectorAll('[data-z]').forEach(b => b.onclick = () => { const z = +b.dataset.z; if (!z) adatta(); else { const r = st.getBoundingClientRect(); zoom(z, r.width / 2, r.height / 2); } });
     const img = $('#tv-map');
     if (sc.mappa) urlMappa(sc.mappa).then(u => { if (img.isConnected) img.src = u; }).catch(e => toast('Mappa non caricata: ' + e.message, 'err'));
     else img.removeAttribute('src');
-    disegnaGriglia(); disegnaToken(); interazioni(st);
+    disegnaGriglia(); disegnaMaschera(); disegnaToken(); interazioni(st); barraMaschera();
     if (centra || !T.viewOk) adatta(); else applicaVista();
   }
   function disegnaGriglia() {
@@ -542,7 +608,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
   function disegnaToken() {
     const box = $('#tv-toks'), sc = scena(); if (!box || !sc) return;
     const lista = [...T.tok.values()].filter(t => t.scena === sc.id).sort((a, b) => b.misura - a.misura || (a.giocatore ? 1 : 0) - (b.giocatore ? 1 : 0));
-    const vivi = new Set(lista.map(t => t.id));
+    const vivi = new Set(lista.map(t => t.id)), att = T.turno?.find(x => x.id === T.stato?.turno);
     box.querySelectorAll('.tv-tok').forEach(el => { if (!vivi.has(el.dataset.id)) el.remove(); });
     lista.forEach((t, i) => {
       let el = tokEl(t.id);
@@ -550,6 +616,9 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
       const lato = t.misura * sc.griglia;
       el.style.cssText = `left:${t.x}px;top:${t.y}px;width:${lato}px;height:${lato}px;--c:${t.colore};--fs:${Math.max(11, sc.griglia * 0.22)}px;z-index:${i + 1}${t.immagine ? `;background-image:url("${t.immagine.replace(/"/g, '%22')}")` : ''}`;
       if (T.drag?.id !== t.id) el.classList.remove('live');
+      el.classList.toggle('turno', !!att && att.token === t.id);
+      // i giocatori non vedono i token altrui sotto la maschera
+      el.hidden = !isDM() && t.giocatore !== T.me.giocatore && coperto(t.x + lato / 2, t.y + lato / 2);
       el.classList.toggle('hid', !!t.nascosto); el.classList.toggle('mine', !!t.giocatore && t.giocatore === T.me.giocatore); el.classList.toggle('dm', isDM());
       el.querySelector('.ini').textContent = t.immagine ? '' : iniziali(t.nome);
       el.querySelector('b').textContent = t.nome + (t.nascosto ? ' (nascosto)' : '');
@@ -562,7 +631,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
   /* ---------- trascinamenti, righello, zoom ---------- */
   function interazioni(st) {
     if (st.__tv) return; st.__tv = true;
-    const punti = new Map(); let pan = null, pinch = null, rul = null, ultimo = 0;
+    const punti = new Map(); let pan = null, pinch = null, rul = null, mas = null, ultimo = 0;
     st.addEventListener('wheel', e => { e.preventDefault(); const r = st.getBoundingClientRect(); zoom(Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0015)), e.clientX - r.left, e.clientY - r.top); }, { passive: false });
     st.addEventListener('pointerdown', e => {
       if (e.button > 0 || !scena() || e.target.closest('.tv-zoom,.tv-pop')) return;
@@ -570,11 +639,12 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
       punti.set(e.pointerId, { x: e.clientX, y: e.clientY });
       try { st.setPointerCapture(e.pointerId); } catch { }
       if (punti.size === 2) { // due dita: ingrandimento, annullo il resto
-        annullaDrag(); rul = fineRighello(rul, true); pan = null;
+        annullaDrag(); rul = fineRighello(rul, true); pan = null; if (mas) { mas = null; disegnaMaschera(); disegnaRighelli(); }
         const [a, b] = [...punti.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), z: T.view.z, v: { ...T.view } }; return;
       }
       if (punti.size > 2) return;
       const p = mondo(st, e), el = e.target.closest('.tv-tok'), t = el && T.tok.get(el.dataset.id);
+      if (T.tool === 'maschera' && isDM()) { mas = inizioMaschera(p); return; }
       if (T.tool === 'righello') { const sc = scena(); const a = { x: centroCasella(p.x, sc.griglia_x), y: centroCasella(p.y, sc.griglia_y) }; rul = { pts: [a, a] }; mostraRighello(rul.pts); return; }
       if (t && T.tool !== 'mano' && puoMuovere(t)) { T.drag = { id: t.id, dx: p.x - t.x, dy: p.y - t.y, x0: t.x, y0: t.y, sx: e.clientX, sy: e.clientY, mosso: false }; el.classList.add('drag'); return; }
       if (t && T.tool !== 'mano' && isDM()) T.clic = { id: t.id, sx: e.clientX, sy: e.clientY };
@@ -589,6 +659,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
         T.view = { z, x: cx - (cx - T.view.x) * k, y: cy - (cy - T.view.y) * k }; applicaVista(); return;
       }
       const p = mondo(st, e);
+      if (mas) { muoviMaschera(mas, p); return; }
       if (rul) {
         const sc = scena(); rul.pts[1] = { x: centroCasella(p.x, sc.griglia_x), y: centroCasella(p.y, sc.griglia_y) }; mostraRighello(rul.pts);
         const now = Date.now(); if (now - ultimo > 60) { ultimo = now; manda('righello', { uid: T.me.uid, nome: T.me.nome, pts: rul.pts }); }
@@ -608,13 +679,14 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
       punti.delete(e.pointerId);
       if (pinch) { if (punti.size < 2) pinch = null; return; }
       st.classList.remove('pan'); pan = null;
+      if (mas) { const m = mas; mas = null; fineMaschera(m); return; }
       if (rul) { rul = fineRighello(rul); return; }
       if (T.clic) { const c = T.clic; T.clic = null; if (e.type === 'pointerup') menuToken(c.id, e); }
       if (T.drag) {
         const d = T.drag; T.drag = null; const el = tokEl(d.id), t = T.tok.get(d.id);
         if (el) el.classList.remove('drag');
         if (!t) return;
-        if (!d.mosso) { if (isDM() && e.type === 'pointerup') menuToken(t.id, e); return; }
+        if (!d.mosso) { if (e.type === 'pointerup') menuToken(t.id, e); return; }
         const sc = scena(), x = aggancia(d.x, sc.griglia_x, t.misura), y = aggancia(d.y, sc.griglia_y, t.misura);
         t.x = x; t.y = y; disegnaToken(); manda('trascina', { id: t.id, x, y });
         const r = await SB.from('tavolo_token').update({ x, y }).eq('id', t.id).select().maybeSingle();
@@ -651,12 +723,21 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     const t = T.tok.get(id), st = $('#tv-stage'); if (!t || !st) return;
     chiudiPop();
     const r = st.getBoundingClientRect(), pop = document.createElement('div'); pop.className = 'tv-pop';
+    const ini = `<div class="row"><span>Iniziativa</span><input type="number" data-k="imod" placeholder="mod" style="width:56px;font:inherit;padding:3px 5px;border-radius:4px;border:1px solid var(--line2);background:var(--paper2);color:var(--ink)"><button class="btn sm" data-k="ini" title="Tira 1d20 + modificatore e aggiungi all'ordine del turno">🎲 Tira</button></div>`;
+    if (!isDM()) {
+      // il giocatore, sul proprio token, può solo tirare l'iniziativa
+      pop.innerHTML = `<b>${esc(t.nome || 'Token')}</b>${ini}`;
+      st.append(pop);
+      pop.style.left = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6) + 'px'; pop.style.top = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6) + 'px';
+      pop.querySelector('[data-k=ini]').onclick = () => { chiudiPop(); iniziativa(t, pop.querySelector('[data-k=imod]').value); };
+      return;
+    }
     const gioc = (T.info.giocatori || []).map(g => `<option value="${esc(g.id)}" ${t.giocatore === g.id ? 'selected' : ''}>${esc(g.name)}</option>`).join('');
     pop.innerHTML = `<b>${esc(t.nome || 'Token')}</b>
       <button class="btn sm" data-k="nasc">${t.nascosto ? '👁 Mostra ai giocatori' : '🙈 Nascondi ai giocatori'}</button>
       <div class="row"><span>Misura</span><button class="btn sm" data-k="meno">−</button><span>${t.misura.toLocaleString('it-IT')}</span><button class="btn sm" data-k="piu">+</button></div>
       <div class="row"><span>Lo muove</span><select data-k="gioc"><option value="">solo il DM</option>${gioc}</select></div>
-      <button class="btn sm" data-k="nome">✎ Rinomina</button><button class="btn sm danger" data-k="via">Elimina</button>`;
+      ${ini}<button class="btn sm" data-k="nome">✎ Rinomina</button><button class="btn sm danger" data-k="via">Elimina</button>`;
     st.append(pop);
     const x = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6), y = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6);
     pop.style.left = x + 'px'; pop.style.top = y + 'px';
@@ -669,6 +750,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     pop.querySelector('[data-k=meno]').onclick = () => salva({ misura: t.misura > 1 ? t.misura - 1 : 0.5 });
     pop.querySelector('[data-k=piu]').onclick = () => salva({ misura: t.misura < 1 ? 1 : Math.min(10, t.misura + 1) });
     pop.querySelector('[data-k=gioc]').onchange = ev => salva({ giocatore: ev.target.value || null });
+    pop.querySelector('[data-k=ini]').onclick = () => { chiudiPop(); iniziativa(t, pop.querySelector('[data-k=imod]').value); };
     pop.querySelector('[data-k=nome]').onclick = () => { const n = prompt('Nome del token', t.nome); if (n != null) salva({ nome: n.trim().slice(0, 60) }); };
     pop.querySelector('[data-k=via]').onclick = async () => {
       chiudiPop(); if (!await ask(`Eliminare il token **${t.nome || 'senza nome'}**?`, { ok: 'Elimina', danger: true, title: 'Elimina token' })) return;
@@ -812,7 +894,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
       <div class="row"><input type="number" id="tv-mod" placeholder="Mod." style="width:64px" aria-label="Modificatore"><button class="btn sm" data-act="tv-vant" title="2d20, tiene il più alto">Vantaggio</button><button class="btn sm" data-act="tv-svant" title="2d20, tiene il più basso">Svantaggio</button></div>
       <div class="row"><input type="text" id="tv-mot" placeholder="Per cosa? (facoltativo)" style="flex:1" maxlength="80" aria-label="Motivo"></div>
       <label><input type="checkbox" id="tv-priv"> ${isDM() ? 'Tiro nascosto (solo io)' : 'Tiro segreto (solo io e il DM)'}</label>
-      <div class="row"><input type="text" id="tv-f" placeholder="/r 1d20+5  ·  /gr per un tiro segreto" style="flex:1" autocomplete="off" aria-label="Scrivi un tiro"><button class="btn sm primary" data-act="tv-tira" style="flex:none">Invia</button></div></div>`;
+      <div class="row"><input type="text" id="tv-f" placeholder="Scrivi… /r 1d20+5 · /gr · /w nome" style="flex:1" autocomplete="off" aria-label="Scrivi un tiro"><button class="btn sm primary" data-act="tv-tira" style="flex:none">Invia</button></div></div>`;
     $('#tv-f').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); scrivi(); } };
     disegnaBarra(); disegnaLog();
   }
@@ -825,11 +907,23 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
     };
   }
   // la riga in fondo alla chat, come su Roll20: /r 1d20+5, /gr (o /gmroll) per un tiro segreto, oppure solo la formula
+  // /w nome testo (o /w dm testo) sussurra; il resto è un messaggio per tutti, oppure un tiro se è solo una formula
   async function scrivi() {
     const f = $('#tv-f'), t = f.value.trim(); if (!t) return;
-    const m = t.match(/^\/(r|roll|gr|gmroll)\s+(.+)$/i), formula = m ? m[2] : t, segreto = m ? /^g/i.test(m[1]) : undefined;
-    if (!/^[\sd\d+\-khl]+$/i.test(formula)) { toast('Per ora la chat accetta i tiri: scrivi per esempio /r 1d20+5', 'err'); return; }
-    if (await tira(formula, null, segreto)) f.value = '';
+    const m = t.match(/^\/(r|roll|gr|gmroll)\s+(.+)$/i);
+    if (m || /^\d*d\d+[\sd\d+\-khl]*$/i.test(t)) { if (await tira(m ? m[2] : t, null, m ? /^g/i.test(m[1]) : undefined)) f.value = ''; return; }
+    let testo = t, per = null;
+    const w = t.match(/^\/w\s+(\S+)\s+([\s\S]+)$/i);
+    if (w) {
+      const chi = norm(w[1]);
+      if (chi === 'dm' || chi === 'gm') per = 'dm';
+      else { const g = T.membri.find(x => x.giocatore && (norm(x.nome) === chi || x.giocatore === chi)); if (!g) { toast('Nessun giocatore si chiama «' + w[1] + '»', 'err'); return; } per = g.giocatore; }
+      testo = w[2];
+    } else if (/^\//.test(t)) { toast('Comandi: /r 1d20+5 · /gr 1d20 (segreto) · /w nome messaggio', 'err'); return; }
+    const r = await SB.rpc('tavolo_scrivi', { p_testo: testo, p_per: per });
+    if (r.error) { toast(r.error.message, 'err'); return; }
+    f.value = ''; const row = Array.isArray(r.data) ? r.data[0] : r.data;
+    if (row && !T.chat.some(x => x.id === row.id)) { T.chat.push(row); nuovoMsg(row); }
   }
   async function tira(formula, extra, segreto) {
     formula = String(formula || '').trim(); if (!formula) return false;
@@ -848,13 +942,182 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
   }
   const rigaTiro = t => `<div class="tv-roll ${esito(t)} ${t.privato ? 'priv' : ''} ${t.autore === T.me.uid ? 'me' : ''}"><div class="h"><span>${esc(t.nome)}${t.privato ? ' 🙈' : ''}</span><small>${new Date(t.creato).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</small></div>
     ${t.motivo ? `<div class="m">${esc(t.motivo)}</div>` : ''}<div class="r"><span class="d">${esc(t.formula)} → ${esc(t.dettaglio)}</span><span class="t">${t.totale}</span></div></div>`;
+  const nomeGioc = id => id === 'dm' ? 'DM' : T.membri.find(x => x.giocatore === id)?.nome || id;
+  const rigaMsg = m => `<div class="tv-msg ${m.per ? 'w' : ''}"><b>${esc(m.nome)}</b>${m.per ? `<small>${m.autore === T.me.uid ? 'sussurra a ' + esc(nomeGioc(m.per)) : 'ti sussurra'}</small>` : ''}: ${esc(m.testo)}</div>`;
   function disegnaLog() {
     const l = $('#tv-log'); if (!l) return;
-    l.innerHTML = T.tiri.map(rigaTiro).join('') || '<p class="hint">Nessun tiro ancora. I tiri li vedono tutti al tavolo.</p>';
+    const tutto = [...T.tiri.map(t => [t.creato, rigaTiro(t)]), ...(T.chat || []).map(m => [m.creato, rigaMsg(m)])].sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
+    l.innerHTML = tutto.map(x => x[1]).join('') || '<p class="hint">Nessun messaggio ancora. Tiri e messaggi li vedono tutti al tavolo.</p>';
     l.scrollTop = 1e9;
+  }
+  function nuovoMsg(m) {
+    disegnaLog();
+    if ($('#tv-dice')?.hidden && m.autore !== T.me.uid) toast(`${m.nome}${m.per ? ' (sussurro)' : ''}: ${m.testo.slice(0, 120)}`);
   }
   function nuovoTiro(t) {
     disegnaLog();
     if ($('#tv-dice')?.hidden) toast(`${t.nome}${t.motivo ? ' (' + t.motivo + ')' : ''}: ${t.formula} = ${t.totale}`);
+  }
+  /* ---------- maschera (DM): la mappa coperta che si svela a pezzi, come la nebbia di Roll20 ---------- */
+  const NERO = '#0b0807', FOG_MAX = 2048;
+  function applica(g, o) {
+    g.globalCompositeOperation = o.svela ? 'destination-out' : 'source-over';
+    g.fillStyle = g.strokeStyle = NERO;
+    const p = o.punti;
+    if (o.forma === 'rett') { g.fillRect(p[0], p[1], p[2], p[3]); return; }
+    g.lineWidth = o.raggio * 2; g.lineCap = g.lineJoin = 'round';
+    g.beginPath(); g.moveTo(p[0], p[1]);
+    for (let i = 2; i < p.length; i += 2) g.lineTo(p[i], p[i + 1]);
+    if (p.length === 2) g.lineTo(p[0] + 0.01, p[1]);
+    g.stroke();
+  }
+  function disegnaMaschera() {
+    const c = $('#tv-fog'), sc = scena(); if (!c || !sc) return;
+    if (!sc.maschera) { c.hidden = true; return; }
+    // la tela è più piccola della mappa (al massimo 2048 px di lato): basta per i bordi e pesa poco
+    const k = Math.min(1, FOG_MAX / Math.max(sc.larghezza, sc.altezza)), W = Math.max(1, Math.round(sc.larghezza * k)), H = Math.max(1, Math.round(sc.altezza * k));
+    if (c.width !== W || c.height !== H) { c.width = W; c.height = H; }
+    const g = c.getContext('2d', { willReadFrequently: true });
+    g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, W, H);
+    g.setTransform(k, 0, 0, k, 0, 0); g.fillStyle = NERO; g.fillRect(0, 0, sc.larghezza, sc.altezza);
+    for (const o of T.mask.filter(m => m.scena === sc.id).sort((a, b) => a.id - b.id)) applica(g, o);
+    c.hidden = false; c.style.opacity = isDM() ? 0.5 : 1; T.fogK = k;
+  }
+  function coperto(x, y) {
+    const sc = scena(), c = $('#tv-fog'); if (!sc?.maschera || !c || c.hidden) return false;
+    const k = T.fogK || 1, d = c.getContext('2d', { willReadFrequently: true }).getImageData(clamp(Math.floor(x * k), 0, c.width - 1), clamp(Math.floor(y * k), 0, c.height - 1), 1, 1).data;
+    return d[3] > 128;
+  }
+  function programmaMaschera() { cancelAnimationFrame(T.mraf); T.mraf = requestAnimationFrame(() => { disegnaMaschera(); disegnaToken(); }); }
+  function barraMaschera() {
+    const b = $('#tv-mbar'), sc = scena(); if (!b) return;
+    if (T.tool !== 'maschera' || !isDM() || !sc) { b.hidden = true; disegnaRighelli(); return; }
+    if (!T.mraggio) T.mraggio = sc.griglia;
+    const on = sc.maschera, dis = on ? '' : 'disabled', bt = (k, l, sel, tip) => `<button type="button" data-m="${k}" class="${sel ? 'on' : ''}" ${k === 'attiva' ? '' : dis} title="${esc(tip || l)}">${l}</button>`;
+    b.innerHTML = `<label title="Con la maschera attiva la mappa parte tutta coperta per i giocatori"><input type="checkbox" data-m="attiva" ${on ? 'checked' : ''}> Maschera attiva</label><span class="sep"></span>
+      ${bt('svela', '👁 Svela', T.mmodo === 'svela', 'Togli la maschera dove trascini')}${bt('copri', '◼ Copri', T.mmodo === 'copri', 'Rimetti la maschera dove trascini')}<span class="sep"></span>
+      ${bt('rett', '▭ Rettangolo', T.mforma === 'rett')}${bt('pennello', '🖌 Pennello', T.mforma === 'pennello')}
+      ${T.mforma === 'pennello' ? `<label>Misura <input type="range" data-m="raggio" min="0.25" max="4" step="0.25" value="${T.mraggio / sc.griglia}" ${dis}></label>` : ''}<span class="sep"></span>
+      ${bt('annulla', '↶ Annulla', false, 'Annulla l\'ultima modifica')}${bt('tutto', 'Svela tutto', false)}${bt('niente', 'Copri tutto', false)}`;
+    b.hidden = false;
+    b.querySelector('[data-m=attiva]').onchange = async e => {
+      const r = await SB.from('tavolo_scene').update({ maschera: e.target.checked }).eq('id', sc.id).select().single();
+      if (r.error) { toast(r.error.message, 'err'); e.target.checked = !e.target.checked; return; }
+      T.scene.set(sc.id, r.data); programmaMaschera(); barraMaschera();
+    };
+    b.querySelectorAll('button[data-m]').forEach(x => x.onclick = () => azioneMaschera(x.dataset.m).catch(err => toast(err.message, 'err')));
+    const rg = b.querySelector('[data-m=raggio]'); if (rg) rg.oninput = () => { T.mraggio = +rg.value * sc.griglia; };
+  }
+  async function azioneMaschera(k) {
+    const sc = scena(); if (!sc) return;
+    if (k === 'svela' || k === 'copri') T.mmodo = k;
+    else if (k === 'rett' || k === 'pennello') T.mforma = k;
+    else {
+      const mie = T.mask.filter(m => m.scena === sc.id);
+      if (k === 'annulla') { const u = mie.sort((a, b) => b.id - a.id)[0]; if (!u) return; chk(await SB.from('tavolo_maschera').delete().eq('id', u.id)); T.mask = T.mask.filter(m => m.id !== u.id); }
+      else {
+        if (k === 'niente' && !await ask('Ricoprire tutta la mappa?', { ok: 'Copri tutto', title: 'Maschera' })) return;
+        if (mie.length) chk(await SB.from('tavolo_maschera').delete().in('id', mie.map(m => m.id)));
+        T.mask = T.mask.filter(m => m.scena !== sc.id);
+        if (k === 'tutto') await salvaMaschera({ scena: sc.id, svela: true, forma: 'rett', punti: [0, 0, sc.larghezza, sc.altezza] });
+      }
+      programmaMaschera();
+    }
+    barraMaschera();
+  }
+  async function salvaMaschera(o) {
+    const r = await SB.from('tavolo_maschera').insert(o).select().single();
+    if (r.error) { toast(r.error.message, 'err'); programmaMaschera(); return; }
+    if (!T.mask.some(m => m.id === r.data.id)) T.mask.push(r.data);
+    programmaMaschera();
+  }
+  function inizioMaschera(p) {
+    const sc = scena(); if (!sc) return null;
+    if (!sc.maschera) { toast('Attiva prima la maschera su questa mappa.'); return null; }
+    const m = { svela: T.mmodo === 'svela', forma: T.mforma, a: p, b: p, punti: [Math.round(p.x), Math.round(p.y)], raggio: T.mraggio || sc.griglia };
+    if (m.forma === 'pennello') { const c = $('#tv-fog'); if (c) applica(c.getContext('2d'), m); }
+    return m;
+  }
+  function muoviMaschera(m, p) {
+    if (!m) return;
+    if (m.forma === 'rett') {
+      m.b = p; disegnaRighelli();
+      const ov = $('#tv-ov'), v = T.view, x = v.x + Math.min(m.a.x, p.x) * v.z, y = v.y + Math.min(m.a.y, p.y) * v.z;
+      if (ov) ov.insertAdjacentHTML('beforeend', `<rect x="${x}" y="${y}" width="${Math.abs(p.x - m.a.x) * v.z}" height="${Math.abs(p.y - m.a.y) * v.z}" fill="${m.svela ? '#ffffff22' : '#00000066'}" stroke="#f2b51d" stroke-width="2" stroke-dasharray="8 5"/>`);
+      return;
+    }
+    const n = m.punti.length, dx = p.x - m.punti[n - 2], dy = p.y - m.punti[n - 1];
+    if (Math.hypot(dx, dy) < m.raggio / 4) return;
+    const c = $('#tv-fog'); if (c) applica(c.getContext('2d'), { ...m, punti: [m.punti[n - 2], m.punti[n - 1], Math.round(p.x), Math.round(p.y)] });
+    m.punti.push(Math.round(p.x), Math.round(p.y));
+  }
+  function fineMaschera(m) {
+    const sc = scena(); if (!m || !sc) return;
+    disegnaRighelli();
+    if (m.forma === 'rett') {
+      const x = Math.min(m.a.x, m.b.x), y = Math.min(m.a.y, m.b.y), w = Math.abs(m.b.x - m.a.x), h = Math.abs(m.b.y - m.a.y);
+      if (w < 3 || h < 3) return;
+      return salvaMaschera({ scena: sc.id, svela: m.svela, forma: 'rett', punti: [Math.round(x), Math.round(y), Math.round(w), Math.round(h)] });
+    }
+    return salvaMaschera({ scena: sc.id, svela: m.svela, forma: 'pennello', punti: m.punti, raggio: m.raggio });
+  }
+
+  /* ---------- ordine del turno ---------- */
+  function apriTurno(apri) { const b = $('#tv-turno'); if (!b) return; b.hidden = !apri; disegnaTurno(); disegnaRail(); }
+  const ordinati = () => [...T.turno].sort((a, b) => b.valore - a.valore || (a.creato < b.creato ? -1 : 1));
+  function disegnaTurno() {
+    const b = $('#tv-turno'); if (!b || b.hidden) return;
+    const L = ordinati(), att = T.stato?.turno, mia = x => isDM() || (!!x.giocatore && x.giocatore === T.me.giocatore);
+    const avanti = L.length && (isDM() || L.some(x => x.id === att && x.giocatore === T.me.giocatore));
+    b.innerHTML = `<div class="tv-th"><b>Ordine del turno</b><small>Round ${T.stato?.round || 1}</small>${avanti ? '<button type="button" class="go" data-k="av" title="Passa al prossimo">Avanti ▶</button>' : ''}<button type="button" data-k="x" aria-label="Chiudi">✕</button></div>
+      <div class="tv-tl">${L.map(x => `<div class="tv-tr ${x.id === att ? 'att' : ''} ${x.nascosto ? 'hid' : ''}" data-id="${x.id}"><i style="--c:${esc(x.colore || '#7d2530')};${x.immagine ? `background-image:url('${x.immagine}')` : ''}">${x.immagine ? '' : esc(iniziali(x.nome))}</i><span title="${esc(x.nome)}">${esc(x.nome)}</span>
+        ${mia(x) ? `<input type="number" step="1" value="${x.valore}" aria-label="Iniziativa di ${esc(x.nome)}">${isDM() ? `<button type="button" data-k="nasc" title="${x.nascosto ? 'Mostra ai giocatori' : 'Nascondi ai giocatori'}">${x.nascosto ? '🙈' : '👁'}</button>` : ''}<button type="button" data-k="via" title="Togli dall'ordine">✕</button>` : `<em>${x.valore}</em>`}</div>`).join('')
+        || '<div class="tv-tvuoto">Nessuno ancora. Clicca un token e premi «Tira» accanto a Iniziativa.</div>'}</div>
+      ${isDM() ? '<div class="tv-tf"><input type="text" data-k="nn" placeholder="Nome" style="flex:1;width:auto"><input type="number" data-k="nv" placeholder="0"><button type="button" data-k="add">+ Aggiungi</button><button type="button" data-k="svuota">Svuota</button></div>' : ''}`;
+    b.querySelector('[data-k=x]').onclick = () => apriTurno(false);
+    const av = b.querySelector('[data-k=av]');
+    if (av) av.onclick = async () => { const r = await SB.rpc('tavolo_turno_avanti'); if (r.error) return toast(r.error.message, 'err'); };
+    b.querySelectorAll('.tv-tr').forEach(row => {
+      const x = T.turno.find(y => y.id === row.dataset.id); if (!x) return;
+      const inp = row.querySelector('input');
+      if (inp) inp.onchange = () => salvaTurno(x.id, { valore: +inp.value || 0 });
+      const v = row.querySelector('[data-k=via]');
+      if (v) v.onclick = async () => { const r = await SB.from('tavolo_turno').delete().eq('id', x.id); if (r.error) return toast(r.error.message, 'err'); T.turno = T.turno.filter(y => y.id !== x.id); disegnaTurno(); disegnaToken(); manda('turno', {}); };
+      const n = row.querySelector('[data-k=nasc]');
+      if (n) n.onclick = async () => { await salvaTurno(x.id, { nascosto: !x.nascosto }); manda('turno', {}); };
+    });
+    const add = b.querySelector('[data-k=add]');
+    if (add) add.onclick = async () => {
+      const nome = b.querySelector('[data-k=nn]').value.trim(); if (!nome) { b.querySelector('[data-k=nn]').focus(); return; }
+      const r = await SB.from('tavolo_turno').insert({ nome: nome.slice(0, 60), valore: +b.querySelector('[data-k=nv]').value || 0, colore: '#5b6670' }).select().single();
+      if (r.error) return toast(r.error.message, 'err');
+      if (!T.turno.some(y => y.id === r.data.id)) T.turno.push(r.data); disegnaTurno();
+    };
+    const sv = b.querySelector('[data-k=svuota]');
+    if (sv) sv.onclick = async () => {
+      if (!T.turno.length || !await ask('Svuotare l\'ordine del turno?', { ok: 'Svuota', title: 'Ordine del turno' })) return;
+      const r = await SB.from('tavolo_turno').delete().in('id', T.turno.map(y => y.id)); if (r.error) return toast(r.error.message, 'err');
+      await SB.from('tavolo_stato').update({ turno: null, round: 1 }).eq('id', 1);
+      T.turno = []; T.stato.turno = null; T.stato.round = 1; disegnaTurno(); disegnaToken(); manda('turno', {});
+    };
+  }
+  async function salvaTurno(id, ch) {
+    const r = await SB.from('tavolo_turno').update(ch).eq('id', id).select().single();
+    if (r.error) { toast(r.error.message, 'err'); disegnaTurno(); return; }
+    const i = T.turno.findIndex(y => y.id === id); if (i >= 0) T.turno[i] = r.data; disegnaTurno();
+  }
+  // 1d20 + modificatore, tirato dal server come ogni dado, e il risultato entra (o si aggiorna) nell'ordine del turno
+  async function iniziativa(t, mod) {
+    const m = Math.trunc(+mod || 0), f = '1d20' + (m ? (m > 0 ? '+' : '') + m : '');
+    const r = await SB.rpc('tavolo_tira', { p_formula: f, p_motivo: 'Iniziativa · ' + (t.nome || 'token'), p_privato: !!t.nascosto });
+    if (r.error) return toast(r.error.message, 'err');
+    const tiro = Array.isArray(r.data) ? r.data[0] : r.data;
+    if (tiro && !T.tiri.some(x => x.id === tiro.id)) { T.tiri.push(tiro); nuovoTiro(tiro); }
+    const ex = T.turno.find(x => x.token === t.id);
+    const q = ex ? SB.from('tavolo_turno').update({ valore: tiro.totale }).eq('id', ex.id).select().single()
+      : SB.from('tavolo_turno').insert({ nome: t.nome || 'Token', valore: tiro.totale, token: t.id, immagine: t.immagine, colore: t.colore, giocatore: t.giocatore, nascosto: !!t.nascosto }).select().single();
+    const r2 = await q; if (r2.error) return toast(r2.error.message, 'err');
+    const i = T.turno.findIndex(x => x.id === r2.data.id); if (i >= 0) T.turno[i] = r2.data; else T.turno.push(r2.data);
+    apriTurno(true); toast(`Iniziativa di ${t.nome || 'token'}: ${tiro.totale}`);
   }
 })();
