@@ -124,6 +124,13 @@
 .tv-roll .h span{font-weight:600}
 .tv-roll .h small{color:var(--mute)}
 .tv-roll .m{color:var(--ink2);font-style:italic}
+.tv-roll .kt{display:flex;align-items:center;justify-content:space-between;gap:6px;margin:2px 0 1px;font:700 .74rem var(--body);letter-spacing:.04em;text-transform:uppercase}
+.tv-roll.k-att{border-left:4px solid #2f5d8a}.tv-roll.k-att .kt b{color:#2f5d8a}
+.tv-roll.k-dan{border-left:4px solid #9b2c2c;margin-left:14px}.tv-roll.k-dan .kt b{color:#9b2c2c}
+.tv-roll.k-ts{border-left:4px solid #3d7a6e}.tv-roll.k-ts .kt b{color:#3d7a6e}
+.tv-roll.k-ext{border-left:4px solid #6b3fa0;margin-left:14px}.tv-roll.k-ext .kt b{color:#6b3fa0}
+.tv-roll .es{font-size:.7rem;padding:1px 7px;border-radius:9px;text-transform:none;letter-spacing:0;white-space:nowrap}
+.tv-roll .es.si{background:#2e6b3a;color:#fff}.tv-roll .es.no{background:#6d6d6d;color:#fff}.tv-roll .es.crit{background:#b8860b;color:#fff}
 .tv-roll .r{display:flex;align-items:center;gap:8px;margin-top:2px}
 .tv-roll .d{flex:1;color:var(--mute);font-size:.85rem;overflow-wrap:anywhere}
 .tv-roll .t{font:700 1.45rem/1 var(--display);color:var(--wine);min-width:36px;text-align:right}
@@ -933,7 +940,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     const pg = (table, f, event = '*') => ch.on('postgres_changes', { event, schema: 'public', table }, f);
     pg('tavolo_token', p => {
       if (p.eventType === 'DELETE') { T.tok.delete(p.old.id); disegnaToken(); return; }
-      const t = completa(T.tok.get(p.new.id), p.new); if (T.drag?.id === t.id) return; T.tok.set(t.id, t); disegnaToken();
+      const t = completa(T.tok.get(p.new.id), p.new); if (T.drag?.id === t.id) return; T.tok.set(t.id, t); disegnaToken(); togliMorti();
       if (T.sv?.tok === t.id) aggiornaFinestra();
     });
     pg('tavolo_pf_gruppo', p => { if (p.eventType === 'DELETE') T.pfg.delete(p.old.giocatore); else T.pfg.set(p.new.giocatore, p.new); disegnaToken(); });
@@ -941,7 +948,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     pg('tavolo_schede', p => {
       if (!T.schede) return;
       if (p.eventType === 'DELETE') { T.schede.delete(p.old.id); dopoScheda(p.old.id); return; }
-      arrivaScheda(p.new);
+      arrivaScheda(p.new); togliMorti();
     });
     // schede di PNG che il DM ha appena mostrato o nascosto: i giocatori ricaricano l'elenco
     ch.on('broadcast', { event: 'schede' }, () => { if (!isDM() && T.schede) ricaricaSchede(); });
@@ -966,6 +973,8 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     });
     pg('tavolo_tiri', p => { if (T.tiri.some(x => x.id === p.new.id)) return; T.tiri.push(p.new); if (T.tiri.length > 120) T.tiri.shift(); nuovoTiro(p.new); }, 'INSERT');
     pg('tavolo_tiri', p => { T.tiri = T.tiri.filter(x => x.id !== p.old.id); disegnaLog(); }, 'DELETE');
+    // l'esito dell'attacco (colpito, mancato) il server lo scrive sul tiro subito dopo averlo tirato
+    pg('tavolo_tiri', p => { const i = T.tiri.findIndex(x => x.id === p.new.id); if (i < 0) return; T.tiri[i] = p.new; disegnaLog(); }, 'UPDATE');
     pg('tavolo_chat', p => { if (T.chat.some(x => x.id === p.new.id)) return; T.chat.push(p.new); if (T.chat.length > 120) T.chat.shift(); nuovoMsg(p.new); }, 'INSERT');
     pg('tavolo_chat', p => { T.chat = T.chat.filter(x => x.id !== p.old.id); disegnaLog(); }, 'DELETE');
     pg('tavolo_maschera', p => {
@@ -1370,7 +1379,8 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       if (T.tool === 'allinea' && isDM()) { T.al = { a: p, b: p }; disegnaRighelli(); return; }
       if (T.tool === 'righello') { const sc = scena(); const a = { x: centroCasella(p.x, sc.griglia_x), y: centroCasella(p.y, sc.griglia_y) }; rul = { pts: [a, a] }; mostraRighello(rul.pts); return; }
       if (t && T.tool !== 'mano' && puoMuovere(t) && T.passo) annullaPasso();
-      if (t && T.tool !== 'mano' && puoMuovere(t) && !isDM() && suoTurno(t) && movimentoDi(t).resta <= 0) { toast(`${t.nome || 'Il token'} ha finito il movimento di questo turno.`, 'err'); return; }
+      // nel suo turno, finito il movimento non si sposta più (il DM può forzare tenendo premuto Alt)
+      if (t && T.tool !== 'mano' && puoMuovere(t) && suoTurno(t) && !(isDM() && e.altKey) && movimentoDi(t).resta < 1.49) { avvisoFermo(t); return; }
       if (t && T.tool !== 'mano' && puoMuovere(t)) { T.drag = { id: t.id, dx: p.x - t.x, dy: p.y - t.y, x0: t.x, y0: t.y, sx: e.clientX, sy: e.clientY, mosso: false }; el.classList.add('drag'); return; }
       if (t && T.tool !== 'mano') T.clic = { id: t.id, sx: e.clientX, sy: e.clientY };
       pan = { sx: e.clientX, sy: e.clientY, x: T.view.x, y: T.view.y }; st.classList.add('pan');
@@ -1435,7 +1445,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
         const cm = suoTurno(t) ? costoMov(t, d.x0, d.y0, x, y) : { m: 0, dif: 0 }, m = cm.m;
         if (m) {
           const mv = movimentoDi(t);
-          if (!isDM() && m > mv.resta + 0.01) { tornaIndietro(t, d.x0, d.y0); mostraRighello(null); manda('righello', { uid: T.me.uid, pts: null }); toast(`Troppo lontano: ${t.nome || 'il token'} ha ancora ${metri(Math.max(mv.resta, 0))} di movimento.`, 'err'); return; }
+          if (!(isDM() && e.altKey) && m > mv.resta + 0.01) { tornaIndietro(t, d.x0, d.y0); mostraRighello(null); manda('righello', { uid: T.me.uid, pts: null }); toast(`Troppo lontano: ${t.nome || 'il token'} ha ancora ${metri(Math.max(mv.resta, 0))} di movimento.`, 'err'); return; }
           t.x = x; t.y = y; disegnaToken(); manda('trascina', { id: t.id, x, y });
           return chiediPasso(t, x, y, d.x0, d.y0, m, cm.dif);
         }
@@ -1652,6 +1662,10 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     return true;
   }
   // «Muovere Livion di 6 m?»: con la conferma il movimento si scala, altrimenti il token torna dov'era
+  function avvisoFermo(t) {
+    const mio = !isDM() && t.giocatore === T.me.giocatore;
+    toast(mio ? 'Hai esaurito il tuo movimento: non puoi muoverti oltre in questo turno.' : `${t.nome || 'Il token'} ha esaurito il movimento: non può muoversi oltre in questo turno.${isDM() ? ' (Alt + trascina per forzare)' : ''}`, 'err');
+  }
   function chiediPasso(t, x, y, x0, y0, m, dif) {
     const b = $('#tv-mbar'); if (!b) return;
     const mv = movimentoDi(t), dopo = mv.resta - m;
@@ -2070,8 +2084,26 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       }).join('');
     });
   }
-  const rigaTiro = t => `<div class="tv-roll ${esito(t)} ${t.privato ? 'priv' : ''} ${t.autore === T.me.uid ? 'me' : ''}">${tagTiro(t)}<div class="h"><span class="who">${avatar(t.autore, t.nome)}${esc(t.nome)}</span><span class="dx"><small>${ora(t.creato)}</small>${via('t', t)}</span></div>
-    ${t.motivo ? `<div class="m">${esc(t.motivo)}</div>` : ''}<div class="fo">tira ${esc(t.formula)}</div><div class="r"><span class="chips">${chips(t.dettaglio)}</span><span class="t">${t.totale}</span></div></div>`;
+  // che tiro è: per colpire, danni, danni in più… (dal motivo scritto dal tavolo, anche nel formato di prima della tappa 9)
+  const TIPI_TIRO = { '🎯': ['att', '🎯 Tiro per colpire'], '💥': ['dan', '💥 Danni'], '🧪': ['dan', '🧪 Danni in più (tiro salvezza)'] };
+  function tipoTiro(mo) {
+    mo = String(mo || ''); let m;
+    const es = x => /💥 CRITICO$/.test(x) ? ['crit', '💥 Critico!'] : /✅ COLPITO$/.test(x) ? ['si', '✅ Colpito'] : /❌ MANCATO$/.test(x) ? ['no', '❌ Mancato'] : null;
+    const senza = x => x.replace(/ · (💥 CRITICO|✅ COLPITO|❌ MANCATO|CA sconosciuta)$/, '');
+    if ((m = mo.match(/^(🎯|💥|🧪) [^·]+ · (.+)$/u))) { const [k, l] = TIPI_TIRO[m[1]]; return { k, l, d: senza(m[2]), es: es(mo) }; }
+    if ((m = mo.match(/^➕ ([^·]+) · (.+)$/u))) return { k: 'ext', l: '➕ ' + m[1].trim(), d: m[2] };
+    if ((m = mo.match(/^(.+? → .+?) · conferma del critico$/))) return { k: 'att', l: '🎲 Conferma del critico', d: m[1] };
+    if ((m = mo.match(/^(.+?) · TS ([A-Z]{3}) CD (\d+)(?: contro (.+))?$/))) return { k: 'ts', l: '🛡 Tiro salvezza', d: `${m[1]} · ${m[2]} CD ${m[3]}${m[4] ? ' contro ' + m[4] : ''}` };
+    if ((m = mo.match(/^(.+?) · (.+) \(area\)$/))) return { k: 'dan', l: '💥 Danni ad area', d: `${m[2]} · ${m[1]}` };
+    if ((m = mo.match(/^(.+? → .+?) · danni in più \(TS\)$/))) return { k: 'dan', l: '🧪 Danni in più (tiro salvezza)', d: m[1] };
+    if ((m = mo.match(/^(.+? → .+?) · danni( \(critico[^)]*\))?$/))) return { k: 'dan', l: '💥 Danni', d: m[1] + (m[2] ? ' · critico ×2' : '') };
+    if ((m = mo.match(/^(.+?) → (.+?) · (.+)$/))) return { k: 'att', l: '🎯 Tiro per colpire', d: `${m[3]} · ${m[1]} → ${m[2]}` };
+    if ((m = mo.match(/^(.+?) · Attacco: (.+)$/))) return { k: 'att', l: '🎯 Tiro per colpire', d: `${m[2]} · ${m[1]}` };
+    if ((m = mo.match(/^(.+?) · Danni: (.+)$/))) return { k: 'dan', l: '💥 Danni', d: `${m[2]} · ${m[1]}` };
+    return null;
+  }
+  const rigaTiro = t => { const tt = tipoTiro(t.motivo); return `<div class="tv-roll ${esito(t)} ${t.privato ? 'priv' : ''} ${t.autore === T.me.uid ? 'me' : ''}${tt ? ' k-' + tt.k : ''}">${tagTiro(t)}<div class="h"><span class="who">${avatar(t.autore, t.nome)}${esc(t.nome)}</span><span class="dx"><small>${ora(t.creato)}</small>${via('t', t)}</span></div>
+    ${tt ? `<div class="kt"><b>${esc(tt.l)}</b>${tt.es ? `<span class="es ${tt.es[0]}">${tt.es[1]}</span>` : ''}</div><div class="m">${esc(tt.d)}</div>` : t.motivo ? `<div class="m">${esc(t.motivo)}</div>` : ''}<div class="fo">tira ${esc(t.formula)}</div><div class="r"><span class="chips">${chips(t.dettaglio)}</span><span class="t">${t.totale}</span></div></div>`; };
   const nomeGioc = id => id === 'dm' ? 'DM' : T.membri.find(x => x.giocatore === id)?.nome || id;
   const rigaMsg = m => `<div class="tv-roll tv-msg ${m.per ? 'w' : ''} ${m.autore === T.me.uid ? 'me' : ''}">${tagMsg(m)}<div class="h"><span class="who">${avatar(m.autore, m.nome)}${esc(m.nome)}</span><span class="dx"><small>${ora(m.creato)}</small>${via('c', m)}</span></div><div class="tx">${esc(m.testo)}</div></div>`;
   async function cancella(k) {
@@ -2999,6 +3031,24 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   async function finisciTurno() {
     const r = await SB.rpc('tavolo_turno_avanti'); if (r.error) return toast(r.error.message, 'err');
     const x = T.turno.find(y => y.id === r.data); if (x) toast(`Tocca a ${x.nome || '?'}.`);
+  }
+  // chi muore (un PNG a 0 PF, o chiunque abbia la condizione «Morto») esce dall'ordine del turno: lo fa il DM
+  const togliendo = new Set();
+  function togliMorti() {
+    if (!isDM() || !T.turno?.length) return;
+    for (const x of T.turno) {
+      const t = x.token && T.tok.get(x.token); if (!t || togliendo.has(x.id)) continue;
+      const pf = pfDi(t), morto = condTok(t).includes('Morto') || (!t.giocatore && pf?.max > 0 && pf.pf === 0);
+      if (!morto) continue;
+      togliendo.add(x.id);
+      (async () => {
+        if (T.stato?.turno === x.id && T.turno.length > 1) { const r = await SB.rpc('tavolo_turno_avanti'); if (r.error) toast(r.error.message, 'err'); }
+        const r = await SB.from('tavolo_turno').delete().eq('id', x.id); togliendo.delete(x.id);
+        if (r.error) return toast(r.error.message, 'err');
+        T.turno = T.turno.filter(y => y.id !== x.id); disegnaTurno(); disegnaToken(); manda('turno', {});
+        toast(`☠ ${x.nome || t.nome || 'Il token'} è morto: tolto dall'ordine del turno.`);
+      })();
+    }
   }
   function disegnaTurno() {
     const b = $('#tv-turno'); if (!b || b.hidden) return;
