@@ -841,6 +841,9 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
 .tv-azm button>span{font-size:1.05rem;line-height:1.2;width:20px;text-align:center;flex:none}
 .tv-azm button b{display:block;font-weight:700}
 .tv-azm button small{display:block;margin-top:2px;color:#bda983;font:400 .76rem/1.25 var(--body)}
+.tv-azm button>i{width:24px;height:24px;border-radius:50%;background:var(--c,#7d2530) center/cover no-repeat;border:1.5px solid #e7cf9a88;flex:none;box-sizing:border-box}
+.tv-azm .ind{justify-content:center;margin-top:4px;color:#e7cf9a;font-weight:700}
+.tv-mbar .avv.opp{display:block;margin-top:4px;padding:5px 8px;border-radius:8px;background:#a3262f55;border:1px solid #ff8a7d66;color:#ffd9d3}
 .tv-azm .nota{margin:6px 8px 4px;padding-top:8px;border-top:1px solid #ffffff1a;color:#bda983;font:400 .74rem/1.3 var(--body)}
 /* fin dove arriva chi gioca: le caselle che il movimento rimasto copre */
 .tv-mvr{position:absolute;pointer-events:none;border:2px dashed #e7cf9acc;border-radius:12px;background:#e7cf9a1c;box-shadow:inset 0 0 40px #e7cf9a26;z-index:0;box-sizing:border-box}
@@ -943,7 +946,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
 /* barre del DM in basso al centro */
 .tv-mbar{top:auto;bottom:14px;left:50%;transform:translateX(-50%);max-width:min(880px,calc(100% - 24px));width:max-content;justify-content:center;box-sizing:border-box}
 .tv-mbar[data-t]:not([data-t=""])::before{content:attr(data-t);flex-basis:100%;text-align:center;font:600 .66rem/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--gold2);margin:2px 0}
-.tv-wrap.con-hud .tv-mbar{bottom:92px}
+.tv-wrap.con-hud .tv-mbar{bottom:var(--tv-hudh,92px)}
 
 /* schede: pulsanti uguali dappertutto */
 .tv-sch .tbar{padding:8px 10px;gap:10px}
@@ -1009,7 +1012,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
   .tv-hud .mv{flex:1 1 120px;min-width:0}
   .tv-zoom .tv-zs{display:none}
   .tv-hud .ac .tv-b{height:36px;font-size:.76rem;padding:0 9px}
-  .tv-wrap.con-hud .tv-mbar{bottom:150px}
+  .tv-wrap.con-hud .tv-mbar{bottom:var(--tv-hudh,150px)}
   .tv-mbar{bottom:8px}
   .tv-sch .tbar .zt,.tv-sch .tbar .tema{display:none}
   .tv-sch .tbar.aperta .zt,.tv-sch .tbar.aperta .tema{display:flex}
@@ -1595,14 +1598,15 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
       el.querySelector('b').textContent = t.nome + (t.nascosto ? ' (nascosto)' : '');
       el.querySelector('b').hidden = !t.nome;
       el.title = t.nome || '';
-      const cl = condTok(t).filter(c => COND_FX[c]), ck = cl.join('|');
+      const ai = aiutoPer(t), sg = [schiva(t) && ['🌀', 'Schivata'], ai && ['🤝', 'Aiutato da ' + ai.h.nome]].filter(Boolean);
+      const cl = condTok(t).filter(c => COND_FX[c]), ck = cl.join('|') + '#' + sg.map(x => x[1]).join('|');
       if (el.dataset.cnd !== ck) { // ridisegno gli effetti solo se cambiano, così le animazioni non ripartono
         el.dataset.cnd = ck;
         Object.values(COND_FX).forEach(([, c]) => el.classList.remove('c-' + c)); cl.forEach(c => el.classList.add('c-' + COND_FX[c][1]));
         el.querySelector('.fxs').innerHTML = cl.map(c => `<span class="fx f-${COND_FX[c][1]}"></span>`).join('');
-        el.querySelector('.cnd').innerHTML = cl.map(c => `<i title="${c}">${COND_FX[c][0]}</i>`).join('');
+        el.querySelector('.cnd').innerHTML = cl.map(c => `<i title="${c}">${COND_FX[c][0]}</i>`).join('') + sg.map(([ic, l]) => `<i title="${esc(l)}">${ic}</i>`).join('');
       }
-      if (cl.length) el.title += ' · ' + cl.join(', ');
+      if (cl.length || sg.length) el.title += ' · ' + [...cl, ...sg.map(x => x[1])].join(', ');
       // la barra della salute: il DM la vede su tutti, i giocatori su quelli del gruppo e sui PNG che il DM mostra
       const pf = (isDM() || !!t.giocatore || !!t.barra) && pfDi(t), bar = el.querySelector('.pf');
       bar.hidden = !pf; el.classList.toggle('barra', !!pf);
@@ -1965,12 +1969,14 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
   }
   function chiediPasso(t, x, y, x0, y0, m, dif) {
     const b = $('#tv-mbar'); if (!b) return;
-    const mv = movimentoDi(t), dopo = mv.resta - m;
-    T.passo = { id: t.id, x, y, x0, y0, m };
-    b.innerHTML = `<div class="g"><b class="tit">🏃 ${esc(t.nome || 'Token')}: ${metri(m)}${dif ? ' 🪨' : ''}</b>${dif ? `<span class="avv">${dif} ${dif === 1 ? 'casella' : 'caselle'} di terreno difficile (contano doppio).</span>` : ''}<span class="avv">${dopo >= 0 ? `Dopo restano ${metri(dopo)} di ${metri(mv.tot)}.` : `<b>Oltre il movimento di ${metri(-dopo)}.</b>`} Confermi lo spostamento?</span></div><div class="g">${dopo < 0 && suoTurno(t) && puoScattare(t) ? `<button type="button" data-k="scatta" class="on" title="Usa ${puoScattare(t) === 'bon' ? 'l\'azione bonus' : 'l\'azione'} per lo Scatto: altri ${metri(velocitaDi(schedaDi(t)))}">🏃 Scatta e conferma</button>` : ''}${dopo >= 0 || isDM() ? `<button type="button" data-k="ok" class="${dopo < 0 && suoTurno(t) && puoScattare(t) ? '' : 'on'}">✓ Conferma</button>` : ''}<button type="button" data-k="no">Annulla</button></div>`;
+    const mv = movimentoDi(t), dopo = mv.resta - m, opp = suoTurno(t) ? opportunita(t, x0, y0, x, y) : [], pd = opp.length && puoDisimpegnarsi(t);
+    T.passo = { id: t.id, x, y, x0, y0, m, dif };
+    const nomi = opp.map(o => o.nome || 'un nemico').join(', '), oppHtml = opp.length ? `<span class="avv opp">⚔️ <b>Attacco di opportunità:</b> ${esc(t.nome || 'il token')} esce dalla portata di ${esc(nomi)} senza Disimpegno. ${opp.length > 1 ? 'Possono' : 'Può'} attaccarlo con la reazione.</span>` : '';
+    b.innerHTML = `<div class="g"><b class="tit">🏃 ${esc(t.nome || 'Token')}: ${metri(m)}${dif ? ' 🪨' : ''}</b>${dif ? `<span class="avv">${dif} ${dif === 1 ? 'casella' : 'caselle'} di terreno difficile (contano doppio).</span>` : ''}<span class="avv">${dopo >= 0 ? `Dopo restano ${metri(dopo)} di ${metri(mv.tot)}.` : `<b>Oltre il movimento di ${metri(-dopo)}.</b>`} Confermi lo spostamento?</span>${oppHtml}</div><div class="g">${pd ? `<button type="button" data-k="dis" class="on" title="Usa ${pd === 'bon' ? 'l\'azione bonus' : 'l\'azione'} per il Disimpegno: niente attacchi di opportunità">🛡 Disimpegno${dopo >= 0 || isDM() ? ' e conferma' : ''}</button>` : ''}${dopo < 0 && suoTurno(t) && puoScattare(t) ? `<button type="button" data-k="scatta" class="on" title="Usa ${puoScattare(t) === 'bon' ? 'l\'azione bonus' : 'l\'azione'} per lo Scatto: altri ${metri(velocitaDi(schedaDi(t)))}">🏃 Scatta e conferma</button>` : ''}${dopo >= 0 || isDM() ? `<button type="button" data-k="ok" class="${dopo < 0 && suoTurno(t) && puoScattare(t) ? '' : 'on'}">✓ Conferma</button>` : ''}<button type="button" data-k="no">Annulla</button></div>`;
     b.classList.remove('spenta'); b.hidden = false;
     const ok = b.querySelector('[data-k=ok]'); if (ok) ok.onclick = confermaPasso;
     const sc = b.querySelector('[data-k=scatta]'); if (sc) sc.onclick = () => faiAzione(t, 'scatto', puoScattare(t)); // conferma il passo e poi scatta
+    const di = b.querySelector('[data-k=dis]'); if (di) di.onclick = async () => { await faiAzione(t, 'dis', puoDisimpegnarsi(t)); if (dopo >= 0 || isDM()) confermaPasso(); };
     disegnaToken(); // il pannello e l'area contano già questo passo
     b.querySelector('[data-k=no]').onclick = annullaPasso;
   }
@@ -1978,7 +1984,9 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     const p = T.passo; if (!p) return; T.passo = null; barraMaschera();
     mostraRighello(null); manda('righello', { uid: T.me.uid, pts: null });
     const t = T.tok.get(p.id); if (!t) return;
+    const opp = suoTurno(t) ? opportunita(t, p.x0, p.y0, p.x, p.y) : [];
     if (!await salvaPosto(t, p.x, p.y, p.x0, p.y0)) return;
+    if (opp.length) annuncia(`⚔️ Attacco di opportunità: ${t.nome || 'Il token'} esce dalla portata di ${opp.map(o => o.nome || 'un nemico').join(', ')} senza Disimpegno. ${opp.length > 1 ? 'Possono' : 'Può'} usare la reazione per attaccarlo.`);
     const a = azioniDi(t);
     await segnaAzioni(t, { mov: (a.mov || 0) + p.m, ...(a.ox == null ? { ox: p.x0, oy: p.y0 } : {}) });
   }
@@ -3015,9 +3023,11 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     const vb = ['Accecato', 'Paralizzato', 'Pietrificato', 'Stordito', 'Svenuto', 'Trattenuto'].find(c => cb.includes(c)); if (vb) pro.push(`${nb} è ${vb.toLowerCase()}`);
     if (cb.includes('Prono')) (d <= 1.51 ? pro : contro).push(`${nb} è prono`);
     if (cb.includes('Invisibile')) contro.push(`${nb} è invisibile`);
+    const ai = aiutoPer(a); if (ai) pro.push(`aiutato da ${ai.h.nome}`);
+    if (schiva(b)) contro.push(`${nb} sta schivando`);
     if (m.adv === 1) pro.push('scelto dalla scheda'); if (m.adv === 2) contro.push('scelto dalla scheda');
     const adv = pro.length && !contro.length ? 1 : contro.length && !pro.length ? 2 : 0;
-    return { ok: true, modo, d, adv, pro, contro, anim: modo === 'mischia' ? 'spada' : p.col ? 'magia' : p.lancio ? 'lancio' : 'freccia', col: p.col, ritorna: modo === 'distanza' && p.ritorna };
+    return { ok: true, modo, d, adv, pro, contro, anim: modo === 'mischia' ? 'spada' : p.col ? 'magia' : p.lancio ? 'lancio' : 'freccia', col: p.col, ritorna: modo === 'distanza' && p.ritorna, aiuto: ai };
   }
   // il token con cui attacca chi apre la scheda: il suo personaggio, o il PNG da cui il DM ha aperto la scheda
   function attaccante(s) {
@@ -3177,7 +3187,8 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     const mossa = { da: m.tok, a: b.id, anim: v.anim, col: v.col, ritorna: !!v.ritorna, esito: x.colpito === true ? 'si' : x.colpito === false ? 'no' : 'nd', crit: !!x.critico, fallito: !!x.fallito, danni: x.danni || 0 };
     manda('attacco', mossa); mostraAttacco(mossa);
     if (m.inc != null) usaSlot(sx, m.inc, m.slot);
-    if (a && suoTurno(a) && !azioniDi(a).az) segnaAzioni(a, { az: true });
+    if (a && suoTurno(a) && !azioniDi(a).az) await segnaAzioni(a, { az: true });
+    if (a && v.aiuto) usaAiuto(a, v.aiuto);
     if (x.critico && x.pf !== 0) barraCritico(x, a, b, mossa);
     if (x.salvezza) toast(`${b.nome || 'Il bersaglio'} deve fare un tiro salvezza su ${nomeCar(x.salvezza.car)} (CD ${x.salvezza.cd}) per i danni in più.`);
     const perche = [v.adv === 1 ? 'vantaggio: ' + v.pro.join(', ') : v.adv === 2 ? 'svantaggio: ' + v.contro.join(', ') : ''].filter(Boolean).join('');
@@ -3457,7 +3468,9 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
   // gli avvisi in basso salgono sopra il pannello del turno, così non lo coprono
   function alzaAvvisi() {
     const h = $('#tv-hud'); if (!h || h.hidden) return;
-    document.documentElement.style.setProperty('--tv-avvisi', Math.round(innerHeight - h.getBoundingClientRect().top + 10) + 'px');
+    const r = h.getBoundingClientRect(), w = h.closest('.tv-wrap');
+    document.documentElement.style.setProperty('--tv-avvisi', Math.round(innerHeight - r.top + 10) + 'px');
+    if (w) w.style.setProperty('--tv-hudh', Math.round(w.getBoundingClientRect().bottom - r.top + 8) + 'px');
   }
   function disegnaHud() {
     const h = $('#tv-hud'), w = $('.tv-wrap'); if (!h) return;
@@ -3965,7 +3978,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
   const origineTurno = t => { const a = azioniDi(t); if (a.ox != null) return { x: a.ox, y: a.oy }; const p = T.passo?.id === t.id ? T.passo : T.drag?.id === t.id ? T.drag : null; return p ? { x: p.x0, y: p.y0 } : { x: t.x, y: t.y }; };
   const suoTurno = t => { const att = T.turno?.find(x => x.id === T.stato?.turno); return !!t && !!att && att.token === t.id; };
   async function segnaAzioni(t, ch) {
-    if (!t) return; const a = { ...azioniDi(t), ...ch, chiave: chiaveTurno() }, prima = t.azioni;
+    if (!t) return; const a = { ...azioniDi(t), segni: t.azioni?.segni, ...ch, chiave: chiaveTurno() }, prima = t.azioni;
     t.azioni = a; disegnaToken(); if (T.sv) aggiornaFinestra();
     const r = await SB.from('tavolo_token').update({ azioni: a }).eq('id', t.id);
     if (r.error) { t.azioni = prima; disegnaToken(); toast(/azioni/i.test(r.error.message) ? 'Per segnare azioni e movimento esegui tavolo/tappa-6.sql in Supabase.' : r.error.message, 'err'); }
@@ -3992,22 +4005,84 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
   }
   // con cosa può scattare ora: l'azione, se no l'azione bonus (Azione scaltra…)
   const puoScattare = t => { const a = azioniDi(t); if (!a.az) return 'az'; const b = bonusAz(t); return b && b.k.includes('scatto') && !a.bon ? 'bon' : null; };
-  async function faiAzione(t, k, da) {
-    if (T.passo?.id === t.id) await confermaPasso(); // prima si conferma lo spostamento fatto
-    const a = azioniDi(t); if (a[da]) { toast(da === 'az' ? 'L\'azione di questo turno è già usata.' : 'L\'azione bonus di questo turno è già usata.', 'err'); return; }
-    const fatte = [...(a.fatte || (a.scatto ? [{ k: 'scatto', da: 'az' }] : [])), { k, da }];
-    await segnaAzioni(t, { [da]: true, fatte, scatto: fatte.some(x => x.k === 'scatto') });
-    const [, ic, l] = voceAz(k), b = da === 'bon' ? bonusAz(t) : null;
-    const r = await SB.rpc('tavolo_scrivi', { p_testo: `${ic} ${t.nome || 'Token'}: ${l}${b ? ` (azione bonus · ${b.nome})` : ''}${k === 'scatto' ? ` · ora ha ${metri(Math.max(0, movimentoDi(t).resta))} di movimento` : ''}`, p_per: null });
+  // un messaggio in chat a nome di chi gioca
+  async function annuncia(testo) {
+    const r = await SB.rpc('tavolo_scrivi', { p_testo: testo, p_per: null });
     const row = !r.error && (Array.isArray(r.data) ? r.data[0] : r.data);
     if (row && !T.chat.some(x => x.id === row.id)) { T.chat.push(row); nuovoMsg(row); }
   }
+  // cosa fa ogni azione, scritto per bene in chat
+  function descriviAzione(t, k, da, x) {
+    const n = t.nome || 'Il token', b = da === 'bon' ? bonusAz(t) : null, con = b ? `azione bonus · ${b.nome}` : 'azione', [, ic] = voceAz(k);
+    const D = {
+      scatto: `usa Scatto (${con}): guadagna altri ${metri(velocitaDi(schedaDi(t)))} di movimento in questo turno, ora può muoversi ancora di ${metri(Math.max(0, movimentoDi(t).resta))}.`,
+      dis: `usa Disimpegno (${con}): fino alla fine del turno il suo movimento non provoca attacchi di opportunità.`,
+      sch: `usa Schivata (${con}): fino all'inizio del suo prossimo turno chi lo attacca ha svantaggio, se ${n} lo vede, e lui ha vantaggio ai tiri salvezza su Destrezza.`,
+      nas: `prova a Nascondersi (${con}): tira Furtività. Chi lo cerca deve superare il risultato con la Percezione.`,
+      aiu: `usa Aiuto${x ? ' su ' + (x.nome || 'un alleato') : ''} (${con}): ${x ? x.nome || 'l\'alleato' : 'l\'alleato'} ha vantaggio alla prossima prova o al prossimo tiro per colpire, fino all'inizio del prossimo turno di ${n}.`,
+      pre: `si prepara ad agire (${con}): sceglie un innesco e, quando succede, agisce usando la reazione.`,
+      cer: `usa Cercare (${con}): fa una prova di Saggezza (Percezione) o di Intelligenza (Indagare) per trovare qualcosa.`,
+      ogg: `usa un oggetto (${con}).`
+    };
+    return `${ic} ${n} ${D[k] || voceAz(k)[2] + ' (' + con + ').'}`;
+  }
+  async function faiAzione(t, k, da, x) {
+    if (T.passo?.id === t.id && k !== 'dis') await confermaPasso(); // prima si conferma lo spostamento fatto
+    const a = azioniDi(t); if (a[da]) { toast(da === 'az' ? 'L\'azione di questo turno è già usata.' : 'L\'azione bonus di questo turno è già usata.', 'err'); return; }
+    const fatte = [...(a.fatte || (a.scatto ? [{ k: 'scatto', da: 'az' }] : [])), { k, da, ...(x ? { a: x.id } : {}) }];
+    await segnaAzioni(t, { [da]: true, fatte, scatto: fatte.some(y => y.k === 'scatto') });
+    const quando = { round: T.stato?.round || 1, turno: T.stato?.turno || null };
+    if (k === 'sch') await segna(t, { schivata: quando });
+    if (k === 'aiu' && x) await segna(t, { aiuto: { ...quando, a: x.id, id: Date.now().toString(36) } });
+    await annuncia(descriviAzione(t, k, da, x));
+    if (k === 'nas') await tiraFurtivita(t);
+    // il Disimpegno vale anche per lo spostamento ancora da confermare: si riscrive la richiesta senza l'avviso
+    if (k === 'dis' && T.passo?.id === t.id) { const p = T.passo; T.passo = null; chiediPasso(t, p.x, p.y, p.x0, p.y0, p.m, p.dif); }
+  }
+  async function tiraFurtivita(t) {
+    const s = schedaDi(t), mod = s ? abTot(s, 'furtivita') : 0, ai = aiutoPer(t);
+    if (ai) usaAiuto(t, ai);
+    await tira((ai ? '2d20kh1' : '1d20') + piuMod(mod), ai ? `vantaggio (aiutato da ${ai.h.nome})` : null, isDM() && !t.giocatore, `${t.nome || 'Token'} · Furtività (Nascondersi)`);
+  }
+  // segni che durano oltre il turno (Schivata, Aiuto): stanno sul token di chi li fa e valgono fino all'inizio del suo prossimo turno
+  function segnoVivo(g) {
+    if (!g || !T.stato?.turno) return false;
+    const r = T.stato.round || 1; if (r === g.round) return true; if (r > g.round + 1 || r < g.round) return false;
+    const L = ordinati(), i = L.findIndex(y => y.id === T.stato.turno), j = L.findIndex(y => y.id === g.turno);
+    return j < 0 || i < j;
+  }
+  const segniDi = t => t?.azioni?.segni || {};
+  async function segna(t, ch) {
+    const prima = t.azioni, segni = { ...segniDi(t), ...ch };
+    Object.keys(segni).forEach(k => { if (segni[k] == null) delete segni[k]; });
+    t.azioni = { ...(t.azioni || {}), segni }; disegnaToken();
+    const r = await SB.from('tavolo_token').update({ azioni: t.azioni }).eq('id', t.id);
+    if (r.error) { t.azioni = prima; disegnaToken(); toast(r.error.message, 'err'); }
+  }
+  const schiva = t => segnoVivo(segniDi(t).schivata) && !condTok(t).some(c => FERMO.includes(c));
+  // chi è aiutato: un altro token ha fatto Aiuto su di lui e lui non l'ha ancora usato
+  function aiutoPer(t) {
+    if (!t) return null; const usati = segniDi(t).usati || [];
+    for (const h of T.tok.values()) { const g = segniDi(h).aiuto; if (h.id !== t.id && h.scena === t.scena && g?.a === t.id && segnoVivo(g) && !usati.includes(g.id)) return { h, id: g.id }; }
+    return null;
+  }
+  const usaAiuto = (t, ai) => ai && segna(t, { usati: [...(segniDi(t).usati || []).slice(-9), ai.id] });
+  // da che parte sta: personaggi e alleati contro gli altri
+  const parte = o => o.giocatore || o.colore === '#3f7a4a' ? 'pg' : 'nem';
+  // attacco di opportunità: un nemico che aveva il token entro 1,5 m e non ce l'ha più, se non si è disimpegnato
+  function opportunita(t, x0, y0, x, y) {
+    const sc = scena(); if (!sc || (azioniDi(t).fatte || []).some(f => f.k === 'dis')) return [];
+    const da = { ...t, x: x0, y: y0 }, a = { ...t, x, y };
+    return [...T.tok.values()].filter(o => { if (o.scena !== sc.id || o.id === t.id || parte(o) === parte(t) || (o.nascosto && !isDM()) || condTok(o).some(c => FERMO.includes(c))) return false; const p = pfDi(o); return (!p || p.pf > 0) && distanza(da, o, sc) <= 1.51 && distanza(a, o, sc) > 1.51; });
+  }
+  const puoDisimpegnarsi = t => { const a = azioniDi(t); if (!a.az) return 'az'; const b = bonusAz(t); return b && b.k.includes('dis') && !a.bon ? 'bon' : null; };
   function togliAzione(t, i) {
     const a = azioniDi(t), f = [...(a.fatte || [])], x = f.splice(i, 1)[0]; if (!x) return;
     segnaAzioni(t, { [x.da]: false, fatte: f, scatto: f.some(y => y.k === 'scatto') });
+    if (x.k === 'sch') segna(t, { schivata: null }); if (x.k === 'aiu') segna(t, { aiuto: null });
   }
   // le azioni fatte in questo turno, da togliere con un tocco se segnate per sbaglio
-  const fatteHtml = (t, cls, k) => (azioniDi(t).fatte || []).map((x, i) => { const [, ic, l] = voceAz(x.k); return `<button type="button" class="${cls}" data-k="${k}" data-i="${i}" title="${l} (${x.da === 'bon' ? 'azione bonus' : 'azione'}): tocca per toglierla">${ic} ${l} ✕</button>`; }).join('');
+  const fatteHtml = (t, cls, k) => (azioniDi(t).fatte || []).map((x, i) => { const [, ic, l] = voceAz(x.k), su = x.a && T.tok.get(x.a); return `<button type="button" class="${cls}" data-k="${k}" data-i="${i}" title="${l} (${x.da === 'bon' ? 'azione bonus' : 'azione'}): tocca per toglierla">${ic} ${l}${su ? ' → ' + esc(String(su.nome || '').split(/\s+/)[0]) : ''} ✕</button>`; }).join('');
   function menuAzioni(t, anc) {
     document.querySelectorAll('.tv-azm').forEach(x => x.remove());
     const a = azioniDi(t), b = bonusAz(t), m = document.createElement('div'); m.className = 'tv-azm'; m.setAttribute('role', 'menu');
@@ -4023,7 +4098,15 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     const fuori = e => { if (!m.contains(e.target) && !anc.contains(e.target)) chiudi(); };
     const tasto = e => { if (e.key === 'Escape') chiudi(); };
     addEventListener('pointerdown', fuori, true); addEventListener('keydown', tasto); onCleanup(chiudi);
-    m.querySelectorAll('[data-a]').forEach(x => x.onclick = () => { chiudi(); faiAzione(t, x.dataset.a, x.dataset.da); });
+    const chi = da => {
+      const sc = scena(), L = sc ? [...T.tok.values()].filter(o => o.scena === sc.id && o.id !== t.id && !o.nascosto && parte(o) === parte(t) && !condTok(o).includes('Morto')).map(o => [o, distanza(t, o, sc)]).sort((p, q) => p[1] - q[1]) : [];
+      m.innerHTML = `<h5>Chi aiuti?</h5><div class="gz">${L.map(([o, d]) => `<button type="button" data-o="${o.id}"><i style="--c:${esc(o.colore || '#7d2530')};${o.immagine ? `background-image:url('${o.immagine.replace(/'/g, '%27')}')` : ''}"></i><div><b>${esc(o.nome || 'Token')}</b><small>a ${metri(d)}</small></div></button>`).join('')}</div>${L.length ? '' : '<p class="nota">Nessun alleato sulla mappa.</p>'}<p class="nota">Avrà vantaggio alla prossima prova o al prossimo tiro per colpire.</p><button type="button" class="ind">← Indietro</button>`;
+      m.querySelectorAll('[data-o]').forEach(y => y.onclick = () => { chiudi(); faiAzione(t, 'aiu', da, T.tok.get(y.dataset.o)); });
+      m.querySelector('.ind').onclick = () => { chiudi(); menuAzioni(t, anc); };
+      const h2 = m.offsetHeight; m.style.top = (r.top - h2 - 8 >= 6 ? r.top - h2 - 8 : clamp(r.bottom + 8, 6, innerHeight - h2 - 6)) + 'px';
+      m.querySelector('[data-o]')?.focus();
+    };
+    m.querySelectorAll('[data-a]').forEach(x => x.onclick = () => { if (x.dataset.a === 'aiu') return chi(x.dataset.da); chiudi(); faiAzione(t, x.dataset.a, x.dataset.da); });
     m.querySelector('[data-a]:not([disabled])')?.focus();
   }
   function boxTurno(t, w) {
@@ -4209,9 +4292,11 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     if (f.startsWith('att.')) { const [, i, k] = f.split('.'), a = (s.dati.attacchi || []).map(x => ({ ...x })); if (!a[i]) return; a[i][k] = v; salvaScheda(s.id, { attacchi: a }); return; }
     salvaScheda(s.id, { [f]: v });
   }
-  function tiroD20(s, mod, cosa) {
-    const sv = T.sv, f = (sv.adv === 1 ? '2d20kh1' : sv.adv === 2 ? '2d20kl1' : '1d20') + piu(mod);
-    return tira(f, sv.adv === 1 ? 'vantaggio' : sv.adv === 2 ? 'svantaggio' : null, sv.seg, s.nome + ' · ' + cosa);
+  function tiroD20(s, mod, cosa, aiutabile) {
+    const sv = T.sv, tk = aiutabile && sv.adv !== 2 ? tokScheda() || attaccante(s) : null, ai = tk ? aiutoPer(tk) : null, adv = ai ? 1 : sv.adv;
+    if (ai) usaAiuto(tk, ai);
+    const f = (adv === 1 ? '2d20kh1' : adv === 2 ? '2d20kl1' : '1d20') + piu(mod);
+    return tira(f, adv === 1 ? 'vantaggio' + (ai ? ` (aiutato da ${ai.h.nome})` : '') : adv === 2 ? 'svantaggio' : null, sv.seg, s.nome + ' · ' + cosa);
   }
   // l'iniziativa dalla scheda entra nell'ordine del turno per ogni suo token sulla mappa
   async function inizScheda(s) {
@@ -4246,11 +4331,11 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     }
     if (b.dataset.roll) {
       const [r, a] = b.dataset.roll.split(':'), ca = CAR.find(x => x[0] === a), at = (d.attacchi || [])[a];
-      if (r === 'car') return tiroD20(s, modC(d[a]), 'Prova di ' + ca[2]);
+      if (r === 'car') return tiroD20(s, modC(d[a]), 'Prova di ' + ca[2], true);
       if (r === 'ts') return tiroD20(s, tsTot(s, a), 'Tiro salvezza su ' + ca[2]);
-      if (r === 'ab') return tiroD20(s, abTot(s, a), ABIL.find(x => x[0] === a)[1]);
+      if (r === 'ab') return tiroD20(s, abTot(s, a), ABIL.find(x => x[0] === a)[1], true);
       if (r === 'iniz') return inizScheda(s);
-      if (r === 'inc') return tiroD20(s, comp(s) + modC(d[carInc(s)]), 'Attacco con incantesimo');
+      if (r === 'inc') return tiroD20(s, comp(s) + modC(d[carInc(s)]), 'Attacco con incantesimo', true);
       if (r === 'txt') return tira(a, null, sv.seg, s.nome);
       if (r === 'morte') return tira('1d20', null, sv.seg, s.nome + ' · Tiro contro la morte');
       if (!at) return;
@@ -4258,7 +4343,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
         // con un token sulla mappa si sceglie il bersaglio; senza, è un tiro per colpire come prima
         const tk = attaccante(s); if (tk && T.mira?.tok !== tk.id) return iniziaMira(s, +a, tk);
         if (!tk && scena() && [...T.tok.values()].filter(t => t.scena === scena().id && schedaDi(t)?.id === s.id).length > 1) toast('Per scegliere il bersaglio apri la scheda dal token che attacca.');
-        return tiroD20(s, num(at.colpire) || 0, 'Attacco: ' + (at.nome || 'arma'));
+        return tiroD20(s, num(at.colpire) || 0, 'Attacco: ' + (at.nome || 'arma'), true);
       }
       if (r === 'dan' || r === 'cri') { const cr = r === 'cri' || T.maiusc; if (!String(at.danni || '').trim()) return toast('Scrivi i danni dell\'attacco, per esempio 1d8+3', 'err'); return tira(cr ? critico(at.danni) : at.danni, cr ? 'critico' : null, sv.seg, `${s.nome} · Danni: ${at.nome || 'arma'}${at.tipo ? ' (' + at.tipo + ')' : ''}`); }
       return;
