@@ -42,6 +42,23 @@
 .tv-world{position:absolute;left:0;top:0;transform-origin:0 0}
 .tv-map{position:absolute;left:0;top:0;max-width:none;pointer-events:none;-webkit-user-drag:none;box-shadow:0 0 0 1px #0008,0 10px 40px #0009;background:#e8dcc0}
 .tv-grid{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
+.tv-dif,.tv-efx{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
+.tv-efx .ef *{transform-box:fill-box;transform-origin:center}
+.tv-efx .pf{animation:tvEfSu 1.4s ease-in infinite}
+.tv-efx .pb{animation:tvEfBolla 2s ease-out infinite}
+.tv-efx .pg{animation:tvEfGas 8s ease-in-out infinite alternate}
+.tv-efx .pi{animation:tvEfLuce 2.6s ease-in-out infinite}
+.tv-efx .pl{animation:tvEfLampo 1.6s steps(1) infinite}
+.tv-efx .ef-fuoco .base{animation:tvEfLuce 1.2s ease-in-out infinite}
+.tv-efx .ef-oscurita .base{animation:tvEfLuce 5s ease-in-out infinite}
+.tv-efx.fermo *{animation:none!important}
+.tv-efx .sel circle.man{fill:#f2b51d;stroke:#1b1512;stroke-width:3}
+.tv-efx text{font:700 15px var(--body);fill:#fff;paint-order:stroke;stroke:#000c;stroke-width:4px}
+@keyframes tvEfSu{0%{transform:translateY(0) scale(1);opacity:0}15%{opacity:.95}100%{transform:translateY(calc(var(--d) * -1)) scale(.35);opacity:0}}
+@keyframes tvEfBolla{0%{transform:translateY(0) scale(.3);opacity:0}30%{opacity:.9}100%{transform:translateY(calc(var(--d) * -1)) scale(1.3);opacity:0}}
+@keyframes tvEfGas{0%{transform:translate(0,0) scale(1)}100%{transform:translate(var(--dx),var(--dy)) scale(1.25)}}
+@keyframes tvEfLuce{0%,100%{opacity:1}50%{opacity:.65}}
+@keyframes tvEfLampo{0%{opacity:0}8%{opacity:1}14%{opacity:.2}20%{opacity:1}28%{opacity:0}}
 .tv-tok{position:absolute;border-radius:50%;box-sizing:border-box;background:var(--c) center/cover no-repeat;border:3px solid var(--c);box-shadow:0 2px 6px #000a;transition:left .12s,top .12s}
 .tv-tok.mine,.tv-tok.dm{cursor:grab}
 .tv-tok.drag{transition:none;z-index:5;box-shadow:0 8px 18px #000c;cursor:grabbing}
@@ -397,6 +414,12 @@ dialog.tv-sw>.rz:hover{background-color:#7d253033}
 .tv-sch .pv .pu{font:700 .75rem var(--body);background:#7d2530;color:#fff;border-radius:10px;padding:1px 7px}
 .tv-sch .pv .ing{all:unset;cursor:pointer;opacity:.5;font-size:.95rem;padding:0 3px}
 .tv-sch .pv .ing:hover{opacity:1}
+.tv-sch .sbat{border-left:3px solid #7d2530;background:#7d25300c;border-radius:0 6px 6px 0;padding:5px 8px;margin:6px 0}
+.tv-sch .sbat p{margin:0}
+.tv-sch .sbb{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+.tv-sch .sbb .mini.on{background:#7d2530;border-color:#7d2530;color:#fff}
+.tv-sch .sbb .mini.on:hover{background:#962c3a}
+.tv-scuro .tv-sch .sbat{background:#e8a0a614;border-left-color:#c0505c}
 .tv-sch .pv .sw2{display:flex;align-items:center;gap:3px;cursor:pointer;font:700 .66rem var(--body);text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;border:1px solid var(--ul);color:var(--k2)}
 .tv-sch .pv .sw2 input{width:auto;margin:0;accent-color:#7d2530}
 .tv-sch .pv .sw2.on{background:#7d2530;border-color:#7d2530;color:#fff}
@@ -509,6 +532,14 @@ dialog.tv-poz menu small{font-weight:400;opacity:.8}
 .tv-sch .spl .tg2{display:flex;gap:2px;align-items:center}
 .tv-sch .spl .tg2 i{font:700 .6rem var(--body);font-style:normal;width:15px;height:15px;border-radius:50%;background:var(--k);color:var(--pp);display:flex;align-items:center;justify-content:center}
 .tv-sch .spl .tg2 small{font:600 .62rem var(--body);color:var(--k2);white-space:nowrap}
+.tv-sch .spl .prp{all:unset;box-sizing:border-box;cursor:pointer;flex:none;width:13px;height:13px;border:1.5px solid var(--k);border-radius:50%;margin-right:4px}
+.tv-sch .spl .prp.on{background:#7d2530;border-color:#7d2530;box-shadow:inset 0 0 0 2px var(--pp)}
+.tv-sch .spl .prp:disabled{cursor:default}
+.tv-sch .spl .mchat{all:unset;cursor:pointer;font-size:.8rem;opacity:0;transition:opacity .15s;padding:0 2px}
+.tv-sch .spl:hover .mchat,.tv-sch .spl .mchat:focus-visible{opacity:.85}
+.tv-sch .spl .mchat:disabled{display:none}
+.tv-sch .srdA{margin:14px 4px 2px;font-size:.68rem;line-height:1.35;opacity:.6}
+.tv-sch .srdb{margin:4px 0}
 .tv-sch .spl .lancia{all:unset;box-sizing:border-box;cursor:pointer;padding:2px 8px;border-radius:5px;background:#7d2530;color:#fff;font:700 .72rem var(--body);white-space:nowrap}
 .tv-sch .spl .lancia:hover{background:#962c3a}
 .tv-sch .spl .lancia:disabled{display:none}
@@ -638,6 +669,7 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
 .tv-mbar .g.sl>span{font:600 .76rem var(--body);color:var(--pan-mute)}
 .tv-mbar .g.sl>svg{width:16px;height:16px;fill:none;stroke:var(--pan-mute);stroke-width:2}
 .tv-mbar .g.sl input{width:92px}
+.tv-mbar .g.sl input[type=number]{height:26px;box-sizing:border-box;background:#0006;border:1px solid #ffffff2a;border-radius:6px;color:var(--pan-ink);font:600 .8rem var(--body);padding:0 6px}
 .tv-mbar output{font:700 .72rem var(--body);color:var(--gold2);min-width:54px;text-align:right;white-space:nowrap}
 .tv-mbar output[data-m=tv]{min-width:30px}
 .tv-mbar button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:8px;font:600 .8rem var(--body);white-space:nowrap;color:var(--pan-ink);transition:background .12s}
@@ -915,13 +947,17 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     ch.on('broadcast', { event: 'schede' }, () => { if (!isDM() && T.schede) ricaricaSchede(); });
     pg('tavolo_scene', p => {
       if (p.eventType === 'DELETE') { T.scene.delete(p.old.id); if (T.vista === p.old.id) T.vista = T.stato.scena; }
-      else { const prima = T.scene.get(p.new.id); T.scene.set(p.new.id, p.new); if (prima?.mappa !== p.new.mappa) T.url.delete(prima?.mappa); }
+      else {
+        const prima = T.scene.get(p.new.id); T.scene.set(p.new.id, p.new); if (prima?.mappa !== p.new.mappa) T.url.delete(prima?.mappa);
+        const solo = prima && Object.keys(p.new).every(k => ['difficile', 'effetti'].includes(k) || JSON.stringify(prima[k]) === JSON.stringify(p.new[k]));
+        if (solo && p.eventType === 'UPDATE') { if (p.new.id === T.vista) { disegnaDifficile(); disegnaEffetti(); } return; }
+      }
       disegnaBarra(); if (p.eventType === 'DELETE' || p.new.id === T.vista) mostraScena(p.eventType !== 'UPDATE');
       if (isDM() && !$('#tv-pages')?.hidden) pannelloMappe(true);
     });
     pg('tavolo_stato', async p => {
       const prima = T.stato.scena, primoTurno = T.stato.turno; T.stato = p.new;
-      if (primoTurno !== T.stato.turno || p.old?.round !== p.new.round) { disegnaTurno(); disegnaToken(); }
+      if (primoTurno !== T.stato.turno || p.old?.round !== p.new.round) { disegnaTurno(); disegnaToken(); disegnaEffetti(); scadenzeEffetti(); }
       if (prima === T.stato.scena) return;
       if (isDM()) { disegnaBarra(); return; }
       // i giocatori seguono il DM nella nuova scena: scena e token arrivano solo ora che è attiva
@@ -1016,6 +1052,8 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     sole: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>',
     luna: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
     muro: '<path d="M3 5h18v14H3zM3 9.7h18M3 14.3h18M9 5v4.7M15 5v4.7M6 9.7v4.6M12 9.7v4.6M18 9.7v4.6M9 14.3V19M15 14.3V19"/>',
+    dif: '<path d="M3 3h18v18H3zM3 9l6-6M3 15 15 3M3 21 21 3M9 21l12-12M15 21l6-6"/>',
+    efx: '<path d="M12 3c1 3 4 4.5 4 8.5a4 4 0 0 1-8 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 0-7.5zM5 19c2-1.3 4-1.3 7 0s5 1.3 7 0"/>',
     porta: '<path d="M6 21V4.5L15 3v18M15 5h3.5V21M3.5 21h17"/><circle cx="12.3" cy="12.5" r=".6"/>',
     portaAp: '<path d="M4.5 21V4h14v17M3 21h18"/><path d="M4.5 4L11 6.5V22l-6.5-1"/>',
     gomma: '<path d="M9 20h11M4.6 14.4l9.2-9.2a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8L12 19H8.2l-3.6-3.6a.7.7 0 0 1 0-1z"/><path d="M9.5 9.5l5 5"/>',
@@ -1030,7 +1068,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     let h = b('tv-sel', 'Seleziona e sposta i token (S)', 'sel', T.tool === 'muovi') + b('tv-mano', 'Sposta la mappa (M)', 'mano', T.tool === 'mano')
       + b('tv-righello', 'Righello (R)', 'rig', T.tool === 'righello') + b('tv-tiradadi', 'Tiradadi', 'dado', !$('#tv-tdp')?.hidden)
       + b('tv-turno', 'Ordine del turno', 'tur', !$('#tv-turno')?.hidden) + b('tv-schede', 'Schede dei personaggi e dei PNG', 'sch', !$('#tv-sp')?.hidden);
-    if (isDM() && scena()) h += '<hr><span class="lbl">DM</span>' + b('tv-maschera', 'Maschera: nascondi e svela la mappa', 'mas', T.tool === 'maschera') + b('tv-muri', 'Muri, porte e nebbia automatica', 'muro', T.tool === 'muri') + b('tv-token', 'Aggiungi un token', 'tok') + b('tv-griglia', 'Impostazioni della pagina', 'gri');
+    if (isDM() && scena()) h += '<hr><span class="lbl">DM</span>' + b('tv-maschera', 'Maschera: nascondi e svela la mappa', 'mas', T.tool === 'maschera') + b('tv-muri', 'Muri, porte e nebbia automatica', 'muro', T.tool === 'muri') + b('tv-difficile', 'Terreno difficile: il movimento costa il doppio', 'dif', T.tool === 'difficile') + b('tv-effetti', 'Effetti sulla mappa: fuoco, gas, veleno…', 'efx', T.tool === 'effetti') + b('tv-token', 'Aggiungi un token', 'tok') + b('tv-griglia', 'Impostazioni della pagina', 'gri');
     h += '<span class="sp"></span>';
     if (isDM() && scena()) h += '<span class="lbl">Livelli</span>' + b('tv-liv-seg', 'Livello Segnalini: i token che vedono tutti', 'lseg', T.livello === 'segnalini').replace('class="', 'class="liv ') + b('tv-liv-mas', 'Livello Master: i token che vedi solo tu', 'lmas', T.livello === 'master').replace('class="', 'class="liv ');
     h += `<span class="tv-cnt" id="tv-cnt">${T.online.length > 1 ? T.online.length : ''}</span><span class="tv-on ${T.live ? 'ok' : ''}" id="tv-on" title="${T.live ? esc('Al tavolo ora: ' + T.online.join(', ')) : 'Connessione…'}"></span>`;
@@ -1054,7 +1092,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       'tv-token': () => dlgToken(), 'tv-griglia': () => dlgGriglia(),
       'tv-turno': () => apriTurno($('#tv-turno').hidden), 'tv-schede': () => apriSchede($('#tv-sp').hidden),
       'tv-tiradadi': () => { const p = $('#tv-tdp'); p.hidden = !p.hidden; if (!p.hidden) { disegnaTdp(); $('#tv-sp').hidden = true; if (matchMedia('(max-width:820px)').matches) apriChat(false); } disegnaRail(); },
-      'tv-liv-seg': () => livello('segnalini'), 'tv-liv-mas': () => livello('master'), 'tv-maschera': () => strumento(T.tool === 'maschera' ? 'muovi' : 'maschera'), 'tv-muri': () => strumento(T.tool === 'muri' ? 'muovi' : 'muri'),
+      'tv-liv-seg': () => livello('segnalini'), 'tv-liv-mas': () => livello('master'), 'tv-maschera': () => strumento(T.tool === 'maschera' ? 'muovi' : 'maschera'), 'tv-muri': () => strumento(T.tool === 'muri' ? 'muovi' : 'muri'), 'tv-difficile': () => strumento(T.tool === 'difficile' ? 'muovi' : 'difficile'), 'tv-effetti': () => strumento(T.tool === 'effetti' ? 'muovi' : 'effetti'),
       ...dadiActs()
     };
   }
@@ -1063,8 +1101,8 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   function strumento(t) {
     const prima = T.tool; T.tool = t; if (T.mira && t !== 'muovi') fineMira();
     // le barre degli strumenti del DM stanno in alto a sinistra: chiudo i pannelli che le coprirebbero
-    if (t === 'maschera' || t === 'allinea' || t === 'muri' || t === 'griglia') { const p = $('#tv-tdp'), sp = $('#tv-sp'); if (p) p.hidden = true; if (sp && !sp.hidden) apriSchede(false); }
-    const st = $('#tv-stage'); if (st) { st.classList.toggle('rul', ['righello', 'maschera', 'allinea', 'muri'].includes(t)); st.classList.toggle('mano', t === 'mano'); st.classList.toggle('muri', t === 'muri'); st.classList.toggle('gmano', t === 'griglia'); }
+    if (t === 'maschera' || t === 'allinea' || t === 'muri' || t === 'griglia' || t === 'difficile' || t === 'effetti') { const p = $('#tv-tdp'), sp = $('#tv-sp'); if (p) p.hidden = true; if (sp && !sp.hidden) apriSchede(false); }
+    const st = $('#tv-stage'); if (st) { st.classList.toggle('rul', ['righello', 'maschera', 'allinea', 'muri', 'difficile', 'effetti'].includes(t)); st.classList.toggle('mano', t === 'mano'); st.classList.toggle('muri', t === 'muri'); st.classList.toggle('gmano', t === 'griglia'); }
     if (prima === 'griglia' && t !== 'griglia' && T.gm) annullaGriglia();
     if (prima === 'muri' && t !== 'muri') T.mu = T.mdown = T.mhov = T.mgom = null;
     disegnaRail(); barraMaschera(); disegnaMuri(); disegnaRighelli();
@@ -1189,7 +1227,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       return;
     }
     st.innerHTML = `<div class="tv-world" id="tv-world"><img class="tv-map" id="tv-map" alt="" draggable="false" width="${sc.larghezza}" height="${sc.altezza}" style="width:${sc.larghezza}px;height:${sc.altezza}px">
-      <svg class="tv-grid" id="tv-grid" width="${sc.larghezza}" height="${sc.altezza}"></svg><div id="tv-toks"></div><canvas class="tv-fog" id="tv-fog" style="width:${sc.larghezza}px;height:${sc.altezza}px"></canvas>
+      <svg class="tv-grid" id="tv-grid" width="${sc.larghezza}" height="${sc.altezza}"></svg><svg class="tv-dif" id="tv-dif" width="${sc.larghezza}" height="${sc.altezza}"></svg><svg class="tv-efx" id="tv-efx" width="${sc.larghezza}" height="${sc.altezza}"></svg><div id="tv-toks"></div><canvas class="tv-fog" id="tv-fog" style="width:${sc.larghezza}px;height:${sc.altezza}px"></canvas>
       <svg class="tv-walls" id="tv-walls" width="${sc.larghezza}" height="${sc.altezza}"></svg><div class="tv-porte" id="tv-porte"></div><svg class="tv-fx" id="tv-fx" width="${sc.larghezza}" height="${sc.altezza}"></svg></div>
       <svg class="tv-ov" id="tv-ov"></svg><div class="tv-zoom" role="group" aria-label="Zoom"><button type="button" data-z="1.25" data-tip="Ingrandisci" aria-label="Ingrandisci">${svg('piu')}</button>
         <div class="tv-zs" id="tv-zs" role="slider" tabindex="0" aria-label="Zoom" aria-valuemin="5" aria-valuemax="600" data-tip="Trascina per lo zoom"><span class="tr"><i></i></span>${[0.25, 0.5, 1, 2, 4].map(z => `<span class="tk ${z === 1 ? 'uno' : ''}" style="--q:${(Math.log(z) - Z_MIN) / (Z_MAX - Z_MIN)}"></span>`).join('')}<span class="kn"></span></div>
@@ -1210,7 +1248,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     const img = $('#tv-map');
     if (sc.mappa) urlMappa(sc.mappa).then(u => { if (img.isConnected) img.src = u; }).catch(e => toast('Mappa non caricata: ' + e.message, 'err'));
     else img.removeAttribute('src');
-    disegnaGriglia(); disegnaMaschera(); disegnaToken(); interazioni(st); barraMaschera();
+    disegnaGriglia(); disegnaDifficile(); disegnaEffetti(); disegnaMaschera(); disegnaToken(); interazioni(st); barraMaschera();
     if (centra || !T.viewOk) adatta(); else applicaVista();
   }
   function disegnaGriglia() {
@@ -1326,6 +1364,8 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       if (T.mira && t) { if (t.id !== T.mira.tok) scegliBersaglio(t); return; }
       if (T.tool === 'maschera' && isDM()) { mas = inizioMaschera(p); return; }
       if (T.tool === 'muri' && isDM()) { inizioMuro(p, e); return; }
+      if (T.tool === 'difficile' && isDM()) { inizioDif(p); return; }
+      if (T.tool === 'effetti' && isDM()) { inizioEff(p, e); return; }
       if (T.tool === 'griglia' && isDM()) { const sc = scena(); T.gd = { sx: e.clientX, sy: e.clientY, x: sc.griglia_x, y: sc.griglia_y }; return; }
       if (T.tool === 'allinea' && isDM()) { T.al = { a: p, b: p }; disegnaRighelli(); return; }
       if (T.tool === 'righello') { const sc = scena(); const a = { x: centroCasella(p.x, sc.griglia_x), y: centroCasella(p.y, sc.griglia_y) }; rul = { pts: [a, a] }; mostraRighello(rul.pts); return; }
@@ -1346,6 +1386,8 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       const p = mondo(st, e);
       if (mas) { muoviMaschera(mas, p); return; }
       if (T.mdown || T.mgom) { muoviMuro(p, e); return; }
+      if (T.dif) { muoviDif(p); return; }
+      if (T.efm) { muoviEff(p); return; }
       if (T.gd) { const sc = scena(); sc.griglia_x = T.gd.x; sc.griglia_y = T.gd.y; spostaGriglia((e.clientX - T.gd.sx) / T.view.z, (e.clientY - T.gd.sy) / T.view.z); return; }
       if (T.al) { T.al.b = p; disegnaRighelli(); return; }
       if (rul) {
@@ -1371,6 +1413,8 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       st.classList.remove('pan'); pan = null;
       if (mas) { const m = mas; mas = null; fineMaschera(m); return; }
       if (T.gd) { T.gd = null; return; }
+      if (T.dif) { fineDif(); return; }
+      if (T.efm) { fineEff(); return; }
       if (T.mdown || T.mgom) { if (e.type === 'pointerup') fineMuro(mondo(st, e), e); else T.mdown = T.mgom = null; return; }
       if (T.al) { const a = T.al; T.al = null; fineAllinea(a).catch(err => toast(err.message, 'err')); return; }
       if (rul) { rul = fineRighello(rul); return; }
@@ -1388,12 +1432,12 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
         const l = t.misura * sc.griglia;
         if (!isDM() && sc.visuale && attraversa(sc, d.x0 + l / 2, d.y0 + l / 2, x + l / 2, y + l / 2)) { t.x = d.x0; t.y = d.y0; disegnaToken(); via(); manda('trascina', { id: t.id, x: d.x0, y: d.y0 }); toast('C\'è un muro in mezzo: fai il giro.', 'err'); return; }
         // nel suo turno il movimento (in caselle, come col righello) si conferma e poi si scala dalla scheda
-        const m = suoTurno(t) ? Math.round(Math.max(Math.abs(x - d.x0), Math.abs(y - d.y0)) / sc.griglia) * (sc.metri || 1.5) : 0;
+        const cm = suoTurno(t) ? costoMov(t, d.x0, d.y0, x, y) : { m: 0, dif: 0 }, m = cm.m;
         if (m) {
           const mv = movimentoDi(t);
           if (!isDM() && m > mv.resta + 0.01) { tornaIndietro(t, d.x0, d.y0); mostraRighello(null); manda('righello', { uid: T.me.uid, pts: null }); toast(`Troppo lontano: ${t.nome || 'il token'} ha ancora ${metri(Math.max(mv.resta, 0))} di movimento.`, 'err'); return; }
           t.x = x; t.y = y; disegnaToken(); manda('trascina', { id: t.id, x, y });
-          return chiediPasso(t, x, y, d.x0, d.y0, m);
+          return chiediPasso(t, x, y, d.x0, d.y0, m, cm.dif);
         }
         mostraRighello(null); manda('righello', { uid: T.me.uid, pts: null });
         t.x = x; t.y = y; disegnaToken(); manda('trascina', { id: t.id, x, y });
@@ -1420,6 +1464,172 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       return null;
     }
   }
+  /* ---------- terreno difficile: il DM dipinge le caselle, chi le attraversa spende il doppio ---------- */
+  const difScena = sc => Array.isArray(sc?.difficile) ? sc.difficile : [];
+  const casella = (sc, x, y) => [Math.floor((x - sc.griglia_x) / sc.griglia), Math.floor((y - sc.griglia_y) / sc.griglia)];
+  function disegnaDifficile() {
+    const sc = scena(), g = $('#tv-dif'); if (!sc || !g) return;
+    const set = new Set(difScena(sc)); if (T.dif) for (const k of T.dif.celle) T.dif.togli ? set.delete(k) : set.add(k);
+    const q = sc.griglia, ox = sc.griglia_x, oy = sc.griglia_y, w = q / 4;
+    const celle = [...set].map(k => { const [c, r] = k.split(',').map(Number); return `<rect x="${ox + c * q}" y="${oy + r * q}" width="${q}" height="${q}"/>`; }).join('');
+    g.innerHTML = set.size ? `<defs><pattern id="tv-difp" width="${w}" height="${w}" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="${w}" height="${w}" fill="#8a5a2b" fill-opacity=".28"/><path d="M0 0V${w}" stroke="#3a1f06" stroke-opacity=".65" stroke-width="${Math.max(1.5, q / 26)}"/></pattern></defs><g fill="url(#tv-difp)" stroke="#4a2a0c" stroke-opacity=".3" stroke-width="1">${celle}</g>` : '';
+  }
+  function celleDif(p) {
+    const sc = scena(), [c, r] = casella(sc, p.x, p.y), n = T.dpenn || 1, h = Math.floor((n - 1) / 2), out = [];
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) out.push(`${c - h + i},${r - h + j}`);
+    return out;
+  }
+  function inizioDif(p) { const sc = scena(); T.dif = { togli: T.dmodo === 'togli', celle: new Set(), a: casella(sc, p.x, p.y) }; muoviDif(p); }
+  function muoviDif(p) {
+    const d = T.dif, sc = scena(); if (!d || !sc) return;
+    if (T.dforma === 'rett') { const [c, r] = casella(sc, p.x, p.y); d.celle = new Set(); for (let i = Math.min(c, d.a[0]); i <= Math.max(c, d.a[0]); i++) for (let j = Math.min(r, d.a[1]); j <= Math.max(r, d.a[1]); j++) d.celle.add(i + ',' + j); }
+    else celleDif(p).forEach(k => d.celle.add(k));
+    cancelAnimationFrame(T.draf); T.draf = requestAnimationFrame(disegnaDifficile);
+  }
+  function fineDif() {
+    const d = T.dif, sc = scena(); T.dif = null; if (!d || !sc) return;
+    const set = new Set(difScena(sc)); for (const k of d.celle) d.togli ? set.delete(k) : set.add(k);
+    salvaZone(sc, { difficile: [...set] });
+  }
+  // terreno difficile ed effetti stanno nella mappa (tavolo/tappa-8.sql): li vedono tutti, li cambia il DM
+  async function salvaZone(sc, ch) {
+    const prima = { difficile: sc.difficile, effetti: sc.effetti }; Object.assign(sc, ch); disegnaDifficile(); disegnaEffetti(); barraMaschera();
+    const r = await SB.from('tavolo_scene').update(ch).eq('id', sc.id);
+    if (r.error) { Object.assign(sc, prima); disegnaDifficile(); disegnaEffetti(); barraMaschera(); toast(/difficile|effetti|column/i.test(r.error.message) ? 'Per terreno difficile ed effetti esegui tavolo/tappa-8.sql in Supabase.' : r.error.message, 'err'); }
+  }
+  function barraDifficile(b) {
+    const bt = (k, v, l, sel, tip) => `<button type="button" data-d="${k}" data-v="${v}" class="${sel ? 'on' : ''}" title="${esc(tip || l)}"><span>${l}</span></button>`;
+    const n = difScena(scena()).length;
+    b.innerHTML = `<div class="g"><b class="tit">🪨 Terreno difficile</b><span class="avv">Dipingi le caselle: chi le attraversa spende il doppio del movimento.</span></div>
+      <div class="g seg">${bt('modo', 'metti', 'Dipingi', T.dmodo !== 'togli')}${bt('modo', 'togli', 'Cancella', T.dmodo === 'togli')}</div>
+      <div class="g seg">${bt('forma', 'penn', 'Pennello', T.dforma !== 'rett')}${bt('forma', 'rett', 'Rettangolo', T.dforma === 'rett', 'Trascina per riempire un rettangolo di caselle')}</div>
+      ${T.dforma !== 'rett' ? `<div class="g seg">${[1, 2, 3].map(k => bt('penn', k, k + '×' + k, (T.dpenn || 1) === k, `Pennello di ${k}×${k} caselle`)).join('')}</div>` : ''}
+      <div class="g"><button type="button" data-d="svuota"${n ? '' : ' disabled'}><span>Svuota (${n})</span></button></div>`;
+    b.classList.remove('spenta'); b.hidden = false;
+    b.querySelectorAll('[data-d]').forEach(x => x.onclick = async () => {
+      const k = x.dataset.d, v = x.dataset.v;
+      if (k === 'modo') T.dmodo = v; if (k === 'forma') T.dforma = v; if (k === 'penn') T.dpenn = +v;
+      if (k === 'svuota') { if (!await ask('Togliere tutto il terreno difficile da questa mappa?', { ok: 'Svuota', danger: true, title: 'Terreno difficile' })) return; return salvaZone(scena(), { difficile: [] }); }
+      barraDifficile(b);
+    });
+  }
+  // quanto costa uno spostamento, casella per casella come il righello: in quelle difficili si spende il doppio
+  function costoMov(t, x0, y0, x, y) {
+    const sc = scena(); if (!sc) return { m: 0, dif: 0 };
+    const q = sc.griglia, mt = sc.metri || 1.5, set = new Set(difScena(sc)), n = Math.max(1, Math.round(t.misura || 1));
+    const c0 = Math.round((x0 - sc.griglia_x) / q), r0 = Math.round((y0 - sc.griglia_y) / q), dc = Math.round((x - x0) / q), dr = Math.round((y - y0) / q), passi = Math.max(Math.abs(dc), Math.abs(dr));
+    let m = 0, dif = 0;
+    for (let i = 1; i <= passi; i++) {
+      const c = c0 + Math.round(dc * i / passi), r = r0 + Math.round(dr * i / passi);
+      let d = false; if (set.size) for (let a = 0; a < n && !d; a++) for (let b = 0; b < n && !d; b++) d = set.has(`${c + a},${r + b}`);
+      m += d ? 2 * mt : mt; if (d) dif++;
+    }
+    return { m: Math.round(m * 10) / 10, dif };
+  }
+
+  /* ---------- effetti sulla mappa: zone animate di fuoco, gas, veleno… che il DM piazza e ridimensiona ---------- */
+  const EFFETTI = {
+    fuoco: ['🔥', 'Fuoco', '#ff7a1a', '#ffd23a', '#c2260f'], gas: ['☁', 'Gas', '#b9c79a', '#e7eed2', '#7d8a5c'], veleno: ['☠', 'Veleno', '#6fcf4a', '#c8ff7a', '#2f6b1d'],
+    acido: ['🧪', 'Acido', '#b8e03a', '#f2ff8a', '#5c7a10'], ghiaccio: ['❄', 'Ghiaccio', '#8fdcff', '#ffffff', '#3b8fc7'], fulmine: ['⚡', 'Fulmini', '#ffe45c', '#ffffff', '#7a6cff'],
+    nebbia: ['🌫', 'Nebbia', '#d8dde3', '#ffffff', '#8a939c'], oscurita: ['🌑', 'Oscurità', '#1a1420', '#3a2f4a', '#000000']
+  };
+  const effScena = sc => Array.isArray(sc?.effetti) ? sc.effetti : [];
+  // durata in round: l'effetto finisce quando torna il turno in cui è stato messo, dopo «durata» round
+  const posTurno = id => ordinati().findIndex(x => x.id === id);
+  function roundRestanti(e) {
+    if (!(+e.durata > 0)) return null;
+    const fine = (+e.inizio?.round || 1) + +e.durata, ora = +T.stato?.round || 1;
+    const passato = !e.inizio?.turno || !T.stato?.turno || posTurno(T.stato.turno) >= Math.max(0, posTurno(e.inizio.turno));
+    return ora > fine || (ora === fine && passato) ? 0 : Math.max(1, fine - ora);
+  }
+  const scaduto = e => roundRestanti(e) === 0;
+  function scadenzeEffetti() {
+    if (!isDM()) return;
+    for (const sc of T.scene.values()) {
+      const L = effScena(sc), via = L.filter(scaduto); if (!via.length) continue;
+      salvaZone(sc, { effetti: L.filter(e => !scaduto(e)) });
+      toast(`Finito: ${via.map(e => (EFFETTI[e.tipo] || EFFETTI.fuoco).slice(0, 2).join(' ')).join(', ')} (durata scaduta).`);
+    }
+  }
+  const raggioPx = (sc, e) => (+e.m || 3) * sc.griglia / (sc.metri || 1.5);
+  // numeri «a caso» ma sempre uguali per lo stesso effetto, così ridisegnandolo non salta
+  const semeDi = id => { let h = 2166136261; for (const c of String(id)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return () => ((h = Math.imul(h ^ (h >>> 15), 2246822507) ^ Math.imul(h ^ (h >>> 13), 3266489909)) >>> 0) / 4294967296; };
+  function svgEffetto(sc, e, sel) {
+    const [, , c1, c2, c3] = EFFETTI[e.tipo] || EFFETTI.fuoco, R = raggioPx(sc, e), rnd = semeDi(e.id), id = 'ef' + String(e.id).replace(/\W/g, '');
+    const quad = e.forma === 'quadrato', forma = quad ? `<rect x="${e.x - R}" y="${e.y - R}" width="${2 * R}" height="${2 * R}" rx="${R * 0.06}"/>` : `<circle cx="${e.x}" cy="${e.y}" r="${R}"/>`;
+    const n = Math.round(clamp(R * R / 900, 8, 60)), parti = [], nube = e.tipo === 'gas' || e.tipo === 'nebbia';
+    for (let i = 0; i < n; i++) {
+      const a = rnd() * Math.PI * 2, d = Math.sqrt(rnd()) * R * 0.95, x = e.x + Math.cos(a) * d, y = e.y + Math.sin(a) * d, k = 0.6 + rnd() * 0.8, del = -(rnd() * 3).toFixed(2);
+      if (e.tipo === 'fuoco') parti.push(`<path class="pf" style="--d:${(R * 0.12 * k).toFixed(1)}px;animation-delay:${del}s;animation-duration:${(1 + rnd()).toFixed(2)}s" d="M${x} ${y}q${-8 * k} ${-10 * k} 0 ${-26 * k}q${8 * k} ${16 * k} 0 ${26 * k}z" fill="${rnd() < 0.5 ? c2 : c1}"/>`);
+      else if (e.tipo === 'gas' || e.tipo === 'nebbia' || e.tipo === 'oscurita') parti.push(`<circle class="pg" style="--dx:${((rnd() - .5) * R * 0.3).toFixed(1)}px;--dy:${((rnd() - .5) * R * 0.3).toFixed(1)}px;animation-delay:${del * 2}s;animation-duration:${(6 + rnd() * 5).toFixed(1)}s" cx="${x}" cy="${y}" r="${(R * (0.18 + rnd() * 0.22)).toFixed(1)}" fill="${rnd() < 0.5 ? c1 : c3}" opacity="${e.tipo === 'oscurita' ? .85 : .32}"/>`);
+      else if (e.tipo === 'veleno' || e.tipo === 'acido') parti.push(`<circle class="pb" style="--d:${(R * 0.08 * k).toFixed(1)}px;animation-delay:${del}s;animation-duration:${(1.4 + rnd() * 1.4).toFixed(2)}s" cx="${x}" cy="${y}" r="${(3 + rnd() * 7) * k}" fill="none" stroke="${c2}" stroke-width="2"/>`);
+      else if (e.tipo === 'ghiaccio') parti.push(`<path class="pi" style="animation-delay:${del}s" d="M${x} ${y - 9 * k}l${4 * k} ${9 * k} ${-4 * k} ${9 * k} ${-4 * k} ${-9 * k}z" fill="${c2}" opacity=".8" transform="rotate(${(rnd() * 360).toFixed(0)} ${x} ${y})"/>`);
+      else if (e.tipo === 'fulmine' && i < n / 3) { let px = x, py = y, dd = `M${px} ${py}`; for (let j = 0; j < 4; j++) { px += (rnd() - .5) * 30; py += 8 + rnd() * 14; dd += `L${px.toFixed(1)} ${py.toFixed(1)}`; } parti.push(`<path class="pl" style="animation-delay:${del}s;animation-duration:${(0.9 + rnd() * 1.6).toFixed(2)}s" d="${dd}" fill="none" stroke="${rnd() < .5 ? c1 : c2}" stroke-width="${2 + rnd() * 2}" stroke-linecap="round"/>`); }
+    }
+    return `<g class="ef ef-${e.tipo}${sel ? ' sel' : ''}" data-id="${esc(e.id)}"><defs><clipPath id="${id}c">${forma}</clipPath><radialGradient id="${id}g"><stop offset="0" stop-color="${c2}" stop-opacity="${e.tipo === 'oscurita' ? .95 : nube ? .3 : .55}"/><stop offset=".6" stop-color="${c1}" stop-opacity="${e.tipo === 'oscurita' ? .9 : nube ? .28 : .4}"/><stop offset="1" stop-color="${c3}" stop-opacity="${e.tipo === 'oscurita' ? .8 : .12}"/></radialGradient><filter id="${id}f" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="${(R * 0.05).toFixed(1)}"/></filter></defs>
+      <g clip-path="url(#${id}c)"><g class="base">${forma.replace('/>', ` fill="url(#${id}g)"/>`)}</g><g${['gas', 'nebbia', 'oscurita'].includes(e.tipo) ? ` filter="url(#${id}f)"` : ''}>${parti.join('')}</g></g>
+      ${roundRestanti(e) ? `<text class="dur" x="${e.x}" y="${e.y + R + Math.max(16, sc.griglia * 0.28)}" text-anchor="middle">⏳ ${roundRestanti(e)} round</text>` : ''}
+      ${sel ? `<g class="sel">${forma.replace('/>', ' fill="none" stroke="#f2b51d" stroke-width="3" stroke-dasharray="10 6"/>')}<circle class="man" cx="${e.x + R}" cy="${e.y}" r="${Math.max(8, sc.griglia * 0.14)}"/><text x="${e.x + R + 14}" y="${e.y - 12}">${String((+e.m || 3).toLocaleString('it-IT'))} m</text></g>` : ''}</g>`;
+  }
+  function disegnaEffetti() {
+    const sc = scena(), g = $('#tv-efx'); if (!sc || !g) return;
+    const L = (T.efm?.l || effScena(sc)).filter(e => !scaduto(e)), sel = isDM() && T.tool === 'effetti' ? T.efSel : null;
+    g.classList.toggle('fermo', !animazioni());
+    g.innerHTML = L.map(e => svgEffetto(sc, e, e.id === sel)).join('');
+  }
+  function effettoIn(sc, p) {
+    const L = effScena(sc);
+    for (let i = L.length - 1; i >= 0; i--) { const e = L[i], R = raggioPx(sc, e), dx = p.x - e.x, dy = p.y - e.y; if (e.forma === 'quadrato' ? Math.abs(dx) <= R && Math.abs(dy) <= R : Math.hypot(dx, dy) <= R) return e; }
+    return null;
+  }
+  function inizioEff(p) {
+    const sc = scena(); if (!sc) return;
+    const sel = effScena(sc).find(e => e.id === T.efSel);
+    // la maniglia sul bordo dell'effetto scelto lo allarga o lo stringe
+    if (sel && Math.hypot(p.x - (sel.x + raggioPx(sc, sel)), p.y - sel.y) <= Math.max(14, sc.griglia * 0.22)) { T.efm = { id: sel.id, modo: 'raggio', l: effScena(sc).map(e => ({ ...e })) }; return; }
+    const e = effettoIn(sc, p);
+    if (e) { T.efSel = e.id; T.efm = { id: e.id, modo: 'muovi', dx: p.x - e.x, dy: p.y - e.y, l: effScena(sc).map(x => ({ ...x })), mosso: false }; disegnaEffetti(); barraMaschera(); return; }
+    const nuovo = { id: nuovoId(), tipo: T.efTipo || 'fuoco', x: Math.round(p.x), y: Math.round(p.y), m: T.efM || 3, forma: T.efForma || 'cerchio', durata: T.efDur || 0, inizio: { round: +T.stato?.round || 1, turno: T.stato?.turno || null } };
+    T.efSel = nuovo.id; salvaZone(sc, { effetti: [...effScena(sc), nuovo] });
+  }
+  function muoviEff(p) {
+    const m = T.efm, sc = scena(); if (!m || !sc) return;
+    const e = m.l.find(x => x.id === m.id); if (!e) return;
+    if (m.modo === 'raggio') { const passo = (sc.metri || 1.5) / 2; e.m = clamp(Math.round(Math.max(Math.abs(p.x - e.x), Math.abs(p.y - e.y)) / sc.griglia * (sc.metri || 1.5) / passo) * passo, passo, 60); T.efM = e.m; }
+    else { e.x = Math.round(p.x - m.dx); e.y = Math.round(p.y - m.dy); m.mosso = true; }
+    m.cambiato = true; cancelAnimationFrame(T.eraf); T.eraf = requestAnimationFrame(disegnaEffetti);
+  }
+  function fineEff() {
+    const m = T.efm, sc = scena(); T.efm = null; if (!m || !sc) return;
+    if (m.cambiato) salvaZone(sc, { effetti: m.l }); else { disegnaEffetti(); barraMaschera(); }
+  }
+  function barraEffetti(b) {
+    const sc = scena(), L = effScena(sc), sel = L.find(e => e.id === T.efSel) || null, tipo = sel?.tipo || T.efTipo || 'fuoco', m = sel ? +sel.m || 3 : T.efM || 3, forma = sel?.forma || T.efForma || 'cerchio', dur = sel ? +sel.durata || 0 : T.efDur || 0;
+    b.innerHTML = `<div class="g"><b class="tit">✨ Effetti</b><span class="avv">${sel ? 'Trascina l\'effetto per spostarlo, il pallino sul bordo per cambiarne la grandezza.' : 'Scegli un effetto e clicca sulla mappa per piazzarlo.'}</span></div>
+      <div class="g seg">${Object.entries(EFFETTI).map(([k, [ic, l]]) => `<button type="button" data-e="tipo" data-v="${k}" class="${tipo === k ? 'on' : ''}" title="${l}"><span>${ic} ${l}</span></button>`).join('')}</div>
+      <div class="g sl" title="Raggio dell'effetto (metà del lato per il quadrato)"><span>Raggio</span><input type="range" class="tv-rg" data-e="m" min="1.5" max="30" step="1.5" value="${m}" aria-label="Raggio in metri"><output>${m.toLocaleString('it-IT')} m</output></div>
+      <div class="g sl" title="Quanti round dura: sparisce da sola quando torna il turno in cui l'hai messo. 0 = finché non la togli"><span>Durata</span><input type="number" data-e="dur" min="0" max="999" step="1" value="${dur}" aria-label="Durata in round" style="width:56px"><output>${dur ? (sel && roundRestanti(sel) != null ? `round · ne restano ${roundRestanti(sel)}` : 'round') : 'per sempre'}</output></div>
+      <div class="g seg"><button type="button" data-e="forma" data-v="cerchio" class="${forma !== 'quadrato' ? 'on' : ''}"><span>◯ Cerchio</span></button><button type="button" data-e="forma" data-v="quadrato" class="${forma === 'quadrato' ? 'on' : ''}"><span>▢ Quadrato</span></button></div>
+      <div class="g">${sel ? '<button type="button" data-e="via"><span>🗑 Togli questo</span></button><button type="button" data-e="desel"><span>Nuovo effetto</span></button>' : ''}<button type="button" data-e="svuota"${L.length ? '' : ' disabled'}><span>Svuota (${L.length})</span></button></div>`;
+    b.classList.remove('spenta'); b.hidden = false;
+    const cambia = ch => salvaZone(sc, { effetti: effScena(sc).map(e => e.id === sel.id ? { ...e, ...ch } : e) });
+    b.querySelectorAll('button[data-e]').forEach(x => x.onclick = async () => {
+      const k = x.dataset.e, v = x.dataset.v;
+      if (k === 'tipo') { T.efTipo = v; if (sel) return cambia({ tipo: v }); }
+      if (k === 'forma') { T.efForma = v; if (sel) return cambia({ forma: v }); }
+      if (k === 'via' && sel) { T.efSel = null; return salvaZone(sc, { effetti: L.filter(e => e.id !== sel.id) }); }
+      if (k === 'desel') { T.efSel = null; disegnaEffetti(); }
+      if (k === 'svuota') { if (!await ask('Togliere tutti gli effetti da questa mappa?', { ok: 'Svuota', danger: true, title: 'Effetti' })) return; T.efSel = null; return salvaZone(sc, { effetti: [] }); }
+      barraEffetti(b);
+    });
+    const rg = b.querySelector('[data-e=m]'), out = rg.nextElementSibling;
+    rg.oninput = () => { T.efM = +rg.value; out.textContent = (+rg.value).toLocaleString('it-IT') + ' m'; if (sel) { sel.m = +rg.value; disegnaEffetti(); } };
+    rg.onchange = () => { if (sel) cambia({ m: +rg.value }); };
+    // cambiare la durata la fa ripartire da adesso
+    const du = b.querySelector('[data-e=dur]');
+    du.onchange = () => { const v = clamp(Math.round(+du.value || 0), 0, 999); T.efDur = v; if (sel) return cambia({ durata: v, inizio: { round: +T.stato?.round || 1, turno: T.stato?.turno || null } }); barraEffetti(b); };
+  }
+
   /* ---------- movimento in combattimento: righello mentre si trascina, poi conferma ---------- */
   const RIGT = 'tavolo-righello-trascina';
   const righelloAuto = () => { try { return localStorage.getItem(RIGT) !== 'no'; } catch { return true; } };
@@ -1429,7 +1639,9 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     const l = t.misura * sc.griglia / 2, x = aggancia(d.x, sc.griglia_x, t.misura), y = aggancia(d.y, sc.griglia_y, t.misura);
     const pts = [{ x: d.x0 + l, y: d.y0 + l }, { x: x + l, y: y + l }];
     let extra = '', ko = false;
-    if (suoTurno(t)) { const m = Math.round(Math.max(Math.abs(x - d.x0), Math.abs(y - d.y0)) / sc.griglia) * (sc.metri || 1.5), mv = movimentoDi(t); ko = m > mv.resta + 0.01; extra = ko ? `oltre di ${metri(m - mv.resta)}` : `resta ${metri(mv.resta - m)}`; }
+    const cm = costoMov(t, d.x0, d.y0, x, y);
+    if (cm.dif) extra = `costa ${metri(cm.m)} (terreno difficile)`;
+    if (suoTurno(t)) { const m = cm.m, mv = movimentoDi(t); ko = m > mv.resta + 0.01; extra = [cm.dif ? `costa ${metri(m)}, terreno difficile` : '', ko ? `oltre di ${metri(m - mv.resta)}` : `resta ${metri(mv.resta - m)}`].filter(Boolean).join(' · '); }
     T.rulers.set('io', { nome: '', pts, extra, ko }); disegnaRighelli();
     const now = Date.now(); if (now - (d.rt || 0) > 80) { d.rt = now; manda('righello', { uid: T.me.uid, nome: T.me.nome, pts }); }
   }
@@ -1440,11 +1652,11 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     return true;
   }
   // «Muovere Livion di 6 m?»: con la conferma il movimento si scala, altrimenti il token torna dov'era
-  function chiediPasso(t, x, y, x0, y0, m) {
+  function chiediPasso(t, x, y, x0, y0, m, dif) {
     const b = $('#tv-mbar'); if (!b) return;
     const mv = movimentoDi(t), dopo = mv.resta - m;
     T.passo = { id: t.id, x, y, x0, y0, m };
-    b.innerHTML = `<div class="g"><b class="tit">🏃 ${esc(t.nome || 'Token')}: ${metri(m)}</b><span class="avv">${dopo >= 0 ? `Dopo restano ${metri(dopo)} di ${metri(mv.tot)}.` : `<b>Oltre il movimento di ${metri(-dopo)}.</b>`} Confermi lo spostamento?</span></div><div class="g"><button type="button" data-k="ok" class="on">✓ Conferma</button><button type="button" data-k="no">Annulla</button></div>`;
+    b.innerHTML = `<div class="g"><b class="tit">🏃 ${esc(t.nome || 'Token')}: ${metri(m)}${dif ? ' 🪨' : ''}</b>${dif ? `<span class="avv">${dif} ${dif === 1 ? 'casella' : 'caselle'} di terreno difficile (contano doppio).</span>` : ''}<span class="avv">${dopo >= 0 ? `Dopo restano ${metri(dopo)} di ${metri(mv.tot)}.` : `<b>Oltre il movimento di ${metri(-dopo)}.</b>`} Confermi lo spostamento?</span></div><div class="g"><button type="button" data-k="ok" class="on">✓ Conferma</button><button type="button" data-k="no">Annulla</button></div>`;
     b.classList.remove('spenta'); b.hidden = false;
     b.querySelector('[data-k=ok]').onclick = confermaPasso;
     b.querySelector('[data-k=no]').onclick = annullaPasso;
@@ -1996,6 +2208,8 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     if (T.tool === 'righello' && sc) return barraRighello(b);
     if (T.tool === 'muri' && isDM() && sc) return barraMuri(b);
     if (T.tool === 'griglia' && isDM() && sc) return barraGriglia(b);
+    if (T.tool === 'difficile' && isDM() && sc) return barraDifficile(b);
+    if (T.tool === 'effetti' && isDM() && sc) return barraEffetti(b);
     if (T.tool !== 'maschera' || !isDM() || !sc) { b.hidden = true; disegnaRighelli(); return; }
     if (!T.mraggio) T.mraggio = sc.griglia;
     const on = sc.maschera, dis = on ? '' : 'disabled', bt = (k, ic, l, sel, tip) => `<button type="button" data-m="${k}" class="${sel ? 'on' : ''}" ${dis} title="${esc(tip || l)}">${ic ? svg(ic) : ''}<span>${l}</span></button>`;
@@ -2433,7 +2647,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   // come tavolo_inc_att in tappa-7.sql: l'incantesimo scritto come un attacco che il tavolo sa leggere
   function attDaInc(s, sp) {
     if (!s || !sp) return null;
-    const g = String(sp.portata || '').match(/(\d+(?:[.,]\d+)?)\s*m\b/i), self = /^\s*(s[eé]|contatto|personale)/i.test(sp.portata || '');
+    const g = String(sp.portata || '').match(/(\d+(?:[.,]\d+)?)\s*m(?:etri)?\b/i), self = /^\s*(s[eé]|contatto|personale|incantatore)/i.test(sp.portata || '');
     const tipo = [g && !self ? `gittata ${g[1]} m` : '', sp.area || '', sp.ts ? `TS ${sp.ts} CD ${8 + bonusInc(s)}${sp.dimezza ? ' dimezza' : ''}` : '', sp.tipo_danni || ''].filter(Boolean).join(', ');
     return { nome: sp.nome || 'Incantesimo', colpire: sp.attacco ? bonusInc(s) : '', danni: sp.danni || '', tipo };
   }
@@ -2459,10 +2673,27 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     usaSlot(s, inc);
     const t = tokScheda() || attaccante(s); if (t && suoTurno(t) && /azione bonus/i.test(sp.tempo || '')) segnaAzioni(t, { bon: true }); else if (t && suoTurno(t) && /^\s*1\s*azione/i.test(sp.tempo || '')) segnaAzioni(t, { az: true });
   }
+  /* ---------- manuale degli incantesimi: l'SRD 5.1 in italiano, caricato solo quando serve ---------- */
+  let SRD = null;
+  const chiaveInc = n => String(n || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  function manuale() {
+    SRD = SRD || fetch('incantesimi.json').then(r => r.ok ? r.json() : Promise.reject(new Error(r.status))).then(j => {
+      T.srd = { ...j, per: new Map(j.incantesimi.map(x => [chiaveInc(x.nome), x])) };
+      if (!document.getElementById('tv-srd-l')) { const dl = document.createElement('datalist'); dl.id = 'tv-srd-l'; dl.innerHTML = j.incantesimi.map(x => `<option value="${esc(x.nome)}">${x.livello ? x.livello + '° livello' : 'Trucchetto'} · ${esc(x.scuola)}</option>`).join(''); document.body.append(dl); }
+      return T.srd;
+    }).catch(() => { SRD = null; return null; });
+    return SRD;
+  }
+  const dalManuale = sp => !String(sp?.testo || '').trim() && T.srd?.per.get(chiaveInc(sp?.nome)) || null;
+  // l'incantesimo preso dal manuale: tiene id e «preparato», il resto viene dal libro
+  const daManuale = (sp, x) => ({ id: sp.id || nuovoId(), ...(sp.prep ? { prep: true } : {}), ...x, srd: true });
+  const testoInc = (t, dis) => String(t || '').split(/\n+/).map(r => r.trim()).filter(Boolean).map(r => { const m = r.match(/^\*\*(.+?)\*\*\s*(.*)$/) || r.match(/^(Ai livelli superiori)[.:]\s*(.*)$/i); return `<p>${m ? `<b><i>${esc(m[1].replace(/[.:]\s*$/, ''))}.</i></b> ${dadiTesto(m[2], dis)}` : dadiTesto(r, dis)}</p>`; }).join('');
   function incForm(sp, i) {
     const f = (k, ph, cls = '') => `<input type="text" data-f="inc.${i}.${k}" class="${cls}" placeholder="${esc(ph)}" aria-label="${esc(ph)}">`;
     const ck = (k, l, tip) => `<label class="ck"${tip ? ` title="${esc(tip)}"` : ''}><input type="checkbox" data-f="inc.${i}.${k}"> ${l}</label>`;
-    return `<div class="pvf">${f('nome', 'Nome (es. Palla di fuoco)', 'pn')}
+    manuale();
+    return `<div class="pvf"><input type="text" data-f="inc.${i}.nome" class="pn" list="tv-srd-l" autocomplete="off" placeholder="Nome (es. Palla di fuoco): scegli dal manuale o scrivilo" aria-label="Nome">
+      ${dalManuale(sp) ? `<button type="button" class="mini srdb" data-k="inc-srd" data-i="${i}">📖 Compila dal manuale</button>` : ''}
       <div class="pvr"><label>Livello <select data-f="inc.${i}.livello">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<option value="${n}">${n ? n + '°' : 'Trucchetto'}</option>`).join('')}</select></label><label>Scuola <select data-f="inc.${i}.scuola"><option value="">—</option>${SCUOLE.map(x => `<option>${x}</option>`).join('')}</select></label>${ck('conc', 'Concentrazione')}${ck('rituale', 'Rituale')}</div>
       <div class="ig">${f('tempo', 'Tempo di lancio (1 azione)')}${f('portata', 'Portata (45 m, Contatto, Sé)')}${f('bersaglio', 'Bersaglio')}${f('componenti', 'Componenti (V, S, M)')}${f('durata', 'Durata (Istantanea, 1 minuto)')}${f('area', 'Area (sfera 6 m, cono 4,5 m)')}</div>
       <textarea data-f="inc.${i}.testo" rows="5" placeholder="Descrizione" aria-label="Descrizione"></textarea>
@@ -2472,15 +2703,15 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   function voceInc(s, sp, i, w, dis) {
     const sv = T.sv, key = sp.id || 'n' + i, aperta = sv.aperti?.has(key), mod = sv.minc === key && w, lv = num(sp.livello) || 0;
     const riga = (l, v) => `<p><b>${l}:</b> ${esc(v || '')}</p>`;
-    const sotto = `${sp.scuola || ''}${lv ? ' ' + lv : sp.scuola ? ' (trucchetto)' : 'Trucchetto'}${sp.rituale ? ' (rituale)' : ''}`;
+    const sotto = `${lv ? `${sp.scuola ? sp.scuola + ' di ' : ''}${lv}° livello` : sp.scuola ? 'Trucchetto di ' + sp.scuola.toLowerCase() : 'Trucchetto'}${sp.rituale ? ' (rituale)' : ''}`;
     const dett = `<div class="sc"><div class="st">${esc(sp.nome || 'Incantesimo')}</div><div class="ss">${esc(sotto)}</div>
-      ${riga('Tempo di lancio', sp.tempo)}${riga('Portata', sp.portata)}${sp.area ? riga('Area', sp.area) : ''}${riga('Bersaglio', sp.bersaglio)}${riga('Componenti', sp.componenti)}${riga('Durata', (sp.conc ? 'Concentrazione' + (sp.durata ? ', ' : '') : '') + (sp.durata || ''))}
+      ${riga('Tempo di lancio', sp.tempo)}${riga('Portata', sp.portata)}${sp.area ? riga('Area', sp.area) : ''}${sp.bersaglio ? riga('Bersaglio', sp.bersaglio) : ''}${riga('Componenti', sp.componenti)}${riga('Durata', (sp.conc ? 'Concentrazione' + (sp.durata ? ', ' : '') : '') + (sp.durata || ''))}
       ${sp.danni || sp.ts || sp.attacco ? `<p><b>Effetto:</b> ${[sp.attacco ? `tiro per colpire ${segno(bonusInc(s))}` : '', sp.danni ? `${esc(sp.danni)}${sp.tipo_danni ? ' ' + esc(sp.tipo_danni) : ''}` : '', sp.ts ? `TS ${esc(nomeCar(sp.ts))} CD ${8 + bonusInc(s)}${sp.dimezza ? ', metà se riesce' : ''}` : ''].filter(Boolean).join(' · ')}</p>` : ''}
-      <p><b>Descrizione:</b></p>${paragrafi(sp.testo, dis) || '<p class="vuoto">Nessuna descrizione.</p>'}</div>`;
+      <p><b>Descrizione:</b></p>${testoInc(sp.testo, dis) || `<p class="vuoto">Nessuna descrizione.${dalManuale(sp) && w ? ` <button type="button" class="mini srdb" data-k="inc-srd" data-i="${i}">📖 Compila dal manuale</button>` : ''}</p>`}</div>`;
     const tag = [sp.conc ? '<i title="Concentrazione">C</i>' : '', sp.rituale ? '<i title="Rituale">R</i>' : '', sp.componenti ? `<small>${esc(String(sp.componenti).split('(')[0].trim())}</small>` : ''].join('');
     return `<div class="pv spl${aperta ? ' ap' : ''}" data-ordi="${i}">
-      <div class="ph">${w ? '<span class="mano" title="Trascina per spostare" aria-hidden="true">⠿</span>' : ''}<button type="button" class="pt" data-k="inc-apri" data-i="${i}" aria-expanded="${!!aperta}">${esc(sp.nome || 'Senza nome')}</button>
-        <span class="tg2">${tag}</span><button type="button" class="lancia" data-k="inc-lancia" data-i="${i}" title="Lancia ${esc(sp.nome || 'l\'incantesimo')}"${dis}>✨ Lancia</button>
+      <div class="ph">${w ? '<span class="mano" title="Trascina per spostare" aria-hidden="true">⠿</span>' : ''}${lv ? `<button type="button" class="prp${sp.prep ? ' on' : ''}" data-k="inc-prep" data-i="${i}" title="${sp.prep ? 'Preparato' : 'Non preparato'}" aria-pressed="${!!sp.prep}"${w ? '' : ' disabled'}></button>` : ''}<button type="button" class="pt" data-k="inc-apri" data-i="${i}" aria-expanded="${!!aperta}">${esc(sp.nome || 'Senza nome')}</button>
+        <span class="tg2">${tag}</span><button type="button" class="mchat" data-k="inc-chat" data-i="${i}" title="Mostra la descrizione in chat" aria-label="Mostra in chat"${dis}>💬</button><button type="button" class="lancia" data-k="inc-lancia" data-i="${i}" title="Lancia ${esc(sp.nome || 'l\'incantesimo')}"${dis}>✨ Lancia</button>
         ${w ? `<button type="button" class="ing" data-k="inc-mod" data-i="${i}" title="Modifica" aria-label="Modifica">⚙</button>` : ''}</div>
       ${mod ? incForm(sp, i) : aperta ? dett : ''}</div>`;
   }
@@ -3052,8 +3283,9 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     d.querySelectorAll('.rz').forEach(h => h.addEventListener('pointerdown', e => ridimensionaScheda(e, d, h.dataset.rz)));
     posizionaScheda();
     const box = d.querySelector('.tv-sch');
-    box.addEventListener('input', e => { const el = e.target.closest('[data-f]'); if (el && el.type !== 'checkbox' && el.tagName !== 'SELECT') campo(el); });
-    box.addEventListener('change', e => { const el = e.target.closest('[data-f]'); if (el && (el.type === 'checkbox' || el.tagName === 'SELECT')) campo(el); else if (e.target.dataset.k) azioneScheda(e.target); });
+    // scegliere un nome tra i suggerimenti del manuale arriva come input senza digitazione
+    box.addEventListener('input', e => { const el = e.target.closest('[data-f]'); if (el && el.type !== 'checkbox' && el.tagName !== 'SELECT') campo(el, !e.inputType || e.inputType === 'insertReplacementText'); });
+    box.addEventListener('change', e => { const el = e.target.closest('[data-f]'); if (el && (el.type === 'checkbox' || el.tagName === 'SELECT')) campo(el); else if (el && /^inc\.\d+\.nome$/.test(el.dataset.f)) campo(el, true); else if (e.target.dataset.k) azioneScheda(e.target); });
     box.addEventListener('click', e => { const b = e.target.closest('button'); T.maiusc = e.shiftKey; if (b && box.contains(b)) azioneScheda(b); });
     // si sposta trascinandola dalla barra scura in alto; la posizione resta per le prossime volte
     box.addEventListener('input', e => { if (e.target.dataset.k !== 'filtro') return; sv.filtro = e.target.value; const fl = norm(sv.filtro); box.querySelectorAll('.prv .pv').forEach(el => { const p = (T.schede.get(id)?.dati.privilegi || [])[+el.dataset.ordi]; el.hidden = !!fl && !norm(`${p?.nome} ${p?.fonte} ${p?.testo}`).includes(fl); }); });
@@ -3149,8 +3381,11 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     const riga = (et, v) => v ? `<p><b>${et}</b> ${v}</p>` : '';
     const gs = String(d.gs ?? '').trim(), pe = PE[gs];
     const atts = (d.attacchi || []).map((a, i) => {
-      const dist = /gittata|distanza/i.test(a.tipo || ''), mi = media(a.danni);
-      return `<p><b><i>${esc(a.nome || 'Attacco')}.</i></b> <i>Attacco con arma ${dist ? 'a distanza' : 'da mischia'}:</i> <button type="button" class="dt" data-roll="att:${i}" title="Tiro per colpire"${dis}>${segno(num(a.colpire) || 0)}</button> al colpire. <i>Colpito:</i> <button type="button" class="dt" data-roll="dan:${i}" title="Tira i danni (con Maiusc: critico)"${dis}>${mi != null ? `${mi} (${esc(a.danni)})` : esc(a.danni || '—')}</button> danni ${esc(a.tipo || '')}.</p>`;
+      // come nelle schede dei personaggi: il testo del manuale e sotto i tasti per attaccare
+      const pa = portata(a), dist = !!pa.dist && !pa.mischia, mi = media(a.danni), col = segno(num(a.colpire) || 0);
+      const dove = pa.area ? 'incantesimo ad area' : pa.ts ? 'incantesimo con tiro salvezza' : `Attacco con arma ${pa.dist && pa.mischia ? 'da mischia o a distanza' : dist ? 'a distanza' : 'da mischia'}`;
+      return `<div class="sbat"><p><b><i>${esc(a.nome || 'Attacco')}.</i></b> <i>${dove}:</i> ${pa.area || pa.ts ? '' : `${col} al colpire. `}<i>Colpito:</i> ${mi != null ? `${mi} (${esc(a.danni)})` : esc(a.danni || '—')} danni${a.tipo ? ' ' + esc(a.tipo) : ''}.</p>
+        <div class="sbb"><button type="button" class="mini on" data-roll="att:${i}" title="${pa.area ? 'Scegli il punto sulla mappa' : 'Scegli il bersaglio sulla mappa (senza token: tiro per colpire)'}"${dis}>${pa.area ? '🔥 Lancia' : pa.ts ? '✨ Lancia' : '🎯 Attacca ' + col}</button><button type="button" class="mini" data-roll="dan:${i}" title="Tira i danni (con Maiusc: critico)"${dis}>💥 Danni ${esc(a.danni || '')}</button><button type="button" class="mini" data-roll="cri:${i}" title="Critico: dadi dei danni raddoppiati"${dis}>✖2 Critico</button></div></div>`;
     }).join('');
     return `<div class="sb">
       <div class="sbh"><div><h3>${esc(s.nome)}</h3><i>${esc(sotto)}</i></div>${w ? '<button type="button" class="mini" data-k="modifica" title="Cambia i valori della scheda">✎ Modifica</button>' : ''}</div>
@@ -3373,6 +3608,8 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
             : w ? `<select data-k="cond" class="selc" aria-label="Aggiungi una condizione"><option value="">+ Condizione</option>${CONDIZIONI.filter(c => !conds.includes(c)).map(c => `<option>${c}</option>`).join('')}</select>` : ''}
         </div></div>`;
     } else if (sv.tab === 'inc') {
+      if (!T.srd) manuale().then(m => { if (m && T.sv?.tab === 'inc') disegnaScheda(); });
+      const daCompl = (d.incantesimi || []).filter(dalManuale).length;
       const IL = (d.incantesimi || []).map((sp, j) => [sp, j]), vecchi = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].some(i => String(d['inc_' + i] || '').trim());
       const liv = i => { const voci = IL.filter(([sp]) => (num(sp.livello) || 0) === i); return `<div class="sez lv"><div class="lt"><b>${i || '0'}</b>${i ? `<span>Slot</span>${n('slot_' + i, '0', 'sn')}<span class="dots" data-dots="usati_${i}"></span>` : '<span>Trucchetti</span>'}</div>
         <div class="pl incL" data-ord="incantesimi">${voci.map(([sp, j]) => voceInc(s, sp, j, w, dis)).join('')}</div>
@@ -3383,7 +3620,9 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
           <div class="li grande"><button type="button" class="rb" data-roll="inc" data-c="inc" title="Tiro per colpire con un incantesimo"${dis}></button><small>Bonus di attacco</small></div></div>
         ${w ? '<button type="button" class="mini agg" data-k="riposo" title="Azzera gli slot usati">🌙 Riposo lungo: azzera gli slot</button>' : ''}
         ${vecchi && w ? '<div class="vec"><p>Qui ci sono ancora gli incantesimi scritti come testo: trasformali in voci da aprire, modificare e lanciare (una riga, un incantesimo).</p><button type="button" class="mini" data-k="inc-conv">✨ Trasforma in voci</button></div>' : ''}
-        <div class="incG">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(liv).join('')}</div>`;
+        ${daCompl && w ? `<div class="vec"><p>${daCompl === 1 ? 'Un incantesimo non ha' : daCompl + ' incantesimi non hanno'} ancora la descrizione, ma ${daCompl === 1 ? 'è' : 'sono'} nel manuale.</p><button type="button" class="mini" data-k="inc-srd-tutti">📖 Completa dal manuale</button></div>` : ''}
+        <div class="incG">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(liv).join('')}</div>
+        ${T.srd && (d.incantesimi || []).some(x => x.srd) ? `<p class="srdA">${esc(T.srd.attribuzione)}</p>` : ''}`;
     } else {
       corpo = pg ? `<div class="bgT">${[['eta', 'Età'], ['altezza', 'Altezza'], ['peso', 'Peso'], ['occhi', 'Occhi'], ['pelle', 'Pelle'], ['capelli', 'Capelli']].map(([k, l]) => cella(inp(k, ''), l)).join('')}</div>
         <div class="bgG">${box(area('aspetto', 'Come appare il personaggio…', 6), 'Aspetto del personaggio')}${box(area('alleati', 'Gilde, ordini, amici e nemici…', 6), 'Alleati e organizzazioni')}
@@ -3406,7 +3645,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       ${isDM() ? `<div class="fd">${s.tipo === 'png' ? `<button type="button" class="mini" data-k="vis">${s.nascosta ? '🙈 Nascosta ai giocatori' : '👁 La vedono i giocatori'}</button>${scena() ? '<button type="button" class="mini" data-k="metti">＋ Metti un token sulla mappa</button>' : ''}` : '<span class="vuoto">La compila anche il giocatore, dal vivo.</span>'}</div>` : (w ? '' : '<p class="vuoto fd">Scheda mostrata dal DM: puoi solo leggerla.</p>')}`;
     riempi(); applicaZoomScheda(); sv.d.classList.toggle('tv-scuro', schedaScura());
   }
-  function campo(el) {
+  function campo(el, scelto = false) {
     const sv = T.sv, s = sv && T.schede.get(sv.id); if (!s || !puoScrivere(s)) return;
     const f = el.dataset.f, v = el.type === 'checkbox' ? el.checked : el.type === 'number' ? num(el.value) : el.value;
     if (f === 'nome') {
@@ -3423,6 +3662,8 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     if (f.startsWith('inc.')) {
       const [, i, k] = f.split('.'), a = (s.dati.incantesimi || []).map(x => ({ ...x })); if (!a[i]) return;
       a[i][k] = k === 'livello' ? +v || 0 : v;
+      const x = k === 'nome' && (scelto || !el.matches(':focus')) && dalManuale(a[i]);
+      if (x) { a[i] = daManuale(a[i], x); if (sv.minc === (a[i].id)) sv.minc = null; (sv.aperti = sv.aperti || new Set()).add(a[i].id); salvaScheda(s.id, { incantesimi: a }, true).then(() => disegnaScheda()); return; }
       // cambiando livello l'incantesimo passa in un altro riquadro
       if (k === 'livello' || k === 'scuola' || el.type === 'checkbox') { salvaScheda(s.id, { incantesimi: a }, true).then(() => disegnaScheda()); return; }
       salvaScheda(s.id, { incantesimi: a }); return;
@@ -3458,6 +3699,12 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     const I = d.incantesimi || [], sp = I[pi], ckey = sp && (sp.id || 'n' + pi);
     if (k === 'inc-apri' && sp) { sv.aperti = sv.aperti || new Set(); sv.aperti.has(ckey) ? sv.aperti.delete(ckey) : sv.aperti.add(ckey); return disegnaScheda(); }
     if (k === 'inc-lancia' && sp) return lanciaInc(s, pi);
+    if (k === 'inc-chat' && sp) {
+      const lv = num(sp.livello) || 0, r = [`📖 ${sp.nome || 'Incantesimo'}`, `${sp.scuola || ''}${lv ? ` di ${lv}° livello` : ' (trucchetto)'}`.trim(),
+        ...[['Tempo di lancio', sp.tempo], ['Portata', sp.portata], ['Area', sp.area], ['Componenti', sp.componenti], ['Durata', (sp.conc ? 'Concentrazione' + (sp.durata ? ', ' : '') : '') + (sp.durata || '')]].filter(([, v]) => String(v || '').trim()).map(([l, v]) => `${l}: ${v}`),
+        String(sp.testo || '').replace(/\*\*/g, '').trim()].filter(Boolean);
+      const e = await SB.rpc('tavolo_scrivi', { p_testo: r.join('\n') }); if (e.error) toast(e.error.message, 'err'); return;
+    }
     if (b.dataset.roll) {
       const [r, a] = b.dataset.roll.split(':'), ca = CAR.find(x => x[0] === a), at = (d.attacchi || [])[a];
       if (r === 'car') return tiroD20(s, modC(d[a]), 'Prova di ' + ca[2]);
@@ -3488,6 +3735,9 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     const salvaP = (L, subito = true) => salvaScheda(s.id, { privilegi: L }, subito).then(() => disegnaScheda());
     const salvaI = L => salvaScheda(s.id, { incantesimi: L }, true).then(() => disegnaScheda());
     if (k === 'inc-mod' && sp) { sv.minc = sv.minc === ckey ? null : ckey; if (!sp.id) { const L = I.map(x => ({ ...x })); L[pi].id = nuovoId(); if (sv.minc) sv.minc = L[pi].id; return salvaI(L); } return disegnaScheda(); }
+    if (k === 'inc-srd' && sp) { const x = dalManuale(sp); if (!x) return; const L = I.map(y => ({ ...y })); L[pi] = daManuale(sp, x); if (sv.minc === ckey) sv.minc = null; (sv.aperti = sv.aperti || new Set()).add(L[pi].id); return salvaI(L); }
+    if (k === 'inc-srd-tutti') { let n = 0; const L = I.map(y => { const x = dalManuale(y); if (!x) return { ...y }; n++; return daManuale(y, x); }); if (!n) return; await salvaI(L); return toast(`${n} incantesimi completati dal manuale.`); }
+    if (k === 'inc-prep' && sp) { const L = I.map(x => ({ ...x })); L[pi].prep = !L[pi].prep; return salvaI(L); }
     if (k === 'inc-via' && sp) { if (!await ask(`Eliminare **${sp.nome || 'questo incantesimo'}**?`, { ok: 'Elimina', danger: true, title: 'Incantesimi' })) return; sv.minc = null; return salvaI(I.filter((_, i) => i !== pi)); }
     if (k === 'inc-add') { const v = { id: nuovoId(), nome: '', livello: +b.dataset.l || 0 }; sv.minc = v.id; (sv.aperti = sv.aperti || new Set()).add(v.id); await salvaI([...I, v]); sv.d.querySelector(`[data-f="inc.${I.length}.nome"]`)?.focus(); return; }
     if (k === 'inc-conv') {
