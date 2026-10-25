@@ -141,13 +141,14 @@ end $$;
 
 -- ---------- attacco: se colpisce e nelle note c'è «+ 2d8 … (TS Costituzione CD 11)», quei danni li decide il tiro salvezza ----------
 drop function if exists public.tavolo_attacca(uuid, uuid, int, int, boolean, text);
-create or replace function public.tavolo_attacca(p_token uuid, p_bersaglio uuid, p_attacco int, p_adv int default 0, p_privato boolean default false, p_extra text default null, p_inc int default null)
+drop function if exists public.tavolo_attacca(uuid, uuid, int, int, boolean, text, int);
+create or replace function public.tavolo_attacca(p_token uuid, p_bersaglio uuid, p_attacco int, p_adv int default 0, p_privato boolean default false, p_extra text default null, p_inc int default null, p_extra_nome text default null)
 returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare
   a tavolo_token; b tavolo_token; sa tavolo_schede; sb tavolo_schede; att jsonb;
   bonus int; danni text; ca int; tiro tavolo_tiri; td tavolo_tiri; nat int; colpito boolean; critico boolean := false;
-  dmg int := 0; ferita jsonb := '{}'; nome_att text; testo text; car text; cd int; dv text; tv tavolo_tiri; ric jsonb; extra text := lower(regexp_replace(coalesce(p_extra, ''), '\s+', '', 'g'));
+  dmg int := 0; ferita jsonb := '{}'; nome_att text; testo text; car text; cd int; dv text; tv tavolo_tiri; ric jsonb; tx tavolo_tiri; extra text := lower(regexp_replace(coalesce(p_extra, ''), '\s+', '', 'g'));
 begin
   if not tavolo_e_membro() then raise exception 'Non fai parte del tavolo'; end if;
   select * into a from tavolo_token where id = p_token;
@@ -176,10 +177,17 @@ begin
 
   -- colpito: i danni si tirano subito (raddoppiati col critico) e si tolgono al bersaglio
   if colpito and (danni ~ '\d' or extra <> '') then
-    danni := concat_ws('+', nullif(danni, ''), nullif(extra, ''));
-    td := tavolo_tira(case when critico then tavolo_critico(danni) else danni end,
-      coalesce(a.nome, '') || ' → ' || coalesce(b.nome, '') || ' · danni' || case when critico then ' (critico ×2)' else '' end, p_privato);
-    dmg := greatest(td.totale, 0);
+    if danni ~ '\d' then
+      td := tavolo_tira(case when critico then tavolo_critico(danni) else danni end,
+        coalesce(a.nome, '') || ' → ' || coalesce(b.nome, '') || ' · danni' || case when critico then ' (critico ×2)' else '' end, p_privato);
+      dmg := greatest(td.totale, 0);
+    end if;
+    -- attacco furtivo, punizione…: un tiro a parte, così in chat si distingue dai danni dell'arma
+    if extra <> '' then
+      tx := tavolo_tira(case when critico then tavolo_critico(extra) else extra end,
+        coalesce(a.nome, '') || ' → ' || coalesce(b.nome, '') || ' · ' || coalesce(nullif(left(p_extra_nome, 60), ''), 'danni in più') || case when critico then ' (critico ×2)' else '' end, p_privato);
+      dmg := dmg + greatest(tx.totale, 0);
+    end if;
     ferita := tavolo_ferisci(b.id, dmg);
     -- «+ 2d8 da veleno (TS Costituzione CD 11, dimezza)»: i danni in più li decide il tiro salvezza del bersaglio
     testo := lower(coalesce(att ->> 'tipo', ''));
@@ -194,7 +202,7 @@ begin
   if critico then insert into tavolo_critici (tiro, autore, token, bersaglio, privato) values (tiro.id, auth.uid(), a.id, b.id, p_privato) on conflict do nothing; end if;
 
   return jsonb_build_object('colpito', colpito, 'critico', critico, 'fallito', nat = 1, 'naturale', nat, 'totale', tiro.totale,
-    'danni', dmg, 'pf', ferita -> 'pf', 'morto', coalesce((ferita ->> 'morto')::boolean, false), 'tiro', tiro.id, 'tiro_danni', td.id, 'salvezza', ric);
+    'danni', dmg, 'pf', ferita -> 'pf', 'morto', coalesce((ferita ->> 'morto')::boolean, false), 'tiro', tiro.id, 'tiro_danni', td.id, 'danni_extra', tx.totale, 'salvezza', ric);
 end $$;
 
 
@@ -248,8 +256,8 @@ revoke execute on function public.tavolo_salva_annulla(uuid) from anon, public;
 grant execute on function public.tavolo_salva_annulla(uuid) to authenticated;
 revoke execute on function public.tavolo_area(uuid, int, uuid[], int, boolean, int) from anon, public;
 grant execute on function public.tavolo_area(uuid, int, uuid[], int, boolean, int) to authenticated;
-revoke execute on function public.tavolo_attacca(uuid, uuid, int, int, boolean, text, int) from anon, public;
-grant execute on function public.tavolo_attacca(uuid, uuid, int, int, boolean, text, int) to authenticated;
+revoke execute on function public.tavolo_attacca(uuid, uuid, int, int, boolean, text, int, text) from anon, public;
+grant execute on function public.tavolo_attacca(uuid, uuid, int, int, boolean, text, int, text) to authenticated;
 revoke execute on function public.tavolo_inc_att(public.tavolo_schede, int) from anon, public, authenticated;
 revoke execute on function public.tavolo_turno_fuori(uuid) from anon, public, authenticated;
 revoke execute on function public.tavolo_turno_avanti() from anon, public;
