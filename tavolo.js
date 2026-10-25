@@ -535,7 +535,9 @@ dialog.tv-poz menu small{font-weight:400;opacity:.8}
 .tv-sch .lv .lt{display:flex;align-items:center;gap:6px;font:700 .62rem var(--body);text-transform:uppercase;color:var(--k2);border-bottom:2px solid var(--lin);padding-bottom:4px;margin-bottom:3px}
 .tv-sch .lv .lt b{width:26px;height:26px;border:2px solid var(--lin);border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 .95rem var(--display);color:var(--k)}
 .tv-sch .lv .sn{width:38px;border:1px solid var(--ul);border-radius:4px}
-.tv-sch .spl .pt{font-size:.95rem}
+.tv-sch .spl .ph{flex-wrap:wrap;row-gap:3px}
+.tv-sch .spl .pt{font-size:.95rem;flex:1 1 120px;overflow-wrap:anywhere}
+.tv-sch .spl .az2{display:flex;gap:5px;align-items:center;flex:none;margin-left:auto}
 .tv-sch .spl .tg2{display:flex;gap:2px;align-items:center}
 .tv-sch .spl .tg2 i{font:700 .6rem var(--body);font-style:normal;width:15px;height:15px;border-radius:50%;background:var(--k);color:var(--pp);display:flex;align-items:center;justify-content:center}
 .tv-sch .spl .tg2 small{font:600 .62rem var(--body);color:var(--k2);white-space:nowrap}
@@ -2795,8 +2797,8 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     const tag = [sp.conc ? '<i title="Concentrazione">C</i>' : '', sp.rituale ? '<i title="Rituale">R</i>' : '', sp.componenti ? `<small>${esc(String(sp.componenti).split('(')[0].trim())}</small>` : ''].join('');
     return `<div class="pv spl${aperta ? ' ap' : ''}" data-ordi="${i}">
       <div class="ph">${w ? '<span class="mano" title="Trascina per spostare" aria-hidden="true">⠿</span>' : ''}${lv ? `<button type="button" class="prp${sp.prep ? ' on' : ''}" data-k="inc-prep" data-i="${i}" title="${sp.prep ? 'Preparato' : 'Non preparato'}" aria-pressed="${!!sp.prep}"${w ? '' : ' disabled'}></button>` : ''}<button type="button" class="pt" data-k="inc-apri" data-i="${i}" aria-expanded="${!!aperta}">${esc(sp.nome || 'Senza nome')}</button>
-        <span class="tg2">${tag}</span><button type="button" class="mchat" data-k="inc-chat" data-i="${i}" title="Mostra la descrizione in chat" aria-label="Mostra in chat"${dis}>💬</button><button type="button" class="lancia" data-k="inc-lancia" data-i="${i}" title="Lancia ${esc(sp.nome || 'l\'incantesimo')}"${dis}>✨ Lancia</button>
-        ${w ? `<button type="button" class="ing" data-k="inc-mod" data-i="${i}" title="Modifica" aria-label="Modifica">⚙</button>` : ''}</div>
+        <span class="az2"><span class="tg2">${tag}</span><button type="button" class="mchat" data-k="inc-chat" data-i="${i}" title="Mostra la descrizione in chat" aria-label="Mostra in chat"${dis}>💬</button><button type="button" class="lancia" data-k="inc-lancia" data-i="${i}" title="Lancia ${esc(sp.nome || 'l\'incantesimo')}"${dis}>✨ Lancia</button>
+        ${w ? `<button type="button" class="ing" data-k="inc-mod" data-i="${i}" title="Modifica" aria-label="Modifica">⚙</button>` : ''}</span></div>
       ${mod ? incForm(sp, i) : aperta ? dett : ''}</div>`;
   }
   // un incantesimo (inc) si lancia come un attacco: la scheda lo traduce in gittata, area e tiro salvezza
