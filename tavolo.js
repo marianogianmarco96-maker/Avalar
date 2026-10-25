@@ -397,6 +397,9 @@ dialog.tv-sw>.rz:hover{background-color:#7d253033}
 .tv-sch .pv .pu{font:700 .75rem var(--body);background:#7d2530;color:#fff;border-radius:10px;padding:1px 7px}
 .tv-sch .pv .ing{all:unset;cursor:pointer;opacity:.5;font-size:.95rem;padding:0 3px}
 .tv-sch .pv .ing:hover{opacity:1}
+.tv-sch .pv .sw2{display:flex;align-items:center;gap:3px;cursor:pointer;font:700 .66rem var(--body);text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:10px;border:1px solid var(--ul);color:var(--k2)}
+.tv-sch .pv .sw2 input{width:auto;margin:0;accent-color:#7d2530}
+.tv-sch .pv .sw2.on{background:#7d2530;border-color:#7d2530;color:#fff}
 .tv-sch .pvf{display:grid;gap:5px;margin:6px 0 2px 18px;padding:6px;border-radius:6px;background:var(--gr)}
 .tv-sch .pvf .pn{font-weight:700}
 .tv-sch .pvf textarea{background:var(--box);border-radius:4px}
@@ -2381,7 +2384,10 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     const area = ar ? { forma: /cubo/i.test(ar[1]) ? 'cubo' : /cono/i.test(ar[1]) ? 'cono' : /linea/i.test(ar[1]) ? 'linea' : 'cerchio', m: f(ar[2]) } : null;
     // «TS Destrezza CD 13»: niente tiro per colpire, il bersaglio tira il salvezza (ma «+ 2d8 da veleno (TS…)» resta un attacco)
     const ts = TS_RE.test(tx) && !/\+\s*\d+\s*d\s*\d+/i.test(a.tipo || '');
-    return { mischia: !area && (!dist || /lancio/i.test(tx)), reach: p ? f(p[1]) : 1.5, dist, col: el?.[1] || null, area, ts };
+    // il pugnale boomerang si lancia (6/18 m, come un pugnale) e torna in mano
+    const ritorna = /boomerang|ritorna|torna in mano/i.test(tx); if (ritorna && !dist) dist = [6, 18];
+    const lancio = /lancio/i.test(tx) || ritorna;
+    return { mischia: !area && (!dist || lancio), reach: p ? f(p[1]) : 1.5, dist, col: el?.[1] || null, area, ts, lancio, ritorna };
   }
   // distanza come sul regolamento: caselle tra i bordi dei token (le diagonali contano 1), due token vicini sono a 1,5 m
   function distanza(a, b, sc) {
@@ -2412,7 +2418,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     if (cb.includes('Invisibile')) contro.push(`${nb} è invisibile`);
     if (m.adv === 1) pro.push('scelto dalla scheda'); if (m.adv === 2) contro.push('scelto dalla scheda');
     const adv = pro.length && !contro.length ? 1 : contro.length && !pro.length ? 2 : 0;
-    return { ok: true, modo, d, adv, pro, contro, anim: modo === 'mischia' ? 'spada' : p.col ? 'magia' : 'freccia', col: p.col };
+    return { ok: true, modo, d, adv, pro, contro, anim: modo === 'mischia' ? 'spada' : p.col ? 'magia' : p.lancio ? 'lancio' : 'freccia', col: p.col, ritorna: modo === 'distanza' && p.ritorna };
   }
   // il token con cui attacca chi apre la scheda: il suo personaggio, o il PNG da cui il DM ha aperto la scheda
   function attaccante(s) {
@@ -2482,7 +2488,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   function iniziaMira(s, i, tok, inc = null) {
     const sv = T.sv, at = inc != null ? attDaInc(s, s.dati.incantesimi?.[inc]) : s.dati.attacchi[i]; if (!at) return;
     const pa = portata(at); T.critico = null;
-    T.mira = { sid: s.id, i: inc != null ? 0 : i, inc, tok: tok.id, adv: sv?.adv || 0, seg: !!sv?.seg, area: pa.area, dist: pa.dist, col: pa.col, extra: new Set() };
+    T.mira = { sid: s.id, i: inc != null ? 0 : i, inc, tok: tok.id, adv: sv?.adv || 0, seg: !!sv?.seg, area: pa.area, dist: pa.dist, col: pa.col, extra: new Set(inc != null ? [] : (s.dati.privilegi || []).map((x, j) => x.extra && x.dadi && x.attivo ? j : -1).filter(j => j >= 0)) };
     // la scheda coprirebbe la mappa: sul telefono si chiude, sul computer sparisce finché non si è scelto il bersaglio
     if (sv?.d.open) { if (innerWidth <= 820) sv.d.close(); else { sv.d.style.visibility = 'hidden'; T.mira.d = sv.d; } }
     strumento('muovi'); $('#tv-stage')?.classList.add('mira'); barraMira(at, tok); disegnaToken();
@@ -2499,12 +2505,17 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     const s = T.schede?.get(m.sid), ex = (s?.dati.privilegi || []).map((x, i) => [x, i]).filter(([x]) => x.extra && x.dadi);
     const forma = p.area && { cerchio: 'sfera', cubo: 'cubo', cono: 'cono', linea: 'linea' }[p.area.forma] + ' di ' + metri(p.area.m);
     b.innerHTML = `<div class="g"><b class="tit">🎯 ${esc(at.nome || 'Attacco')}</b><span class="avv">di ${esc(tok.nome || '')} · ${arr}${forma ? ' · ' + forma : ''}. ${p.area ? (m.f ? (m.f.lontano ? '<b>Troppo lontano.</b>' : `Dentro: ${m.bers.length ? m.bers.map(id => esc(T.tok.get(id)?.nome || '?')).join(', ') : 'nessuno'}.`) : 'Clicca sulla mappa il punto dove lanciarlo.') : 'Clicca il bersaglio sulla mappa.'}</span></div>
-      ${ex.length && !p.area ? `<div class="g">${ex.map(([x, i]) => `<label class="sw" title="Aggiunge ${esc(x.dadi)} ai danni se colpisci"><input type="checkbox" data-x="${i}" ${m.extra.has(i) ? 'checked' : ''}><span class="tg" aria-hidden="true"></span>＋ ${esc(x.nome)} (${esc(x.dadi)})</label>`).join('')}</div>` : ''}
+      ${ex.length && !p.area && m.inc == null ? `<div class="g">${ex.map(([x, i]) => `<label class="sw" title="Aggiunge ${esc(x.dadi)} ai danni se colpisci"><input type="checkbox" data-x="${i}" ${m.extra.has(i) ? 'checked' : ''}><span class="tg" aria-hidden="true"></span>＋ ${esc(x.nome)} (${esc(x.dadi)})</label>`).join('')}</div>` : ''}
       <div class="g">${p.area ? `<button type="button" data-k="lancia" class="on"${m.f && !m.f.lontano ? '' : ' disabled'}>🔥 Lancia qui</button>` : ''}<button type="button" data-k="annulla">Annulla (Esc)</button></div>`;
     b.classList.remove('spenta'); b.hidden = false;
     b.querySelector('[data-k=annulla]').onclick = () => fineMira();
     b.querySelector('[data-k=lancia]')?.addEventListener('click', lanciaArea);
-    b.querySelectorAll('[data-x]').forEach(x => x.onchange = () => { x.checked ? m.extra.add(+x.dataset.x) : m.extra.delete(+x.dataset.x); });
+    b.querySelectorAll('[data-x]').forEach(x => x.onchange = () => { x.checked ? m.extra.add(+x.dataset.x) : m.extra.delete(+x.dataset.x); attivaExtra(s, +x.dataset.x, x.checked); });
+  }
+  // attacco furtivo e simili restano accesi (o spenti) finché non si cambia: dalla mira o dalla scheda
+  function attivaExtra(s, i, on) {
+    if (!s || !puoScrivere(s)) return; const L = (s.dati.privilegi || []).map(x => ({ ...x })); if (!L[i] || !!L[i].attivo === on) return;
+    L[i].attivo = on; salvaScheda(s.id, { privilegi: L }, true).then(() => { if (T.sv?.id === s.id) disegnaScheda(); });
   }
   async function scegliBersaglio(b) {
     const m = T.mira; if (!m) return;
@@ -2512,18 +2523,18 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     const sx = T.schede?.get(m.sid), at = armaMira(m);
     if (at && portata(at).ts) { fineMira(animazioni() ? 1800 : 700); return incantesimoTS(m, [b.id], null, v.col || '#ffb347', at); }
     fineMira(animazioni() ? 1800 : 700);
-    const extra = [...m.extra].map(i => sx?.dati.privilegi?.[i]?.dadi).filter(Boolean).join('+');
-    const r = await SB.rpc('tavolo_attacca', { p_token: m.tok, p_bersaglio: b.id, p_attacco: m.i, p_adv: v.adv, p_privato: m.seg, ...(extra ? { p_extra: extra } : {}), ...(m.inc != null ? { p_inc: m.inc } : {}) });
-    if (r.error) return toast(sqlMancante(r.error) ? 'Per gli attacchi sulla mappa esegui tavolo/tappa-5.sql in Supabase.' : extra && /p_extra|function/i.test(r.error.message) ? 'Per aggiungere i dadi in più esegui tavolo/tappa-6.sql in Supabase.' : r.error.message, 'err');
+    const exP = [...m.extra].map(i => sx?.dati.privilegi?.[i]).filter(x => x?.dadi), extra = exP.map(x => x.dadi).join('+'), exN = exP.map(x => x.nome || 'danni in più').join(' + ');
+    const r = await SB.rpc('tavolo_attacca', { p_token: m.tok, p_bersaglio: b.id, p_attacco: m.i, p_adv: v.adv, p_privato: m.seg, ...(extra ? { p_extra: extra, p_extra_nome: exN } : {}), ...(m.inc != null ? { p_inc: m.inc } : {}) });
+    if (r.error) return toast(sqlMancante(r.error) ? 'Per gli attacchi sulla mappa esegui tavolo/tappa-5.sql in Supabase.' : extra && /p_extra|function/i.test(r.error.message) ? 'Per aggiungere i dadi in più esegui tavolo/tappa-7.sql in Supabase.' : r.error.message, 'err');
     const x = Array.isArray(r.data) ? r.data[0] : r.data, a = T.tok.get(m.tok);
-    const mossa = { da: m.tok, a: b.id, anim: v.anim, col: v.col, esito: x.colpito === true ? 'si' : x.colpito === false ? 'no' : 'nd', crit: !!x.critico, fallito: !!x.fallito, danni: x.danni || 0 };
+    const mossa = { da: m.tok, a: b.id, anim: v.anim, col: v.col, ritorna: !!v.ritorna, esito: x.colpito === true ? 'si' : x.colpito === false ? 'no' : 'nd', crit: !!x.critico, fallito: !!x.fallito, danni: x.danni || 0 };
     manda('attacco', mossa); mostraAttacco(mossa);
     if (m.inc != null) usaSlot(sx, m.inc);
     if (a && suoTurno(a) && !azioniDi(a).az) segnaAzioni(a, { az: true });
     if (x.critico && x.pf !== 0) barraCritico(x, a, b, mossa);
     if (x.salvezza) toast(`${b.nome || 'Il bersaglio'} deve fare un tiro salvezza su ${nomeCar(x.salvezza.car)} (CD ${x.salvezza.cd}) per i danni in più.`);
     const perche = [v.adv === 1 ? 'vantaggio: ' + v.pro.join(', ') : v.adv === 2 ? 'svantaggio: ' + v.contro.join(', ') : ''].filter(Boolean).join('');
-    toast(`${a?.nome || ''} → ${b.nome || ''}: ${mossa.esito === 'nd' ? `tiro ${x.totale}, senza CA nella scheda del bersaglio decide il DM` : mossa.esito === 'si' ? `${x.critico ? 'critico! ' : 'colpito, '}${x.danni} danni` : x.fallito ? '1 naturale, mancato' : 'mancato'}${perche ? ' (' + perche + ')' : ''}`);
+    toast(`${a?.nome || ''} → ${b.nome || ''}: ${mossa.esito === 'nd' ? `tiro ${x.totale}, senza CA nella scheda del bersaglio decide il DM` : mossa.esito === 'si' ? `${x.critico ? 'critico! ' : 'colpito, '}${x.danni} danni${x.danni_extra != null ? ` (di cui ${x.danni_extra} da ${exN})` : ''}` : x.fallito ? '1 naturale, mancato' : 'mancato'}${perche ? ' (' + perche + ')' : ''}${v.ritorna ? ' · il pugnale torna in mano' : ''}`);
   }
 
   /* ---------- incantesimi ad area: chi lancia sceglie il punto, il tavolo trova chi è dentro ---------- */
@@ -2716,13 +2727,19 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     if (m.anim === 'magia') {
       nodo(g, 'circle', { r: u * 0.2, fill: m.col }); nodo(g, 'circle', { r: u * 0.1, fill: '#fff8e0' });
       for (let i = 1; i <= 5; i++) { const sci = nodo(fx, 'circle', { r: u * (0.18 - i * 0.025), fill: m.col, opacity: .55 - i * .08 }); muovi(sci, [{ transform: `translate(${sx}px,${sy}px)` }, { transform: `translate(${fine[0]}px,${fine[1]}px)` }], { duration: dur, delay: i * 30, easing: 'ease-in' }).finished.then(() => sci.remove()); }
+    } else if (m.anim === 'lancio') {
+      // pugnale che ruota in volo: lama chiara, elsa scura
+      nodo(g, 'path', { d: `M${-u * .06} ${-u * .05}L${u * .3} 0 ${-u * .06} ${u * .05}z`, fill: m.crit ? '#ffd24a' : '#dfe5ea', stroke: '#6b7480', 'stroke-width': u * 0.012 });
+      nodo(g, 'path', { d: `M${-u * .06} ${-u * .11}V${u * .11}`, stroke: '#8a6a3a', 'stroke-width': u * 0.04, 'stroke-linecap': 'round' });
+      nodo(g, 'path', { d: `M${-u * .06} 0H${-u * .2}`, stroke: '#5a3d22', 'stroke-width': u * 0.05, 'stroke-linecap': 'round' });
     } else {
       nodo(g, 'path', { d: `M${-u * .5} 0H${u * .18}`, stroke: m.crit ? '#ffe08a' : '#e9d8b0', 'stroke-width': u * 0.05 });
       nodo(g, 'path', { d: `M${u * .18} ${-u * .1}L${u * .38} 0 ${u * .18} ${u * .1}z`, fill: m.crit ? '#ffd24a' : '#cfd6dc' });
       nodo(g, 'path', { d: `M${-u * .5} 0l${-u * .12} ${-u * .1}M${-u * .5} 0l${-u * .12} ${u * .1}M${-u * .4} 0l${-u * .12} ${-u * .1}M${-u * .4} 0l${-u * .12} ${u * .1}`, stroke: '#d6453b', 'stroke-width': u * 0.04 });
     }
-    const alto = Math.min(u * 0.6, Math.hypot(fine[0] - sx, fine[1] - sy) * 0.08);
-    muovi(g, [{ transform: `translate(${sx}px,${sy}px) rotate(${d2}deg)` }, { transform: `translate(${(sx + fine[0]) / 2}px,${(sy + fine[1]) / 2 - alto}px) rotate(${d2 - 4}deg)`, offset: .5 }, { transform: `translate(${fine[0]}px,${fine[1]}px) rotate(${d2 + 3}deg)` }], { duration: dur, easing: 'cubic-bezier(.3,.1,.6,1)' }).finished.then(() => {
+    const alto = Math.min(u * 0.6, Math.hypot(fine[0] - sx, fine[1] - sy) * 0.08), giri = m.anim === 'lancio' ? 720 : 0;
+    muovi(g, [{ transform: `translate(${sx}px,${sy}px) rotate(${d2}deg)` }, { transform: `translate(${(sx + fine[0]) / 2}px,${(sy + fine[1]) / 2 - alto}px) rotate(${d2 - 4 + giri / 2}deg)`, offset: .5 }, { transform: `translate(${fine[0]}px,${fine[1]}px) rotate(${d2 + 3 + giri}deg)` }], { duration: dur, easing: 'cubic-bezier(.3,.1,.6,1)' }).finished.then(() => {
+      if (m.ritorna) { esito(); muovi(g, [{ transform: `translate(${fine[0]}px,${fine[1]}px) rotate(${d2}deg)` }, { transform: `translate(${(sx + fine[0]) / 2}px,${(sy + fine[1]) / 2 + alto}px) rotate(${d2 + 360}deg)`, offset: .5 }, { transform: `translate(${sx}px,${sy}px) rotate(${d2 + 720}deg)` }], { duration: dur, delay: 150, easing: 'cubic-bezier(.4,0,.7,1)' }).finished.then(() => g.remove()); return; }
       if (manca && m.anim !== 'magia') muovi(g, [{ opacity: 1 }, { opacity: 0 }], { duration: 400, delay: 200 }).finished.then(() => g.remove()); else g.remove();
       if (manca && m.anim === 'magia') { const f = nodo(fx, 'circle', { cx: fine[0], cy: fine[1], r: u * 0.15, fill: '#8a8178', opacity: .7 }); muovi(f, [{ r: u * 0.15, opacity: .7 }, { r: u * 0.5, opacity: 0 }], { duration: 700 }).finished.then(() => f.remove()); }
       esito();
@@ -3214,7 +3231,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       const nasc = fl && !norm(`${p.nome} ${p.fonte} ${p.testo}`).includes(fl);
       return `<div class="pv${aperta ? ' ap' : ''}" data-ordi="${i}"${nasc ? ' hidden' : ''}>
         <div class="ph">${w ? '<span class="mano" title="Trascina per spostare" aria-hidden="true">⠿</span>' : ''}<button type="button" class="pt" data-k="prv-apri" data-i="${i}" aria-expanded="${!!aperta}">${esc(p.nome || 'Senza nome')}</button>
-          ${num(p.usi) > 0 ? `<span class="pu" title="Usi rimasti">${restanti(p)}/${num(p.usi)}</span>` : ''}${p.dadi ? `<button type="button" class="mini" data-k="prv-dadi" data-i="${i}" title="Tira ${esc(p.dadi)}"${dis}>🎲 ${esc(p.dadi)}</button>` : ''}
+          ${num(p.usi) > 0 ? `<span class="pu" title="Usi rimasti">${restanti(p)}/${num(p.usi)}</span>` : ''}${p.dadi ? `<button type="button" class="mini" data-k="prv-dadi" data-i="${i}" title="Tira ${esc(p.dadi)}"${dis}>🎲 ${esc(p.dadi)}</button>` : ''}${p.extra && p.dadi ? `<label class="sw2${p.attivo ? ' on' : ''}" title="Acceso: quando colpisci, ${esc(p.dadi)} si tirano da soli (a parte) e si sommano ai danni"><input type="checkbox" data-k="prv-att" data-i="${i}"${p.attivo ? ' checked' : ''}${dis}>${p.attivo ? 'attivo' : 'spento'}</label>` : ''}
           ${w ? `<button type="button" class="ing" data-k="prv-mod" data-i="${i}" title="Modifica" aria-label="Modifica">⚙</button>` : ''}</div>
         ${p.fonte ? `<small class="pf2">${esc(p.fonte)}</small>` : ''}
         ${mod ? voceForm(p, i) : aperta ? `<div class="pd">${paragrafi(p.testo, dis) || '<p class="vuoto">Nessuna descrizione.</p>'}</div>` : ''}</div>`;
@@ -3480,6 +3497,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       if (!nuovi.length) return;
       await salvaScheda(s.id, { incantesimi: [...I, ...nuovi], ...via }, true); toast(`${nuovi.length} incantesimi trasformati in voci: apri ⚙ per completarli.`); return disegnaScheda();
     }
+    if (k === 'prv-att' && pv) return attivaExtra(s, pi, b.checked);
     if (k === 'prv-mod' && pv) { sv.mprv = sv.mprv === chiave ? null : chiave; if (!pv.id) { const L = P.map(x => ({ ...x })); L[pi].id = nuovoId(); if (sv.mprv) sv.mprv = L[pi].id; return salvaP(L); } return disegnaScheda(); }
     if (k === 'prv-via' && pv) { if (!await ask(`Eliminare **${pv.nome || 'questa voce'}**?`, { ok: 'Elimina', danger: true, title: 'Privilegi' })) return; sv.mprv = null; return salvaP(P.filter((_, i) => i !== pi)); }
     if (k === 'prv-add' || k === 'ris-add') { const v = { id: nuovoId(), nome: '', fonte: '', testo: '', ...(k === 'ris-add' ? { usi: 1, usati: 0, riposo: 'lungo' } : {}) }; sv.mprv = v.id; (sv.aperti = sv.aperti || new Set()).add(v.id); await salvaP([...P, v]); sv.d.querySelector(`.pv [data-f="prv.${P.length}.nome"]`)?.focus(); return; }
