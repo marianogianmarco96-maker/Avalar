@@ -532,6 +532,14 @@ dialog.tv-poz menu small{font-weight:400;opacity:.8}
 .tv-sch .spl .tg2{display:flex;gap:2px;align-items:center}
 .tv-sch .spl .tg2 i{font:700 .6rem var(--body);font-style:normal;width:15px;height:15px;border-radius:50%;background:var(--k);color:var(--pp);display:flex;align-items:center;justify-content:center}
 .tv-sch .spl .tg2 small{font:600 .62rem var(--body);color:var(--k2);white-space:nowrap}
+.tv-sch .spl .prp{all:unset;box-sizing:border-box;cursor:pointer;flex:none;width:13px;height:13px;border:1.5px solid var(--k);border-radius:50%;margin-right:4px}
+.tv-sch .spl .prp.on{background:#7d2530;border-color:#7d2530;box-shadow:inset 0 0 0 2px var(--pp)}
+.tv-sch .spl .prp:disabled{cursor:default}
+.tv-sch .spl .mchat{all:unset;cursor:pointer;font-size:.8rem;opacity:0;transition:opacity .15s;padding:0 2px}
+.tv-sch .spl:hover .mchat,.tv-sch .spl .mchat:focus-visible{opacity:.85}
+.tv-sch .spl .mchat:disabled{display:none}
+.tv-sch .srdA{margin:14px 4px 2px;font-size:.68rem;line-height:1.35;opacity:.6}
+.tv-sch .srdb{margin:4px 0}
 .tv-sch .spl .lancia{all:unset;box-sizing:border-box;cursor:pointer;padding:2px 8px;border-radius:5px;background:#7d2530;color:#fff;font:700 .72rem var(--body);white-space:nowrap}
 .tv-sch .spl .lancia:hover{background:#962c3a}
 .tv-sch .spl .lancia:disabled{display:none}
@@ -2639,7 +2647,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   // come tavolo_inc_att in tappa-7.sql: l'incantesimo scritto come un attacco che il tavolo sa leggere
   function attDaInc(s, sp) {
     if (!s || !sp) return null;
-    const g = String(sp.portata || '').match(/(\d+(?:[.,]\d+)?)\s*m\b/i), self = /^\s*(s[eé]|contatto|personale)/i.test(sp.portata || '');
+    const g = String(sp.portata || '').match(/(\d+(?:[.,]\d+)?)\s*m(?:etri)?\b/i), self = /^\s*(s[eé]|contatto|personale|incantatore)/i.test(sp.portata || '');
     const tipo = [g && !self ? `gittata ${g[1]} m` : '', sp.area || '', sp.ts ? `TS ${sp.ts} CD ${8 + bonusInc(s)}${sp.dimezza ? ' dimezza' : ''}` : '', sp.tipo_danni || ''].filter(Boolean).join(', ');
     return { nome: sp.nome || 'Incantesimo', colpire: sp.attacco ? bonusInc(s) : '', danni: sp.danni || '', tipo };
   }
@@ -2665,10 +2673,27 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     usaSlot(s, inc);
     const t = tokScheda() || attaccante(s); if (t && suoTurno(t) && /azione bonus/i.test(sp.tempo || '')) segnaAzioni(t, { bon: true }); else if (t && suoTurno(t) && /^\s*1\s*azione/i.test(sp.tempo || '')) segnaAzioni(t, { az: true });
   }
+  /* ---------- manuale degli incantesimi: l'SRD 5.1 in italiano, caricato solo quando serve ---------- */
+  let SRD = null;
+  const chiaveInc = n => String(n || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  function manuale() {
+    SRD = SRD || fetch('incantesimi.json').then(r => r.ok ? r.json() : Promise.reject(new Error(r.status))).then(j => {
+      T.srd = { ...j, per: new Map(j.incantesimi.map(x => [chiaveInc(x.nome), x])) };
+      if (!document.getElementById('tv-srd-l')) { const dl = document.createElement('datalist'); dl.id = 'tv-srd-l'; dl.innerHTML = j.incantesimi.map(x => `<option value="${esc(x.nome)}">${x.livello ? x.livello + '° livello' : 'Trucchetto'} · ${esc(x.scuola)}</option>`).join(''); document.body.append(dl); }
+      return T.srd;
+    }).catch(() => { SRD = null; return null; });
+    return SRD;
+  }
+  const dalManuale = sp => !String(sp?.testo || '').trim() && T.srd?.per.get(chiaveInc(sp?.nome)) || null;
+  // l'incantesimo preso dal manuale: tiene id e «preparato», il resto viene dal libro
+  const daManuale = (sp, x) => ({ id: sp.id || nuovoId(), ...(sp.prep ? { prep: true } : {}), ...x, srd: true });
+  const testoInc = (t, dis) => String(t || '').split(/\n+/).map(r => r.trim()).filter(Boolean).map(r => { const m = r.match(/^\*\*(.+?)\*\*\s*(.*)$/) || r.match(/^(Ai livelli superiori)[.:]\s*(.*)$/i); return `<p>${m ? `<b><i>${esc(m[1].replace(/[.:]\s*$/, ''))}.</i></b> ${dadiTesto(m[2], dis)}` : dadiTesto(r, dis)}</p>`; }).join('');
   function incForm(sp, i) {
     const f = (k, ph, cls = '') => `<input type="text" data-f="inc.${i}.${k}" class="${cls}" placeholder="${esc(ph)}" aria-label="${esc(ph)}">`;
     const ck = (k, l, tip) => `<label class="ck"${tip ? ` title="${esc(tip)}"` : ''}><input type="checkbox" data-f="inc.${i}.${k}"> ${l}</label>`;
-    return `<div class="pvf">${f('nome', 'Nome (es. Palla di fuoco)', 'pn')}
+    manuale();
+    return `<div class="pvf"><input type="text" data-f="inc.${i}.nome" class="pn" list="tv-srd-l" autocomplete="off" placeholder="Nome (es. Palla di fuoco): scegli dal manuale o scrivilo" aria-label="Nome">
+      ${dalManuale(sp) ? `<button type="button" class="mini srdb" data-k="inc-srd" data-i="${i}">📖 Compila dal manuale</button>` : ''}
       <div class="pvr"><label>Livello <select data-f="inc.${i}.livello">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<option value="${n}">${n ? n + '°' : 'Trucchetto'}</option>`).join('')}</select></label><label>Scuola <select data-f="inc.${i}.scuola"><option value="">—</option>${SCUOLE.map(x => `<option>${x}</option>`).join('')}</select></label>${ck('conc', 'Concentrazione')}${ck('rituale', 'Rituale')}</div>
       <div class="ig">${f('tempo', 'Tempo di lancio (1 azione)')}${f('portata', 'Portata (45 m, Contatto, Sé)')}${f('bersaglio', 'Bersaglio')}${f('componenti', 'Componenti (V, S, M)')}${f('durata', 'Durata (Istantanea, 1 minuto)')}${f('area', 'Area (sfera 6 m, cono 4,5 m)')}</div>
       <textarea data-f="inc.${i}.testo" rows="5" placeholder="Descrizione" aria-label="Descrizione"></textarea>
@@ -2678,15 +2703,15 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   function voceInc(s, sp, i, w, dis) {
     const sv = T.sv, key = sp.id || 'n' + i, aperta = sv.aperti?.has(key), mod = sv.minc === key && w, lv = num(sp.livello) || 0;
     const riga = (l, v) => `<p><b>${l}:</b> ${esc(v || '')}</p>`;
-    const sotto = `${sp.scuola || ''}${lv ? ' ' + lv : sp.scuola ? ' (trucchetto)' : 'Trucchetto'}${sp.rituale ? ' (rituale)' : ''}`;
+    const sotto = `${lv ? `${sp.scuola ? sp.scuola + ' di ' : ''}${lv}° livello` : sp.scuola ? 'Trucchetto di ' + sp.scuola.toLowerCase() : 'Trucchetto'}${sp.rituale ? ' (rituale)' : ''}`;
     const dett = `<div class="sc"><div class="st">${esc(sp.nome || 'Incantesimo')}</div><div class="ss">${esc(sotto)}</div>
-      ${riga('Tempo di lancio', sp.tempo)}${riga('Portata', sp.portata)}${sp.area ? riga('Area', sp.area) : ''}${riga('Bersaglio', sp.bersaglio)}${riga('Componenti', sp.componenti)}${riga('Durata', (sp.conc ? 'Concentrazione' + (sp.durata ? ', ' : '') : '') + (sp.durata || ''))}
+      ${riga('Tempo di lancio', sp.tempo)}${riga('Portata', sp.portata)}${sp.area ? riga('Area', sp.area) : ''}${sp.bersaglio ? riga('Bersaglio', sp.bersaglio) : ''}${riga('Componenti', sp.componenti)}${riga('Durata', (sp.conc ? 'Concentrazione' + (sp.durata ? ', ' : '') : '') + (sp.durata || ''))}
       ${sp.danni || sp.ts || sp.attacco ? `<p><b>Effetto:</b> ${[sp.attacco ? `tiro per colpire ${segno(bonusInc(s))}` : '', sp.danni ? `${esc(sp.danni)}${sp.tipo_danni ? ' ' + esc(sp.tipo_danni) : ''}` : '', sp.ts ? `TS ${esc(nomeCar(sp.ts))} CD ${8 + bonusInc(s)}${sp.dimezza ? ', metà se riesce' : ''}` : ''].filter(Boolean).join(' · ')}</p>` : ''}
-      <p><b>Descrizione:</b></p>${paragrafi(sp.testo, dis) || '<p class="vuoto">Nessuna descrizione.</p>'}</div>`;
+      <p><b>Descrizione:</b></p>${testoInc(sp.testo, dis) || `<p class="vuoto">Nessuna descrizione.${dalManuale(sp) && w ? ` <button type="button" class="mini srdb" data-k="inc-srd" data-i="${i}">📖 Compila dal manuale</button>` : ''}</p>`}</div>`;
     const tag = [sp.conc ? '<i title="Concentrazione">C</i>' : '', sp.rituale ? '<i title="Rituale">R</i>' : '', sp.componenti ? `<small>${esc(String(sp.componenti).split('(')[0].trim())}</small>` : ''].join('');
     return `<div class="pv spl${aperta ? ' ap' : ''}" data-ordi="${i}">
-      <div class="ph">${w ? '<span class="mano" title="Trascina per spostare" aria-hidden="true">⠿</span>' : ''}<button type="button" class="pt" data-k="inc-apri" data-i="${i}" aria-expanded="${!!aperta}">${esc(sp.nome || 'Senza nome')}</button>
-        <span class="tg2">${tag}</span><button type="button" class="lancia" data-k="inc-lancia" data-i="${i}" title="Lancia ${esc(sp.nome || 'l\'incantesimo')}"${dis}>✨ Lancia</button>
+      <div class="ph">${w ? '<span class="mano" title="Trascina per spostare" aria-hidden="true">⠿</span>' : ''}${lv ? `<button type="button" class="prp${sp.prep ? ' on' : ''}" data-k="inc-prep" data-i="${i}" title="${sp.prep ? 'Preparato' : 'Non preparato'}" aria-pressed="${!!sp.prep}"${w ? '' : ' disabled'}></button>` : ''}<button type="button" class="pt" data-k="inc-apri" data-i="${i}" aria-expanded="${!!aperta}">${esc(sp.nome || 'Senza nome')}</button>
+        <span class="tg2">${tag}</span><button type="button" class="mchat" data-k="inc-chat" data-i="${i}" title="Mostra la descrizione in chat" aria-label="Mostra in chat"${dis}>💬</button><button type="button" class="lancia" data-k="inc-lancia" data-i="${i}" title="Lancia ${esc(sp.nome || 'l\'incantesimo')}"${dis}>✨ Lancia</button>
         ${w ? `<button type="button" class="ing" data-k="inc-mod" data-i="${i}" title="Modifica" aria-label="Modifica">⚙</button>` : ''}</div>
       ${mod ? incForm(sp, i) : aperta ? dett : ''}</div>`;
   }
@@ -3258,8 +3283,9 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     d.querySelectorAll('.rz').forEach(h => h.addEventListener('pointerdown', e => ridimensionaScheda(e, d, h.dataset.rz)));
     posizionaScheda();
     const box = d.querySelector('.tv-sch');
-    box.addEventListener('input', e => { const el = e.target.closest('[data-f]'); if (el && el.type !== 'checkbox' && el.tagName !== 'SELECT') campo(el); });
-    box.addEventListener('change', e => { const el = e.target.closest('[data-f]'); if (el && (el.type === 'checkbox' || el.tagName === 'SELECT')) campo(el); else if (e.target.dataset.k) azioneScheda(e.target); });
+    // scegliere un nome tra i suggerimenti del manuale arriva come input senza digitazione
+    box.addEventListener('input', e => { const el = e.target.closest('[data-f]'); if (el && el.type !== 'checkbox' && el.tagName !== 'SELECT') campo(el, !e.inputType || e.inputType === 'insertReplacementText'); });
+    box.addEventListener('change', e => { const el = e.target.closest('[data-f]'); if (el && (el.type === 'checkbox' || el.tagName === 'SELECT')) campo(el); else if (el && /^inc\.\d+\.nome$/.test(el.dataset.f)) campo(el, true); else if (e.target.dataset.k) azioneScheda(e.target); });
     box.addEventListener('click', e => { const b = e.target.closest('button'); T.maiusc = e.shiftKey; if (b && box.contains(b)) azioneScheda(b); });
     // si sposta trascinandola dalla barra scura in alto; la posizione resta per le prossime volte
     box.addEventListener('input', e => { if (e.target.dataset.k !== 'filtro') return; sv.filtro = e.target.value; const fl = norm(sv.filtro); box.querySelectorAll('.prv .pv').forEach(el => { const p = (T.schede.get(id)?.dati.privilegi || [])[+el.dataset.ordi]; el.hidden = !!fl && !norm(`${p?.nome} ${p?.fonte} ${p?.testo}`).includes(fl); }); });
@@ -3582,6 +3608,8 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
             : w ? `<select data-k="cond" class="selc" aria-label="Aggiungi una condizione"><option value="">+ Condizione</option>${CONDIZIONI.filter(c => !conds.includes(c)).map(c => `<option>${c}</option>`).join('')}</select>` : ''}
         </div></div>`;
     } else if (sv.tab === 'inc') {
+      if (!T.srd) manuale().then(m => { if (m && T.sv?.tab === 'inc') disegnaScheda(); });
+      const daCompl = (d.incantesimi || []).filter(dalManuale).length;
       const IL = (d.incantesimi || []).map((sp, j) => [sp, j]), vecchi = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].some(i => String(d['inc_' + i] || '').trim());
       const liv = i => { const voci = IL.filter(([sp]) => (num(sp.livello) || 0) === i); return `<div class="sez lv"><div class="lt"><b>${i || '0'}</b>${i ? `<span>Slot</span>${n('slot_' + i, '0', 'sn')}<span class="dots" data-dots="usati_${i}"></span>` : '<span>Trucchetti</span>'}</div>
         <div class="pl incL" data-ord="incantesimi">${voci.map(([sp, j]) => voceInc(s, sp, j, w, dis)).join('')}</div>
@@ -3592,7 +3620,9 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
           <div class="li grande"><button type="button" class="rb" data-roll="inc" data-c="inc" title="Tiro per colpire con un incantesimo"${dis}></button><small>Bonus di attacco</small></div></div>
         ${w ? '<button type="button" class="mini agg" data-k="riposo" title="Azzera gli slot usati">🌙 Riposo lungo: azzera gli slot</button>' : ''}
         ${vecchi && w ? '<div class="vec"><p>Qui ci sono ancora gli incantesimi scritti come testo: trasformali in voci da aprire, modificare e lanciare (una riga, un incantesimo).</p><button type="button" class="mini" data-k="inc-conv">✨ Trasforma in voci</button></div>' : ''}
-        <div class="incG">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(liv).join('')}</div>`;
+        ${daCompl && w ? `<div class="vec"><p>${daCompl === 1 ? 'Un incantesimo non ha' : daCompl + ' incantesimi non hanno'} ancora la descrizione, ma ${daCompl === 1 ? 'è' : 'sono'} nel manuale.</p><button type="button" class="mini" data-k="inc-srd-tutti">📖 Completa dal manuale</button></div>` : ''}
+        <div class="incG">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(liv).join('')}</div>
+        ${T.srd && (d.incantesimi || []).some(x => x.srd) ? `<p class="srdA">${esc(T.srd.attribuzione)}</p>` : ''}`;
     } else {
       corpo = pg ? `<div class="bgT">${[['eta', 'Età'], ['altezza', 'Altezza'], ['peso', 'Peso'], ['occhi', 'Occhi'], ['pelle', 'Pelle'], ['capelli', 'Capelli']].map(([k, l]) => cella(inp(k, ''), l)).join('')}</div>
         <div class="bgG">${box(area('aspetto', 'Come appare il personaggio…', 6), 'Aspetto del personaggio')}${box(area('alleati', 'Gilde, ordini, amici e nemici…', 6), 'Alleati e organizzazioni')}
@@ -3615,7 +3645,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       ${isDM() ? `<div class="fd">${s.tipo === 'png' ? `<button type="button" class="mini" data-k="vis">${s.nascosta ? '🙈 Nascosta ai giocatori' : '👁 La vedono i giocatori'}</button>${scena() ? '<button type="button" class="mini" data-k="metti">＋ Metti un token sulla mappa</button>' : ''}` : '<span class="vuoto">La compila anche il giocatore, dal vivo.</span>'}</div>` : (w ? '' : '<p class="vuoto fd">Scheda mostrata dal DM: puoi solo leggerla.</p>')}`;
     riempi(); applicaZoomScheda(); sv.d.classList.toggle('tv-scuro', schedaScura());
   }
-  function campo(el) {
+  function campo(el, scelto = false) {
     const sv = T.sv, s = sv && T.schede.get(sv.id); if (!s || !puoScrivere(s)) return;
     const f = el.dataset.f, v = el.type === 'checkbox' ? el.checked : el.type === 'number' ? num(el.value) : el.value;
     if (f === 'nome') {
@@ -3632,6 +3662,8 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     if (f.startsWith('inc.')) {
       const [, i, k] = f.split('.'), a = (s.dati.incantesimi || []).map(x => ({ ...x })); if (!a[i]) return;
       a[i][k] = k === 'livello' ? +v || 0 : v;
+      const x = k === 'nome' && (scelto || !el.matches(':focus')) && dalManuale(a[i]);
+      if (x) { a[i] = daManuale(a[i], x); if (sv.minc === (a[i].id)) sv.minc = null; (sv.aperti = sv.aperti || new Set()).add(a[i].id); salvaScheda(s.id, { incantesimi: a }, true).then(() => disegnaScheda()); return; }
       // cambiando livello l'incantesimo passa in un altro riquadro
       if (k === 'livello' || k === 'scuola' || el.type === 'checkbox') { salvaScheda(s.id, { incantesimi: a }, true).then(() => disegnaScheda()); return; }
       salvaScheda(s.id, { incantesimi: a }); return;
@@ -3667,6 +3699,12 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     const I = d.incantesimi || [], sp = I[pi], ckey = sp && (sp.id || 'n' + pi);
     if (k === 'inc-apri' && sp) { sv.aperti = sv.aperti || new Set(); sv.aperti.has(ckey) ? sv.aperti.delete(ckey) : sv.aperti.add(ckey); return disegnaScheda(); }
     if (k === 'inc-lancia' && sp) return lanciaInc(s, pi);
+    if (k === 'inc-chat' && sp) {
+      const lv = num(sp.livello) || 0, r = [`📖 ${sp.nome || 'Incantesimo'}`, `${sp.scuola || ''}${lv ? ` di ${lv}° livello` : ' (trucchetto)'}`.trim(),
+        ...[['Tempo di lancio', sp.tempo], ['Portata', sp.portata], ['Area', sp.area], ['Componenti', sp.componenti], ['Durata', (sp.conc ? 'Concentrazione' + (sp.durata ? ', ' : '') : '') + (sp.durata || '')]].filter(([, v]) => String(v || '').trim()).map(([l, v]) => `${l}: ${v}`),
+        String(sp.testo || '').replace(/\*\*/g, '').trim()].filter(Boolean);
+      const e = await SB.rpc('tavolo_scrivi', { p_testo: r.join('\n') }); if (e.error) toast(e.error.message, 'err'); return;
+    }
     if (b.dataset.roll) {
       const [r, a] = b.dataset.roll.split(':'), ca = CAR.find(x => x[0] === a), at = (d.attacchi || [])[a];
       if (r === 'car') return tiroD20(s, modC(d[a]), 'Prova di ' + ca[2]);
@@ -3697,6 +3735,9 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     const salvaP = (L, subito = true) => salvaScheda(s.id, { privilegi: L }, subito).then(() => disegnaScheda());
     const salvaI = L => salvaScheda(s.id, { incantesimi: L }, true).then(() => disegnaScheda());
     if (k === 'inc-mod' && sp) { sv.minc = sv.minc === ckey ? null : ckey; if (!sp.id) { const L = I.map(x => ({ ...x })); L[pi].id = nuovoId(); if (sv.minc) sv.minc = L[pi].id; return salvaI(L); } return disegnaScheda(); }
+    if (k === 'inc-srd' && sp) { const x = dalManuale(sp); if (!x) return; const L = I.map(y => ({ ...y })); L[pi] = daManuale(sp, x); if (sv.minc === ckey) sv.minc = null; (sv.aperti = sv.aperti || new Set()).add(L[pi].id); return salvaI(L); }
+    if (k === 'inc-srd-tutti') { let n = 0; const L = I.map(y => { const x = dalManuale(y); if (!x) return { ...y }; n++; return daManuale(y, x); }); if (!n) return; await salvaI(L); return toast(`${n} incantesimi completati dal manuale.`); }
+    if (k === 'inc-prep' && sp) { const L = I.map(x => ({ ...x })); L[pi].prep = !L[pi].prep; return salvaI(L); }
     if (k === 'inc-via' && sp) { if (!await ask(`Eliminare **${sp.nome || 'questo incantesimo'}**?`, { ok: 'Elimina', danger: true, title: 'Incantesimi' })) return; sv.minc = null; return salvaI(I.filter((_, i) => i !== pi)); }
     if (k === 'inc-add') { const v = { id: nuovoId(), nome: '', livello: +b.dataset.l || 0 }; sv.minc = v.id; (sv.aperti = sv.aperti || new Set()).add(v.id); await salvaI([...I, v]); sv.d.querySelector(`[data-f="inc.${I.length}.nome"]`)?.focus(); return; }
     if (k === 'inc-conv') {
