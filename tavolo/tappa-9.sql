@@ -75,6 +75,9 @@ begin
 end $$;
 
 -- ---------- attacco: l'esito resta scritto sul tiro; gli incantesimi con lo slot scelto ----------
+-- toglie anche eventuali versioni vecchie rimaste: con due versioni Supabase non sa quale usare
+drop function if exists public.tavolo_attacca(uuid, uuid, int, int, boolean, text);
+drop function if exists public.tavolo_attacca(uuid, uuid, int, int, boolean, text, int);
 drop function if exists public.tavolo_attacca(uuid, uuid, int, int, boolean, text, int, text);
 create or replace function public.tavolo_attacca(p_token uuid, p_bersaglio uuid, p_attacco int, p_adv int default 0, p_privato boolean default false, p_extra text default null, p_inc int default null, p_extra_nome text default null, p_liv int default null)
 returns jsonb

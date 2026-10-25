@@ -828,6 +828,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
 .tv-hud .ac .tv-b.sec.on{background:#c9a24a;color:#1d1613;border-color:#c9a24a}
 .tv-hud .fzr{flex-wrap:wrap}
 .tv-hud .fz{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:4px;padding:6px 9px;border-radius:9px;background:#c9a24a2e;border:1px solid #c9a24a99;color:#f3e3bd;font:700 .76rem/1 var(--body);white-space:nowrap}
+.tv-hud .sh{display:none}
 .tv-hud .fz:hover,.tv-hud .fz:focus-visible{background:#c9a24a55;outline:none}
 /* menu delle azioni (Scatto, Disimpegno…): sta sopra a tutto, anche alla scheda */
 .tv-azm{position:fixed;z-index:1000;width:340px;max-width:calc(100vw - 12px);max-height:min(72vh,560px);overflow:auto;box-sizing:border-box;background:#211a16f7;color:#f1e4c8;border:1px solid #e7cf9a55;border-radius:14px;box-shadow:0 12px 34px #000c;padding:6px;font:600 .86rem/1.2 var(--body);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
@@ -1004,14 +1005,40 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
   .tv-wrap.con-turno .tv-top{top:84px}
   .tv-wrap.con-turno .tv-zoom{top:132px}
   .tv-wrap.con-turno .tv-tdp,.tv-wrap.con-turno .tv-sp,.tv-turno{top:84px}
-  .tv-hud{left:8px;right:8px;transform:none;bottom:8px;flex-wrap:wrap;gap:8px;padding:8px}
-  .tv-hud .fo{width:36px;height:36px}
-  .tv-hud .t{flex:1 1 calc(100% - 52px)}
-  .tv-hud .r{gap:4px;flex-wrap:wrap}
-  .tv-hud .c{padding:6px 7px;font-size:.72rem}
-  .tv-hud .mv{flex:1 1 120px;min-width:0}
-  .tv-zoom .tv-zs{display:none}
-  .tv-hud .ac .tv-b{height:36px;font-size:.76rem;padding:0 9px}
+  .tv-hud{left:6px;right:6px;transform:none;bottom:6px;gap:6px;padding:5px 6px;border-radius:12px;max-width:none}
+  .tv-hud .fo,.tv-hud .t>b,.tv-hud .fzr,.tv-hud .lg{display:none}
+  .tv-hud .sh{display:inline}
+  .tv-hud .t{flex:none}
+  .tv-hud .r{gap:3px}
+  .tv-hud .c{width:32px;height:32px;padding:0;justify-content:center;font-size:.95rem;border-radius:8px}
+  .tv-hud .mv{flex:1 1 auto;min-width:52px;gap:4px;font-size:.72rem}
+  .tv-hud .mv b{font-size:.9rem}
+  .tv-hud .bar{height:5px}
+  .tv-hud .ac{gap:4px}
+  .tv-hud .ac .tv-b{height:32px;font-size:.74rem;padding:0 8px}
+  .tv-zoom{padding:3px;border-radius:12px;right:8px}
+  .tv-zoom .tv-zs,.tv-zoom .sep,.tv-zoom [data-z="1.25"],.tv-zoom [data-z="0.8"]{display:none}
+  .tv-zoom button{width:30px;height:30px}
+  .tv-chip .qui{font-size:0;gap:0}
+  .tv-chip{padding:4px 8px 4px 10px;font-size:.8rem}
+  .tv-pgbtn{width:36px;height:36px;padding:0}
+  .tv-pgbtn span{display:none}
+  .tv-hud .mv b{font-family:var(--body)}
+  .tv-pop.nuovo{left:6px!important;right:6px;top:auto!important;bottom:6px;width:auto;max-width:none;max-height:58%}
+  .tv-pop.nuovo .hd{padding:7px 10px;gap:8px}
+  .tv-pop.nuovo .hd>i{width:34px;height:34px}
+  .tv-pop.nuovo .hd .nm b,.tv-pop.nuovo .tv-pnome{font-size:.95rem}
+  .tv-pop.nuovo .pfr{padding:7px 10px;gap:5px}
+  .tv-pop.nuovo .pfr input{height:30px}
+  .tv-pop.nuovo .pfr .tv-b{height:30px}
+  .tv-pop.nuovo .gr{grid-template-columns:repeat(4,1fr);padding:7px 10px;gap:5px}
+  .tv-pop.nuovo .gr button{padding:6px 2px 5px;gap:2px}
+  .tv-pop.nuovo .tv-pcond{padding:0 10px 7px}
+  .tv-pop.nuovo .ini{padding:6px 10px}
+  .tv-pop.nuovo .ini input,.tv-pop.nuovo .ini .tv-b{height:30px}
+  .tv-pop.nuovo details{padding:6px 10px}
+  .tv-pop.nuovo .fine{padding:7px 10px 0}
+  body:has(.tv) .toast{font-size:.85rem;line-height:1.3;max-width:min(92vw,460px);padding:7px 12px}
   .tv-wrap.con-hud .tv-mbar{bottom:var(--tv-hudh,150px)}
   .tv-mbar{bottom:8px}
   .tv-sch .tbar .zt,.tv-sch .tbar .tema{display:none}
@@ -3181,8 +3208,8 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     if (at && portata(at).ts) { fineMira(animazioni() ? 1800 : 700); return incantesimoTS(m, [b.id], null, v.col || '#ffb347', at); }
     fineMira(animazioni() ? 1800 : 700);
     const exP = [...m.extra].map(i => sx?.dati.privilegi?.[i]).filter(x => x?.dadi), extra = exP.map(x => x.dadi).join('+'), exN = exP.map(x => x.nome || 'danni in più').join(' + ');
-    const r = await SB.rpc('tavolo_attacca', { p_token: m.tok, p_bersaglio: b.id, p_attacco: m.i, p_adv: v.adv, p_privato: m.seg, ...(extra ? { p_extra: extra, p_extra_nome: exN } : {}), ...(m.inc != null ? { p_inc: m.inc } : {}), ...(m.liv ? { p_liv: m.liv } : {}) });
-    if (r.error) return toast(m.liv && /p_liv|function/i.test(r.error.message) ? 'Per lanciare con uno slot più alto esegui tavolo/tappa-9.sql in Supabase.' : sqlMancante(r.error) ? 'Per gli attacchi sulla mappa esegui tavolo/tappa-5.sql in Supabase.' : extra && /p_extra|function/i.test(r.error.message) ? 'Per aggiungere i dadi in più esegui tavolo/tappa-7.sql in Supabase.' : r.error.message, 'err');
+    const r = await SB.rpc('tavolo_attacca', { p_token: m.tok, p_bersaglio: b.id, p_attacco: m.i, p_adv: v.adv, p_privato: m.seg, ...(extra ? { p_extra: extra, p_extra_nome: exN } : {}), ...(m.inc != null ? { p_inc: m.inc } : {}), p_liv: m.liv || null });
+    if (r.error) return toast(/candidate function/i.test(r.error.message) ? 'In Supabase è rimasta una versione vecchia della funzione: esegui di nuovo tavolo/tappa-9.sql.' : /p_liv/i.test(r.error.message) ? 'Per lanciare con uno slot più alto esegui tavolo/tappa-9.sql in Supabase.' : sqlMancante(r.error) ? 'Per gli attacchi sulla mappa esegui tavolo/tappa-5.sql in Supabase.' : extra && /p_extra|function/i.test(r.error.message) ? 'Per aggiungere i dadi in più esegui tavolo/tappa-7.sql in Supabase.' : r.error.message, 'err');
     const x = Array.isArray(r.data) ? r.data[0] : r.data, a = T.tok.get(m.tok);
     const mossa = { da: m.tok, a: b.id, anim: v.anim, col: v.col, ritorna: !!v.ritorna, esito: x.colpito === true ? 'si' : x.colpito === false ? 'no' : 'nd', crit: !!x.critico, fallito: !!x.fallito, danni: x.danni || 0 };
     manda('attacco', mossa); mostraAttacco(mossa);
@@ -3251,8 +3278,8 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
   // l'incantesimo parte: i danni si tirano una volta, poi ogni bersaglio con un tiro salvezza riceve la richiesta
   async function incantesimoTS(m, bers, f, col, at) {
     const s = T.schede.get(m.sid), a = T.tok.get(m.tok); if (!s || !a) return;
-    const r = await SB.rpc('tavolo_area', { p_token: a.id, p_attacco: m.i, p_bersagli: bers, p_cd: 8 + comp(s) + modC(s.dati[carInc(s)]), p_privato: m.seg, ...(m.inc != null ? { p_inc: m.inc } : {}), ...(m.liv ? { p_liv: m.liv } : {}) });
-    if (r.error) return toast(m.liv && /p_liv|function/i.test(r.error.message) ? 'Per lanciare con uno slot più alto esegui tavolo/tappa-9.sql in Supabase.' : sqlMancante(r.error) || /tavolo_area/.test(r.error.message) ? 'Per gli incantesimi ad area esegui tavolo/tappa-6.sql in Supabase.' : r.error.message, 'err');
+    const r = await SB.rpc('tavolo_area', { p_token: a.id, p_attacco: m.i, p_bersagli: bers, p_cd: 8 + comp(s) + modC(s.dati[carInc(s)]), p_privato: m.seg, ...(m.inc != null ? { p_inc: m.inc } : {}), p_liv: m.liv || null });
+    if (r.error) return toast(/candidate function/i.test(r.error.message) ? 'In Supabase è rimasta una versione vecchia della funzione: esegui di nuovo tavolo/tappa-9.sql.' : /p_liv/i.test(r.error.message) ? 'Per lanciare con uno slot più alto esegui tavolo/tappa-9.sql in Supabase.' : sqlMancante(r.error) || /tavolo_area/.test(r.error.message) ? 'Per gli incantesimi ad area esegui tavolo/tappa-6.sql in Supabase.' : r.error.message, 'err');
     const x = r.data, esiti = x.esiti || [], mossa = { f, col, da: a.id, esiti: esiti.map(e => ({ id: e.id, danni: e.danni, salvo: e.salvo, attesa: !!e.attesa })) };
     manda('area', mossa); mostraArea(mossa);
     if (m.inc != null) usaSlot(s, m.inc, m.slot);
@@ -3483,9 +3510,9 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     requestAnimationFrame(alzaAvvisi);
     const a = azioniDi(t), mv = movimentoDi(t), q = mv.tot > 0 ? clamp(mv.resta / mv.tot, 0, 1) : 0;
     h.innerHTML = `<i class="fo" style="--c:${esc(t.colore || '#7d2530')};${t.immagine ? `background-image:url('${t.immagine.replace(/'/g, '%27')}')` : ''}">${t.immagine ? '' : esc(iniziali(t.nome))}</i>
-      <div class="t"><b>Turno di ${esc(t.nome || att.nome || '?')}</b><div class="r">${AZ.map(([k, ic, l]) => `<button type="button" class="c${a[k] ? ' no' : ''}" data-z="${k}" title="${l}: ${a[k] ? 'usata (tocca per ridarla)' : 'disponibile (tocca quando la usi)'}">${ic} ${l}</button>`).join('')}</div>${(a.fatte || []).length ? `<div class="r fzr">${fatteHtml(t, 'fz', 'fz')}</div>` : ''}</div>
-      <div class="mv${mv.resta < 0 ? ' ko' : ''}"><span>🏃 Movimento: <b>${metri(Math.max(0, mv.resta))}</b> di ${metri(mv.tot)}</span><span class="bar"><s style="width:${q * 100}%"></s></span></div>
-      <div class="ac"><button type="button" class="tv-b sec" data-k="azm" title="Scatto, Disimpegno, Schivata, Nascondersi…" aria-haspopup="menu">Azioni ▾</button><button type="button" class="tv-b pri" data-k="fine" title="Passa al prossimo nell'ordine del turno">Finisci il turno ▶</button></div>`;
+      <div class="t"><b>Turno di ${esc(t.nome || att.nome || '?')}</b><div class="r">${AZ.map(([k, ic, l]) => `<button type="button" class="c${a[k] ? ' no' : ''}" data-z="${k}" title="${l}: ${a[k] ? 'usata (tocca per ridarla)' : 'disponibile (tocca quando la usi)'}" aria-label="${l}">${ic}<span class="lg"> ${l}</span></button>`).join('')}</div>${(a.fatte || []).length ? `<div class="r fzr">${fatteHtml(t, 'fz', 'fz')}</div>` : ''}</div>
+      <div class="mv${mv.resta < 0 ? ' ko' : ''}"><span>🏃<span class="lg"> Movimento:</span> <b>${metri(Math.max(0, mv.resta))}</b><span class="lg"> di </span><span class="sh">/</span>${metri(mv.tot)}</span><span class="bar"><s style="width:${q * 100}%"></s></span></div>
+      <div class="ac"><button type="button" class="tv-b sec" data-k="azm" title="Scatto, Disimpegno, Schivata, Nascondersi…" aria-haspopup="menu">Azioni ▾</button><button type="button" class="tv-b pri" data-k="fine" title="Passa al prossimo nell'ordine del turno"><span class="lg">Finisci il turno ▶</span><span class="sh">Fine ▶</span></button></div>`;
     h.querySelectorAll('[data-z]').forEach(b => b.onclick = () => { const z = b.dataset.z; segnaAzioni(t, { [z]: !azioniDi(t)[z] }); });
     h.querySelectorAll('[data-k=fz]').forEach(b => b.onclick = () => togliAzione(t, +b.dataset.i));
     h.querySelector('[data-k=azm]').onclick = e => menuAzioni(t, e.currentTarget);
