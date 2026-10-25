@@ -760,7 +760,262 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
 }
 }`;
   let cssDone = false;
-  const css = () => { if (cssDone) return; cssDone = true; const s = document.createElement('style'); s.textContent = CSS; document.head.append(s); };
+  // la grafica nuova del tavolo: striscia del turno, pannello del turno, menu del token, chat coi dadi, telefono
+  const CSS2 = `.tv-x{}
+/* ---------- grafica nuova: pulsanti comuni ---------- */
+.tv-b{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;height:34px;padding:0 13px;border-radius:9px;font:600 .82rem var(--body);white-space:nowrap;transition:filter .12s,background .12s}
+.tv-b:focus-visible{outline:2px solid var(--gold2);outline-offset:2px}
+.tv-b.pri{background:linear-gradient(var(--acc2),var(--acc));color:#fff;box-shadow:inset 0 1px 0 #ffffff33,0 2px 6px #0007}
+.tv-b.pri:hover,.tv-b.ko:hover,.tv-b.ok:hover{filter:brightness(1.12)}
+.tv-b.sec{background:#ffffff14;color:var(--pan-ink);border:1px solid #ffffff22}
+.tv-b.sec:hover{background:#ffffff26}
+.tv-b.ko{background:#a3262f;color:#fff}.tv-b.ok{background:#2f7d3e;color:#fff}
+.tv-b.ico{width:34px;padding:0;font-size:1rem}
+.tv-b[disabled]{opacity:.45;pointer-events:none}
+
+/* barra degli strumenti con le scritte */
+.tv-rail{width:66px;gap:3px;padding:8px 0}
+.tv-rail button{width:58px;height:50px;flex-direction:column;gap:3px;border-radius:10px}
+.tv-rail button svg{width:20px;height:20px}
+.tv-rail button .rl{font:600 .6rem/1 var(--body);letter-spacing:.01em;color:#cbb994;white-space:nowrap}
+.tv-rail button.on .rl{color:#fff}
+.tv-rail button.on::before{content:"";position:absolute;left:-4px;top:12px;bottom:12px;width:3px;border-radius:2px;background:var(--gold2)}
+.tv-rail button.tel{display:none}
+.tv-rail hr{width:40px}
+.tv-rail .lbl{color:var(--gold2);opacity:.75}
+
+/* ordine del turno: striscia in alto */
+.tv-strip{position:absolute;left:12px;top:10px;z-index:9;display:flex;align-items:center;gap:10px;background:var(--pan);border:1px solid var(--pan-b);border-radius:16px;padding:6px 8px 6px 12px;box-shadow:var(--ombra);color:var(--pan-ink);max-width:calc(100% - 340px);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.tv-strip[hidden]{display:none!important}
+.tv-strip .rd{display:flex;flex-direction:column;align-items:center;font:700 1.05rem/1 var(--display);color:var(--gold2);padding-right:10px;border-right:1px solid #ffffff1f;flex:none}
+.tv-strip .rd small{font:600 .55rem/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--pan-mute);margin-bottom:3px}
+.tv-strip .ls{display:flex;align-items:flex-end;gap:8px;overflow-x:auto;scrollbar-width:none;min-width:0;padding-top:6px}
+.tv-strip .ls::-webkit-scrollbar{display:none}
+.tv-strip .p{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;width:52px;flex:none;opacity:.88}
+.tv-strip .p i{width:40px;height:40px;border-radius:50%;background:var(--c) center/cover no-repeat;border:2px solid #ffffff55;display:flex;align-items:center;justify-content:center;font:700 .8rem var(--display);font-style:normal;color:#fff;box-sizing:border-box}
+.tv-strip .p b{font:600 .66rem/1 var(--body);max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tv-strip .p em{position:absolute;top:-6px;right:2px;min-width:18px;height:18px;padding:0 3px;box-sizing:border-box;border-radius:9px;background:#000;border:1px solid #ffffff44;font:700 .62rem/16px var(--body);font-style:normal;text-align:center}
+.tv-strip .p.nem i{border-color:#e05a5a}
+.tv-strip .p.hid{opacity:.5;font-style:italic}
+.tv-strip .p.gia{opacity:.45}
+.tv-strip .p.on{opacity:1;width:64px}
+.tv-strip .p.on i{width:52px;height:52px;border:3px solid var(--gold2);box-shadow:0 0 0 3px #e7cf9a44,0 0 16px #e7cf9a88}
+.tv-strip .p.on b{color:var(--gold2);font-size:.72rem}
+.tv-strip .p.on em{background:#c9a24a;color:#1d1613;border-color:#fff}
+.tv-strip .ac{display:flex;gap:6px;padding-left:10px;border-left:1px solid #ffffff1f;flex:none}
+.tv-wrap.con-turno .tv-tdp,.tv-wrap.con-turno .tv-sp{top:96px;max-height:calc(100% - 106px)}
+.tv-turno{left:12px;top:96px;bottom:auto;max-height:calc(100% - 200px)}
+.tv-wrap:not(.con-turno) .tv-turno{top:10px}
+
+/* il pannello del turno, in basso al centro */
+.tv-hud{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:9;display:flex;align-items:center;gap:12px;background:var(--pan);border:1px solid #e7cf9a55;border-radius:16px;padding:8px 10px 8px 8px;box-shadow:var(--ombra);color:var(--pan-ink);max-width:calc(100% - 24px);box-sizing:border-box;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.tv-hud[hidden]{display:none!important}
+.tv-hud .fo{width:46px;height:46px;border-radius:50%;background:var(--c) center/cover no-repeat;border:3px solid var(--gold2);flex:none;display:flex;align-items:center;justify-content:center;font:700 .9rem var(--display);font-style:normal;color:#fff;box-sizing:border-box}
+.tv-hud .t{display:flex;flex-direction:column;gap:6px;min-width:0}
+.tv-hud .t>b{font:600 .9rem/1 var(--display);color:var(--gold2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tv-hud .r{display:flex;gap:6px}
+.tv-hud .c{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:5px;padding:6px 10px;border-radius:9px;font:700 .8rem/1 var(--body);white-space:nowrap;background:#2f7d3e;color:#fff;box-shadow:inset 0 1px 0 #ffffff33}
+.tv-hud .c.no{background:#ffffff12;color:#8f867c;text-decoration:line-through;box-shadow:none}
+.tv-hud .c:focus-visible{outline:2px solid var(--gold2)}
+.tv-hud .c[disabled]{cursor:default}
+.tv-hud .mv{display:flex;flex-direction:column;gap:5px;min-width:130px;font:600 .78rem var(--body);white-space:nowrap}
+.tv-hud .mv b{font:700 1.05rem var(--display);color:#fff}
+.tv-hud .mv.ko b{color:#ff8a7d}
+.tv-hud .bar{height:8px;border-radius:4px;background:#000;overflow:hidden;box-shadow:inset 0 0 0 1px #ffffff1a}
+.tv-hud .bar s{display:block;height:100%;background:linear-gradient(90deg,#e7cf9a,#c9a24a);transition:width .25s}
+.tv-hud .ac{display:flex;gap:6px;align-items:center}
+.tv-hud .ac .tv-b{height:40px}
+.tv-hud .ac .tv-b.sec.on{background:#c9a24a;color:#1d1613;border-color:#c9a24a}
+.tv-hud .fzr{flex-wrap:wrap}
+.tv-hud .fz{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:4px;padding:6px 9px;border-radius:9px;background:#c9a24a2e;border:1px solid #c9a24a99;color:#f3e3bd;font:700 .76rem/1 var(--body);white-space:nowrap}
+.tv-hud .fz:hover,.tv-hud .fz:focus-visible{background:#c9a24a55;outline:none}
+/* menu delle azioni (Scatto, Disimpegno…): sta sopra a tutto, anche alla scheda */
+.tv-azm{position:fixed;z-index:1000;width:340px;max-width:calc(100vw - 12px);max-height:min(72vh,560px);overflow:auto;box-sizing:border-box;background:#211a16f7;color:#f1e4c8;border:1px solid #e7cf9a55;border-radius:14px;box-shadow:0 12px 34px #000c;padding:6px;font:600 .86rem/1.2 var(--body);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.tv-azm h5{margin:8px 8px 4px;font:600 .68rem/1.3 var(--display);letter-spacing:.1em;text-transform:uppercase;color:#e7cf9a}
+.tv-azm h5 small{letter-spacing:0;text-transform:none;font:italic 400 .76rem var(--body);color:#bda983;margin-left:4px}
+.tv-azm .gz{display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.tv-azm button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:8px;align-items:flex-start;width:100%;padding:7px 7px;border-radius:9px;min-width:0}
+.tv-azm button>div{min-width:0}
+.tv-azm button:hover,.tv-azm button:focus-visible{background:#7d253099;outline:none}
+.tv-azm button[disabled]{opacity:.38;cursor:default;background:none}
+.tv-azm button>span{font-size:1.05rem;line-height:1.2;width:20px;text-align:center;flex:none}
+.tv-azm button b{display:block;font-weight:700}
+.tv-azm button small{display:block;margin-top:2px;color:#bda983;font:400 .76rem/1.25 var(--body)}
+.tv-azm .nota{margin:6px 8px 4px;padding-top:8px;border-top:1px solid #ffffff1a;color:#bda983;font:400 .74rem/1.3 var(--body)}
+/* fin dove arriva chi gioca: le caselle che il movimento rimasto copre */
+.tv-mvr{position:absolute;pointer-events:none;border:2px dashed #e7cf9acc;border-radius:12px;background:#e7cf9a1c;box-shadow:inset 0 0 40px #e7cf9a26;z-index:0;box-sizing:border-box}
+.tv-mvr span{position:absolute;left:50%;bottom:0;transform:translate(-50%,60%);background:#1d1613;color:#e7cf9a;border:1px solid #e7cf9a88;border-radius:9px;padding:2px 9px;font:700 var(--fs,14px)/1.3 var(--body);white-space:nowrap}
+.tv-tok .az{display:none!important}
+.tv-tok.turno{box-shadow:0 0 0 4px #e7cf9a,0 0 22px 6px #e7cf9acc}
+
+/* token: barra della salute sotto, nome più leggibile */
+.tv-tok .pf{top:auto;bottom:-9px;left:6%;right:6%;height:7px;border-radius:4px;box-shadow:0 0 0 1.5px #000c;z-index:3}
+.tv-tok b{margin-top:10px;background:#120d0bd9;border:1px solid #ffffff2a;font-weight:700}
+.tv-tok .cnd i{background:#2b1d14;box-shadow:0 0 0 2px #e7cf9a,0 2px 4px #000a}
+
+/* luogo e mappe in alto a destra */
+.tv-chip{border-radius:12px;padding:6px 8px 6px 12px;gap:10px}
+.tv-chip .qui{font:600 .72rem/1 var(--body);color:#9fd08f;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.tv-chip .qui::before{content:"";width:8px;height:8px;border-radius:50%;background:#5cc06a;box-shadow:0 0 0 3px #5cc06a33}
+.tv-pgbtn{width:auto;padding:0 12px;gap:6px;font:600 .82rem var(--body);border-radius:12px}
+
+/* chat: dadi rapidi sotto, tiri più leggibili */
+.tv-dk{display:flex;flex-direction:column;gap:8px;padding:8px 10px 10px}
+.tv-dk .dd{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.tv-dk .dd button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 0 4px;border-radius:9px;background:var(--paper);border:1px solid var(--line2);font:700 .66rem/1 var(--body);color:var(--ink2)}
+.tv-dk .dd button svg{width:22px;height:22px;fill:#7d253018;stroke:var(--wine);stroke-width:1.6;stroke-linejoin:round}
+.tv-dk .dd button:hover,.tv-dk .dd button:focus-visible{border-color:var(--wine);outline:none}
+.tv-dk .dd button:active{transform:scale(.94)}
+.tv-dk .op{display:flex;gap:4px;align-items:center}
+.tv-dk .sg{display:flex;background:var(--paper);border:1px solid var(--line2);border-radius:9px;padding:2px;gap:2px;flex:1;min-width:0}
+.tv-dk .sg button{all:unset;flex:1;text-align:center;cursor:pointer;font:600 .74rem/1 var(--body);padding:6px 2px;border-radius:7px;color:var(--ink2);white-space:nowrap}
+.tv-dk .sg button.on{background:var(--wine);color:#fff}
+.tv-dk .md{width:50px;height:30px;box-sizing:border-box;border:1px solid var(--line2);border-radius:9px;background:var(--paper);color:var(--ink);text-align:center;font:600 .8rem var(--body);flex:none}
+.tv-dk .sgr{all:unset;cursor:pointer;width:30px;height:30px;border-radius:9px;border:1px solid var(--line2);background:var(--paper);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex:none}
+.tv-dk .sgr.on{background:#6b3fa0;border-color:#6b3fa0}
+.tv-dk .in{display:flex;gap:6px}
+.tv-dk .in input{flex:1;min-width:0;height:38px;box-sizing:border-box;border:1px solid var(--line2);border-radius:19px;padding:0 14px;background:var(--paper);color:var(--ink);font:inherit}
+.tv-dk .in button{all:unset;cursor:pointer;width:38px;height:38px;border-radius:50%;background:linear-gradient(var(--acc2),var(--acc));color:#fff;display:flex;align-items:center;justify-content:center;font-size:1rem;box-shadow:0 2px 5px #0005;flex:none}
+.tv-roll{border-radius:12px;padding:8px 10px}
+.tv-roll .t{min-width:44px;height:40px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:#fff;background:#7d2530;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);flex:none}
+.tv-roll.crit .t{background:#2f8a3c;color:#fff}.tv-roll.fail .t{background:#b3261e;color:#fff}
+.tv-roll.priv .t{background:#6b3fa0}
+.tv-roll .chips i{border-radius:6px}
+
+/* tiradadi */
+.tv-tdp .dz{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:0 10px}
+.tv-tdp .dz button{all:unset;box-sizing:border-box;cursor:pointer;position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 6px;border-radius:10px;background:#ffffff0d;border:1px solid #ffffff14;font:700 .74rem var(--body);text-align:center}
+.tv-tdp .dz button:hover,.tv-tdp .dz button:focus-visible{background:#ffffff1c;outline:none}
+.tv-tdp .dz button svg{width:30px;height:30px;fill:#7d253055;stroke:#e7cf9a;stroke-width:1.4;stroke-linejoin:round}
+.tv-tdp .dz button.on{background:#7d253066;border-color:#e7cf9a88}
+.tv-tdp .dz button em{position:absolute;top:-6px;right:-4px;min-width:20px;height:20px;border-radius:10px;background:#c9a24a;color:#1d1613;font:700 .72rem/20px var(--body);font-style:normal}
+.tv-tdp .dz button .meno{position:absolute;top:-6px;left:-4px;width:20px;height:20px;border-radius:10px;background:#000;border:1px solid #ffffff44;font:700 .8rem/18px var(--body);color:#fff}
+.tv-tdp .fx{margin:10px;padding:8px 10px;border-radius:10px;background:#0006;display:flex;align-items:center;gap:8px}
+.tv-tdp .fx code{flex:1;min-width:0;font:700 1.05rem var(--body);color:#fff;background:none;overflow-wrap:anywhere}
+.tv-tdp .fx code.vuota{font:italic 400 .85rem var(--body);color:var(--pan-mute)}
+.tv-tdp .fx input{width:52px;height:30px;box-sizing:border-box;border-radius:8px;border:1px solid #ffffff2a;background:#0006;color:#fff;text-align:center;font:600 .85rem var(--body)}
+.tv-tdp .adv{display:flex;margin:0 10px 8px;background:#0005;border-radius:9px;padding:3px;gap:3px}
+.tv-tdp .adv button{all:unset;flex:1;text-align:center;cursor:pointer;padding:6px 2px;border-radius:7px;font:600 .76rem var(--body)}
+.tv-tdp .adv button.on{background:linear-gradient(var(--acc2),var(--acc));color:#fff}
+.tv-tdp .mot{display:flex;margin:0 10px 8px}
+.tv-tdp .mot input{flex:1;min-width:0;font:inherit;font-weight:400;padding:6px 9px;border-radius:8px;border:1px solid #ffffff2a;background:#0005;color:#fff}
+.tv-tdp .go{display:flex;gap:6px;margin:0 10px 10px}
+.tv-tdp .go .tv-b.pri{flex:1}
+
+/* menu del token */
+.tv-pop.nuovo{z-index:12;background:var(--pan);color:var(--pan-ink);border:1px solid var(--pan-b);border-radius:14px;padding:0;width:290px;max-width:calc(100% - 12px);gap:0;overflow:hidden auto;max-height:calc(100% - 12px);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-sizing:border-box}
+.tv-pop.nuovo .hd{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#00000040;border-bottom:1px solid #ffffff14}
+.tv-pop.nuovo .hd>i{width:44px;height:44px;border-radius:50%;background:var(--c) center/cover no-repeat;border:2px solid var(--gold2);display:flex;align-items:center;justify-content:center;font:700 .95rem var(--display);font-style:normal;color:#fff;flex:none;box-sizing:border-box}
+.tv-pop.nuovo .hd .nm{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.tv-pop.nuovo .hd .nm b,.tv-pop.nuovo .tv-pnome{font:600 1.05rem/1.2 var(--display);color:var(--gold2);padding:0;margin:0}
+.tv-pop.nuovo .tv-pnome{background:transparent;border:0;border-bottom:1px dashed #e7cf9a55;width:100%;min-width:0;box-sizing:border-box}
+.tv-pop.nuovo .tv-pnome:focus{background:#0004;border-bottom-color:var(--gold2)}
+.tv-pop.nuovo .hd small{color:var(--pan-mute);font-size:.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tv-pop.nuovo .hd .x{all:unset;cursor:pointer;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--pan-mute);flex:none}
+.tv-pop.nuovo .hd .x:hover{background:#ffffff1a;color:#fff}
+.tv-pop.nuovo .fine{padding:10px 12px 0}.tv-pop.nuovo .fine .tv-b{width:100%}
+.tv-pop.nuovo .pfr{padding:10px 12px;display:flex;flex-direction:column;gap:7px;border-bottom:1px solid #ffffff14}
+.tv-pop.nuovo .pfr .rr{display:flex;align-items:center;gap:6px}
+.tv-pop.nuovo .pfr .rr span{flex:1;font:600 .9rem var(--body)}
+.tv-pop.nuovo .pfr .rr span b{font:700 1.15rem var(--display);color:#fff}
+.tv-pop.nuovo .pfr input{width:50px;height:34px;box-sizing:border-box;border-radius:8px;border:1px solid #ffffff2a;background:#0006;color:#fff;text-align:center;font:600 .9rem var(--body)}
+.tv-pop.nuovo .bar{height:10px;border-radius:5px;background:#000a;overflow:hidden;box-shadow:inset 0 0 0 1px #ffffff1a}
+.tv-pop.nuovo .bar s{display:block;height:100%;background:var(--b,#3f9a4a)}
+.tv-pop.nuovo .gr{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:10px 12px}
+.tv-pop.nuovo .gr button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:9px 2px 7px;border-radius:10px;background:#ffffff0f;border:1px solid #ffffff14;font:600 .7rem/1.15 var(--body);text-align:center;min-height:58px}
+.tv-pop.nuovo .gr button span{font-size:1.15rem;line-height:1}
+.tv-pop.nuovo .gr button:hover,.tv-pop.nuovo .gr button:focus-visible{background:#7d253088;border-color:#e7cf9a55;outline:none}
+.tv-pop.nuovo .gr button.via{color:#ff9d93}
+.tv-pop.nuovo .tv-pcond{padding:0 12px 10px;gap:5px}
+.tv-pop.nuovo .tv-pcond button{background:#6b3fa055;border:1px solid #b98cff66;border-radius:12px;padding:4px 9px;font:600 .74rem var(--body);color:var(--pan-ink)}
+.tv-pop.nuovo select{font:600 .8rem var(--body);padding:6px 8px;border-radius:8px;border:1px solid #ffffff2a;background:#0006;color:var(--pan-ink);min-width:0}
+.tv-pop.nuovo .ini{display:flex;align-items:center;gap:6px;padding:10px 12px;border-top:1px solid #ffffff14;font:600 .85rem var(--body)}
+.tv-pop.nuovo .ini span{flex:1}
+.tv-pop.nuovo .ini input{width:56px;height:32px;box-sizing:border-box;border-radius:8px;border:1px solid #ffffff2a;background:#0006;color:#fff;text-align:center;font:inherit}
+.tv-pop.nuovo details{border-top:1px solid #ffffff14;padding:8px 12px;font-size:.84rem;color:var(--pan-mute)}
+.tv-pop.nuovo details summary{cursor:pointer;padding:2px 0}
+.tv-pop.nuovo details .row{display:flex;align-items:center;gap:6px;margin-top:8px;color:var(--pan-ink)}
+.tv-pop.nuovo details .row>span:first-child{flex:1}
+.tv-pop.nuovo details .row .tv-b{height:30px}
+
+/* barre del DM in basso al centro */
+.tv-mbar{top:auto;bottom:14px;left:50%;transform:translateX(-50%);max-width:min(880px,calc(100% - 24px));width:max-content;justify-content:center;box-sizing:border-box}
+.tv-mbar[data-t]:not([data-t=""])::before{content:attr(data-t);flex-basis:100%;text-align:center;font:600 .66rem/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--gold2);margin:2px 0}
+.tv-wrap.con-hud .tv-mbar{bottom:92px}
+
+/* schede: pulsanti uguali dappertutto */
+.tv-sch .tbar{padding:8px 10px;gap:10px}
+.tv-sch .seg3{border-radius:10px;padding:3px}
+.tv-sch .seg3::before{content:"🎲 Tiri:";font:600 .72rem/26px var(--body);color:#bda983;padding:0 6px}
+.tv-sch .seg3 button{padding:5px 11px;border-radius:8px;font-size:.78rem}
+.tv-sch .seg3 button.on{background:linear-gradient(var(--acc2),var(--acc));box-shadow:inset 0 1px 0 #ffffff33}
+.tv-sch .tbar .sg{background:#ffffff12;border-radius:9px;padding:5px 9px;border:1px solid #ffffff1c}
+.tv-sch .tbar .tema,.tv-sch .tbar .zt button{border-radius:8px;padding:5px 9px;background:#ffffff12;border:1px solid #ffffff1c}
+.tv-sch .tbar .x{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:#ffffff14;padding:0;box-sizing:border-box}
+.tv-sch .tbar .piu{all:unset;display:none;cursor:pointer;width:32px;height:32px;border-radius:9px;background:#ffffff14;align-items:center;justify-content:center;font-size:1.1rem}
+.tv-sch .tabs{border-bottom:0;background:var(--gr);border-radius:12px;padding:4px;gap:4px}
+.tv-sch .tabs button{border:0;border-radius:9px;margin:0;padding:8px 14px;flex:1;text-align:center}
+.tv-sch .tabs button.on{background:var(--box);box-shadow:0 1px 3px #0003;color:#7d2530}
+.tv-scuro .tv-sch .tabs button.on{color:#e8a0a6}
+.tv-sch .mini,.tv-sch .q button{height:30px;padding:0 11px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;gap:5px;font-size:.78rem;box-shadow:0 1px 0 #0000000d}
+.tv-sch .mini:hover,.tv-sch .q button:hover{background:var(--box);color:#7d2530;border-color:#7d2530}
+.tv-sch .q{gap:6px}
+.tv-sch .q button[data-k=pfm],.tv-sch .q button[data-k=pfm]:hover{background:#a3262f;color:#fff;border-color:#a3262f;height:34px;padding:0 14px}
+.tv-sch .q button[data-k=pfp],.tv-sch .q button[data-k=pfp]:hover{background:#2f7d3e;color:#fff;border-color:#2f7d3e;height:34px;padding:0 14px}
+.tv-sch .q input{height:34px;border:1px solid var(--lin);border-radius:8px}
+.tv-sch .mini.agg{width:100%;border-style:dashed;background:transparent;height:34px}
+.tv-sch .tzb{border-radius:10px;padding:7px 10px;font-weight:700}
+.tv-sch .fine{border-radius:10px;min-height:38px;background:linear-gradient(var(--acc2),var(--acc));box-shadow:inset 0 1px 0 #ffffff33,0 2px 5px #0004}
+.tv-sch .at{border-radius:10px}
+.tv-sch .at .riga.az{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.tv-sch .at .riga.az .tp{flex:1 1 100%}
+.tv-sch .at .riga .mini{height:28px;padding:0 8px}
+.tv-sch .at .riga .mini[data-roll^="att"]{background:#7d2530;color:#fff;border-color:#7d2530}
+.tv-sch .at .riga .mini[data-roll^="dan"]{background:#fbeee6;color:#8a3b12;border-color:#e2b99f}
+.tv-scuro .tv-sch .at .riga .mini[data-roll^="dan"]{background:#3a2a20;color:#f0b48f;border-color:#6b4a35}
+.tv-sch .at .riga .mini.via{border:0;background:transparent;box-shadow:none;color:var(--k2);width:28px;padding:0;margin-left:auto}
+.tv-sch .at .riga .mini.via:hover{color:#a3262f}
+
+/* telefono: strumenti in basso, mappa a tutta larghezza */
+@media (max-width:820px){
+  .tv{flex-direction:column-reverse}
+  .tv-rail{width:100%;height:62px;flex-direction:row;overflow-x:auto;overflow-y:hidden;padding:5px 6px;border-right:0;border-top:1px solid #e7cf9a33;gap:2px;box-sizing:border-box;flex:none}
+  .tv-rail button{width:52px;height:50px}
+  .tv-rail button.tel{display:flex}
+  .tv-rail button.on::before{left:14px;right:14px;top:auto;bottom:-5px;width:auto;height:3px}
+  .tv-rail hr{width:1px;height:34px;border:0;border-left:1px solid #e7cf9a33;margin:0 4px;flex:none}
+  .tv-rail .lbl,.tv-rail .sp,.tv-rail .tv-cnt{display:none}
+  .tv-rail .tv-on{margin:0 8px;align-self:center}
+  .tv-ctab{display:none}
+  .tv-wrap{min-height:0}
+  .tv-strip{left:8px;right:8px;top:8px;max-width:none;padding:5px 6px 5px 8px;gap:6px}
+  .tv-strip .rd{padding-right:6px}
+  .tv-strip .ls{gap:4px;flex:1}
+  .tv-strip .p{width:38px}.tv-strip .p i{width:32px;height:32px}
+  .tv-strip .p.on{width:50px}.tv-strip .p.on i{width:42px;height:42px}
+  .tv-strip .p b{display:none}.tv-strip .p.on b{display:block}
+  .tv-strip .ac{padding-left:6px}
+  .tv-strip .ac .tv-b.pri{padding:0 9px;font-size:.74rem}
+  .tv-wrap.con-turno .tv-top{top:84px}
+  .tv-wrap.con-turno .tv-zoom{top:132px}
+  .tv-wrap.con-turno .tv-tdp,.tv-wrap.con-turno .tv-sp,.tv-turno{top:84px}
+  .tv-hud{left:8px;right:8px;transform:none;bottom:8px;flex-wrap:wrap;gap:8px;padding:8px}
+  .tv-hud .fo{width:36px;height:36px}
+  .tv-hud .t{flex:1 1 calc(100% - 52px)}
+  .tv-hud .r{gap:4px;flex-wrap:wrap}
+  .tv-hud .c{padding:6px 7px;font-size:.72rem}
+  .tv-hud .mv{flex:1 1 120px;min-width:0}
+  .tv-zoom .tv-zs{display:none}
+  .tv-hud .ac .tv-b{height:36px;font-size:.76rem;padding:0 9px}
+  .tv-wrap.con-hud .tv-mbar{bottom:150px}
+  .tv-mbar{bottom:8px}
+  .tv-sch .tbar .zt,.tv-sch .tbar .tema{display:none}
+  .tv-sch .tbar.aperta .zt,.tv-sch .tbar.aperta .tema{display:flex}
+  .tv-sch .tbar .piu{display:flex}
+  .tv-sch .tbar .x{margin-left:0}
+}
+`;
+  const css = () => { if (cssDone) return; cssDone = true; const s = document.createElement('style'); s.textContent = CSS + '\n' + CSS2; document.head.append(s); };
 
   /* ---------- account ---------- */
   const enc = s => new TextEncoder().encode(s);
@@ -868,7 +1123,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     T.diceInit = false; T.drag = null; T.online = []; T.live = false; T.tool = 'muovi';
     setView(`<h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Tavolo</h1>
       <div class="tv"><nav class="tv-rail" id="tv-rail" aria-label="Strumenti del tavolo"><span class="sp"></span><span class="tv-on" id="tv-on" title="Connessione…"></span></nav>
-      <div class="tv-wrap"><div class="tv-stage" id="tv-stage"><div class="tv-empty"><div><p>Apro il tavolo…</p></div></div></div><div class="tv-top" id="tv-top"></div><div class="tv-mbar" id="tv-mbar" hidden></div><div class="tv-ts" id="tv-ts" hidden></div><div class="tv-turno" id="tv-turno" hidden></div><div class="tv-tdp" id="tv-tdp" hidden></div><div class="tv-sp" id="tv-sp" hidden></div><button type="button" class="tv-ctab" id="tv-ctab" data-act="tv-dadi"></button></div>
+      <div class="tv-wrap"><div class="tv-stage" id="tv-stage"><div class="tv-empty"><div><p>Apro il tavolo…</p></div></div></div><div class="tv-strip" id="tv-strip" hidden></div><div class="tv-hud" id="tv-hud" hidden></div><div class="tv-top" id="tv-top"></div><div class="tv-mbar" id="tv-mbar" hidden></div><div class="tv-ts" id="tv-ts" hidden></div><div class="tv-turno" id="tv-turno" hidden></div><div class="tv-tdp" id="tv-tdp" hidden></div><div class="tv-sp" id="tv-sp" hidden></div><button type="button" class="tv-ctab" id="tv-ctab" data-act="tv-dadi"></button></div>
       <aside class="tv-chat" id="tv-dice" hidden></aside><div class="tv-pages" id="tv-pages" hidden></div></div>`);
     suggerimenti($('.tv'));
     const fit = () => {
@@ -889,7 +1144,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       await carica();
       if (!vivo) return;
       collega();
-      disegnaBarra(); disegnaDadi(); mostraScena(true); if (T.turno.length) apriTurno(true);
+      disegnaBarra(); disegnaDadi(); mostraScena(true); disegnaStriscia();
       if (isDM()) preparaGiocatori(info).catch(e => toast(e.tv ? ERR[e.tv][1].replace(/<[^>]+>/g, '') : e.message, 'err'));
       if (isDM()) preparaSchede(info).catch(e => toast(e.message, 'err'));
     } catch (e) {
@@ -999,7 +1254,6 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     // il DM ha fatto dimenticare le zone esplorate
     ch.on('broadcast', { event: 'esplorato' }, ({ payload: m }) => { if (!isDM()) dimenticaEsplorato(m.scena); });
     pg('tavolo_turno', p => {
-      if (!T.turno.length && p.eventType === 'INSERT') apriTurno(true);
       if (p.eventType === 'DELETE') T.turno = T.turno.filter(x => x.id !== p.old.id);
       else { const i = T.turno.findIndex(x => x.id === p.new.id); if (i >= 0) T.turno[i] = completa(T.turno[i], p.new); else T.turno.push(p.new); }
       disegnaTurno(); disegnaToken();
@@ -1077,14 +1331,28 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     lucc: '<rect x="5" y="11" width="14" height="10" rx="1.5"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/>',
     pag: '<rect x="3" y="7" width="13" height="13" rx="1.5"/><path d="M7 4h12.5A1.5 1.5 0 0 1 21 5.5V17"/><path d="M5.5 17l3.5-4 2.5 2.5 1.5-1.5 2 3"/>'
   };
+  ICO.chat = '<path d="M4 5h16v11H9.5L5 20v-4H4z"/>';
+  // i dadi disegnati, per la chat e il tiradadi
+  const DADO = {
+    4: '<path d="M12 3l9 16H3z"/><path d="M12 3v16"/>',
+    6: '<rect x="4" y="4" width="16" height="16" rx="2.5"/>',
+    8: '<path d="M12 2l9 10-9 10-9-10z"/><path d="M3 12h18"/>',
+    10: '<path d="M12 2l9 8-9 12-9-12z"/><path d="M3 10l9 3 9-3M12 13v9"/>',
+    12: '<path d="M12 2l9.5 7-3.6 11H6.1L2.5 9z"/><path d="M12 7l4.5 3.3-1.7 5.2H9.2l-1.7-5.2z"/>',
+    20: '<path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 7l5 9H7z"/><path d="M12 2v5M3 7l4 9M21 7l-4 9M12 22l-5-6M12 22l5-6"/>',
+    100: '<path d="M8 3l6 6-6 12-6-12z"/><path d="M17 5l5 5-5 9-4-7"/>'
+  };
+  const dado = n => `<svg viewBox="0 0 24 24" aria-hidden="true">${DADO[n]}</svg>`;
   const svg = k => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICO[k]}</svg>`;
   function disegnaBarra() { disegnaRail(); disegnaTop(); setActs(azioni()); }
   function disegnaRail() {
     const r = $('#tv-rail'); if (!r) return;
-    const b = (act, tip, k, on) => `<button type="button" data-act="${act}" data-tip="${esc(tip)}" aria-label="${esc(tip)}" class="${on ? 'on' : ''}">${svg(k)}</button>`;
+    const RL = { 'tv-sel': 'Seleziona', 'tv-mano': 'Sposta', 'tv-righello': 'Righello', 'tv-tiradadi': 'Dadi', 'tv-turno': 'Turno', 'tv-schede': 'Schede', 'tv-dadi': 'Chat', 'tv-maschera': 'Maschera', 'tv-muri': 'Muri', 'tv-difficile': 'Terreno', 'tv-effetti': 'Effetti', 'tv-token': 'Token', 'tv-griglia': 'Griglia', 'tv-liv-seg': 'Tutti', 'tv-liv-mas': 'Solo io' };
+    const b = (act, tip, k, on) => `<button type="button" data-act="${act}" data-tip="${esc(tip)}" aria-label="${esc(tip)}" class="${on ? 'on' : ''}">${svg(k)}<span class="rl" aria-hidden="true">${RL[act] || ''}</span></button>`;
     let h = b('tv-sel', 'Seleziona e sposta i token (S)', 'sel', T.tool === 'muovi') + b('tv-mano', 'Sposta la mappa (M)', 'mano', T.tool === 'mano')
       + b('tv-righello', 'Righello (R)', 'rig', T.tool === 'righello') + b('tv-tiradadi', 'Tiradadi', 'dado', !$('#tv-tdp')?.hidden)
-      + b('tv-turno', 'Ordine del turno', 'tur', !$('#tv-turno')?.hidden) + b('tv-schede', 'Schede dei personaggi e dei PNG', 'sch', !$('#tv-sp')?.hidden);
+      + b('tv-turno', 'Ordine del turno', 'tur', !$('#tv-turno')?.hidden) + b('tv-schede', 'Schede dei personaggi e dei PNG', 'sch', !$('#tv-sp')?.hidden)
+      + b('tv-dadi', 'Chat e dadi', 'chat', !$('#tv-dice')?.hidden).replace('class="', 'class="tel '); // solo sul telefono, al posto della linguetta
     if (isDM() && scena()) h += '<hr><span class="lbl">DM</span>' + b('tv-maschera', 'Maschera: nascondi e svela la mappa', 'mas', T.tool === 'maschera') + b('tv-muri', 'Muri, porte e nebbia automatica', 'muro', T.tool === 'muri') + b('tv-difficile', 'Terreno difficile: il movimento costa il doppio', 'dif', T.tool === 'difficile') + b('tv-effetti', 'Effetti sulla mappa: fuoco, gas, veleno…', 'efx', T.tool === 'effetti') + b('tv-token', 'Aggiungi un token', 'tok') + b('tv-griglia', 'Impostazioni della pagina', 'gri');
     h += '<span class="sp"></span>';
     if (isDM() && scena()) h += '<span class="lbl">Livelli</span>' + b('tv-liv-seg', 'Livello Segnalini: i token che vedono tutti', 'lseg', T.livello === 'segnalini').replace('class="', 'class="liv ') + b('tv-liv-mas', 'Livello Master: i token che vedi solo tu', 'lmas', T.livello === 'master').replace('class="', 'class="liv ');
@@ -1095,9 +1363,9 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     const t = $('#tv-top'); if (!t) return;
     const sc = scena(), att = T.stato?.scena;
     let h = '';
-    if (sc) h += `<div class="tv-chip"><b>${esc(sc.nome)}</b>${isDM() ? (sc.id === att ? '<span title="I giocatori sono su questa mappa" aria-label="I giocatori sono qui">🔖</span>' : '<button type="button" class="btn sm primary" data-act="tv-porta">Porta qui i giocatori</button>') : ''}</div>`;
+    if (sc) h += `<div class="tv-chip"><b>${esc(sc.nome)}</b>${isDM() ? (sc.id === att ? '<span class="qui" title="I giocatori sono su questa mappa">I giocatori sono qui</span>' : '<button type="button" class="btn sm primary" data-act="tv-porta">Porta qui i giocatori</button>') : ''}</div>`;
     if (isDM() && sc && T.livello === 'master') h = '<div class="tv-liv" title="I token che aggiungi e sposti ora li vedi solo tu">👑 Livello Master</div>' + h;
-    if (isDM()) h += `<button type="button" class="tv-pgbtn" data-act="tv-pagine" data-tip="Mappe" aria-label="Mappe">${svg('pag')}</button>`;
+    if (isDM()) h += `<button type="button" class="tv-pgbtn" data-act="tv-pagine" data-tip="Mappe" aria-label="Mappe">${svg('pag')}<span>Mappe</span></button>`;
     t.innerHTML = h;
   }
   function azioni() {
@@ -1108,7 +1376,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       'tv-pagine': () => pannelloMappe($('#tv-pages').hidden), 'tv-nuova': () => dlgNuovaScena(),
       'tv-token': () => dlgToken(), 'tv-griglia': () => dlgGriglia(),
       'tv-turno': () => apriTurno($('#tv-turno').hidden), 'tv-schede': () => apriSchede($('#tv-sp').hidden),
-      'tv-tiradadi': () => { const p = $('#tv-tdp'); p.hidden = !p.hidden; if (!p.hidden) { disegnaTdp(); $('#tv-sp').hidden = true; if (matchMedia('(max-width:820px)').matches) apriChat(false); } disegnaRail(); },
+      'tv-tiradadi': () => { const p = $('#tv-tdp'); p.hidden = !p.hidden; if (!p.hidden) { disegnaTdp(); $('#tv-sp').hidden = true; $('#tv-turno').hidden = true; if (matchMedia('(max-width:820px)').matches) apriChat(false); } disegnaRail(); },
       'tv-liv-seg': () => livello('segnalini'), 'tv-liv-mas': () => livello('master'), 'tv-maschera': () => strumento(T.tool === 'maschera' ? 'muovi' : 'maschera'), 'tv-muri': () => strumento(T.tool === 'muri' ? 'muovi' : 'muri'), 'tv-difficile': () => strumento(T.tool === 'difficile' ? 'muovi' : 'difficile'), 'tv-effetti': () => strumento(T.tool === 'effetti' ? 'muovi' : 'effetti'),
       ...dadiActs()
     };
@@ -1343,6 +1611,17 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       if (mio) { const a = azioniDi(t), mv = movimentoDi(t); hud.innerHTML = `<b class="${mv.resta < 0 ? 'ko' : ''}">${metri(mv.resta)}</b>${AZ.map(([k, ic, l]) => `<i class="${a[k] ? 'usata' : ''}" title="${l}${a[k] ? ': usata' : ''}">${ic}</i>`).join('')}`; }
       box.append(el); // l'ordine nel riquadro decide chi sta sopra
     });
+    // fin dove arriva chi gioca (le diagonali contano 1, come sul regolamento): lo vede chi lo muove
+    let mvr = box.querySelector('.tv-mvr');
+    const tt = att?.token && T.tok.get(att.token);
+    if (tt && tt.scena === sc.id && puoMuovere(tt) && !(T.drag?.id === tt.id && T.drag.mosso)) {
+      const mv = movimentoDi(tt), cas = Math.max(0, Math.floor(mv.resta / (sc.metri || 1.5) + 1e-6)), g = sc.griglia, lato = tt.misura * g;
+      if (!mvr) { mvr = document.createElement('div'); mvr.className = 'tv-mvr'; }
+      mvr.style.cssText = `left:${tt.x - cas * g}px;top:${tt.y - cas * g}px;width:${lato + 2 * cas * g}px;height:${lato + 2 * cas * g}px;--fs:${Math.max(12, g * 0.22)}px`;
+      mvr.innerHTML = `<span>🏃 ancora ${metri(Math.max(0, mv.resta))}</span>`;
+      mvr.hidden = mv.resta <= 0; box.prepend(mvr);
+    } else mvr?.remove();
+    disegnaHud();
   }
 
   // i token dei personaggi non si sovrappongono: se la casella è occupata da un altro personaggio, va nella libera più vicina
@@ -1672,15 +1951,17 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   // «Muovere Livion di 6 m?»: con la conferma il movimento si scala, altrimenti il token torna dov'era
   function avvisoFermo(t) {
     const mio = !isDM() && t.giocatore === T.me.giocatore;
-    toast(mio ? 'Hai esaurito il tuo movimento: non puoi muoverti oltre in questo turno.' : `${t.nome || 'Il token'} ha esaurito il movimento: non può muoversi oltre in questo turno.${isDM() ? ' (Alt + trascina per forzare)' : ''}`, 'err');
+    const sc = puoScattare(t), dopo = sc ? ` Per muoverti ancora: «Azioni» → Scatto${sc === 'bon' ? ' (con l\'azione bonus)' : ''}.` : '';
+    toast(mio ? 'Hai esaurito il tuo movimento.' + (dopo || ' Non puoi muoverti oltre in questo turno.') : `${t.nome || 'Il token'} ha esaurito il movimento.${dopo || ' Non può muoversi oltre in questo turno.'}${isDM() ? ' (Alt + trascina per forzare)' : ''}`, 'err');
   }
   function chiediPasso(t, x, y, x0, y0, m, dif) {
     const b = $('#tv-mbar'); if (!b) return;
     const mv = movimentoDi(t), dopo = mv.resta - m;
     T.passo = { id: t.id, x, y, x0, y0, m };
-    b.innerHTML = `<div class="g"><b class="tit">🏃 ${esc(t.nome || 'Token')}: ${metri(m)}${dif ? ' 🪨' : ''}</b>${dif ? `<span class="avv">${dif} ${dif === 1 ? 'casella' : 'caselle'} di terreno difficile (contano doppio).</span>` : ''}<span class="avv">${dopo >= 0 ? `Dopo restano ${metri(dopo)} di ${metri(mv.tot)}.` : `<b>Oltre il movimento di ${metri(-dopo)}.</b>`} Confermi lo spostamento?</span></div><div class="g"><button type="button" data-k="ok" class="on">✓ Conferma</button><button type="button" data-k="no">Annulla</button></div>`;
+    b.innerHTML = `<div class="g"><b class="tit">🏃 ${esc(t.nome || 'Token')}: ${metri(m)}${dif ? ' 🪨' : ''}</b>${dif ? `<span class="avv">${dif} ${dif === 1 ? 'casella' : 'caselle'} di terreno difficile (contano doppio).</span>` : ''}<span class="avv">${dopo >= 0 ? `Dopo restano ${metri(dopo)} di ${metri(mv.tot)}.` : `<b>Oltre il movimento di ${metri(-dopo)}.</b>`} Confermi lo spostamento?</span></div><div class="g">${dopo < 0 && suoTurno(t) && puoScattare(t) ? `<button type="button" data-k="scatta" class="on" title="Usa ${puoScattare(t) === 'bon' ? 'l\'azione bonus' : 'l\'azione'} per lo Scatto: altri ${metri(velocitaDi(schedaDi(t)))}">🏃 Scatta e conferma</button>` : ''}<button type="button" data-k="ok" class="${dopo < 0 && suoTurno(t) && puoScattare(t) ? '' : 'on'}">✓ Conferma</button><button type="button" data-k="no">Annulla</button></div>`;
     b.classList.remove('spenta'); b.hidden = false;
     b.querySelector('[data-k=ok]').onclick = confermaPasso;
+    const sc = b.querySelector('[data-k=scatta]'); if (sc) sc.onclick = async () => { await faiAzione(t, 'scatto', puoScattare(t)); confermaPasso(); };
     b.querySelector('[data-k=no]').onclick = annullaPasso;
   }
   async function confermaPasso() {
@@ -1720,15 +2001,21 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   function menuToken(id, e) {
     const t = T.tok.get(id), st = $('#tv-stage'); if (!t || !st) return;
     chiudiPop();
-    const r = st.getBoundingClientRect(), pop = document.createElement('div'); pop.className = 'tv-pop';
-    const ini = `<div class="row"><span>Iniziativa</span><input type="number" data-k="imod" placeholder="mod" style="width:56px;font:inherit;padding:3px 5px;border-radius:4px;border:1px solid var(--line2);background:var(--paper2);color:var(--ink)"><button class="btn sm" data-k="ini" title="Tira 1d20 + modificatore e aggiungi all'ordine del turno">🎲 Tira</button></div>`;
+    const r = st.getBoundingClientRect(), pop = document.createElement('div'); pop.className = 'tv-pop nuovo';
+    const ini = `<div class="ini"><span>🎲 Iniziativa</span><input type="number" data-k="imod" placeholder="mod" aria-label="Modificatore d'iniziativa"><button type="button" class="tv-b sec" data-k="ini" title="Tira 1d20 + modificatore e aggiungi all'ordine del turno">Tira</button></div>`;
     const ft = haFoto(t), sch = schedaDi(t), pf = (isDM() || puoMuovere(t)) && pfDi(t);
-    const rpf = pf ? `<div class="row"><span>PF ${pf.pf}/${pf.max}</span><input type="number" data-k="pfq" value="1" min="1" aria-label="Quanti punti" style="width:52px;font:inherit;padding:3px 5px;border-radius:4px;border:1px solid var(--line2);background:var(--paper2);color:var(--ink)"><button class="btn sm" data-k="pfm" title="Danni">−</button><button class="btn sm" data-k="pfp" title="Cura">+</button></div>` : '';
-    const bsch = sch ? `<button class="btn sm" data-k="sch">📜 ${sch.giocatore && sch.giocatore === T.me.giocatore ? 'La mia scheda' : 'Scheda'}</button>` : isDM() && T.schede ? '<button class="btn sm" data-k="sch">📜 Crea la scheda</button>' : '';
-    const cnow = condTok(t), pcond = isDM() || puoMuovere(t);
-    const bfine = suoTurno(t) && pcond ? '<button class="btn sm primary" data-k="fine" title="Passa al prossimo nell\'ordine del turno">⏭ Finisci il turno</button>' : '';
+    const quota = pf ? clamp(pf.pf / Math.max(1, pf.max), 0, 1) : 0;
+    const rpf = pf ? `<div class="pfr"><div class="rr"><span>PF <b>${pf.pf}</b> / ${pf.max}</span><button type="button" class="tv-b ko ico" data-k="pfm" title="Danni">−</button><input type="number" data-k="pfq" value="1" min="1" aria-label="Quanti punti"><button type="button" class="tv-b ok ico" data-k="pfp" title="Cura">+</button></div><div class="bar"><s style="width:${Math.round(quota * 100)}%;--b:${quota > 0.5 ? '#3f9a4a' : quota > 0.25 ? '#c9a24a' : '#b8322c'}"></s></div></div>` : '';
+    const cnow = condTok(t), pcond = isDM() || puoMuovere(t), mio = puoMuovere(t);
+    const tile = (k, ic, txt, tit, cls) => `<button type="button" data-k="${k}"${cls ? ` class="${cls}"` : ''}${tit ? ` title="${tit}"` : ''}><span>${ic}</span>${txt}</button>`;
+    const tsch = sch ? tile('sch', '📜', sch.giocatore && sch.giocatore === T.me.giocatore ? 'La mia scheda' : 'Scheda') : isDM() && T.schede ? tile('sch', '📜', 'Crea la scheda') : '';
+    const bfine = suoTurno(t) && pcond ? '<div class="fine"><button type="button" class="tv-b pri" data-k="fine" title="Passa al prossimo nell\'ordine del turno">⏭ Finisci il turno</button></div>' : '';
     const rcond = pcond ? `<div class="tv-pcond">${cnow.map(c => `<button type="button" data-tc="${esc(c)}" title="Togli">${COND_FX[c]?.[0] || ''} ${esc(c)} ✕</button>`).join('')}<select data-k="tcond" aria-label="Aggiungi una condizione"><option value="">+ Condizione</option>${CONDIZIONI.filter(c => !cnow.includes(c)).map(c => `<option>${c}</option>`).join('')}</select></div>` : '';
+    const chi = t.giocatore ? (T.info.giocatori || []).find(g => g.id === t.giocatore) : null;
+    const sotto = mio && !isDM() ? 'Il tuo personaggio' : chi ? 'Lo muove ' + chi.name : 'Lo muove solo il DM';
+    const testa = `<div class="hd"><i style="--c:${esc(t.colore || '#7d2530')};${t.immagine ? `background-image:url('${t.immagine.replace(/'/g, '%27')}')` : ''}">${t.immagine ? '' : esc(iniziali(t.nome))}</i><div class="nm">${isDM() ? `<input class="tv-pnome" data-k="rin" value="${esc(t.nome || '')}" maxlength="60" placeholder="Nome del token" aria-label="Nome del token" title="Scrivi per rinominare il token, Invio per salvare">` : `<b>${esc(t.nome || 'Token')}</b>`}<small>${esc(sotto)}${isDM() && t.nascosto ? ' · solo tu lo vedi' : ''}</small></div><button type="button" class="x" data-k="chiudi" aria-label="Chiudi">✕</button></div>`;
     const extra = () => {
+      pop.querySelector('[data-k=chiudi]').onclick = chiudiPop;
       const metti = async lista => { chiudiPop(); const s = t.giocatore ? schedaDi(t) : null; if (s && puoScrivere(s)) await cambiaCond(s, null, lista); else await condSuToken(t, lista); };
       pop.querySelectorAll('[data-tc]').forEach(b => b.onclick = () => metti(cnow.filter(c => c !== b.dataset.tc)));
       const sc = pop.querySelector('[data-k=tcond]'); if (sc) sc.onchange = () => { if (sc.value) metti([...cnow, sc.value]); };
@@ -1750,8 +2037,9 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     };
     if (!isDM()) {
       // il giocatore apre la foto (solo per sé) e, sul proprio token, tira l'iniziativa
-      const mio = puoMuovere(t); if (!ft && !mio && !sch) return;
-      pop.innerHTML = `<b>${esc(t.nome || 'Token')}</b>${mio ? bfine : ''}${bsch}${ft ? '<button class="btn sm" data-k="foto">🖼 Apri la foto</button>' : ''}${mio ? rpf + rcond + ini : ''}`;
+      if (!ft && !mio && !sch) return;
+      const gr = tsch + (ft ? tile('foto', '🖼', 'Foto', 'Solo sul tuo schermo') : '');
+      pop.innerHTML = `${testa}${mio ? bfine + rpf : ''}${gr ? `<div class="gr">${gr}</div>` : ''}${mio ? rcond + ini : ''}`;
       st.append(pop); extra();
       pop.style.left = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6) + 'px'; pop.style.top = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6) + 'px';
       if (ft) pop.querySelector('[data-k=foto]').onclick = () => { chiudiPop(); apriFoto(fotoDi(t)); };
@@ -1759,14 +2047,16 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       return;
     }
     const gioc = (T.info.giocatori || []).map(g => `<option value="${esc(g.id)}" ${t.giocatore === g.id ? 'selected' : ''}>${esc(g.name)}</option>`).join('');
-    pop.innerHTML = `<input class="tv-pnome" data-k="rin" value="${esc(t.nome || '')}" maxlength="60" placeholder="Nome del token" aria-label="Nome del token" title="Scrivi per rinominare il token, Invio per salvare">${bfine}${bsch}${rpf}${rcond}
-      ${!t.giocatore && pf ? `<button class="btn sm" data-k="barra" title="${t.barra ? 'I giocatori vedono la barra della salute di questo token' : 'Per ora la barra della salute la vedi solo tu'}">${t.barra ? '🙈 Nascondi barra salute' : '❤ Mostra barra salute'}</button>` : ''}
-      <button class="btn sm" data-k="nasc">${t.nascosto ? '⬆ Sposta nei Segnalini (lo vedono tutti)' : '👑 Sposta nel livello Master (solo tu)'}</button>
-      <div class="row"><span>Misura</span><button class="btn sm" data-k="meno">−</button><span>${t.misura.toLocaleString('it-IT')}</span><button class="btn sm" data-k="piu">+</button></div>
+    const vista = scena()?.visuale && t.giocatore;
+    const gr = tsch + (ft ? tile('foto', '🖼', 'Foto', 'Solo sul tuo schermo') + tile('mostra', '📣', 'Mostra a tutti', 'Si apre a schermo intero a tutti i giocatori') : '')
+      + (t.nascosto ? tile('nasc', '⬆', 'Rendi visibile', 'Sposta nei Segnalini: lo vedono tutti') : tile('nasc', '👑', 'Solo per me', 'Sposta nel livello Master: lo vedi solo tu'))
+      + (!t.giocatore && pf ? (t.barra ? tile('barra', '🙈', 'Nascondi salute', 'I giocatori vedono la barra della salute di questo token') : tile('barra', '❤', 'Mostra salute', 'Per ora la barra della salute la vedi solo tu')) : '')
+      + tile('via', '🗑', 'Elimina', '', 'via');
+    pop.innerHTML = `${testa}${bfine}${rpf}<div class="gr">${gr}</div>${rcond}${ini}
+      <details><summary>Altro: misura, chi lo muove${vista ? ', vista' : ''}</summary>
+      <div class="row"><span>Misura</span><button type="button" class="tv-b sec ico" data-k="meno">−</button><span>${t.misura.toLocaleString('it-IT')}</span><button type="button" class="tv-b sec ico" data-k="piu">+</button></div>
       <div class="row"><span>Lo muove</span><select data-k="gioc"><option value="">solo il DM</option>${gioc}</select></div>
-      ${scena()?.visuale && t.giocatore ? `<div class="row" title="Con la nebbia automatica: fin dove vede questo personaggio (18 m è la scurovisione)"><span>Vede fino a</span><select data-k="vista"><option value="">senza limite</option>${[0, 1.5, 3, 6, 9, 12, 18, 24, 36].map(n => `<option value="${n}" ${t.vista != null && +t.vista === n ? 'selected' : ''}>${n ? n.toLocaleString('it-IT') + ' m' + (n === 18 ? ' (scurovisione)' : '') : 'non vede'}</option>`).join('')}</select></div>` : ''}
-      ${ft ? '<div class="row"><span>Foto</span><button class="btn sm" data-k="foto" title="Solo sul tuo schermo">🖼 Apri</button><button class="btn sm" data-k="mostra" title="Si apre a schermo intero a tutti i giocatori">📣 Mostra a tutti</button></div>' : ''}
-      ${ini}<button class="btn sm danger" data-k="via">Elimina</button>`;
+      ${vista ? `<div class="row" title="Con la nebbia automatica: fin dove vede questo personaggio (18 m è la scurovisione)"><span>Vede fino a</span><select data-k="vista"><option value="">senza limite</option>${[0, 1.5, 3, 6, 9, 12, 18, 24, 36].map(n => `<option value="${n}" ${t.vista != null && +t.vista === n ? 'selected' : ''}>${n ? n.toLocaleString('it-IT') + ' m' + (n === 18 ? ' (scurovisione)' : '') : 'non vede'}</option>`).join('')}</select></div>` : ''}</details>`;
     st.append(pop); extra();
     const x = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6), y = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6);
     pop.style.left = x + 'px'; pop.style.top = y + 'px';
@@ -1987,25 +2277,38 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
 
   /* ---------- dadi ---------- */
   /* ---------- tiradadi, come su Roll20: quanti dadi e di che tipo, con il modificatore ---------- */
+  // il tiradadi: si toccano i dadi per comporre il tiro (2d6 + 1d20…), poi «Tira»
+  const piuMod = m => m ? (m > 0 ? '+' : '') + m : '';
+  function formulaTdp(mod) {
+    const c = T.tdc || {}, adv = T.tdadv || '';
+    const parti = DADI.filter(f => c[f] > 0).map(f => f === 20 && c[f] === 1 && adv ? '2d20' + adv : c[f] + 'd' + f);
+    if (!parti.length && adv) parti.push('2d20' + adv);
+    return parti.length ? parti.join('+') + piuMod(mod) : '';
+  }
   function disegnaTdp() {
     const p = $('#tv-tdp'); if (!p || p.hidden) return;
     const mod = p.querySelector('[data-k=mod]')?.value || '', mot = p.querySelector('[data-k=mot]')?.value || '';
+    const c = T.tdc || (T.tdc = {}), adv = T.tdadv || '', f = formulaTdp(Math.trunc(+mod || 0));
     p.innerHTML = `<div class="hd"><b>Tiradadi</b><button type="button" data-act="tv-tiradadi" aria-label="Chiudi">✕</button></div>
-      <div class="tabs"><button type="button" data-v="0" class="${T.tdpriv ? '' : 'on'}">Tutti</button><button type="button" data-v="1" class="${T.tdpriv ? 'on' : ''}">${isDM() ? 'Solo io' : 'Solo al DM'}</button></div>
-      <div class="mods"><input type="number" data-k="mod" placeholder="Mod" style="width:64px" aria-label="Modificatore" value="${esc(mod)}"><input type="text" data-k="mot" placeholder="Per cosa? (facoltativo)" style="flex:1" maxlength="80" value="${esc(mot)}"></div>
-      <table>${DADI.map(f => `<tr><td><button type="button" data-n="1" data-f="${f}">D${f}</button></td>${[2, 3, 4, 5, 6].map(n => `<td><button type="button" data-n="${n}" data-f="${f}" aria-label="${n}d${f}">${n}</button></td>`).join('')}</tr>`).join('')}</table>
-      <div class="vs"><button type="button" data-v2="kh1" title="2d20, tiene il più alto">D20 con vantaggio</button><button type="button" data-v2="kl1" title="2d20, tiene il più basso">D20 con svantaggio</button></div>
-      <p class="ft">Clicca il dado per tirarne uno, o un numero per tirarne di più.</p>`;
-    p.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { T.tdpriv = b.dataset.v === '1'; disegnaTdp(); });
-    p.querySelectorAll('[data-v2]').forEach(b => b.onclick = async () => {
-      const m = Math.trunc(+p.querySelector('[data-k=mod]').value || 0), mt = p.querySelector('[data-k=mot]');
-      if (await tira('2d20' + b.dataset.v2 + (m ? (m > 0 ? '+' : '') + m : ''), b.dataset.v2 === 'kh1' ? 'vantaggio' : 'svantaggio', T.tdpriv, mt.value.trim())) mt.value = '';
+      <div class="tabs"><button type="button" data-v="0" class="${T.tdpriv ? '' : 'on'}">Tutti</button><button type="button" data-v="1" class="${T.tdpriv ? 'on' : ''}">${isDM() ? '🙈 Solo io' : '🙈 Solo al DM'}</button></div>
+      <div class="dz">${DADI.map(n => `<button type="button" data-f="${n}" class="${c[n] ? 'on' : ''}" title="Aggiungi 1d${n}">${dado(n)}d${n}${c[n] ? `<em>${c[n]}</em><span class="meno" data-meno="${n}" role="button" aria-label="Togli 1d${n}">−</span>` : ''}</button>`).join('')}</div>
+      <div class="fx"><code class="${f ? '' : 'vuota'}">${f ? esc(f.replace(/\+/g, ' + ').replace(/kh1/g, ' vant.').replace(/kl1/g, ' svant.')) : 'Tocca i dadi per comporre il tiro'}</code><span>+</span><input type="number" data-k="mod" placeholder="0" aria-label="Modificatore" value="${esc(mod)}"></div>
+      <div class="adv">${[['', 'Normale'], ['kh1', 'Vantaggio'], ['kl1', 'Svantaggio']].map(([v, l]) => `<button type="button" data-adv="${v}" class="${adv === v ? 'on' : ''}" title="${v ? 'Vale per un solo d20' : ''}">${l}</button>`).join('')}</div>
+      <div class="mot"><input type="text" data-k="mot" placeholder="Per cosa? (facoltativo)" maxlength="80" value="${esc(mot)}"></div>
+      <div class="go"><button type="button" class="tv-b sec" data-k="svuota">Svuota</button><button type="button" class="tv-b pri" data-k="tira" ${f ? '' : 'disabled'}>🎲 Tira ${f ? esc(f) : ''}</button></div>`;
+    p.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { T.tdpriv = b.dataset.v === '1'; disegnaTdp(); segnaPriv(); });
+    p.querySelectorAll('.dz button').forEach(b => b.onclick = e => {
+      const n = +b.dataset.f, meno = e.target.closest('[data-meno]');
+      c[n] = Math.max(0, Math.min(20, (c[n] || 0) + (meno ? -1 : 1))); disegnaTdp();
     });
-    p.querySelectorAll('td button').forEach(b => b.onclick = async () => {
-      const m = Math.trunc(+p.querySelector('[data-k=mod]').value || 0), f = b.dataset.n + 'd' + b.dataset.f + (m ? (m > 0 ? '+' : '') + m : '');
-      const mt = p.querySelector('[data-k=mot]');
-      if (await tira(f, null, T.tdpriv, mt.value.trim())) mt.value = '';
-    });
+    p.querySelectorAll('[data-adv]').forEach(b => b.onclick = () => { T.tdadv = b.dataset.adv; disegnaTdp(); });
+    p.querySelector('[data-k=mod]').oninput = () => { const g = p.querySelector('[data-k=tira]'), x = formulaTdp(Math.trunc(+p.querySelector('[data-k=mod]').value || 0)); p.querySelector('.fx code').textContent = x ? x.replace(/\+/g, ' + ').replace(/kh1/g, ' vant.').replace(/kl1/g, ' svant.') : 'Tocca i dadi per comporre il tiro'; g.textContent = '🎲 Tira ' + x; g.disabled = !x; };
+    p.querySelector('[data-k=svuota]').onclick = () => { T.tdc = {}; T.tdadv = ''; disegnaTdp(); };
+    p.querySelector('[data-k=tira]').onclick = async () => {
+      const x = formulaTdp(Math.trunc(+p.querySelector('[data-k=mod]').value || 0)); if (!x) return;
+      const mt = p.querySelector('[data-k=mot]'), ad = T.tdadv && /k[hl]1/.test(x) ? (T.tdadv === 'kh1' ? 'vantaggio' : 'svantaggio') : null;
+      if (await tira(x, ad, T.tdpriv, mt.value.trim())) { T.tdc = {}; T.tdadv = ''; mt.value = ''; p.querySelector('[data-k=mod]').value = ''; disegnaTdp(); }
+    };
   }
 
   // la chat resta aperta; la linguetta sul bordo la chiude e la riapre (si ricorda la scelta)
@@ -2016,17 +2319,32 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     if (salva) try { localStorage.setItem(CHAT, apri ? '1' : '0'); } catch { }
     if (tab) { const tel = matchMedia('(max-width:820px)').matches; tab.textContent = tel ? (apri ? '⌄' : '💬') : apri ? '›' : '‹'; tab.classList.toggle('chiusa', !apri); tab.dataset.tip = apri ? 'Chiudi la chat' : 'Apri la chat'; tab.setAttribute('aria-label', tab.dataset.tip); if (apri) tab.classList.remove('nuovo'); }
     if (apri) { const l = $('#tv-log'); if (l) l.scrollTop = 1e9; }
+    disegnaRail();
   }
   function disegnaDadi() {
     const box = $('#tv-dice'); if (!box) return;
     if (!T.diceInit) { let v = null; try { v = localStorage.getItem(CHAT); } catch { } apriChat(v ? v === '1' : matchMedia('(min-width:821px)').matches); }
     T.diceInit = true;
     box.innerHTML = `<div class="tv-dh"><span>Chat</span><span class="dx"><button type="button" class="tv-cx tv-anim ${animazioni() ? 'on' : ''}" data-act="tv-anim" title="Animazioni degli attacchi: ${animazioni() ? 'accese' : 'spente'}" aria-label="Animazioni degli attacchi" aria-pressed="${animazioni()}">✨</button><button type="button" class="tv-cx" data-act="tv-dadi" title="Chiudi la chat" aria-label="Chiudi la chat">✕</button></span></div><div class="tv-log" id="tv-log"></div>
-      <div class="tv-dk"><div class="row"><input type="text" id="tv-f" placeholder="Scrivi un messaggio… (/w nome per sussurrare)" style="flex:1" autocomplete="off" aria-label="Scrivi un messaggio"><button class="btn sm primary" data-act="tv-tira" style="flex:none">Invia</button></div>
-      <p class="hint">I dadi si tirano dal Tiradadi, nella barra a sinistra.</p></div>`;
+      <div class="tv-dk"><div class="dd">${DADI.map(f => `<button type="button" data-df="${f}" title="Tira 1d${f}${f === 20 ? ' (con il vantaggio scelto sotto)' : ''}">${dado(f)}d${f}</button>`).join('')}</div>
+      <div class="op"><span class="sg" title="Vale per il d20">${[['', 'Normale'], ['kh1', 'Vantaggio'], ['kl1', 'Svantaggio']].map(([v, l]) => `<button type="button" data-cadv="${v}" class="${(T.cadv || '') === v ? 'on' : ''}">${l}</button>`).join('')}</span><input class="md" type="number" data-k="cmod" placeholder="+0" aria-label="Modificatore" value="${esc(T.cmod || '')}"><button type="button" class="sgr ${T.tdpriv ? 'on' : ''}" data-k="cpriv" aria-label="Tiri nascosti">🙈</button></div>
+      <div class="in"><input type="text" id="tv-f" placeholder="Scrivi… (/w nome per sussurrare)" autocomplete="off" aria-label="Scrivi un messaggio"><button type="button" data-act="tv-tira" title="Invia" aria-label="Invia">➤</button></div></div>`;
     $('#tv-f').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); scrivi(); } };
     $('#tv-log').onclick = e => { const b = e.target.closest('[data-del]'); if (b) cancella(b.dataset.del).catch(err => toast(err.message, 'err')); };
-    disegnaBarra(); disegnaLog();
+    const dk = box.querySelector('.tv-dk'), cm = dk.querySelector('[data-k=cmod]');
+    cm.oninput = () => { T.cmod = cm.value; };
+    dk.querySelectorAll('[data-cadv]').forEach(b => b.onclick = () => { T.cadv = b.dataset.cadv; dk.querySelectorAll('[data-cadv]').forEach(x => x.classList.toggle('on', x === b)); });
+    dk.querySelector('[data-k=cpriv]').onclick = () => { T.tdpriv = !T.tdpriv; segnaPriv(); disegnaTdp(); };
+    dk.querySelectorAll('[data-df]').forEach(b => b.onclick = () => {
+      const f = +b.dataset.df, adv = f === 20 ? T.cadv || '' : '';
+      tira((adv ? '2d20' + adv : '1d' + f) + piuMod(Math.trunc(+cm.value || 0)), adv ? (adv === 'kh1' ? 'vantaggio' : 'svantaggio') : null, T.tdpriv, '');
+    });
+    segnaPriv(); disegnaBarra(); disegnaLog();
+  }
+  function segnaPriv() {
+    const b = $('#tv-dice [data-k=cpriv]'); if (!b) return;
+    b.classList.toggle('on', !!T.tdpriv); b.setAttribute('aria-pressed', !!T.tdpriv);
+    b.title = T.tdpriv ? (isDM() ? 'Tiri nascosti: li vedi solo tu' : 'Tiri nascosti: li vedete solo tu e il DM') : 'Tiri visibili a tutti (tocca per nasconderli)';
   }
   function dadiActs() {
     return {
@@ -2038,7 +2356,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   // i dadi si tirano solo dal Tiradadi
   async function scrivi() {
     const f = $('#tv-f'), t = f.value.trim(); if (!t) return;
-    if (/^\/(r|roll|gr|gmroll)\b/i.test(t)) { toast('I dadi si tirano dal Tiradadi, nella barra a sinistra.', 'err'); return; }
+    if (/^\/(r|roll|gr|gmroll)\b/i.test(t)) { toast('I dadi si tirano dai pulsanti qui sopra o dal Tiradadi.', 'err'); return; }
     let testo = t, per = null;
     const w = t.match(/^\/w\s+(\S+)\s+([\s\S]+)$/i);
     if (w) {
@@ -2242,6 +2560,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   function programmaMaschera() { cancelAnimationFrame(T.mraf); T.mraf = requestAnimationFrame(() => { disegnaMaschera(); disegnaToken(); }); }
   function barraMaschera() {
     const b = $('#tv-mbar'), sc = scena(); if (!b) return;
+    b.dataset.t = T.mira ? '' : { maschera: 'Maschera', muri: 'Muri, porte e nebbia', difficile: 'Terreno difficile', effetti: 'Effetti sulla mappa', griglia: 'Griglia', allinea: 'Allinea la griglia', righello: 'Righello' }[T.tool] || '';
     if (T.tool === 'allinea' && isDM() && sc) return barraAllinea(b);
     if (T.mira && sc) { const s2 = T.schede?.get(T.mira.sid), tk = T.tok.get(T.mira.tok); if (s2 && tk) return barraMira(armaMira(T.mira) || {}, tk); }
     if (T.critico && sc && !b.hidden) return; // la conferma del critico aspetta una risposta
@@ -3079,7 +3398,11 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   function effettoPF(t, delta) { if (!t || !delta) return; const m = { id: t.id, delta }; manda('pf', m); mostraPF(m); }
 
   /* ---------- ordine del turno ---------- */
-  function apriTurno(apri) { const b = $('#tv-turno'); if (!b) return; b.hidden = !apri; disegnaTurno(); disegnaRail(); }
+  function apriTurno(apri) {
+    const b = $('#tv-turno'); if (!b) return; b.hidden = !apri;
+    if (apri) { const t = $('#tv-tdp'), p = $('#tv-sp'); if (t) t.hidden = true; if (p) p.hidden = true; }
+    disegnaTurno(); disegnaRail();
+  }
   const ordinati = () => [...T.turno].sort((a, b) => b.valore - a.valore || (a.creato < b.creato ? -1 : 1));
   // passa al prossimo nell'ordine del turno (tappa-7.sql salta chi è a 0 PF)
   async function finisciTurno() {
@@ -3104,11 +3427,45 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       })();
     }
   }
+  // la striscia in alto: le facce in ordine di iniziativa, chi gioca in grande
+  function disegnaStriscia() {
+    const s = $('#tv-strip'), w = $('.tv-wrap'); if (!s) return;
+    const L = ordinati(), att = T.stato?.turno, ia = L.findIndex(x => x.id === att);
+    s.hidden = !L.length; w?.classList.toggle('con-turno', !!L.length);
+    if (!L.length) { s.innerHTML = ''; disegnaHud(); return; }
+    const avanti = isDM() || L.some(x => x.id === att && x.giocatore === T.me.giocatore);
+    s.innerHTML = `<div class="rd"><small>Round</small>${T.stato?.round || 1}</div><div class="ls">${L.map((x, i) => `<span class="p${i === ia ? ' on' : ''}${ia >= 0 && i < ia ? ' gia' : ''}${x.giocatore ? '' : ' nem'}${x.nascosto ? ' hid' : ''}" title="${esc(x.nome)} · iniziativa ${x.valore}${x.nascosto ? ' (nascosto ai giocatori)' : ''}"><i style="--c:${esc(x.colore || '#7d2530')};${x.immagine ? `background-image:url('${x.immagine}')` : ''}">${x.immagine ? '' : esc(iniziali(x.nome))}</i><b>${esc(String(x.nome || '').split(/\s+/)[0])}</b><em>${x.valore}</em></span>`).join('')}</div>
+      <div class="ac"><button type="button" class="tv-b pri" data-k="av" title="Passa al prossimo (chi è a 0 PF viene saltato)"${avanti ? '' : ' hidden'}>Finisci il turno ▶</button><button type="button" class="tv-b sec ico" data-k="ed" title="${isDM() ? 'Modifica l\'ordine del turno' : 'Ordine del turno'}" aria-label="Ordine del turno">✎</button></div>`;
+    s.querySelector('[data-k=av]').onclick = finisciTurno;
+    s.querySelector('[data-k=ed]').onclick = () => apriTurno($('#tv-turno').hidden);
+    const on = s.querySelector('.p.on'), ls = s.querySelector('.ls');
+    if (on) ls.scrollLeft = on.offsetLeft - ls.clientWidth / 2 + on.offsetWidth / 2;
+    disegnaHud();
+  }
+  // il pannello in basso di chi sta giocando: azione, azione bonus, reazione, movimento rimasto
+  function disegnaHud() {
+    const h = $('#tv-hud'), w = $('.tv-wrap'); if (!h) return;
+    const att = T.turno?.find(x => x.id === T.stato?.turno), t = att?.token && T.tok.get(att.token);
+    const vedo = !!t && t.scena === T.vista && puoMuovere(t);
+    h.hidden = !vedo; w?.classList.toggle('con-hud', vedo);
+    // la striscia mostra «Finisci il turno» solo quando non c'è il pannello
+    const sa = $('#tv-strip [data-k=av]'); if (sa) sa.hidden = vedo || !(isDM() || att?.giocatore === T.me.giocatore);
+    if (!vedo) { h.innerHTML = ''; return; }
+    const a = azioniDi(t), mv = movimentoDi(t), q = mv.tot > 0 ? clamp(mv.resta / mv.tot, 0, 1) : 0;
+    h.innerHTML = `<i class="fo" style="--c:${esc(t.colore || '#7d2530')};${t.immagine ? `background-image:url('${t.immagine.replace(/'/g, '%27')}')` : ''}">${t.immagine ? '' : esc(iniziali(t.nome))}</i>
+      <div class="t"><b>Turno di ${esc(t.nome || att.nome || '?')}</b><div class="r">${AZ.map(([k, ic, l]) => `<button type="button" class="c${a[k] ? ' no' : ''}" data-z="${k}" title="${l}: ${a[k] ? 'usata (tocca per ridarla)' : 'disponibile (tocca quando la usi)'}">${ic} ${l}</button>`).join('')}</div>${(a.fatte || []).length ? `<div class="r fzr">${fatteHtml(t, 'fz', 'fz')}</div>` : ''}</div>
+      <div class="mv${mv.resta < 0 ? ' ko' : ''}"><span>🏃 Movimento: <b>${metri(Math.max(0, mv.resta))}</b> di ${metri(mv.tot)}</span><span class="bar"><s style="width:${q * 100}%"></s></span></div>
+      <div class="ac"><button type="button" class="tv-b sec" data-k="azm" title="Scatto, Disimpegno, Schivata, Nascondersi…" aria-haspopup="menu">Azioni ▾</button><button type="button" class="tv-b pri" data-k="fine" title="Passa al prossimo nell'ordine del turno">Finisci il turno ▶</button></div>`;
+    h.querySelectorAll('[data-z]').forEach(b => b.onclick = () => { const z = b.dataset.z; segnaAzioni(t, { [z]: !azioniDi(t)[z] }); });
+    h.querySelectorAll('[data-k=fz]').forEach(b => b.onclick = () => togliAzione(t, +b.dataset.i));
+    h.querySelector('[data-k=azm]').onclick = e => menuAzioni(t, e.currentTarget);
+    h.querySelector('[data-k=fine]').onclick = finisciTurno;
+  }
   function disegnaTurno() {
+    disegnaStriscia();
     const b = $('#tv-turno'); if (!b || b.hidden) return;
     const L = ordinati(), att = T.stato?.turno, mia = x => isDM() || (!!x.giocatore && x.giocatore === T.me.giocatore);
-    const avanti = L.length && (isDM() || L.some(x => x.id === att && x.giocatore === T.me.giocatore));
-    b.innerHTML = `<div class="tv-th"><b>Ordine del turno</b><small>Round ${T.stato?.round || 1}</small>${avanti ? '<button type="button" class="go" data-k="av" title="Passa al prossimo (chi è a 0 PF viene saltato)">Finisci il turno ▶</button>' : ''}<button type="button" data-k="x" aria-label="Chiudi">✕</button></div>
+    b.innerHTML = `<div class="tv-th"><b>Ordine del turno</b><button type="button" data-k="x" aria-label="Chiudi">✕</button></div>
       <div class="tv-tl">${L.map(x => `<div class="tv-tr ${x.id === att ? 'att' : ''} ${x.nascosto ? 'hid' : ''}" data-id="${x.id}"><i style="--c:${esc(x.colore || '#7d2530')};${x.immagine ? `background-image:url('${x.immagine}')` : ''}">${x.immagine ? '' : esc(iniziali(x.nome))}</i><span title="${esc(x.nome)}">${esc(x.nome)}${x.id === att ? '<small class="ora">sta giocando</small>' : ''}</span>
         ${mia(x) ? `<input type="number" step="1" value="${x.valore}" aria-label="Iniziativa di ${esc(x.nome)}">${isDM() ? `<button type="button" data-k="nasc" title="${x.nascosto ? 'Mostra ai giocatori' : 'Nascondi ai giocatori'}">${x.nascosto ? '🙈' : '👁'}</button>` : ''}<button type="button" data-k="via" title="Togli dall'ordine">✕</button>` : `<em>${x.valore}</em>`}</div>`).join('')
         || '<div class="tv-tvuoto">Nessuno ancora. Clicca un token e premi «Tira» accanto a Iniziativa.</div>'}</div>
@@ -3157,7 +3514,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       : SB.from('tavolo_turno').insert({ nome: t.nome || 'Token', valore: tiro.totale, token: t.id, immagine: t.immagine, colore: t.colore, giocatore: t.giocatore, nascosto: !!t.nascosto }).select().single();
     const r2 = await q; if (r2.error) return toast(r2.error.message, 'err');
     const i = T.turno.findIndex(x => x.id === r2.data.id); if (i >= 0) T.turno[i] = r2.data; else T.turno.push(r2.data);
-    apriTurno(true); toast(`Iniziativa di ${t.nome || 'token'}: ${tiro.totale}`);
+    disegnaTurno(); toast(`Iniziativa di ${t.nome || 'token'}: ${tiro.totale}`);
   }
   /* ---------- schede dei personaggi e dei PNG (tappa 3) ---------- */
   // una scheda di 5e per personaggio e per PNG; il giocatore compila la sua, il DM tutte. Si aggiornano dal vivo.
@@ -3297,7 +3654,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   /* elenco delle schede (pannello a sinistra) */
   function apriSchede(apri) {
     const p = $('#tv-sp'); if (!p) return; p.hidden = !apri;
-    if (apri) { const t = $('#tv-tdp'); if (t) t.hidden = true; }
+    if (apri) { const t = $('#tv-tdp'), u = $('#tv-turno'); if (t) t.hidden = true; if (u) u.hidden = true; }
     disegnaSchede(); disegnaRail(); posizionaScheda();
   }
   const riass = s => {
@@ -3584,7 +3941,8 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   const chiaveTurno = () => T.stato?.turno ? `${T.stato.round || 1}:${T.stato.turno}` : 'fuori';
   const azioniDi = t => (t?.azioni && t.azioni.chiave === chiaveTurno() ? t.azioni : { chiave: chiaveTurno() });
   const velocitaDi = s => { const m = String(s?.dati.velocita || '').match(/\d+(?:[.,]\d+)?/); return m ? parseFloat(m[0].replace(',', '.')) : 9; };
-  const movimentoDi = t => { const a = azioniDi(t), tot = velocitaDi(schedaDi(t)) * (a.scatto ? 2 : 1); return { tot, resta: Math.round((tot - (a.mov || 0)) * 10) / 10 }; };
+  const scattiDi = a => a.fatte ? a.fatte.filter(x => x.k === 'scatto').length : a.scatto ? 1 : 0;
+  const movimentoDi = t => { const a = azioniDi(t), tot = velocitaDi(schedaDi(t)) * (1 + scattiDi(a)); return { tot, resta: Math.round((tot - (a.mov || 0)) * 10) / 10 }; };
   const suoTurno = t => { const att = T.turno?.find(x => x.id === T.stato?.turno); return !!t && !!att && att.token === t.id; };
   async function segnaAzioni(t, ch) {
     if (!t) return; const a = { ...azioniDi(t), ...ch, chiave: chiaveTurno() }, prima = t.azioni;
@@ -3593,11 +3951,66 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     if (r.error) { t.azioni = prima; disegnaToken(); toast(/azioni/i.test(r.error.message) ? 'Per segnare azioni e movimento esegui tavolo/tappa-6.sql in Supabase.' : r.error.message, 'err'); }
   }
   const AZ = [['az', '⚔', 'Azione'], ['bon', '✚', 'Azione bonus'], ['rea', '↺', 'Reazione']];
+  // le azioni del regolamento: si fanno con l'azione (alcune anche con l'azione bonus, vedi bonusAz)
+  const AZIONI = [
+    ['scatto', '🏃', 'Scatto', 'Altro movimento', 'Ti muovi ancora quanto la tua velocità, anche se ti sei già mosso'],
+    ['dis', '🛡', 'Disimpegno', 'Niente attacchi di opportunità', 'In questo turno il tuo movimento non provoca attacchi di opportunità'],
+    ['sch', '🌀', 'Schivata', 'Ti attaccano con svantaggio', 'Fino al tuo prossimo turno chi ti attacca ha svantaggio e tu hai vantaggio ai TS su Destrezza'],
+    ['nas', '🫥', 'Nascondersi', 'Prova di Furtività', 'Fai una prova di Destrezza (Furtività)'],
+    ['aiu', '🤝', 'Aiuto', 'Vantaggio a un alleato', 'Un alleato ha vantaggio alla sua prossima prova o al prossimo attacco'],
+    ['pre', '⏳', 'Preparare', 'Agisci dopo, di reazione', 'Decidi cosa farai e quando: agirai con la reazione'],
+    ['cer', '🔍', 'Cercare', 'Percezione o Indagare', 'Prova di Saggezza (Percezione) o di Intelligenza (Indagare)'],
+    ['ogg', '🧰', 'Usa un oggetto', 'Leva, porta, oggetto', 'Una leva, una porta, un oggetto da usare']];
+  const voceAz = k => AZIONI.find(x => x[0] === k) || ['', '•', k, ''];
+  // Azione scaltra del ladro (dal 2° livello), Fuga agile del goblin, Passo del vento del monaco
+  function bonusAz(t) {
+    const d = schedaDi(t)?.dati || {}, testo = norm([(d.privilegi || []).map(p => p.nome || '').join('|'), d.azioni || '', d.tratti || ''].join('|'));
+    if (/azione scaltra|azioni scaltre/.test(testo) || (/ladr/i.test(d.classe || '') && (parseInt(d.livello) || 0) >= 2)) return { nome: 'Azione scaltra', k: ['scatto', 'dis', 'nas'] };
+    if (/fuga agile/.test(testo)) return { nome: 'Fuga agile', k: ['dis', 'nas'] };
+    if (/passo del vento/.test(testo)) return { nome: 'Passo del vento', k: ['scatto', 'dis'] };
+    return null;
+  }
+  // con cosa può scattare ora: l'azione, se no l'azione bonus (Azione scaltra…)
+  const puoScattare = t => { const a = azioniDi(t); if (!a.az) return 'az'; const b = bonusAz(t); return b && b.k.includes('scatto') && !a.bon ? 'bon' : null; };
+  async function faiAzione(t, k, da) {
+    const a = azioniDi(t); if (a[da]) { toast(da === 'az' ? 'L\'azione di questo turno è già usata.' : 'L\'azione bonus di questo turno è già usata.', 'err'); return; }
+    const fatte = [...(a.fatte || (a.scatto ? [{ k: 'scatto', da: 'az' }] : [])), { k, da }];
+    await segnaAzioni(t, { [da]: true, fatte, scatto: fatte.some(x => x.k === 'scatto') });
+    const [, ic, l] = voceAz(k), b = da === 'bon' ? bonusAz(t) : null;
+    const r = await SB.rpc('tavolo_scrivi', { p_testo: `${ic} ${t.nome || 'Token'}: ${l}${b ? ` (azione bonus · ${b.nome})` : ''}${k === 'scatto' ? ` · ora ha ${metri(Math.max(0, movimentoDi(t).resta))} di movimento` : ''}`, p_per: null });
+    const row = !r.error && (Array.isArray(r.data) ? r.data[0] : r.data);
+    if (row && !T.chat.some(x => x.id === row.id)) { T.chat.push(row); nuovoMsg(row); }
+  }
+  function togliAzione(t, i) {
+    const a = azioniDi(t), f = [...(a.fatte || [])], x = f.splice(i, 1)[0]; if (!x) return;
+    segnaAzioni(t, { [x.da]: false, fatte: f, scatto: f.some(y => y.k === 'scatto') });
+  }
+  // le azioni fatte in questo turno, da togliere con un tocco se segnate per sbaglio
+  const fatteHtml = (t, cls, k) => (azioniDi(t).fatte || []).map((x, i) => { const [, ic, l] = voceAz(x.k); return `<button type="button" class="${cls}" data-k="${k}" data-i="${i}" title="${l} (${x.da === 'bon' ? 'azione bonus' : 'azione'}): tocca per toglierla">${ic} ${l} ✕</button>`; }).join('');
+  function menuAzioni(t, anc) {
+    document.querySelectorAll('.tv-azm').forEach(x => x.remove());
+    const a = azioniDi(t), b = bonusAz(t), m = document.createElement('div'); m.className = 'tv-azm'; m.setAttribute('role', 'menu');
+    const voce = (k, da, off) => { const [, ic, l, d, lungo] = voceAz(k); return `<button type="button" role="menuitem" data-a="${k}" data-da="${da}" title="${lungo}"${off ? ' disabled' : ''}><span>${ic}</span><div><b>${l}</b><small>${d}</small></div></button>`; };
+    m.innerHTML = `<h5>Con l'azione${a.az ? ' <small>già usata</small>' : ''}</h5><div class="gz">${AZIONI.map(([k]) => voce(k, 'az', a.az)).join('')}</div>
+      ${b ? `<h5>Con l'azione bonus <small>${b.nome}${a.bon ? ' · già usata' : ''}</small></h5><div class="gz">${b.k.map(k => voce(k, 'bon', a.bon)).join('')}</div>` : ''}
+      <p class="nota">Attaccare e lanciare incantesimi si fa dalla scheda. Le azioni scelte finiscono in chat.</p>`;
+    document.body.append(m);
+    const r = anc.getBoundingClientRect(), h = m.offsetHeight, w = m.offsetWidth;
+    m.style.left = clamp(r.left + r.width / 2 - w / 2, 6, innerWidth - w - 6) + 'px';
+    m.style.top = (r.top - h - 8 >= 6 ? r.top - h - 8 : clamp(r.bottom + 8, 6, innerHeight - h - 6)) + 'px';
+    const chiudi = () => { m.remove(); removeEventListener('pointerdown', fuori, true); removeEventListener('keydown', tasto); };
+    const fuori = e => { if (!m.contains(e.target) && !anc.contains(e.target)) chiudi(); };
+    const tasto = e => { if (e.key === 'Escape') chiudi(); };
+    addEventListener('pointerdown', fuori, true); addEventListener('keydown', tasto); onCleanup(chiudi);
+    m.querySelectorAll('[data-a]').forEach(x => x.onclick = () => { chiudi(); faiAzione(t, x.dataset.a, x.dataset.da); });
+    m.querySelector('[data-a]:not([disabled])')?.focus();
+  }
   function boxTurno(t, w) {
     if (!t) return '';
     const a = azioniDi(t), mv = movimentoDi(t), dis = w ? '' : ' disabled';
     return `<div class="sez tz${suoTurno(t) ? ' ora' : ''}"><div class="tzr">${AZ.map(([k, ic, l]) => `<button type="button" class="tzb${a[k] ? ' usata' : ''}" data-k="tz" data-z="${k}" title="${l}: ${a[k] ? 'usata (clicca per ridarla)' : 'disponibile'}"${dis}><i>${ic}</i>${l}</button>`).join('')}</div>
-      <div class="tzr"><span class="mv${mv.resta < 0 ? ' ko' : ''}">🏃 <b>${metri(mv.resta)}</b> di ${metri(mv.tot)}</span>${w ? `<button type="button" class="mini" data-k="tz-m" data-d="-1.5" title="Muovi di 1,5 m">−1,5</button><button type="button" class="mini" data-k="tz-m" data-d="1.5" title="Ridai 1,5 m">+1,5</button><button type="button" class="mini${a.scatto ? ' on' : ''}" data-k="tz" data-z="scatto" title="Scatto: il movimento raddoppia (usa l'azione)">Scatto</button><button type="button" class="mini" data-k="tz-reset" title="Ridai azioni e movimento">↺ Nuovo turno</button>` : ''}</div>
+      <div class="tzr"><span class="mv${mv.resta < 0 ? ' ko' : ''}">🏃 <b>${metri(mv.resta)}</b> di ${metri(mv.tot)}</span>${w ? `<button type="button" class="mini" data-k="tz-m" data-d="-1.5" title="Muovi di 1,5 m">−1,5</button><button type="button" class="mini" data-k="tz-m" data-d="1.5" title="Ridai 1,5 m">+1,5</button><button type="button" class="mini" data-k="tz-azm" title="Scatto, Disimpegno, Schivata, Nascondersi…" aria-haspopup="menu">Azioni ▾</button><button type="button" class="mini" data-k="tz-reset" title="Ridai azioni e movimento">↺ Nuovo turno</button>` : ''}</div>
+      ${(azioniDi(t).fatte || []).length ? `<div class="tzr">${fatteHtml(t, 'mini on', 'tz-fz')}</div>` : ''}
       ${w && suoTurno(t) ? '<div class="tzr"><button type="button" class="fine" data-k="tz-fine" title="Passa al prossimo nell\'ordine del turno">⏭ Finisci il turno</button></div>' : ''}
       <h6>${suoTurno(t) ? 'È il turno di ' + esc(t.nome || '') : 'Turno di ' + esc(t.nome || '')}: si azzera da solo al suo turno</h6></div>`;
   }
@@ -3676,7 +4089,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       const ts = CAR.map(([k, , nome]) => `<div class="r"><button type="button" class="pr" data-prof="ts_${k}"${dis}></button><em data-c="ts:${k}"></em><button type="button" class="lk" data-roll="ts:${k}"${dis}>${nome}</button></div>`).join('');
       const ab = ABIL.map(([k, nome, c]) => `<div class="r"><button type="button" class="pr" data-prof="ab_${k}"${dis}></button><em data-c="ab:${k}"></em><button type="button" class="lk" data-roll="ab:${k}"${dis}>${nome} <small>(${c.slice(0, 1).toUpperCase() + c.slice(1, 3)})</small></button></div>`).join('');
       const at = (d.attacchi || []).map((x, i) => `<div class="at" data-ordi="${i}"><div class="riga">${w ? '<span class="mano" title="Trascina per spostare" aria-hidden="true">⠿</span>' : ''}${inp(`att.${i}.nome`, 'Arma', 'an')}${inp(`att.${i}.colpire`, '+0', 'ac', 'number')}${inp(`att.${i}.danni`, '1d6+1', 'ad')}</div>
-          <div class="riga">${inp(`att.${i}.tipo`, 'Tipo e note', 'tp')}<button type="button" class="mini" data-roll="att:${i}"${dis} title="Tiro per colpire">🎲</button><button type="button" class="mini" data-roll="dan:${i}"${dis} title="Danni">💥</button><button type="button" class="mini" data-roll="cri:${i}"${dis} title="Critico: dadi dei danni raddoppiati">✖2</button>${w ? `<button type="button" class="mini via" data-k="delatt" data-i="${i}" title="Togli l'attacco">✕</button>` : ''}</div></div>`).join('');
+          <div class="riga az">${inp(`att.${i}.tipo`, 'Tipo e note', 'tp')}<button type="button" class="mini" data-roll="att:${i}"${dis} title="Tiro per colpire">🎯 Colpisci</button><button type="button" class="mini" data-roll="dan:${i}"${dis} title="Danni">💥 Danni</button><button type="button" class="mini" data-roll="cri:${i}"${dis} title="Critico: dadi dei danni raddoppiati">✖2 Critico</button>${w ? `<button type="button" class="mini via" data-k="delatt" data-i="${i}" title="Togli l'attacco" aria-label="Togli l'attacco">🗑</button>` : ''}</div></div>`).join('');
       const pf = `<div class="pfmax"><span>Punti ferita massimi</span>${n(tk ? 'tok.pf_max' : 'pf_max', '—')}</div>${n(tk ? 'tok.pf' : 'pf', '—', 'pfa')}
         ${w ? '<div class="q"><button type="button" data-k="pfm" title="Danni">− Danni</button><input type="number" data-k="pfq" value="1" min="1" aria-label="Quanti punti"><button type="button" data-k="pfp" title="Cura">+ Cura</button></div>' : ''}`;
       corpo = `${!pg ? '<button type="button" class="mini agg fine" data-k="fine">✓ Fatto: torna al blocco delle statistiche</button>' : ''}<div class="p1">
@@ -3740,7 +4153,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
         ${w ? `<label class="sg"><input type="checkbox" data-k="seg" ${sv.seg ? 'checked' : ''}> ${isDM() ? 'Nascosti' : 'Segreti'}</label>` : ''}
         <button type="button" class="tema" data-k="tema" title="Scheda chiara o scura, indipendente dal tema del sito (solo per te)" aria-label="Cambia il tema della scheda">${schedaScura() ? '☀' : '☾'}</button>
         <span class="zt" title="Grandezza del testo della scheda (solo per te)"><button type="button" data-k="za" data-d="-0.1" aria-label="Testo più piccolo">A−</button><span data-k="zv"></span><button type="button" data-k="za" data-d="0.1" aria-label="Testo più grande">A+</button></span>
-        <button type="button" class="x" data-k="chiudi" aria-label="Chiudi la scheda">✕</button></div>
+        <button type="button" class="piu" data-k="piu" aria-label="Altre opzioni" title="Altre opzioni">⋯</button><button type="button" class="x" data-k="chiudi" aria-label="Chiudi la scheda">✕</button></div>
       <div class="testa"><div class="nome">${isDM() ? '<label class="ft cambia" title="Clicca per scegliere la foto"' : '<i class="ft"'} style="${foto ? `background-image:url('${esc(foto)}')` : `--c:${pg ? '#7d2530' : '#5b6670'}`}">${foto ? '' : isDM() ? '<span class="piu">📷<small>Foto</small></span>' : esc(iniziali(s.nome))}${isDM() ? '<input type="file" accept="image/*" data-k="img" hidden></label>' : '</i>'}
           <div class="ban">${isDM() ? inp('nome', 'Nome', 'nm') : `<b class="nm">${esc(s.nome)}</b>`}<small>${pg ? 'Nome del personaggio' : 'Nome del PNG'}</small></div></div>
         <div class="info">${info}</div></div>
@@ -3791,6 +4204,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     const sv = T.sv, s = sv && T.schede.get(sv.id); if (!s) return;
     const d = s.dati, w = puoScrivere(s), k = b.dataset.k;
     if (k === 'chiudi') return sv.d.close();
+    if (k === 'piu') { b.closest('.tbar').classList.toggle('aperta'); return; }
     if (k === 'modifica' || k === 'fine') { sv.edit = k === 'modifica'; return disegnaScheda(); }
     if (b.dataset.tab) { sv.tab = b.dataset.tab; return disegnaScheda(); }
     if (b.dataset.adv) { sv.adv = +b.dataset.adv; return riempi(); }
@@ -3874,10 +4288,12 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     }
     if (k === 'bevi') return bevi(s, b.dataset.p);
     const tkz = tokScheda() || attaccante(s);
-    if (k === 'tz' && tkz) { const a = azioniDi(tkz), z = b.dataset.z; return segnaAzioni(tkz, z === 'scatto' ? { scatto: !a.scatto, az: !a.scatto ? true : a.az } : { [z]: !a[z] }); }
+    if (k === 'tz' && tkz) { const z = b.dataset.z; return segnaAzioni(tkz, { [z]: !azioniDi(tkz)[z] }); }
+    if (k === 'tz-azm' && tkz) return menuAzioni(tkz, b);
+    if (k === 'tz-fz' && tkz) return w ? togliAzione(tkz, +b.dataset.i) : undefined;
     if (k === 'tz-m' && tkz) { const a = azioniDi(tkz); return segnaAzioni(tkz, { mov: Math.max(0, (a.mov || 0) - +b.dataset.d) }); }
     if (k === 'tz-fine') return finisciTurno();
-    if (k === 'tz-reset' && tkz) return segnaAzioni(tkz, { az: false, bon: false, rea: false, mov: 0, scatto: false });
+    if (k === 'tz-reset' && tkz) return segnaAzioni(tkz, { az: false, bon: false, rea: false, mov: 0, scatto: false, fatte: [] });
     if (k === 'addatt') { await salvaScheda(s.id, { attacchi: [...(d.attacchi || []), { nome: '', colpire: null, danni: '', tipo: '' }] }, true); disegnaScheda(); sv.d.querySelector('.atts .at:last-of-type input')?.focus(); return; }
     if (k === 'delatt') { await salvaScheda(s.id, { attacchi: (d.attacchi || []).filter((_, i) => i !== +b.dataset.i) }, true); return disegnaScheda(); }
     if (k === 'riposo') { const p = {}; for (let i = 1; i <= 9; i++) if (num(d['usati_' + i])) p['usati_' + i] = 0; return salvaScheda(s.id, p, true); }

@@ -346,8 +346,8 @@ Se ti chiedo modifiche o approfondimenti su una proposta, rispondi con la propos
     if (window.__RO) return;
     const nav = document.getElementById('nav'); if (!nav || nav.querySelector('a[href="#/idee"]')) return;
     const a = document.createElement('a'); a.href = '#/idee';
-    // icona del d20, come le altre sezioni della barra
-    a.innerHTML = '<svg class="nic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 7l5 9H7z"/><path d="M12 2v5M3 7l4 9M21 7l-4 9M3 17l4-1M21 17l-4-1M12 22l-5-6M12 22l5-6"/></svg><span>Idee</span>';
+    // icona della lampadina, come le altre sezioni della barra
+    a.innerHTML = '<svg class="nic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.4 1.1 2.2v1h5v-1c0-.8.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/><path d="M12 7.5a2.5 2.5 0 0 0-2.5 2.5"/></svg><span>Idee</span>';
     nav.insertBefore(a, nav.querySelector('a[href="#/import"]'));
     if (location.hash.startsWith('#/idee')) a.classList.add('on');
   });
