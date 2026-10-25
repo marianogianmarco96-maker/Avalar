@@ -826,6 +826,22 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
 .tv-hud .ac{display:flex;gap:6px;align-items:center}
 .tv-hud .ac .tv-b{height:40px}
 .tv-hud .ac .tv-b.sec.on{background:#c9a24a;color:#1d1613;border-color:#c9a24a}
+.tv-hud .fzr{flex-wrap:wrap}
+.tv-hud .fz{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:4px;padding:6px 9px;border-radius:9px;background:#c9a24a2e;border:1px solid #c9a24a99;color:#f3e3bd;font:700 .76rem/1 var(--body);white-space:nowrap}
+.tv-hud .fz:hover,.tv-hud .fz:focus-visible{background:#c9a24a55;outline:none}
+/* menu delle azioni (Scatto, Disimpegno…): sta sopra a tutto, anche alla scheda */
+.tv-azm{position:fixed;z-index:1000;width:340px;max-width:calc(100vw - 12px);max-height:min(72vh,560px);overflow:auto;box-sizing:border-box;background:#211a16f7;color:#f1e4c8;border:1px solid #e7cf9a55;border-radius:14px;box-shadow:0 12px 34px #000c;padding:6px;font:600 .86rem/1.2 var(--body);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.tv-azm h5{margin:8px 8px 4px;font:600 .68rem/1.3 var(--display);letter-spacing:.1em;text-transform:uppercase;color:#e7cf9a}
+.tv-azm h5 small{letter-spacing:0;text-transform:none;font:italic 400 .76rem var(--body);color:#bda983;margin-left:4px}
+.tv-azm .gz{display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.tv-azm button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:8px;align-items:flex-start;width:100%;padding:7px 7px;border-radius:9px;min-width:0}
+.tv-azm button>div{min-width:0}
+.tv-azm button:hover,.tv-azm button:focus-visible{background:#7d253099;outline:none}
+.tv-azm button[disabled]{opacity:.38;cursor:default;background:none}
+.tv-azm button>span{font-size:1.05rem;line-height:1.2;width:20px;text-align:center;flex:none}
+.tv-azm button b{display:block;font-weight:700}
+.tv-azm button small{display:block;margin-top:2px;color:#bda983;font:400 .76rem/1.25 var(--body)}
+.tv-azm .nota{margin:6px 8px 4px;padding-top:8px;border-top:1px solid #ffffff1a;color:#bda983;font:400 .74rem/1.3 var(--body)}
 /* fin dove arriva chi gioca: le caselle che il movimento rimasto copre */
 .tv-mvr{position:absolute;pointer-events:none;border:2px dashed #e7cf9acc;border-radius:12px;background:#e7cf9a1c;box-shadow:inset 0 0 40px #e7cf9a26;z-index:0;box-sizing:border-box}
 .tv-mvr span{position:absolute;left:50%;bottom:0;transform:translate(-50%,60%);background:#1d1613;color:#e7cf9a;border:1px solid #e7cf9a88;border-radius:9px;padding:2px 9px;font:700 var(--fs,14px)/1.3 var(--body);white-space:nowrap}
@@ -986,7 +1002,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   .tv-hud{left:8px;right:8px;transform:none;bottom:8px;flex-wrap:wrap;gap:8px;padding:8px}
   .tv-hud .fo{width:36px;height:36px}
   .tv-hud .t{flex:1 1 calc(100% - 52px)}
-  .tv-hud .r{gap:4px}
+  .tv-hud .r{gap:4px;flex-wrap:wrap}
   .tv-hud .c{padding:6px 7px;font-size:.72rem}
   .tv-hud .mv{flex:1 1 120px;min-width:0}
   .tv-zoom .tv-zs{display:none}
@@ -1935,15 +1951,17 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   // «Muovere Livion di 6 m?»: con la conferma il movimento si scala, altrimenti il token torna dov'era
   function avvisoFermo(t) {
     const mio = !isDM() && t.giocatore === T.me.giocatore;
-    toast(mio ? 'Hai esaurito il tuo movimento: non puoi muoverti oltre in questo turno.' : `${t.nome || 'Il token'} ha esaurito il movimento: non può muoversi oltre in questo turno.${isDM() ? ' (Alt + trascina per forzare)' : ''}`, 'err');
+    const sc = puoScattare(t), dopo = sc ? ` Per muoverti ancora: «Azioni» → Scatto${sc === 'bon' ? ' (con l\'azione bonus)' : ''}.` : '';
+    toast(mio ? 'Hai esaurito il tuo movimento.' + (dopo || ' Non puoi muoverti oltre in questo turno.') : `${t.nome || 'Il token'} ha esaurito il movimento.${dopo || ' Non può muoversi oltre in questo turno.'}${isDM() ? ' (Alt + trascina per forzare)' : ''}`, 'err');
   }
   function chiediPasso(t, x, y, x0, y0, m, dif) {
     const b = $('#tv-mbar'); if (!b) return;
     const mv = movimentoDi(t), dopo = mv.resta - m;
     T.passo = { id: t.id, x, y, x0, y0, m };
-    b.innerHTML = `<div class="g"><b class="tit">🏃 ${esc(t.nome || 'Token')}: ${metri(m)}${dif ? ' 🪨' : ''}</b>${dif ? `<span class="avv">${dif} ${dif === 1 ? 'casella' : 'caselle'} di terreno difficile (contano doppio).</span>` : ''}<span class="avv">${dopo >= 0 ? `Dopo restano ${metri(dopo)} di ${metri(mv.tot)}.` : `<b>Oltre il movimento di ${metri(-dopo)}.</b>`} Confermi lo spostamento?</span></div><div class="g"><button type="button" data-k="ok" class="on">✓ Conferma</button><button type="button" data-k="no">Annulla</button></div>`;
+    b.innerHTML = `<div class="g"><b class="tit">🏃 ${esc(t.nome || 'Token')}: ${metri(m)}${dif ? ' 🪨' : ''}</b>${dif ? `<span class="avv">${dif} ${dif === 1 ? 'casella' : 'caselle'} di terreno difficile (contano doppio).</span>` : ''}<span class="avv">${dopo >= 0 ? `Dopo restano ${metri(dopo)} di ${metri(mv.tot)}.` : `<b>Oltre il movimento di ${metri(-dopo)}.</b>`} Confermi lo spostamento?</span></div><div class="g">${dopo < 0 && suoTurno(t) && puoScattare(t) ? `<button type="button" data-k="scatta" class="on" title="Usa ${puoScattare(t) === 'bon' ? 'l\'azione bonus' : 'l\'azione'} per lo Scatto: altri ${metri(velocitaDi(schedaDi(t)))}">🏃 Scatta e conferma</button>` : ''}<button type="button" data-k="ok" class="${dopo < 0 && suoTurno(t) && puoScattare(t) ? '' : 'on'}">✓ Conferma</button><button type="button" data-k="no">Annulla</button></div>`;
     b.classList.remove('spenta'); b.hidden = false;
     b.querySelector('[data-k=ok]').onclick = confermaPasso;
+    const sc = b.querySelector('[data-k=scatta]'); if (sc) sc.onclick = async () => { await faiAzione(t, 'scatto', puoScattare(t)); confermaPasso(); };
     b.querySelector('[data-k=no]').onclick = annullaPasso;
   }
   async function confermaPasso() {
@@ -3435,10 +3453,12 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     if (!vedo) { h.innerHTML = ''; return; }
     const a = azioniDi(t), mv = movimentoDi(t), q = mv.tot > 0 ? clamp(mv.resta / mv.tot, 0, 1) : 0;
     h.innerHTML = `<i class="fo" style="--c:${esc(t.colore || '#7d2530')};${t.immagine ? `background-image:url('${t.immagine.replace(/'/g, '%27')}')` : ''}">${t.immagine ? '' : esc(iniziali(t.nome))}</i>
-      <div class="t"><b>Turno di ${esc(t.nome || att.nome || '?')}</b><div class="r">${AZ.map(([k, ic, l]) => `<button type="button" class="c${a[k] ? ' no' : ''}" data-z="${k}" title="${l}: ${a[k] ? 'usata (tocca per ridarla)' : 'disponibile (tocca quando la usi)'}">${ic} ${l}</button>`).join('')}</div></div>
+      <div class="t"><b>Turno di ${esc(t.nome || att.nome || '?')}</b><div class="r">${AZ.map(([k, ic, l]) => `<button type="button" class="c${a[k] ? ' no' : ''}" data-z="${k}" title="${l}: ${a[k] ? 'usata (tocca per ridarla)' : 'disponibile (tocca quando la usi)'}">${ic} ${l}</button>`).join('')}</div>${(a.fatte || []).length ? `<div class="r fzr">${fatteHtml(t, 'fz', 'fz')}</div>` : ''}</div>
       <div class="mv${mv.resta < 0 ? ' ko' : ''}"><span>🏃 Movimento: <b>${metri(Math.max(0, mv.resta))}</b> di ${metri(mv.tot)}</span><span class="bar"><s style="width:${q * 100}%"></s></span></div>
-      <div class="ac"><button type="button" class="tv-b sec${a.scatto ? ' on' : ''}" data-z="scatto" title="Scatto: il movimento raddoppia (usa l'azione)">Scatto</button><button type="button" class="tv-b pri" data-k="fine" title="Passa al prossimo nell'ordine del turno">Finisci il turno ▶</button></div>`;
-    h.querySelectorAll('[data-z]').forEach(b => b.onclick = () => { const a2 = azioniDi(t), z = b.dataset.z; segnaAzioni(t, z === 'scatto' ? { scatto: !a2.scatto, az: !a2.scatto ? true : a2.az } : { [z]: !a2[z] }); });
+      <div class="ac"><button type="button" class="tv-b sec" data-k="azm" title="Scatto, Disimpegno, Schivata, Nascondersi…" aria-haspopup="menu">Azioni ▾</button><button type="button" class="tv-b pri" data-k="fine" title="Passa al prossimo nell'ordine del turno">Finisci il turno ▶</button></div>`;
+    h.querySelectorAll('[data-z]').forEach(b => b.onclick = () => { const z = b.dataset.z; segnaAzioni(t, { [z]: !azioniDi(t)[z] }); });
+    h.querySelectorAll('[data-k=fz]').forEach(b => b.onclick = () => togliAzione(t, +b.dataset.i));
+    h.querySelector('[data-k=azm]').onclick = e => menuAzioni(t, e.currentTarget);
     h.querySelector('[data-k=fine]').onclick = finisciTurno;
   }
   function disegnaTurno() {
@@ -3921,7 +3941,8 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   const chiaveTurno = () => T.stato?.turno ? `${T.stato.round || 1}:${T.stato.turno}` : 'fuori';
   const azioniDi = t => (t?.azioni && t.azioni.chiave === chiaveTurno() ? t.azioni : { chiave: chiaveTurno() });
   const velocitaDi = s => { const m = String(s?.dati.velocita || '').match(/\d+(?:[.,]\d+)?/); return m ? parseFloat(m[0].replace(',', '.')) : 9; };
-  const movimentoDi = t => { const a = azioniDi(t), tot = velocitaDi(schedaDi(t)) * (a.scatto ? 2 : 1); return { tot, resta: Math.round((tot - (a.mov || 0)) * 10) / 10 }; };
+  const scattiDi = a => a.fatte ? a.fatte.filter(x => x.k === 'scatto').length : a.scatto ? 1 : 0;
+  const movimentoDi = t => { const a = azioniDi(t), tot = velocitaDi(schedaDi(t)) * (1 + scattiDi(a)); return { tot, resta: Math.round((tot - (a.mov || 0)) * 10) / 10 }; };
   const suoTurno = t => { const att = T.turno?.find(x => x.id === T.stato?.turno); return !!t && !!att && att.token === t.id; };
   async function segnaAzioni(t, ch) {
     if (!t) return; const a = { ...azioniDi(t), ...ch, chiave: chiaveTurno() }, prima = t.azioni;
@@ -3930,11 +3951,66 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     if (r.error) { t.azioni = prima; disegnaToken(); toast(/azioni/i.test(r.error.message) ? 'Per segnare azioni e movimento esegui tavolo/tappa-6.sql in Supabase.' : r.error.message, 'err'); }
   }
   const AZ = [['az', '⚔', 'Azione'], ['bon', '✚', 'Azione bonus'], ['rea', '↺', 'Reazione']];
+  // le azioni del regolamento: si fanno con l'azione (alcune anche con l'azione bonus, vedi bonusAz)
+  const AZIONI = [
+    ['scatto', '🏃', 'Scatto', 'Altro movimento', 'Ti muovi ancora quanto la tua velocità, anche se ti sei già mosso'],
+    ['dis', '🛡', 'Disimpegno', 'Niente attacchi di opportunità', 'In questo turno il tuo movimento non provoca attacchi di opportunità'],
+    ['sch', '🌀', 'Schivata', 'Ti attaccano con svantaggio', 'Fino al tuo prossimo turno chi ti attacca ha svantaggio e tu hai vantaggio ai TS su Destrezza'],
+    ['nas', '🫥', 'Nascondersi', 'Prova di Furtività', 'Fai una prova di Destrezza (Furtività)'],
+    ['aiu', '🤝', 'Aiuto', 'Vantaggio a un alleato', 'Un alleato ha vantaggio alla sua prossima prova o al prossimo attacco'],
+    ['pre', '⏳', 'Preparare', 'Agisci dopo, di reazione', 'Decidi cosa farai e quando: agirai con la reazione'],
+    ['cer', '🔍', 'Cercare', 'Percezione o Indagare', 'Prova di Saggezza (Percezione) o di Intelligenza (Indagare)'],
+    ['ogg', '🧰', 'Usa un oggetto', 'Leva, porta, oggetto', 'Una leva, una porta, un oggetto da usare']];
+  const voceAz = k => AZIONI.find(x => x[0] === k) || ['', '•', k, ''];
+  // Azione scaltra del ladro (dal 2° livello), Fuga agile del goblin, Passo del vento del monaco
+  function bonusAz(t) {
+    const d = schedaDi(t)?.dati || {}, testo = norm([(d.privilegi || []).map(p => p.nome || '').join('|'), d.azioni || '', d.tratti || ''].join('|'));
+    if (/azione scaltra|azioni scaltre/.test(testo) || (/ladr/i.test(d.classe || '') && (parseInt(d.livello) || 0) >= 2)) return { nome: 'Azione scaltra', k: ['scatto', 'dis', 'nas'] };
+    if (/fuga agile/.test(testo)) return { nome: 'Fuga agile', k: ['dis', 'nas'] };
+    if (/passo del vento/.test(testo)) return { nome: 'Passo del vento', k: ['scatto', 'dis'] };
+    return null;
+  }
+  // con cosa può scattare ora: l'azione, se no l'azione bonus (Azione scaltra…)
+  const puoScattare = t => { const a = azioniDi(t); if (!a.az) return 'az'; const b = bonusAz(t); return b && b.k.includes('scatto') && !a.bon ? 'bon' : null; };
+  async function faiAzione(t, k, da) {
+    const a = azioniDi(t); if (a[da]) { toast(da === 'az' ? 'L\'azione di questo turno è già usata.' : 'L\'azione bonus di questo turno è già usata.', 'err'); return; }
+    const fatte = [...(a.fatte || (a.scatto ? [{ k: 'scatto', da: 'az' }] : [])), { k, da }];
+    await segnaAzioni(t, { [da]: true, fatte, scatto: fatte.some(x => x.k === 'scatto') });
+    const [, ic, l] = voceAz(k), b = da === 'bon' ? bonusAz(t) : null;
+    const r = await SB.rpc('tavolo_scrivi', { p_testo: `${ic} ${t.nome || 'Token'}: ${l}${b ? ` (azione bonus · ${b.nome})` : ''}${k === 'scatto' ? ` · ora ha ${metri(Math.max(0, movimentoDi(t).resta))} di movimento` : ''}`, p_per: null });
+    const row = !r.error && (Array.isArray(r.data) ? r.data[0] : r.data);
+    if (row && !T.chat.some(x => x.id === row.id)) { T.chat.push(row); nuovoMsg(row); }
+  }
+  function togliAzione(t, i) {
+    const a = azioniDi(t), f = [...(a.fatte || [])], x = f.splice(i, 1)[0]; if (!x) return;
+    segnaAzioni(t, { [x.da]: false, fatte: f, scatto: f.some(y => y.k === 'scatto') });
+  }
+  // le azioni fatte in questo turno, da togliere con un tocco se segnate per sbaglio
+  const fatteHtml = (t, cls, k) => (azioniDi(t).fatte || []).map((x, i) => { const [, ic, l] = voceAz(x.k); return `<button type="button" class="${cls}" data-k="${k}" data-i="${i}" title="${l} (${x.da === 'bon' ? 'azione bonus' : 'azione'}): tocca per toglierla">${ic} ${l} ✕</button>`; }).join('');
+  function menuAzioni(t, anc) {
+    document.querySelectorAll('.tv-azm').forEach(x => x.remove());
+    const a = azioniDi(t), b = bonusAz(t), m = document.createElement('div'); m.className = 'tv-azm'; m.setAttribute('role', 'menu');
+    const voce = (k, da, off) => { const [, ic, l, d, lungo] = voceAz(k); return `<button type="button" role="menuitem" data-a="${k}" data-da="${da}" title="${lungo}"${off ? ' disabled' : ''}><span>${ic}</span><div><b>${l}</b><small>${d}</small></div></button>`; };
+    m.innerHTML = `<h5>Con l'azione${a.az ? ' <small>già usata</small>' : ''}</h5><div class="gz">${AZIONI.map(([k]) => voce(k, 'az', a.az)).join('')}</div>
+      ${b ? `<h5>Con l'azione bonus <small>${b.nome}${a.bon ? ' · già usata' : ''}</small></h5><div class="gz">${b.k.map(k => voce(k, 'bon', a.bon)).join('')}</div>` : ''}
+      <p class="nota">Attaccare e lanciare incantesimi si fa dalla scheda. Le azioni scelte finiscono in chat.</p>`;
+    document.body.append(m);
+    const r = anc.getBoundingClientRect(), h = m.offsetHeight, w = m.offsetWidth;
+    m.style.left = clamp(r.left + r.width / 2 - w / 2, 6, innerWidth - w - 6) + 'px';
+    m.style.top = (r.top - h - 8 >= 6 ? r.top - h - 8 : clamp(r.bottom + 8, 6, innerHeight - h - 6)) + 'px';
+    const chiudi = () => { m.remove(); removeEventListener('pointerdown', fuori, true); removeEventListener('keydown', tasto); };
+    const fuori = e => { if (!m.contains(e.target) && !anc.contains(e.target)) chiudi(); };
+    const tasto = e => { if (e.key === 'Escape') chiudi(); };
+    addEventListener('pointerdown', fuori, true); addEventListener('keydown', tasto); onCleanup(chiudi);
+    m.querySelectorAll('[data-a]').forEach(x => x.onclick = () => { chiudi(); faiAzione(t, x.dataset.a, x.dataset.da); });
+    m.querySelector('[data-a]:not([disabled])')?.focus();
+  }
   function boxTurno(t, w) {
     if (!t) return '';
     const a = azioniDi(t), mv = movimentoDi(t), dis = w ? '' : ' disabled';
     return `<div class="sez tz${suoTurno(t) ? ' ora' : ''}"><div class="tzr">${AZ.map(([k, ic, l]) => `<button type="button" class="tzb${a[k] ? ' usata' : ''}" data-k="tz" data-z="${k}" title="${l}: ${a[k] ? 'usata (clicca per ridarla)' : 'disponibile'}"${dis}><i>${ic}</i>${l}</button>`).join('')}</div>
-      <div class="tzr"><span class="mv${mv.resta < 0 ? ' ko' : ''}">🏃 <b>${metri(mv.resta)}</b> di ${metri(mv.tot)}</span>${w ? `<button type="button" class="mini" data-k="tz-m" data-d="-1.5" title="Muovi di 1,5 m">−1,5</button><button type="button" class="mini" data-k="tz-m" data-d="1.5" title="Ridai 1,5 m">+1,5</button><button type="button" class="mini${a.scatto ? ' on' : ''}" data-k="tz" data-z="scatto" title="Scatto: il movimento raddoppia (usa l'azione)">Scatto</button><button type="button" class="mini" data-k="tz-reset" title="Ridai azioni e movimento">↺ Nuovo turno</button>` : ''}</div>
+      <div class="tzr"><span class="mv${mv.resta < 0 ? ' ko' : ''}">🏃 <b>${metri(mv.resta)}</b> di ${metri(mv.tot)}</span>${w ? `<button type="button" class="mini" data-k="tz-m" data-d="-1.5" title="Muovi di 1,5 m">−1,5</button><button type="button" class="mini" data-k="tz-m" data-d="1.5" title="Ridai 1,5 m">+1,5</button><button type="button" class="mini" data-k="tz-azm" title="Scatto, Disimpegno, Schivata, Nascondersi…" aria-haspopup="menu">Azioni ▾</button><button type="button" class="mini" data-k="tz-reset" title="Ridai azioni e movimento">↺ Nuovo turno</button>` : ''}</div>
+      ${(azioniDi(t).fatte || []).length ? `<div class="tzr">${fatteHtml(t, 'mini on', 'tz-fz')}</div>` : ''}
       ${w && suoTurno(t) ? '<div class="tzr"><button type="button" class="fine" data-k="tz-fine" title="Passa al prossimo nell\'ordine del turno">⏭ Finisci il turno</button></div>' : ''}
       <h6>${suoTurno(t) ? 'È il turno di ' + esc(t.nome || '') : 'Turno di ' + esc(t.nome || '')}: si azzera da solo al suo turno</h6></div>`;
   }
@@ -4212,10 +4288,12 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     }
     if (k === 'bevi') return bevi(s, b.dataset.p);
     const tkz = tokScheda() || attaccante(s);
-    if (k === 'tz' && tkz) { const a = azioniDi(tkz), z = b.dataset.z; return segnaAzioni(tkz, z === 'scatto' ? { scatto: !a.scatto, az: !a.scatto ? true : a.az } : { [z]: !a[z] }); }
+    if (k === 'tz' && tkz) { const z = b.dataset.z; return segnaAzioni(tkz, { [z]: !azioniDi(tkz)[z] }); }
+    if (k === 'tz-azm' && tkz) return menuAzioni(tkz, b);
+    if (k === 'tz-fz' && tkz) return w ? togliAzione(tkz, +b.dataset.i) : undefined;
     if (k === 'tz-m' && tkz) { const a = azioniDi(tkz); return segnaAzioni(tkz, { mov: Math.max(0, (a.mov || 0) - +b.dataset.d) }); }
     if (k === 'tz-fine') return finisciTurno();
-    if (k === 'tz-reset' && tkz) return segnaAzioni(tkz, { az: false, bon: false, rea: false, mov: 0, scatto: false });
+    if (k === 'tz-reset' && tkz) return segnaAzioni(tkz, { az: false, bon: false, rea: false, mov: 0, scatto: false, fatte: [] });
     if (k === 'addatt') { await salvaScheda(s.id, { attacchi: [...(d.attacchi || []), { nome: '', colpire: null, danni: '', tipo: '' }] }, true); disegnaScheda(); sv.d.querySelector('.atts .at:last-of-type input')?.focus(); return; }
     if (k === 'delatt') { await salvaScheda(s.id, { attacchi: (d.attacchi || []).filter((_, i) => i !== +b.dataset.i) }, true); return disegnaScheda(); }
     if (k === 'riposo') { const p = {}; for (let i = 1; i <= 9; i++) if (num(d['usati_' + i])) p['usati_' + i] = 0; return salvaScheda(s.id, p, true); }
