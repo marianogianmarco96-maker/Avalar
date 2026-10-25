@@ -124,6 +124,13 @@
 .tv-roll .h span{font-weight:600}
 .tv-roll .h small{color:var(--mute)}
 .tv-roll .m{color:var(--ink2);font-style:italic}
+.tv-roll .kt{display:flex;align-items:center;justify-content:space-between;gap:6px;margin:2px 0 1px;font:700 .74rem var(--body);letter-spacing:.04em;text-transform:uppercase}
+.tv-roll.k-att{border-left:4px solid #2f5d8a}.tv-roll.k-att .kt b{color:#2f5d8a}
+.tv-roll.k-dan{border-left:4px solid #9b2c2c;margin-left:14px}.tv-roll.k-dan .kt b{color:#9b2c2c}
+.tv-roll.k-ts{border-left:4px solid #3d7a6e}.tv-roll.k-ts .kt b{color:#3d7a6e}
+.tv-roll.k-ext{border-left:4px solid #6b3fa0;margin-left:14px}.tv-roll.k-ext .kt b{color:#6b3fa0}
+.tv-roll .es{font-size:.7rem;padding:1px 7px;border-radius:9px;text-transform:none;letter-spacing:0;white-space:nowrap}
+.tv-roll .es.si{background:#2e6b3a;color:#fff}.tv-roll .es.no{background:#6d6d6d;color:#fff}.tv-roll .es.crit{background:#b8860b;color:#fff}
 .tv-roll .r{display:flex;align-items:center;gap:8px;margin-top:2px}
 .tv-roll .d{flex:1;color:var(--mute);font-size:.85rem;overflow-wrap:anywhere}
 .tv-roll .t{font:700 1.45rem/1 var(--display);color:var(--wine);min-width:36px;text-align:right}
@@ -538,6 +545,12 @@ dialog.tv-poz menu small{font-weight:400;opacity:.8}
 .tv-sch .spl .mchat{all:unset;cursor:pointer;font-size:.8rem;opacity:0;transition:opacity .15s;padding:0 2px}
 .tv-sch .spl:hover .mchat,.tv-sch .spl .mchat:focus-visible{opacity:.85}
 .tv-sch .spl .mchat:disabled{display:none}
+.tv-livd{width:min(440px,94vw)}
+.tv-liv{background:none;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;margin:12px 0}
+.tv-liv .btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;height:auto}
+.tv-liv .btn b{font-size:1.15rem}.tv-liv .btn small{font-size:.7rem;opacity:.85;white-space:nowrap}
+.tv-liv .btn:disabled{opacity:.4}
+.tv-sch .spl .st .alt{font:italic 400 .78rem var(--body);font-variant:normal;letter-spacing:0;opacity:.7}
 .tv-sch .srdA{margin:14px 4px 2px;font-size:.68rem;line-height:1.35;opacity:.6}
 .tv-sch .srdb{margin:4px 0}
 .tv-sch .spl .lancia{all:unset;box-sizing:border-box;cursor:pointer;padding:2px 8px;border-radius:5px;background:#7d2530;color:#fff;font:700 .72rem var(--body);white-space:nowrap}
@@ -933,7 +946,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     const pg = (table, f, event = '*') => ch.on('postgres_changes', { event, schema: 'public', table }, f);
     pg('tavolo_token', p => {
       if (p.eventType === 'DELETE') { T.tok.delete(p.old.id); disegnaToken(); return; }
-      const t = completa(T.tok.get(p.new.id), p.new); if (T.drag?.id === t.id) return; T.tok.set(t.id, t); disegnaToken();
+      const t = completa(T.tok.get(p.new.id), p.new); if (T.drag?.id === t.id) return; T.tok.set(t.id, t); disegnaToken(); togliMorti();
       if (T.sv?.tok === t.id) aggiornaFinestra();
     });
     pg('tavolo_pf_gruppo', p => { if (p.eventType === 'DELETE') T.pfg.delete(p.old.giocatore); else T.pfg.set(p.new.giocatore, p.new); disegnaToken(); });
@@ -941,7 +954,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     pg('tavolo_schede', p => {
       if (!T.schede) return;
       if (p.eventType === 'DELETE') { T.schede.delete(p.old.id); dopoScheda(p.old.id); return; }
-      arrivaScheda(p.new);
+      arrivaScheda(p.new); togliMorti();
     });
     // schede di PNG che il DM ha appena mostrato o nascosto: i giocatori ricaricano l'elenco
     ch.on('broadcast', { event: 'schede' }, () => { if (!isDM() && T.schede) ricaricaSchede(); });
@@ -966,6 +979,8 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     });
     pg('tavolo_tiri', p => { if (T.tiri.some(x => x.id === p.new.id)) return; T.tiri.push(p.new); if (T.tiri.length > 120) T.tiri.shift(); nuovoTiro(p.new); }, 'INSERT');
     pg('tavolo_tiri', p => { T.tiri = T.tiri.filter(x => x.id !== p.old.id); disegnaLog(); }, 'DELETE');
+    // l'esito dell'attacco (colpito, mancato) il server lo scrive sul tiro subito dopo averlo tirato
+    pg('tavolo_tiri', p => { const i = T.tiri.findIndex(x => x.id === p.new.id); if (i < 0) return; T.tiri[i] = p.new; disegnaLog(); }, 'UPDATE');
     pg('tavolo_chat', p => { if (T.chat.some(x => x.id === p.new.id)) return; T.chat.push(p.new); if (T.chat.length > 120) T.chat.shift(); nuovoMsg(p.new); }, 'INSERT');
     pg('tavolo_chat', p => { T.chat = T.chat.filter(x => x.id !== p.old.id); disegnaLog(); }, 'DELETE');
     pg('tavolo_maschera', p => {
@@ -1370,7 +1385,8 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       if (T.tool === 'allinea' && isDM()) { T.al = { a: p, b: p }; disegnaRighelli(); return; }
       if (T.tool === 'righello') { const sc = scena(); const a = { x: centroCasella(p.x, sc.griglia_x), y: centroCasella(p.y, sc.griglia_y) }; rul = { pts: [a, a] }; mostraRighello(rul.pts); return; }
       if (t && T.tool !== 'mano' && puoMuovere(t) && T.passo) annullaPasso();
-      if (t && T.tool !== 'mano' && puoMuovere(t) && !isDM() && suoTurno(t) && movimentoDi(t).resta <= 0) { toast(`${t.nome || 'Il token'} ha finito il movimento di questo turno.`, 'err'); return; }
+      // nel suo turno, finito il movimento non si sposta più (il DM può forzare tenendo premuto Alt)
+      if (t && T.tool !== 'mano' && puoMuovere(t) && suoTurno(t) && !(isDM() && e.altKey) && movimentoDi(t).resta < 1.49) { avvisoFermo(t); return; }
       if (t && T.tool !== 'mano' && puoMuovere(t)) { T.drag = { id: t.id, dx: p.x - t.x, dy: p.y - t.y, x0: t.x, y0: t.y, sx: e.clientX, sy: e.clientY, mosso: false }; el.classList.add('drag'); return; }
       if (t && T.tool !== 'mano') T.clic = { id: t.id, sx: e.clientX, sy: e.clientY };
       pan = { sx: e.clientX, sy: e.clientY, x: T.view.x, y: T.view.y }; st.classList.add('pan');
@@ -1435,7 +1451,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
         const cm = suoTurno(t) ? costoMov(t, d.x0, d.y0, x, y) : { m: 0, dif: 0 }, m = cm.m;
         if (m) {
           const mv = movimentoDi(t);
-          if (!isDM() && m > mv.resta + 0.01) { tornaIndietro(t, d.x0, d.y0); mostraRighello(null); manda('righello', { uid: T.me.uid, pts: null }); toast(`Troppo lontano: ${t.nome || 'il token'} ha ancora ${metri(Math.max(mv.resta, 0))} di movimento.`, 'err'); return; }
+          if (!(isDM() && e.altKey) && m > mv.resta + 0.01) { tornaIndietro(t, d.x0, d.y0); mostraRighello(null); manda('righello', { uid: T.me.uid, pts: null }); toast(`Troppo lontano: ${t.nome || 'il token'} ha ancora ${metri(Math.max(mv.resta, 0))} di movimento.`, 'err'); return; }
           t.x = x; t.y = y; disegnaToken(); manda('trascina', { id: t.id, x, y });
           return chiediPasso(t, x, y, d.x0, d.y0, m, cm.dif);
         }
@@ -1652,6 +1668,10 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     return true;
   }
   // «Muovere Livion di 6 m?»: con la conferma il movimento si scala, altrimenti il token torna dov'era
+  function avvisoFermo(t) {
+    const mio = !isDM() && t.giocatore === T.me.giocatore;
+    toast(mio ? 'Hai esaurito il tuo movimento: non puoi muoverti oltre in questo turno.' : `${t.nome || 'Il token'} ha esaurito il movimento: non può muoversi oltre in questo turno.${isDM() ? ' (Alt + trascina per forzare)' : ''}`, 'err');
+  }
   function chiediPasso(t, x, y, x0, y0, m, dif) {
     const b = $('#tv-mbar'); if (!b) return;
     const mv = movimentoDi(t), dopo = mv.resta - m;
@@ -2070,8 +2090,26 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       }).join('');
     });
   }
-  const rigaTiro = t => `<div class="tv-roll ${esito(t)} ${t.privato ? 'priv' : ''} ${t.autore === T.me.uid ? 'me' : ''}">${tagTiro(t)}<div class="h"><span class="who">${avatar(t.autore, t.nome)}${esc(t.nome)}</span><span class="dx"><small>${ora(t.creato)}</small>${via('t', t)}</span></div>
-    ${t.motivo ? `<div class="m">${esc(t.motivo)}</div>` : ''}<div class="fo">tira ${esc(t.formula)}</div><div class="r"><span class="chips">${chips(t.dettaglio)}</span><span class="t">${t.totale}</span></div></div>`;
+  // che tiro è: per colpire, danni, danni in più… (dal motivo scritto dal tavolo, anche nel formato di prima della tappa 9)
+  const TIPI_TIRO = { '🎯': ['att', '🎯 Tiro per colpire'], '💥': ['dan', '💥 Danni'], '🧪': ['dan', '🧪 Danni in più (tiro salvezza)'] };
+  function tipoTiro(mo) {
+    mo = String(mo || ''); let m;
+    const es = x => /💥 CRITICO$/.test(x) ? ['crit', '💥 Critico!'] : /✅ COLPITO$/.test(x) ? ['si', '✅ Colpito'] : /❌ MANCATO$/.test(x) ? ['no', '❌ Mancato'] : null;
+    const senza = x => x.replace(/ · (💥 CRITICO|✅ COLPITO|❌ MANCATO|CA sconosciuta)$/, '');
+    if ((m = mo.match(/^(🎯|💥|🧪) [^·]+ · (.+)$/u))) { const [k, l] = TIPI_TIRO[m[1]]; return { k, l, d: senza(m[2]), es: es(mo) }; }
+    if ((m = mo.match(/^➕ ([^·]+) · (.+)$/u))) return { k: 'ext', l: '➕ ' + m[1].trim(), d: m[2] };
+    if ((m = mo.match(/^(.+? → .+?) · conferma del critico$/))) return { k: 'att', l: '🎲 Conferma del critico', d: m[1] };
+    if ((m = mo.match(/^(.+?) · TS ([A-Z]{3}) CD (\d+)(?: contro (.+))?$/))) return { k: 'ts', l: '🛡 Tiro salvezza', d: `${m[1]} · ${m[2]} CD ${m[3]}${m[4] ? ' contro ' + m[4] : ''}` };
+    if ((m = mo.match(/^(.+?) · (.+) \(area\)$/))) return { k: 'dan', l: '💥 Danni ad area', d: `${m[2]} · ${m[1]}` };
+    if ((m = mo.match(/^(.+? → .+?) · danni in più \(TS\)$/))) return { k: 'dan', l: '🧪 Danni in più (tiro salvezza)', d: m[1] };
+    if ((m = mo.match(/^(.+? → .+?) · danni( \(critico[^)]*\))?$/))) return { k: 'dan', l: '💥 Danni', d: m[1] + (m[2] ? ' · critico ×2' : '') };
+    if ((m = mo.match(/^(.+?) → (.+?) · (.+)$/))) return { k: 'att', l: '🎯 Tiro per colpire', d: `${m[3]} · ${m[1]} → ${m[2]}` };
+    if ((m = mo.match(/^(.+?) · Attacco: (.+)$/))) return { k: 'att', l: '🎯 Tiro per colpire', d: `${m[2]} · ${m[1]}` };
+    if ((m = mo.match(/^(.+?) · Danni: (.+)$/))) return { k: 'dan', l: '💥 Danni', d: `${m[2]} · ${m[1]}` };
+    return null;
+  }
+  const rigaTiro = t => { const tt = tipoTiro(t.motivo); return `<div class="tv-roll ${esito(t)} ${t.privato ? 'priv' : ''} ${t.autore === T.me.uid ? 'me' : ''}${tt ? ' k-' + tt.k : ''}">${tagTiro(t)}<div class="h"><span class="who">${avatar(t.autore, t.nome)}${esc(t.nome)}</span><span class="dx"><small>${ora(t.creato)}</small>${via('t', t)}</span></div>
+    ${tt ? `<div class="kt"><b>${esc(tt.l)}</b>${tt.es ? `<span class="es ${tt.es[0]}">${tt.es[1]}</span>` : ''}</div><div class="m">${esc(tt.d)}</div>` : t.motivo ? `<div class="m">${esc(t.motivo)}</div>` : ''}<div class="fo">tira ${esc(t.formula)}</div><div class="r"><span class="chips">${chips(t.dettaglio)}</span><span class="t">${t.totale}</span></div></div>`; };
   const nomeGioc = id => id === 'dm' ? 'DM' : T.membri.find(x => x.giocatore === id)?.nome || id;
   const rigaMsg = m => `<div class="tv-roll tv-msg ${m.per ? 'w' : ''} ${m.autore === T.me.uid ? 'me' : ''}">${tagMsg(m)}<div class="h"><span class="who">${avatar(m.autore, m.nome)}${esc(m.nome)}</span><span class="dx"><small>${ora(m.creato)}</small>${via('c', m)}</span></div><div class="tx">${esc(m.testo)}</div></div>`;
   async function cancella(k) {
@@ -2177,7 +2215,8 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     if (nebbia) {
       // nebbia automatica: tutto buio, tranne ciò che vedono i token (e, in penombra, ciò che hanno già visto)
       g.fillStyle = NERO; g.fillRect(0, 0, sc.larghezza, sc.altezza);
-      const segs = muriScena(sc).filter(chiuso).map(m => m.punti), viste = occhi(sc).map(o => ({ ...o, pts: poligono(o, segs, sc) }));
+      const segs = muriScena(sc).filter(chiuso).map(m => m.punti), cono = sc.cono !== false;
+      const viste = occhi(sc).map(o => cono ? { ...o, pts: poligono(o, segs, sc) } : { ...o, ombre: ombre(o, segs, sc) });
       g.globalCompositeOperation = 'destination-out';
       if (!isDM() && sc.esplora !== false) {
         const e = esplorato(sc); segnaEsplorato(e, viste);
@@ -2400,8 +2439,22 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     }
     return pts;
   }
+  // senza cono d'ombra: dietro ogni muro c'è la sua «ombra», e resta buio solo dove se ne sommano un numero dispari
+  // (dentro una stanza chiusa vista da fuori, o fuori dalla stanza vista da dentro); dietro la stanza si torna a vedere
+  function ombre(o, segs, sc) {
+    const K = 4 * (sc.larghezza + sc.altezza), R = o.r || Infinity, fuori = (x, y) => { const l = Math.hypot(x - o.x, y - o.y) || 1; return [x + (x - o.x) / l * K, y + (y - o.y) / l * K]; };
+    return segs.filter(m => !o.r || distSeg(o.x, o.y, m) < R).map(([ax, ay, bx, by]) => [ax, ay, bx, by, ...fuori(bx, by), ...fuori(ax, ay)]);
+  }
   // toglie dalla tela la zona vista (con la vista limitata, sfumata verso il bordo)
   function buca(g, o) {
+    if (o.ombre) {
+      const R = o.r || Infinity, x0 = Math.max(0, o.x - R), y0 = Math.max(0, o.y - R), x1 = Math.min(1e7, o.x + R), y1 = Math.min(1e7, o.y + R);
+      g.save(); g.beginPath(); g.rect(x0, y0, Math.min(x1 - x0, 1e7), Math.min(y1 - y0, 1e7));
+      for (const q of o.ombre) { g.moveTo(q[0], q[1]); for (let i = 2; i < 8; i += 2) g.lineTo(q[i], q[i + 1]); g.closePath(); }
+      if (o.r) { g.clip('evenodd'); const gr = g.createRadialGradient(o.x, o.y, o.r * 0.8, o.x, o.y, o.r); gr.addColorStop(0, '#000'); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.beginPath(); g.arc(o.x, o.y, o.r, 0, Math.PI * 2); g.fill(); }
+      else { g.fillStyle = '#000'; g.fill('evenodd'); }
+      g.restore(); return;
+    }
     if (o.pts.length < 6) return;
     g.save(); g.beginPath(); g.moveTo(o.pts[0], o.pts[1]);
     for (let i = 2; i < o.pts.length; i += 2) g.lineTo(o.pts[i], o.pts[i + 1]);
@@ -2412,7 +2465,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     } else g.fillStyle = '#000';
     g.fill(); g.restore();
   }
-  const chiaveVista = sc => [sc.id, sc.visuale, sc.esplora, sc.vista_condivisa, sc.griglia, sc.metri, sc.larghezza, sc.altezza, T.wver, isDM(), T.esp?.v, nebbiaQui(sc) ? occhi(sc).map(o => `${o.id}:${Math.round(o.x)}:${Math.round(o.y)}:${Math.round(o.r)}`).join() : ''].join('|');
+  const chiaveVista = sc => [sc.id, sc.visuale, sc.cono, sc.esplora, sc.vista_condivisa, sc.griglia, sc.metri, sc.larghezza, sc.altezza, T.wver, isDM(), T.esp?.v, nebbiaQui(sc) ? occhi(sc).map(o => `${o.id}:${Math.round(o.x)}:${Math.round(o.y)}:${Math.round(o.r)}`).join() : ''].join('|');
   // le zone già viste restano in penombra: le ricorda il browser di ogni giocatore
   function esplorato(sc) {
     if (T.esp?.id === sc.id) return T.esp;
@@ -2552,14 +2605,14 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       <div class="g seg">${bt('muro', 'muro', 'Muro', T.mtool === 'muro', 'Disegna i muri: trascina, oppure clicca punto per punto (doppio clic o Esc per finire)')}${bt('porta', 'porta', 'Porta', T.mtool === 'porta', 'Disegna una porta: si apre e si chiude con un clic')}${bt('gomma', 'gomma', 'Gomma', T.mtool === 'gomma', 'Clicca o passa sui muri per cancellarli')}</div>
       <div class="g">${bt('griglia', 'gri', '', aggancioGriglia(), 'Aggancia i punti agli angoli delle caselle (tieni Alt per staccarli)')}${bt('annulla', 'undo', '', false, 'Annulla l\'ultimo muro', !T.mfatti.some(id => T.muri.some(m => m.id === id)))}</div>
       <div class="g sl" title="Solo per te: i giocatori la vedono sempre nera">${svg('luna')}<input type="range" class="tv-rg" data-w="tono" min="0.1" max="0.95" step="0.05" value="${tono()}" aria-label="Opacità della nebbia (solo per te)"><output data-w="tv">${Math.round(tono() * 100)}%</output></div>
-      <div class="g">${sw('esplora', sc.esplora !== false, 'Zone viste', 'I posti già visti restano in penombra')}${sw('vista_condivisa', !!sc.vista_condivisa, 'Vista di gruppo', 'Ogni giocatore vede anche ciò che vedono i compagni')}</div>
+      <div class="g">${sw('cono', sc.cono !== false, 'Cono d\'ombra', 'Acceso: i muri proiettano l\'ombra e non si vede cosa c\'è dietro. Spento: restano buie solo le stanze chiuse in cui il token non è')}${sw('esplora', sc.esplora !== false, 'Zone viste', 'I posti già visti restano in penombra')}${sw('vista_condivisa', !!sc.vista_condivisa, 'Vista di gruppo', 'Ogni giocatore vede anche ciò che vedono i compagni')}</div>
       <div class="g">${bt('dimentica', '', 'Dimentica le zone viste', false, 'Le zone già esplorate tornano buie per tutti')}${bt('svuota', '', `Cancella i muri${n ? ` (${n})` : ''}`, false, 'Cancella tutti i muri e le porte di questa mappa', !n)}</div>`;
     b.classList.remove('spenta'); b.hidden = false;
     b.querySelectorAll('.tv-rg').forEach(pRange);
     const tn = b.querySelector('[data-w=tono]'); tn.oninput = () => { try { localStorage.setItem(TONO, tn.value); } catch { } const c = $('#tv-fog'); if (c) c.style.opacity = tn.value; b.querySelector('[data-w=tv]').value = Math.round(tn.value * 100) + '%'; };
     b.querySelectorAll('input[type=checkbox][data-w]').forEach(x => x.onchange = async () => {
       const r = await SB.from('tavolo_scene').update({ [x.dataset.w]: x.checked }).eq('id', sc.id).select().single();
-      if (r.error) { x.checked = !x.checked; return toast(sqlMancante(r.error) || /column/i.test(r.error.message) ? 'Esegui tavolo/tappa-4.sql in Supabase.' : r.error.message, 'err'); }
+      if (r.error) { x.checked = !x.checked; return toast(sqlMancante(r.error) || /column/i.test(r.error.message) ? `Esegui tavolo/tappa-${x.dataset.w === 'cono' ? 9 : 4}.sql in Supabase.` : r.error.message, 'err'); }
       T.scene.set(sc.id, r.data);
       programmaMaschera(); barraMaschera();
       if (x.dataset.w === 'visuale' && x.checked && !occhi(r.data).length) toast('Nessun token è assegnato a un giocatore: dal menu del token scegli chi lo muove, così vedrà da lì.');
@@ -2653,24 +2706,46 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   }
   const armaMira = m => { const s = T.schede?.get(m.sid); if (!s) return null; return m.inc != null ? attDaInc(s, s.dati.incantesimi?.[m.inc]) : s.dati.attacchi?.[m.i]; };
   // lanciare un incantesimo di 1° livello o più consuma uno slot di quel livello
-  function usaSlot(s, inc) {
-    const sp = s?.dati.incantesimi?.[inc], lv = num(sp?.livello) || 0; if (!sp || !lv || !puoScrivere(s)) return;
+  function usaSlot(s, inc, liv) {
+    const sp = s?.dati.incantesimi?.[inc], lv = liv || num(sp?.livello) || 0; if (!sp || !lv || !puoScrivere(s)) return;
     const tot = num(s.dati['slot_' + lv]) || 0, usati = num(s.dati['usati_' + lv]) || 0; if (!tot) return;
     salvaScheda(s.id, { ['usati_' + lv]: Math.min(tot, usati + 1) }, true);
   }
+  // «Ai livelli superiori»: i dadi in più per ogni livello di slot sopra quello dell'incantesimo (come tavolo_inc_att in tappa-9.sql)
+  const piuInc = sp => String(sp?.piu || sp?.testo || '').match(/(\d+)d(\d+)(?: danni)? (?:per ogni|per ciascun) (?:slot di )?livello (?:di slot )?superiore/i);
+  function danniInc(sp, liv) {
+    const lv = num(sp?.livello) || 0, d = String(sp?.danni || '').replace(/\s+/g, ''), p = piuInc(sp);
+    return liv > lv && lv && p && /\d/.test(d) ? `${d}+${p[1] * (Math.min(liv, 9) - lv)}d${p[2]}` : d;
+  }
+  // con quale slot si lancia: solo i livelli dall'incantesimo in su che hanno slot in scheda (null: annullato)
+  function sceltaLivello(s, sp) {
+    const lv = num(sp.livello) || 0; if (!lv) return Promise.resolve(0);
+    const L = []; for (let i = lv; i <= 9; i++) { const tot = num(s.dati['slot_' + i]) || 0; if (tot) L.push([i, Math.max(tot - (num(s.dati['usati_' + i]) || 0), 0), tot]); }
+    if (!L.length) return Promise.resolve(lv);
+    const p = piuInc(sp), liberi = L.some(([, r]) => r > 0);
+    return new Promise(res => {
+      const d = openDlg(`<form method="dialog"><h3>✨ ${esc(sp.nome || 'Incantesimo')}</h3><p class="hint">Incantesimo di ${lv}° livello: con quale slot lo lanci?${p && /\d/.test(sp.danni || '') ? ` Ogni livello in più aggiunge ${esc(p[1] + 'd' + p[2])} ai danni.` : ''}</p>
+        <div class="tv-liv">${L.map(([i, r, tot]) => `<button value="${i}" class="btn ${i === lv ? 'primary' : 'ghost'}"${r ? '' : ' disabled'}><b>${i}°</b><small>${r} di ${tot} slot</small>${i > lv && p && /\d/.test(sp.danni || '') ? `<small>${esc(danniInc(sp, i))}</small>` : ''}</button>`).join('')}</div>
+        ${liberi ? '' : `<p class="hint">Non hai più slot liberi.</p>`}
+        <menu><button value="cancel" class="btn ghost">Annulla</button>${liberi ? '' : `<button value="senza" class="btn">Lancia lo stesso (${lv}°)</button>`}</menu></form>`, 'tv-livd');
+      d.addEventListener('close', () => res(d.returnValue === 'senza' ? lv : /^\d$/.test(d.returnValue) ? +d.returnValue : null));
+    });
+  }
   async function lanciaInc(s, inc) {
     const sp = s.dati.incantesimi?.[inc]; if (!sp) return;
-    const lv = num(sp.livello) || 0, tot = num(s.dati['slot_' + lv]) || 0, usati = num(s.dati['usati_' + lv]) || 0;
+    const liv = await sceltaLivello(s, sp); if (liv == null) return;
+    const lv = liv || num(sp.livello) || 0, tot = num(s.dati['slot_' + lv]) || 0, usati = num(s.dati['usati_' + lv]) || 0;
     if (lv && tot && usati >= tot && !await ask(`Non hai più slot di ${lv}° livello. Lanciare lo stesso **${sp.nome || 'l\'incantesimo'}**?`, { ok: 'Lancia', title: 'Slot finiti' })) return;
     const at = attDaInc(s, sp), pa = portata(at), mira = !!(String(sp.danni || '').trim() && (pa.area || sp.ts || sp.attacco));
     const tk = mira ? attaccante(s) : null;
-    if (tk) return iniziaMira(s, 0, tk, inc);
+    if (tk) return iniziaMira(s, 0, tk, inc, lv);
     // senza bersagli da scegliere: lo annuncio in chat, tiro gli eventuali dadi e consumo lo slot
     const chi = s.nome || 'Qualcuno';
-    await SB.rpc('tavolo_scrivi', { p_testo: `✨ ${chi} lancia ${sp.nome || 'un incantesimo'}${lv ? ` (${lv}° livello)` : ''}${sp.conc ? ' · concentrazione' : ''}` });
+    const base = num(sp.livello) || 0, dn = danniInc(sp, lv);
+    await SB.rpc('tavolo_scrivi', { p_testo: `✨ ${chi} lancia ${sp.nome || 'un incantesimo'}${lv ? ` (${lv > base ? `slot di ${lv}° livello, è di ${base}°` : `${lv}° livello`})` : ''}${sp.conc ? ' · concentrazione' : ''}` });
     if (sp.attacco) await tiroD20(s, bonusInc(s), 'Attacco: ' + (sp.nome || 'incantesimo'));
-    if (String(sp.danni || '').trim()) tira(sp.danni, null, T.sv?.seg, `${chi} · ${sp.nome || 'Incantesimo'}`);
-    usaSlot(s, inc);
+    if (dn) tira(dn, null, T.sv?.seg, `${chi} · Danni: ${sp.nome || 'Incantesimo'}${lv > base ? ` (slot di ${lv}°)` : ''}`);
+    usaSlot(s, inc, lv);
     const t = tokScheda() || attaccante(s); if (t && suoTurno(t) && /azione bonus/i.test(sp.tempo || '')) segnaAzioni(t, { bon: true }); else if (t && suoTurno(t) && /^\s*1\s*azione/i.test(sp.tempo || '')) segnaAzioni(t, { az: true });
   }
   /* ---------- manuale degli incantesimi: l'SRD 5.1 in italiano, caricato solo quando serve ---------- */
@@ -2678,15 +2753,24 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   const chiaveInc = n => String(n || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
   function manuale() {
     SRD = SRD || fetch('incantesimi.json').then(r => r.ok ? r.json() : Promise.reject(new Error(r.status))).then(j => {
-      T.srd = { ...j, per: new Map(j.incantesimi.map(x => [chiaveInc(x.nome), x])) };
-      if (!document.getElementById('tv-srd-l')) { const dl = document.createElement('datalist'); dl.id = 'tv-srd-l'; dl.innerHTML = j.incantesimi.map(x => `<option value="${esc(x.nome)}">${x.livello ? x.livello + '° livello' : 'Trucchetto'} · ${esc(x.scuola)}</option>`).join(''); document.body.append(dl); }
+      // si trova anche col nome inglese (Fireball → Palla di fuoco)
+      const en = x => String(x.en || '').split(' / ').filter(Boolean);
+      T.srd = { ...j, per: new Map(j.incantesimi.flatMap(x => [[chiaveInc(x.nome), x], ...en(x).map(n => [chiaveInc(n), x])])) };
+      if (!document.getElementById('tv-srd-l')) {
+        const dl = document.createElement('datalist'), liv = x => `${x.livello ? x.livello + '° livello' : 'Trucchetto'} · ${x.scuola}`; dl.id = 'tv-srd-l';
+        dl.innerHTML = j.incantesimi.map(x => `<option value="${esc(x.nome)}">${esc(liv(x))}${x.en ? ' · ' + esc(x.en) : ''}</option>` + en(x).map(n => `<option value="${esc(n)}">${esc(x.nome)} · ${esc(liv(x))}</option>`).join('')).join('');
+        document.body.append(dl);
+      }
       return T.srd;
     }).catch(() => { SRD = null; return null; });
     return SRD;
   }
-  const dalManuale = sp => !String(sp?.testo || '').trim() && T.srd?.per.get(chiaveInc(sp?.nome)) || null;
+  // «Luce, 2 al giorno» o «Messaggio (rituale)»: conta il nome prima della virgola o della parentesi
+  const dalManuale = sp => !String(sp?.testo || '').trim() && (T.srd?.per.get(chiaveInc(sp?.nome)) || T.srd?.per.get(chiaveInc(String(sp?.nome || '').split(/[,(]/)[0]))) || null;
   // l'incantesimo preso dal manuale: tiene id e «preparato», il resto viene dal libro
-  const daManuale = (sp, x) => ({ id: sp.id || nuovoId(), ...(sp.prep ? { prep: true } : {}), ...x, srd: true });
+  // il nome resta quello scritto (anche in inglese); l'altro nome si vede sotto il titolo della card
+  const daManuale = (sp, x) => { const mio = String(sp.nome || '').trim(), it = !mio || chiaveInc(mio) === chiaveInc(x.nome); const { riassunto, ...v } = x;
+    return { id: sp.id || nuovoId(), ...(sp.prep ? { prep: true } : {}), ...v, nome: it ? x.nome : mio, alt: it ? x.en || '' : x.nome, srd: !riassunto, ...(riassunto ? { riassunto: true } : {}) }; };
   const testoInc = (t, dis) => String(t || '').split(/\n+/).map(r => r.trim()).filter(Boolean).map(r => { const m = r.match(/^\*\*(.+?)\*\*\s*(.*)$/) || r.match(/^(Ai livelli superiori)[.:]\s*(.*)$/i); return `<p>${m ? `<b><i>${esc(m[1].replace(/[.:]\s*$/, ''))}.</i></b> ${dadiTesto(m[2], dis)}` : dadiTesto(r, dis)}</p>`; }).join('');
   function incForm(sp, i) {
     const f = (k, ph, cls = '') => `<input type="text" data-f="inc.${i}.${k}" class="${cls}" placeholder="${esc(ph)}" aria-label="${esc(ph)}">`;
@@ -2704,7 +2788,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     const sv = T.sv, key = sp.id || 'n' + i, aperta = sv.aperti?.has(key), mod = sv.minc === key && w, lv = num(sp.livello) || 0;
     const riga = (l, v) => `<p><b>${l}:</b> ${esc(v || '')}</p>`;
     const sotto = `${lv ? `${sp.scuola ? sp.scuola + ' di ' : ''}${lv}° livello` : sp.scuola ? 'Trucchetto di ' + sp.scuola.toLowerCase() : 'Trucchetto'}${sp.rituale ? ' (rituale)' : ''}`;
-    const dett = `<div class="sc"><div class="st">${esc(sp.nome || 'Incantesimo')}</div><div class="ss">${esc(sotto)}</div>
+    const dett = `<div class="sc"><div class="st">${esc(sp.nome || 'Incantesimo')}${sp.alt ? ` <small class="alt">${esc(sp.alt)}</small>` : ''}</div><div class="ss">${esc(sotto)}</div>
       ${riga('Tempo di lancio', sp.tempo)}${riga('Portata', sp.portata)}${sp.area ? riga('Area', sp.area) : ''}${sp.bersaglio ? riga('Bersaglio', sp.bersaglio) : ''}${riga('Componenti', sp.componenti)}${riga('Durata', (sp.conc ? 'Concentrazione' + (sp.durata ? ', ' : '') : '') + (sp.durata || ''))}
       ${sp.danni || sp.ts || sp.attacco ? `<p><b>Effetto:</b> ${[sp.attacco ? `tiro per colpire ${segno(bonusInc(s))}` : '', sp.danni ? `${esc(sp.danni)}${sp.tipo_danni ? ' ' + esc(sp.tipo_danni) : ''}` : '', sp.ts ? `TS ${esc(nomeCar(sp.ts))} CD ${8 + bonusInc(s)}${sp.dimezza ? ', metà se riesce' : ''}` : ''].filter(Boolean).join(' · ')}</p>` : ''}
       <p><b>Descrizione:</b></p>${testoInc(sp.testo, dis) || `<p class="vuoto">Nessuna descrizione.${dalManuale(sp) && w ? ` <button type="button" class="mini srdb" data-k="inc-srd" data-i="${i}">📖 Compila dal manuale</button>` : ''}</p>`}</div>`;
@@ -2716,10 +2800,10 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       ${mod ? incForm(sp, i) : aperta ? dett : ''}</div>`;
   }
   // un incantesimo (inc) si lancia come un attacco: la scheda lo traduce in gittata, area e tiro salvezza
-  function iniziaMira(s, i, tok, inc = null) {
+  function iniziaMira(s, i, tok, inc = null, liv = null) {
     const sv = T.sv, at = inc != null ? attDaInc(s, s.dati.incantesimi?.[inc]) : s.dati.attacchi[i]; if (!at) return;
     const pa = portata(at); T.critico = null;
-    T.mira = { sid: s.id, i: inc != null ? 0 : i, inc, tok: tok.id, adv: sv?.adv || 0, seg: !!sv?.seg, area: pa.area, dist: pa.dist, col: pa.col, extra: new Set(inc != null ? [] : (s.dati.privilegi || []).map((x, j) => x.extra && x.dadi && x.attivo ? j : -1).filter(j => j >= 0)) };
+    T.mira = { sid: s.id, i: inc != null ? 0 : i, inc, liv: liv > (num(s.dati.incantesimi?.[inc]?.livello) || 0) ? liv : null, slot: liv || null, tok: tok.id, adv: sv?.adv || 0, seg: !!sv?.seg, area: pa.area, dist: pa.dist, col: pa.col, extra: new Set(inc != null ? [] : (s.dati.privilegi || []).map((x, j) => x.extra && x.dadi && x.attivo ? j : -1).filter(j => j >= 0)) };
     // la scheda coprirebbe la mappa: sul telefono si chiude, sul computer sparisce finché non si è scelto il bersaglio
     if (sv?.d.open) { if (innerWidth <= 820) sv.d.close(); else { sv.d.style.visibility = 'hidden'; T.mira.d = sv.d; } }
     strumento('muovi'); $('#tv-stage')?.classList.add('mira'); barraMira(at, tok); disegnaToken();
@@ -2735,7 +2819,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     // i privilegi con dadi da aggiungere ai danni (attacco furtivo, punizione…) si accendono qui
     const s = T.schede?.get(m.sid), ex = (s?.dati.privilegi || []).map((x, i) => [x, i]).filter(([x]) => x.extra && x.dadi);
     const forma = p.area && { cerchio: 'sfera', cubo: 'cubo', cono: 'cono', linea: 'linea' }[p.area.forma] + ' di ' + metri(p.area.m);
-    b.innerHTML = `<div class="g"><b class="tit">🎯 ${esc(at.nome || 'Attacco')}</b><span class="avv">di ${esc(tok.nome || '')} · ${arr}${forma ? ' · ' + forma : ''}. ${p.area ? (m.f ? (m.f.lontano ? '<b>Troppo lontano.</b>' : `Dentro: ${m.bers.length ? m.bers.map(id => esc(T.tok.get(id)?.nome || '?')).join(', ') : 'nessuno'}.`) : 'Clicca sulla mappa il punto dove lanciarlo.') : 'Clicca il bersaglio sulla mappa.'}</span></div>
+    b.innerHTML = `<div class="g"><b class="tit">🎯 ${esc(at.nome || 'Attacco')}${m.inc != null && m.slot ? ` · slot di ${m.slot}°` : ''}</b><span class="avv">di ${esc(tok.nome || '')} · ${arr}${forma ? ' · ' + forma : ''}. ${p.area ? (m.f ? (m.f.lontano ? '<b>Troppo lontano.</b>' : `Dentro: ${m.bers.length ? m.bers.map(id => esc(T.tok.get(id)?.nome || '?')).join(', ') : 'nessuno'}.`) : 'Clicca sulla mappa il punto dove lanciarlo.') : 'Clicca il bersaglio sulla mappa.'}</span></div>
       ${ex.length && !p.area && m.inc == null ? `<div class="g">${ex.map(([x, i]) => `<label class="sw" title="Aggiunge ${esc(x.dadi)} ai danni se colpisci"><input type="checkbox" data-x="${i}" ${m.extra.has(i) ? 'checked' : ''}><span class="tg" aria-hidden="true"></span>＋ ${esc(x.nome)} (${esc(x.dadi)})</label>`).join('')}</div>` : ''}
       <div class="g">${p.area ? `<button type="button" data-k="lancia" class="on"${m.f && !m.f.lontano ? '' : ' disabled'}>🔥 Lancia qui</button>` : ''}<button type="button" data-k="annulla">Annulla (Esc)</button></div>`;
     b.classList.remove('spenta'); b.hidden = false;
@@ -2755,12 +2839,12 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     if (at && portata(at).ts) { fineMira(animazioni() ? 1800 : 700); return incantesimoTS(m, [b.id], null, v.col || '#ffb347', at); }
     fineMira(animazioni() ? 1800 : 700);
     const exP = [...m.extra].map(i => sx?.dati.privilegi?.[i]).filter(x => x?.dadi), extra = exP.map(x => x.dadi).join('+'), exN = exP.map(x => x.nome || 'danni in più').join(' + ');
-    const r = await SB.rpc('tavolo_attacca', { p_token: m.tok, p_bersaglio: b.id, p_attacco: m.i, p_adv: v.adv, p_privato: m.seg, ...(extra ? { p_extra: extra, p_extra_nome: exN } : {}), ...(m.inc != null ? { p_inc: m.inc } : {}) });
-    if (r.error) return toast(sqlMancante(r.error) ? 'Per gli attacchi sulla mappa esegui tavolo/tappa-5.sql in Supabase.' : extra && /p_extra|function/i.test(r.error.message) ? 'Per aggiungere i dadi in più esegui tavolo/tappa-7.sql in Supabase.' : r.error.message, 'err');
+    const r = await SB.rpc('tavolo_attacca', { p_token: m.tok, p_bersaglio: b.id, p_attacco: m.i, p_adv: v.adv, p_privato: m.seg, ...(extra ? { p_extra: extra, p_extra_nome: exN } : {}), ...(m.inc != null ? { p_inc: m.inc } : {}), ...(m.liv ? { p_liv: m.liv } : {}) });
+    if (r.error) return toast(m.liv && /p_liv|function/i.test(r.error.message) ? 'Per lanciare con uno slot più alto esegui tavolo/tappa-9.sql in Supabase.' : sqlMancante(r.error) ? 'Per gli attacchi sulla mappa esegui tavolo/tappa-5.sql in Supabase.' : extra && /p_extra|function/i.test(r.error.message) ? 'Per aggiungere i dadi in più esegui tavolo/tappa-7.sql in Supabase.' : r.error.message, 'err');
     const x = Array.isArray(r.data) ? r.data[0] : r.data, a = T.tok.get(m.tok);
     const mossa = { da: m.tok, a: b.id, anim: v.anim, col: v.col, ritorna: !!v.ritorna, esito: x.colpito === true ? 'si' : x.colpito === false ? 'no' : 'nd', crit: !!x.critico, fallito: !!x.fallito, danni: x.danni || 0 };
     manda('attacco', mossa); mostraAttacco(mossa);
-    if (m.inc != null) usaSlot(sx, m.inc);
+    if (m.inc != null) usaSlot(sx, m.inc, m.slot);
     if (a && suoTurno(a) && !azioniDi(a).az) segnaAzioni(a, { az: true });
     if (x.critico && x.pf !== 0) barraCritico(x, a, b, mossa);
     if (x.salvezza) toast(`${b.nome || 'Il bersaglio'} deve fare un tiro salvezza su ${nomeCar(x.salvezza.car)} (CD ${x.salvezza.cd}) per i danni in più.`);
@@ -2824,11 +2908,11 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   // l'incantesimo parte: i danni si tirano una volta, poi ogni bersaglio con un tiro salvezza riceve la richiesta
   async function incantesimoTS(m, bers, f, col, at) {
     const s = T.schede.get(m.sid), a = T.tok.get(m.tok); if (!s || !a) return;
-    const r = await SB.rpc('tavolo_area', { p_token: a.id, p_attacco: m.i, p_bersagli: bers, p_cd: 8 + comp(s) + modC(s.dati[carInc(s)]), p_privato: m.seg, ...(m.inc != null ? { p_inc: m.inc } : {}) });
-    if (r.error) return toast(sqlMancante(r.error) || /tavolo_area/.test(r.error.message) ? 'Per gli incantesimi ad area esegui tavolo/tappa-6.sql in Supabase.' : r.error.message, 'err');
+    const r = await SB.rpc('tavolo_area', { p_token: a.id, p_attacco: m.i, p_bersagli: bers, p_cd: 8 + comp(s) + modC(s.dati[carInc(s)]), p_privato: m.seg, ...(m.inc != null ? { p_inc: m.inc } : {}), ...(m.liv ? { p_liv: m.liv } : {}) });
+    if (r.error) return toast(m.liv && /p_liv|function/i.test(r.error.message) ? 'Per lanciare con uno slot più alto esegui tavolo/tappa-9.sql in Supabase.' : sqlMancante(r.error) || /tavolo_area/.test(r.error.message) ? 'Per gli incantesimi ad area esegui tavolo/tappa-6.sql in Supabase.' : r.error.message, 'err');
     const x = r.data, esiti = x.esiti || [], mossa = { f, col, da: a.id, esiti: esiti.map(e => ({ id: e.id, danni: e.danni, salvo: e.salvo, attesa: !!e.attesa })) };
     manda('area', mossa); mostraArea(mossa);
-    if (m.inc != null) usaSlot(s, m.inc);
+    if (m.inc != null) usaSlot(s, m.inc, m.slot);
     if (suoTurno(a)) segnaAzioni(a, { az: true });
     const attesa = esiti.filter(e => e.attesa).length, nome = at.nome || 'Incantesimo';
     if (x.car && !attesa && esiti.length) toast(`${nome}: per i tiri salvezza su richiesta esegui tavolo/tappa-7.sql in Supabase.`, 'err');
@@ -2999,6 +3083,24 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   async function finisciTurno() {
     const r = await SB.rpc('tavolo_turno_avanti'); if (r.error) return toast(r.error.message, 'err');
     const x = T.turno.find(y => y.id === r.data); if (x) toast(`Tocca a ${x.nome || '?'}.`);
+  }
+  // chi muore (un PNG a 0 PF, o chiunque abbia la condizione «Morto») esce dall'ordine del turno: lo fa il DM
+  const togliendo = new Set();
+  function togliMorti() {
+    if (!isDM() || !T.turno?.length) return;
+    for (const x of T.turno) {
+      const t = x.token && T.tok.get(x.token); if (!t || togliendo.has(x.id)) continue;
+      const pf = pfDi(t), morto = condTok(t).includes('Morto') || (!t.giocatore && pf?.max > 0 && pf.pf === 0);
+      if (!morto) continue;
+      togliendo.add(x.id);
+      (async () => {
+        if (T.stato?.turno === x.id && T.turno.length > 1) { const r = await SB.rpc('tavolo_turno_avanti'); if (r.error) toast(r.error.message, 'err'); }
+        const r = await SB.from('tavolo_turno').delete().eq('id', x.id); togliendo.delete(x.id);
+        if (r.error) return toast(r.error.message, 'err');
+        T.turno = T.turno.filter(y => y.id !== x.id); disegnaTurno(); disegnaToken(); manda('turno', {});
+        toast(`☠ ${x.nome || t.nome || 'Il token'} è morto: tolto dall'ordine del turno.`);
+      })();
+    }
   }
   function disegnaTurno() {
     const b = $('#tv-turno'); if (!b || b.hidden) return;
