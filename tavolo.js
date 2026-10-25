@@ -498,10 +498,24 @@ dialog.tv-poz menu small{font-weight:400;opacity:.8}
 .tv-sch .incT{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;border:2px solid var(--lin);border-radius:8px;padding:8px 10px;background:var(--box);margin-bottom:8px}
 .tv-sch .li.grande b,.tv-sch .li.grande .rb{font:700 1.3rem var(--display);text-align:center;padding:2px 0}
 .tv-sch .li.grande small{text-align:center}
-.tv-sch .incG{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:8px;margin-top:4px}
+.tv-sch .incG{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:8px;margin-top:4px;align-items:start}
 .tv-sch .lv .lt{display:flex;align-items:center;gap:6px;font:700 .62rem var(--body);text-transform:uppercase;color:var(--k2);border-bottom:2px solid var(--lin);padding-bottom:4px;margin-bottom:3px}
 .tv-sch .lv .lt b{width:26px;height:26px;border:2px solid var(--lin);border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 .95rem var(--display);color:var(--k)}
 .tv-sch .lv .sn{width:38px;border:1px solid var(--ul);border-radius:4px}
+.tv-sch .spl .pt{font-size:.95rem}
+.tv-sch .spl .tg2{display:flex;gap:2px;align-items:center}
+.tv-sch .spl .tg2 i{font:700 .6rem var(--body);font-style:normal;width:15px;height:15px;border-radius:50%;background:var(--k);color:var(--pp);display:flex;align-items:center;justify-content:center}
+.tv-sch .spl .tg2 small{font:600 .62rem var(--body);color:var(--k2);white-space:nowrap}
+.tv-sch .spl .lancia{all:unset;box-sizing:border-box;cursor:pointer;padding:2px 8px;border-radius:5px;background:#7d2530;color:#fff;font:700 .72rem var(--body);white-space:nowrap}
+.tv-sch .spl .lancia:hover{background:#962c3a}
+.tv-sch .spl .lancia:disabled{display:none}
+.tv-sch .spl .sc{margin:5px 0 2px 18px;font-size:.84rem;line-height:1.35}
+.tv-sch .spl .sc p{margin:0 0 3px}
+.tv-sch .spl .st{font:700 1.08rem var(--display);font-variant:small-caps;letter-spacing:.03em;color:#7d2530}
+.tv-sch .spl .ss{font-style:italic;color:var(--k2);margin-bottom:4px}
+.tv-sch .pvf .ig{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.tv-sch .lv .agg{margin-top:4px}
+.tv-scuro .tv-sch .spl .st{color:#e8a0a6}
 .tv-sch .bgT{display:grid;grid-template-columns:repeat(6,1fr);gap:4px 10px;border:2px solid var(--lin);border-radius:8px;padding:6px 10px;background:var(--box);margin-bottom:8px}
 .tv-sch .bgG{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px;margin-bottom:8px}
 .tv-sch .fd{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--ul)}
@@ -1973,7 +1987,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   function barraMaschera() {
     const b = $('#tv-mbar'), sc = scena(); if (!b) return;
     if (T.tool === 'allinea' && isDM() && sc) return barraAllinea(b);
-    if (T.mira && sc) { const s2 = T.schede?.get(T.mira.sid), tk = T.tok.get(T.mira.tok); if (s2 && tk) return barraMira(s2.dati.attacchi[T.mira.i], tk); }
+    if (T.mira && sc) { const s2 = T.schede?.get(T.mira.sid), tk = T.tok.get(T.mira.tok); if (s2 && tk) return barraMira(armaMira(T.mira) || {}, tk); }
     if (T.critico && sc && !b.hidden) return; // la conferma del critico aspetta una risposta
     if (T.passo && sc && !b.hidden) return; // e anche quella del movimento
     if (T.tool === 'righello' && sc) return barraRighello(b);
@@ -2377,7 +2391,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   }
   // si può attaccare? con che modo (mischia o distanza) e con vantaggio o svantaggio, spiegando perché
   function valuta(m, b) {
-    const sc = scena(), a = T.tok.get(m.tok), s = T.schede?.get(m.sid), at = s?.dati.attacchi?.[m.i];
+    const sc = scena(), a = T.tok.get(m.tok), s = T.schede?.get(m.sid), at = armaMira(m);
     if (!sc || !a || !at) return { ok: false, motivo: 'Attacco non trovato.' };
     if (b.id === a.id) return { ok: false, motivo: '' };
     const ca = condTok(a), cb = condTok(b), nb = b.nome || 'il bersaglio';
@@ -2407,10 +2421,68 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     const l = [...T.tok.values()].filter(t => t.scena === sc.id && schedaDi(t)?.id === s.id && puoMuovere(t));
     return l.length === 1 ? l[0] : null;
   }
-  function iniziaMira(s, i, tok) {
-    const sv = T.sv, at = s.dati.attacchi[i];
+  /* ---------- incantesimi come voci alla Roll20: si aprono, si modificano e si lanciano ---------- */
+  const SCUOLE = ['Abiurazione', 'Ammaliamento', 'Divinazione', 'Evocazione', 'Illusione', 'Invocazione', 'Necromanzia', 'Trasmutazione'];
+  const bonusInc = s => comp(s) + modC(s.dati[carInc(s)]);
+  // come tavolo_inc_att in tappa-7.sql: l'incantesimo scritto come un attacco che il tavolo sa leggere
+  function attDaInc(s, sp) {
+    if (!s || !sp) return null;
+    const g = String(sp.portata || '').match(/(\d+(?:[.,]\d+)?)\s*m\b/i), self = /^\s*(s[eé]|contatto|personale)/i.test(sp.portata || '');
+    const tipo = [g && !self ? `gittata ${g[1]} m` : '', sp.area || '', sp.ts ? `TS ${sp.ts} CD ${8 + bonusInc(s)}${sp.dimezza ? ' dimezza' : ''}` : '', sp.tipo_danni || ''].filter(Boolean).join(', ');
+    return { nome: sp.nome || 'Incantesimo', colpire: sp.attacco ? bonusInc(s) : '', danni: sp.danni || '', tipo };
+  }
+  const armaMira = m => { const s = T.schede?.get(m.sid); if (!s) return null; return m.inc != null ? attDaInc(s, s.dati.incantesimi?.[m.inc]) : s.dati.attacchi?.[m.i]; };
+  // lanciare un incantesimo di 1° livello o più consuma uno slot di quel livello
+  function usaSlot(s, inc) {
+    const sp = s?.dati.incantesimi?.[inc], lv = num(sp?.livello) || 0; if (!sp || !lv || !puoScrivere(s)) return;
+    const tot = num(s.dati['slot_' + lv]) || 0, usati = num(s.dati['usati_' + lv]) || 0; if (!tot) return;
+    salvaScheda(s.id, { ['usati_' + lv]: Math.min(tot, usati + 1) }, true);
+  }
+  async function lanciaInc(s, inc) {
+    const sp = s.dati.incantesimi?.[inc]; if (!sp) return;
+    const lv = num(sp.livello) || 0, tot = num(s.dati['slot_' + lv]) || 0, usati = num(s.dati['usati_' + lv]) || 0;
+    if (lv && tot && usati >= tot && !await ask(`Non hai più slot di ${lv}° livello. Lanciare lo stesso **${sp.nome || 'l\'incantesimo'}**?`, { ok: 'Lancia', title: 'Slot finiti' })) return;
+    const at = attDaInc(s, sp), pa = portata(at), mira = !!(String(sp.danni || '').trim() && (pa.area || sp.ts || sp.attacco));
+    const tk = mira ? attaccante(s) : null;
+    if (tk) return iniziaMira(s, 0, tk, inc);
+    // senza bersagli da scegliere: lo annuncio in chat, tiro gli eventuali dadi e consumo lo slot
+    const chi = s.nome || 'Qualcuno';
+    await SB.rpc('tavolo_scrivi', { p_testo: `✨ ${chi} lancia ${sp.nome || 'un incantesimo'}${lv ? ` (${lv}° livello)` : ''}${sp.conc ? ' · concentrazione' : ''}` });
+    if (sp.attacco) await tiroD20(s, bonusInc(s), 'Attacco: ' + (sp.nome || 'incantesimo'));
+    if (String(sp.danni || '').trim()) tira(sp.danni, null, T.sv?.seg, `${chi} · ${sp.nome || 'Incantesimo'}`);
+    usaSlot(s, inc);
+    const t = tokScheda() || attaccante(s); if (t && suoTurno(t) && /azione bonus/i.test(sp.tempo || '')) segnaAzioni(t, { bon: true }); else if (t && suoTurno(t) && /^\s*1\s*azione/i.test(sp.tempo || '')) segnaAzioni(t, { az: true });
+  }
+  function incForm(sp, i) {
+    const f = (k, ph, cls = '') => `<input type="text" data-f="inc.${i}.${k}" class="${cls}" placeholder="${esc(ph)}" aria-label="${esc(ph)}">`;
+    const ck = (k, l, tip) => `<label class="ck"${tip ? ` title="${esc(tip)}"` : ''}><input type="checkbox" data-f="inc.${i}.${k}"> ${l}</label>`;
+    return `<div class="pvf">${f('nome', 'Nome (es. Palla di fuoco)', 'pn')}
+      <div class="pvr"><label>Livello <select data-f="inc.${i}.livello">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<option value="${n}">${n ? n + '°' : 'Trucchetto'}</option>`).join('')}</select></label><label>Scuola <select data-f="inc.${i}.scuola"><option value="">—</option>${SCUOLE.map(x => `<option>${x}</option>`).join('')}</select></label>${ck('conc', 'Concentrazione')}${ck('rituale', 'Rituale')}</div>
+      <div class="ig">${f('tempo', 'Tempo di lancio (1 azione)')}${f('portata', 'Portata (45 m, Contatto, Sé)')}${f('bersaglio', 'Bersaglio')}${f('componenti', 'Componenti (V, S, M)')}${f('durata', 'Durata (Istantanea, 1 minuto)')}${f('area', 'Area (sfera 6 m, cono 4,5 m)')}</div>
+      <textarea data-f="inc.${i}.testo" rows="5" placeholder="Descrizione" aria-label="Descrizione"></textarea>
+      <div class="pvr"><label>Danni ${f('danni', 'es. 8d6', 'd')}</label><label>Tipo ${f('tipo_danni', 'fuoco', 'd')}</label>${ck('attacco', 'Tiro per colpire', 'Si tira per colpire contro la CA del bersaglio')}<label>TS <select data-f="inc.${i}.ts"><option value="">nessuno</option>${CAR.map(([k, , n]) => `<option value="${k}">${n}</option>`).join('')}</select></label>${ck('dimezza', 'Metà danni se riesce')}</div>
+      <div class="pvr"><button type="button" class="mini" data-k="inc-mod" data-i="${i}">✓ Fatto</button><button type="button" class="mini via" data-k="inc-via" data-i="${i}">Elimina</button></div></div>`;
+  }
+  function voceInc(s, sp, i, w, dis) {
+    const sv = T.sv, key = sp.id || 'n' + i, aperta = sv.aperti?.has(key), mod = sv.minc === key && w, lv = num(sp.livello) || 0;
+    const riga = (l, v) => `<p><b>${l}:</b> ${esc(v || '')}</p>`;
+    const sotto = `${sp.scuola || ''}${lv ? ' ' + lv : sp.scuola ? ' (trucchetto)' : 'Trucchetto'}${sp.rituale ? ' (rituale)' : ''}`;
+    const dett = `<div class="sc"><div class="st">${esc(sp.nome || 'Incantesimo')}</div><div class="ss">${esc(sotto)}</div>
+      ${riga('Tempo di lancio', sp.tempo)}${riga('Portata', sp.portata)}${sp.area ? riga('Area', sp.area) : ''}${riga('Bersaglio', sp.bersaglio)}${riga('Componenti', sp.componenti)}${riga('Durata', (sp.conc ? 'Concentrazione' + (sp.durata ? ', ' : '') : '') + (sp.durata || ''))}
+      ${sp.danni || sp.ts || sp.attacco ? `<p><b>Effetto:</b> ${[sp.attacco ? `tiro per colpire ${segno(bonusInc(s))}` : '', sp.danni ? `${esc(sp.danni)}${sp.tipo_danni ? ' ' + esc(sp.tipo_danni) : ''}` : '', sp.ts ? `TS ${esc(nomeCar(sp.ts))} CD ${8 + bonusInc(s)}${sp.dimezza ? ', metà se riesce' : ''}` : ''].filter(Boolean).join(' · ')}</p>` : ''}
+      <p><b>Descrizione:</b></p>${paragrafi(sp.testo, dis) || '<p class="vuoto">Nessuna descrizione.</p>'}</div>`;
+    const tag = [sp.conc ? '<i title="Concentrazione">C</i>' : '', sp.rituale ? '<i title="Rituale">R</i>' : '', sp.componenti ? `<small>${esc(String(sp.componenti).split('(')[0].trim())}</small>` : ''].join('');
+    return `<div class="pv spl${aperta ? ' ap' : ''}" data-ordi="${i}">
+      <div class="ph">${w ? '<span class="mano" title="Trascina per spostare" aria-hidden="true">⠿</span>' : ''}<button type="button" class="pt" data-k="inc-apri" data-i="${i}" aria-expanded="${!!aperta}">${esc(sp.nome || 'Senza nome')}</button>
+        <span class="tg2">${tag}</span><button type="button" class="lancia" data-k="inc-lancia" data-i="${i}" title="Lancia ${esc(sp.nome || 'l\'incantesimo')}"${dis}>✨ Lancia</button>
+        ${w ? `<button type="button" class="ing" data-k="inc-mod" data-i="${i}" title="Modifica" aria-label="Modifica">⚙</button>` : ''}</div>
+      ${mod ? incForm(sp, i) : aperta ? dett : ''}</div>`;
+  }
+  // un incantesimo (inc) si lancia come un attacco: la scheda lo traduce in gittata, area e tiro salvezza
+  function iniziaMira(s, i, tok, inc = null) {
+    const sv = T.sv, at = inc != null ? attDaInc(s, s.dati.incantesimi?.[inc]) : s.dati.attacchi[i]; if (!at) return;
     const pa = portata(at); T.critico = null;
-    T.mira = { sid: s.id, i, tok: tok.id, adv: sv?.adv || 0, seg: !!sv?.seg, area: pa.area, dist: pa.dist, col: pa.col, extra: new Set() };
+    T.mira = { sid: s.id, i: inc != null ? 0 : i, inc, tok: tok.id, adv: sv?.adv || 0, seg: !!sv?.seg, area: pa.area, dist: pa.dist, col: pa.col, extra: new Set() };
     // la scheda coprirebbe la mappa: sul telefono si chiude, sul computer sparisce finché non si è scelto il bersaglio
     if (sv?.d.open) { if (innerWidth <= 820) sv.d.close(); else { sv.d.style.visibility = 'hidden'; T.mira.d = sv.d; } }
     strumento('muovi'); $('#tv-stage')?.classList.add('mira'); barraMira(at, tok); disegnaToken();
@@ -2437,15 +2509,16 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   async function scegliBersaglio(b) {
     const m = T.mira; if (!m) return;
     const v = valuta(m, b); if (!v.ok) { if (v.motivo) toast(v.motivo, 'err'); return; }
-    const sx = T.schede?.get(m.sid), at = sx?.dati.attacchi?.[m.i];
+    const sx = T.schede?.get(m.sid), at = armaMira(m);
     if (at && portata(at).ts) { fineMira(animazioni() ? 1800 : 700); return incantesimoTS(m, [b.id], null, v.col || '#ffb347', at); }
     fineMira(animazioni() ? 1800 : 700);
     const extra = [...m.extra].map(i => sx?.dati.privilegi?.[i]?.dadi).filter(Boolean).join('+');
-    const r = await SB.rpc('tavolo_attacca', { p_token: m.tok, p_bersaglio: b.id, p_attacco: m.i, p_adv: v.adv, p_privato: m.seg, ...(extra ? { p_extra: extra } : {}) });
+    const r = await SB.rpc('tavolo_attacca', { p_token: m.tok, p_bersaglio: b.id, p_attacco: m.i, p_adv: v.adv, p_privato: m.seg, ...(extra ? { p_extra: extra } : {}), ...(m.inc != null ? { p_inc: m.inc } : {}) });
     if (r.error) return toast(sqlMancante(r.error) ? 'Per gli attacchi sulla mappa esegui tavolo/tappa-5.sql in Supabase.' : extra && /p_extra|function/i.test(r.error.message) ? 'Per aggiungere i dadi in più esegui tavolo/tappa-6.sql in Supabase.' : r.error.message, 'err');
     const x = Array.isArray(r.data) ? r.data[0] : r.data, a = T.tok.get(m.tok);
     const mossa = { da: m.tok, a: b.id, anim: v.anim, col: v.col, esito: x.colpito === true ? 'si' : x.colpito === false ? 'no' : 'nd', crit: !!x.critico, fallito: !!x.fallito, danni: x.danni || 0 };
     manda('attacco', mossa); mostraAttacco(mossa);
+    if (m.inc != null) usaSlot(sx, m.inc);
     if (a && suoTurno(a) && !azioniDi(a).az) segnaAzioni(a, { az: true });
     if (x.critico && x.pf !== 0) barraCritico(x, a, b, mossa);
     if (x.salvezza) toast(`${b.nome || 'Il bersaglio'} deve fare un tiro salvezza su ${nomeCar(x.salvezza.car)} (CD ${x.salvezza.cd}) per i danni in più.`);
@@ -2497,11 +2570,11 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     const g = nodo(fx, 'g', { class: 'area-mira' });
     nodo(g, 'path', { d: pathArea(f), fill: col, 'fill-opacity': .22, stroke: col, 'stroke-width': Math.max(2, scena().griglia * 0.04), 'stroke-dasharray': f.lontano ? '10 6' : 'none' });
     m.f = f; m.bers = f.lontano ? [] : bersagliArea(f).map(t => t.id);
-    disegnaToken(); barraMira(T.schede.get(m.sid)?.dati.attacchi?.[m.i] || {}, T.tok.get(m.tok));
+    disegnaToken(); barraMira(armaMira(m) || {}, T.tok.get(m.tok));
   }
   async function lanciaArea() {
     const m = T.mira; if (!m?.f || m.f.lontano) return toast(m?.f?.lontano ? 'Troppo lontano: avvicina il punto a chi lancia.' : 'Prima clicca sulla mappa il punto dove lanciare.', 'err');
-    const s = T.schede.get(m.sid), a = T.tok.get(m.tok), at = s?.dati.attacchi?.[m.i]; if (!s || !a || !at) return;
+    const s = T.schede.get(m.sid), a = T.tok.get(m.tok), at = armaMira(m); if (!s || !a || !at) return;
     if (!m.bers.length && !await ask('Nell\'area non c\'è nessuno. Lanciare lo stesso?', { ok: 'Lancia', title: at.nome || 'Incantesimo' })) return;
     const f = m.f, col = m.col || '#ffb347', bers = [...m.bers]; fineMira(animazioni() ? 2000 : 700);
     incantesimoTS(m, bers, f, col, at);
@@ -2509,10 +2582,11 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   // l'incantesimo parte: i danni si tirano una volta, poi ogni bersaglio con un tiro salvezza riceve la richiesta
   async function incantesimoTS(m, bers, f, col, at) {
     const s = T.schede.get(m.sid), a = T.tok.get(m.tok); if (!s || !a) return;
-    const r = await SB.rpc('tavolo_area', { p_token: a.id, p_attacco: m.i, p_bersagli: bers, p_cd: 8 + comp(s) + modC(s.dati[carInc(s)]), p_privato: m.seg });
+    const r = await SB.rpc('tavolo_area', { p_token: a.id, p_attacco: m.i, p_bersagli: bers, p_cd: 8 + comp(s) + modC(s.dati[carInc(s)]), p_privato: m.seg, ...(m.inc != null ? { p_inc: m.inc } : {}) });
     if (r.error) return toast(sqlMancante(r.error) || /tavolo_area/.test(r.error.message) ? 'Per gli incantesimi ad area esegui tavolo/tappa-6.sql in Supabase.' : r.error.message, 'err');
     const x = r.data, esiti = x.esiti || [], mossa = { f, col, da: a.id, esiti: esiti.map(e => ({ id: e.id, danni: e.danni, salvo: e.salvo, attesa: !!e.attesa })) };
     manda('area', mossa); mostraArea(mossa);
+    if (m.inc != null) usaSlot(s, m.inc);
     if (suoTurno(a)) segnaAzioni(a, { az: true });
     const attesa = esiti.filter(e => e.attesa).length, nome = at.nome || 'Incantesimo';
     if (x.car && !attesa && esiti.length) toast(`${nome}: per i tiri salvezza su richiesta esegui tavolo/tappa-7.sql in Supabase.`, 'err');
@@ -3014,6 +3088,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     if (f === 'nome') return s.nome;
     if (f.startsWith('att.')) { const [, i, k] = f.split('.'); return (s.dati.attacchi || [])[i]?.[k]; }
     if (f.startsWith('prv.')) { const [, i, k] = f.split('.'); const v = (s.dati.privilegi || [])[i]?.[k]; return k === 'riposo' ? v || 'lungo' : v; }
+    if (f.startsWith('inc.')) { const [, i, k] = f.split('.'); const v = (s.dati.incantesimi || [])[i]?.[k]; return k === 'livello' ? String(num(v) || 0) : v; }
     if (f.startsWith('tok.')) { const t = tokScheda(), k = f.slice(4); return t ? t[k] ?? (t.pf_max == null ? s.dati[k] : null) : null; }
     if (f === 'ispirazione' && typeof s.dati[f] === 'boolean') return s.dati[f] ? 1 : 0; // prima era una casella da spuntare
     return s.dati[f];
@@ -3281,11 +3356,16 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
             : w ? `<select data-k="cond" class="selc" aria-label="Aggiungi una condizione"><option value="">+ Condizione</option>${CONDIZIONI.filter(c => !conds.includes(c)).map(c => `<option>${c}</option>`).join('')}</select>` : ''}
         </div></div>`;
     } else if (sv.tab === 'inc') {
-      const liv = i => `<div class="sez lv"><div class="lt"><b>${i || '0'}</b>${i ? `<span>Slot</span>${n('slot_' + i, '0', 'sn')}<span class="dots" data-dots="usati_${i}"></span>` : '<span>Trucchetti</span>'}</div>${area('inc_' + i, i ? 'Incantesimi di ' + i + '° livello' : 'Trucchetti', i ? 4 : 3)}</div>`;
+      const IL = (d.incantesimi || []).map((sp, j) => [sp, j]), vecchi = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].some(i => String(d['inc_' + i] || '').trim());
+      const liv = i => { const voci = IL.filter(([sp]) => (num(sp.livello) || 0) === i); return `<div class="sez lv"><div class="lt"><b>${i || '0'}</b>${i ? `<span>Slot</span>${n('slot_' + i, '0', 'sn')}<span class="dots" data-dots="usati_${i}"></span>` : '<span>Trucchetti</span>'}</div>
+        <div class="pl incL" data-ord="incantesimi">${voci.map(([sp, j]) => voceInc(s, sp, j, w, dis)).join('')}</div>
+        ${String(d['inc_' + i] || '').trim() ? area('inc_' + i, i ? 'Incantesimi di ' + i + '° livello' : 'Trucchetti', 3) : ''}
+        ${w ? `<button type="button" class="mini agg" data-k="inc-add" data-l="${i}">+ ${i ? 'Incantesimo' : 'Trucchetto'}</button>` : ''}</div>`; };
       corpo = `<div class="incT"><div class="li grande"><select data-f="car_inc"${dis}>${['int', 'sag', 'car'].map(k => `<option value="${k}">${CAR.find(x => x[0] === k)[2]}</option>`).join('')}</select><small>Caratteristica da incantatore</small></div>
           <div class="li grande"><b data-c="cd"></b><small>CD tiro salvezza</small></div>
           <div class="li grande"><button type="button" class="rb" data-roll="inc" data-c="inc" title="Tiro per colpire con un incantesimo"${dis}></button><small>Bonus di attacco</small></div></div>
         ${w ? '<button type="button" class="mini agg" data-k="riposo" title="Azzera gli slot usati">🌙 Riposo lungo: azzera gli slot</button>' : ''}
+        ${vecchi && w ? '<div class="vec"><p>Qui ci sono ancora gli incantesimi scritti come testo: trasformali in voci da aprire, modificare e lanciare (una riga, un incantesimo).</p><button type="button" class="mini" data-k="inc-conv">✨ Trasforma in voci</button></div>' : ''}
         <div class="incG">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(liv).join('')}</div>`;
     } else {
       corpo = pg ? `<div class="bgT">${[['eta', 'Età'], ['altezza', 'Altezza'], ['peso', 'Peso'], ['occhi', 'Occhi'], ['pelle', 'Pelle'], ['capelli', 'Capelli']].map(([k, l]) => cella(inp(k, ''), l)).join('')}</div>
@@ -3323,6 +3403,13 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       sv.tt = setTimeout(async () => { const r = await SB.from('tavolo_token').update(ch).eq('id', t.id); if (r.error) toast(r.error.message, 'err'); }, 500); return;
     }
     if (f.startsWith('prv.')) { const [, i, k] = f.split('.'), a = (s.dati.privilegi || []).map(x => ({ ...x })); if (!a[i]) return; a[i][k] = v; salvaScheda(s.id, { privilegi: a }); return; }
+    if (f.startsWith('inc.')) {
+      const [, i, k] = f.split('.'), a = (s.dati.incantesimi || []).map(x => ({ ...x })); if (!a[i]) return;
+      a[i][k] = k === 'livello' ? +v || 0 : v;
+      // cambiando livello l'incantesimo passa in un altro riquadro
+      if (k === 'livello' || k === 'scuola' || el.type === 'checkbox') { salvaScheda(s.id, { incantesimi: a }, true).then(() => disegnaScheda()); return; }
+      salvaScheda(s.id, { incantesimi: a }); return;
+    }
     if (f.startsWith('att.')) { const [, i, k] = f.split('.'), a = (s.dati.attacchi || []).map(x => ({ ...x })); if (!a[i]) return; a[i][k] = v; salvaScheda(s.id, { attacchi: a }); return; }
     salvaScheda(s.id, { [f]: v });
   }
@@ -3351,6 +3438,9 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     const P = d.privilegi || [], pi = +b.dataset.i, pv = P[pi], chiave = pv && (pv.id || 'i' + pi);
     if (k === 'prv-apri' && pv) { sv.aperti = sv.aperti || new Set(); sv.aperti.has(chiave) ? sv.aperti.delete(chiave) : sv.aperti.add(chiave); return disegnaScheda(); }
     if (k === 'prv-dadi' && pv) return tira(pv.dadi, null, sv.seg, `${s.nome} · ${pv.nome || 'Privilegio'}`);
+    const I = d.incantesimi || [], sp = I[pi], ckey = sp && (sp.id || 'n' + pi);
+    if (k === 'inc-apri' && sp) { sv.aperti = sv.aperti || new Set(); sv.aperti.has(ckey) ? sv.aperti.delete(ckey) : sv.aperti.add(ckey); return disegnaScheda(); }
+    if (k === 'inc-lancia' && sp) return lanciaInc(s, pi);
     if (b.dataset.roll) {
       const [r, a] = b.dataset.roll.split(':'), ca = CAR.find(x => x[0] === a), at = (d.attacchi || [])[a];
       if (r === 'car') return tiroD20(s, modC(d[a]), 'Prova di ' + ca[2]);
@@ -3379,6 +3469,17 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       await cambiaCond(s, tk, b.dataset.cond ? ora.filter(c => c !== b.dataset.cond) : [...ora, b.value]); return disegnaScheda();
     }
     const salvaP = (L, subito = true) => salvaScheda(s.id, { privilegi: L }, subito).then(() => disegnaScheda());
+    const salvaI = L => salvaScheda(s.id, { incantesimi: L }, true).then(() => disegnaScheda());
+    if (k === 'inc-mod' && sp) { sv.minc = sv.minc === ckey ? null : ckey; if (!sp.id) { const L = I.map(x => ({ ...x })); L[pi].id = nuovoId(); if (sv.minc) sv.minc = L[pi].id; return salvaI(L); } return disegnaScheda(); }
+    if (k === 'inc-via' && sp) { if (!await ask(`Eliminare **${sp.nome || 'questo incantesimo'}**?`, { ok: 'Elimina', danger: true, title: 'Incantesimi' })) return; sv.minc = null; return salvaI(I.filter((_, i) => i !== pi)); }
+    if (k === 'inc-add') { const v = { id: nuovoId(), nome: '', livello: +b.dataset.l || 0 }; sv.minc = v.id; (sv.aperti = sv.aperti || new Set()).add(v.id); await salvaI([...I, v]); sv.d.querySelector(`[data-f="inc.${I.length}.nome"]`)?.focus(); return; }
+    if (k === 'inc-conv') {
+      // il testo scritto prima nei riquadri dei livelli: una riga, un incantesimo
+      const nuovi = [], via = {};
+      for (let l = 0; l <= 9; l++) { const t = String(d['inc_' + l] || ''); if (!t.trim()) continue; t.split(/\n|;/).map(x => x.replace(/^[\s•\-*·]+|[\s,.;]+$/g, '')).filter(Boolean).forEach(nome => nuovi.push({ id: nuovoId(), nome: nome.slice(0, 80), livello: l })); via['inc_' + l] = ''; }
+      if (!nuovi.length) return;
+      await salvaScheda(s.id, { incantesimi: [...I, ...nuovi], ...via }, true); toast(`${nuovi.length} incantesimi trasformati in voci: apri ⚙ per completarli.`); return disegnaScheda();
+    }
     if (k === 'prv-mod' && pv) { sv.mprv = sv.mprv === chiave ? null : chiave; if (!pv.id) { const L = P.map(x => ({ ...x })); L[pi].id = nuovoId(); if (sv.mprv) sv.mprv = L[pi].id; return salvaP(L); } return disegnaScheda(); }
     if (k === 'prv-via' && pv) { if (!await ask(`Eliminare **${pv.nome || 'questa voce'}**?`, { ok: 'Elimina', danger: true, title: 'Privilegi' })) return; sv.mprv = null; return salvaP(P.filter((_, i) => i !== pi)); }
     if (k === 'prv-add' || k === 'ris-add') { const v = { id: nuovoId(), nome: '', fonte: '', testo: '', ...(k === 'ris-add' ? { usi: 1, usati: 0, riposo: 'lungo' } : {}) }; sv.mprv = v.id; (sv.aperti = sv.aperti || new Set()).add(v.id); await salvaP([...P, v]); sv.d.querySelector(`.pv [data-f="prv.${P.length}.nome"]`)?.focus(); return; }

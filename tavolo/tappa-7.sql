@@ -1,6 +1,6 @@
 -- Tavolo virtuale di Avalar — tappa 7: tiri salvezza su richiesta. Quando un incantesimo o un veleno chiede un tiro
 -- salvezza, al giocatore (o al DM per i PNG) compare un avviso: con un clic tira, e i danni si contano da soli.
--- In più: «Finisci il turno» salta chi è a 0 PF.
+-- In più: «Finisci il turno» salta chi è a 0 PF, e gli incantesimi della scheda si lanciano sulla mappa.
 -- Da incollare nell'SQL Editor di Supabase (New query › incolla › Run) dopo gli script delle tappe 1–6.
 -- Si può rieseguire senza danni.
 
@@ -81,8 +81,28 @@ begin
   delete from tavolo_salvezze where id = p_id;
 end $$;
 
+-- ---------- un incantesimo della scheda (le voci alla Roll20) letto come un attacco ----------
+create or replace function public.tavolo_inc_att(sa public.tavolo_schede, p_inc int) returns jsonb
+language plpgsql stable security definer set search_path = public as $$
+declare sp jsonb := sa.dati -> 'incantesimi' -> p_inc; v text; bon int; cd int; g text;
+begin
+  if sp is null then return null; end if;
+  v := sa.dati ->> coalesce(nullif(sa.dati ->> 'car_inc', ''), 'int');
+  bon := tavolo_comp(sa) + floor((coalesce(case when v ~ '^-?\d+(\.\d+)?$' then v::numeric end, 10) - 10) / 2)::int;
+  cd := 8 + bon;
+  g := (regexp_match(coalesce(sp ->> 'portata', ''), '(\d+(?:[.,]\d+)?)\s*m\M', 'i'))[1];
+  if coalesce(sp ->> 'portata', '') ~* '^\s*(s[eé]|contatto|personale)' then g := null; end if;
+  return jsonb_build_object('nome', coalesce(nullif(sp ->> 'nome', ''), 'incantesimo'),
+    'colpire', case when sp ->> 'attacco' = 'true' then bon end,
+    'danni', coalesce(sp ->> 'danni', ''),
+    'tipo', concat_ws(', ', case when g is not null then 'gittata ' || g || ' m' end, nullif(sp ->> 'area', ''),
+      case when coalesce(sp ->> 'ts', '') <> '' then 'TS ' || (sp ->> 'ts') || ' CD ' || cd || case when sp ->> 'dimezza' = 'true' then ' dimezza' else '' end end,
+      nullif(sp ->> 'tipo_danni', '')));
+end $$;
+
 -- ---------- incantesimi (ad area o su un bersaglio) con tiro salvezza: ora lo tira chi lo subisce ----------
-create or replace function public.tavolo_area(p_token uuid, p_attacco int, p_bersagli uuid[], p_cd int default null, p_privato boolean default false)
+drop function if exists public.tavolo_area(uuid, int, uuid[], int, boolean);
+create or replace function public.tavolo_area(p_token uuid, p_attacco int, p_bersagli uuid[], p_cd int default null, p_privato boolean default false, p_inc int default null)
 returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare
@@ -95,7 +115,7 @@ begin
   if not tavolo_e_dm() and (a.giocatore is null or a.giocatore <> tavolo_mio_giocatore()) then raise exception 'Puoi lanciare solo con il tuo token'; end if;
   if coalesce(array_length(p_bersagli, 1), 0) > 40 then raise exception 'Troppi bersagli'; end if;
   sa := tavolo_scheda_di(a);
-  att := sa.dati -> 'attacchi' -> p_attacco;
+  att := case when p_inc is not null then tavolo_inc_att(sa, p_inc) else sa.dati -> 'attacchi' -> p_attacco end;
   if att is null then raise exception 'Incantesimo non trovato nella scheda'; end if;
   nome_att := coalesce(nullif(att ->> 'nome', ''), 'incantesimo');
   testo := lower(coalesce(att ->> 'tipo', '') || ' ' || coalesce(att ->> 'nome', ''));
@@ -120,7 +140,8 @@ begin
 end $$;
 
 -- ---------- attacco: se colpisce e nelle note c'è «+ 2d8 … (TS Costituzione CD 11)», quei danni li decide il tiro salvezza ----------
-create or replace function public.tavolo_attacca(p_token uuid, p_bersaglio uuid, p_attacco int, p_adv int default 0, p_privato boolean default false, p_extra text default null)
+drop function if exists public.tavolo_attacca(uuid, uuid, int, int, boolean, text);
+create or replace function public.tavolo_attacca(p_token uuid, p_bersaglio uuid, p_attacco int, p_adv int default 0, p_privato boolean default false, p_extra text default null, p_inc int default null)
 returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare
@@ -136,7 +157,7 @@ begin
   if not tavolo_e_dm() and (b.scena <> tavolo_scena_attiva() or b.nascosto) then raise exception 'Bersaglio non valido'; end if;
   if extra <> '' and extra !~ '^\d{0,2}d\d{1,3}([+-]\d{1,3})?(\+\d{0,2}d\d{1,3}([+-]\d{1,3})?)*$' then raise exception 'Danni in più non validi: scrivi per esempio 3d6'; end if;
   sa := tavolo_scheda_di(a);
-  att := sa.dati -> 'attacchi' -> p_attacco;
+  att := case when p_inc is not null then tavolo_inc_att(sa, p_inc) else sa.dati -> 'attacchi' -> p_attacco end;
   if att is null then raise exception 'Attacco non trovato nella scheda'; end if;
   bonus := coalesce(nullif(att ->> 'colpire', '')::numeric::int, 0);
   danni := regexp_replace(coalesce(att ->> 'danni', ''), '\s+', '', 'g');
@@ -225,10 +246,11 @@ revoke execute on function public.tavolo_salva(uuid, int) from anon, public;
 grant execute on function public.tavolo_salva(uuid, int) to authenticated;
 revoke execute on function public.tavolo_salva_annulla(uuid) from anon, public;
 grant execute on function public.tavolo_salva_annulla(uuid) to authenticated;
-revoke execute on function public.tavolo_area(uuid, int, uuid[], int, boolean) from anon, public;
-grant execute on function public.tavolo_area(uuid, int, uuid[], int, boolean) to authenticated;
-revoke execute on function public.tavolo_attacca(uuid, uuid, int, int, boolean, text) from anon, public;
-grant execute on function public.tavolo_attacca(uuid, uuid, int, int, boolean, text) to authenticated;
+revoke execute on function public.tavolo_area(uuid, int, uuid[], int, boolean, int) from anon, public;
+grant execute on function public.tavolo_area(uuid, int, uuid[], int, boolean, int) to authenticated;
+revoke execute on function public.tavolo_attacca(uuid, uuid, int, int, boolean, text, int) from anon, public;
+grant execute on function public.tavolo_attacca(uuid, uuid, int, int, boolean, text, int) to authenticated;
+revoke execute on function public.tavolo_inc_att(public.tavolo_schede, int) from anon, public, authenticated;
 revoke execute on function public.tavolo_turno_fuori(uuid) from anon, public, authenticated;
 revoke execute on function public.tavolo_turno_avanti() from anon, public;
 grant execute on function public.tavolo_turno_avanti() to authenticated;
