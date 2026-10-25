@@ -844,6 +844,8 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
 .tv-azm .nota{margin:6px 8px 4px;padding-top:8px;border-top:1px solid #ffffff1a;color:#bda983;font:400 .74rem/1.3 var(--body)}
 /* fin dove arriva chi gioca: le caselle che il movimento rimasto copre */
 .tv-mvr{position:absolute;pointer-events:none;border:2px dashed #e7cf9acc;border-radius:12px;background:#e7cf9a1c;box-shadow:inset 0 0 40px #e7cf9a26;z-index:0;box-sizing:border-box}
+body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
+.tv-mvr.finito{border-color:#e7cf9a66;background:#00000026;box-shadow:none}
 .tv-mvr span{position:absolute;left:50%;bottom:0;transform:translate(-50%,60%);background:#1d1613;color:#e7cf9a;border:1px solid #e7cf9a88;border-radius:9px;padding:2px 9px;font:700 var(--fs,14px)/1.3 var(--body);white-space:nowrap}
 .tv-tok .az{display:none!important}
 .tv-tok.turno{box-shadow:0 0 0 4px #e7cf9a,0 0 22px 6px #e7cf9acc}
@@ -1132,9 +1134,9 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       f.style.top = (top ? top.getBoundingClientRect().bottom : 0) + 'px';
       f.style.bottom = (nav && getComputedStyle(nav).position === 'fixed' ? nav.offsetHeight : 0) + 'px';
     };
-    fit(); scrollTo(0, 0); addEventListener('resize', fit);
+    fit(); scrollTo(0, 0); addEventListener('resize', fit); addEventListener('resize', alzaAvvisi);
     let vivo = true;
-    onCleanup(() => { vivo = false; removeEventListener('resize', fit); esci(); document.querySelectorAll('.tv-tip').forEach(x => x.remove()); });
+    onCleanup(() => { vivo = false; removeEventListener('resize', fit); removeEventListener('resize', alzaAvvisi); esci(); document.querySelectorAll('.tv-tip').forEach(x => x.remove()); });
     const info = await window.__tavolo?.();
     T.info = info;
     try {
@@ -1614,12 +1616,13 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     // fin dove arriva chi gioca (le diagonali contano 1, come sul regolamento): lo vede chi lo muove
     let mvr = box.querySelector('.tv-mvr');
     const tt = att?.token && T.tok.get(att.token);
-    if (tt && tt.scena === sc.id && puoMuovere(tt) && !(T.drag?.id === tt.id && T.drag.mosso)) {
-      const mv = movimentoDi(tt), cas = Math.max(0, Math.floor(mv.resta / (sc.metri || 1.5) + 1e-6)), g = sc.griglia, lato = tt.misura * g;
+    if (tt && tt.scena === sc.id && puoMuovere(tt)) {
+      const o = origineTurno(tt), mv = movimentoDi(tt), cas = Math.max(0, Math.floor(mv.tot / (sc.metri || 1.5) + 1e-6)), g = sc.griglia, lato = tt.misura * g;
       if (!mvr) { mvr = document.createElement('div'); mvr.className = 'tv-mvr'; }
-      mvr.style.cssText = `left:${tt.x - cas * g}px;top:${tt.y - cas * g}px;width:${lato + 2 * cas * g}px;height:${lato + 2 * cas * g}px;--fs:${Math.max(12, g * 0.22)}px`;
-      mvr.innerHTML = `<span>🏃 ancora ${metri(Math.max(0, mv.resta))}</span>`;
-      mvr.hidden = mv.resta <= 0; box.prepend(mvr);
+      mvr.style.cssText = `left:${o.x - cas * g}px;top:${o.y - cas * g}px;width:${lato + 2 * cas * g}px;height:${lato + 2 * cas * g}px;--fs:${Math.max(12, g * 0.22)}px`;
+      mvr.classList.toggle('finito', mv.resta <= 0);
+      mvr.innerHTML = `<span>${mv.resta > 0 ? '🏃 ancora ' + metri(mv.resta) : '🏃 movimento finito'}</span>`;
+      box.prepend(mvr);
     } else mvr?.remove();
     disegnaHud();
   }
@@ -1665,10 +1668,12 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
       if (T.tool === 'griglia' && isDM()) { const sc = scena(); T.gd = { sx: e.clientX, sy: e.clientY, x: sc.griglia_x, y: sc.griglia_y }; return; }
       if (T.tool === 'allinea' && isDM()) { T.al = { a: p, b: p }; disegnaRighelli(); return; }
       if (T.tool === 'righello') { const sc = scena(); const a = { x: centroCasella(p.x, sc.griglia_x), y: centroCasella(p.y, sc.griglia_y) }; rul = { pts: [a, a] }; mostraRighello(rul.pts); return; }
-      if (t && T.tool !== 'mano' && puoMuovere(t) && T.passo) annullaPasso();
+      // riprendere il token mentre aspetta la conferma: si continua da dove è, misurando sempre dalla partenza
+      let da = null;
+      if (t && T.tool !== 'mano' && puoMuovere(t) && T.passo) { if (T.passo.id === t.id) { da = T.passo; T.passo = null; barraMaschera(); } else annullaPasso(); }
       // nel suo turno, finito il movimento non si sposta più (il DM può forzare tenendo premuto Alt)
       if (t && T.tool !== 'mano' && puoMuovere(t) && suoTurno(t) && !(isDM() && e.altKey) && movimentoDi(t).resta < 1.49) { avvisoFermo(t); return; }
-      if (t && T.tool !== 'mano' && puoMuovere(t)) { T.drag = { id: t.id, dx: p.x - t.x, dy: p.y - t.y, x0: t.x, y0: t.y, sx: e.clientX, sy: e.clientY, mosso: false }; el.classList.add('drag'); return; }
+      if (t && T.tool !== 'mano' && puoMuovere(t)) { T.drag = { id: t.id, dx: p.x - t.x, dy: p.y - t.y, x0: da ? da.x0 : t.x, y0: da ? da.y0 : t.y, sx: e.clientX, sy: e.clientY, mosso: false }; el.classList.add('drag'); return; }
       if (t && T.tool !== 'mano') T.clic = { id: t.id, sx: e.clientX, sy: e.clientY };
       pan = { sx: e.clientX, sy: e.clientY, x: T.view.x, y: T.view.y }; st.classList.add('pan');
     });
@@ -1720,7 +1725,10 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
         const d = T.drag; T.drag = null; const el = tokEl(d.id), t = T.tok.get(d.id);
         if (el) el.classList.remove('drag');
         if (!t) return;
-        if (!d.mosso) { if (e.type === 'pointerup') menuToken(t.id, e); return; }
+        if (!d.mosso) {
+          if (t.x !== d.x0 || t.y !== d.y0) { const cm = costoMov(t, d.x0, d.y0, t.x, t.y); if (cm.m) return chiediPasso(t, t.x, t.y, d.x0, d.y0, cm.m, cm.dif); }
+          if (e.type === 'pointerup') menuToken(t.id, e); return;
+        }
         const sc = scena(); let x = aggancia(d.x, sc.griglia_x, t.misura), y = aggancia(d.y, sc.griglia_y, t.misura);
         const via = () => { if (T.rulers.has('io')) { mostraRighello(null); manda('righello', { uid: T.me.uid, pts: null }); } };
         const lib = postoLibero(t, x, y); if (!lib) { via(); t.x = d.x0; t.y = d.y0; disegnaToken(); manda('trascina', { id: t.id, x: d.x0, y: d.y0 }); return; }
@@ -1732,7 +1740,8 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
         const cm = suoTurno(t) ? costoMov(t, d.x0, d.y0, x, y) : { m: 0, dif: 0 }, m = cm.m;
         if (m) {
           const mv = movimentoDi(t);
-          if (!(isDM() && e.altKey) && m > mv.resta + 0.01) { tornaIndietro(t, d.x0, d.y0); mostraRighello(null); manda('righello', { uid: T.me.uid, pts: null }); toast(`Troppo lontano: ${t.nome || 'il token'} ha ancora ${metri(Math.max(mv.resta, 0))} di movimento.`, 'err'); return; }
+          const conScatto = puoScattare(t) && m <= mv.resta + velocitaDi(schedaDi(t)) + 0.01; // oltre il movimento, ma con lo Scatto ci arriva
+          if (!(isDM() && e.altKey) && !conScatto && m > mv.resta + 0.01) { tornaIndietro(t, d.x0, d.y0); mostraRighello(null); manda('righello', { uid: T.me.uid, pts: null }); toast(`Troppo lontano: ${t.nome || 'il token'} ha ancora ${metri(Math.max(mv.resta, 0))} di movimento.`, 'err'); return; }
           t.x = x; t.y = y; disegnaToken(); manda('trascina', { id: t.id, x, y });
           return chiediPasso(t, x, y, d.x0, d.y0, m, cm.dif);
         }
@@ -1958,10 +1967,11 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     const b = $('#tv-mbar'); if (!b) return;
     const mv = movimentoDi(t), dopo = mv.resta - m;
     T.passo = { id: t.id, x, y, x0, y0, m };
-    b.innerHTML = `<div class="g"><b class="tit">🏃 ${esc(t.nome || 'Token')}: ${metri(m)}${dif ? ' 🪨' : ''}</b>${dif ? `<span class="avv">${dif} ${dif === 1 ? 'casella' : 'caselle'} di terreno difficile (contano doppio).</span>` : ''}<span class="avv">${dopo >= 0 ? `Dopo restano ${metri(dopo)} di ${metri(mv.tot)}.` : `<b>Oltre il movimento di ${metri(-dopo)}.</b>`} Confermi lo spostamento?</span></div><div class="g">${dopo < 0 && suoTurno(t) && puoScattare(t) ? `<button type="button" data-k="scatta" class="on" title="Usa ${puoScattare(t) === 'bon' ? 'l\'azione bonus' : 'l\'azione'} per lo Scatto: altri ${metri(velocitaDi(schedaDi(t)))}">🏃 Scatta e conferma</button>` : ''}<button type="button" data-k="ok" class="${dopo < 0 && suoTurno(t) && puoScattare(t) ? '' : 'on'}">✓ Conferma</button><button type="button" data-k="no">Annulla</button></div>`;
+    b.innerHTML = `<div class="g"><b class="tit">🏃 ${esc(t.nome || 'Token')}: ${metri(m)}${dif ? ' 🪨' : ''}</b>${dif ? `<span class="avv">${dif} ${dif === 1 ? 'casella' : 'caselle'} di terreno difficile (contano doppio).</span>` : ''}<span class="avv">${dopo >= 0 ? `Dopo restano ${metri(dopo)} di ${metri(mv.tot)}.` : `<b>Oltre il movimento di ${metri(-dopo)}.</b>`} Confermi lo spostamento?</span></div><div class="g">${dopo < 0 && suoTurno(t) && puoScattare(t) ? `<button type="button" data-k="scatta" class="on" title="Usa ${puoScattare(t) === 'bon' ? 'l\'azione bonus' : 'l\'azione'} per lo Scatto: altri ${metri(velocitaDi(schedaDi(t)))}">🏃 Scatta e conferma</button>` : ''}${dopo >= 0 || isDM() ? `<button type="button" data-k="ok" class="${dopo < 0 && suoTurno(t) && puoScattare(t) ? '' : 'on'}">✓ Conferma</button>` : ''}<button type="button" data-k="no">Annulla</button></div>`;
     b.classList.remove('spenta'); b.hidden = false;
-    b.querySelector('[data-k=ok]').onclick = confermaPasso;
-    const sc = b.querySelector('[data-k=scatta]'); if (sc) sc.onclick = async () => { await faiAzione(t, 'scatto', puoScattare(t)); confermaPasso(); };
+    const ok = b.querySelector('[data-k=ok]'); if (ok) ok.onclick = confermaPasso;
+    const sc = b.querySelector('[data-k=scatta]'); if (sc) sc.onclick = () => faiAzione(t, 'scatto', puoScattare(t)); // conferma il passo e poi scatta
+    disegnaToken(); // il pannello e l'area contano già questo passo
     b.querySelector('[data-k=no]').onclick = annullaPasso;
   }
   async function confermaPasso() {
@@ -1969,7 +1979,8 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     mostraRighello(null); manda('righello', { uid: T.me.uid, pts: null });
     const t = T.tok.get(p.id); if (!t) return;
     if (!await salvaPosto(t, p.x, p.y, p.x0, p.y0)) return;
-    await segnaAzioni(t, { mov: (azioniDi(t).mov || 0) + p.m });
+    const a = azioniDi(t);
+    await segnaAzioni(t, { mov: (a.mov || 0) + p.m, ...(a.ox == null ? { ox: p.x0, oy: p.y0 } : {}) });
   }
   function annullaPasso() {
     const p = T.passo; if (!p) return; T.passo = null; barraMaschera();
@@ -3443,6 +3454,11 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     disegnaHud();
   }
   // il pannello in basso di chi sta giocando: azione, azione bonus, reazione, movimento rimasto
+  // gli avvisi in basso salgono sopra il pannello del turno, così non lo coprono
+  function alzaAvvisi() {
+    const h = $('#tv-hud'); if (!h || h.hidden) return;
+    document.documentElement.style.setProperty('--tv-avvisi', Math.round(innerHeight - h.getBoundingClientRect().top + 10) + 'px');
+  }
   function disegnaHud() {
     const h = $('#tv-hud'), w = $('.tv-wrap'); if (!h) return;
     const att = T.turno?.find(x => x.id === T.stato?.turno), t = att?.token && T.tok.get(att.token);
@@ -3451,6 +3467,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     // la striscia mostra «Finisci il turno» solo quando non c'è il pannello
     const sa = $('#tv-strip [data-k=av]'); if (sa) sa.hidden = vedo || !(isDM() || att?.giocatore === T.me.giocatore);
     if (!vedo) { h.innerHTML = ''; return; }
+    requestAnimationFrame(alzaAvvisi);
     const a = azioniDi(t), mv = movimentoDi(t), q = mv.tot > 0 ? clamp(mv.resta / mv.tot, 0, 1) : 0;
     h.innerHTML = `<i class="fo" style="--c:${esc(t.colore || '#7d2530')};${t.immagine ? `background-image:url('${t.immagine.replace(/'/g, '%27')}')` : ''}">${t.immagine ? '' : esc(iniziali(t.nome))}</i>
       <div class="t"><b>Turno di ${esc(t.nome || att.nome || '?')}</b><div class="r">${AZ.map(([k, ic, l]) => `<button type="button" class="c${a[k] ? ' no' : ''}" data-z="${k}" title="${l}: ${a[k] ? 'usata (tocca per ridarla)' : 'disponibile (tocca quando la usi)'}">${ic} ${l}</button>`).join('')}</div>${(a.fatte || []).length ? `<div class="r fzr">${fatteHtml(t, 'fz', 'fz')}</div>` : ''}</div>
@@ -3942,7 +3959,10 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   const azioniDi = t => (t?.azioni && t.azioni.chiave === chiaveTurno() ? t.azioni : { chiave: chiaveTurno() });
   const velocitaDi = s => { const m = String(s?.dati.velocita || '').match(/\d+(?:[.,]\d+)?/); return m ? parseFloat(m[0].replace(',', '.')) : 9; };
   const scattiDi = a => a.fatte ? a.fatte.filter(x => x.k === 'scatto').length : a.scatto ? 1 : 0;
-  const movimentoDi = t => { const a = azioniDi(t), tot = velocitaDi(schedaDi(t)) * (1 + scattiDi(a)); return { tot, resta: Math.round((tot - (a.mov || 0)) * 10) / 10 }; };
+  // conta anche lo spostamento che aspetta la conferma
+  const movimentoDi = t => { const a = azioniDi(t), tot = velocitaDi(schedaDi(t)) * (1 + scattiDi(a)), att = T.passo?.id === t.id ? T.passo.m : 0; return { tot, resta: Math.round((tot - (a.mov || 0) - att) * 10) / 10 }; };
+  // da dove è partito nel suo turno: il primo spostamento confermato lo fissa; prima è dov'è (o da dove lo sta portando)
+  const origineTurno = t => { const a = azioniDi(t); if (a.ox != null) return { x: a.ox, y: a.oy }; const p = T.passo?.id === t.id ? T.passo : T.drag?.id === t.id ? T.drag : null; return p ? { x: p.x0, y: p.y0 } : { x: t.x, y: t.y }; };
   const suoTurno = t => { const att = T.turno?.find(x => x.id === T.stato?.turno); return !!t && !!att && att.token === t.id; };
   async function segnaAzioni(t, ch) {
     if (!t) return; const a = { ...azioniDi(t), ...ch, chiave: chiaveTurno() }, prima = t.azioni;
@@ -3973,6 +3993,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   // con cosa può scattare ora: l'azione, se no l'azione bonus (Azione scaltra…)
   const puoScattare = t => { const a = azioniDi(t); if (!a.az) return 'az'; const b = bonusAz(t); return b && b.k.includes('scatto') && !a.bon ? 'bon' : null; };
   async function faiAzione(t, k, da) {
+    if (T.passo?.id === t.id) await confermaPasso(); // prima si conferma lo spostamento fatto
     const a = azioniDi(t); if (a[da]) { toast(da === 'az' ? 'L\'azione di questo turno è già usata.' : 'L\'azione bonus di questo turno è già usata.', 'err'); return; }
     const fatte = [...(a.fatte || (a.scatto ? [{ k: 'scatto', da: 'az' }] : [])), { k, da }];
     await segnaAzioni(t, { [da]: true, fatte, scatto: fatte.some(x => x.k === 'scatto') });
@@ -4293,7 +4314,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
     if (k === 'tz-fz' && tkz) return w ? togliAzione(tkz, +b.dataset.i) : undefined;
     if (k === 'tz-m' && tkz) { const a = azioniDi(tkz); return segnaAzioni(tkz, { mov: Math.max(0, (a.mov || 0) - +b.dataset.d) }); }
     if (k === 'tz-fine') return finisciTurno();
-    if (k === 'tz-reset' && tkz) return segnaAzioni(tkz, { az: false, bon: false, rea: false, mov: 0, scatto: false, fatte: [] });
+    if (k === 'tz-reset' && tkz) return segnaAzioni(tkz, { az: false, bon: false, rea: false, mov: 0, scatto: false, fatte: [], ox: null, oy: null });
     if (k === 'addatt') { await salvaScheda(s.id, { attacchi: [...(d.attacchi || []), { nome: '', colpire: null, danni: '', tipo: '' }] }, true); disegnaScheda(); sv.d.querySelector('.atts .at:last-of-type input')?.focus(); return; }
     if (k === 'delatt') { await salvaScheda(s.id, { attacchi: (d.attacchi || []).filter((_, i) => i !== +b.dataset.i) }, true); return disegnaScheda(); }
     if (k === 'riposo') { const p = {}; for (let i = 1; i <= 9; i++) if (num(d['usati_' + i])) p['usati_' + i] = 0; return salvaScheda(s.id, p, true); }
