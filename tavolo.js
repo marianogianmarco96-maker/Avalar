@@ -1900,21 +1900,23 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     }
   }
   const raggioPx = (sc, e) => (+e.m || 3) * sc.griglia / (sc.metri || 1.5);
+  // intensità in percentuale (100 = come prima): moltiplica l'opacità di fondo e particelle, fino a coprire del tutto
+  const intEff = e => clamp(+e.int || 100, 10, 400) / 100;
   // numeri «a caso» ma sempre uguali per lo stesso effetto, così ridisegnandolo non salta
   const semeDi = id => { let h = 2166136261; for (const c of String(id)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return () => ((h = Math.imul(h ^ (h >>> 15), 2246822507) ^ Math.imul(h ^ (h >>> 13), 3266489909)) >>> 0) / 4294967296; };
   function svgEffetto(sc, e, sel) {
     const [, , c1, c2, c3] = EFFETTI[e.tipo] || EFFETTI.fuoco, R = raggioPx(sc, e), rnd = semeDi(e.id), id = 'ef' + String(e.id).replace(/\W/g, '');
     const quad = e.forma === 'quadrato', forma = quad ? `<rect x="${e.x - R}" y="${e.y - R}" width="${2 * R}" height="${2 * R}" rx="${R * 0.06}"/>` : `<circle cx="${e.x}" cy="${e.y}" r="${R}"/>`;
-    const n = Math.round(clamp(R * R / 900, 8, 60)), parti = [], nube = e.tipo === 'gas' || e.tipo === 'nebbia';
+    const n = Math.round(clamp(R * R / 900, 8, 60)), parti = [], nube = e.tipo === 'gas' || e.tipo === 'nebbia', ki = intEff(e), op = o => Math.min(1, o * ki).toFixed(2);
     for (let i = 0; i < n; i++) {
       const a = rnd() * Math.PI * 2, d = Math.sqrt(rnd()) * R * 0.95, x = e.x + Math.cos(a) * d, y = e.y + Math.sin(a) * d, k = 0.6 + rnd() * 0.8, del = -(rnd() * 3).toFixed(2);
-      if (e.tipo === 'fuoco') parti.push(`<path class="pf" style="--d:${(R * 0.12 * k).toFixed(1)}px;animation-delay:${del}s;animation-duration:${(1 + rnd()).toFixed(2)}s" d="M${x} ${y}q${-8 * k} ${-10 * k} 0 ${-26 * k}q${8 * k} ${16 * k} 0 ${26 * k}z" fill="${rnd() < 0.5 ? c2 : c1}"/>`);
-      else if (e.tipo === 'gas' || e.tipo === 'nebbia' || e.tipo === 'oscurita') parti.push(`<circle class="pg" style="--dx:${((rnd() - .5) * R * 0.3).toFixed(1)}px;--dy:${((rnd() - .5) * R * 0.3).toFixed(1)}px;animation-delay:${del * 2}s;animation-duration:${(6 + rnd() * 5).toFixed(1)}s" cx="${x}" cy="${y}" r="${(R * (0.18 + rnd() * 0.22)).toFixed(1)}" fill="${rnd() < 0.5 ? c1 : c3}" opacity="${e.tipo === 'oscurita' ? .85 : .32}"/>`);
-      else if (e.tipo === 'veleno' || e.tipo === 'acido') parti.push(`<circle class="pb" style="--d:${(R * 0.08 * k).toFixed(1)}px;animation-delay:${del}s;animation-duration:${(1.4 + rnd() * 1.4).toFixed(2)}s" cx="${x}" cy="${y}" r="${(3 + rnd() * 7) * k}" fill="none" stroke="${c2}" stroke-width="2"/>`);
-      else if (e.tipo === 'ghiaccio') parti.push(`<path class="pi" style="animation-delay:${del}s" d="M${x} ${y - 9 * k}l${4 * k} ${9 * k} ${-4 * k} ${9 * k} ${-4 * k} ${-9 * k}z" fill="${c2}" opacity=".8" transform="rotate(${(rnd() * 360).toFixed(0)} ${x} ${y})"/>`);
-      else if (e.tipo === 'fulmine' && i < n / 3) { let px = x, py = y, dd = `M${px} ${py}`; for (let j = 0; j < 4; j++) { px += (rnd() - .5) * 30; py += 8 + rnd() * 14; dd += `L${px.toFixed(1)} ${py.toFixed(1)}`; } parti.push(`<path class="pl" style="animation-delay:${del}s;animation-duration:${(0.9 + rnd() * 1.6).toFixed(2)}s" d="${dd}" fill="none" stroke="${rnd() < .5 ? c1 : c2}" stroke-width="${2 + rnd() * 2}" stroke-linecap="round"/>`); }
+      if (e.tipo === 'fuoco') parti.push(`<path class="pf" style="--d:${(R * 0.12 * k).toFixed(1)}px;animation-delay:${del}s;animation-duration:${(1 + rnd()).toFixed(2)}s" d="M${x} ${y}q${-8 * k} ${-10 * k} 0 ${-26 * k}q${8 * k} ${16 * k} 0 ${26 * k}z" fill="${rnd() < 0.5 ? c2 : c1}" opacity="${op(1)}"/>`);
+      else if (e.tipo === 'gas' || e.tipo === 'nebbia' || e.tipo === 'oscurita') parti.push(`<circle class="pg" style="--dx:${((rnd() - .5) * R * 0.3).toFixed(1)}px;--dy:${((rnd() - .5) * R * 0.3).toFixed(1)}px;animation-delay:${del * 2}s;animation-duration:${(6 + rnd() * 5).toFixed(1)}s" cx="${x}" cy="${y}" r="${(R * (0.18 + rnd() * 0.22)).toFixed(1)}" fill="${rnd() < 0.5 ? c1 : c3}" opacity="${op(e.tipo === 'oscurita' ? .85 : .32)}"/>`);
+      else if (e.tipo === 'veleno' || e.tipo === 'acido') parti.push(`<circle class="pb" style="--d:${(R * 0.08 * k).toFixed(1)}px;animation-delay:${del}s;animation-duration:${(1.4 + rnd() * 1.4).toFixed(2)}s" cx="${x}" cy="${y}" r="${(3 + rnd() * 7) * k}" fill="none" stroke="${c2}" stroke-width="2" opacity="${op(1)}"/>`);
+      else if (e.tipo === 'ghiaccio') parti.push(`<path class="pi" style="animation-delay:${del}s" d="M${x} ${y - 9 * k}l${4 * k} ${9 * k} ${-4 * k} ${9 * k} ${-4 * k} ${-9 * k}z" fill="${c2}" opacity="${op(.8)}" transform="rotate(${(rnd() * 360).toFixed(0)} ${x} ${y})"/>`);
+      else if (e.tipo === 'fulmine' && i < n / 3) { let px = x, py = y, dd = `M${px} ${py}`; for (let j = 0; j < 4; j++) { px += (rnd() - .5) * 30; py += 8 + rnd() * 14; dd += `L${px.toFixed(1)} ${py.toFixed(1)}`; } parti.push(`<path class="pl" style="animation-delay:${del}s;animation-duration:${(0.9 + rnd() * 1.6).toFixed(2)}s" d="${dd}" fill="none" opacity="${op(1)}" stroke="${rnd() < .5 ? c1 : c2}" stroke-width="${2 + rnd() * 2}" stroke-linecap="round"/>`); }
     }
-    return `<g class="ef ef-${e.tipo}${sel ? ' sel' : ''}" data-id="${esc(e.id)}"><defs><clipPath id="${id}c">${forma}</clipPath><radialGradient id="${id}g"><stop offset="0" stop-color="${c2}" stop-opacity="${e.tipo === 'oscurita' ? .95 : nube ? .3 : .55}"/><stop offset=".6" stop-color="${c1}" stop-opacity="${e.tipo === 'oscurita' ? .9 : nube ? .28 : .4}"/><stop offset="1" stop-color="${c3}" stop-opacity="${e.tipo === 'oscurita' ? .8 : .12}"/></radialGradient><filter id="${id}f" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="${(R * 0.05).toFixed(1)}"/></filter></defs>
+    return `<g class="ef ef-${e.tipo}${sel ? ' sel' : ''}" data-id="${esc(e.id)}"><defs><clipPath id="${id}c">${forma}</clipPath><radialGradient id="${id}g"><stop offset="0" stop-color="${c2}" stop-opacity="${op(e.tipo === 'oscurita' ? .95 : nube ? .3 : .55)}"/><stop offset=".6" stop-color="${c1}" stop-opacity="${op(e.tipo === 'oscurita' ? .9 : nube ? .28 : .4)}"/><stop offset="1" stop-color="${c3}" stop-opacity="${op(e.tipo === 'oscurita' ? .8 : .12)}"/></radialGradient><filter id="${id}f" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="${(R * 0.05).toFixed(1)}"/></filter></defs>
       <g clip-path="url(#${id}c)"><g class="base">${forma.replace('/>', ` fill="url(#${id}g)"/>`)}</g><g${['gas', 'nebbia', 'oscurita'].includes(e.tipo) ? ` filter="url(#${id}f)"` : ''}>${parti.join('')}</g></g>
       ${roundRestanti(e) ? `<text class="dur" x="${e.x}" y="${e.y + R + Math.max(16, sc.griglia * 0.28)}" text-anchor="middle">⏳ ${roundRestanti(e)} round</text>` : ''}
       ${sel ? `<g class="sel">${forma.replace('/>', ' fill="none" stroke="#f2b51d" stroke-width="3" stroke-dasharray="10 6"/>')}<circle class="man" cx="${e.x + R}" cy="${e.y}" r="${Math.max(8, sc.griglia * 0.14)}"/><text x="${e.x + R + 14}" y="${e.y - 12}">${String((+e.m || 3).toLocaleString('it-IT'))} m</text></g>` : ''}</g>`;
@@ -1937,7 +1939,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     if (sel && Math.hypot(p.x - (sel.x + raggioPx(sc, sel)), p.y - sel.y) <= Math.max(14, sc.griglia * 0.22)) { T.efm = { id: sel.id, modo: 'raggio', l: effScena(sc).map(e => ({ ...e })) }; return; }
     const e = effettoIn(sc, p);
     if (e) { T.efSel = e.id; T.efm = { id: e.id, modo: 'muovi', dx: p.x - e.x, dy: p.y - e.y, l: effScena(sc).map(x => ({ ...x })), mosso: false }; disegnaEffetti(); barraMaschera(); return; }
-    const nuovo = { id: nuovoId(), tipo: T.efTipo || 'fuoco', x: Math.round(p.x), y: Math.round(p.y), m: T.efM || 3, forma: T.efForma || 'cerchio', durata: T.efDur || 0, inizio: { round: +T.stato?.round || 1, turno: T.stato?.turno || null } };
+    const nuovo = { id: nuovoId(), tipo: T.efTipo || 'fuoco', x: Math.round(p.x), y: Math.round(p.y), m: T.efM || 3, forma: T.efForma || 'cerchio', durata: T.efDur || 0, inizio: { round: +T.stato?.round || 1, turno: T.stato?.turno || null }, int: T.efInt || 100 };
     T.efSel = nuovo.id; salvaZone(sc, { effetti: [...effScena(sc), nuovo] });
   }
   function muoviEff(p) {
@@ -1952,10 +1954,11 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     if (m.cambiato) salvaZone(sc, { effetti: m.l }); else { disegnaEffetti(); barraMaschera(); }
   }
   function barraEffetti(b) {
-    const sc = scena(), L = effScena(sc), sel = L.find(e => e.id === T.efSel) || null, tipo = sel?.tipo || T.efTipo || 'fuoco', m = sel ? +sel.m || 3 : T.efM || 3, forma = sel?.forma || T.efForma || 'cerchio', dur = sel ? +sel.durata || 0 : T.efDur || 0;
+    const sc = scena(), L = effScena(sc), sel = L.find(e => e.id === T.efSel) || null, tipo = sel?.tipo || T.efTipo || 'fuoco', m = sel ? +sel.m || 3 : T.efM || 3, forma = sel?.forma || T.efForma || 'cerchio', dur = sel ? +sel.durata || 0 : T.efDur || 0, int = sel ? +sel.int || 100 : T.efInt || 100;
     b.innerHTML = `<div class="g"><b class="tit">✨ Effetti</b><span class="avv">${sel ? 'Trascina l\'effetto per spostarlo, il pallino sul bordo per cambiarne la grandezza.' : 'Scegli un effetto e clicca sulla mappa per piazzarlo.'}</span></div>
       <div class="g seg">${Object.entries(EFFETTI).map(([k, [ic, l]]) => `<button type="button" data-e="tipo" data-v="${k}" class="${tipo === k ? 'on' : ''}" title="${l}"><span>${ic} ${l}</span></button>`).join('')}</div>
       <div class="g sl" title="Raggio dell'effetto (metà del lato per il quadrato)"><span>Raggio</span><input type="range" class="tv-rg" data-e="m" min="1.5" max="30" step="1.5" value="${m}" aria-label="Raggio in metri"><output>${m.toLocaleString('it-IT')} m</output></div>
+      <div class="g sl" title="Quanto si vede l'effetto: abbassala per un velo leggero, alzala per una nube densa che copre la mappa"><span>Intensità</span><input type="range" class="tv-rg" data-e="int" min="10" max="400" step="10" value="${int}" aria-label="Intensità in percentuale"><output>${int}%</output></div>
       <div class="g sl" title="Quanti round dura: sparisce da sola quando torna il turno in cui l'hai messo. 0 = finché non la togli"><span>Durata</span><input type="number" data-e="dur" min="0" max="999" step="1" value="${dur}" aria-label="Durata in round" style="width:56px"><output>${dur ? (sel && roundRestanti(sel) != null ? `round · ne restano ${roundRestanti(sel)}` : 'round') : 'per sempre'}</output></div>
       <div class="g seg"><button type="button" data-e="forma" data-v="cerchio" class="${forma !== 'quadrato' ? 'on' : ''}"><span>◯ Cerchio</span></button><button type="button" data-e="forma" data-v="quadrato" class="${forma === 'quadrato' ? 'on' : ''}"><span>▢ Quadrato</span></button></div>
       <div class="g">${sel ? '<button type="button" data-e="via"><span>🗑 Togli questo</span></button><button type="button" data-e="desel"><span>Nuovo effetto</span></button>' : ''}<button type="button" data-e="svuota"${L.length ? '' : ' disabled'}><span>Svuota (${L.length})</span></button></div>`;
@@ -1973,6 +1976,10 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     const rg = b.querySelector('[data-e=m]'), out = rg.nextElementSibling;
     rg.oninput = () => { T.efM = +rg.value; out.textContent = (+rg.value).toLocaleString('it-IT') + ' m'; if (sel) { sel.m = +rg.value; disegnaEffetti(); } };
     rg.onchange = () => { if (sel) cambia({ m: +rg.value }); };
+    const ri = b.querySelector('[data-e=int]'), oi = ri.nextElementSibling;
+    ri.oninput = () => { T.efInt = +ri.value; oi.textContent = ri.value + '%'; if (sel) { sel.int = +ri.value; disegnaEffetti(); } };
+    ri.onchange = () => { if (sel) cambia({ int: +ri.value }); };
+    b.querySelectorAll('.tv-rg').forEach(pRange);
     // cambiare la durata la fa ripartire da adesso
     const du = b.querySelector('[data-e=dur]');
     du.onchange = () => { const v = clamp(Math.round(+du.value || 0), 0, 999); T.efDur = v; if (sel) return cambia({ durata: v, inizio: { round: +T.stato?.round || 1, turno: T.stato?.turno || null } }); barraEffetti(b); };

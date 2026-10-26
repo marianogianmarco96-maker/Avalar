@@ -5,4 +5,4 @@
 -- Si può rieseguire senza danni.
 
 alter table public.tavolo_scene add column if not exists difficile jsonb not null default '[]';  -- caselle «colonna,riga»
-alter table public.tavolo_scene add column if not exists effetti jsonb not null default '[]';    -- {id, tipo, x, y, m, forma, durata, inizio}
+alter table public.tavolo_scene add column if not exists effetti jsonb not null default '[]';    -- {id, tipo, x, y, m, forma, durata, inizio, int}
