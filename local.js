@@ -2,8 +2,11 @@
    - Giocatore (Livion, Sam, Violet, Mungus): la sua password decifra giocatori/<id>.enc, la copia preparata per lui
      (solo ciò che il DM gli mostra con «Mostra a:»), in sola lettura. Le altre copie non le può aprire.
    - Amministratore: il codice decifra data.enc (dati completi), tenuti in IndexedDB. Le modifiche fatte sul sito
-     restano qui solo finché non vengono inviate a Claude (una richiesta cifrata su GitHub) o scartate:
-     i dati veri sono sempre quelli pubblicati. Il codice non viene mai salvato in chiaro. */
+     restano qui finché non le salva (vanno subito online su Supabase, vedi tavolo/sito-1.sql) o le scarta:
+     i dati veri sono sempre quelli pubblicati. Le note e gli errori per Claude passano invece da GitHub.
+     Il codice non viene mai salvato in chiaro.
+   - I dati pubblicati stanno su GitHub (data.enc, giocatori/*.enc, versione.json) e su Supabase (bucket «sito»):
+     si apre sempre la copia più recente delle due. */
 (() => {
   'use strict';
   const rq = r => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
@@ -50,9 +53,40 @@
     return JSON.parse(new TextDecoder().decode(pt));
   }
 
+  /* ---------- da dove arrivano i dati ----------
+     GitHub ha i dati pubblicati da Claude (versione.json dice quando), Supabase quelli salvati dal DM sul sito
+     (sito_stato dice in quale cartella del bucket «sito»): vince la versione più recente. */
+  const SB_URL = 'https://zwxwnmcxryfmzkqsakjz.supabase.co';
+  const SB_KEY = 'sb_publishable_cAGuilUZdnxhtDeJ-qwuEQ_ihjCyFj0'; // la stessa chiave pubblica del tavolo
+  const SB_FILES = SB_URL + '/storage/v1/object/public/sito/';
+  // le immagini caricate dal sito stanno su Supabase (blobs/sb-….jpg, priv/sb-….bin), le altre su GitHub
+  const fileUrl = p => /^(blobs|priv)\/sb-/.test(p) ? SB_FILES + p : p;
+  // FONTE: { base: '' per GitHub o indirizzo della cartella su Supabase, sbv: versione su Supabase, pronto: tavolo/sito-1.sql eseguito }
+  let FONTE = null;
+  async function fonte(fresca) {
+    if (FONTE && !fresca) return FONTE;
+    const gh = fetch('versione.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : {}).then(j => +j.pub || 0, () => 0);
+    let sb = null, pronto = false;
+    try {
+      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 6000);
+      const r = await fetch(SB_URL + '/rest/v1/sito_stato?select=versione,cartella&id=eq.1', { headers: { apikey: SB_KEY }, cache: 'no-store', signal: ctl.signal });
+      clearTimeout(t);
+      if (r.ok) { pronto = true; const [s] = await r.json(); sb = s ? { versione: +s.versione, cartella: s.cartella } : null; ls.set('cdnd_sito', JSON.stringify(sb)); }
+    } catch { try { sb = JSON.parse(ls.get('cdnd_sito')); } catch { } } // senza rete: l'ultima cartella vista (i file restano nel service worker)
+    const ghv = await gh, sbv = sb ? sb.versione : 0;
+    FONTE = sb && sb.cartella && sbv > ghv ? { base: SB_FILES + sb.cartella + '/', sbv, pronto, cartella: sb.cartella } : { base: '', sbv, pronto };
+    return FONTE;
+  }
+  // un file dei dati dalla copia più recente (su Supabase, o su GitHub se Supabase non risponde)
+  async function dataFetch(f) {
+    const src = await fonte();
+    if (src.base) try { const r = await fetch(src.base + f); if (r.ok || r.status === 404) return r; } catch { }
+    return fetch(f, { cache: 'no-cache' });
+  }
+
   /* ---------- aperture ---------- */
   async function playerOpen(id, code, remember) {
-    let r; try { r = await fetch('giocatori/' + id + '.enc', { cache: 'no-cache' }); } catch { throw new Error('Per il primo accesso serve internet.'); }
+    let r; try { r = await dataFetch('giocatori/' + id + '.enc'); } catch { throw new Error('Per il primo accesso serve internet.'); }
     if (!r.ok) throw new Error(r.status === 404 ? 'Questo account non è ancora attivo: chiedi al DM.' : 'Impossibile caricare i dati (' + r.status + ').');
     const enc = await r.json();
     let raw;
@@ -75,7 +109,7 @@
     for (const [aid, path] of Object.entries(payload.blobmap)) {
       if (!path.startsWith('priv/')) continue;
       try {
-        const buf = new Uint8Array(await (await fetch(path)).arrayBuffer());
+        const buf = new Uint8Array(await (await fetch(fileUrl(path))).arrayBuffer());
         const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: buf.slice(0, 12) }, keys[aid] ? await aesKey(b64d(keys[aid])) : key, buf.slice(12));
         const t2 = DB.transaction('files', 'readwrite'); t2.objectStore('files').put({ blob: new Blob([plain], { type: types[aid] || 'image/jpeg' }), type: types[aid] }, aid); await done(t2);
       } catch { }
@@ -83,7 +117,7 @@
   }
   async function adminOpen(code, remember) {
     DB = await idbOpen();
-    let enc = null; try { const r = await fetch('data.enc', { cache: 'no-cache' }); if (r.ok) enc = await r.json(); } catch { }
+    let enc = null; try { const r = await dataFetch('data.enc'); if (r.ok) enc = await r.json(); } catch { }
     const have = (await rq(store('docs').count())) > 0;
     let raw;
     if (code != null) { if (!enc) throw new Error('Per il primo accesso serve internet.'); raw = await deriveRaw(code, b64d(enc.salt), enc.it); }
@@ -257,14 +291,14 @@
     const p = BLOBMAP[aid];
     if (p && p.startsWith('priv/') && BLOBKEYS[aid]) { try { const b = await playerBlob(aid, p); return { ok: true, blob: async () => b }; } catch { return { ok: false, status: 404 }; } }
     if (!p || p.startsWith('priv/')) return { ok: false, status: 404 };
-    return fetch(p);
+    return fetch(fileUrl(p));
   };
-  window.__blobHref = aid => { const p = BLOBMAP[aid]; return p && !p.startsWith('priv/') ? p : ''; };
+  window.__blobHref = aid => { const p = BLOBMAP[aid]; return p && !p.startsWith('priv/') ? fileUrl(p) : ''; };
   // giocatore: le immagini riservate che può vedere arrivano cifrate con una chiave propria, che c'è solo nella sua copia
   const PLAIN = new Map();
   async function playerBlob(aid, p) {
     if (!PLAIN.has(aid)) PLAIN.set(aid, (async () => {
-      const r = await fetch(p); if (!r.ok) throw new Error(r.status);
+      const r = await fetch(fileUrl(p)); if (!r.ok) throw new Error(r.status);
       const buf = new Uint8Array(await r.arrayBuffer()), t = [...(MEM.blobs?.values() || [])].find(b => b.aid === aid)?.type;
       return new Blob([await crypto.subtle.decrypt({ name: 'AES-GCM', iv: buf.slice(0, 12) }, await aesKey(b64d(BLOBKEYS[aid])), buf.slice(12))], { type: t || 'image/jpeg' });
     })().catch(x => { PLAIN.delete(aid); throw x; }));
@@ -330,6 +364,7 @@
     const up = mk('⟳', 'Verifica aggiornamento', 'Verifica se c\'è una versione più recente del sito e caricala subito', () => checkUpdate(up), 'upbtn');
     if (PLAYER) { mk('🐞', 'Segnala un bug', 'Qualcosa non funziona o si vede male: avvisa il DM', () => { setOpen(false); playerDlg('bug'); }); mk('💡', 'Proponi una miglioria', 'Un\'idea per migliorare il sito: proponila al DM', () => { setOpen(false); playerDlg('idea'); }); }
     if (adm) mk('✎', 'Segnala a Claude', 'Segnala un errore o correggi i contenuti del sito', () => { setOpen(false); reportDlg(); });
+    if (adm) mk('🕘', 'Versioni salvate', 'Le ultime versioni salvate dal sito: puoi tornare a una precedente', () => { setOpen(false); versioniDlg(); });
     if (adm) mk('👥', 'Account giocatori', 'Password dei giocatori: vederle o cambiarle', () => { setOpen(false); accountsDlg(); });
     if (adm) { mk('⇪', 'Importa', 'Importa una sessione o dei dati', () => { setOpen(false); location.hash = '#/import'; }); mk('⛁', 'Backup', 'Scarica o ripristina un backup', () => { setOpen(false); location.hash = '#/backup'; }); }
     const out = mk('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M16 8l4 4-4 4"/><path d="M20 12H9"/></svg>', 'Esci', 'Esci e torna alla schermata di accesso', async () => { out.disabled = true; ls.del('cdnd_remember'); ls.del('cdnd_pkey'); if (DB) { try { const t = DB.transaction('kv', 'readwrite'); t.objectStore('kv').delete('key'); await done(t); } catch { } } location.reload(); });
@@ -391,11 +426,13 @@
   async function checkUpdate(btn) {
     btn.disabled = true; btn.classList.add('spin');
     try {
-      const files = ['index.html', 'local.js', 'sw.js', ROLE === 'admin' ? 'data.enc' : PLAYER ? 'giocatori/' + PLAYER.id + '.enc' : 'data.json'];
+      // i dati salvati dal DM su Supabase: è cambiato qualcosa se c'è una cartella nuova
+      const prima = FONTE && FONTE.base, ora = (await fonte(true)).base;
+      const files = ['index.html', 'local.js', 'copie.js', 'sw.js'].concat(ora ? [] : [ROLE === 'admin' ? 'data.enc' : PLAYER ? 'giocatori/' + PLAYER.id + '.enc' : 'data.json']);
       const fresh = await Promise.all(files.map(async f => { const r = await fetch(f + '?v=' + Date.now(), { cache: 'reload' }); if (!r.ok) throw new Error(); return r.text(); }));
       const reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : null;
       if (reg) await reg.update().catch(() => { });
-      let changed = !('caches' in window);
+      let changed = !('caches' in window) || prima !== ora;
       if (!changed) {
         const name = (await caches.keys()).find(k => k.startsWith('campagna-') && k !== 'campagna-fonts');
         const c = name && await caches.open(name);
@@ -408,7 +445,7 @@
         if (c) for (let i = 0; i < files.length; i++) if (files[i] !== 'sw.js') { await c.put(files[i], new Response(fresh[i], { headers: { 'Content-Type': files[i].endsWith('.js') ? 'text/javascript' : files[i].endsWith('.html') ? 'text/html' : 'application/json' } })); if (files[i] === 'index.html') await c.put('./', new Response(fresh[i], { headers: { 'Content-Type': 'text/html' } })); }
       }
       if (changed) { ls.set('cdnd_updated', '1'); location.reload(); return; }
-      notice('Hai già la versione più recente. Se hai appena approvato una modifica, GitHub può metterci qualche minuto a pubblicarla: riprova tra poco.');
+      notice('Hai già la versione più recente. Se hai appena approvato una modifica di Claude, GitHub può metterci qualche minuto a pubblicarla: riprova tra poco.');
     } catch { notice('Non riesco a contattare il sito: controlla la connessione e riprova.'); }
     btn.disabled = false; btn.classList.remove('spin');
   }
@@ -421,12 +458,13 @@
   const b64e = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); };
   const GROUPS = [[['entities', 'bodies'], 'scheda', 'schede'], [['sessions', 'sbodies'], 'sessione', 'sessioni'], [['events'], 'evento', 'eventi'], [['maps'], 'mappa', 'mappe'],
     [['pins'], 'segnalino', 'segnalini'], [['regions'], 'regione', 'regioni'], [['links'], 'collegamento', 'collegamenti'], [['blobs'], 'immagine', 'immagini'], [['meta'], 'impostazione', 'impostazioni']];
-  function summary() {
+  function summary(soloDati) {
     const ids = {}; for (const k of PEND) { const j = k.indexOf('/'); (ids[k.slice(0, j)] = ids[k.slice(0, j)] || new Set()).add(k.slice(j + 1)); }
     const out = [];
     for (const [cs, one, many] of GROUPS) { const u = new Set(); for (const c of cs) for (const id of ids[c] || []) if (!/-t$/.test(id)) u.add(id.replace(/^portrait-/, '')) /* le miniature non contano come immagini a parte */; if (u.size) out.push(u.size + ' ' + (u.size === 1 ? one : many)); }
     const other = Object.keys(ids).filter(c => !GROUPS.some(g => g[0].includes(c))); if (other.length) out.push('altro');
     if (!out.length && PFILES.size) out.push(PFILES.size + (PFILES.size === 1 ? ' immagine' : ' immagini'));
+    if (soloDati) return out.join(', ');
     if (NOTES.length) out.push(NOTES.length + (NOTES.length === 1 ? ' nota' : ' note'));
     if (BUGS.length) out.push(BUGS.length + (BUGS.length === 1 ? ' errore' : ' errori'));
     return out.join(', ');
@@ -434,8 +472,9 @@
   // dati pubblicati, per mandare solo i campi cambiati (le schede contengono anche il ritratto, troppo grande da rimandare)
   let SERVER = null;
   async function serverData() {
-    const enc = await (await fetch('data.enc', { cache: 'no-cache' })).json();
-    if (!SERVER || SERVER.iv !== enc.iv) SERVER = { iv: enc.iv, d: JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64d(enc.iv) }, await aesKey(RAW), b64d(enc.ct)))) };
+    await fonte(true);
+    const enc = await (await dataFetch('data.enc')).json();
+    if (!SERVER || SERVER.iv !== enc.iv) SERVER = { iv: enc.iv, env: { it: enc.it, salt: enc.salt }, d: JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64d(enc.iv) }, await aesKey(RAW), b64d(enc.ct)))) };
     return SERVER.d;
   }
   async function buildRequest() {
@@ -471,11 +510,162 @@
   async function resetToServer(btn) {
     if (btn) btn.disabled = true;
     try {
-      const enc = await (await fetch('data.enc', { cache: 'no-cache' })).json();
+      await fonte(true);
+      const enc = await (await dataFetch('data.enc')).json();
       const payload = JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64d(enc.iv) }, await aesKey(RAW), b64d(enc.ct))));
       const t = DB.transaction('files', 'readwrite'); for (const aid of PFILES) t.objectStore('files').delete(aid); for (const b of BUGS) for (const aid of b.photos || []) t.objectStore('files').delete(aid); await done(t);
       await seedAdmin(payload, RAW); location.reload();
     } catch { if (btn) btn.disabled = false; notice('Non riesco a scaricare i dati pubblicati: controlla la connessione e riprova.'); }
+  }
+  /* ---------- salvare dal sito (amministratore) ----------
+     «Salva» mette subito online le modifiche, senza passare da Claude: parte dai dati pubblicati più recenti, ci mette
+     sopra i documenti cambiati su questo browser (come strumenti/applica_richiesta.py), prepara le copie dei giocatori
+     e le cifra con la password di ognuno (come pubblica.py salva, con copie.js), poi carica tutto su Supabase in una
+     cartella nuova. Supabase riceve solo file cifrati e tiene le ultime 15 versioni (Strumenti › Versioni salvate). */
+  const datiDaSalvare = () => PEND.size + PFILES.size > 0;
+  const sha16 = async u8 => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', u8)), b => b.toString(16).padStart(2, '0')).join('').slice(0, 16);
+  async function cifra(raw, u8) { const iv = crypto.getRandomValues(new Uint8Array(12)); return { iv, ct: new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await aesKey(raw), u8)) }; }
+  const unisci = (a, b) => { const o = new Uint8Array(a.length + b.length); o.set(a); o.set(b, a.length); return o; };
+  const gzip = async u8 => new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer());
+  const EST = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp', 'image/gif': '.gif' };
+  // un'immagine in chiaro: dal browser se c'è (le riservate sono già decifrate qui), altrimenti dal suo indirizzo
+  async function immagine(aid, p) {
+    const f = await rq(store('files').get(aid)); if (f) return new Uint8Array(await f.blob.arrayBuffer());
+    const r = await fetch(fileUrl(p)); if (!r.ok) throw new Error('Non trovo l\'immagine ' + p);
+    const b = new Uint8Array(await r.arrayBuffer());
+    return p.startsWith('priv/') ? new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b.slice(0, 12) }, await aesKey(RAW), b.slice(12))) : b;
+  }
+  async function preparaSalvataggio(passo) {
+    const { copia, giocatori } = window.__copie;
+    passo('Preparo i dati…');
+    const d = clone(await serverData()), env = SERVER.env, S = d.stores, file = []; // file: [percorso nel bucket, contenuto, tipo]
+    const daCapo = d.dataVersion !== await kvGet('dataVersion'); // un altro dispositivo ha salvato: dopo ricarico la pagina
+    for (const k of PEND) {
+      const j = k.indexOf('/'), c = k.slice(0, j), id = k.slice(j + 1), m = MEM[c];
+      S[c] = S[c] || {};
+      if (m && m.has(id)) S[c][id] = clone(m.get(id)); else delete S[c][id];
+    }
+    // immagini nuove: in chiaro se le vede chiunque, altrimenti cifrate con la chiave del DM
+    const nuove = {};
+    for (const aid of PFILES) {
+      const f = await rq(store('files').get(aid)); if (!f) continue;
+      const b = new Uint8Array(await f.blob.arrayBuffer()), type = f.type || f.blob.type;
+      nuove[aid] = { b, nome: 'sb-' + await sha16(b), type };
+      d.blobmap[aid] = 'blobs/' + nuove[aid].nome + (EST[type] || '.bin');
+    }
+    let pubbliche = new Set(Object.keys(copia(d).blobmap));
+    for (const [aid, n] of Object.entries(nuove)) {
+      if (pubbliche.has(aid)) { file.push([d.blobmap[aid], n.b, n.type]); continue; }
+      const e = await cifra(RAW, n.b); d.blobmap[aid] = 'priv/' + n.nome + '.bin'; file.push([d.blobmap[aid], unisci(e.iv, e.ct), 'application/octet-stream']);
+    }
+    // come immagini_riservate() in pubblica.py: un'immagine resta in chiaro solo se la vede un ospite…
+    passo('Controllo le immagini riservate…');
+    const bm = d.blobmap; pubbliche = new Set(Object.keys(copia(d).blobmap));
+    const fatte = {};
+    for (const [aid, p] of Object.entries(bm)) {
+      if (!p.startsWith('blobs/') || pubbliche.has(aid) || [...pubbliche].some(a => bm[a] === p)) continue;
+      if (!(p in fatte)) {
+        let b = null; try { b = await immagine(aid, p); } catch { } // non raggiungibile: resta dov'è, tanto nessuna copia la nomina
+        if (b) { const e = await cifra(RAW, b); file.push(['priv/sb-' + await sha16(b) + '.bin', unisci(e.iv, e.ct), 'application/octet-stream']); fatte[p] = file[file.length - 1][0]; } else fatte[p] = null;
+      }
+      if (fatte[p]) bm[aid] = fatte[p];
+    }
+    // …e quelle riservate che vede qualche giocatore ricevono una chiave propria, che arriva solo nelle copie di chi le vede
+    const chiavi = d.blobkeys = d.blobkeys || {}, finta = { ...d, blobkeys: Object.fromEntries(Object.keys(bm).map(a => [a, ''])) };
+    const usate = new Set(); for (const g of giocatori(d)) for (const [aid, p] of Object.entries(copia(finta, g.id).blobmap)) if (p.startsWith('priv/')) usate.add(aid);
+    const rifatte = {};
+    for (const aid of [...usate].filter(a => !(a in chiavi)).sort()) {
+      const p = bm[aid];
+      if (!rifatte[p]) {
+        const plain = await immagine(aid, p), kk = crypto.getRandomValues(new Uint8Array(32)), e = await cifra(kk, plain);
+        rifatte[p] = ['priv/sb-' + await sha16(plain) + '-g.bin', b64e(kk)]; file.push([rifatte[p][0], unisci(e.iv, e.ct), 'application/octet-stream']);
+      }
+      [bm[aid], chiavi[aid]] = rifatte[p];
+    }
+    d.dataVersion = Math.floor(Date.now() / 1000); // gli altri dispositivi del DM riprendono i dati nuovi
+    for (const g of giocatori(d)) if (!g.salt) g.salt = b64e(crypto.getRandomValues(new Uint8Array(16)));
+    const cartella = 'v/' + Date.now().toString(36) + '-' + newId().slice(0, 10);
+    passo('Cifro i dati del DM…');
+    const e = await cifra(RAW, new TextEncoder().encode(JSON.stringify(d)));
+    file.push([cartella + '/data.enc', JSON.stringify({ v: 1, it: env.it, salt: env.salt, iv: b64e(e.iv), ct: b64e(e.ct) }), 'application/json']);
+    for (const g of giocatori(d)) {
+      if (!g.code) continue;
+      passo('Preparo la copia di ' + g.name + '…');
+      const kg = await deriveRaw(g.code, b64d(g.salt), env.it), c = await cifra(kg, await gzip(new TextEncoder().encode(JSON.stringify(copia(d, g.id)))));
+      file.push([cartella + '/giocatori/' + g.id + '.enc', JSON.stringify({ v: 1, z: 1, it: env.it, salt: g.salt, iv: b64e(c.iv), ct: b64e(c.ct) }), 'application/json']);
+    }
+    return { d, env, file, cartella, iv: b64e(e.iv), daCapo };
+  }
+  const giaCaricato = e => e && (String(e.statusCode) === '409' || /exists|duplicate/i.test(e.message || ''));
+  async function togliCartella(sb, cart) {
+    const g = await sb.storage.from('sito').list(cart + '/giocatori');
+    await sb.storage.from('sito').remove([cart + '/data.enc', ...(g.data || []).map(x => cart + '/giocatori/' + x.name)]);
+  }
+  let SAVING = null;
+  async function salvaSito() {
+    if (SAVING) return;
+    const passo = t => { SAVING = t; drawOutbox(); };
+    passo('Mi collego a Supabase…');
+    try {
+      if (!window.__sbDM || !window.__copie) throw new Error('Ricarica la pagina e riprova.');
+      const sb = await window.__sbDM();
+      for (let prova = 0; ; prova++) {
+        const p = await preparaSalvataggio(passo), nota = summary(true);
+        for (const [i, [path, body, type]] of p.file.entries()) {
+          passo('Carico su Supabase… (' + (i + 1) + ' di ' + p.file.length + ')');
+          const r = await sb.storage.from('sito').upload(path, new Blob([body], { type }), { contentType: type, upsert: false, cacheControl: '31536000' });
+          if (r.error && !giaCaricato(r.error)) throw new Error(/row-level|policy|Unauthorized|not found/i.test(r.error.message) ? 'Manca la preparazione di Supabase: esegui tavolo/sito-1.sql nell\'SQL Editor.' : r.error.message);
+        }
+        const r = await sb.rpc('sito_pubblica', { p_prima: FONTE.sbv, p_cartella: p.cartella, p_nota: nota });
+        if (r.error) {
+          togliCartella(sb, p.cartella).catch(() => { });
+          if (/conflitto/.test(r.error.message) && prova < 1) { passo('Un altro dispositivo ha appena salvato: riparto dai suoi dati…'); continue; }
+          throw new Error(/conflitto/.test(r.error.message) ? 'Il sito è stato salvato da un altro dispositivo proprio adesso: riprova.' : r.error.message);
+        }
+        for (const c of r.data.vecchie || []) togliCartella(sb, c).catch(() => { });
+        await dopoSalvataggio(p, r.data.versione);
+        return;
+      }
+    } catch (x) {
+      SAVING = null; drawOutbox(); notice('Non sono riuscito a salvare: ' + (x && x.message || 'riprova.'));
+    }
+  }
+  // il browser riparte dai dati appena salvati, tenendo solo le note e gli errori ancora da inviare a Claude
+  async function dopoSalvataggio(p, versione) {
+    FONTE = { base: SB_FILES + p.cartella + '/', sbv: versione, pronto: true, cartella: p.cartella };
+    ls.set('cdnd_sito', JSON.stringify({ versione, cartella: p.cartella }));
+    SERVER = { iv: p.iv, env: p.env, d: p.d };
+    const t = DB.transaction(['docs', 'kv'], 'readwrite'), docs = t.objectStore('docs'), kv = t.objectStore('kv'); docs.clear();
+    for (const [c, ds] of Object.entries(p.d.stores)) for (const [id, v] of Object.entries(ds)) docs.put(v, c + '/' + id);
+    kv.put(p.d.dataVersion, 'dataVersion'); kv.put(p.d.blobmap, 'blobmap'); kv.put([], 'pending'); kv.put([], 'pfiles');
+    kv.put(NOTES.length + BUGS.length > 0, 'dirty'); kv.put(false, 'sent');
+    await done(t);
+    if (p.daCapo) { location.reload(); return; }
+    MEM = {}; for (const [c, ds] of Object.entries(clone(p.d.stores))) MEM[c] = new Map(Object.entries(ds));
+    BLOBMAP = p.d.blobmap; PEND = new Set(); PFILES = new Set(); SENT = false; IDX = null; SAVING = null;
+    outbox(); notice('Salvato: le modifiche sono online.');
+  }
+  // Strumenti › Versioni salvate: le ultime 15, per tornare indietro
+  async function versioniDlg() {
+    const d = dlg('verdlg', `<h3 style="${H3}">Versioni salvate</h3><p class="sd" style="margin:0 0 8px">Ogni «Salva» tiene una copia: puoi rimettere online una versione precedente.</p><div class="rvl">Carico…</div><p class="sd m" style="min-height:1.2em;margin:8px 0 0"></p>
+      <div style="display:flex;margin-top:10px"><button type="button" class="btn ghost" style="margin-left:auto" data-a="close">Chiudi</button></div>`);
+    const body = d.querySelector('.rvl'), m = d.querySelector('.m');
+    try {
+      const sb = await window.__sbDM(), f = await fonte(true);
+      const r = await sb.from('sito_versioni').select('id,versione,cartella,nota,creata').order('versione', { ascending: false });
+      if (r.error) throw new Error(r.error.message);
+      if (!r.data.length) { body.innerHTML = '<p class="sd">Nessun salvataggio ancora: i dati in uso sono quelli pubblicati da Claude su GitHub.</p>'; return; }
+      body.innerHTML = r.data.map(v => `<div class="bugi" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span style="flex:1;min-width:180px"><b style="color:#561820">${esc(new Date(v.creata).toLocaleString('it-IT', { dateStyle: 'medium', timeStyle: 'short' }))}</b><br><span class="sd">${esc(v.nota || '')}</span></span>${f.cartella === v.cartella ? '<span class="sd"><b>In uso</b></span>' : `<button type="button" class="btn sm" data-id="${v.id}">Torna a questa</button>`}</div>`).join('')
+        + (f.base ? '' : '<p class="sd">Adesso è in uso la versione pubblicata da Claude su GitHub, più recente di questi salvataggi.</p>');
+      body.querySelectorAll('[data-id]').forEach(b => b.onclick = async () => {
+        if (datiDaSalvare() && !confirm('Hai modifiche non salvate: tornando a una versione precedente le perdi. Continuare?')) return;
+        if (!confirm('Rimettere online questa versione? Tutti vedranno i dati di quel momento.')) return;
+        b.disabled = true; m.textContent = 'Ripristino…';
+        const x = await sb.rpc('sito_ripristina', { p_id: +b.dataset.id });
+        if (x.error) { b.disabled = false; m.textContent = x.error.message; return; }
+        resetToServer();
+      });
+    } catch (x) { body.textContent = 'Non riesco a leggere le versioni: ' + (x && x.message || 'riprova.'); }
   }
   const OB_CSS = `#outbox{position:fixed;z-index:44;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));width:min(430px,calc(100vw - 92px));box-sizing:border-box;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:11px 12px;border-radius:12px;background:#561820;color:#f5e6c4;border:1px solid #e7cf9a;box-shadow:0 6px 20px #0007;font:15px/1.35 Georgia,serif}
 #outbox .om{flex:1 1 100%}#outbox .om b{color:#f7e3ae;font-weight:600}
@@ -488,12 +678,23 @@
     if (!anyPending()) { if (OB) OB.remove(); OB = null; return; }
     if (!OB) { const st = document.createElement('style'); st.textContent = OB_CSS; document.head.append(st); OB = document.createElement('div'); OB.id = 'outbox'; OB.setAttribute('role', 'status'); document.body.append(OB); }
     PREP = null; const v = ++PREPV; drawOutbox();
+    if (salvaQui()) return; // le modifiche si salvano su Supabase: la richiesta per Claude serve solo per note ed errori
     clearTimeout(outbox.t); outbox.t = setTimeout(() => buildRequest().then(r => { if (v === PREPV) { PREP = r; drawOutbox(); } }, () => { if (v === PREPV) { PREP = { err: true }; drawOutbox(); } }), 400);
   }
+  // con tavolo/sito-1.sql eseguito le modifiche ai dati si salvano direttamente; senza, si mandano a Claude come prima
+  const salvaQui = () => !!(FONTE && FONTE.pronto && datiDaSalvare());
   function drawOutbox() {
     if (!OB) return; OB.innerHTML = '';
     const msg = document.createElement('div'); msg.className = 'om'; OB.append(msg);
     const mk = (t, f, p) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = t; if (p) b.className = 'p'; b.onclick = () => f(b); OB.append(b); return b; };
+    if (SAVING) { msg.innerHTML = '<b>Salvataggio in corso:</b> ' + esc(SAVING); return; }
+    if (salvaQui()) {
+      const altro = NOTES.length + BUGS.length ? ' Dopo potrai inviare a Claude anche le note e gli errori.' : '';
+      msg.innerHTML = '<b>Da salvare:</b> ' + summary(true) + '. Finché non premi «Salva» le vedi solo tu.' + altro;
+      mk('Salva', () => salvaSito(), true);
+      mk('Rivedi elenco', () => reviewList());
+      mk('Scarta', b => { if (confirm('Scartare le modifiche non salvate? Il sito torna ai dati pubblicati.')) resetToServer(b); }); return;
+    }
     if (SENT) {
       const how = JUST ? (PREP && PREP.file ? '<b>Su GitHub allega il file «modifiche-avalar.txt» e premi «Create».</b> ' : '<b>Su GitHub premi «Create» per inviare la richiesta.</b> ') : '<b>Inviate a Claude:</b> ' + summary() + '. ';
       msg.innerHTML = how + 'Restano visibili su questo browser finché non approvi la modifica di Claude; quando è pubblicata questo riquadro sparisce da solo.';
@@ -569,7 +770,7 @@ html.review #view :is(p,li,h1,h2,h3,h4,h5,dd,dt,td,th,figcaption,blockquote):hov
         const abc = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789', r = crypto.getRandomValues(new Uint8Array(8));
         g.code = Array.from(r, x => abc[x % abc.length]).join('');
         await col('meta').doc('giocatori').set({ k: 'giocatori', v: G2 }); draw();
-        d.querySelector('#acc-m').textContent = 'Nuova password per ' + g.name + ': inviala a Claude dal riquadro in basso per renderla valida.';
+        d.querySelector('#acc-m').textContent = 'Nuova password per ' + g.name + ': ' + (FONTE && FONTE.pronto ? 'premi «Salva» nel riquadro in basso' : 'inviala a Claude dal riquadro in basso') + ' per renderla valida.';
       });
     };
     draw();
@@ -816,7 +1017,7 @@ html.review #view :is(p,li,h1,h2,h3,h4,h5,dd,dt,td,th,figcaption,blockquote):hov
           ls2.splice(h.a, h.b - h.a + 1, ...nv.split('\n')); o[path[path.length - 1]] = ls2.join('\n');
           await window.__cronache.runBatch([h.c], 'Revisione', b => b.put(h.c, rec));
           closeBox(box); await window.__cronache.rerender();
-          notice('Correzione salvata. Quando hai finito di rivedere premi «Invia a Claude» nel riquadro in basso.');
+          notice('Correzione fatta. Quando hai finito di rivedere premi «' + (FONTE && FONTE.pronto ? 'Salva' : 'Invia a Claude') + '» nel riquadro in basso.');
         } catch (x) { sv.disabled = false; notice('Non sono riuscito a salvare: ' + (x && x.message || 'riprova.')); }
       };
     };
@@ -854,7 +1055,7 @@ html.review #view :is(p,li,h1,h2,h3,h4,h5,dd,dt,td,th,figcaption,blockquote):hov
   }
   const KEYF = { meta: 'k', entities: 'id', bodies: 'id', sessions: 'n', sbodies: 'n', events: 'id', maps: 'id', blobs: 'id', pins: 'id', links: 'k', regions: 'id' };
   async function reviewList() {
-    const d = dlg('revlist', `<h3 style="${H3}">Da inviare a Claude</h3><div class="rvl">Carico…</div><div style="display:flex;margin-top:12px"><button type="button" class="btn ghost" style="margin-left:auto" data-a="close">Chiudi</button></div>`);
+    const d = dlg('revlist', `<h3 style="${H3}">${salvaQui() ? 'Da salvare' : 'Da inviare a Claude'}</h3><div class="rvl">Carico…</div><div style="display:flex;margin-top:12px"><button type="button" class="btn ghost" style="margin-left:auto" data-a="close">Chiudi</button></div>`);
     const body = d.querySelector('.rvl'); let base = {};
     if (PEND.size) { try { base = (await serverData()).stores; } catch { body.textContent = 'Non riesco a leggere i dati pubblicati per il confronto: controlla la connessione e riprova.'; return; } }
     const draw = () => {
