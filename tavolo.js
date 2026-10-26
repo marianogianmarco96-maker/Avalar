@@ -520,7 +520,12 @@ dialog.tv-poz menu small{font-weight:400;opacity:.8}
 .tv-sch .at .riga+.riga{grid-template-columns:1fr auto auto auto auto;margin-top:2px}
 .tv-sch .at input{background:var(--box);border:0;border-radius:3px}
 .tv-sch .at .an{font-weight:700}
-.tv-sch .at .tp{font-size:.78rem;background:transparent}
+.tv-sch .at .tp{font-size:.82rem;background:transparent}
+.tv-sch .at textarea.auto{field-sizing:content;resize:none;overflow:hidden;min-height:0;line-height:1.3;white-space:pre-wrap;overflow-wrap:anywhere;background-image:none}
+.tv-sch .at textarea.an{display:block;background:var(--box);border-radius:3px;padding:3px 5px;margin:0}
+.tv-sch .at .riga:first-child input{align-self:start;height:calc(1.3em + 6px)}
+dialog.tv-pag .tv-sch .at .riga.az .tp{flex:1 1 0}
+.tv-sch .at .riga:first-child{align-items:start}
 .tv-sch .at .mini{padding:1px 6px}
 .tv-sch .at .via{border-color:transparent;background:transparent}
 .tv-sch .agg{margin:4px 0 6px}
@@ -3913,6 +3918,9 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     }
     const box = d.querySelector('.tv-sch');
     // scegliere un nome tra i suggerimenti del manuale arriva come input senza digitazione
+    box.addEventListener('input', e => { if (e.target.matches('textarea.auto')) cresci(e.target); });
+    // il nome di un attacco resta su una riga logica: Invio non va a capo
+    box.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('textarea.an')) e.preventDefault(); });
     box.addEventListener('input', e => { const el = e.target.closest('[data-f]'); if (el && el.type !== 'checkbox' && el.tagName !== 'SELECT') campo(el, !e.inputType || e.inputType === 'insertReplacementText'); });
     box.addEventListener('change', e => { const el = e.target.closest('[data-f]'); if (el && (el.type === 'checkbox' || el.tagName === 'SELECT')) campo(el); else if (el && /^inc\.\d+\.nome$/.test(el.dataset.f)) campo(el, true); else if (e.target.dataset.k) azioneScheda(e.target); });
     box.addEventListener('click', e => { const b = e.target.closest('button'); T.maiusc = e.shiftKey; if (b && box.contains(b)) azioneScheda(b); });
@@ -3995,7 +4003,10 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     box.querySelectorAll('[data-prof]').forEach(el => { const v = num(s.dati[el.dataset.prof]) || (s.dati[el.dataset.prof] === true ? 1 : 0); el.textContent = PROF[v]; el.title = PROFT[v]; el.classList.toggle('on', v > 0); });
     box.querySelectorAll('[data-dots]').forEach(el => el.innerHTML = puntini(s, el.dataset.dots, puoScrivere(s)));
     box.querySelectorAll('[data-adv]').forEach(el => el.classList.toggle('on', +el.dataset.adv === sv.adv));
+    box.querySelectorAll('textarea.auto').forEach(cresci);
   }
+  // senza field-sizing (Safari, Firefox) l'altezza si calcola a mano; a scheda nascosta si riprova quando si vede
+  function cresci(el) { if (CSS.supports?.('field-sizing', 'content') || !el.offsetParent) return; el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
   // la scheda di un PNG come nel Manuale dei Mostri: si legge a colpo d'occhio, si tira cliccando sui numeri
   const PE = { '0': 10, '1/8': 25, '1/4': 50, '1/2': 100, 1: 200, 2: 450, 3: 700, 4: 1100, 5: 1800, 6: 2300, 7: 2900, 8: 3900, 9: 5000, 10: 5900, 11: 7200, 12: 8400, 13: 10000, 14: 11500, 15: 13000, 16: 15000, 17: 18000, 18: 20000, 19: 22000, 20: 25000, 21: 33000, 22: 41000, 23: 50000, 24: 62000, 25: 75000, 26: 90000, 27: 105000, 28: 120000, 29: 135000, 30: 155000 };
   const media = f => { const m = String(f || '').replace(/\s+/g, '').match(/^(\d*)d(\d+)([+-]\d+)?$/i); return m ? Math.max(1, Math.floor((+m[1] || 1) * (+m[2] + 1) / 2 + (+m[3] || 0))) : null; };
@@ -4312,6 +4323,8 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     const d = s.dati, w = puoScrivere(s), dis = w ? '' : ' disabled', pg = formaPg(s), foto = fotoScheda(s), tk = tokScheda();
     const inp = (f, ph = '', cls = '', type = 'text', extra = '') => `<input type="${type}" data-f="${f}" class="${cls}" placeholder="${esc(ph)}" aria-label="${esc(ph)}"${extra}${dis}>`;
     const n = (f, ph, cls = '') => inp(f, ph, cls, 'number', ' step="1"');
+    // una riga che va a capo e cresce con il testo (nomi e descrizioni degli attacchi)
+    const testo = (f, ph, cls) => `<textarea data-f="${f}" class="auto ${cls}" rows="1" placeholder="${esc(ph)}" aria-label="${esc(ph)}"${dis}></textarea>`;
     const area = (f, ph, rows = 4) => `<textarea data-f="${f}" placeholder="${esc(ph)}" aria-label="${esc(ph)}" rows="${rows}"${dis}></textarea>`;
     const cella = (dentro, et) => `<div class="li">${dentro}<small>${et}</small></div>`;
     const box = (dentro, et, cls = '') => `<div class="sez ${cls}">${dentro}<h6>${et}</h6></div>`;
@@ -4330,8 +4343,8 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
       const car = CAR.map(([k, , nome]) => `<div class="cbox"><small>${nome}</small><button type="button" class="rb mod" data-roll="car:${k}" data-c="m:${k}" title="Prova di ${nome}"${dis}></button>${n(k, '10', 'ov')}</div>`).join('');
       const ts = CAR.map(([k, , nome]) => `<div class="r"><button type="button" class="pr" data-prof="ts_${k}"${dis}></button><em data-c="ts:${k}"></em><button type="button" class="lk" data-roll="ts:${k}"${dis}>${nome}</button></div>`).join('');
       const ab = ABIL.map(([k, nome, c]) => `<div class="r"><button type="button" class="pr" data-prof="ab_${k}"${dis}></button><em data-c="ab:${k}"></em><button type="button" class="lk" data-roll="ab:${k}"${dis}>${nome} <small>(${c.slice(0, 1).toUpperCase() + c.slice(1, 3)})</small></button></div>`).join('');
-      const at = (d.attacchi || []).map((x, i) => `<div class="at" data-ordi="${i}"><div class="riga">${w ? '<span class="mano" title="Trascina per spostare" aria-hidden="true">⠿</span>' : ''}${inp(`att.${i}.nome`, 'Arma', 'an')}${inp(`att.${i}.colpire`, '+0', 'ac', 'number')}${inp(`att.${i}.danni`, '1d6+1', 'ad')}</div>
-          <div class="riga az">${inp(`att.${i}.tipo`, 'Tipo e note', 'tp')}<button type="button" class="mini" data-roll="att:${i}"${dis} title="Tiro per colpire">🎯 Colpisci</button><button type="button" class="mini" data-roll="dan:${i}"${dis} title="Danni">💥 Danni</button><button type="button" class="mini" data-roll="cri:${i}"${dis} title="Critico: dadi dei danni raddoppiati">✖2 Critico</button>${w ? `<button type="button" class="mini via" data-k="delatt" data-i="${i}" title="Togli l'attacco" aria-label="Togli l'attacco">🗑</button>` : ''}</div></div>`).join('');
+      const at = (d.attacchi || []).map((x, i) => `<div class="at" data-ordi="${i}"><div class="riga">${w ? '<span class="mano" title="Trascina per spostare" aria-hidden="true">⠿</span>' : ''}${testo(`att.${i}.nome`, 'Arma', 'an')}${inp(`att.${i}.colpire`, '+0', 'ac', 'number')}${inp(`att.${i}.danni`, '1d6+1', 'ad')}</div>
+          <div class="riga az">${testo(`att.${i}.tipo`, 'Tipo e note', 'tp')}<button type="button" class="mini" data-roll="att:${i}"${dis} title="Tiro per colpire">🎯 Colpisci</button><button type="button" class="mini" data-roll="dan:${i}"${dis} title="Danni">💥 Danni</button><button type="button" class="mini" data-roll="cri:${i}"${dis} title="Critico: dadi dei danni raddoppiati">✖2 Critico</button>${w ? `<button type="button" class="mini via" data-k="delatt" data-i="${i}" title="Togli l'attacco" aria-label="Togli l'attacco">🗑</button>` : ''}</div></div>`).join('');
       const pf = `<div class="pfmax"><span>Punti ferita massimi</span>${n(tk ? 'tok.pf_max' : 'pf_max', '—')}</div>${n(tk ? 'tok.pf' : 'pf', '—', 'pfa')}
         ${w ? '<div class="q"><button type="button" data-k="pfm" title="Danni">− Danni</button><input type="number" data-k="pfq" value="1" min="1" aria-label="Quanti punti"><button type="button" data-k="pfp" title="Cura">+ Cura</button></div>' : ''}`;
       corpo = `${!pg ? '<button type="button" class="mini agg fine" data-k="fine">✓ Fatto: torna al blocco delle statistiche</button>' : ''}<div class="p1">
@@ -4541,7 +4554,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     if (k === 'tz-m' && tkz) { const a = azioniDi(tkz); return segnaAzioni(tkz, { mov: Math.max(0, (a.mov || 0) - +b.dataset.d) }); }
     if (k === 'tz-fine') return finisciTurno();
     if (k === 'tz-reset' && tkz) return segnaAzioni(tkz, { az: false, bon: false, rea: false, mov: 0, scatto: false, fatte: [], ox: null, oy: null });
-    if (k === 'addatt') { await salvaScheda(s.id, { attacchi: [...(d.attacchi || []), { nome: '', colpire: null, danni: '', tipo: '' }] }, true); disegnaScheda(); sv.d.querySelector('.atts .at:last-of-type input')?.focus(); return; }
+    if (k === 'addatt') { await salvaScheda(s.id, { attacchi: [...(d.attacchi || []), { nome: '', colpire: null, danni: '', tipo: '' }] }, true); disegnaScheda(); sv.d.querySelector('.atts .at:last-of-type textarea.an')?.focus(); return; }
     if (k === 'delatt') { await salvaScheda(s.id, { attacchi: (d.attacchi || []).filter((_, i) => i !== +b.dataset.i) }, true); return disegnaScheda(); }
     if (k === 'riposo') { const p = {}; for (let i = 1; i <= 9; i++) if (num(d['usati_' + i])) p['usati_' + i] = 0; return salvaScheda(s.id, p, true); }
     if (k === 'pfm' || k === 'pfp') {
@@ -4631,6 +4644,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
       }
       if (!s) throw new Error('Questo personaggio non ha ancora una scheda.');
       apriScheda(s.id, null, host); seguiPagina(true);
+      requestAnimationFrame(() => host.querySelectorAll('textarea.auto').forEach(cresci));
       // l'evento arriva dopo la chiusura: se intanto la pagina ha riaperto una scheda, quella resta collegata
       T.sv.d.addEventListener('close', () => { host.dispatchEvent(new Event('chiusa')); if (T.sv?.pag) return; seguiPagina(false); T.pag = false; });
       return true;
