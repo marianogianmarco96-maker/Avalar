@@ -9,6 +9,7 @@ Uso:
 Gli account stanno nei dati del DM (meta «giocatori»: id, nome, scheda del PG, password, sale), quindi solo il DM li legge.
 «Mostra a:» (vis: [id dei giocatori], [] = nessuno) su schede, sezioni, voci, eventi e collegamenti, e le frasi [PER Sam, Violet]…[/PER],
 limitano una parte ai giocatori scelti: senza vis la vede chiunque. La copia pubblica tiene solo ciò che vedono tutti i giocatori.
+La quest personale di un PG (sezione con quest: true) arriva solo nella copia del suo giocatore, anche se vis dicesse altro.
 Le immagini riservate che un giocatore può vedere sono ricifrate con una chiave propria (blobkeys), che arriva solo nelle copie
 di chi le vede: la chiave del DM non esce mai da data.enc.
 
@@ -85,11 +86,15 @@ def copia(d, chi=None):
         t = re.sub(r'\[\[([^\]|]+?)(?:\|([^\]]+?))?\]\]', lambda m: (m.group(2) or nascoste[m.group(1)]) if m.group(1) in nascoste else m.group(0), t)
         return frase(NOTA_DM.sub('', t))
 
+    # quest personale (quest: true nella scheda di un PG): solo il giocatore di quel PG, qualunque cosa dica «Mostra a:»
+    pg_di = {g.get('pg'): g['id'] for g in G}
+    quest_ok = lambda k, s: not s.get('quest') or (chi is not None and pg_di.get(k, k[3:] if k.startswith('pg-') else None) == chi)
+
     bodies = {}
     for k in E:
         b = S['bodies'][k]
         bodies[k] = {**b, 'sections': [senza({**s, 'entries': [senza({**e, 'text': testo(e['text'])}) for e in s['entries'] if not e.get('dm') and vede(e) and not VOCE_DM.match(e['text'])]})
-                                       for s in b['sections'] if not s.get('dm') and vede(s) and not SEZIONE_DM.search(s['title'])]}
+                                       for s in b['sections'] if not s.get('dm') and vede(s) and quest_ok(k, s) and not SEZIONE_DM.search(s['title'])]}
     mappe = {k: m for k, m in S['maps'].items() if m.get('discovered') is not False}
     pins = {k: p for k, p in S['pins'].items() if p.get('discovered') is not False and p.get('entityId', None) not in nascoste and p['mapId'] in mappe}
     usati = {'portrait-' + k for k, e in E.items() if e.get('portrait')} | {x for e in E.values() for ph in e.get('photos', []) for x in (ph['id'], ph.get('tid')) if x} \
