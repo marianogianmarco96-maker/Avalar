@@ -712,6 +712,11 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
 /* la scheda nella pagina del personaggio: riempie il riquadro accanto al testo */
 dialog.dlg.tv-side.tv-sw.tv-pag{position:relative;inset:auto;margin:0;width:100%!important;height:100%!important;max-height:none;min-width:0;min-height:0;z-index:auto;border-radius:8px;box-shadow:0 10px 30px #0005}
 dialog.dlg.tv-side.tv-centro{inset:0;margin:auto;height:fit-content}
+/* fuori dal Tavolo la scheda non tira i dadi: i valori restano, i pulsanti dei tiri spariscono */
+dialog.tv-pag .seg3,dialog.tv-pag .tbar .sg,dialog.tv-pag .mini[data-roll],dialog.tv-pag [data-k=prv-dadi],dialog.tv-pag [data-k=inc-lancia],dialog.tv-pag [data-k=inc-chat],dialog.tv-pag [data-k=tirapf],dialog.tv-pag [data-k=bevi]{display:none!important}
+dialog.tv-pag [data-roll]{pointer-events:none;cursor:default}
+dialog.tv-pag .tv-sch .dt{all:unset;font:inherit;color:inherit}
+dialog.tv-pag .tv-sch button[data-roll]:not(.rb){border:0!important;text-decoration:none!important;background:none!important;box-shadow:none!important}
 dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:#5a4d3e}
 .tv-scuro .tv-sch{--k:#efe5d0;--k2:#bcae95;--lin:#8a7a60;--gr:#2b241e;--pp:#1d1814;--box:#241e19;--ul:#5e5244;--rig:#ffffff10}
 .tv-scuro .tv-sch .cbox .ov,.tv-scuro .tv-sch .lv .lt b{background:#1d1814}
@@ -4450,6 +4455,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     if (k === 'seg') { sv.seg = b.checked; return; }
     if (k === 'tema') { try { localStorage.setItem(TEMAS, schedaScura() ? 'chiaro' : 'scuro'); } catch { } return disegnaScheda(); }
     if (k === 'za') { try { localStorage.setItem(ZOOMS, clamp(Math.round((zoomScheda() + +b.dataset.d) * 10) / 10, 0.8, 1.6)); } catch { } return applicaZoomScheda(); }
+    if (sv.pag && (b.dataset.roll || ['prv-dadi', 'inc-lancia', 'inc-chat', 'tirapf', 'bevi'].includes(k))) return;
     const P = d.privilegi || [], pi = +b.dataset.i, pv = P[pi], chiave = pv && (pv.id || 'i' + pi);
     if (k === 'prv-apri' && pv) { sv.aperti = sv.aperti || new Set(); sv.aperti.has(chiave) ? sv.aperti.delete(chiave) : sv.aperti.add(chiave); return disegnaScheda(); }
     if (k === 'prv-dadi' && pv) return tira(pv.dadi, null, sv.seg, `${s.nome} · ${pv.nome || 'Privilegio'}`);
