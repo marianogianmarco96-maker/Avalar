@@ -719,14 +719,14 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const fmtDate = ts => ts ? new Date(ts).toLocaleString('it-IT', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
 const fmtSize = b => b > 1e6 ? (b / 1e6).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1e3)) + ' KB';
 
-const TYPES = { pg: 'Personaggio', png: 'PNG', luogo: 'Luogo', oggetto: 'Oggetto', fazione: 'Fazione', missione: 'Missione', lore: 'Lore' };
-const TYPE_PL = { pg: 'Personaggi', png: 'PNG', luogo: 'Luoghi', oggetto: 'Oggetti', fazione: 'Fazioni', missione: 'Missioni', lore: 'Lore' };
+const TYPES = { pg: 'Membro del party', png: 'Personaggio', luogo: 'Luogo', oggetto: 'Oggetto', fazione: 'Fazione', missione: 'Missione', lore: 'Lore' };
+const TYPE_PL = { pg: 'Party', png: 'Personaggi', luogo: 'Luoghi', oggetto: 'Oggetti', fazione: 'Fazioni', missione: 'Missioni', lore: 'Lore' };
 const TYPE_ORDER = ['pg', 'png', 'luogo', 'oggetto', 'fazione', 'missione', 'lore'];
-const PNG_ATT = { alleato: 'Alleati', nemico: 'Nemici', neutrale: 'Neutrali' }, PNG_IMP = { importante: 'Importanti', minore: 'Secondari' }, LUOGO_CAT = { regione: 'Regioni', citta: 'Città e quartieri', edificio: 'Locali ed edifici', dungeon: 'Dungeon e sotterranei', altro: 'Altro' };
-const catPills = e => { const a = e.type === 'png' ? [PNG_ATT[e.cat] && e.cat, PNG_IMP[e.imp] && (e.imp === 'minore' ? 'secondario' : e.imp)] : e.type === 'luogo' ? [LUOGO_CAT[e.cat] && LUOGO_CAT[e.cat].toLowerCase()] : []; return a.filter(Boolean).map(x => `<span class="pill">${esc(x)}</span>`).join(' '); };
+const PNG_ATT = { alleato: 'Alleati', nemico: 'Nemici', neutrale: 'Neutrali' }, PNG_IMP = { importante: 'Principali', minore: 'Secondari' }, LUOGO_CAT = { regione: 'Regioni', citta: 'Città e quartieri', edificio: 'Locali ed edifici', dungeon: 'Dungeon e sotterranei', altro: 'Altro' };
+const catPills = e => { const a = e.type === 'png' ? [PNG_ATT[e.cat] && e.cat, PNG_IMP[e.imp] && (e.imp === 'minore' ? 'secondario' : 'principale')] : e.type === 'luogo' ? [LUOGO_CAT[e.cat] && LUOGO_CAT[e.cat].toLowerCase()] : []; return a.filter(Boolean).map(x => `<span class="pill">${esc(x)}</span>`).join(' '); };
 const TYPE_COLOR = { pg: '#8f2d3a', png: '#3b5f8a', luogo: '#3f7a4a', oggetto: '#b0802a', fazione: '#6a4a8c', missione: '#b4541c', lore: '#5b6670' };
 const TYPE_ALIAS = {
-  pg: 'pg', pc: 'pg', personaggio: 'pg', giocatore: 'pg', 'personaggio giocante': 'pg',
+  pg: 'pg', pc: 'pg', personaggio: 'pg', giocatore: 'pg', 'personaggio giocante': 'pg', party: 'pg', 'membro del party': 'pg',
   png: 'png', npc: 'png', 'personaggio non giocante': 'png',
   luogo: 'luogo', location: 'luogo', posto: 'luogo', citta: 'luogo', regione: 'luogo', dungeon: 'luogo',
   oggetto: 'oggetto', item: 'oggetto', artefatto: 'oggetto', arma: 'oggetto',
@@ -735,7 +735,7 @@ const TYPE_ALIAS = {
   lore: 'lore', altro: 'lore', evento: 'lore', creatura: 'lore', divinita: 'lore', concetto: 'lore', mostro: 'lore'
 };
 const typeOf = s => TYPE_ALIAS[norm(s)] || null;
-const badge = t => `<span class="badge t-${t}">${esc(t === 'pg' ? 'PG' : (TYPES[t] || t))}</span>`;
+const badge = t => `<span class="badge t-${t}">${esc(t === 'pg' ? 'Party' : (TYPES[t] || t))}</span>`;
 
 /* ---------- testo: markdown leggero + link [[id]] ---------- */
 function findEnt(ref) {
@@ -1013,7 +1013,7 @@ function ensureEntList() {
 function pickEntity(text) {
   text = String(text || '').trim(); if (!text) return null;
   const m = text.match(/^(.*) \(([^)]+)\)$/);
-  if (m) { const ids = S.byName.get(norm(m[1])) || []; const t = typeOf(m[2]); const hit = ids.map(i => S.ents.get(i)).find(e => e.type === t); if (hit) return hit; }
+  if (m) { const ids = S.byName.get(norm(m[1])) || []; const t = Object.keys(TYPES).find(k => TYPES[k] === m[2]) || typeOf(m[2]); const hit = ids.map(i => S.ents.get(i)).find(e => e.type === t); if (hit) return hit; }
   return findEnt(text);
 }
 
@@ -1877,7 +1877,7 @@ route(/^\/schede$/, async (_, q) => {
       const host = $('#cchips'); let h = '';
       const base = t => [...S.ents.values()].filter(e => e.type === t), cn = (t, f, k) => base(t).filter(e => e[f] === k).length;
       const grp = (t, f, label, map, arr) => `<span class="hint">${label}:</span>` + Object.entries(map).filter(([k]) => cn(t, f, k)).map(([k, l]) => `<a class="chip ${arr.includes(k) ? 'on' : ''}" data-f="${f}" data-v="${k}">${l} <em>${cn(t, f, k)}</em></a>`).join('');
-      if (ES.types.includes('png')) h += grp('png', 'cat', 'Atteggiamento', PNG_ATT, ES.cats) + ' ' + grp('png', 'imp', 'Importanza', PNG_IMP, ES.imps) + ' ';
+      if (ES.types.includes('png')) h += grp('png', 'cat', 'Atteggiamento', PNG_ATT, ES.cats) + ' ' + grp('png', 'imp', 'Ruolo', PNG_IMP, ES.imps) + ' ';
       if (ES.types.includes('luogo')) h += grp('luogo', 'cat', 'Luoghi', LUOGO_CAT, ES.cats);
       if (ES.types.length || ES.cats.length || ES.imps.length) h += ' <a class="chip" data-reset="1">✕ Azzera filtri</a>';
       host.innerHTML = h; host.style.display = h ? '' : 'none';
@@ -2012,7 +2012,7 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
   setActs({
     ...evActs(evs),
     edit: async () => {
-      const r = await formDlg({ title: 'Dati della scheda', fields: [{ k: 'type', label: 'Tipo', type: 'select', value: e.type, options: TYPE_ORDER.map(t => [t, TYPES[t]]) }, { k: 'name', label: 'Nome', value: e.name, req: true }, { k: 'brief', label: 'Riga breve', value: e.brief }, { k: 'status', label: 'Stato', value: e.status }, ...(e.type === 'png' ? [{ k: 'cat', label: 'Atteggiamento', type: 'select', value: e.cat || '', options: [['', '— non assegnato —'], ...Object.entries(PNG_ATT)] }, { k: 'imp', label: 'Importanza', type: 'select', value: e.imp || '', options: [['', '— non assegnata —'], ...Object.entries(PNG_IMP)] }] : e.type === 'luogo' ? [{ k: 'cat', label: 'Categoria del luogo', type: 'select', value: e.cat || '', options: [['', '— non assegnata —'], ...Object.entries(LUOGO_CAT)] }] : []), { k: 'alias', label: 'Alias (separati da virgola)', value: (e.alias || []).join(', ') }, { k: 'dm', label: '🔒 Solo per DM (scheda nascosta ai giocatori)', type: 'check', value: e.discovered === false }, { k: 'vis', type: 'players', value: e.vis }] });
+      const r = await formDlg({ title: 'Dati della scheda', fields: [{ k: 'type', label: 'Tipo', type: 'select', value: e.type, options: TYPE_ORDER.map(t => [t, TYPES[t]]) }, { k: 'name', label: 'Nome', value: e.name, req: true }, { k: 'brief', label: 'Riga breve', value: e.brief }, { k: 'status', label: 'Stato', value: e.status }, ...(e.type === 'png' ? [{ k: 'cat', label: 'Atteggiamento', type: 'select', value: e.cat || '', options: [['', '— non assegnato —'], ...Object.entries(PNG_ATT)] }, { k: 'imp', label: 'Ruolo nella storia', type: 'select', value: e.imp || '', options: [['', '— non assegnato —'], ['importante', 'Principale (nel Tavolo scheda completa, come un giocatore)'], ['minore', 'Secondario (nel Tavolo scheda da PNG)']] }] : e.type === 'luogo' ? [{ k: 'cat', label: 'Categoria del luogo', type: 'select', value: e.cat || '', options: [['', '— non assegnata —'], ...Object.entries(LUOGO_CAT)] }] : []), { k: 'alias', label: 'Alias (separati da virgola)', value: (e.alias || []).join(', ') }, { k: 'dm', label: '🔒 Solo per DM (scheda nascosta ai giocatori)', type: 'check', value: e.discovered === false }, { k: 'vis', type: 'players', value: e.vis }] });
       if (!r) return; await runBatch(['entities'], '', async t => t.put('entities', { ...setVis({ ...e }, r.vis), type: r.type, name: r.name.trim(), brief: r.brief.trim(), status: r.status.trim(), alias: r.alias.split(',').map(x => x.trim()).filter(Boolean), discovered: !r.dm, ...('cat' in r ? { cat: r.cat } : {}), ...('imp' in r ? { imp: r.imp } : {}), upd: Date.now() })); rerender();
     },
     // apparizioni: le sessioni in cui compare la scheda (anche quelle non ancora importate restano spuntate)
