@@ -427,8 +427,12 @@ body{min-width:0}
 .party h2{margin-bottom:12px}
 .party .pgs{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,150px));gap:14px;text-align:center}
 .party a{color:inherit;text-decoration:none!important}
-.party .seguito{margin:14px 0 0;text-align:center}
-.party .seguito a{color:var(--wine);text-decoration:underline!important}
+.party .pgc{position:relative}
+/* personaggio secondario (es. un famiglio): un tondo piccolo sull'angolo del ritratto del suo PG */
+.party .comp{position:absolute;top:-6px;right:-6px;width:54px;display:flex;flex-direction:column;align-items:center;gap:2px;z-index:1}
+.party .comp img,.party .comp .noimg{width:50px;height:50px;aspect-ratio:auto;border-radius:50%;object-position:center;font-size:1.2rem}
+.party .comp small{font-family:var(--display);font-size:.62rem;line-height:1.1;color:var(--wine);background:var(--paper);border:1px solid var(--gold);border-radius:8px;padding:1px 5px;white-space:nowrap}
+@media (max-width:600px){.party .comp{top:-5px;right:-4px;width:44px}.party .comp img,.party .comp .noimg{width:40px;height:40px}.party .comp small{font-size:.55rem;padding:0 4px}}
 .party img,.party .noimg{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;object-position:top;border-radius:6px;border:2px solid var(--gold);box-shadow:0 3px 10px #0004;transition:transform .15s}
 .party .noimg{display:flex;align-items:center;justify-content:center;background:var(--paper2);font-family:var(--display);font-size:2rem;color:var(--wine)}
 .party a:hover img{transform:translateY(-2px)}
@@ -1683,7 +1687,7 @@ route(/^\/$/, async () => {
     const last = S.sess[S.sess.length - 1], party = [...S.ents.values()].filter(e => e.type === 'pg' && !S.ents.has(e.di)).sort((a, c) => (a.sessions?.[0] ?? 99) - (c.sessions?.[0] ?? 99) || a.name.localeCompare(c.name));
     const bgMap = S.maps.find(m => !m.parent && m.thumb) || S.maps.find(m => m.thumb);
     if (last) h += `<a class="hero" href="#/sessioni/${last.n}">${bgMap ? `<span class="bg" style="background-image:url('${bgMap.thumb}')"></span>` : ''}<span class="in"><small>Ultima sessione · <span class="num">${last.n}</span></small><b class="ht">${esc(last.title || 'Sessione ' + last.n)}${ongoingPill(last)}</b>${last.short || last.brief ? `<span class="hb">${esc(last.short || last.brief)}</span>` : ''}<span class="go">${last.ongoing ? 'Riprendi da qui' : 'Continua a leggere'} →</span></span></a>`;
-    if (party.length) h += `<div class="card party"><h2>Il Party</h2><div class="pgs">${party.map(e => `<a href="#/scheda/${encodeURIComponent(e.id)}">${e.portrait ? `<img src="${e.portrait.thumb}" data-pid="${esc(e.portrait.id)}" alt="">` : `<span class="noimg">${esc(e.name[0])}</span>`}<b>${esc(e.name)}</b></a>`).join('')}</div>${(() => { const sec = [...S.ents.values()].filter(e => e.type === 'pg' && S.ents.has(e.di)); return sec.length ? `<p class="hint seguito">Al seguito: ${sec.map(e => `<a href="#/scheda/${encodeURIComponent(e.id)}">${esc(e.name)}</a> (di ${esc(S.ents.get(e.di).name)})`).join(', ')}</p>` : ''; })()}</div>`;
+    if (party.length) h += `<div class="card party"><h2>Il Party</h2><div class="pgs">${party.map(e => `<div class="pgc"><a href="#/scheda/${encodeURIComponent(e.id)}">${e.portrait ? `<img src="${e.portrait.thumb}" data-pid="${esc(e.portrait.id)}" alt="">` : `<span class="noimg">${esc(e.name[0])}</span>`}<b>${esc(e.name)}</b></a>${[...S.ents.values()].filter(x => x.type === 'pg' && x.di === e.id).map(x => `<a class="comp" href="#/scheda/${encodeURIComponent(x.id)}" title="${esc(x.name)}, personaggio secondario di ${esc(e.name)}">${x.portrait ? `<img src="${x.portrait.thumb}" alt="">` : `<span class="noimg">${esc(x.name[0])}</span>`}<small>${esc(x.name)}</small></a>`).join('')}</div>`).join('')}</div></div>`;
     h += `<div class="card"><p class="statline num"><span><b>${S.sess.length}</b> sessioni</span> · <span><b>${S.ents.size}</b> schede</span> · <span><b>${evCount}</b> eventi</span> · <span><b>${S.maps.length}</b> mappe</span></p>
       <div class="chips">${TYPE_ORDER.filter(t => cnt[t]).map(t => `<a class="chip" href="#/schede?tipo=${t}">${TYPE_PL[t]} <em>${cnt[t]}</em></a>`).join('')}</div></div>`;
     const pro = await dbGet('bodies', 'lore-introduzione-al-mondo');
