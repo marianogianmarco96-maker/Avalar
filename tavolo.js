@@ -1154,7 +1154,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
   }
 
   /* ---------- stato ---------- */
-  const T = { mask: [], turno: [], chat: [], mmodo: 'svela', mforma: 'rett', mraggio: 0, mini: new Map(), me: null, info: null, stato: null, scene: new Map(), tok: new Map(), tiri: [], vista: null, view: { x: 0, y: 0, z: 1 }, tool: 'muovi', livello: 'segnalini', tdpriv: false, allN: 3, muri: [], mtool: 'muro', mfatti: [], wver: 0, schede: null, sv: null, ch: null, rulers: new Map(), salv: new Map(), live: false, url: new Map(), online: [] };
+  const T = { mvarchi: new Map(), mask: [], turno: [], chat: [], mmodo: 'svela', mforma: 'rett', mraggio: 0, mini: new Map(), me: null, info: null, stato: null, scene: new Map(), tok: new Map(), tiri: [], vista: null, view: { x: 0, y: 0, z: 1 }, tool: 'muovi', livello: 'segnalini', tdpriv: false, allN: 3, muri: [], mtool: 'muro', mfatti: [], wver: 0, schede: null, sv: null, ch: null, rulers: new Map(), salv: new Map(), live: false, url: new Map(), online: [] };
   const isDM = () => T.me?.ruolo === 'dm';
   const scena = () => T.scene.get(T.vista) || null;
   const puoMuovere = t => isDM() || (t.giocatore && t.giocatore === T.me.giocatore);
@@ -1702,7 +1702,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
       if (punti.size > 2) return;
       const p = mondo(st, e), el = e.target.closest('.tv-tok'), t = el && T.tok.get(el.dataset.id);
       if (T.mira?.area) { T.mira.p = p; disegnaArea(); return; }
-      if (T.mira && t) { if (t.id !== T.mira.tok) scegliBersaglio(t); return; }
+      if (T.mira && t) { if (t.id !== T.mira.tok || suSe(T.mira)) scegliBersaglio(t); return; }
       if (T.tool === 'maschera' && isDM()) { mas = inizioMaschera(p); return; }
       if (T.tool === 'muri' && isDM()) { inizioMuro(p, e); return; }
       if (T.tool === 'difficile' && isDM()) { inizioDif(p); return; }
@@ -2911,7 +2911,24 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     pop.querySelector('[data-k=via]').onclick = () => { chiudiPop(); cancellaMuro(m); };
   }
   // punto del muro: si attacca agli estremi dei muri vicini (per chiudere le stanze) e, se scelto, agli angoli delle caselle
+  // la porta si appoggia sul muro più vicino: il primo punto ovunque lungo il muro, il secondo sullo stesso muro
+  function sulMuro(p, m) {
+    const [x1, y1, x2, y2] = m.punti, dx = x2 - x1, dy = y2 - y1, l = dx * dx + dy * dy || 1;
+    const t = clamp(((p.x - x1) * dx + (p.y - y1) * dy) / l, 0, 1);
+    return { x: Math.round((x1 + t * dx) * 10) / 10, y: Math.round((y1 + t * dy) * 10) / 10, t, m };
+  }
+  function puntaPorta(p, e) {
+    const fisso = (T.mdown?.a || T.mu?.a)?.m;
+    let q = null;
+    if (fisso) q = sulMuro(p, fisso);
+    else { let bd = 18 / T.view.z; for (const m of muriScena(scena())) { if (m.porta) continue; const r = sulMuro(p, m), d = Math.hypot(r.x - p.x, r.y - p.y); if (d < bd) { bd = d; q = r; } } }
+    if (!q) return null;
+    // con l'aggancio alla griglia la porta cade sugli angoli delle caselle, se sono sul muro
+    if (aggancioGriglia() && !e?.altKey) { const sc = scena(), g = sc.griglia, c = { x: sc.griglia_x + Math.round((q.x - sc.griglia_x) / g) * g, y: sc.griglia_y + Math.round((q.y - sc.griglia_y) / g) * g }, r = sulMuro(c, q.m); if (Math.hypot(r.x - c.x, r.y - c.y) < 1) q = r; }
+    return q;
+  }
   function punta(p, e) {
+    if (T.mtool === 'porta') { const q = puntaPorta(p, e); if (q) return q; }
     const sc = scena(), cand = muriScena(sc).flatMap(m => [[m.punti[0], m.punti[1]], [m.punti[2], m.punti[3]]]);
     if (T.mu?.a) cand.push([T.mu.a.x, T.mu.a.y]);
     let best = null, bd = 12 / T.view.z;
@@ -2930,7 +2947,26 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     const r = await SB.from('tavolo_muri').insert({ scena: sc.id, punti: [a.x, a.y, b.x, b.y], porta: T.mtool === 'porta' }).select().single();
     if (r.error) return toast(sqlMancante(r.error) ? 'Per i muri esegui tavolo/tappa-4.sql in Supabase.' : r.error.message, 'err');
     if (!T.muri.some(m => m.id === r.data.id)) T.muri.push(r.data);
-    T.mfatti.push(r.data.id); T.wver++; programmaMaschera(); barraMaschera();
+    T.mfatti.push(r.data.id);
+    if (r.data.porta && a.m && a.m === b.m && T.muri.includes(a.m)) await apriVarco(a.m, a, b, r.data.id);
+    T.wver++; programmaMaschera(); barraMaschera();
+  }
+  // la porta prende il posto del pezzo di muro sotto di lei: da aperta si passa (e si vede) attraverso
+  async function apriVarco(m, a, b, porta) {
+    const [x1, y1, x2, y2] = m.punti, [p, q] = a.t <= b.t ? [a, b] : [b, a];
+    const pezzi = [[x1, y1, p.x, p.y], [q.x, q.y, x2, y2]].filter(([ax, ay, bx, by]) => Math.hypot(bx - ax, by - ay) >= 3);
+    const ins = pezzi.length ? await SB.from('tavolo_muri').insert(pezzi.map(punti => ({ scena: m.scena, punti, porta: false }))).select() : { data: [] };
+    if (ins.error) return toast(ins.error.message, 'err');
+    const del = await SB.from('tavolo_muri').delete().eq('id', m.id); if (del.error) return toast(del.error.message, 'err');
+    T.muri = T.muri.filter(x => x.id !== m.id); for (const n of ins.data) if (!T.muri.some(x => x.id === n.id)) T.muri.push(n);
+    T.mvarchi.set(porta, { punti: m.punti, scena: m.scena, pezzi: ins.data.map(n => n.id) });
+  }
+  // annullando la porta il muro torna intero
+  async function chiudiVarco(porta) {
+    const v = T.mvarchi.get(porta); if (!v) return; T.mvarchi.delete(porta);
+    for (const id of v.pezzi) { const m = T.muri.find(x => x.id === id); if (m) await cancellaMuro(m); }
+    const r = await SB.from('tavolo_muri').insert({ scena: v.scena, punti: v.punti, porta: false }).select().single(); if (r.error) return toast(r.error.message, 'err');
+    if (!T.muri.some(m => m.id === r.data.id)) T.muri.push(r.data); T.wver++; programmaMaschera();
   }
   async function cancellaMuro(m) {
     T.muri = T.muri.filter(x => x.id !== m.id); T.wver++; programmaMaschera();
@@ -2950,8 +2986,8 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
   // trascinando si disegna un muro; cliccando si mettono i punti uno dopo l'altro (doppio clic, Invio o Esc per finire)
   function fineMuro(p, e) {
     if (T.mgom) { T.mgom = null; return; }
-    const d = T.mdown; T.mdown = null; if (!d) return;
-    const b = punta(p, e);
+    const d = T.mdown; if (!d) return;
+    const b = punta(p, e); T.mdown = null;
     if (Math.hypot(e.clientX - d.sx, e.clientY - d.sy) > 6) { T.mu = null; salvaMuro(d.a, b); }
     else if (!T.mu) T.mu = { a: d.a };
     else if (Math.hypot(b.x - T.mu.a.x, b.y - T.mu.a.y) < 3) T.mu = null;
@@ -2980,7 +3016,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     const bt = (k, ic, l, sel, tip, dis) => `<button type="button" data-w="${k}" class="${sel ? 'on' : ''}" title="${esc(tip || l)}" aria-label="${esc(tip || l)}" ${dis ? 'disabled' : ''}>${ic ? svg(ic) : ''}${l ? `<span>${l}</span>` : ''}</button>`;
     const n = muriScena(sc).length;
     b.innerHTML = `<div class="g">${sw('visuale', sc.visuale, 'Nebbia automatica', 'I giocatori vedono solo ciò che vedono i loro token: i muri fermano la vista')}</div>
-      <div class="g seg">${bt('muro', 'muro', 'Muro', T.mtool === 'muro', 'Disegna i muri: trascina, oppure clicca punto per punto (doppio clic o Esc per finire)')}${bt('porta', 'porta', 'Porta', T.mtool === 'porta', 'Disegna una porta: si apre e si chiude con un clic')}${bt('gomma', 'gomma', 'Gomma', T.mtool === 'gomma', 'Clicca o passa sui muri per cancellarli')}</div>
+      <div class="g seg">${bt('muro', 'muro', 'Muro', T.mtool === 'muro', 'Disegna i muri: trascina, oppure clicca punto per punto (doppio clic o Esc per finire)')}${bt('porta', 'porta', 'Porta', T.mtool === 'porta', 'Disegna una porta sopra un muro: si aggancia al muro e da aperta lascia passare')}${bt('gomma', 'gomma', 'Gomma', T.mtool === 'gomma', 'Clicca o passa sui muri per cancellarli')}</div>
       <div class="g">${bt('griglia', 'gri', '', aggancioGriglia(), 'Aggancia i punti agli angoli delle caselle (tieni Alt per staccarli)')}${bt('annulla', 'undo', '', false, 'Annulla l\'ultimo muro', !T.mfatti.some(id => T.muri.some(m => m.id === id)))}</div>
       <div class="g sl" title="Solo per te: i giocatori la vedono sempre nera">${svg('luna')}<input type="range" class="tv-rg" data-w="tono" min="0.1" max="0.95" step="0.05" value="${tono()}" aria-label="Opacità della nebbia (solo per te)"><output data-w="tv">${Math.round(tono() * 100)}%</output></div>
       <div class="g">${sw('cono', sc.cono !== false, 'Cono d\'ombra', 'Acceso: i muri proiettano l\'ombra e non si vede cosa c\'è dietro. Spento: restano buie solo le stanze chiuse in cui il token non è')}${sw('esplora', sc.esplora !== false, 'Zone viste', 'I posti già visti restano in penombra')}${sw('vista_condivisa', !!sc.vista_condivisa, 'Vista di gruppo', 'Ogni giocatore vede anche ciò che vedono i compagni')}</div>
@@ -2999,7 +3035,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
       const k = x.dataset.w;
       if (k === 'muro' || k === 'porta' || k === 'gomma') { T.mtool = k; T.mu = null; }
       else if (k === 'griglia') { try { localStorage.setItem(SNAP, aggancioGriglia() ? '0' : '1'); } catch { } }
-      else if (k === 'annulla') { const id = [...T.mfatti].reverse().find(i => T.muri.some(m => m.id === i)), m = T.muri.find(x => x.id === id); if (m) { T.mfatti = T.mfatti.filter(i => i !== id); await cancellaMuro(m); } }
+      else if (k === 'annulla') { const id = [...T.mfatti].reverse().find(i => T.muri.some(m => m.id === i)), m = T.muri.find(x => x.id === id); if (m) { T.mfatti = T.mfatti.filter(i => i !== id); await cancellaMuro(m); await chiudiVarco(id); } }
       else if (k === 'dimentica') {
         if (!await ask('Le zone già esplorate tornano buie per tutti i giocatori. Continuare?', { ok: 'Dimentica', title: 'Zone viste' })) return;
         manda('esplorato', { scena: sc.id }); toast('Fatto: i giocatori vedono di nuovo solo ciò che hanno davanti.');
@@ -3084,6 +3120,10 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     const tipo = [g && !self ? `gittata ${g[1]} m` : '', sp.area || '', sp.ts ? `TS ${sp.ts} CD ${8 + bonusInc(s)}${sp.dimezza ? ' dimezza' : ''}` : '', sp.tipo_danni || ''].filter(Boolean).join(', ');
     return { nome: sp.nome || 'Incantesimo', colpire: sp.attacco ? bonusInc(s) : '', danni: sp.danni || '', tipo };
   }
+  const incDaAtt = (s, at) => {
+    const k = chiaveInc(String(at?.nome || '').split(/[,(]/)[0]); if (!k) return -1;
+    return (s.dati.incantesimi || []).findIndex(sp => (num(sp.livello) || 0) > 0 && [sp.nome, sp.alt].some(n => { const q = chiaveInc(String(n || '').split(/[,(]/)[0]); return q && (q === k || k.startsWith(q + ' ')); }));
+  };
   const armaMira = m => { const s = T.schede?.get(m.sid); if (!s) return null; return m.inc != null ? attDaInc(s, s.dati.incantesimi?.[m.inc]) : s.dati.attacchi?.[m.i]; };
   // lanciare un incantesimo di 1° livello o più consuma uno slot di quel livello
   function usaSlot(s, inc, liv) {
@@ -3116,9 +3156,12 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     const liv = await sceltaLivello(s, sp); if (liv == null) return;
     const lv = liv || num(sp.livello) || 0, tot = num(s.dati['slot_' + lv]) || 0, usati = num(s.dati['usati_' + lv]) || 0;
     if (lv && tot && usati >= tot && !await ask(`Non hai più slot di ${lv}° livello. Lanciare lo stesso **${sp.nome || 'l\'incantesimo'}**?`, { ok: 'Lancia', title: 'Slot finiti' })) return;
-    const at = attDaInc(s, sp), pa = portata(at), mira = !!(String(sp.danni || '').trim() && (pa.area || sp.ts || sp.attacco));
+    // si sceglie il bersaglio sulla mappa per tutti gli incantesimi che arrivano su qualcuno (non quelli su di sé)
+    const at = attDaInc(s, sp), pa = portata(at), su = /^\s*(s[eé]|personale|incantatore)\b/i.test(sp.portata || '');
+    const mira = !!(pa.area || !su && (String(sp.portata || '').trim() || sp.ts || sp.attacco || String(sp.danni || '').trim()));
     const tk = mira ? attaccante(s) : null;
     if (tk) return iniziaMira(s, 0, tk, inc, lv);
+    if (mira && scena() && [...T.tok.values()].filter(t => t.scena === scena().id && schedaDi(t)?.id === s.id).length > 1) toast('Per scegliere il bersaglio apri la scheda dal token che lancia.');
     // senza bersagli da scegliere: lo annuncio in chat, tiro gli eventuali dadi e consumo lo slot
     const chi = s.nome || 'Qualcuno';
     const base = num(sp.livello) || 0, dn = danniInc(sp, lv);
@@ -3212,11 +3255,15 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     if (!s || !puoScrivere(s)) return; const L = (s.dati.privilegi || []).map(x => ({ ...x })); if (!L[i] || !!L[i].attivo === on) return;
     L[i].attivo = on; salvaScheda(s.id, { privilegi: L }, true).then(() => { if (T.sv?.id === s.id) disegnaScheda(); });
   }
+  // un incantesimo senza tiro per colpire si può lanciare anche su di sé (Cura ferite)
+  const suSe = m => { const sp = m.inc != null ? T.schede?.get(m.sid)?.dati.incantesimi?.[m.inc] : null; return !!sp && !sp.attacco; };
   async function scegliBersaglio(b) {
     const m = T.mira; if (!m) return;
-    const v = valuta(m, b); if (!v.ok) { if (v.motivo) toast(v.motivo, 'err'); return; }
-    const sx = T.schede?.get(m.sid), at = armaMira(m);
+    const sx = T.schede?.get(m.sid), at = armaMira(m), sp = m.inc != null ? sx?.dati.incantesimi?.[m.inc] : null;
+    const v = suSe(m) && b.id === m.tok ? { ok: true, adv: 0, pro: [], contro: [], col: portata(at).col } : valuta(m, b); if (!v.ok) { if (v.motivo) toast(v.motivo, 'err'); return; }
     if (at && portata(at).ts) { fineMira(animazioni() ? 1800 : 700); return incantesimoTS(m, [b.id], null, v.col || '#ffb347', at); }
+    // senza tiro per colpire: i danni arrivano e basta (Dardo incantato), altrimenti si annuncia su chi è lanciato
+    if (sp && !sp.attacco) { fineMira(animazioni() ? 1800 : 700); return String(at.danni || '').trim() ? incantesimoTS(m, [b.id], null, v.col || '#ffb347', at) : incantesimoSu(m, sx, sp, b); }
     fineMira(animazioni() ? 1800 : 700);
     const exP = [...m.extra].map(i => sx?.dati.privilegi?.[i]).filter(x => x?.dadi), extra = exP.map(x => x.dadi).join('+'), exN = exP.map(x => x.nome || 'danni in più').join(' + ');
     const r = await SB.rpc('tavolo_attacca', { p_token: m.tok, p_bersaglio: b.id, p_attacco: m.i, p_adv: v.adv, p_privato: m.seg, ...(extra ? { p_extra: extra, p_extra_nome: exN } : {}), ...(m.inc != null ? { p_inc: m.inc } : {}), p_liv: m.liv || null });
@@ -3231,6 +3278,15 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     if (x.salvezza) toast(`${b.nome || 'Il bersaglio'} deve fare un tiro salvezza su ${nomeCar(x.salvezza.car)} (CD ${x.salvezza.cd}) per i danni in più.`);
     const perche = [v.adv === 1 ? 'vantaggio: ' + v.pro.join(', ') : v.adv === 2 ? 'svantaggio: ' + v.contro.join(', ') : ''].filter(Boolean).join('');
     toast(`${a?.nome || ''} → ${b.nome || ''}: ${mossa.esito === 'nd' ? `tiro ${x.totale}, senza CA nella scheda del bersaglio decide il DM` : mossa.esito === 'si' ? `${x.critico ? 'critico! ' : 'colpito, '}${x.danni} danni${x.danni_extra != null ? ` (di cui ${x.danni_extra} da ${exN})` : ''}` : x.fallito ? '1 naturale, mancato' : 'mancato'}${perche ? ' (' + perche + ')' : ''}${v.ritorna ? ' · il pugnale torna in mano' : ''}`);
+  }
+
+  async function incantesimoSu(m, s, sp, b) {
+    const a = T.tok.get(m.tok), base = num(sp.livello) || 0, lv = m.slot || base;
+    const r = await SB.rpc('tavolo_scrivi', { p_testo: `✨ ${a?.nome || s.nome || 'Qualcuno'} lancia ${sp.nome || 'un incantesimo'}${b.id === m.tok ? ' su di sé' : ` su ${b.nome || 'un bersaglio'}`}${lv ? ` (${lv > base ? `slot di ${lv}° livello, è di ${base}°` : `${lv}° livello`})` : ''}${sp.conc ? ' · concentrazione' : ''}` });
+    if (r.error) return toast(r.error.message, 'err');
+    usaSlot(s, m.inc, m.slot);
+    if (a && suoTurno(a)) segnaAzioni(a, /azione bonus/i.test(sp.tempo || '') ? { bon: true } : /reazione/i.test(sp.tempo || '') ? { rea: true } : { az: true });
+    toast(`${sp.nome || 'Incantesimo'} lanciato su ${b.id === m.tok ? 'di sé' : b.nome || 'il bersaglio'}.`);
   }
 
   /* ---------- incantesimi ad area: chi lancia sceglie il punto, il tavolo trova chi è dentro ---------- */
@@ -3297,7 +3353,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     if (suoTurno(a)) segnaAzioni(a, { az: true });
     const attesa = esiti.filter(e => e.attesa).length, nome = at.nome || 'Incantesimo';
     if (x.car && !attesa && esiti.length) toast(`${nome}: per i tiri salvezza su richiesta esegui tavolo/tappa-7.sql in Supabase.`, 'err');
-    toast(`${nome}: ${x.danni} danni${x.car ? ` · TS ${nomeCar(x.car)} CD ${x.cd}${x.dimezza ? ', metà danni se riesce' : ''}` : ''}.${attesa ? ` Aspetto il tiro salvezza di ${esiti.filter(e => e.attesa).map(e => e.nome || '?').join(', ')}.` : ''}`);
+    toast(`${nome}: ${x.danni || !x.car ? `${x.danni} danni` : 'lanciato'}${x.car ? ` · TS ${nomeCar(x.car)} CD ${x.cd}${x.dimezza ? ', metà danni se riesce' : ''}` : ''}.${attesa ? ` Aspetto il tiro salvezza di ${esiti.filter(e => e.attesa).map(e => e.nome || '?').join(', ')}.` : ''}`);
   }
   function mostraArea(m) {
     const fx = $('#tv-fx'), sc = scena(); if (!fx || !sc) return;
@@ -4378,6 +4434,8 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
       if (r === 'morte') return tira('1d20', null, sv.seg, s.nome + ' · Tiro contro la morte');
       if (!at) return;
       if (r === 'att') {
+        // un attacco che è un incantesimo della scheda (di 1° livello o più) si lancia da lì: si sceglie lo slot
+        const ii = incDaAtt(s, at); if (ii >= 0) return lanciaInc(s, ii);
         // con un token sulla mappa si sceglie il bersaglio; senza, è un tiro per colpire come prima
         const tk = attaccante(s); if (tk && T.mira?.tok !== tk.id) return iniziaMira(s, +a, tk);
         if (!tk && scena() && [...T.tok.values()].filter(t => t.scena === scena().id && schedaDi(t)?.id === s.id).length > 1) toast('Per scegliere il bersaglio apri la scheda dal token che attacca.');
