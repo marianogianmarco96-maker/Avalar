@@ -441,6 +441,18 @@ body{min-width:0}
 
 /* schede: ritratto più grande, sul telefono diventa la copertina */
 .ehead .eheadacts{margin-top:12px}
+.ehead{position:relative}
+.schtag{position:absolute;top:12px;right:12px;z-index:3;display:flex;align-items:center;gap:6px;font:600 .78rem/1 var(--display);letter-spacing:.06em;text-transform:uppercase;padding:7px 12px;border-radius:999px;border:1px solid var(--gold);background:var(--paper2);color:var(--wine);cursor:pointer;box-shadow:0 2px 8px #0003}
+.schtag:hover,.schtag:focus-visible{background:var(--gold);color:#2b1d14}
+.schtag.on{background:var(--wine);color:#fbeccb;border-color:var(--wine)}
+@media (min-width:621px){.ehead:has(.schtag:not([hidden])) .ehb{padding-right:120px}}
+.page.consch{max-width:1960px}
+.ewrap.open{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:24px;align-items:start}
+.esch{position:sticky;top:calc(58px + env(safe-area-inset-top,0px) + 12px);height:calc(100vh - 58px - env(safe-area-inset-top,0px) - 24px);z-index:21}
+@media (max-width:1180px){
+  .ewrap.open{display:block}
+  .esch{position:fixed;inset:calc(58px + env(safe-area-inset-top,0px)) 0 0 0;height:auto;z-index:50;padding:8px;background:#000a}
+}
 .ehead.hasp{grid-template-columns:220px 1fr}
 .ehead.hasp .portrait{width:220px}
 .ehead.hasp .eheadacts{grid-column:2;margin-top:0}
@@ -1961,7 +1973,9 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
   const tops = [], quests = []; b.sections.forEach((s, i) => { if (s.quest) quests.push(i); else if (s.sub && tops.length) tops[tops.length - 1].subs.push(i); else tops.push({ i, subs: [] }); });
   const owner = e.type === 'pg' ? questOwner(id) : null;
   const toc = [...quests.map(i => ['Quest personale', 'sec-' + i]), ...tops.map(({ i }) => [b.sections[i].title.replace(/\s*\(.*\)$/, ''), 'sec-' + i]), ...(photos.length ? [['Foto', 'sec-foto']] : []), ['Collegamenti', 'sec-rel'], ...(evs.length ? [['Eventi', 'sec-ev']] : [])];
-  setView(`<div class="card ehead ${e.portrait ? 'hasp' : ''}">${e.portrait ? `<img class="portrait" src="${e.portrait.thumb}" data-act="viewportrait" alt="${esc(e.name)}" title="Ingrandisci">` : ''}<div class="ehb"><div class="meta">${badge(e.type)}${e.status ? `<span class="pill">${esc(e.status)}</span>` : ''}${catPills(e)}${e.discovered === false ? '<span class="pill dm">🔒 solo DM · nascosta ai giocatori</span>' : ''}${visPill(e)}<span class="hint">${esc(rangeTxt(e.sessions))}</span></div>
+  // la scheda del Tavolo (combattimento, da PNG o completa) si apre accanto, dal segnalino in alto a destra
+  const conSch = ['pg', 'png'].includes(e.type) && !!window.__schedaSito;
+  setView(`<div class="ewrap"><div class="ecol"><div class="card ehead ${e.portrait ? 'hasp' : ''}">${conSch ? '<button type="button" class="schtag" data-act="tvsch" hidden aria-pressed="false"></button>' : ''}${e.portrait ? `<img class="portrait" src="${e.portrait.thumb}" data-act="viewportrait" alt="${esc(e.name)}" title="Ingrandisci">` : ''}<div class="ehb"><div class="meta">${badge(e.type)}${e.status ? `<span class="pill">${esc(e.status)}</span>` : ''}${catPills(e)}${e.discovered === false ? '<span class="pill dm">🔒 solo DM · nascosta ai giocatori</span>' : ''}${visPill(e)}<span class="hint">${esc(rangeTxt(e.sessions))}</span></div>
       <h1>${esc(e.name)}</h1>${e.alias?.length ? `<div class="hint">Detto anche: ${e.alias.map(esc).join(', ')}</div>` : ''}${e.brief ? `<div class="brief">${inl(e.brief)}</div>` : ''}
       </div><div class="row eheadacts"><button class="btn sm" data-act="edit">Modifica dati</button>${[...M.regions.values()].filter(r => r.entityId === id).map(r => `<a class="btn sm" href="#/mappe/${encodeURIComponent(r.mapId)}?reg=${encodeURIComponent(r.id)}">Vedi sulla mappa</a>`).join('')}${moreActs(`${owner && !quests.length ? '<button class="btn sm" data-act="addQuest">🎯 + Quest personale</button>' : ''}<button class="btn sm" data-act="addSec">+ Sezione</button><button class="btn sm" data-act="portrait">${e.portrait ? 'Cambia ritratto' : '+ Ritratto'}</button><button class="btn sm ghost" data-act="copyEnt">Copia per Claude</button><button class="btn sm ghost" data-act="merge">Unisci in un'altra scheda</button><button class="btn sm danger" data-act="del">Elimina</button>`)}</div></div>
     ${toc.length > 2 ? `<nav class="toc" aria-label="Sezioni della scheda">${toc.map(([t, k]) => `<button type="button" data-act="goto" data-to="${k}">${esc(t)}</button>`).join('')}</nav>` : ''}
@@ -1976,7 +1990,26 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
       ${mapsOf.length ? `<h2 style="margin-top:14px">Sulle mappe</h2><div class="chips">${mapsOf.map(({ p, m }) => `<a class="chip" href="#/mappe/${encodeURIComponent(m.id)}?pin=${encodeURIComponent(p.id)}">${esc(m.name)}</a>`).join('')}</div>${mapsOf.some(x => x.p.photos?.length) ? `<div class="gallery" style="margin-top:10px">${mapsOf.flatMap(({ p, m }) => (p.photos || []).map(ph => `<a class="gph" href="#/mappe/${encodeURIComponent(m.id)}?pin=${encodeURIComponent(p.id)}" title="Vedi sulla mappa «${esc(m.name)}»">${phImg(ph, `alt="${esc(ph.name ? ph.name.replace(/\.[a-z0-9]+$/i, '') : 'Foto di ' + e.name)}"`)}</a>`)).join('')}</div>` : ''}` : ''}
       <div style="margin-top:14px"><label class="chk"><input type="checkbox" data-act="toggleDisc" ${e.discovered === false ? 'checked' : ''}> 🔒 Solo per DM (scheda nascosta ai giocatori)</label>
       ${window.__RO ? '' : `<fieldset class="visf"${e.discovered === false ? ' disabled' : ''}><legend>Mostra a:</legend><div class="visrow">${PLAYERS().map(([pid, pn]) => `<label><input type="checkbox" data-act="visEnt" value="${esc(pid)}" ${!Array.isArray(e.vis) || e.vis.includes(pid) ? 'checked' : ''}> ${esc(pn)}</label>`).join('')}</div></fieldset>`}</div></div></div>
-    ${evs.length ? `<div class="card" id="sec-ev"><h2>Eventi</h2>${(() => { const ev = v => `<div class="entry${v.dm ? ' dment' : ''}"><div class="tag">${sessLink(v.n)}</div><div class="tx"><b>${esc(v.title)}</b>${evPills(v)}${prose(v.text)}</div>${evActBtns(v)}</div>`, K = 5; return evs.length > K + 1 ? `<details class="older"><summary class="more">Mostra i ${evs.length - K} eventi precedenti</summary>${evs.slice(0, -K).map(ev).join('')}</details>${evs.slice(-K).map(ev).join('')}` : evs.map(ev).join(''); })()}</div>` : ''}`);
+    ${evs.length ? `<div class="card" id="sec-ev"><h2>Eventi</h2>${(() => { const ev = v => `<div class="entry${v.dm ? ' dment' : ''}"><div class="tag">${sessLink(v.n)}</div><div class="tx"><b>${esc(v.title)}</b>${evPills(v)}${prose(v.text)}</div>${evActBtns(v)}</div>`, K = 5; return evs.length > K + 1 ? `<details class="older"><summary class="more">Mostra i ${evs.length - K} eventi precedenti</summary>${evs.slice(0, -K).map(ev).join('')}</details>${evs.slice(-K).map(ev).join('')}` : evs.map(ev).join(''); })()}</div>` : ''}</div>${conSch ? '<aside class="esch" id="esch" hidden aria-label="Scheda del Tavolo"></aside>' : ''}</div>`);
+  let tvsch = null;
+  if (conSch) {
+    const tag = $('.ehead .schtag'), box = $('#esch'), SCH = 'scheda-aperta';
+    const ricorda = on => { try { on ? sessionStorage.setItem(SCH, '1') : sessionStorage.removeItem(SCH); } catch { } };
+    const mostra = on => { box.hidden = !on; $('.ewrap').classList.toggle('open', on); $('#view .page').classList.toggle('consch', on); tag.classList.toggle('on', on); tag.setAttribute('aria-pressed', String(on)); };
+    // chiusa dalla ✕ della scheda; quando la pagina si ridisegna il riquadro non c'è più e la scheda resta «aperta» per la prossima
+    box.addEventListener('chiusa', () => { if (!box.isConnected) return; mostra(false); ricorda(false); });
+    const apri = async () => {
+      try { if (!await window.__schedaSito.apri(id, box)) return; mostra(true); ricorda(true); tag.innerHTML = '📜 <span>Scheda</span>'; }
+      catch (err) { mostra(false); toast(String(err.message || err), 'err'); }
+    };
+    tvsch = () => box.hidden ? apri() : box.querySelector('dialog')?.close();
+    window.__schedaSito.stato(id).then(st => {
+      if (!st || !tag.isConnected || (!st.s && !st.dm)) return;
+      tag.hidden = false; tag.innerHTML = st.s ? '📜 <span>Scheda</span>' : '＋ <span>Scheda</span>';
+      tag.title = st.s ? 'Apri la scheda del Tavolo qui accanto: la vedi e la modifichi senza lasciare la pagina' : 'Crea la scheda del Tavolo per questo personaggio (da PNG o completa)';
+      try { if (st.s && sessionStorage.getItem(SCH)) apri(); } catch { }
+    });
+  }
   if (e.portrait) dbGet('blobs', e.portrait.id).then(rec => { const im = $('.ehead .portrait'); if (!rec?.blob || !im) return; const u = URL.createObjectURL(rec.blob); im.onload = () => im.closest('.ehead')?.classList.add('sharp'); im.src = u; onCleanup(() => URL.revokeObjectURL(u)); }).catch(() => { });
   const tocEl = $('.toc');
   if (tocEl) {
@@ -2011,6 +2044,7 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
   };
   setActs({
     ...evActs(evs),
+    tvsch: () => tvsch?.(),
     edit: async () => {
       const r = await formDlg({ title: 'Dati della scheda', fields: [{ k: 'type', label: 'Tipo', type: 'select', value: e.type, options: TYPE_ORDER.map(t => [t, TYPES[t]]) }, { k: 'name', label: 'Nome', value: e.name, req: true }, { k: 'brief', label: 'Riga breve', value: e.brief }, { k: 'status', label: 'Stato', value: e.status }, ...(e.type === 'png' ? [{ k: 'cat', label: 'Atteggiamento', type: 'select', value: e.cat || '', options: [['', '— non assegnato —'], ...Object.entries(PNG_ATT)] }, { k: 'imp', label: 'Ruolo nella storia', type: 'select', value: e.imp || '', options: [['', '— non assegnato —'], ['importante', 'Principale (nel Tavolo scheda completa, come un giocatore)'], ['minore', 'Secondario (nel Tavolo scheda da PNG)']] }] : e.type === 'luogo' ? [{ k: 'cat', label: 'Categoria del luogo', type: 'select', value: e.cat || '', options: [['', '— non assegnata —'], ...Object.entries(LUOGO_CAT)] }] : []), { k: 'alias', label: 'Alias (separati da virgola)', value: (e.alias || []).join(', ') }, { k: 'dm', label: '🔒 Solo per DM (scheda nascosta ai giocatori)', type: 'check', value: e.discovered === false }, { k: 'vis', type: 'players', value: e.vis }] });
       if (!r) return; await runBatch(['entities'], '', async t => t.put('entities', { ...setVis({ ...e }, r.vis), type: r.type, name: r.name.trim(), brief: r.brief.trim(), status: r.status.trim(), alias: r.alias.split(',').map(x => x.trim()).filter(Boolean), discovered: !r.dm, ...('cat' in r ? { cat: r.cat } : {}), ...('imp' in r ? { imp: r.imp } : {}), upd: Date.now() })); rerender();

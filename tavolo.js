@@ -709,6 +709,14 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
 .tv-mbar .sw input:focus-visible+.tg{box-shadow:0 0 0 3px #e7cf9a55}
 /* linguetta della chat */
 .tv-ctab{border-radius:10px 0 0 10px;box-shadow:-4px 0 14px #0007}
+/* la scheda nella pagina del personaggio: riempie il riquadro accanto al testo */
+dialog.dlg.tv-side.tv-sw.tv-pag{position:relative;inset:auto;margin:0;width:100%!important;height:100%!important;max-height:none;min-width:0;min-height:0;z-index:auto;border-radius:8px;box-shadow:0 10px 30px #0005}
+dialog.dlg.tv-side.tv-centro{inset:0;margin:auto;height:fit-content}
+/* fuori dal Tavolo la scheda non tira i dadi: i valori restano, i pulsanti dei tiri spariscono */
+dialog.tv-pag .seg3,dialog.tv-pag .tbar .sg,dialog.tv-pag .mini[data-roll],dialog.tv-pag [data-k=prv-dadi],dialog.tv-pag [data-k=inc-lancia],dialog.tv-pag [data-k=inc-chat],dialog.tv-pag [data-k=tirapf],dialog.tv-pag [data-k=bevi]{display:none!important}
+dialog.tv-pag [data-roll]{pointer-events:none;cursor:default}
+dialog.tv-pag .tv-sch .dt{all:unset;font:inherit;color:inherit}
+dialog.tv-pag .tv-sch button[data-roll]:not(.rb){border:0!important;text-decoration:none!important;background:none!important;box-shadow:none!important}
 dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:#5a4d3e}
 .tv-scuro .tv-sch{--k:#efe5d0;--k2:#bcae95;--lin:#8a7a60;--gr:#2b241e;--pp:#1d1814;--box:#241e19;--ul:#5e5244;--rig:#ffffff10}
 .tv-scuro .tv-sch .cbox .ov,.tv-scuro .tv-sch .lv .lt b{background:#1d1814}
@@ -1162,14 +1170,15 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
   /* ---------- stato ---------- */
   const T = { mvarchi: new Map(), mask: [], turno: [], chat: [], mmodo: 'svela', mforma: 'rett', mraggio: 0, mini: new Map(), me: null, info: null, stato: null, scene: new Map(), tok: new Map(), tiri: [], vista: null, view: { x: 0, y: 0, z: 1 }, tool: 'muovi', livello: 'segnalini', tdpriv: false, allN: 3, muri: [], mtool: 'muro', mfatti: [], wver: 0, schede: null, sv: null, ch: null, rulers: new Map(), salv: new Map(), live: false, url: new Map(), online: [] };
   const isDM = () => T.me?.ruolo === 'dm';
-  const scena = () => T.scene.get(T.vista) || null;
+  // nella pagina di un personaggio la scheda si apre senza mappa: niente token, turni né bersagli
+  const scena = () => T.pag ? null : T.scene.get(T.vista) || null;
   const puoMuovere = t => isDM() || (t.giocatore && t.giocatore === T.me.giocatore);
   const iniziali = n => String(n || '?').trim().split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase() || '?';
 
   /* ---------- pagina ---------- */
   route(/^\/tavolo$/, async () => {
     await claude.use('db'); css();
-    T.diceInit = false; T.drag = null; T.online = []; T.live = false; T.tool = 'muovi';
+    T.pag = false; T.diceInit = false; T.drag = null; T.online = []; T.live = false; T.tool = 'muovi';
     setView(`<h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Tavolo</h1>
       <div class="tv"><nav class="tv-rail" id="tv-rail" aria-label="Strumenti del tavolo"><span class="sp"></span><span class="tv-on" id="tv-on" title="Connessione…"></span></nav>
       <div class="tv-wrap"><div class="tv-stage" id="tv-stage"><div class="tv-empty"><div><p>Apro il tavolo…</p></div></div></div><div class="tv-strip" id="tv-strip" hidden></div><div class="tv-hud" id="tv-hud" hidden></div><div class="tv-top" id="tv-top"></div><div class="tv-mbar" id="tv-mbar" hidden></div><div class="tv-ts" id="tv-ts" hidden></div><div class="tv-turno" id="tv-turno" hidden></div><div class="tv-tdp" id="tv-tdp" hidden></div><div class="tv-sp" id="tv-sp" hidden></div><button type="button" class="tv-ctab" id="tv-ctab" data-act="tv-dadi"></button></div>
@@ -2522,7 +2531,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
   }
   function nuovoTiro(t) {
     disegnaLog(); lancia(t);
-    if ($('#tv-dice')?.hidden) { $('#tv-ctab')?.classList.add('nuovo'); toast(`${t.nome}${t.motivo ? ' (' + t.motivo + ')' : ''}: ${t.formula} = ${t.totale}`); }
+    if (!$('#tv-dice') || $('#tv-dice').hidden) { $('#tv-ctab')?.classList.add('nuovo'); toast(`${t.nome}${t.motivo ? ' (' + t.motivo + ')' : ''}: ${t.formula} = ${t.totale}`); }
   }
   /* ---------- dadi che rotolano sulla mappa ---------- */
   const FORME = {
@@ -3856,7 +3865,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
       const d = finestra(`<form method="dialog"><h3>Scheda di ${esc(nome)}</h3>
         <div class="tv-forme">${b('png', 'Scheda da PNG', 'Blocco delle statistiche come nel Manuale dei mostri: per i personaggi secondari, che compaiono poco.')}${b('pg', 'Scheda completa', 'Come quella di un giocatore (classe, livello, privilegi, incantesimi): per i personaggi principali della storia.')}</div>
         ${e ? `<p class="hint">${e.imp === 'importante' ? 'Nel sito è segnato come personaggio principale.' : e.imp === 'minore' ? 'Nel sito è segnato come personaggio secondario.' : 'Nel sito non ha ancora un ruolo: lo scegli da «Modifica dati» della sua scheda.'} Potrai cambiare tipo anche dopo, dalla scheda.</p>` : ''}
-        <menu><button value="cancel" class="btn ghost">Annulla</button></menu></form>`, 'tv-side tv-np');
+        <menu><button value="cancel" class="btn ghost">Annulla</button></menu></form>`, 'tv-side tv-np' + (T.pag ? ' tv-centro' : ''));
       let scelta = null;
       d.querySelectorAll('[data-f]').forEach(x => x.onclick = () => { scelta = x.dataset.f; d.close(); });
       d.addEventListener('close', () => res(scelta));
@@ -3889,16 +3898,19 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
   }
 
   /* la scheda aperta (una alla volta, accanto alla mappa) */
-  function apriScheda(id, tok) {
+  // host: l'elemento della pagina del personaggio in cui la scheda resta aperta (fuori dal Tavolo)
+  function apriScheda(id, tok, host) {
     const s = T.schede?.get(id); if (!s) return;
-    if (T.sv?.d.open) { if (T.sv.id === id) { if (tok) { T.sv.tok = tok; disegnaScheda(); } return; } T.sv.d.close(); }
-    const d = finestra('<div class="tv-sch"></div>', 'tv-side tv-sw');
+    if (T.sv?.d.open) { if (T.sv.id === id && !host === !T.sv.pag) { if (tok) { T.sv.tok = tok; disegnaScheda(); } return; } T.sv.d.close(); }
+    const d = host ? nellaPagina(host) : finestra('<div class="tv-sch"></div>', 'tv-side tv-sw');
     d.setAttribute('aria-label', 'Scheda di ' + s.nome);
-    const sv = T.sv = { id, tok: tok || null, tab: 'pri', d, adv: 0, seg: isDM() && s.tipo === 'png' };
+    const sv = T.sv = { id, tok: tok || null, tab: 'pri', d, adv: 0, seg: isDM() && s.tipo === 'png', pag: !!host };
     d.addEventListener('close', () => { if (T.sv === sv) T.sv = null; invia(id); clearTimeout(sv.tt); });
-    d.insertAdjacentHTML('beforeend', ['e', 'w', 's', 'se', 'sw'].map(k => `<i class="rz ${k}" data-rz="${k}" aria-hidden="true"></i>`).join(''));
-    d.querySelectorAll('.rz').forEach(h => h.addEventListener('pointerdown', e => ridimensionaScheda(e, d, h.dataset.rz)));
-    posizionaScheda();
+    if (!host) {
+      d.insertAdjacentHTML('beforeend', ['e', 'w', 's', 'se', 'sw'].map(k => `<i class="rz ${k}" data-rz="${k}" aria-hidden="true"></i>`).join(''));
+      d.querySelectorAll('.rz').forEach(h => h.addEventListener('pointerdown', e => ridimensionaScheda(e, d, h.dataset.rz)));
+      posizionaScheda();
+    }
     const box = d.querySelector('.tv-sch');
     // scegliere un nome tra i suggerimenti del manuale arriva come input senza digitazione
     box.addEventListener('input', e => { const el = e.target.closest('[data-f]'); if (el && el.type !== 'checkbox' && el.tagName !== 'SELECT') campo(el, !e.inputType || e.inputType === 'insertReplacementText'); });
@@ -3908,7 +3920,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     box.addEventListener('input', e => { if (e.target.dataset.k !== 'filtro') return; sv.filtro = e.target.value; const fl = norm(sv.filtro); box.querySelectorAll('.prv .pv').forEach(el => { const p = (T.schede.get(id)?.dati.privilegi || [])[+el.dataset.ordi]; el.hidden = !!fl && !norm(`${p?.nome} ${p?.fonte} ${p?.testo}`).includes(fl); }); });
     box.addEventListener('pointerdown', e => {
       const h = e.target.closest('.mano'); if (h && !e.button) return trascinaVoce(e, h);
-      const bar = e.target.closest('.tbar'); if (!bar || e.button || e.target.closest('button,input,label') || innerWidth <= 820) return;
+      const bar = e.target.closest('.tbar'); if (!bar || sv.pag || e.button || e.target.closest('button,input,label') || innerWidth <= 820) return;
       e.preventDefault(); const r = d.getBoundingClientRect(), dx = e.clientX - r.left, dy = e.clientY - r.top;
       bar.setPointerCapture(e.pointerId);
       const muovi = ev => { d.style.left = clamp(ev.clientX - dx, 0, Math.max(0, innerWidth - d.offsetWidth)) + 'px'; d.style.top = clamp(ev.clientY - dy, 0, innerHeight - 50) + 'px'; d.style.maxHeight = innerHeight - parseFloat(d.style.top) - 8 + 'px'; };
@@ -4378,7 +4390,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     }
     const root = sv.d.querySelector('.tv-sch');
     root.className = 'tv-sch ' + (pg ? 'pg' : 'png');
-    root.innerHTML = `<div class="tbar" title="Trascina per spostare la scheda"><span class="grip">⠿</span><span class="tt">${pg ? 'Scheda del personaggio' : 'Scheda del PNG'}</span>
+    root.innerHTML = `<div class="tbar"${sv.pag ? '' : ' title="Trascina per spostare la scheda"'}>${sv.pag ? '' : '<span class="grip">⠿</span>'}<span class="tt">${pg ? 'Scheda del personaggio' : 'Scheda del PNG'}</span>
         <span class="seg3">${w ? '<button type="button" data-adv="0" title="Tiro normale">Normale</button><button type="button" data-adv="1">Vantaggio</button><button type="button" data-adv="2">Svantaggio</button>' : ''}</span>
         ${w ? `<label class="sg"><input type="checkbox" data-k="seg" ${sv.seg ? 'checked' : ''}> ${isDM() ? 'Nascosti' : 'Segreti'}</label>` : ''}
         <button type="button" class="tema" data-k="tema" title="Scheda chiara o scura, indipendente dal tema del sito (solo per te)" aria-label="Cambia il tema della scheda">${schedaScura() ? '☀' : '☾'}</button>
@@ -4443,6 +4455,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     if (k === 'seg') { sv.seg = b.checked; return; }
     if (k === 'tema') { try { localStorage.setItem(TEMAS, schedaScura() ? 'chiaro' : 'scuro'); } catch { } return disegnaScheda(); }
     if (k === 'za') { try { localStorage.setItem(ZOOMS, clamp(Math.round((zoomScheda() + +b.dataset.d) * 10) / 10, 0.8, 1.6)); } catch { } return applicaZoomScheda(); }
+    if (sv.pag && (b.dataset.roll || ['prv-dadi', 'inc-lancia', 'inc-chat', 'tirapf', 'bevi'].includes(k))) return;
     const P = d.privilegi || [], pi = +b.dataset.i, pv = P[pi], chiave = pv && (pv.id || 'i' + pi);
     if (k === 'prv-apri' && pv) { sv.aperti = sv.aperti || new Set(); sv.aperti.has(chiave) ? sv.aperti.delete(chiave) : sv.aperti.add(chiave); return disegnaScheda(); }
     if (k === 'prv-dadi' && pv) return tira(pv.dadi, null, sv.seg, `${s.nome} · ${pv.nome || 'Privilegio'}`);
@@ -4561,6 +4574,69 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
       catch (e) { toast(e.message, 'err'); }
     }
   }
+  /* ---------- la scheda del Tavolo nella pagina del personaggio ----------
+     Il segnalino in alto a destra nella pagina anagrafica apre la stessa scheda del Tavolo, accanto al testo:
+     si legge, si tira e si modifica come al tavolo (senza mappa, quindi senza token né turni). */
+  function nellaPagina(host) {
+    const d = document.createElement('dialog'); d.className = 'dlg tv-side tv-sw tv-pag'; d.innerHTML = '<div class="tv-sch"></div>';
+    host.append(d); d.addEventListener('close', () => d.remove());
+    onCleanup(() => { if (d.open) d.close(); });
+    d.show(); return d;
+  }
+  let schedeOra = 0, vivoPag = null;
+  async function schedePagina(forza) {
+    const info = await window.__tavolo?.(); if (!info) return null;
+    T.info = T.info || info; T.me = await entraUnaVolta(info);
+    if (!forza && T.schede && Date.now() - schedeOra < 20000) return T.schede;
+    const [sh, mb] = await Promise.all([SB.from('tavolo_schede').select('*'), SB.from('tavolo_membri').select('*')]);
+    if (sh.error) return null;
+    T.schede = new Map(sh.data.map(x => [x.id, x])); if (!mb.error) T.membri = mb.data; schedeOra = Date.now();
+    return T.schede;
+  }
+  // la scheda di un personaggio del sito: quella collegata a lui, o (per un membro del party) quella del suo giocatore
+  const schedaEnt = (ent, info) => {
+    const l = [...(T.schede?.values() || [])], g = (info?.giocatori || []).find(x => x.pg === ent);
+    return l.find(x => x.entita === ent && x.tipo === 'pg') || l.find(x => x.entita === ent) || (g && l.find(x => x.giocatore === g.id)) || null;
+  };
+  // mentre la scheda è aperta nella pagina arrivano le modifiche fatte da altri (il DM o il giocatore)
+  function seguiPagina(on) {
+    if (vivoPag) { try { SB.removeChannel(vivoPag); } catch { } vivoPag = null; }
+    if (!on) return;
+    vivoPag = SB.channel('schede-pagina-' + Math.random().toString(36).slice(2, 8)).on('postgres_changes', { event: '*', schema: 'public', table: 'tavolo_schede' }, p => {
+      if (!T.schede) return;
+      if (p.eventType === 'DELETE') { T.schede.delete(p.old.id); dopoScheda(p.old.id); return; }
+      arrivaScheda(p.new);
+    }).subscribe();
+  }
+  window.__schedaSito = {
+    // { s: la scheda o null, dm: true se può crearla } oppure null (Tavolo non raggiungibile)
+    async stato(ent) {
+      try {
+        const info = await window.__tavolo?.(); if (!info || !await schedePagina()) return null;
+        return { s: schedaEnt(ent, info), dm: info.ruolo === 'dm' };
+      } catch { return null; }
+    },
+    async apri(ent, host) {
+      css(); T.pag = true;
+      const info = await window.__tavolo?.(); if (!info || !await schedePagina(true)) throw new Error('Il Tavolo non è raggiungibile adesso: riprova tra poco.');
+      let s = schedaEnt(ent, info);
+      if (!s && isDM()) {
+        const e = S.ents?.get(ent);
+        if (e?.type === 'pg' && (info.giocatori || []).some(g => g.pg === ent)) { await preparaSchede(info); s = schedaEnt(ent, info); }
+        else {
+          const forma = await sceltaForma(e?.name || 'personaggio', e); if (!forma) return false;
+          s = await creaPng({ nome: e?.name, entita: ent, immagine: e?.portrait?.thumb || null, forma }); if (!s) return false;
+          toast('Scheda creata: ' + s.nome + '. Al Tavolo i giocatori non la vedono finché non la mostri (👁).');
+        }
+      }
+      if (!s) throw new Error('Questo personaggio non ha ancora una scheda.');
+      apriScheda(s.id, null, host); seguiPagina(true);
+      // l'evento arriva dopo la chiusura: se intanto la pagina ha riaperto una scheda, quella resta collegata
+      T.sv.d.addEventListener('close', () => { host.dispatchEvent(new Event('chiusa')); if (T.sv?.pag) return; seguiPagina(false); T.pag = false; });
+      return true;
+    }
+  };
+
   /* ---------- chi è sul sito adesso (Supabase Realtime Presence) ----------
      Il DM e ogni giocatore, appena entrati nel sito, si fanno vedere su un canale riservato ai membri del tavolo
      (con la pagina in cui sono e se il sito è in primo piano). Il DM vede nella barra in alto chi è connesso. */
