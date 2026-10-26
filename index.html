@@ -130,6 +130,7 @@ label.chk input{width:auto}
 .pill.vis{color:#2f6b5e;border-color:#2f6b5e88;background:#2f6b5e14;font-family:var(--body);font-size:.75rem;letter-spacing:0;text-transform:none}
 .plonly{background:repeating-linear-gradient(135deg,#2f6b5e1c 0 6px,#2f6b5e0d 6px 12px);box-shadow:inset 0 -1px 0 #2f6b5e99;border-radius:3px;padding:0 2px}
 .plonly::before{content:'👁';font-size:.75em;margin-right:2px}
+.approw{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:0 14px;max-height:55vh;overflow:auto;margin:0 0 8px}.approw label{display:flex;gap:6px;align-items:baseline;cursor:pointer;padding:4px 0;min-width:0}.approw span{color:var(--ink2);font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 fieldset.visf{border:1px solid var(--line2);border-radius:8px;padding:6px 10px 2px;margin:0 0 12px}fieldset.visf legend{padding:0 4px;color:var(--ink2);font-size:.9rem}
 .visrow{display:flex;gap:4px 14px;flex-wrap:wrap;align-items:center}.visrow label{display:flex;gap:5px;align-items:center;cursor:pointer;margin:0 0 6px}
 .dmtool .visrow{flex-basis:100%;padding:6px 8px;border:1px dashed #2f6b5e88;border-radius:8px}.dmtool .visrow b{font-weight:600;color:#2f6b5e;margin-bottom:6px}
@@ -1688,7 +1689,7 @@ route(/^\/$/, async () => {
       ${gen?.text ? `<div class="cap">${prose(gen.text)}</div>` + `<p class="hint">Aggiornato ${fmtDate(gen.ts)}${gen.upto != null ? ' · fino alla sessione ' + gen.upto : ''}</p>` : '<p class="empty">Il riassunto comparirà alla prima importazione.</p>'}
       ${S.sess.length ? `<div class="spread" style="margin-top:14px"><h3 style="margin:0">Sessione per sessione</h3><a href="#/sessioni">Tutte le sessioni →</a></div>${S.sess.slice(-3).map(s => `<details class="arc"><summary><b><span class="num">${s.n}.</span> ${esc(s.title || 'Sessione ' + s.n)}</b>${ongoingPill(s)}${s.gameDate ? `<small>${esc(s.gameDate)}</small>` : ''}<br><span class="mute" style="font-family:var(--body);font-weight:400;letter-spacing:0;font-size:.95rem">${esc(s.short || s.brief || '')}</span></summary>${s.brief && s.brief !== s.short ? `<p>${esc(s.brief)}</p>` : ''}<a class="btn sm" href="#/sessioni/${s.n}">Apri la sessione →</a></details>`).join('')}` : ''}</div>`;
     if (S.sess.length) h += `<p class="homelinks"><a href="#/sessioni">Tutte le sessioni →</a><a href="#/cronologia">Cronologia completa →</a></p>`;
-    if (arcs.length) h += `<div class="card"><h2>Archi narrativi</h2>${arcs.map(a => `<details class="arc"><summary>${esc(a.title)}<small>${a.from != null ? 'sessioni ' + a.from + '–' + (a.to ?? '…') : ''}</small></summary>${prose(a.summary)}</details>`).join('')}</div>`;
+    if (arcs.length || !window.__RO) h += `<div class="card"><div class="spread"><h2>Archi narrativi</h2><button class="btn sm" data-act="addArc">+ Nuovo arco</button></div>${arcs.length ? arcs.map((a, i) => `<details class="arc"><summary>${esc(a.title)}<small>${a.from != null ? 'sessioni ' + a.from + '–' + (a.to ?? '…') : ''}</small></summary>${prose(a.summary)}<button type="button" class="btn sm" data-act="editArc" data-i="${i}">Modifica arco</button></details>`).join('') : '<p class="hint">Nessun arco narrativo, per ora.</p>'}</div>`;
   }
   setView(h);
   // ritratti del gruppo a piena risoluzione
@@ -1702,9 +1703,45 @@ route(/^\/$/, async () => {
       const d = showInfo('Versioni precedenti del riassunto', hist.map((v, i) => `<details class="arc"><summary>${fmtDate(v.ts)}${v.upto != null ? ' · fino a sess. ' + v.upto : ''}</summary>${prose(v.text)}<button type="button" class="btn sm" data-restore="${i}">Ripristina questa versione</button></details>`).join(''), 'wide');
       d.addEventListener('click', async e => { const b = e.target.closest('[data-restore]'); if (!b) return; const v = hist[+b.dataset.restore]; const cur = getMeta('general', null); const hh = [...getMeta('generalHist', [])]; if (cur?.text) hh.push({ ts: cur.ts, upto: cur.upto, text: cur.text }); await setMeta('generalHist', hh.slice(-10)); await setMeta('general', { text: v.text, upto: v.upto, ts: Date.now() }); d.close(); rerender(); toast('Versione ripristinata'); });
     },
+    addArc: () => editArcDlg(null),
+    editArc: a => editArcDlg(+a.dataset.i),
     demo: async () => { const P = await planImport(JSON.stringify(DEMO_JSON)); await applyImport(P); toast('Dati di esempio caricati'); rerender(); }
   });
 });
+// archi narrativi (meta «arcs»): il DM li crea, modifica ed elimina dalla Home; le sessioni dell'intervallo prendono l'arco
+async function editArcDlg(i) {
+  const arcs = clone(getMeta('arcs', [])), a = i == null ? null : arcs[i];
+  if (i != null && !a) return;
+  const r = await formDlg({
+    title: a ? 'Modifica arco narrativo' : 'Nuovo arco narrativo', wide: true, fields: [
+      { k: 'title', label: 'Titolo', value: a?.title || '', req: true },
+      { k: 'from', label: 'Dalla sessione', type: 'number', value: a ? a.from : (lastSessionN() ?? 1) },
+      { k: 'to', label: 'Alla sessione (vuoto = ancora in corso)', type: 'number', value: a?.to ?? '' },
+      { k: 'summary', label: 'Riassunto (supporta **grassetto**, elenchi con -, [[id]])', type: 'textarea', rows: 10, value: a?.summary || '', dm: true },
+      { k: 'assign', label: 'Segna le sessioni di questo intervallo come parte dell\'arco', type: 'check', value: !a },
+      ...(a ? [{ k: 'del', label: 'Elimina questo arco', type: 'check', value: false }] : [])]
+  });
+  if (!r) return;
+  const mine = s => s.arc && (s.arc === a?.id || norm(s.arc) === norm(a?.title || ''));
+  if (r.del) {
+    if (!await ask(`Eliminare l'arco **${a.title}**? Le sessioni che ne fanno parte restano, senza arco.`, { danger: true, ok: 'Elimina' })) return;
+    arcs.splice(i, 1);
+    await runBatch(['meta', 'sessions'], '', async t => { await t.put('meta', { k: 'arcs', v: arcs }); for (const s of S.sess) if (mine(s)) await t.put('sessions', { ...s, arc: '' }); });
+    toast('Arco eliminato'); return rerender();
+  }
+  const from = r.from == null ? null : Math.round(r.from), to = r.to == null ? null : Math.round(r.to);
+  if (from != null && to != null && to < from) { toast('L\'ultima sessione dell\'arco viene prima della prima', 'err'); return; }
+  const id = a?.id || 'arco-' + (Math.max(0, ...arcs.map(x => +String(x.id).replace(/^arco-/, '') || 0)) + 1);
+  const rec = { ...a, id, title: r.title.trim(), from, to, summary: r.summary.trim() };
+  if (a) arcs[i] = rec; else arcs.push(rec);
+  arcs.sort((x, y) => (x.from ?? 1e9) - (y.from ?? 1e9));
+  const inRange = s => from != null && s.n >= from && (to == null || s.n <= to);
+  await runBatch(['meta', 'sessions'], '', async t => {
+    await t.put('meta', { k: 'arcs', v: arcs });
+    if (r.assign) for (const s of S.sess) if (inRange(s) && s.arc !== id) await t.put('sessions', { ...s, arc: id });
+  });
+  toast(a ? 'Arco aggiornato' : 'Arco creato'); rerender();
+}
 async function copyContextFlow() {
   let full = false;
   if (S.ents.size > 40) {
@@ -1935,7 +1972,7 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
       ${window.__RO ? '' : `<p class="hint">${photos.length ? '' : 'Nessuna foto, per ora. '}<span class="dz">Trascina qui una o più immagini dal computer, oppure usa «+ Aggiungi foto».</span></p>`}</div>` : ''}
     <div class="grid2"><div class="card" id="sec-rel"><div class="spread"><h2>Collegamenti</h2><button class="btn sm" data-act="addRel">+ Collega</button></div>
       ${outL.length || inL.length ? relCards(outL, inL) : '<p class="hint">Nessun collegamento.</p>'}</div>
-      <div class="card"><h2>Apparizioni</h2>${sessChips(e.sessions)}
+      <div class="card"><div class="spread"><h2>Apparizioni</h2><button class="btn sm" data-act="editApp">Modifica</button></div>${sessChips(e.sessions)}
       ${mapsOf.length ? `<h2 style="margin-top:14px">Sulle mappe</h2><div class="chips">${mapsOf.map(({ p, m }) => `<a class="chip" href="#/mappe/${encodeURIComponent(m.id)}?pin=${encodeURIComponent(p.id)}">${esc(m.name)}</a>`).join('')}</div>${mapsOf.some(x => x.p.photos?.length) ? `<div class="gallery" style="margin-top:10px">${mapsOf.flatMap(({ p, m }) => (p.photos || []).map(ph => `<a class="gph" href="#/mappe/${encodeURIComponent(m.id)}?pin=${encodeURIComponent(p.id)}" title="Vedi sulla mappa «${esc(m.name)}»">${phImg(ph, `alt="${esc(ph.name ? ph.name.replace(/\.[a-z0-9]+$/i, '') : 'Foto di ' + e.name)}"`)}</a>`)).join('')}</div>` : ''}` : ''}
       <div style="margin-top:14px"><label class="chk"><input type="checkbox" data-act="toggleDisc" ${e.discovered === false ? 'checked' : ''}> 🔒 Solo per DM (scheda nascosta ai giocatori)</label>
       ${window.__RO ? '' : `<fieldset class="visf"${e.discovered === false ? ' disabled' : ''}><legend>Mostra a:</legend><div class="visrow">${PLAYERS().map(([pid, pn]) => `<label><input type="checkbox" data-act="visEnt" value="${esc(pid)}" ${!Array.isArray(e.vis) || e.vis.includes(pid) ? 'checked' : ''}> ${esc(pn)}</label>`).join('')}</div></fieldset>`}</div></div></div>
@@ -1977,6 +2014,18 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
     edit: async () => {
       const r = await formDlg({ title: 'Dati della scheda', fields: [{ k: 'type', label: 'Tipo', type: 'select', value: e.type, options: TYPE_ORDER.map(t => [t, TYPES[t]]) }, { k: 'name', label: 'Nome', value: e.name, req: true }, { k: 'brief', label: 'Riga breve', value: e.brief }, { k: 'status', label: 'Stato', value: e.status }, ...(e.type === 'png' ? [{ k: 'cat', label: 'Atteggiamento', type: 'select', value: e.cat || '', options: [['', '— non assegnato —'], ...Object.entries(PNG_ATT)] }, { k: 'imp', label: 'Importanza', type: 'select', value: e.imp || '', options: [['', '— non assegnata —'], ...Object.entries(PNG_IMP)] }] : e.type === 'luogo' ? [{ k: 'cat', label: 'Categoria del luogo', type: 'select', value: e.cat || '', options: [['', '— non assegnata —'], ...Object.entries(LUOGO_CAT)] }] : []), { k: 'alias', label: 'Alias (separati da virgola)', value: (e.alias || []).join(', ') }, { k: 'dm', label: '🔒 Solo per DM (scheda nascosta ai giocatori)', type: 'check', value: e.discovered === false }, { k: 'vis', type: 'players', value: e.vis }] });
       if (!r) return; await runBatch(['entities'], '', async t => t.put('entities', { ...setVis({ ...e }, r.vis), type: r.type, name: r.name.trim(), brief: r.brief.trim(), status: r.status.trim(), alias: r.alias.split(',').map(x => x.trim()).filter(Boolean), discovered: !r.dm, ...('cat' in r ? { cat: r.cat } : {}), ...('imp' in r ? { imp: r.imp } : {}), upd: Date.now() })); rerender();
+    },
+    // apparizioni: le sessioni in cui compare la scheda (anche quelle non ancora importate restano spuntate)
+    editApp: () => {
+      const cur = new Set(e.sessions || []), all = [...new Set([...S.sess.map(s => s.n), ...cur])].sort((x, y) => x - y);
+      const d = openDlg(`<form method="dialog"><h3>Apparizioni di ${esc(e.name)}</h3><p class="hint">Spunta le sessioni in cui compare.</p>${all.length ? `<div class="row" style="margin-bottom:6px"><button type="button" class="btn sm ghost" data-all="1">Tutte</button><button type="button" class="btn sm ghost" data-all="0">Nessuna</button></div><div class="approw">${all.map(n => `<label><input type="checkbox" value="${n}" ${cur.has(n) ? 'checked' : ''}><b class="num">${n}.</b><span>${esc(sessOf(n)?.title || '')}</span></label>`).join('')}</div>` : '<p class="empty">Non ci sono ancora sessioni.</p>'}<menu><button value="cancel" class="btn ghost" formnovalidate>Annulla</button><button value="ok" class="btn primary">Salva</button></menu></form>`, 'wide');
+      d.addEventListener('click', ev => { const b = ev.target.closest('[data-all]'); if (b) d.querySelectorAll('.approw input').forEach(x => x.checked = b.dataset.all === '1'); });
+      d.addEventListener('close', async () => {
+        if (d.returnValue !== 'ok') return;
+        const sessions = [...d.querySelectorAll('.approw input:checked')].map(x => +x.value);
+        if (sessions.join() === [...cur].sort((x, y) => x - y).join()) return;
+        await runBatch(['entities'], '', async t => t.put('entities', { ...e, sessions, upd: Date.now() })); toast('Apparizioni aggiornate'); rerender();
+      });
     },
     viewportrait: async () => { const rec = await dbGet('blobs', e.portrait.id); if (!rec) return; const url = URL.createObjectURL(rec.blob); const d = openDlg(`<form method="dialog" style="padding:12px 16px"><div class="spread" style="margin-bottom:8px"><b>${esc(e.name)}</b><button class="btn sm" value="x">Chiudi</button></div><div class="lb"><img src="${url}" alt=""></div></form>`, 'wide lbdlg'); d.addEventListener('close', () => URL.revokeObjectURL(url)); },
     portrait: async () => {
