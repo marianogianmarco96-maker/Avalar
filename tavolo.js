@@ -1117,6 +1117,10 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     return me;
   }
 
+  // il tavolo e la presenza sul sito entrano con lo stesso account: un solo accesso alla volta
+  let entrato = null;
+  const entraUnaVolta = info => entrato = entrato || entra(info).catch(e => { entrato = null; throw e; });
+
   // il DM crea (o ritrova) l'account di ogni giocatore e lo collega al suo nome
   async function preparaGiocatori(info) {
     if (!info.it) return;
@@ -1171,7 +1175,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     T.info = info;
     try {
       if (!info) throw errore('ospite');
-      T.me = await entra(info);
+      T.me = await entraUnaVolta(info);
       if (!vivo) return;
       await carica();
       if (!vivo) return;
@@ -4459,4 +4463,85 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
       catch (e) { toast(e.message, 'err'); }
     }
   }
+  /* ---------- chi è sul sito adesso (Supabase Realtime Presence) ----------
+     Il DM e ogni giocatore, appena entrati nel sito, si fanno vedere su un canale riservato ai membri del tavolo
+     (con la pagina in cui sono e se il sito è in primo piano). Il DM vede nella barra in alto chi è connesso. */
+  const P = { ch: null, me: null, live: false, info: null, stato: {}, da: Date.now(), ko: false };
+  const SEZ = { '': 'Home', sessioni: 'Sessioni', schede: 'Schede', scheda: 'Schede', mappe: 'Mappe', manuali: 'Manuali', tavolo: 'Tavolo', cerca: 'Ricerca', cronologia: 'Cronologia', idee: 'Idee' };
+  const sezione = () => { const k = location.hash.replace(/^#\/?/, '').split(/[/?]/)[0]; return SEZ[k] || (k ? k[0].toUpperCase() + k.slice(1) : 'Home'); };
+  const traccia = () => { if (P.ch && P.live) P.ch.track({ nome: P.me.nome, ruolo: P.me.ruolo, giocatore: P.me.giocatore, pagina: sezione(), attivo: !document.hidden, da: P.da }).catch(() => { }); };
+  const PCSS = `#online{position:relative;flex:none;z-index:45;font:600 .8rem/1.2 var(--body)}
+#online .otog{display:flex;align-items:center;gap:6px;height:34px;padding:0 10px 0 6px;border-radius:17px;background:#00000030;border:1px solid #ffffff30;color:#f5e6c4;cursor:pointer;font:inherit}
+#online.open .otog,#online .otog:hover{background:#00000055;border-color:#e7cf9a}
+#online .otog .oico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;margin-left:3px}
+#online .ostack{display:flex}
+#online .ostack .oav{width:24px;height:24px;margin-left:-7px;border:1.5px solid #3f9a4a}
+#online .ostack .oav:first-child{margin-left:0}
+#online .ostack .oav.via{border-color:#d9a53a}
+#online .on{min-width:8px;font-weight:700;letter-spacing:.02em}
+#online.ko .otog{opacity:.55}
+#online .olist{display:none;position:absolute;right:0;top:calc(100% + 12px);width:270px;max-width:calc(100vw - 20px);padding:8px;border-radius:12px;background:var(--wine-d,#561820);border:1px solid #e7cf9a80;box-shadow:0 6px 20px #0007;color:#f5e6c4}
+#online.open .olist{display:block}
+#online .ohd{padding:4px 6px 7px;color:#e7cf9a;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid #e7cf9a40;margin-bottom:4px;font-family:Georgia,serif}
+#online .orow{display:flex;align-items:center;gap:10px;padding:6px}
+#online .orow.off{opacity:.5}
+#online .orow b{display:block;font-family:var(--display);font-weight:600;letter-spacing:.03em}
+#online .orow small{display:block;font-size:.76rem;color:#e9dcc0cc;font-weight:500}
+#online .oav{width:36px;height:36px;border-radius:50%;object-fit:cover;object-position:50% 15%;flex:none;background:#00000040;display:flex;align-items:center;justify-content:center;font:700 .8rem/1 var(--display);color:#f5e6c4;box-sizing:border-box;border:2px solid #ffffff30}
+#online .orow .oav.si{border-color:#3f9a4a}#online .orow .oav.via{border-color:#d9a53a}
+#online .onote{padding:6px 6px 2px;font-size:.72rem;color:#e9dcc0aa;font-weight:500;border-top:1px solid #e7cf9a30;margin-top:4px}
+@media (max-width:620px){#online .otog{padding:0 8px 0 4px;gap:4px}#online .otog .oico{display:none}#online .ostack .oav:nth-child(n+3){display:none}#online .olist{position:fixed;right:10px;top:64px}}`;
+  const fotoPg = g => S.ents?.get(g.pg)?.portrait?.thumb || '';
+  const avatarSito = (g, cls = '') => { const f = fotoPg(g); return f ? `<img class="oav ${cls}" src="${esc(f)}" alt="">` : `<span class="oav ${cls}">${esc(iniziali(g.name))}</span>`; };
+  const durata = ms => { const m = Math.max(0, Math.round(ms / 60000)); return m < 1 ? 'da adesso' : m < 60 ? `da ${m} min` : `da ${Math.floor(m / 60)} h ${m % 60 ? (m % 60) + ' min' : ''}`.trim(); };
+  function disegnaPresenza() {
+    const box = document.getElementById('online'); if (!box) return;
+    const vivi = new Map();
+    for (const a of Object.values(P.stato)) for (const x of a) if (x.giocatore) { const p = vivi.get(x.giocatore); if (!p || (x.attivo && !p.attivo)) vivi.set(x.giocatore, x); }
+    const gio = P.info?.giocatori || [], su = gio.filter(g => vivi.has(g.id));
+    for (const [id, x] of vivi) if (!gio.some(g => g.id === id)) su.push({ id, name: x.nome });
+    box.classList.toggle('ko', P.ko || !P.live);
+    const tog = box.querySelector('.otog'), elenco = su.map(g => g.name).join(', ');
+    tog.title = P.ko ? 'Non riesco a vedere chi è connesso (serve internet e il Tavolo pronto)' : !P.live ? 'Mi collego…' : su.length ? 'Sul sito adesso: ' + elenco : 'Nessun giocatore sul sito in questo momento';
+    tog.setAttribute('aria-label', tog.title);
+    tog.innerHTML = `<svg class="oico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c.8-3.4 3.1-5.2 6-5.2s5.2 1.8 6 5.2"/><path d="M16 5.2a3 3 0 0 1 0 5.6M18 13.9c1.6.7 2.6 2.4 3 5.1"/></svg>`
+      + (su.length ? `<span class="ostack">${su.slice(0, 4).map(g => avatarSito(g, vivi.get(g.id).attivo ? '' : 'via')).join('')}</span>` : '') + `<span class="on">${su.length}</span>`;
+    const tutti = [...su, ...gio.filter(g => !vivi.has(g.id))];
+    box.querySelector('.olist').innerHTML = `<div class="ohd">Giocatori sul sito</div>` + (tutti.length ? tutti.map(g => {
+      const x = vivi.get(g.id);
+      const txt = !x ? 'non connesso' : (x.attivo ? 'su ' + esc(x.pagina || 'sito') : 'sito aperto in secondo piano') + ' · ' + durata(Date.now() - (x.da || Date.now()));
+      return `<div class="orow ${x ? '' : 'off'}">${avatarSito(g, x ? (x.attivo ? 'si' : 'via') : '')}<span><b>${esc(g.name)}</b><small>${txt}</small></span></div>`;
+    }).join('') : '<div class="orow off"><small>Nessun account dei giocatori.</small></div>')
+      + `<div class="onote">${P.ko ? 'Non collegato: controlla internet. Il DM deve aver aperto il Tavolo almeno una volta.' : 'Verde: sul sito adesso · giallo: sito aperto ma in un\'altra app o scheda.'}</div>`;
+  }
+  function casellaDM() {
+    const top = document.querySelector('header.top'); if (!top || document.getElementById('online')) return;
+    const s = document.createElement('style'); s.textContent = PCSS; document.head.append(s);
+    const box = document.createElement('div'); box.id = 'online';
+    box.innerHTML = '<button type="button" class="otog" aria-expanded="false"></button><div class="olist" role="dialog" aria-label="Giocatori sul sito"></div>';
+    const tog = box.querySelector('.otog'), apri = o => { box.classList.toggle('open', o); tog.setAttribute('aria-expanded', String(o)); if (o) disegnaPresenza(); };
+    tog.onclick = () => apri(!box.classList.contains('open'));
+    // il pulsante si ridisegna mentre lo premi: conta il percorso del clic, non l'elemento (che non c'è più)
+    document.addEventListener('click', e => { if (!e.composedPath().includes(box)) apri(false); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') apri(false); });
+    top.insertBefore(box, document.getElementById('tools') || document.getElementById('themeBtn'));
+    setInterval(() => { if (box.classList.contains('open')) disegnaPresenza(); }, 30000);
+    disegnaPresenza();
+  }
+  async function presenza() {
+    const info = await window.__tavolo?.().catch(() => null); if (!info) return;
+    P.info = info; if (info.ruolo === 'dm') casellaDM();
+    try {
+      P.me = await entraUnaVolta(info);
+      const r = await SB.from('tavolo_stato').select('canale').eq('id', 1).maybeSingle();
+      if (r.error || !r.data?.canale) throw new Error('canale');
+      const ch = P.ch = SB.channel('sito-' + r.data.canale, { config: { presence: { key: P.me.uid } } });
+      ch.on('presence', { event: 'sync' }, () => { P.stato = ch.presenceState(); disegnaPresenza(); });
+      ch.subscribe(s => { P.live = s === 'SUBSCRIBED'; if (P.live) traccia(); disegnaPresenza(); });
+      let tm; const dopo = () => { clearTimeout(tm); tm = setTimeout(traccia, 300); };
+      addEventListener('hashchange', dopo); document.addEventListener('visibilitychange', dopo);
+    } catch (e) { P.ko = true; disegnaPresenza(); }
+  }
+  // un attimo dopo l'apertura, per non rallentare la prima pagina
+  setTimeout(() => presenza().catch(() => { }), 1500);
 })();
