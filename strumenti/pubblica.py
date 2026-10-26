@@ -252,10 +252,10 @@ def salva(codice, src):
     for p in d['blobmap'].values():
         if not os.path.exists(p) and not SB_FILE.match(p):
             sys.exit('Manca il file ' + p)
-    prima = dict(d['blobmap'])
     immagini_riservate(d, k)
-    if d['blobmap'] != prima:
-        d['dataVersion'] = int(time.time())  # il sito del DM deve riprendere le immagini dai nuovi indirizzi
+    # versione nuova a ogni pubblicazione: il sito del DM riprende i dati solo se la versione cambia
+    # (altrimenti tiene la copia del browser, e le immagini restano ai vecchi indirizzi)
+    d['dataVersion'] = int(time.time())
     # il sale di ogni giocatore resta fisso: chi ha scelto «Ricordami» non deve rientrare a ogni pubblicazione
     for g in giocatori(d):
         g.setdefault('salt', base64.b64encode(os.urandom(16)).decode())
