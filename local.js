@@ -296,9 +296,12 @@
 #tools.open .ttog{background:#00000055;border-color:#e7cf9a}
 #tools .ttog .tr{font-size:.6rem;padding:3px 6px;border-radius:9px;border:1px solid #e7cf9a99;color:#f7e3ae;margin-left:2px}
 #tools .trole{padding:4px 6px 6px;color:#e7cf9a;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid #e7cf9a40;margin-bottom:2px}
+#tools .ttog.hasav{position:relative;padding-left:3px}
+#tools .ttog .tav{width:28px;height:28px;border-radius:50%;object-fit:cover;object-position:50% 15%;border:1.5px solid #e7cf9a;flex:none;box-sizing:border-box}
+#tools .ttog .tgear{position:absolute;left:19px;bottom:-3px;width:15px;height:15px;border-radius:50%;background:var(--wine-d,#561820);border:1px solid #e7cf9a99;display:flex;align-items:center;justify-content:center;font-size:.6rem;line-height:1}
 #themeBtn{flex:none;font-size:1.05rem}
 @media (max-width:1280px){#tools .ttog .tl{display:none}}
-@media (max-width:620px){#tools .ttog{width:34px;padding:0;justify-content:center}#tools .ttog .tr{display:none}}`;
+@media (max-width:620px){#tools .ttog{width:34px;padding:0;justify-content:center}#tools .ttog .tr{display:none}#tools .ttog .tav{width:32px;height:32px}#tools .ttog .tgear{left:auto;right:-4px}}`;
   function applyRoleUI() {
     const root = document.documentElement; root.classList.add(ROLE === 'admin' ? 'adm' : 'ro');
     if (ROLE !== 'admin') {
@@ -312,7 +315,10 @@
     const box = document.createElement('aside'); box.id = 'tools'; box.setAttribute('aria-label', 'Strumenti');
     const tog = document.createElement('button'); tog.type = 'button'; tog.className = 'tbtn ttog'; tog.setAttribute('aria-expanded', 'false');
     const chi = adm ? 'DM' : PLAYER ? PLAYER.name : 'Ospite';
-    tog.innerHTML = `<span class="ti" aria-hidden="true">⚙</span><span class="tl">Strumenti</span><span class="tr">${esc(chi)}</span>`;
+    // il giocatore vede in alto il ritratto del suo personaggio (dalla sua scheda), con l'ingranaggio in piccolo
+    const foto = PLAYER?.pg ? MEM.entities?.get(PLAYER.pg)?.portrait?.thumb : null;
+    if (foto) tog.classList.add('hasav');
+    tog.innerHTML = (foto ? `<img class="tav" src="${esc(foto)}" alt=""><span class="tgear" aria-hidden="true">⚙</span>` : '<span class="ti" aria-hidden="true">⚙</span>') + `<span class="tl">Strumenti</span><span class="tr">${esc(chi)}</span>`;
     tog.title = 'Strumenti · ' + (adm ? 'Dungeon Master' : PLAYER ? PLAYER.name : 'Ospite');
     const list = document.createElement('div'); list.className = 'tlist';
     const role = document.createElement('div'); role.className = 'trole'; role.textContent = adm ? 'Dungeon Master' : PLAYER ? PLAYER.name + ' · sola lettura' : 'Ospite · sola lettura'; list.append(role);
