@@ -2,7 +2,7 @@
 giocatore (giocatori/<id>.enc, ognuna con la password di quel giocatore) e data.json (copia pubblica per gli ospiti).
 
 Uso:
-  python3 strumenti/pubblica.py apri    CODICE  dm.json     # decifra data.enc in dm.json (da NON committare)
+  python3 strumenti/pubblica.py apri    CODICE  dm.json     # decifra i dati più recenti in dm.json (da NON committare)
   python3 strumenti/pubblica.py salva   CODICE  dm.json     # riscrive data.enc, giocatori/*.enc e data.json da dm.json
   python3 strumenti/pubblica.py account CODICE  dm.json     # crea gli account mancanti dei giocatori e ne stampa le password
 
@@ -18,6 +18,11 @@ che restano come testo semplice), sezioni del DM (titolo con «DM»), voci e not
 voci, eventi e paragrafi che iniziano con «*(Solo DM)*», sezioni, voci, eventi e collegamenti segnati «Solo per DM» (dm: true),
 testi evidenziati con [DM]…[/DM], documenti allegati alle sessioni, cronologia del riassunto e immagini riservate (priv/).
 Le immagini in priv/ sono cifrate con la stessa chiave dei dati.
+
+Il DM salva anche direttamente dal sito: il browser rifà le stesse copie (copie.js) e le carica su Supabase
+(bucket «sito», tavolo/sito-1.sql). «apri» prende la versione più recente tra GitHub (versione.json) e Supabase,
+così si parte sempre dalle ultime modifiche del DM; «salva» scrive versione.json, e dopo il merge vince GitHub.
+Le immagini caricate dal sito hanno percorsi blobs/sb-… e priv/sb-…: stanno su Supabase e si scaricano da lì.
 """
 import base64
 import glob
@@ -29,6 +34,7 @@ import re
 import secrets
 import sys
 import time
+import urllib.request
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
@@ -47,12 +53,48 @@ GIOCATORI_BASE = [('livion', 'Livion', 'pg-livion'), ('sam', 'Sam', 'pg-sam'), (
 CARATTERI = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 
 
+SB_URL = 'https://zwxwnmcxryfmzkqsakjz.supabase.co'
+SB_KEY = 'sb_publishable_cAGuilUZdnxhtDeJ-qwuEQ_ihjCyFj0'
+SB_FILE = re.compile(r'^(blobs|priv)/sb-')
+
+
+def scarica(url, **headers):
+    return urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=60).read()
+
+
+def su_supabase():
+    """Versione e cartella dei dati salvati dal DM sul sito, se sono più recenti di quelli su GitHub (altrimenti None)."""
+    try:
+        pub = json.load(open('versione.json')).get('pub', 0)
+    except FileNotFoundError:
+        pub = 0
+    try:
+        st = json.loads(scarica(SB_URL + '/rest/v1/sito_stato?select=versione,cartella&id=eq.1', apikey=SB_KEY))
+    except Exception as e:  # noqa: BLE001
+        print('  (Supabase non risponde: uso i dati di GitHub)', e, file=sys.stderr)
+        return None
+    if st and st[0]['cartella'] and st[0]['versione'] > pub:
+        return st[0]
+    return None
+
+
+def leggi(p):
+    """Un file di blobs/ o priv/: dal repository o, se è stato caricato dal sito, da Supabase."""
+    if os.path.exists(p) or not SB_FILE.match(p):
+        return open(p, 'rb').read()
+    return scarica(SB_URL + '/storage/v1/object/public/sito/' + p)
+
+
 def chiave(codice, enc):
     return hashlib.pbkdf2_hmac('sha256', codice.encode(), base64.b64decode(enc['salt']), enc['it'], 32)
 
 
 def apri(codice, out):
     enc = json.load(open('data.enc'))
+    sb = su_supabase()
+    if sb:
+        print(f"Apro i dati salvati dal DM sul sito ({time.strftime('%d/%m/%Y %H:%M', time.localtime(sb['versione'] / 1000))}, Supabase {sb['cartella']})")
+        enc = json.loads(scarica(SB_URL + '/storage/v1/object/public/sito/' + sb['cartella'] + '/data.enc'))
     pt = AESGCM(chiave(codice, enc)).decrypt(base64.b64decode(enc['iv']), base64.b64decode(enc['ct']), None)
     open(out, 'wb').write(pt)
 
@@ -165,7 +207,7 @@ def immagini_riservate(d, k):
     for aid, p in list(bm.items()):
         if p.startswith('blobs/') and aid not in pubbliche and not any(bm[a] == p for a in pubbliche):
             if p not in per_path:
-                b = open(p, 'rb').read()
+                b = leggi(p)
                 iv, ct = cifra(k, b)
                 per_path[p] = 'priv/' + hashlib.sha256(b).hexdigest()[:16] + '.bin'
                 open(per_path[p], 'wb').write(iv + ct)
@@ -182,7 +224,7 @@ def immagini_riservate(d, k):
     for aid in sorted(usate - set(chiavi)):
         p = bm[aid]
         if p not in nuovi:
-            buf = open(p, 'rb').read()
+            buf = leggi(p)
             plain = AESGCM(k).decrypt(buf[:12], buf[12:], None)
             kk = AESGCM.generate_key(256)
             iv, ct = cifra(kk, plain)
@@ -208,7 +250,7 @@ def salva(codice, src):
     # verifica che il codice sia quello giusto prima di riscrivere qualcosa
     AESGCM(k).decrypt(base64.b64decode(enc['iv']), base64.b64decode(enc['ct']), None)
     for p in d['blobmap'].values():
-        if not os.path.exists(p):
+        if not os.path.exists(p) and not SB_FILE.match(p):
             sys.exit('Manca il file ' + p)
     prima = dict(d['blobmap'])
     immagini_riservate(d, k)
@@ -237,6 +279,8 @@ def salva(codice, src):
     for f in glob.glob('giocatori/*.enc'):
         if f not in fatti:
             os.remove(f)
+    # quando sono stati pubblicati: il sito confronta questa data con l'ultimo salvataggio del DM su Supabase
+    json.dump({'pub': int(time.time() * 1000)}, open('versione.json', 'w'))
 
 
 if __name__ == '__main__':

@@ -1120,6 +1120,13 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
   // il tavolo e la presenza sul sito entrano con lo stesso account: un solo accesso alla volta
   let entrato = null;
   const entraUnaVolta = info => entrato = entrato || entra(info).catch(e => { entrato = null; throw e; });
+  // il sito salva le modifiche del DM su Supabase (local.js) con lo stesso account del tavolo
+  window.__sbDM = async () => {
+    const info = await window.__tavolo?.();
+    if (!info || info.ruolo !== 'dm') throw new Error('Solo il DM può salvare.');
+    try { await entraUnaVolta(info); } catch (e) { throw e.tv && ERR[e.tv] ? new Error(ERR[e.tv][0] + '. ' + ERR[e.tv][1].replace(/<[^>]+>/g, '')) : e; }
+    return SB;
+  };
 
   // il DM crea (o ritrova) l'account di ogni giocatore e lo collega al suo nome
   async function preparaGiocatori(info) {
