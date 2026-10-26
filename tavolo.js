@@ -182,6 +182,12 @@
 .tv-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:8px;max-height:46vh;overflow-y:auto;padding:2px}
 .tv-pick button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 4px;border-radius:6px;border:1px solid transparent;text-align:center;font-size:.85rem;line-height:1.15}
 .tv-pick button:hover,.tv-pick button:focus-visible{border-color:var(--gold);background:var(--paper2)}
+.tv-forme{display:grid;gap:8px;margin:10px 0}
+.tv-forme button{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:6px;border:1px solid var(--line2);background:var(--paper2)}
+.tv-forme button b{font-family:var(--display);color:var(--wine)}
+.tv-forme button small{opacity:.8;line-height:1.3}
+.tv-forme button.cons{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+.tv-forme button:hover,.tv-forme button:focus-visible{border-color:var(--gold)}
 .tv-pick i{width:58px;height:58px;border-radius:50%;background:var(--c,#7d2530) center/cover no-repeat;border:2px solid var(--c,#7d2530);box-shadow:0 1px 4px #0006;display:flex;align-items:center;justify-content:center;font:700 1.3rem var(--display);color:#fff;font-style:normal}
 .tv-f{display:grid;grid-template-columns:auto 1fr;gap:8px 10px;align-items:center;margin:8px 0}
 .tv-f input,.tv-f select{font:inherit;padding:6px 8px;border-radius:4px;border:1px solid var(--line2);background:var(--paper2);color:var(--ink);min-width:0}
@@ -2086,8 +2092,8 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
       pop.querySelector('[data-k=sch]')?.addEventListener('click', async () => {
         chiudiPop(); let s = schedaDi(t);
         if (!s) {
-          const e = t.scheda && S.ents?.get(t.scheda);
-          s = await creaPng({ nome: t.nome || e?.name || 'PNG', entita: e ? e.id : null, immagine: t.immagine || null });
+          const e = t.scheda && S.ents?.get(t.scheda), forma = await sceltaForma(t.nome || e?.name || 'PNG', e); if (!forma) return;
+          s = await creaPng({ nome: t.nome || e?.name || 'PNG', entita: e ? e.id : null, immagine: t.immagine || null, forma });
           if (!s) return;
           if (!e) { const r = await SB.from('tavolo_token').update({ scheda: 'tv:' + s.id }).eq('id', t.id).select().single(); if (!r.error) T.tok.set(t.id, completa(t, r.data)); }
         }
@@ -2198,9 +2204,9 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     const tutti = [...pg, ...png, ...tv]; tutti.forEach((x, i) => x.i = i);
     if ($('dialog.tv-tk[open]')) return;
     const d = finestra(`<form method="dialog"><h3>Aggiungi un token</h3>
-      <div class="tv-tabs"><button type="button" class="btn sm on" data-tab="pg">Personaggi</button><button type="button" class="btn sm" data-tab="png">PNG del sito</button>${T.schede ? '<button type="button" class="btn sm" data-tab="tv">Schede PNG</button>' : ''}<button type="button" class="btn sm" data-tab="nuovo">Nuovo</button></div>
+      <div class="tv-tabs"><button type="button" class="btn sm on" data-tab="pg">Party</button><button type="button" class="btn sm" data-tab="png">Personaggi del sito</button>${T.schede ? '<button type="button" class="btn sm" data-tab="tv">Schede del tavolo</button>' : ''}<button type="button" class="btn sm" data-tab="nuovo">Nuovo</button></div>
       <div data-p="pg"><div class="tv-pick">${pg.map(cella).join('')}</div><p class="hint">Il token di un personaggio lo può muovere il suo giocatore.</p></div>
-      <div data-p="png" hidden><input type="search" placeholder="Cerca un PNG…" style="width:100%;margin-bottom:8px;font:inherit;padding:6px 8px;border-radius:4px;border:1px solid var(--line2);background:var(--paper2);color:var(--ink)"><div class="tv-pick">${png.map(cella).join('') || '<p class="hint">Nessun PNG nel sito.</p>'}</div></div>
+      <div data-p="png" hidden><input type="search" placeholder="Cerca un personaggio…" style="width:100%;margin-bottom:8px;font:inherit;padding:6px 8px;border-radius:4px;border:1px solid var(--line2);background:var(--paper2);color:var(--ink)"><div class="tv-pick">${png.map(cella).join('') || '<p class="hint">Nessun personaggio nel sito.</p>'}</div></div>
       <div data-p="tv" hidden><div class="tv-pick">${tv.map(cella).join('') || '<p class="hint">Nessuna scheda di PNG: creale dal pannello Schede.</p>'}</div><p class="hint">Ogni token di una scheda ha i suoi punti ferita.</p></div>
       <div data-p="nuovo" hidden><div class="tv-f"><label>Nome</label><input name="nome" maxlength="60" placeholder="Es. Bandito 1">
         <label>Colore</label><div class="tv-cols">${COLORI.map((c, i) => `<button type="button" style="--c:${c}" data-c="${c}" aria-pressed="${!i}" aria-label="Colore ${i + 1}"></button>`).join('')}</div>
@@ -3658,7 +3664,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
   const piu = n => n ? (n > 0 ? '+' : '') + n : '';
   const modC = v => Math.floor(((num(v) ?? 10) - 10) / 2);
   const gsN = g => { const s = String(g ?? ''); return s.includes('/') ? 0 : +s || 0; };
-  const comp = s => num(s.dati.comp) ?? (s.tipo === 'pg' ? 2 + Math.floor((Math.max(1, num(s.dati.livello) || 1) - 1) / 4) : 2 + Math.floor(Math.max(0, gsN(s.dati.gs) - 1) / 4));
+  const comp = s => num(s.dati.comp) ?? (formaPg(s) ? 2 + Math.floor((Math.max(1, num(s.dati.livello) || 1) - 1) / 4) : 2 + Math.floor(Math.max(0, gsN(s.dati.gs) - 1) / 4));
   const tsTot = (s, k) => modC(s.dati[k]) + (s.dati['ts_' + k] ? comp(s) : 0);
   const abTot = (s, k) => { const a = ABIL.find(x => x[0] === k); return modC(s.dati[a[2]]) + (num(s.dati['ab_' + k]) || 0) * comp(s); };
   const carInc = s => s.dati.car_inc || 'int';
@@ -3691,6 +3697,11 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     return t.scheda ? v.find(x => x.entita === t.scheda) || null : null;
   };
   const puoScrivere = s => isDM() || (!!s.giocatore && s.giocatore === T.me.giocatore);
+  // scheda completa, come quella di un giocatore: i PG e i personaggi principali del DM (dati.forma = 'pg');
+  // gli altri personaggi hanno la scheda da PNG (blocco delle statistiche)
+  const formaPg = s => s.tipo === 'pg' || s.dati?.forma === 'pg';
+  // quella consigliata per un personaggio del sito: completa se nel sito è segnato come principale
+  const formaPer = e => e?.imp === 'importante' ? 'pg' : 'png';
   const fotoScheda = s => s.immagine || S.ents?.get(s.entita)?.portrait?.thumb || null;
   const completaS = (prima, nuovo) => { const o = completa(prima, nuovo); if (prima?.dati && !nuovo.dati) o.dati = prima.dati; return o; };
   // condizioni sui token, con un effetto che vedono tutti
@@ -3790,7 +3801,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
   }
   const riass = s => {
     const d = s.dati, pf = d.pf_max != null ? ` · PF ${d.pf ?? d.pf_max}/${d.pf_max}` : '';
-    return (s.tipo === 'pg' ? [d.classe, d.livello ? 'liv. ' + d.livello : ''].filter(Boolean).join(' ') : d.gs != null && d.gs !== '' ? 'GS ' + d.gs : '') + (d.ca != null ? (s.tipo === 'pg' && !d.classe && !d.livello ? '' : ' · ') + 'CA ' + d.ca : '') + pf;
+    return (formaPg(s) ? [d.classe, d.livello ? 'liv. ' + d.livello : ''].filter(Boolean).join(' ') : d.gs != null && d.gs !== '' ? 'GS ' + d.gs : '') + (d.ca != null ? (formaPg(s) && !d.classe && !d.livello ? '' : ' · ') + 'CA ' + d.ca : '') + pf;
   };
   const tondo = s => { const f = fotoScheda(s); return `<i style="${f ? `background-image:url('${esc(f)}')` : `--c:${s.tipo === 'pg' ? '#7d2530' : '#5b6670'}`}">${f ? '' : esc(iniziali(s.nome))}</i>`; };
   function disegnaSchede() {
@@ -3805,9 +3816,9 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     const riga = s => `<div class="r" data-id="${s.id}">${tondo(s)}<button type="button" class="nm" data-k="apri">${esc(s.nome)}<small>${esc(riass(s)) || '&nbsp;'}</small></button>${isDM() && s.tipo === 'png' ? `<button type="button" class="s" data-k="vis" title="${s.nascosta ? 'I giocatori non la vedono: clicca per mostrarla' : 'I giocatori la vedono: clicca per nasconderla'}">${s.nascosta ? '🙈' : '👁'}</button><button type="button" class="s" data-k="via" title="Elimina la scheda">✕</button>` : ''}</div>`;
     const pg = v.filter(s => s.tipo === 'pg'), png = v.filter(s => s.tipo === 'png');
     p.innerHTML = hd + `${isDM() && png.length > 5 ? `<input type="search" data-k="cerca" placeholder="Cerca…" value="${esc(cerca)}" aria-label="Cerca una scheda">` : ''}<div class="tv-tl">
-      <h5>Personaggi</h5>${pg.map(riga).join('') || `<div class="tv-tvuoto">${isDM() ? 'Si creano da sole all\'apertura del tavolo, una per giocatore.' : 'La tua scheda compare quando il DM apre il tavolo.'}</div>`}
-      <h5>PNG</h5>${png.map(riga).join('') || `<div class="tv-tvuoto">${isDM() ? 'Nessun PNG. Creane uno qui sotto.' : 'Il DM non vi ha ancora mostrato nessun PNG.'}</div>`}</div>
-      ${isDM() ? '<div class="tv-tf"><button type="button" data-k="nuovo">+ Nuovo PNG</button></div>' : ''}`;
+      <h5>Party</h5>${pg.map(riga).join('') || `<div class="tv-tvuoto">${isDM() ? 'Si creano da sole all\'apertura del tavolo, una per giocatore.' : 'La tua scheda compare quando il DM apre il tavolo.'}</div>`}
+      <h5>Personaggi</h5>${png.map(riga).join('') || `<div class="tv-tvuoto">${isDM() ? 'Nessun personaggio. Creane uno qui sotto.' : 'Il DM non vi ha ancora mostrato nessun personaggio.'}</div>`}</div>
+      ${isDM() ? '<div class="tv-tf"><button type="button" data-k="nuovo">+ Nuovo personaggio</button></div>' : ''}`;
     p.querySelector('[data-k=x]').onclick = () => apriSchede(false);
     const q = p.querySelector('[data-k=cerca]');
     const filtra = () => { const s = norm(q.value); p.querySelectorAll('.r').forEach(r => r.hidden = !!s && T.schede.get(r.dataset.id)?.tipo === 'png' && !norm(r.textContent).includes(s)); };
@@ -3833,22 +3844,36 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
 
   /* nuovo PNG (DM): da un modello, da un PNG del sito o vuoto */
   async function creaPng(o) {
-    const r = await SB.from('tavolo_schede').insert({ tipo: 'png', nome: String(o.nome || 'PNG').slice(0, 80), entita: o.entita || null, immagine: o.immagine || null, nascosta: true, dati: o.dati || { ...BASE } }).select().single();
+    const dati = { ...(o.dati || BASE), ...(o.forma === 'pg' ? { forma: 'pg', livello: 1 } : {}) };
+    const r = await SB.from('tavolo_schede').insert({ tipo: 'png', nome: String(o.nome || 'PNG').slice(0, 80), entita: o.entita || null, immagine: o.immagine || null, nascosta: true, dati }).select().single();
     if (r.error) { toast(r.error.message, 'err'); return null; }
     T.schede.set(r.data.id, r.data); disegnaSchede(); return r.data;
+  }
+  // il DM sceglie che scheda dare a un personaggio: completa (come un giocatore) o da PNG. Risponde 'pg', 'png' o nulla (annullato)
+  function sceltaForma(nome, e) {
+    return new Promise(res => {
+      const cons = formaPer(e), b = (f, t, sub) => `<button type="button" data-f="${f}" class="${f === cons ? 'cons' : ''}"><b>${t}${f === cons ? ' · consigliata' : ''}</b><small>${sub}</small></button>`;
+      const d = finestra(`<form method="dialog"><h3>Scheda di ${esc(nome)}</h3>
+        <div class="tv-forme">${b('png', 'Scheda da PNG', 'Blocco delle statistiche come nel Manuale dei mostri: per i personaggi secondari, che compaiono poco.')}${b('pg', 'Scheda completa', 'Come quella di un giocatore (classe, livello, privilegi, incantesimi): per i personaggi principali della storia.')}</div>
+        ${e ? `<p class="hint">${e.imp === 'importante' ? 'Nel sito è segnato come personaggio principale.' : e.imp === 'minore' ? 'Nel sito è segnato come personaggio secondario.' : 'Nel sito non ha ancora un ruolo: lo scegli da «Modifica dati» della sua scheda.'} Potrai cambiare tipo anche dopo, dalla scheda.</p>` : ''}
+        <menu><button value="cancel" class="btn ghost">Annulla</button></menu></form>`, 'tv-side tv-np');
+      let scelta = null;
+      d.querySelectorAll('[data-f]').forEach(x => x.onclick = () => { scelta = x.dataset.f; d.close(); });
+      d.addEventListener('close', () => res(scelta));
+    });
   }
   function dlgNuovoPng() {
     if (!T.schede) return;
     document.querySelectorAll('dialog.tv-np[open]').forEach(x => x.close());
     const sito = [...(S.ents?.values() || [])].filter(e => e.type === 'png').sort((a, b) => a.name.localeCompare(b.name, 'it'));
     const tondoM = (nome, img, c) => `<i style="--c:${c};${img ? `background-image:url('${esc(img)}')` : ''}">${img ? '' : esc(iniziali(nome))}</i>`;
-    const d = finestra(`<form method="dialog"><h3>Nuovo PNG</h3>
-      <div class="tv-tabs"><button type="button" class="btn sm on" data-tab="mod">Da un modello</button><button type="button" class="btn sm" data-tab="sito">PNG del sito</button><button type="button" class="btn sm" data-tab="vuoto">Vuoto</button></div>
+    const d = finestra(`<form method="dialog"><h3>Nuovo personaggio</h3>
+      <div class="tv-tabs"><button type="button" class="btn sm on" data-tab="mod">Da un modello</button><button type="button" class="btn sm" data-tab="sito">Personaggi del sito</button><button type="button" class="btn sm" data-tab="vuoto">Vuoto</button></div>
       <div data-p="mod"><div class="tv-pick">${MODELLI.map((m, i) => `<button type="button" data-m="${i}">${tondoM(m.nome, null, '#5b6670')}${esc(m.nome)}<small>GS ${esc(m.dati.gs)}</small></button>`).join('')}</div>
         <p class="hint">Statistiche del regolamento base (SRD 5.1). Dopo le cambi come vuoi.</p></div>
       <div data-p="sito" hidden><div class="tv-f"><label>Statistiche</label><select name="base"><option value="">Da compilare</option>${MODELLI.map((m, i) => `<option value="${i}">Come: ${esc(m.nome)}</option>`).join('')}</select></div>
-        <input type="search" placeholder="Cerca un PNG…" style="width:100%;margin-bottom:8px;font:inherit;padding:6px 8px;border-radius:4px;border:1px solid var(--line2);background:var(--paper2);color:var(--ink)">
-        <div class="tv-pick">${sito.map(e => `<button type="button" data-e="${esc(e.id)}">${tondoM(e.name, e.portrait?.thumb, '#3b5f8a')}${esc(e.name)}</button>`).join('') || '<p class="hint">Nessun PNG nel sito.</p>'}</div></div>
+        <input type="search" placeholder="Cerca un personaggio…" style="width:100%;margin-bottom:8px;font:inherit;padding:6px 8px;border-radius:4px;border:1px solid var(--line2);background:var(--paper2);color:var(--ink)">
+        <div class="tv-pick">${sito.map(e => `<button type="button" data-e="${esc(e.id)}">${tondoM(e.name, e.portrait?.thumb, '#3b5f8a')}${esc(e.name)}</button>`).join('') || '<p class="hint">Nessun personaggio nel sito.</p>'}</div></div>
       <div data-p="vuoto" hidden><div class="tv-f"><label>Nome</label><input name="nome" maxlength="80" placeholder="Es. Capitano della guardia"></div><button type="button" class="btn primary" data-k="crea">Crea la scheda</button></div>
       <menu><button value="cancel" class="btn ghost">Chiudi</button></menu></form>`, 'tv-side tv-np');
     d.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { d.querySelectorAll('[data-tab]').forEach(x => x.classList.toggle('on', x === b)); d.querySelectorAll('[data-p]').forEach(p => p.hidden = p.dataset.p !== b.dataset.tab); });
@@ -3857,10 +3882,10 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     const copia = m => JSON.parse(JSON.stringify(m.dati));
     d.querySelectorAll('[data-m]').forEach(b => b.onclick = async () => { const m = MODELLI[+b.dataset.m], n = [...T.schede.values()].filter(s => s.nome === m.nome || s.nome.startsWith(m.nome + ' ')).length; fatto(await creaPng({ nome: n ? m.nome + ' ' + (n + 1) : m.nome, dati: copia(m) })); });
     d.querySelectorAll('[data-e]').forEach(b => b.onclick = async () => {
-      const e = S.ents.get(b.dataset.e), m = MODELLI[+d.querySelector('[name=base]').value];
-      fatto(await creaPng({ nome: e.name, entita: e.id, immagine: e.portrait?.thumb || null, dati: m && d.querySelector('[name=base]').value !== '' ? copia(m) : { ...BASE } }));
+      const e = S.ents.get(b.dataset.e), m = MODELLI[+d.querySelector('[name=base]').value], forma = await sceltaForma(e.name, e); if (!forma) return;
+      fatto(await creaPng({ nome: e.name, entita: e.id, immagine: e.portrait?.thumb || null, dati: m && d.querySelector('[name=base]').value !== '' ? copia(m) : { ...BASE }, forma }));
     });
-    d.querySelector('[data-k=crea]').onclick = async () => { const n = d.querySelector('[name=nome]'); if (!n.value.trim()) return n.focus(); fatto(await creaPng({ nome: n.value.trim() })); };
+    d.querySelector('[data-k=crea]').onclick = async () => { const n = d.querySelector('[name=nome]'); if (!n.value.trim()) return n.focus(); const forma = await sceltaForma(n.value.trim(), null); if (forma) fatto(await creaPng({ nome: n.value.trim(), forma })); };
   }
 
   /* la scheda aperta (una alla volta, accanto alla mappa) */
@@ -4272,7 +4297,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
   const n2 = (f, dis) => `<input type="number" data-f="${f}" class="pfi" step="1" aria-label="Punti ferita attuali"${dis}>`;
   function disegnaScheda() {
     const sv = T.sv; if (!sv) return; const s = T.schede.get(sv.id); if (!s) { sv.d.close(); return; }
-    const d = s.dati, w = puoScrivere(s), dis = w ? '' : ' disabled', pg = s.tipo === 'pg', foto = fotoScheda(s), tk = tokScheda();
+    const d = s.dati, w = puoScrivere(s), dis = w ? '' : ' disabled', pg = formaPg(s), foto = fotoScheda(s), tk = tokScheda();
     const inp = (f, ph = '', cls = '', type = 'text', extra = '') => `<input type="${type}" data-f="${f}" class="${cls}" placeholder="${esc(ph)}" aria-label="${esc(ph)}"${extra}${dis}>`;
     const n = (f, ph, cls = '') => inp(f, ph, cls, 'number', ' step="1"');
     const area = (f, ph, rows = 4) => `<textarea data-f="${f}" placeholder="${esc(ph)}" aria-label="${esc(ph)}" rows="${rows}"${dis}></textarea>`;
@@ -4280,11 +4305,11 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     const box = (dentro, et, cls = '') => `<div class="sez ${cls}">${dentro}<h6>${et}</h6></div>`;
     // testata, come il riquadro in alto della scheda ufficiale
     const info = pg
-      ? cella(`<span class="cl">${inp('classe', 'Classe')}${n('livello', 'Liv.', 'lv')}</span>`, 'Classe e livello') + cella(inp('background', 'Background'), 'Background') + cella(`<span class="ro">${esc(nomeGioc(s.giocatore))}</span>`, 'Nome del giocatore')
+      ? cella(`<span class="cl">${inp('classe', 'Classe')}${n('livello', 'Liv.', 'lv')}</span>`, 'Classe e livello') + cella(inp('background', 'Background'), 'Background') + cella(`<span class="ro">${esc(s.giocatore ? nomeGioc(s.giocatore) : 'DM')}</span>`, 'Nome del giocatore')
         + cella(inp('razza', 'Razza'), 'Razza') + cella(inp('allineamento', 'Allineamento'), 'Allineamento') + cella(n('pe', '0'), 'Punti esperienza')
       : cella(inp('taglia_tipo', 'Taglia e tipo'), 'Taglia e tipo') + cella(inp('gs', 'GS'), 'Grado di sfida') + cella(inp('allineamento', 'Allineamento'), 'Allineamento')
         + cella(inp('sensi', 'Scurovisione 18 m'), 'Sensi') + cella(inp('linguaggi', 'Comune'), 'Linguaggi') + cella(inp('difese', '—'), 'Resistenze e immunità');
-    const conds = !pg && tk ? condTok(tk) : d.condizioni || [];
+    const conds = s.tipo !== 'pg' && tk ? condTok(tk) : d.condizioni || [];
     const cond = conds.map(c => `<button type="button" class="ch" data-cond="${esc(c)}" title="${w ? 'Togli' : ''}"${dis}>${esc(c)}${w ? ' ✕' : ''}</button>`).join('');
     let corpo = '';
     const tkT = tk || attaccante(s);
@@ -4364,7 +4389,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
         <div class="info">${info}</div></div>
       <div class="tabs" role="tablist">${[['pri', pg ? 'Personaggio' : 'Statistiche'], ['inc', 'Incantesimi'], ['bg', pg ? 'Background e note' : 'Note']].map(([k, l]) => `<button type="button" role="tab" data-tab="${k}" aria-selected="${sv.tab === k}" class="${sv.tab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
       <div class="corpo">${corpo}</div>
-      ${isDM() ? `<div class="fd">${s.tipo === 'png' ? `<button type="button" class="mini" data-k="vis">${s.nascosta ? '🙈 Nascosta ai giocatori' : '👁 La vedono i giocatori'}</button>${scena() ? '<button type="button" class="mini" data-k="metti">＋ Metti un token sulla mappa</button>' : ''}` : '<span class="vuoto">La compila anche il giocatore, dal vivo.</span>'}</div>` : (w ? '' : '<p class="vuoto fd">Scheda mostrata dal DM: puoi solo leggerla.</p>')}`;
+      ${isDM() ? `<div class="fd">${s.tipo === 'png' ? `<button type="button" class="mini" data-k="forma" title="${pg ? 'Passa al blocco delle statistiche da PNG' : 'Passa alla scheda completa, come quella di un giocatore'}">${pg ? '📋 Scheda da PNG' : '📜 Scheda completa'}</button><button type="button" class="mini" data-k="vis">${s.nascosta ? '🙈 Nascosta ai giocatori' : '👁 La vedono i giocatori'}</button>${scena() ? '<button type="button" class="mini" data-k="metti">＋ Metti un token sulla mappa</button>' : ''}` : '<span class="vuoto">La compila anche il giocatore, dal vivo.</span>'}</div>` : (w ? '' : '<p class="vuoto fd">Scheda mostrata dal DM: puoi solo leggerla.</p>')}`;
     riempi(); applicaZoomScheda(); sv.d.classList.toggle('tv-scuro', schedaScura());
   }
   function campo(el, scelto = false) {
@@ -4517,6 +4542,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
       const tk = tokScheda(); if (tk) { const r = await SB.from('tavolo_token').update({ pf: t.totale, pf_max: t.totale }).eq('id', tk.id).select().single(); if (!r.error) { T.tok.set(tk.id, completa(tk, r.data)); disegnaToken(); } return aggiornaFinestra(); }
       return salvaScheda(s.id, { pf: t.totale, pf_max: t.totale }, true);
     }
+    if (k === 'forma') { sv.tab = 'pri'; sv.edit = false; await salvaScheda(s.id, { forma: formaPg(s) ? null : 'pg' }, true); return disegnaScheda(); }
     if (k === 'vis') {
       const u = await SB.from('tavolo_schede').update({ nascosta: !s.nascosta }).eq('id', s.id).select().single();
       if (u.error) return toast(u.error.message, 'err'); arrivaScheda(u.data); manda('schede', {}); return;
