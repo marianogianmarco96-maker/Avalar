@@ -1181,6 +1181,59 @@ dialog.dlg.tv-guida[open]{display:flex}
 .tv-guida .lvl button{all:unset;cursor:pointer;font:600 .68rem var(--display);padding:3px 8px;border-radius:4px;background:#dccaa0;color:#5a4636}
 .tv-guida .lvl button.on{background:#7d2530;color:#fff}
 .tv-guida .dado{font:600 1.5rem var(--display);color:#7d2530;min-width:30px;text-align:center}
+/* procedura guidata, stile "carte da gioco" */
+dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
+.tv-guida .gh{background:#7d2530;color:#fff;padding:12px 18px}
+.tv-guida .gh b{color:#fff}.tv-guida .gh .who{color:#f3d3d6}
+.tv-guida .gs{background:#7d2530;border:0;padding:0 18px 12px;gap:0}
+.tv-guida .gs button{flex-direction:column;gap:4px;padding:0 4px;min-width:84px;color:#f3d3d6;font-size:.62rem;border:0;border-radius:0;position:relative;z-index:0}
+.tv-guida .gs button:after{content:'';position:absolute;top:11px;left:calc(50% + 14px);width:calc(100% - 28px);height:2px;background:#ffffff44;z-index:-1}
+.tv-guida .gs button:last-child:after{display:none}
+.tv-guida .gs i{width:24px;height:24px;background:#5a1820;color:#f3d3d6;border:2px solid #f3d3d677;box-sizing:border-box}
+.tv-guida .gs .ok{color:#fff}.tv-guida .gs .ok i{background:#fff;color:#7d2530;border-color:#fff}
+.tv-guida .gs .on{background:none;color:#fff;border:0}.tv-guida .gs .on i{background:#e2c27a;color:#5a1820;border-color:#fff;box-shadow:0 0 0 4px #ffffff33}
+.tv-guida .gs button:disabled{opacity:.6}
+.tv-guida .gm{padding:18px 22px 30px}
+.tv-guida h4{font-size:1.3rem;color:#2b1d14}
+.tv-guida .gc{background:#fffaf0;border:0;border-radius:12px;box-shadow:0 2px 0 #d7c191,0 4px 10px #6b4a2a1a;padding:10px 12px;transition:transform .15s,box-shadow .15s}
+.tv-guida .gc:hover{border:0;box-shadow:0 2px 0 #c4ae80,0 8px 16px #6b4a2a2a}
+.tv-guida .gc.on{border:0;background:#fff;padding:10px 12px;box-shadow:0 0 0 2px #7d2530,0 6px 16px #7d253033}
+.tv-guida .gc[data-g=sotto]{border-top:5px solid var(--c,#a98334);padding-top:9px}
+.tv-guida .gc[data-g=sotto].on{border-top:5px solid var(--c,#a98334)}
+.tv-guida .gcards:has(.carta){grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.tv-guida .gc.carta{padding:0 10px 12px;text-align:center;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-start}
+.tv-guida .gc.carta .gi{display:grid;place-items:center;height:78px;margin:0 -10px 10px;color:#fff;background:linear-gradient(160deg,color-mix(in srgb,var(--c) 70%,#fff),var(--c) 60%,color-mix(in srgb,var(--c) 70%,#000));position:relative}
+.tv-guida .gc.carta .gi:after{content:'';position:absolute;inset:auto 0 -1px;height:14px;background:#fffaf0;border-radius:50% 50% 0 0/100% 100% 0 0}
+.tv-guida .gc.carta.on .gi:after{background:#fff}
+.tv-guida .gc.carta .gi svg{width:40px;height:40px;filter:drop-shadow(0 2px 2px #0004)}
+.tv-guida .gc.carta b{padding:0;font-size:1rem}
+.tv-guida .gc.carta .src{top:7px;right:7px;background:#0005;color:#fff;border-radius:10px;padding:2px 6px;font-size:.58rem}
+.tv-guida .gc.carta small{font-size:.8rem}
+.tv-guida .gc.carta:hover{transform:translateY(-3px)}
+.tv-guida .gc.carta.on{padding:0 10px 12px;transform:translateY(-4px);box-shadow:0 0 0 3px #e2c27a,0 0 0 5px #7d2530,0 12px 24px #7d253044}
+.tv-guida .gc.carta.on:before{content:'✓';position:absolute;top:6px;left:7px;width:22px;height:22px;border-radius:50%;background:#fff;color:#7d2530;font-weight:700;display:grid;place-items:center;z-index:2;font-size:.8rem}
+.tv-guida .gc.carta.no,.tv-guida .gc.carta:disabled{transform:none;filter:grayscale(.7)}
+.tv-guida .chip{background:#fffaf0;border-color:#d7c191;padding:5px 13px}
+.tv-guida .chip.on{background:#7d2530;border-color:#7d2530}
+.tv-guida .seg{background:#fffaf0;border-color:#d7c191;border-radius:10px}
+.tv-guida .box{background:#fffaf0;border:0;border-radius:12px;box-shadow:0 2px 0 #d7c191}
+.tv-guida .box.ko{box-shadow:0 0 0 1px #a3262f}
+.tv-guida .spls{border:0;border-radius:12px;box-shadow:0 2px 0 #d7c191;background:#fffaf0}
+.tv-guida .ab{border:0;border-radius:10px;box-shadow:0 2px 0 #d7c191;background:#fffaf0}
+.tv-guida .ab.up{box-shadow:0 0 0 2px #3f6b46}
+.tv-guida .ga{background:#e6d7b4;border:0;padding:16px}
+.tv-guida .ga .pv{background:linear-gradient(160deg,color-mix(in srgb,var(--c,#7a5a40) 75%,#fff),var(--c,#7a5a40));color:#fff;border-radius:12px 12px 0 0;margin:0;padding:14px;flex-direction:column;text-align:center}
+.tv-guida .ga .pv i{width:64px;height:64px;border:3px solid #fff;background-color:#0002}
+.tv-guida .ga .pv small{color:#ffffffd9}
+.tv-guida .ga .ab6,.tv-guida .ga .kv,.tv-guida .ga .nov,.tv-guida .ga .pv+.ab6~h5{background:#fffaf0;margin:0;padding:10px}
+.tv-guida .ga .ab6{padding-top:12px}
+.tv-guida .ga .ab6 .ab{box-shadow:0 0 0 1px #e6d7b4}
+.tv-guida .ga .pv+.ab6~h5{padding:4px 10px 0}
+.tv-guida .ga .nov{margin-top:0}
+.tv-guida .ga>:last-child{border-radius:0 0 12px 12px;padding-bottom:14px}
+.tv-guida .gf{background:#efe4c9;border-top:1px solid #d7c191}
+.tv-guida .gbtn{border-radius:30px;padding:9px 20px}
+.tv-guida .gbtn.p{box-shadow:0 3px 0 #4a121a}
 @media (max-width:820px){
   dialog.dlg.tv-guida{width:100vw;height:100dvh;border-radius:0;border:0;inset:0}
   .tv-guida .gb{grid-template-columns:minmax(0,1fr);overflow-y:auto;display:block}
@@ -1188,6 +1241,9 @@ dialog.dlg.tv-guida[open]{display:flex}
   .tv-guida .ga{border-left:0;border-top:1px solid #dccaa0;overflow:visible}
   .tv-guida .gs button span{display:none}.tv-guida .gs button.on span{display:inline}
   .tv-guida .gcards{grid-template-columns:minmax(0,1fr)}
+  .tv-guida .gcards:has(.carta){grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .tv-guida .gs{padding:0 10px 10px}.tv-guida .gs button{min-width:44px}.tv-guida .gs button.on{min-width:110px}
+  .tv-guida .gh{padding:10px 12px}
   .tv-guida .ab6{grid-template-columns:repeat(3,minmax(0,1fr))}
   .tv-guida .ab6.pic{grid-template-columns:repeat(6,minmax(0,1fr))}
   .tv-guida .gf{padding:8px 10px;gap:6px}.tv-guida .gbtn{padding:7px 11px}
@@ -5251,7 +5307,25 @@ dialog.dlg.tv-guida[open]{display:flex}
     if (ck != null) { const c = w.querySelector(`[data-gf=cerca][data-q="${ck}"]`); if (c) { c.value = cv; c.focus(); filtraGuida(c); } }
     aggiornaPiede(G);
   }
-  const card = (g, v, on, titolo, sotto, src, no, extra = '') => `<button type="button" class="gc${on ? ' on' : ''}${no && !on ? ' no' : ''}" data-g="${g}" data-v="${esc(v)}"${extra}${no && !on ? ' disabled' : ''}><b>${esc(titolo)}</b>${src ? `<span class="src">${esc(src)}</span>` : ''}${sotto ? `<small>${esc(sotto)}</small>` : ''}${no ? `<small class="no">${esc(no)}</small>` : ''}</button>`;
+  // emblemi delle classi: colore e disegno (tratto da 24×24) per le carte della procedura guidata
+  const EMBLEMI = {
+    artefice: ['#b07a2a', '<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>'],
+    barbaro: ['#a3402f', '<path d="M5 21 15 9"/><path d="M13 5c2-2 6-2 7 0 1 3-1 6-3 7-2-1-5-4-4-7z"/>'],
+    bardo: ['#a0457f', '<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>'],
+    chierico: ['#b8902c', '<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/>'],
+    druido: ['#4f7d3a', '<path d="M5 19C5 9 11 4 20 4c0 9-5 15-15 15z"/><path d="M5 19 14 10"/>'],
+    guerriero: ['#7a6248', '<path d="M5 3h3l9 9-3 3-9-9zM19 3h-3l-4 4M14 15l5 5M10 15l-5 5M17 13l3 3M7 13l-3 3"/>'],
+    ladro: ['#45455a', '<path d="M20 4l-9 9-2-2 9-9h2zM9 11l4 4M7 13l4 4M8 16l-4 4"/>'],
+    mago: ['#2f5f9e', '<path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z"/>'],
+    monaco: ['#3f8a86', '<circle cx="12" cy="12" r="9"/><path d="M12 3a4.5 4.5 0 0 0 0 9 4.5 4.5 0 0 1 0 9"/><circle cx="12" cy="7.5" r=".8"/><circle cx="12" cy="16.5" r=".8"/>'],
+    paladino: ['#b08a2e', '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M12 8v8M9 11h6"/>'],
+    ranger: ['#3f6b46', '<path d="M6 3c7 2 13 8 15 15"/><path d="M6 3l15 15"/><path d="M3 21 15 9M15 9h-4M15 9v4"/>'],
+    stregone: ['#c2502b', '<path d="M12 22c4 0 7-3 7-7 0-4-3-6-4-10-2 2-3 4-3 6-1-1-2-2-2-4-3 3-5 5-5 8 0 4 3 7 7 7z"/>'],
+    warlock: ['#5b3b85', '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'],
+  };
+  const emblema = id => EMBLEMI[id] ? `<i class="gi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${EMBLEMI[id][1]}</svg></i>` : '';
+  const coloreCl = id => EMBLEMI[id] ? ` style="--c:${EMBLEMI[id][0]}"` : '';
+  const card = (g, v, on, titolo, sotto, src, no, extra = '', cl = (g === 'classe' || g === 'cl') && EMBLEMI[v] ? v : '') => `<button type="button" class="gc${cl ? ' carta' : ''}${on ? ' on' : ''}${no && !on ? ' no' : ''}" data-g="${g}" data-v="${esc(v)}"${extra}${cl ? coloreCl(cl) : ''}${no && !on ? ' disabled' : ''}>${cl ? emblema(cl) : ''}<b>${esc(titolo)}</b>${src ? `<span class="src">${esc(src)}</span>` : ''}${sotto ? `<small>${esc(sotto)}</small>` : ''}${no ? `<small class="no">${esc(no)}</small>` : ''}</button>`;
   const cercaBox = (q, ph) => `<input type="search" data-gf="cerca" data-q="${q}" placeholder="${esc(ph)}" aria-label="${esc(ph)}">`;
   function sceltaHtml(G, sc, ctx) {
     const v = G.sc[sc.key] ?? (sc.tipo === 'testo' ? '' : []), tit = sc.titolo || (sc.tipo === 'abilita' ? 'Competenza nelle abilità' : sc.tipo === 'maestria' ? 'Maestria (competenza doppia)' : 'Scelta');
@@ -5329,7 +5403,7 @@ dialog.dlg.tv-guida[open]{display:flex}
     if (p === 'sotto') {
       const k = ctx.k, L = R.sotto[ctx.cid] || [];
       return `<h4>${esc(k.sotto.nome)}</h4><p class="hint">Al ${ctx.lc}° livello da ${k.nome.toLowerCase()} scegli la tua strada: ci sono tutte quelle dei manuali ufficiali.</p>${L.length > 8 ? cercaBox('sotto', 'Cerca…') : ''}
-        <div class="gcards">${L.map(x => { const pri = Object.entries(x.liv || {}).filter(([lv]) => +lv <= ctx.lc).flatMap(([, a]) => a.map(y => y[0])); return `<button type="button" class="gc${G.sotto === x.id ? ' on' : ''}" data-g="sotto" data-v="${x.id}" data-n="${esc(norm(x.nome + ' ' + x.desc))}"><b>${esc(x.nome)}</b><span class="src">${esc(x.fonte)}</span><small>${esc(x.desc)}</small>${pri.length ? `<small><i>Subito: ${esc(pri.join(', '))}</i></small>` : ''}</button>`; }).join('')}</div>
+        <div class="gcards">${L.map(x => { const pri = Object.entries(x.liv || {}).filter(([lv]) => +lv <= ctx.lc).flatMap(([, a]) => a.map(y => y[0])); return `<button type="button" class="gc${G.sotto === x.id ? ' on' : ''}" data-g="sotto" data-v="${x.id}"${coloreCl(ctx.cid)} data-n="${esc(norm(x.nome + ' ' + x.desc))}"><b>${esc(x.nome)}</b><span class="src">${esc(x.fonte)}</span><small>${esc(x.desc)}</small>${pri.length ? `<small><i>Subito: ${esc(pri.join(', '))}</i></small>` : ''}</button>`; }).join('')}</div>
         ${ctx.sb ? `<div class="box"><h5>${esc(ctx.sb.nome)}</h5><ul class="nov">${Object.entries(ctx.sb.liv || {}).map(([lv, a]) => a.map(([n, t]) => `<li><b>${lv}°: ${esc(n)}</b> · ${esc(t)}</li>`).join('')).join('')}</ul></div>` : ''}`;
     }
     if (p === 'asi') {
@@ -5363,7 +5437,7 @@ dialog.dlg.tv-guida[open]{display:flex}
       if (!k) return h;
       const ab = k.abil[1] === 'tutte' ? ABIL.map(x => x[0]) : k.abil[1], base = baseCrea({ ...G, cr: { ...C, abilC: [] } });
       h += `<h5>Abilità della classe <span class="cnt${C.abilC.length >= k.abil[0] ? ' ok' : ''}">${C.abilC.length}/${k.abil[0]}</span></h5><div class="chips">${ab.map(a => `<button type="button" class="chip${C.abilC.includes(a) ? ' on' : ''}" data-g="abilc" data-v="${a}"${num(base['ab_' + a]) && !C.abilC.includes(a) ? ' disabled title="Ce l\'hai già dalla razza o dal background"' : ''}>${esc(nomeAb(a))}</button>`).join('')}</div>`;
-      if (k.sotto.liv === 1) h += `<h5>${esc(k.sotto.nome)}</h5><div class="gcards">${(R.sotto[C.cl] || []).map(x => card('sotto', x.id, G.sotto === x.id, x.nome, x.desc, x.fonte, '')).join('')}</div>`;
+      if (k.sotto.liv === 1) h += `<h5>${esc(k.sotto.nome)}</h5><div class="gcards">${(R.sotto[C.cl] || []).map(x => card('sotto', x.id, G.sotto === x.id, x.nome, x.desc, x.fonte, '', coloreCl(C.cl))).join('')}</div>`;
       h += scelteLiv(ctx).map(sc => sceltaHtml(G, sc, ctx)).join('');
       h += `<div class="box"><h5>Al 1° livello</h5><ul class="nov">${(k.liv[1] || []).map(([n, t]) => `<li><b>${esc(n)}</b> · ${esc(t)}</li>`).join('')}<li><b>Competenze</b> · ${esc(k.comp)}</li></ul></div>`;
       return h;
@@ -5432,7 +5506,8 @@ dialog.dlg.tv-guida[open]{display:flex}
     const ab = CAR.map(([k, sg]) => { const v = num(d[k]) ?? 10, up = d0 ? v > (num(d0[k]) ?? 10) : false; return `<div class="ab${up ? ' up' : ''}"><small>${sg}</small><b>${v}</b><span>${segnoP(modV(v)) || '+0'}</span></div>`; }).join('');
     const kv = [['PF', d0 ? `${d0.pf_max ?? '—'} → ${d.pf_max ?? '—'}` : d.pf_max || '—'], ['CA', d.ca ?? '—'], ['Competenza', '+' + compL(num(d.livello) || 1)], ['Velocità', d.velocita || '—'], ['Dadi vita', d.dadi_vita || '—']];
     const nov = (r?.righe || []).filter(([l]) => l !== 'Punti ferita').slice(0, 14);
-    return `<h5>Anteprima della scheda</h5><div class="pv"><i style="${foto ? `background-image:url('${esc(foto)}')` : ''}">${foto ? '' : esc(iniziali(G.nome))}</i><div><b>${esc(G.nome)}</b><small>${esc(sub)}</small></div></div>
+    const cid = G.tipo === 'crea' ? G.cr?.cl : (G.classi[0]?.id || G.cl);
+    return `<h5>Anteprima della scheda</h5><div class="pv"${coloreCl(cid)}><i style="${foto ? `background-image:url('${esc(foto)}')` : ''}">${foto ? '' : esc(iniziali(G.nome))}</i><div><b>${esc(G.nome)}</b><small>${esc(sub)}</small></div></div>
       <div class="ab6 pic">${ab}</div><dl class="kv">${kv.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
       ${nov.length ? `<h5>Novità</h5><ul class="nov">${nov.map(([l, t]) => `<li><b>${esc(l)}</b> · ${esc(t)}</li>`).join('')}</ul>` : ''}`;
   }
