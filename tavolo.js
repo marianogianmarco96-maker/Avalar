@@ -2208,7 +2208,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const e = effettoIn(sc, p);
     if (e) { T.efSel = e.id; T.efm = { id: e.id, modo: 'muovi', dx: p.x - e.x, dy: p.y - e.y, l: effScena(sc).map(x => ({ ...x })), mosso: false }; disegnaEffetti(); barraMaschera(); return; }
     const nuovo = { id: nuovoId(), tipo: T.efTipo || 'fuoco', x: Math.round(p.x), y: Math.round(p.y), m: T.efM || 3, forma: T.efForma || 'cerchio', durata: T.efDur || 0, inizio: { round: +T.stato?.round || 1, turno: T.stato?.turno || null }, int: T.efInt || 100 };
-    T.efSel = nuovo.id; salvaZone(sc, { effetti: [...effScena(sc), nuovo] });
+    // il nuovo effetto non resta scelto: così il tipo che scegli dopo vale per il prossimo, non cambia questo
+    T.efSel = null; salvaZone(sc, { effetti: [...effScena(sc), nuovo] });
   }
   function muoviEff(p) {
     const m = T.efm, sc = scena(); if (!m || !sc) return;
@@ -2223,13 +2224,13 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
   function barraEffetti(b) {
     const sc = scena(), L = effScena(sc), sel = L.find(e => e.id === T.efSel) || null, tipo = sel?.tipo || T.efTipo || 'fuoco', m = sel ? +sel.m || 3 : T.efM || 3, forma = sel?.forma || T.efForma || 'cerchio', dur = sel ? +sel.durata || 0 : T.efDur || 0, int = sel ? +sel.int || 100 : T.efInt || 100;
-    b.innerHTML = `<div class="g"><b class="tit">✨ Effetti</b><span class="avv">${sel ? 'Trascina l\'effetto per spostarlo, il pallino sul bordo per cambiarne la grandezza.' : 'Scegli un effetto e clicca sulla mappa per piazzarlo.'}</span></div>
+    b.innerHTML = `<div class="g"><b class="tit">✨ Effetti</b><span class="avv">${sel ? 'Stai modificando questo effetto: tipo, raggio e intensità cambiano lui. Trascinalo per spostarlo, il pallino sul bordo cambia la grandezza.' : 'Scegli un effetto e clicca sulla mappa per piazzarlo. Clicca un effetto già messo per modificarlo.'}</span></div>
       <div class="g seg">${Object.entries(EFFETTI).map(([k, [ic, l]]) => `<button type="button" data-e="tipo" data-v="${k}" class="${tipo === k ? 'on' : ''}" title="${l}"><span>${ic} ${l}</span></button>`).join('')}</div>
       <div class="g sl" title="Raggio dell'effetto (metà del lato per il quadrato)"><span>Raggio</span><input type="range" class="tv-rg" data-e="m" min="1.5" max="30" step="1.5" value="${m}" aria-label="Raggio in metri"><output>${m.toLocaleString('it-IT')} m</output></div>
       <div class="g sl" title="Quanto si vede l'effetto: abbassala per un velo leggero, alzala per una nube densa che copre la mappa"><span>Intensità</span><input type="range" class="tv-rg" data-e="int" min="10" max="400" step="10" value="${int}" aria-label="Intensità in percentuale"><output>${int}%</output></div>
       <div class="g sl" title="Quanti round dura: sparisce da sola quando torna il turno in cui l'hai messo. 0 = finché non la togli"><span>Durata</span><input type="number" data-e="dur" min="0" max="999" step="1" value="${dur}" aria-label="Durata in round" style="width:56px"><output>${dur ? (sel && roundRestanti(sel) != null ? `round · ne restano ${roundRestanti(sel)}` : 'round') : 'per sempre'}</output></div>
       <div class="g seg"><button type="button" data-e="forma" data-v="cerchio" class="${forma !== 'quadrato' ? 'on' : ''}"><span>◯ Cerchio</span></button><button type="button" data-e="forma" data-v="quadrato" class="${forma === 'quadrato' ? 'on' : ''}"><span>▢ Quadrato</span></button></div>
-      <div class="g">${sel ? '<button type="button" data-e="via"><span>🗑 Togli questo</span></button><button type="button" data-e="desel"><span>Nuovo effetto</span></button>' : ''}<button type="button" data-e="svuota"${L.length ? '' : ' disabled'}><span>Svuota (${L.length})</span></button></div>`;
+      <div class="g">${sel ? '<button type="button" data-e="via"><span>🗑 Togli questo</span></button><button type="button" data-e="desel"><span>Fatto</span></button>' : ''}<button type="button" data-e="svuota"${L.length ? '' : ' disabled'}><span>Svuota (${L.length})</span></button></div>`;
     b.classList.remove('spenta'); b.hidden = false;
     const cambia = ch => salvaZone(sc, { effetti: effScena(sc).map(e => e.id === sel.id ? { ...e, ...ch } : e) });
     b.querySelectorAll('button[data-e]').forEach(x => x.onclick = async () => {
