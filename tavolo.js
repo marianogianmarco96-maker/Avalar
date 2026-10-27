@@ -1010,6 +1010,12 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
 .tv-sch .atcfg{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:6px 10px;padding:8px 4px 4px;margin-top:4px;border-top:1px dashed var(--ul)}
 .tv-sch .atcfg label{display:flex;flex-direction:column;gap:2px;font-size:.72rem;color:var(--k2)}
 .tv-sch .atcfg label.ck{flex-direction:row;align-items:center;gap:6px;grid-column:1/-1;font-size:.78rem;color:var(--k)}
+.tv-sch .atcfg label.lg{grid-column:1/-1}
+.tv-sch .at .arma{display:flex;flex-wrap:wrap;gap:4px;margin:3px 0 1px;font-size:.72rem;color:var(--k2)}
+.tv-sch .at .arma span{background:var(--box);border-radius:999px;padding:1px 7px}
+.tv-sch .at .arma b{color:var(--k)}
+.tv-sch .at .arma .avv{background:#a3262f1f;color:#a3262f;font-weight:700}
+.tv-scuro .tv-sch .at .arma .avv{color:#ff9a8f}
 .tv-sch .atcfg .conto{grid-column:1/-1;margin:0;font-size:.8rem;color:var(--k);line-height:1.35}
 
 /* telefono: strumenti in basso, mappa a tutta larghezza */
@@ -3985,8 +3991,47 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   // salvataggio: subito sullo schermo, al database dopo una breve pausa (solo i campi cambiati)
   const pend = new Map();
   // attacchi con la caratteristica scelta dall'ingranaggio: bonus per colpire e danni si calcolano da soli
-  const CAR_ATT = [['', 'Manuale: scrivo io bonus e danni'], ['for', 'Forza'], ['des', 'Destrezza'], ['acc', 'Accurata: la migliore tra Forza e Destrezza'], ['int', 'Intelligenza'], ['sag', 'Saggezza'], ['car', 'Carisma']];
-  const carAtt = (s, a) => a.car === 'acc' ? (modC(s.dati.des) > modC(s.dati.for) ? 'des' : 'for') : a.car;
+  const CAR_ATT = [['', 'Automatica'], ['man', 'Manuale: scrivo io bonus e danni'], ['for', 'Forza'], ['des', 'Destrezza'], ['acc', 'Accurata: la migliore tra Forza e Destrezza'], ['int', 'Intelligenza'], ['sag', 'Saggezza'], ['car', 'Carisma']];
+  const migliore = s => modC(s.dati.des) > modC(s.dati.for) ? 'des' : 'for';
+  /* armi del manuale (regole.js): dal nome dell'attacco il sito riconosce l'arma e ne conosce dado, tipo di danno, proprietà
+     e caratteristica; dalla classe, dalla razza e dalle «Altre competenze» capisce se il personaggio è competente */
+  const REG = () => window.__regole || null;
+  const radice = w => w.replace(/i?h?[aeio]$/, '');
+  const chiaveArma = t => norm(t).replace(/[^a-z ]/g, ' ').split(/\s+/).filter(Boolean).map(radice).join(' ');
+  function armaAtt(s, a) {
+    const R = REG(); if (!R || !a || a.car === 'man') return null;
+    if (a.arma) return R.armi.find(w => w[0] === a.arma) || null;
+    // solo le schede complete: il blocco dei PNG resta com'è scritto
+    if (!formaPg(s)) return null;
+    const n = norm(a.nome); if (!n || /incantat/.test(n) || /incantesim/.test(norm(a.tipo))) return null;
+    if ((s.dati.incantesimi || []).some(sp => chiaveInc(sp.nome) && chiaveInc(sp.nome) === chiaveInc(a.nome))) return null;
+    const k = chiaveArma(a.nome);
+    return [...R.armi].sort((x, y) => y[0].length - x[0].length).find(w => { const c = chiaveArma(w[0]); return k === c || k.startsWith(c + ' '); }) || null;
+  }
+  const propArma = w => String(w?.[4] || '');
+  const versatile = w => (propArma(w).match(/versatile \((\d*d\d+)\)/) || [])[1] || '';
+  const carArma = (s, w) => /accurata/.test(propArma(w)) ? migliore(s) : /a distanza/.test(propArma(w)) ? 'des' : 'for';
+  // la razza della scheda: quella scelta nella procedura, oppure riconosciuta dal testo («Elfo alto» = «Alto elfo»)
+  function razzeScheda(R, d) {
+    const parole = new Set(norm(d.razza).split(/\s+/).filter(Boolean)), out = [];
+    for (const r of R.razze) for (const x of [r, ...(r.sotto || [])]) {
+      const p = norm(x.nome).replace(/\(.*\)/, '').split(/\s+/).filter(Boolean);
+      if (d.razza_id === x.id || d.sottorazza === x.id || (p.length && p.every(w => parole.has(w)))) { if (x !== r && !out.includes(r)) out.push(r); out.push(x); }
+    }
+    return out;
+  }
+  function competenzeArmi(s) {
+    const R = REG(), d = s.dati, testi = [d.lingue, d.competenze];
+    if (R) {
+      classiDi(R, d).L.forEach((c, i) => { const k = R.classi[c.id]; testi.push(i ? k.multiComp : k.comp); });
+      razzeScheda(R, d).forEach(x => testi.push(x.comp));
+    }
+    const t = norm(testi.filter(Boolean).join('; ')), frasi = new Set(t.split(/[,;.\n]|\be\b/).map(chiaveArma).filter(Boolean));
+    return { semplici: /armi semplici/.test(t), guerra: /armi (?:semplici e )?da guerra/.test(t), frasi };
+  }
+  const competenteArma = (s, w) => { const c = competenzeArmi(s); return (w[3] === 'semplice' && c.semplici) || (w[3] === 'guerra' && c.guerra) || c.frasi.has(chiaveArma(w[0])); };
+  const piccolo = s => { const R = REG(); return !!R && razzeScheda(R, s.dati).some(x => /piccol/i.test(x.taglia || '')); };
+  const carAtt = (s, a) => a.car === 'acc' ? migliore(s) : a.car && a.car !== 'man' ? a.car : (w => w ? carArma(s, w) : null)(armaAtt(s, a));
   const dadoAtt = a => String(a.dado || '').replace(/\s+/g, '') || (String(a.danni || '').replace(/\s+/g, '').match(/^\d*d\d+/i) || [''])[0];
   // danni bonus dell'attacco (arma infuocata, veleno…), tirati a parte con il loro tipo
   const TIPI_DANNO = [['acido', 'da acido'], ['contundenti', 'contundenti'], ['forza', 'da forza'], ['freddo', 'da freddo'], ['fulmine', 'da fulmine'], ['fuoco', 'da fuoco'], ['necrotici', 'necrotici'], ['perforanti', 'perforanti'], ['psichici', 'psichici'], ['radiosi', 'radiosi'], ['taglienti', 'taglienti'], ['tuono', 'da tuono'], ['veleno', 'da veleno']];
@@ -3994,14 +4039,18 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   const bonusNome = a => 'danni ' + ((TIPI_DANNO.find(t => t[0] === a?.btipo) || [, 'bonus'])[1]);
   function calcAtt(s, a) {
     const k = carAtt(s, a); if (!k || !CAR.some(c => c[0] === k)) return null;
-    const m = modC(s.dati[k]), mg = num(a.magia) || 0, dd = dadoAtt(a);
-    return { k, m, mg, colpire: m + (a.nocomp ? 0 : comp(s)) + mg, danni: dd ? dd + piu(m + mg) : '' };
+    const w = armaAtt(s, a), m = modC(s.dati[k]);
+    // il bonus magico si legge anche dal nome («Spada lunga +1»)
+    const mg = a.magia != null && a.magia !== '' ? num(a.magia) || 0 : +(String(a.nome || '').match(/\+\s?([1-3])\b/) || [])[1] || 0;
+    const dd = w ? (a.duemani && versatile(w)) || (w[1] === '1' ? '' : w[1]) : dadoAtt(a);
+    const cp = a.comp_att === 'si' ? true : a.comp_att === 'no' || a.nocomp ? false : w ? competenteArma(s, w) : true;
+    return { k, m, mg, w, cp, colpire: m + (cp ? comp(s) : 0) + mg, danni: dd ? dd + piu(m + mg) : w?.[1] === '1' ? String(Math.max(1, 1 + m + mg)) : '' };
   }
   function attacchiCalcolati(s) {
     let cambiati = false;
     const L = (s.dati.attacchi || []).map(a => {
       const c = calcAtt(s, a); if (!c || (num(a.colpire) === c.colpire && a.danni === c.danni)) return a;
-      cambiati = true; return { ...a, colpire: c.colpire, danni: c.danni, dado: dadoAtt(a) };
+      cambiati = true; return { ...a, colpire: c.colpire, danni: c.danni };
     });
     return cambiati ? L : null;
   }
@@ -4190,7 +4239,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     // il nome di un attacco resta su una riga logica: Invio non va a capo
     box.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('textarea.an')) e.preventDefault(); });
     box.addEventListener('input', e => { const el = e.target.closest('[data-f]'); if (el && el.type !== 'checkbox' && el.tagName !== 'SELECT') campo(el, !e.inputType || e.inputType === 'insertReplacementText'); });
-    box.addEventListener('change', e => { const el = e.target.closest('[data-f]'); if (el && (el.type === 'checkbox' || el.tagName === 'SELECT')) campo(el); else if (el && /^inc\.\d+\.nome$/.test(el.dataset.f)) campo(el, true); else if (el && /^att\.\d+\.bdadi$/.test(el.dataset.f)) campo(el); else if (e.target.dataset.k) azioneScheda(e.target); });
+    box.addEventListener('change', e => { const el = e.target.closest('[data-f]'); if (el && (el.type === 'checkbox' || el.tagName === 'SELECT')) campo(el); else if (el && /^inc\.\d+\.nome$/.test(el.dataset.f)) campo(el, true); else if (el && /^att\.\d+\.(bdadi|nome)$/.test(el.dataset.f)) campo(el); else if (e.target.dataset.k) azioneScheda(e.target); });
     box.addEventListener('click', e => { const b = e.target.closest('button'); T.maiusc = e.shiftKey; if (b && box.contains(b)) azioneScheda(b); });
     // si sposta trascinandola dalla barra scura in alto; la posizione resta per le prossime volte
     box.addEventListener('input', e => { if (e.target.dataset.k !== 'filtro') return; sv.filtro = e.target.value; const fl = norm(sv.filtro); box.querySelectorAll('.prv .pv').forEach(el => { const p = (T.schede.get(id)?.dati.privilegi || [])[+el.dataset.ordi]; el.hidden = !!fl && !norm(`${p?.nome} ${p?.fonte} ${p?.testo}`).includes(fl); }); });
@@ -4260,7 +4309,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (k === 'att') {
       const at = (s.dati.attacchi || [])[a], c = at && calcAtt(s, at), bd = bonusDadi(at), piuB = bd ? ` · più ${bd} ${bonusNome(at)}` : '';
       if (!c) return 'Manuale: bonus e danni li scrivi tu nella riga sopra.' + (bd ? ` Danni bonus: ${bd} ${bonusNome(at)}.` : '');
-      return `${segno(c.colpire)} al colpire = ${nomeCar(c.k)} ${segno(c.m)}${at.nocomp ? '' : ` + competenza ${segno(comp(s))}`}${c.mg ? ` + magia ${segno(c.mg)}` : ''} · danni ${c.danni || 'scrivi il dado'}${piuB}`;
+      return `${segno(c.colpire)} al colpire = ${nomeCar(c.k)} ${segno(c.m)}${c.cp ? ` + competenza ${segno(comp(s))}` : ''}${c.mg ? ` + magia ${segno(c.mg)}` : ''} · danni ${c.danni || 'scrivi il dado'}${c.w?.[2] ? ' ' + c.w[2] : ''}${piuB}`;
     }
     return '';
   }
@@ -4595,9 +4644,13 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   const zoomScheda = () => { try { return clamp(+localStorage.getItem(ZOOMS) || 1, 0.8, 1.6); } catch { return 1; } };
   function applicaZoomScheda() { const c = T.sv?.d.querySelector('.corpo'); if (c) c.style.zoom = zoomScheda(); const o = T.sv?.d.querySelector('[data-k=zv]'); if (o) o.textContent = Math.round(zoomScheda() * 100) + '%'; }
   const n2 = (f, dis) => `<input type="number" data-f="${f}" class="pfi" step="1" aria-label="Punti ferita attuali"${dis}>`;
+  // gli attacchi delle armi riconosciute si rimettono in pari con le regole appena la scheda si apre
+  const allinea = s => { if (s && puoScrivere(s) && attacchiCalcolati(s)) salvaScheda(s.id, {}, true); };
   function disegnaScheda() {
     const sv = T.sv; if (!sv) return; const s = T.schede.get(sv.id); if (!s) { sv.d.close(); return; }
     const d = s.dati, w = puoScrivere(s), dis = w ? '' : ' disabled', pg = formaPg(s), foto = fotoScheda(s), tk = tokScheda();
+    if (pg && !REG()) regole().then(() => { const x = T.sv && T.schede.get(T.sv.id); if (x) { allinea(x); disegnaScheda(); } }).catch(() => { });
+    else if (pg && sv.allineata !== sv.id) { sv.allineata = sv.id; allinea(s); }
     const inp = (f, ph = '', cls = '', type = 'text', extra = '') => `<input type="${type}" data-f="${f}" class="${cls}" placeholder="${esc(ph)}" aria-label="${esc(ph)}"${extra}${dis}>`;
     const n = (f, ph, cls = '') => inp(f, ph, cls, 'number', ' step="1"');
     // una riga che va a capo e cresce con il testo (nomi e descrizioni degli attacchi)
@@ -4620,12 +4673,26 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       const car = CAR.map(([k, , nome]) => `<div class="cbox"><small>${nome}</small><button type="button" class="rb mod" data-roll="car:${k}" data-c="m:${k}" title="Prova di ${nome}"${dis}></button>${n(k, '10', 'ov')}</div>`).join('');
       const ts = CAR.map(([k, , nome]) => `<div class="r"><button type="button" class="pr" data-prof="ts_${k}"${dis}></button><em data-c="ts:${k}"></em><button type="button" class="lk" data-roll="ts:${k}"${dis}>${nome}</button></div>`).join('');
       const ab = ABIL.map(([k, nome, c]) => `<div class="r"><button type="button" class="pr" data-prof="ab_${k}"${dis}></button><em data-c="ab:${k}"></em><button type="button" class="lk" data-roll="ab:${k}"${dis}>${nome} <small>(${c.slice(0, 1).toUpperCase() + c.slice(1, 3)})</small></button></div>`).join('');
+      const R = REG();
+      // l'arma riconosciuta: proprietà come nel manuale e avvisi (competenza, armi pesanti per i Piccoli)
+      const infoArma = x => {
+        const wa = armaAtt(s, x); if (!wa) return '';
+        const c = calcAtt(s, x), pr = propArma(wa), due = /a due mani/.test(pr) ? 'a due mani' : versatile(wa) ? (x.duemani ? 'impugnata a due mani' : 'a una mano (versatile)') : 'a una mano';
+        const w2 = [`<b>${esc(wa[0])}</b>`, wa[3] === 'semplice' ? 'arma semplice' : 'arma da guerra', due, ...pr.split(/,\s*/).filter(p => p && !/a due mani|versatile/.test(p)), `${esc(c?.danni || wa[1])} ${esc(wa[2])}`, c ? 'usa ' + nomeCar(c.k) : ''].filter(Boolean);
+        const avv = [c && !c.cp ? 'non competente: niente bonus di competenza' : '', /pesante/.test(pr) && piccolo(s) ? 'pesante: svantaggio per le creature Piccole' : ''].filter(Boolean);
+        return `<div class="arma">${w2.map(t => `<span>${t}</span>`).join('')}${avv.map(t => `<span class="avv">⚠ ${t}</span>`).join('')}</div>`;
+      };
+      const opzArmi = R ? `<optgroup label="Armi semplici">${R.armi.filter(w => w[3] === 'semplice').map(w => `<option>${esc(w[0])}</option>`).join('')}</optgroup><optgroup label="Armi da guerra">${R.armi.filter(w => w[3] === 'guerra').map(w => `<option>${esc(w[0])}</option>`).join('')}</optgroup>` : '';
       const at = (d.attacchi || []).map((x, i) => `<div class="at" data-ordi="${i}"><div class="riga">${w ? '<span class="mano" title="Trascina per spostare" aria-hidden="true">⠿</span>' : ''}${testo(`att.${i}.nome`, 'Arma', 'an')}${inp(`att.${i}.colpire`, '+0', 'ac', 'number')}${inp(`att.${i}.danni`, '1d6+1', 'ad')}</div>
           <div class="riga az">${testo(`att.${i}.tipo`, 'Tipo e note', 'tp')}${bonusDadi(x) ? `<span class="bon" title="Danni bonus: si tirano insieme ai danni">+ ${esc(bonusDadi(x))} ${esc(bonusNome(x).replace(/^danni /, ''))}</span>` : ''}<button type="button" class="mini" data-roll="att:${i}"${dis} title="Tiro per colpire">🎯 Colpisci</button><button type="button" class="mini" data-roll="dan:${i}"${dis} title="Danni">💥 Danni</button><button type="button" class="mini" data-roll="cri:${i}"${dis} title="Critico: dadi dei danni raddoppiati">✖2 Critico</button>${w ? `<button type="button" class="mini cfg${sv.matt === i ? ' on' : ''}" data-k="attcfg" data-i="${i}" title="Modifica: caratteristica (Forza, Destrezza…), competenza, dado e bonus magico" aria-label="Modifica l'attacco" aria-expanded="${sv.matt === i}">⚙</button><button type="button" class="mini via" data-k="delatt" data-i="${i}" title="Togli l'attacco" aria-label="Togli l'attacco">🗑</button>` : ''}</div>
-          ${w && sv.matt === i ? `<div class="atcfg"><label><span>Caratteristica</span><select data-f="att.${i}.car">${CAR_ATT.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select></label>
-            <label><span>Dado dei danni</span>${inp(`att.${i}.dado`, '1d8')}</label><label><span>Bonus magico</span>${inp(`att.${i}.magia`, '+0', '', 'number')}</label>
+          ${infoArma(x)}
+          ${w && sv.matt === i ? (wa => `<div class="atcfg">${R ? `<label class="lg"><span>Arma del manuale</span><select data-f="att.${i}.arma"><option value="">${wa && !x.arma ? 'Riconosciuta dal nome: ' + esc(wa[0]) : 'Dal nome (nessuna arma riconosciuta)'}</option>${opzArmi}</select></label>` : ''}
+            <label><span>Caratteristica</span><select data-f="att.${i}.car">${CAR_ATT.map(([v, l]) => `<option value="${v}">${v === '' ? (wa ? `Automatica: ${nomeCar(carArma(s, wa))}` : 'Automatica: nessuna arma, scrivi tu') : l}</option>`).join('')}</select></label>
+            ${wa ? (versatile(wa) ? `<label class="ck"><input type="checkbox" data-f="att.${i}.duemani"> Impugnata a due mani: ${esc(versatile(wa))} invece di ${esc(wa[1])}</label>` : '') : `<label><span>Dado dei danni</span>${inp(`att.${i}.dado`, '1d8')}</label>`}
+            <label><span>Competenza</span><select data-f="att.${i}.comp_att"><option value="">${wa ? `Automatica: ${calcAtt(s, x)?.cp ? 'sì' : 'no'} (classe e razza)` : 'Sì'}</option><option value="si">Sì, competente</option><option value="no">No, non competente</option></select></label>
+            <label><span>Bonus magico</span>${inp(`att.${i}.magia`, '+0', '', 'number')}</label>
             <label><span>Danni bonus</span>${inp(`att.${i}.bdadi`, '1d6')}</label><label><span>Tipo dei danni bonus</span><select data-f="att.${i}.btipo"><option value="">—</option>${TIPI_DANNO.map(([v]) => `<option value="${v}">${v[0].toUpperCase() + v.slice(1)}</option>`).join('')}</select></label>
-            <label class="ck"><input type="checkbox" data-f="att.${i}.nocomp"> Non competente: senza bonus di competenza</label><p class="conto" data-c="att:${i}"></p></div>` : ''}</div>`).join('');
+            <p class="conto" data-c="att:${i}"></p></div>`)(armaAtt(s, x)) : ''}</div>`).join('');
       const pf = `<div class="pfmax"><span>Punti ferita massimi</span>${n(tk ? 'tok.pf_max' : 'pf_max', '—')}</div>${n(tk ? 'tok.pf' : 'pf', '—', 'pfa')}
         ${w ? '<div class="q"><button type="button" data-k="pfm" title="Danni">− Danni</button><input type="number" data-k="pfq" value="1" min="1" aria-label="Quanti punti"><button type="button" data-k="pfp" title="Cura">+ Cura</button></div>' : ''}`;
       corpo = `${!pg ? '<button type="button" class="mini agg fine" data-k="fine">✓ Fatto: torna al blocco delle statistiche</button>' : ''}<div class="p1">
@@ -4723,9 +4790,12 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       salvaScheda(s.id, { incantesimi: a }); return;
     }
     if (f.startsWith('att.')) {
-      const [, i, k] = f.split('.'), a = (s.dati.attacchi || []).map(x => ({ ...x })); if (!a[i]) return; a[i][k] = v; salvaScheda(s.id, { attacchi: a });
+      const [, i, k] = f.split('.'), a = (s.dati.attacchi || []).map(x => ({ ...x })); if (!a[i]) return; a[i][k] = v;
+      if (k === 'comp_att') delete a[i].nocomp;
+      if (k === 'arma' && v && (!String(a[i].nome || '').trim() || armaAtt(s, { ...a[i], arma: '' }))) a[i].nome = v;
+      salvaScheda(s.id, { attacchi: a });
       // le scelte dell'ingranaggio cambiano anche la riga dell'attacco (danni bonus)
-      if (['car', 'btipo', 'nocomp'].includes(k) || (k === 'bdadi' && !el.matches(':focus'))) disegnaScheda(); return;
+      if (['car', 'btipo', 'comp_att', 'arma', 'duemani'].includes(k) || k === 'nome' && !el.matches(':focus') || (k === 'bdadi' && !el.matches(':focus'))) disegnaScheda(); return;
     }
     salvaScheda(s.id, { [f]: v });
   }
@@ -4851,7 +4921,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (k === 'tz-fine') return finisciTurno();
     if (k === 'tz-reset' && tkz) return segnaAzioni(tkz, { az: false, bon: false, rea: false, mov: 0, scatto: false, fatte: [], ox: null, oy: null });
     if (k === 'attcfg') { const i = +b.dataset.i; sv.matt = sv.matt === i ? null : i; return disegnaScheda(); }
-    if (k === 'addatt') { await salvaScheda(s.id, { attacchi: [...(d.attacchi || []), { nome: '', colpire: null, danni: '', tipo: '' }] }, true); disegnaScheda(); sv.d.querySelector('.atts .at:last-of-type textarea.an')?.focus(); return; }
+    if (k === 'addatt') { sv.matt = (d.attacchi || []).length; await salvaScheda(s.id, { attacchi: [...(d.attacchi || []), { nome: '', colpire: null, danni: '', tipo: '' }] }, true); disegnaScheda(); sv.d.querySelector('.atts .at:last-of-type textarea.an')?.focus(); return; }
     if (k === 'delatt') { await salvaScheda(s.id, { attacchi: (d.attacchi || []).filter((_, i) => i !== +b.dataset.i) }, true); return disegnaScheda(); }
     if (k === 'riposo') { const p = {}; for (let i = 1; i <= 9; i++) if (num(d['usati_' + i])) p['usati_' + i] = 0; return salvaScheda(s.id, p, true); }
     if (k === 'pfm' || k === 'pfp') {
