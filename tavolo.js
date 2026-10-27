@@ -2195,12 +2195,12 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       else if (e.tipo === 'ghiaccio') parti.push(`<path class="pi" style="animation-delay:${del}s" d="M${x} ${y - 10 * k}l${4 * k} ${10 * k} ${-4 * k} ${10 * k} ${-4 * k} ${-10 * k}z" fill="${c2}" transform="rotate(${(rnd() * 360).toFixed(0)} ${x} ${y})"/>`);
       else if (e.tipo === 'fulmine' && i < n / 3) { let px = x, py = y - R * 0.3, dd = `M${px} ${py}`; for (let j = 0; j < 5; j++) { px += (rnd() - .5) * 34; py += 9 + rnd() * 14; dd += `L${px.toFixed(1)} ${py.toFixed(1)}`; } parti.push(`<path class="pl" style="animation-delay:${del}s;animation-duration:${(0.9 + rnd() * 1.6).toFixed(2)}s" d="${dd}" fill="none" stroke="${rnd() < .5 ? c1 : c2}" stroke-width="${((2 + rnd() * 2) * 1.5).toFixed(1)}" stroke-linecap="round" stroke-linejoin="round"/>`); }
     }
-    // fuoco, fulmini, ghiaccio, acido e veleno brillano sopra la mappa
-    const luce = ['fuoco', 'fulmine', 'ghiaccio', 'acido', 'veleno'].includes(e.tipo), bordo = Math.max(3, R * 0.025);
+    // niente fusioni di colore né sfocature sul bordo: su Safari pesano tanto da far sparire anche i token
+    const bordo = Math.max(3, R * 0.025);
     const st = scuro ? [.95, .92, .9] : nube ? [.6, .55, .5] : [.85, .7, .6];
     return `<g class="ef ef-${e.tipo}${sel ? ' sel' : ''}" data-id="${esc(e.id)}"><defs><clipPath id="${id}c">${forma}</clipPath><radialGradient id="${id}g"><stop offset="0" stop-color="${c2}" stop-opacity="${op(st[0])}"/><stop offset=".55" stop-color="${c1}" stop-opacity="${op(st[1])}"/><stop offset="1" stop-color="${c3}" stop-opacity="${op(st[2])}"/></radialGradient><filter id="${id}f" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="${(R * 0.06).toFixed(1)}"/></filter></defs>
-      ${forma.replace('/>', ` fill="none" stroke="${c1}" stroke-width="${(bordo * 2.7).toFixed(1)}" opacity="${op(.55)}" filter="url(#${id}f)"/>`)}
-      <g clip-path="url(#${id}c)"><g class="base">${forma.replace('/>', ` fill="url(#${id}g)"/>`)}</g><g opacity="${Math.min(1, ki).toFixed(2)}"${nube || scuro ? ` filter="url(#${id}f)"` : ''}${luce ? ' style="mix-blend-mode:screen"' : ''}>${parti.join('')}</g></g>
+      ${forma.replace('/>', ` fill="none" stroke="${c1}" stroke-width="${(bordo * 4).toFixed(1)}" opacity="${op(.25)}"/>`)}${forma.replace('/>', ` fill="none" stroke="${c1}" stroke-width="${(bordo * 2.2).toFixed(1)}" opacity="${op(.4)}"/>`)}
+      <g clip-path="url(#${id}c)"><g class="base">${forma.replace('/>', ` fill="url(#${id}g)"/>`)}</g><g opacity="${Math.min(1, ki).toFixed(2)}"${nube || scuro ? ` filter="url(#${id}f)"` : ''}>${parti.join('')}</g></g>
       ${forma.replace('/>', ` fill="none" stroke="${scuro ? c2 : c1}" stroke-width="${bordo.toFixed(1)}" opacity="${op(.95)}"/>`)}
       ${roundRestanti(e) ? `<text class="dur" x="${e.x}" y="${e.y + R + Math.max(16, sc.griglia * 0.28)}" text-anchor="middle">⏳ ${roundRestanti(e)} round</text>` : ''}
       ${sel ? `<g class="sel">${forma.replace('/>', ' fill="none" stroke="#f2b51d" stroke-width="3" stroke-dasharray="10 6"/>')}<circle class="man" cx="${e.x + R}" cy="${e.y}" r="${Math.max(8, sc.griglia * 0.14)}"/><text x="${e.x + R + 14}" y="${e.y - 12}">${String((+e.m || 3).toLocaleString('it-IT'))} m</text></g>` : ''}</g>`;
@@ -5356,7 +5356,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
 
   /* un livello in più (o il primo, nella creazione): i dati nuovi e le righe del riepilogo */
-  function applica(G) {
+  function applicaLiv(G) {
     const R = G.R, ctx = ctxDi(G); if (!ctx) return null;
     const { k, c, lc, lt, sb, L } = ctx, crea = G.tipo === 'crea';
     const d = JSON.parse(JSON.stringify(ctx.d)), righe = [], P = d.privilegi = [...(d.privilegi || [])];
@@ -5845,7 +5845,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         ${maxL > 1 ? `<h4>Livello di partenza</h4><div class="riga"><select data-gi="fino">${Array.from({ length: maxL }, (_, i) => `<option value="${i + 1}"${(G.fino || 1) === i + 1 ? ' selected' : ''}>${i + 1}° livello</option>`).join('')}</select><span class="hint">Si crea al 1° livello, poi si sale un livello alla volta con le stesse scelte guidate.</span></div>` : ''}`;
     }
     if (p === 'riep') {
-      const r = applica(G); if (!r) return '<p class="hint">Mancano ancora delle scelte.</p>';
+      const r = applicaLiv(G); if (!r) return '<p class="hint">Mancano ancora delle scelte.</p>';
       const d0 = G.tipo === 'crea' ? null : G.d0, d = r.d, ko = passiDi(G).map(x => [x, manca(G, x)]).filter(([, m]) => m);
       const righe = d0 ? [['Livello', d0.livello || 1, d.livello], ['Classe', d0.classe || '—', d.classe], ['PF massimi', d0.pf_max ?? '—', d.pf_max], ['Dadi vita', d0.dadi_vita || '—', d.dadi_vita], ['Bonus di competenza', '+' + compL(num(d0.livello) || 1), '+' + compL(d.livello)], ...CAR.filter(([k]) => num(d0[k]) !== num(d[k])).map(([k, , n]) => [n, d0[k] ?? 10, d[k]])].filter(([, a, b]) => String(a) !== String(b) || /Classe|PF/.test(String(a)))
         : [['Razza', '', d.razza], ['Classe', '', d.classe], ['Background', '', d.background], ['PF', '', d.pf_max], ['CA', '', d.ca], ['Velocità', '', d.velocita]];
@@ -5857,7 +5857,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     return '';
   }
   function anteprimaG(G) {
-    const R = G.R; let r = null; try { r = applica(G); } catch (e) { console.warn(e); }
+    const R = G.R; let r = null; try { r = applicaLiv(G); } catch (e) { console.warn(e); }
     const d = r?.d || (G.tipo === 'crea' ? baseCrea(G) : G.d0), d0 = G.tipo === 'crea' ? null : G.d0, s = T.schede.get(G.id), foto = s && fotoScheda(s);
     const sub = [d.razza, d.classe ? `${d.classe} ${d.livello || ''}`.trim() : ''].filter(Boolean).join(' · ') || 'Ancora da scegliere';
     const ab = CAR.map(([k, sg]) => { const v = num(d[k]) ?? 10, up = d0 ? v > (num(d0[k]) ?? 10) : false; return `<div class="ab${up ? ' up' : ''}"><small>${sg}</small><b>${v}</b><span>${segnoP(modV(v)) || '+0'}</span></div>`; }).join('');
@@ -5880,7 +5880,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (G.tipo === 'liv' && !isDM() && !(num(s.dati.liv_concesso) > lv0)) return toast('Il DM non ti ha ancora concesso il prossimo livello.', 'err');
     if ((num(s.dati.livello) || 0) !== (num(G.d0.livello) || 0)) return toast('Intanto la scheda è cambiata: chiudi e riapri la procedura.', 'err');
     if (G.tipo === 'crea' && !schedaVuota(s) && !await ask(`La scheda di **${s.nome}** ha già dei dati: verranno sostituiti (storia e note restano). Si può tornare indietro dalla Storia dei livelli.`, { ok: 'Sostituisci', danger: true, title: 'Nuovo personaggio' })) return;
-    const r = applica(G), d = r.d, d0 = s.dati, patch = {}, prima = {};
+    const r = applicaLiv(G), d = r.d, d0 = s.dati, patch = {}, prima = {};
     const TIENI = ['storia_livelli', 'forma', 'storia', 'aspetto', 'alleati', 'tesoro', 'note', 'eta', 'altezza', 'peso', 'occhi', 'pelle', 'capelli', 'liv_concesso', 'condizioni', 'ispirazione', 'genere'];
     for (const k of new Set([...Object.keys(d), ...(G.tipo === 'crea' ? Object.keys(d0) : [])])) {
       if (k === 'storia_livelli' || (!(k in d) && TIENI.includes(k))) continue;
