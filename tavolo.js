@@ -1016,6 +1016,13 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
 .tv-sch .at .arma b{color:var(--k)}
 .tv-sch .at .arma .avv{background:#a3262f1f;color:#a3262f;font-weight:700}
 .tv-scuro .tv-sch .at .arma .avv{color:#ff9a8f}
+.tv-sch .scudo{position:relative}
+.tv-sch .scudo .cacfgb{position:absolute;top:-6px;right:-6px;padding:1px 5px;font-size:.78rem;line-height:1.2}
+.tv-sch .tre input.calcolato{color:#7d2530;cursor:default}
+.tv-scuro .tv-sch .tre input.calcolato{color:#f0a8a0}
+.tv-sch .cacfg{border:1px dashed var(--ul);border-radius:8px;background:var(--box);padding:8px}
+.tv-sch .cacfg .avvca{grid-column:1/-1;margin:0;font-size:.76rem;font-weight:700;color:#a3262f;line-height:1.35}
+.tv-scuro .tv-sch .cacfg .avvca{color:#ff9a8f}
 .tv-sch .atcfg .conto{grid-column:1/-1;margin:0;font-size:.8rem;color:var(--k);line-height:1.35}
 
 /* telefono: strumenti in basso, mappa a tutta larghezza */
@@ -4049,13 +4056,17 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     }
     return out;
   }
-  function competenzeArmi(s) {
+  // tutte le competenze della scheda in un testo: classe (e multiclasse), razza, «Altre competenze»
+  function testoComp(s) {
     const R = REG(), d = s.dati, testi = [d.lingue, d.competenze];
     if (R) {
       classiDi(R, d).L.forEach((c, i) => { const k = R.classi[c.id]; testi.push(i ? k.multiComp : k.comp); });
       razzeScheda(R, d).forEach(x => testi.push(x.comp));
     }
-    const t = norm(testi.filter(Boolean).join('; ')), frasi = new Set(t.split(/[,;.\n]|\be\b/).map(chiaveArma).filter(Boolean));
+    return norm(testi.filter(Boolean).join('; '));
+  }
+  function competenzeArmi(s) {
+    const t = testoComp(s), frasi = new Set(t.split(/[,;.\n]|\be\b/).map(chiaveArma).filter(Boolean));
     return { semplici: /armi semplici/.test(t), guerra: /armi (?:semplici e )?da guerra/.test(t), frasi };
   }
   const competenteArma = (s, w) => { const c = competenzeArmi(s); return (w[3] === 'semplice' && c.semplici) || (w[3] === 'guerra' && c.guerra) || c.frasi.has(chiaveArma(w[0])); };
@@ -4083,11 +4094,61 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     });
     return cambiati ? L : null;
   }
+  /* classe armatura dal manuale: armatura (o difesa senza armatura) con la Destrezza dove vale, scudo, magia e altri bonus */
+  const ARMATURE_TESTO = [['Armatura imbottita', /\bimbottit[ao]/], ['Armatura di cuoio borchiato', /cuoio borchiat/], ['Armatura di cuoio', /armatura (?:di|in) cuoio(?! borchiat)|\barmatura leggera\b/],
+    ['Armatura di pelle', /armatura (?:di|in) pell[ei]/], ['Giaco di maglia', /giaco di maglia/], ['Corazza di scaglie', /corazza (?:di|a) scaglie/], ['Corazza di piastre', /corazza di piastre|pettorale/],
+    ['Mezza armatura', /mezza armatura/], ['Corazza ad anelli', /(?:corazza|armatura) ad anelli/], ['Cotta di maglia', /cotta di maglia/], ['Armatura a strisce', /armatura a (?:strisce|bande)/], ['Armatura completa', /armatura completa|armatura a piastre/]];
+  const magiaIn = (t, re) => +(t.match(new RegExp(re.source + '[^,;]{0,12}?\\+\\s?([1-3])\\b')) || [])[1] || 0;
+  const baseArm = (a, dm) => a[2] === 'leggera' ? a[1] + dm : a[2] === 'media' ? a[1] + Math.min(2, dm) : a[1];
+  // l'armatura e lo scudo scritti nell'equipaggiamento (se non sono stati scelti nell'ingranaggio)
+  function armaturaEquip(s) {
+    const R = REG(), t = norm(s.dati.equip), dm = modC(s.dati.des);
+    const trovate = ARMATURE_TESTO.filter(([, re]) => re.test(t)).map(([n, re]) => ({ a: R.armature.find(x => x[0] === n), mg: magiaIn(t, re) })).filter(x => x.a);
+    trovate.sort((x, y) => baseArm(y.a, dm) + y.mg - baseArm(x.a, dm) - x.mg);
+    return { arm: trovate[0] || null, scudo: /\bscudo\b(?! della fede)/.test(t), mgS: magiaIn(t, /\bscudo\b/) };
+  }
+  function calcCA(s) {
+    const R = REG(), d = s.dati; if (!R || !formaPg(s) || d.ca_auto === 'man') return null;
+    const eq = armaturaEquip(s), dm = modC(d.des), L = classiDi(R, d).L, razze = razzeScheda(R, d), ha = re => (d.privilegi || []).some(p => re.test(norm(p.nome)));
+    const arm = d.armatura === 'nessuna' ? null : d.armatura ? { a: R.armature.find(x => x[0] === d.armatura), mg: 0 } : eq.arm;
+    const a = arm?.a || null, scudo = d.scudo_ca === 'si' || (d.scudo_ca !== 'no' && eq.scudo);
+    const parti = [], avv = [];
+    let ca;
+    if (a) {
+      ca = baseArm(a, dm);
+      parti.push(`${a[0]} ${a[1]}` + (a[2] === 'pesante' ? '' : ` + Destrezza ${segno(a[2] === 'media' ? Math.min(2, dm) : dm)}${a[2] === 'media' && dm > 2 ? ' (massimo +2)' : ''}`));
+      if (a[3] && (num(d.for) ?? 10) < a[3]) avv.push(`serve Forza ${a[3]}: senza, −3 m di velocità`);
+    } else {
+      // senza armatura vale la difesa migliore fra quelle che il personaggio ha
+      const op = [[10 + dm, `10 + Destrezza ${segno(dm)}`]];
+      if (L.some(c => c.id === 'barbaro')) op.push([10 + dm + modC(d.cos), `Difesa senza armatura: 10 + Destrezza ${segno(dm)} + Costituzione ${segno(modC(d.cos))}`]);
+      if (L.some(c => c.id === 'monaco') && !scudo) op.push([10 + dm + modC(d.sag), `Difesa senza armatura: 10 + Destrezza ${segno(dm)} + Saggezza ${segno(modC(d.sag))}`]);
+      if (L.some(c => sottoDi(R, c)?.caSenza) || ha(/^resilienza draconica/)) op.push([13 + dm, `Resilienza draconica: 13 + Destrezza ${segno(dm)}`]);
+      for (const r of razze) { const rc = String(r.ca || ''); if (rc === '13+des') op.push([13 + dm, `Armatura naturale: 13 + Destrezza ${segno(dm)}`]); else if (+rc) op.push([+rc, `Armatura naturale ${rc}`]); }
+      const m = op.reduce((x, y) => y[0] > x[0] ? y : x); ca = m[0]; parti.push(m[1]);
+    }
+    const mgA = a ? (d.ca_magia != null && d.ca_magia !== '' ? num(d.ca_magia) || 0 : arm.mg) : 0;
+    if (mgA) { ca += mgA; parti.push(`armatura magica ${segno(mgA)}`); }
+    if (scudo) { const mg = eq.mgS || 0; ca += 2 + mg; parti.push(`scudo +2${mg ? ` (magico ${segno(mg)})` : ''}`); }
+    if (a && ha(/^(?:stile(?: di combattimento)?\W*)?difesa\)?$/)) { ca += 1; parti.push('stile Difesa +1'); }
+    const rp = razze.reduce((x, r) => x + (r.caPiu || 0), 0); if (rp) { ca += rp; parti.push(`protezione integrata ${segno(rp)}`); }
+    const bo = num(d.ca_bonus) || 0; if (bo) { ca += bo; parti.push(`altri bonus ${segno(bo)}`); }
+    // competenza nelle armature: senza, svantaggio a For e Des e niente incantesimi
+    const t = testoComp(s), tutte = /tutte le armature/.test(t), seg = t.split(/[;.\n]/).filter(x => /armatur/.test(x)).join(' ');
+    if (a && !(tutte || new RegExp('\\b' + { leggera: 'leggere', media: 'medie', pesante: 'pesanti' }[a[2]] + '\\b').test(seg))) avv.push(`non competente in armature ${a[2] === 'leggera' ? 'leggere' : a[2] === 'media' ? 'medie' : 'pesanti'}: svantaggio a Forza e Destrezza e niente incantesimi`);
+    if (scudo && !/\bscudi\b/.test(t)) avv.push('non competente negli scudi: svantaggio a Forza e Destrezza e niente incantesimi');
+    // armatura non trovata nell'equipaggiamento e CA scritta più alta: non la si abbassa da soli, si chiede di scegliere l'armatura
+    const incerta = !d.armatura && !a && num(d.ca) > ca;
+    return { ca, parti, avv, a, scudo, incerta };
+  }
+  const cambiaCA = s => { const c = calcCA(s); return c && !c.incerta && num(s.dati.ca) !== c.ca ? c.ca : null; };
   function salvaScheda(id, patch, subito) {
     const s = T.schede?.get(id); if (!s) return Promise.resolve();
     s.dati = { ...s.dati, ...patch };
     // gli attacchi legati a una caratteristica (⚙) seguono i punteggi, il livello e le loro impostazioni
     const ric = attacchiCalcolati(s); if (ric) { s.dati.attacchi = ric; patch = { ...patch, attacchi: ric }; }
+    // e la CA segue armatura, scudo e caratteristiche
+    const ca = cambiaCA(s); if (ca != null) { s.dati.ca = ca; patch = { ...patch, ca }; }
     dopoScheda(id, true);
     const p = pend.get(id) || { dati: {} }; Object.assign(p.dati, patch); clearTimeout(p.t); pend.set(id, p);
     return new Promise(res => { p.t = setTimeout(() => invia(id).then(res), subito ? 0 : 600); });
@@ -4335,6 +4396,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (k === 'pp') return String(10 + abTot(s, 'percezione'));
     if (k === 'cd') return String(8 + comp(s) + modC(s.dati[carInc(s)]));
     if (k === 'inc') return segno(comp(s) + modC(s.dati[carInc(s)]));
+    if (k === 'ca') { const x = calcCA(s); return !x ? '' : x.incerta ? `Senza armatura la CA sarebbe ${x.ca} (${x.parti.join(' + ')}), ma la scheda dice ${s.dati.ca}: scegli qui sopra l'armatura indossata e la CA si calcola da sola.` : `CA ${x.ca} = ${x.parti.join(' + ')}`; }
     if (k === 'att') {
       const at = (s.dati.attacchi || [])[a], c = at && calcAtt(s, at), bd = bonusDadi(at), piuB = bd ? ` · più ${bd} ${bonusNome(at)}` : '';
       if (!c) return 'Manuale: bonus e danni li scrivi tu nella riga sopra.' + (bd ? ` Danni bonus: ${bd} ${bonusNome(at)}.` : '');
@@ -4355,6 +4417,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     box.querySelectorAll('[data-dots]').forEach(el => el.innerHTML = puntini(s, el.dataset.dots, puoScrivere(s)));
     box.querySelectorAll('[data-adv]').forEach(el => el.classList.toggle('on', +el.dataset.adv === sv.adv));
     box.querySelectorAll('textarea.auto').forEach(cresci);
+    const caI = box.querySelector('.scudo [data-f=ca]'), caA = (x => !!x && !x.incerta)(calcCA(s));
+    if (caI) { caI.readOnly = caA; caI.classList.toggle('calcolato', caA); caI.title = caA ? 'Calcolata da armatura, scudo e Destrezza: cambiala con ⚙' : ''; }
     box.querySelectorAll('.at[data-ordi]').forEach(el => {
       const a = (s.dati.attacchi || [])[+el.dataset.ordi], auto = !!(a && calcAtt(s, a));
       el.querySelectorAll('.riga:first-child .ac, .riga:first-child .ad').forEach(x => { x.readOnly = auto; x.classList.toggle('calcolato', auto); x.title = auto ? 'Calcolato dalla caratteristica scelta: cambialo con ⚙' : ''; });
@@ -4674,7 +4738,20 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function applicaZoomScheda() { const c = T.sv?.d.querySelector('.corpo'); if (c) c.style.zoom = zoomScheda(); const o = T.sv?.d.querySelector('[data-k=zv]'); if (o) o.textContent = Math.round(zoomScheda() * 100) + '%'; }
   const n2 = (f, dis) => `<input type="number" data-f="${f}" class="pfi" step="1" aria-label="Punti ferita attuali"${dis}>`;
   // gli attacchi delle armi riconosciute si rimettono in pari con le regole appena la scheda si apre
-  const allinea = s => { if (s && puoScrivere(s) && attacchiCalcolati(s)) salvaScheda(s.id, {}, true); };
+  // l'ingranaggio della CA: armatura e scudo dal manuale (o dall'equipaggiamento), bonus magici e altri
+  function pannelloCA(s, inp) {
+    const R = REG(), d = s.dati, c = calcCA(s), eq = R ? armaturaEquip(s) : null;
+    const tipo = a => a[2] === 'leggera' ? `${a[1]} + Des` : a[2] === 'media' ? `${a[1]} + Des (max +2)` : String(a[1]);
+    const gr = (t, et) => `<optgroup label="${et}">${R.armature.filter(a => a[2] === t).map(a => `<option value="${esc(a[0])}">${esc(a[0])} · ${tipo(a)}</option>`).join('')}</optgroup>`;
+    return `<div class="atcfg cacfg">
+      <label class="lg"><span>Calcolo</span><select data-f="ca_auto"><option value="">Automatico dal manuale</option><option value="man">Manuale: la scrivo io</option></select></label>
+      ${R && d.ca_auto !== 'man' ? `<label class="lg"><span>Armatura indossata</span><select data-f="armatura"><option value="">${eq.arm ? 'Dall\'equipaggiamento: ' + esc(eq.arm.a[0]) : 'Dall\'equipaggiamento: nessuna armatura'}</option><option value="nessuna">Nessuna armatura</option>${gr('leggera', 'Leggere')}${gr('media', 'Medie')}${gr('pesante', 'Pesanti')}</select></label>
+      <label><span>Scudo</span><select data-f="scudo_ca"><option value="">Dall'equipaggiamento: ${eq.scudo ? 'sì' : 'no'}</option><option value="si">Sì, imbracciato</option><option value="no">No</option></select></label>
+      ${c?.a ? `<label><span>Bonus magico armatura</span>${inp('ca_magia', '+0', '', 'number')}</label>` : ''}
+      <label><span>Altri bonus</span>${inp('ca_bonus', '+0', '', 'number')}</label>
+      <p class="conto" data-c="ca"></p>${c?.avv.length ? `<p class="avvca">${c.avv.map(x => '⚠ ' + esc(x)).join('<br>')}</p>` : ''}` : '<p class="conto">La CA la scrivi tu nel riquadro.</p>'}</div>`;
+  }
+  const allinea = s => { if (s && puoScrivere(s) && (attacchiCalcolati(s) || cambiaCA(s) != null)) salvaScheda(s.id, {}, true); };
   function disegnaScheda() {
     const sv = T.sv; if (!sv) return; const s = T.schede.get(sv.id); if (!s) { sv.d.close(); return; }
     const d = s.dati, w = puoScrivere(s), dis = w ? '' : ' disabled', pg = formaPg(s), foto = fotoScheda(s), tk = tokScheda();
@@ -4737,9 +4814,10 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         </div>
         <div class="colB">
           <div class="grigio">
-            <div class="tre"><div class="scudo">${n('ca', '10')}<small>Classe armatura</small></div>
+            <div class="tre"><div class="scudo">${n('ca', '10')}<small>Classe armatura</small>${pg && w ? `<button type="button" class="mini cfg cacfgb${sv.mca ? ' on' : ''}" data-k="cacfg" title="Modifica la CA: armatura, scudo, bonus" aria-label="Modifica la classe armatura" aria-expanded="${!!sv.mca}">⚙</button>` : ''}</div>
               <div class="qq"><button type="button" class="rb" data-roll="iniz" data-c="iniz" title="Tira l'iniziativa"${dis}></button><small>Iniziativa</small></div>
               <div class="qq">${inp('velocita', '9 m')}<small>Velocità</small></div></div>
+            ${pg && w && sv.mca ? pannelloCA(s, inp) : ''}
             <div class="sez pf">${pf}<h6>${tk ? 'Punti ferita di ' + esc(tk.nome || 'questo token') : 'Punti ferita attuali'}</h6></div>
             ${tk ? '' : box(n('pf_temp', '0', 'pfa piccolo'), 'Punti ferita temporanei', 'pf')}
             <div class="due"><div class="sez"><div class="dvt"><span>Totale</span>${inp('dadi_vita', pg ? '5d10' : '2d8+2')}${isDM() && !pg ? '<button type="button" class="mini" data-k="tirapf" title="Tira i PF massimi con i dadi vita (tiro nascosto)">🎲</button>' : ''}</div>${pg ? n('dv_rest', '—', 'pfa piccolo') : ''}<h6>Dadi vita</h6></div>
@@ -4827,6 +4905,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (['car', 'btipo', 'comp_att', 'arma', 'duemani'].includes(k) || k === 'nome' && !el.matches(':focus') || (k === 'bdadi' && !el.matches(':focus'))) disegnaScheda(); return;
     }
     salvaScheda(s.id, { [f]: v });
+    if (['ca_auto', 'armatura', 'scudo_ca'].includes(f) || (f === 'equip' && sv.mca && !el.matches(':focus'))) disegnaScheda();
   }
   function tiroD20(s, mod, cosa, aiutabile) {
     const sv = T.sv, tk = aiutabile && sv.adv !== 2 ? tokScheda() || attaccante(s) : null, ai = tk ? aiutoPer(tk) : null, adv = ai ? 1 : sv.adv;
@@ -4949,6 +5028,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (k === 'tz-m' && tkz) { const a = azioniDi(tkz); return segnaAzioni(tkz, { mov: Math.max(0, (a.mov || 0) - +b.dataset.d) }); }
     if (k === 'tz-fine') return finisciTurno();
     if (k === 'tz-reset' && tkz) return segnaAzioni(tkz, { az: false, bon: false, rea: false, mov: 0, scatto: false, fatte: [], ox: null, oy: null });
+    if (k === 'cacfg') { sv.mca = !sv.mca; return disegnaScheda(); }
     if (k === 'attcfg') { const i = +b.dataset.i; sv.matt = sv.matt === i ? null : i; return disegnaScheda(); }
     if (k === 'addatt') { sv.matt = (d.attacchi || []).length; await salvaScheda(s.id, { attacchi: [...(d.attacchi || []), { nome: '', colpire: null, danni: '', tipo: '' }] }, true); disegnaScheda(); sv.d.querySelector('.atts .at:last-of-type textarea.an')?.focus(); return; }
     if (k === 'delatt') { await salvaScheda(s.id, { attacchi: (d.attacchi || []).filter((_, i) => i !== +b.dataset.i) }, true); return disegnaScheda(); }
@@ -5223,7 +5303,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (sbc?.caSenza) op.push(sbc.caSenza + dm); const rc = String(r?.ca || ''); if (rc === '13+des') op.push(13 + dm); else if (+rc) op.push(+rc);
       ca = Math.max(...op);
     }
-    d.ca = ca + (C.scudo ? 2 : 0) + (r?.caPiu || 0);
+    d.ca = ca + (C.scudo ? 2 : 0) + (r?.caPiu || 0); d.armatura = a ? a[0] : 'nessuna'; d.scudo_ca = C.scudo ? 'si' : 'no';
     d.attacchi = C.armi.filter(Boolean).map(n => { const w = R.armi.find(x => x[0] === n); if (!w) return null; const kk = statArma(w, st), m = modV(st[kk]); return { nome: w[0], colpire: 2 + m, danni: w[1] + segnoP(m), tipo: [w[2], w[4]].filter(Boolean).join(' · ') }; }).filter(Boolean);
     // incantesimi della razza al 1° livello
     if (r) for (const [n, lv] of [...(r.inc || []), ...(sr?.inc || [])]) if (lv <= 1 && !d.incantesimi.some(x => chiaveInc(x.nome) === chiaveInc(n))) d.incantesimi.push(voceIncDa(R, n));
