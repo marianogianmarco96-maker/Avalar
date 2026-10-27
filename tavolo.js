@@ -1505,6 +1505,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     // senza tavolo/tappa-3.sql il tavolo funziona lo stesso, solo senza schede
     T.schede = sh.error ? null : new Map(sh.data.map(x => [x.id, x]));
     setTimeout(festaInSospeso, 1500);
+    setTimeout(() => regole().catch(() => { }), 4000); // servono anche alle azioni bonus e alle reazioni dei privilegi
     // senza tavolo/tappa-4.sql niente muri né nebbia automatica
     T.muri = mu.error ? null : mu.data; T.wver++;
     // senza tavolo/tappa-6.sql i giocatori non vedono la salute dei compagni
@@ -4562,14 +4563,48 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     ['pre', '⏳', 'Preparare', 'Agisci dopo, di reazione', 'Decidi cosa farai e quando: agirai con la reazione'],
     ['cer', '🔍', 'Cercare', 'Percezione o Indagare', 'Prova di Saggezza (Percezione) o di Intelligenza (Indagare)'],
     ['ogg', '🧰', 'Usa un oggetto', 'Leva, porta, oggetto', 'Una leva, una porta, un oggetto da usare']];
-  const voceAz = k => AZIONI.find(x => x[0] === k) || ['', '•', k, ''];
-  // Azione scaltra del ladro (dal 2° livello), Fuga agile del goblin, Passo del vento del monaco
+  const voceAz = k => AZIONI.find(x => x[0] === k) || (/^p:/.test(k) ? ['', '✨', k.slice(2), ''] : ['', '•', k, '']);
+  // privilegi che si usano con l'azione bonus o con la reazione (Ira, Schivata prodigiosa, Maestro delle tattiche…):
+  // quelli della scheda più quelli che la classe, la sottoclasse e la razza danno a quel livello, così valgono anche per le schede fatte a mano
+  const STD_BON = { 'azione scaltra': ['scatto', 'dis', 'nas'], 'fuga agile': ['dis', 'nas'], 'passo del vento': ['scatto', 'dis'], 'difesa paziente': ['sch'], 'maestro delle tattiche': ['aiu'], 'dono fatato': ['aiu'], 'carica furiosa': ['scatto'], 'impeto': ['scatto'], 'svanire': ['nas'], 'occhio per i dettagli': ['cer'] };
+  const KI = [['Arti marziali', 'Dopo l\'azione di Attacco, un colpo senz\'armi con l\'azione bonus.'], ['Raffica di colpi', '1 ki dopo l\'azione di Attacco: due colpi senz\'armi con l\'azione bonus.'], ['Difesa paziente', '1 ki: Schivata con l\'azione bonus.'], ['Passo del vento', '1 ki: Scatto o Disimpegno con l\'azione bonus, e salti il doppio.']];
+  const OPP = { nome: 'Attacco di opportunità', testo: 'Un attacco in mischia contro chi esce dalla tua portata senza Disimpegno.' };
+  const tempoPriv = t => /(^|[.;:,]\s*)(con )?(la|una) reazione\b|\be la reazione\b|\b(usi|usare|spendi|spendere) la (tua )?reazione/i.test(t) ? 'rea' : /azione bonus/i.test(t) ? 'bon' : '';
+  function privAzioni(R, d) {
+    if (!R.__ip) {
+      const m = new Map(), put = (n, t) => { const k = norm(n); if (n && t && !m.has(k)) m.set(k, t); }, liv = o => Object.values(o || {}).forEach(a => a.forEach(([n, t]) => put(n, t)));
+      Object.values(R.classi).forEach(k => liv(k.liv)); Object.values(R.sotto).forEach(L => L.forEach(x => liv(x.liv)));
+      R.razze.forEach(r => [r, ...(r.sotto || [])].forEach(x => (x.tratti || []).forEach(([n, t]) => put(n, t)))); (R.talenti || []).forEach(f => put(f.nome, f.testo));
+      R.__ip = m;
+    }
+    const out = new Map(), add = (n, t, f) => { n = String(n || '').trim(); const k = norm(n); if (!n || out.has(k)) return; t = t || R.__ip.get(k) || ''; const tempo = STD_BON[k] ? 'bon' : tempoPriv(t); if (tempo) out.set(k, { nome: n, testo: t, tempo, fonte: f, std: STD_BON[k] || null }); };
+    (d.privilegi || []).forEach(p => add(p.nome, p.testo, p.fonte));
+    const L = classiDi(R, d).L;
+    for (const c of L) { const k = R.classi[c.id], sb = sottoDi(R, c); for (let l = 1; l <= c.livello; l++) { (k.liv[l] || []).forEach(([n, t]) => add(n, t, `${k.nome} ${l}`)); (sb?.liv?.[l] || []).forEach(([n, t]) => add(n, t, `${nomeBreve(sb.nome)} ${l}`)); } }
+    const mo = L.find(c => c.id === 'monaco'); if (mo) KI.forEach(([n, t], i) => (!i || mo.livello >= 2) && add(n, t, 'Monaco'));
+    const rn = norm(d.razza), r = R.razze.find(x => x.id === d.razza_id) || (rn ? R.razze.find(x => rn.includes(norm(x.nome))) : null), sr = r?.sotto?.find(x => x.id === d.sottorazza || (rn && rn.includes(norm(x.nome))));
+    for (const x of [r, sr]) (x?.tratti || []).forEach(([n, t]) => add(n, t, x.nome));
+    return out;
+  }
+  // con l'azione bonus: Scatto, Disimpegno, Aiuto… quando un privilegio lo permette (Azione scaltra, Fuga agile, Maestro delle tattiche…)
   function bonusAz(t) {
-    const d = schedaDi(t)?.dati || {}, testo = norm([(d.privilegi || []).map(p => p.nome || '').join('|'), d.azioni || '', d.tratti || ''].join('|'));
+    const d = schedaDi(t)?.dati || {};
+    if (window.__regole) {
+      const P = [...privAzioni(window.__regole, d).values()].filter(x => x.std);
+      if (P.length) { const k = AZIONI.map(x => x[0]).filter(k => P.some(x => x.std.includes(k))); return { nome: P.map(x => x.nome).join(', '), k, per: Object.fromEntries(k.map(y => [y, P.find(x => x.std.includes(y)).nome])) }; }
+    }
+    const testo = norm([(d.privilegi || []).map(p => p.nome || '').join('|'), d.azioni || '', d.tratti || ''].join('|'));
     if (/azione scaltra|azioni scaltre/.test(testo) || (/ladr/i.test(d.classe || '') && (parseInt(d.livello) || 0) >= 2)) return { nome: 'Azione scaltra', k: ['scatto', 'dis', 'nas'] };
     if (/fuga agile/.test(testo)) return { nome: 'Fuga agile', k: ['dis', 'nas'] };
     if (/passo del vento/.test(testo)) return { nome: 'Passo del vento', k: ['scatto', 'dis'] };
     return null;
+  }
+  // un privilegio usato con l'azione bonus o con la reazione: si segna e si scrive in chat
+  async function usaPriv(t, x, da) {
+    const a = azioniDi(t); if (a[da]) { toast(da === 'rea' ? 'La reazione di questo turno è già usata.' : 'L\'azione bonus di questo turno è già usata.', 'err'); return; }
+    const fatte = [...(a.fatte || (a.scatto ? [{ k: 'scatto', da: 'az' }] : [])), { k: 'p:' + x.nome, da }];
+    await segnaAzioni(t, { [da]: true, fatte, scatto: fatte.some(y => y.k === 'scatto') });
+    await annuncia(`${da === 'rea' ? '↺' : '✨'} ${t.nome || 'Il token'} usa ${x.nome} (${da === 'rea' ? 'reazione' : 'azione bonus'})${x.testo ? ': ' + corto(x.testo, 220) : '.'}`);
   }
   // con cosa può scattare ora: l'azione, se no l'azione bonus (Azione scaltra…)
   const puoScattare = t => { const a = azioniDi(t); if (!a.az) return 'az'; const b = bonusAz(t); return b && b.k.includes('scatto') && !a.bon ? 'bon' : null; };
@@ -4581,7 +4616,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
   // cosa fa ogni azione, scritto per bene in chat
   function descriviAzione(t, k, da, x) {
-    const n = t.nome || 'Il token', b = da === 'bon' ? bonusAz(t) : null, con = b ? `azione bonus · ${b.nome}` : 'azione', [, ic] = voceAz(k);
+    const n = t.nome || 'Il token', b = da === 'bon' ? bonusAz(t) : null, con = b ? `azione bonus · ${b.per?.[k] || b.nome}` : 'azione', [, ic] = voceAz(k);
     const D = {
       scatto: `usa Scatto (${con}): guadagna altri ${metri(velocitaDi(schedaDi(t)))} di movimento in questo turno, ora può muoversi ancora di ${metri(Math.max(0, movimentoDi(t).resta))}.`,
       dis: `usa Disimpegno (${con}): fino alla fine del turno il suo movimento non provoca attacchi di opportunità.`,
@@ -4650,13 +4685,17 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (x.k === 'sch') segna(t, { schivata: null }); if (x.k === 'aiu') segna(t, { aiuto: null });
   }
   // le azioni fatte in questo turno, da togliere con un tocco se segnate per sbaglio
-  const fatteHtml = (t, cls, k) => (azioniDi(t).fatte || []).map((x, i) => { const [, ic, l] = voceAz(x.k), su = x.a && T.tok.get(x.a); return `<button type="button" class="${cls}" data-k="${k}" data-i="${i}" title="${l} (${x.da === 'bon' ? 'azione bonus' : 'azione'}): tocca per toglierla">${ic} ${l}${su ? ' → ' + esc(String(su.nome || '').split(/\s+/)[0]) : ''} ✕</button>`; }).join('');
+  const fatteHtml = (t, cls, k) => (azioniDi(t).fatte || []).map((x, i) => { const [, ic, l] = voceAz(x.k), su = x.a && T.tok.get(x.a); return `<button type="button" class="${cls}" data-k="${k}" data-i="${i}" title="${l} (${x.da === 'bon' ? 'azione bonus' : x.da === 'rea' ? 'reazione' : 'azione'}): tocca per toglierla">${ic} ${l}${su ? ' → ' + esc(String(su.nome || '').split(/\s+/)[0]) : ''} ✕</button>`; }).join('');
   function menuAzioni(t, anc) {
     document.querySelectorAll('.tv-azm').forEach(x => x.remove());
     const a = azioniDi(t), b = bonusAz(t), m = document.createElement('div'); m.className = 'tv-azm'; m.setAttribute('role', 'menu');
     const voce = (k, da, off) => { const [, ic, l, d, lungo] = voceAz(k); return `<button type="button" role="menuitem" data-a="${k}" data-da="${da}" title="${lungo}"${off ? ' disabled' : ''}><span>${ic}</span><div><b>${l}</b><small>${d}</small></div></button>`; };
+    // le azioni bonus e le reazioni dei privilegi arrivano con le regole: se non sono ancora caricate il menu si ridisegna appena ci sono
+    const R = window.__regole, P = R ? [...privAzioni(R, schedaDi(t)?.dati || {}).values()] : [], pb = P.filter(x => x.tempo === 'bon' && !x.std), pr = [OPP, ...P.filter(x => x.tempo === 'rea')];
+    const vp = (x, i, da, off) => `<button type="button" role="menuitem" data-p="${i}" data-da="${da}" title="${esc(x.testo)}"${off ? ' disabled' : ''}><span>${da === 'rea' ? '↺' : '✨'}</span><div><b>${esc(x.nome)}</b><small>${esc(corto(x.testo, 64))}</small></div></button>`;
     m.innerHTML = `<h5>Con l'azione${a.az ? ' <small>già usata</small>' : ''}</h5><div class="gz">${AZIONI.map(([k]) => voce(k, 'az', a.az)).join('')}</div>
-      ${b ? `<h5>Con l'azione bonus <small>${b.nome}${a.bon ? ' · già usata' : ''}</small></h5><div class="gz">${b.k.map(k => voce(k, 'bon', a.bon)).join('')}</div>` : ''}
+      ${b || pb.length ? `<h5>Con l'azione bonus <small>${[b?.nome, a.bon ? 'già usata' : ''].filter(Boolean).join(' · ')}</small></h5><div class="gz">${b ? b.k.map(k => voce(k, 'bon', a.bon)).join('') : ''}${pb.map(x => vp(x, P.indexOf(x), 'bon', a.bon)).join('')}</div>` : ''}
+      <h5>Con la reazione${a.rea ? ' <small>già usata</small>' : ''}</h5><div class="gz">${pr.map(x => vp(x, x === OPP ? 'opp' : P.indexOf(x), 'rea', a.rea)).join('')}</div>
       <p class="nota">Attaccare e lanciare incantesimi si fa dalla scheda. Le azioni scelte finiscono in chat.</p>`;
     document.body.append(m);
     const r = anc.getBoundingClientRect(), h = m.offsetHeight, w = m.offsetWidth;
@@ -4675,7 +4714,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       m.querySelector('[data-o]')?.focus();
     };
     m.querySelectorAll('[data-a]').forEach(x => x.onclick = () => { if (x.dataset.a === 'aiu') return chi(x.dataset.da); chiudi(); faiAzione(t, x.dataset.a, x.dataset.da); });
+    m.querySelectorAll('[data-p]').forEach(x => x.onclick = () => { chiudi(); usaPriv(t, x.dataset.p === 'opp' ? OPP : P[+x.dataset.p], x.dataset.da); });
     m.querySelector('[data-a]:not([disabled])')?.focus();
+    if (!R) regole().then(() => { if (m.isConnected) menuAzioni(t, anc); }, () => { });
   }
   function boxTurno(t, w) {
     if (!t) return '';
