@@ -5356,7 +5356,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
 
   /* un livello in più (o il primo, nella creazione): i dati nuovi e le righe del riepilogo */
-  function applica(G) {
+  function applicaLiv(G) {
     const R = G.R, ctx = ctxDi(G); if (!ctx) return null;
     const { k, c, lc, lt, sb, L } = ctx, crea = G.tipo === 'crea';
     const d = JSON.parse(JSON.stringify(ctx.d)), righe = [], P = d.privilegi = [...(d.privilegi || [])];
@@ -5845,7 +5845,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         ${maxL > 1 ? `<h4>Livello di partenza</h4><div class="riga"><select data-gi="fino">${Array.from({ length: maxL }, (_, i) => `<option value="${i + 1}"${(G.fino || 1) === i + 1 ? ' selected' : ''}>${i + 1}° livello</option>`).join('')}</select><span class="hint">Si crea al 1° livello, poi si sale un livello alla volta con le stesse scelte guidate.</span></div>` : ''}`;
     }
     if (p === 'riep') {
-      const r = applica(G); if (!r) return '<p class="hint">Mancano ancora delle scelte.</p>';
+      const r = applicaLiv(G); if (!r) return '<p class="hint">Mancano ancora delle scelte.</p>';
       const d0 = G.tipo === 'crea' ? null : G.d0, d = r.d, ko = passiDi(G).map(x => [x, manca(G, x)]).filter(([, m]) => m);
       const righe = d0 ? [['Livello', d0.livello || 1, d.livello], ['Classe', d0.classe || '—', d.classe], ['PF massimi', d0.pf_max ?? '—', d.pf_max], ['Dadi vita', d0.dadi_vita || '—', d.dadi_vita], ['Bonus di competenza', '+' + compL(num(d0.livello) || 1), '+' + compL(d.livello)], ...CAR.filter(([k]) => num(d0[k]) !== num(d[k])).map(([k, , n]) => [n, d0[k] ?? 10, d[k]])].filter(([, a, b]) => String(a) !== String(b) || /Classe|PF/.test(String(a)))
         : [['Razza', '', d.razza], ['Classe', '', d.classe], ['Background', '', d.background], ['PF', '', d.pf_max], ['CA', '', d.ca], ['Velocità', '', d.velocita]];
@@ -5857,7 +5857,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     return '';
   }
   function anteprimaG(G) {
-    const R = G.R; let r = null; try { r = applica(G); } catch (e) { console.warn(e); }
+    const R = G.R; let r = null; try { r = applicaLiv(G); } catch (e) { console.warn(e); }
     const d = r?.d || (G.tipo === 'crea' ? baseCrea(G) : G.d0), d0 = G.tipo === 'crea' ? null : G.d0, s = T.schede.get(G.id), foto = s && fotoScheda(s);
     const sub = [d.razza, d.classe ? `${d.classe} ${d.livello || ''}`.trim() : ''].filter(Boolean).join(' · ') || 'Ancora da scegliere';
     const ab = CAR.map(([k, sg]) => { const v = num(d[k]) ?? 10, up = d0 ? v > (num(d0[k]) ?? 10) : false; return `<div class="ab${up ? ' up' : ''}"><small>${sg}</small><b>${v}</b><span>${segnoP(modV(v)) || '+0'}</span></div>`; }).join('');
@@ -5880,7 +5880,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (G.tipo === 'liv' && !isDM() && !(num(s.dati.liv_concesso) > lv0)) return toast('Il DM non ti ha ancora concesso il prossimo livello.', 'err');
     if ((num(s.dati.livello) || 0) !== (num(G.d0.livello) || 0)) return toast('Intanto la scheda è cambiata: chiudi e riapri la procedura.', 'err');
     if (G.tipo === 'crea' && !schedaVuota(s) && !await ask(`La scheda di **${s.nome}** ha già dei dati: verranno sostituiti (storia e note restano). Si può tornare indietro dalla Storia dei livelli.`, { ok: 'Sostituisci', danger: true, title: 'Nuovo personaggio' })) return;
-    const r = applica(G), d = r.d, d0 = s.dati, patch = {}, prima = {};
+    const r = applicaLiv(G), d = r.d, d0 = s.dati, patch = {}, prima = {};
     const TIENI = ['storia_livelli', 'forma', 'storia', 'aspetto', 'alleati', 'tesoro', 'note', 'eta', 'altezza', 'peso', 'occhi', 'pelle', 'capelli', 'liv_concesso', 'condizioni', 'ispirazione', 'genere'];
     for (const k of new Set([...Object.keys(d), ...(G.tipo === 'crea' ? Object.keys(d0) : [])])) {
       if (k === 'storia_livelli' || (!(k in d) && TIENI.includes(k))) continue;
