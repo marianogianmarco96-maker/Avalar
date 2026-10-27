@@ -3961,6 +3961,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const row = Array.isArray(r.data) ? r.data[0] : r.data; if (row) arrivaScheda(row);
   }
   function arrivaScheda(row) {
+    if (L.s && row.id === L.s.id) { L.s = { ...L.s, ...row }; segnaLivello(); }
     if (!T.schede) return;
     const vecchia = T.schede.get(row.id), s = completaS(vecchia, row), p = pend.get(row.id);
     if (vecchia && !isDM() && s.giocatore && s.giocatore === T.me?.giocatore && (num(s.dati?.liv_concesso) || 0) > (num(vecchia.dati?.liv_concesso) || 0) && num(s.dati.liv_concesso) > (num(s.dati.livello) || 1)) toast(`🎁 Il DM ti ha concesso il ${num(s.dati.liv_concesso)}° livello: apri la tua scheda e premi «Sali di livello».`);
@@ -5712,6 +5713,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     P.info = info; if (info.ruolo === 'dm') casellaDM();
     try {
       P.me = await entraUnaVolta(info);
+      if (info.ruolo !== 'dm') sigilloLivello(info).catch(() => { });
       const r = await SB.from('tavolo_stato').select('canale').eq('id', 1).maybeSingle();
       if (r.error || !r.data?.canale) throw new Error('canale');
       const ch = P.ch = SB.channel('sito-' + r.data.canale, { config: { presence: { key: P.me.uid } } });
@@ -5720,6 +5722,55 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       let tm; const dopo = () => { clearTimeout(tm); tm = setTimeout(traccia, 300); };
       addEventListener('hashchange', dopo); document.addEventListener('visibilitychange', dopo);
     } catch (e) { P.ko = true; disegnaPresenza(); }
+  }
+  /* ---------- livello concesso: il giocatore se ne accorge subito ----------
+     Quando il DM concede un livello, la foto in alto (accanto a «Strumenti») pulsa con un anello d'oro e l'ingranaggio
+     diventa ⬆; sulla pagina del suo personaggio il tasto Scheda ha un riflesso dorato e la scritta sotto. Sparisce appena sale. */
+  const L = { s: null, ch: null, pg: null };
+  const LCSS = `#tools .ttog.lvpend{border-color:#e0c071}
+#tools .ttog.lvpend .tav,#tools .ttog.lvpend .ti{animation:lvAnello 1.6s ease-out infinite;border-radius:50%}
+#tools .ttog.lvpend .tgear{background:linear-gradient(#f3d98a,#c9a24b);color:#561820;border-color:#fff;font-weight:900;animation:lvTimbro 1.6s ease-in-out infinite}
+@keyframes lvAnello{0%{box-shadow:0 0 0 0 #e0c071}100%{box-shadow:0 0 0 11px #e0c07100}}
+@keyframes lvTimbro{0%,30%,100%{transform:scale(1)}15%{transform:scale(1.35)}}
+.schtag.lvpend{overflow:hidden;border-color:#e0c071;animation:lvAlone 2.2s ease-in-out infinite}
+.schtag.lvpend:after{content:'';position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,#fff6d6cc,transparent);animation:lvRiflesso 2.2s ease-in-out infinite;pointer-events:none}
+@keyframes lvRiflesso{0%{left:-60%}55%,100%{left:130%}}
+@keyframes lvAlone{0%,100%{box-shadow:0 2px 8px #0004}50%{box-shadow:0 0 16px 2px #e0c071aa,0 2px 8px #0004}}
+.schlv{position:absolute;top:50px;right:12px;z-index:3;font:italic 600 .88rem/1.2 var(--body);color:#e0c071;background:#2c0f14d9;padding:3px 9px;border-radius:8px;pointer-events:none;white-space:nowrap}
+.schtag[hidden]+.schlv,.schtag.on+.schlv{display:none}
+@media (min-width:621px){.schlv{background:none;padding:0}}`;
+  const livDaPrendere = () => { const d = L.s?.dati || {}, c = num(d.liv_concesso) || 0; return c > (num(d.livello) || 1) ? c : 0; };
+  function segnaLivello() {
+    const n = livDaPrendere(), tog = document.querySelector('#tools .ttog');
+    if (tog) {
+      if (!tog.dataset.titolo) tog.dataset.titolo = tog.title;
+      tog.classList.toggle('lvpend', !!n);
+      const g = tog.querySelector('.tgear') || tog.querySelector('.ti'); if (g) g.textContent = n ? '⬆' : '⚙';
+      tog.title = n ? `Il DM ti ha concesso il ${n}° livello: apri la tua scheda e premi «Sali di livello»` : tog.dataset.titolo;
+    }
+    // il tasto Scheda solo sulla pagina del proprio personaggio
+    const tag = document.querySelector('.ehead .schtag'), ent = decodeURIComponent((location.hash.match(/^#\/scheda\/([^/?]+)/) || [])[1] || '');
+    const mio = !!tag && !!ent && (ent === L.pg || ent === L.s?.entita), on = mio && !!n;
+    tag?.classList.toggle('lvpend', on);
+    let lab = tag?.parentNode.querySelector('.schlv');
+    if (on) { if (!lab) { lab = document.createElement('span'); lab.className = 'schlv'; tag.after(lab); } lab.textContent = `⬆ Puoi salire al ${n}° livello`; }
+    else lab?.remove();
+  }
+  async function leggiLivello() {
+    const r = await SB.from('tavolo_schede').select('id,tipo,entita,giocatore,dati').eq('giocatore', P.me.giocatore);
+    if (r.error) return;
+    L.s = r.data.find(x => x.tipo === 'pg' && (!L.pg || x.entita === L.pg)) || r.data.find(x => x.tipo === 'pg') || null; segnaLivello();
+  }
+  async function sigilloLivello(info) {
+    if (!P.me?.giocatore || L.ch) return;
+    L.pg = info.pg || null;
+    const st = document.createElement('style'); st.textContent = LCSS; document.head.append(st);
+    await leggiLivello();
+    // il DM concede o il giocatore sale (anche da un altro dispositivo): arriva subito
+    L.ch = SB.channel('livello-' + P.me.giocatore).on('postgres_changes', { event: '*', schema: 'public', table: 'tavolo_schede', filter: 'giocatore=eq.' + P.me.giocatore }, () => leggiLivello().catch(() => { })).subscribe();
+    // la pagina si ridisegna a ogni cambio di sezione: il tasto Scheda è nuovo e va segnato di nuovo
+    const v = document.getElementById('view'); if (v) new MutationObserver(segnaLivello).observe(v, { childList: true });
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) leggiLivello().catch(() => { }); });
   }
   // un attimo dopo l'apertura, per non rallentare la prima pagina
   setTimeout(() => presenza().catch(() => { }), 1500);
