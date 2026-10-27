@@ -576,7 +576,7 @@ dialog.tv-pag .tv-sch .at .riga.az .tp{flex:1 1 0}
 .tv-sch .pvf .ig{display:grid;grid-template-columns:1fr 1fr;gap:5px}
 .tv-sch .lv .agg{margin-top:4px}
 .tv-scuro .tv-sch .spl .st{color:#e8a0a6}
-.tv-sch .bgT{display:grid;grid-template-columns:repeat(6,1fr);gap:4px 10px;border:2px solid var(--lin);border-radius:8px;padding:6px 10px;background:var(--box);margin-bottom:8px}
+.tv-sch .bgT{display:grid;grid-template-columns:repeat(7,1fr);gap:4px 10px;border:2px solid var(--lin);border-radius:8px;padding:6px 10px;background:var(--box);margin-bottom:8px}
 .tv-sch .bgG{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px;margin-bottom:8px}
 .tv-sch .fd{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--ul)}
 .tv-scuro .tv-sch .nm,.tv-scuro .tv-sch h4{color:var(--gold2)}
@@ -771,7 +771,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   dialog.dlg.tv-side.tv-sw{inset:auto 0 0 0;width:auto!important;height:auto!important;min-width:0;max-height:90vh;border-radius:12px 12px 0 0}
   dialog.tv-sw>.rz{display:none}
   .tv-sch .testa{grid-template-columns:1fr}.tv-sch .info{grid-template-columns:repeat(2,1fr)}
-  .tv-sch .bgT{grid-template-columns:repeat(3,1fr)}
+  .tv-sch .bgT{grid-template-columns:repeat(4,1fr)}
   .tv-sch .tbar{cursor:default}.tv-sch .tbar .tt,.tv-sch .tbar .grip{display:none}.tv-sch .tbar .x{margin-left:auto}
   .tv-sch .tabs{overflow-x:auto;scrollbar-width:none}.tv-sch .tabs button{white-space:nowrap;padding:5px 8px;font-size:.72rem}
   .tv-chip b{max-width:34vw}
@@ -1234,6 +1234,29 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
 .tv-guida .gf{background:#efe4c9;border-top:1px solid #d7c191}
 .tv-guida .gbtn{border-radius:30px;padding:9px 20px}
 .tv-guida .gbtn.p{box-shadow:0 3px 0 #4a121a}
+/* livello concesso: la colonna di luce */
+.tv-festa{position:fixed;inset:0;z-index:90;display:grid;place-items:center;overflow:hidden;font:17px/1.35 var(--body);color:#ecdfc6}
+.tv-festa .fvel{position:absolute;inset:0;background:radial-gradient(ellipse at center,#000000b3,#000000e6);animation:tvfFade .5s ease-out both}
+.tv-festa .fraggi{position:absolute;left:50%;top:44%;width:900px;height:900px;translate:-50% -50%;background:repeating-conic-gradient(from 0deg,#ffe9a833 0 6deg,transparent 6deg 18deg);-webkit-mask:radial-gradient(circle,#000 10%,transparent 60%);mask:radial-gradient(circle,#000 10%,transparent 60%);animation:tvfGira 12s linear infinite,tvfFade 1s .2s both;pointer-events:none}
+.tv-festa .fluce{position:absolute;left:50%;top:-10%;width:260px;height:120%;translate:-50% 0;background:linear-gradient(90deg,transparent,#ffe9a855,#fff7d8aa,#ffe9a855,transparent);filter:blur(6px);animation:tvfScende .9s ease-out both;opacity:.55;pointer-events:none}
+.tv-festa .fsc{position:absolute;inset:0;pointer-events:none}
+.tv-festa .fsc i{position:absolute;top:100%;font-style:normal;color:#ffe08a;text-shadow:0 0 8px #ffcf5a;animation:tvfSale 2.4s linear infinite}
+.tv-festa .fbox{position:relative;text-align:center;width:min(640px,92vw);margin-top:-6vh}
+.tv-festa .flv{font:700 1.1rem var(--display);letter-spacing:.4em;text-transform:uppercase;color:#f3d98a;animation:tvfFade .5s 1.2s both}
+.tv-festa .fnum{font:900 9rem/1 var(--display);color:#ffe9a8;text-shadow:0 0 30px #ffcf5a,0 0 60px #c9a24b,0 4px 0 #7d2530;animation:tvfZoom .7s cubic-bezier(.2,1.6,.4,1) .7s both}
+.tv-festa h2{font:700 1.7rem/1.2 var(--display);color:#fff4d6;margin:10px 0 4px;text-shadow:0 2px 8px #000;animation:tvfFade .5s 1.4s both}
+.tv-festa p{margin:0;color:#ecdfc6;text-shadow:0 1px 4px #000;animation:tvfFade .5s 1.6s both}
+.tv-festa .fbt{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px;animation:tvfFade .5s 1.9s both}
+.tv-festa .fbt button{font:600 .85rem var(--display);letter-spacing:.06em;text-transform:uppercase;padding:10px 18px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.tv-festa .fbt .si{border:1px solid #e0c071;background:linear-gradient(180deg,#c4494f,#8c2c38);color:#fbeccb;box-shadow:0 3px 0 #4a121a}
+.tv-festa .fbt .no{border:1px solid #ffffff40;background:#00000055;color:#ecdfc6}
+.tv-festa.calma *{animation:none!important}
+@keyframes tvfFade{from{opacity:0}}
+@keyframes tvfGira{to{rotate:360deg}}
+@keyframes tvfScende{0%{transform:scaleY(0);transform-origin:top;opacity:0}60%{opacity:1}100%{transform:scaleY(1);opacity:.55}}
+@keyframes tvfZoom{0%{transform:scale(3);opacity:0;filter:blur(8px)}100%{transform:scale(1);opacity:1;filter:none}}
+@keyframes tvfSale{0%{transform:translateY(0);opacity:0}15%{opacity:1}100%{transform:translateY(-110vh);opacity:0}}
+@media (max-width:620px){.tv-festa .fnum{font-size:7rem}.tv-festa h2{font-size:1.35rem}.tv-festa .fbt button{font-size:.72rem;padding:9px 13px}}
 @media (max-width:820px){
   dialog.dlg.tv-guida{width:100vw;height:100dvh;border-radius:0;border:0;inset:0}
   .tv-guida .gb{grid-template-columns:minmax(0,1fr);overflow-y:auto;display:block}
@@ -1435,6 +1458,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     T.mask = chk(ms); T.turno = chk(tu); T.chat = chk(ct).reverse();
     // senza tavolo/tappa-3.sql il tavolo funziona lo stesso, solo senza schede
     T.schede = sh.error ? null : new Map(sh.data.map(x => [x.id, x]));
+    setTimeout(festaInSospeso, 1500);
     // senza tavolo/tappa-4.sql niente muri né nebbia automatica
     T.muri = mu.error ? null : mu.data; T.wver++;
     // senza tavolo/tappa-6.sql i giocatori non vedono la salute dei compagni
@@ -3960,17 +3984,36 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (r.error) { toast(r.error.message, 'err'); return; }
     const row = Array.isArray(r.data) ? r.data[0] : r.data; if (row) arrivaScheda(row);
   }
+  /* il DM concede un livello: al giocatore appare la «colonna di luce» con il nuovo livello.
+     Una volta per livello concesso: se non era connesso la vede appena entra nel Tavolo. */
+  const FESTA = id => 'tavolo-festa-' + id;
+  const festaInSospeso = () => { if (!isDM() && T.schede && !T.pag) for (const x of T.schede.values()) if (x.tipo === 'pg' && x.giocatore && x.giocatore === T.me?.giocatore && num(x.dati?.liv_concesso) > (num(x.dati?.livello) || 1)) festaLivello(x); };
+  function festaLivello(s) {
+    const n = num(s.dati?.liv_concesso) || 0; if (!n || document.querySelector('.tv-festa')) return;
+    try { if (+localStorage.getItem(FESTA(s.id)) >= n) return; localStorage.setItem(FESTA(s.id), n); } catch { }
+    css();
+    const lei = s.dati?.genere === 'f', w = document.createElement('div');
+    w.className = 'tv-festa' + (animazioni() ? '' : ' calma'); w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-label', 'Nuovo livello');
+    w.innerHTML = `<div class="fvel"></div><div class="fraggi"></div><div class="fluce"></div><div class="fsc">${Array.from({ length: 26 }, (_, i) => `<i style="left:${(Math.sin(i * 7.3) * 50 + 50).toFixed(1)}%;font-size:${8 + i % 4 * 4}px;animation-delay:${(i * .11).toFixed(2)}s">${i % 3 ? '✦' : '✧'}</i>`).join('')}</div>
+      <div class="fbox"><div class="flv">Livello</div><div class="fnum">${n}</div><h2>Congratulazioni! Sei ${lei ? 'salita' : 'salito'} di livello</h2><p>${esc(s.nome)} · scegli adesso cosa ${lei ? 'la' : 'lo'} rende più forte</p>
+      <div class="fbt"><button type="button" class="si">⬆ Sali di livello ora</button><button type="button" class="no">Più tardi</button></div></div>`;
+    const via = () => { w.remove(); removeEventListener('keydown', esc_); }, esc_ = e => { if (e.key === 'Escape') via(); };
+    w.querySelector('.no').onclick = via; w.querySelector('.fvel').onclick = via; addEventListener('keydown', esc_);
+    w.querySelector('.si').onclick = () => { via(); const x = T.schede?.get(s.id) || s; if (num(x.dati?.liv_concesso) > (num(x.dati?.livello) || 1)) apriGuida(x, 'liv'); };
+    document.body.append(w); w.querySelector('.si').focus();
+  }
   function arrivaScheda(row) {
     if (L.s && row.id === L.s.id) { L.s = { ...L.s, ...row }; segnaLivello(); }
     if (!T.schede) return;
     const vecchia = T.schede.get(row.id), s = completaS(vecchia, row), p = pend.get(row.id);
-    if (vecchia && !isDM() && s.giocatore && s.giocatore === T.me?.giocatore && (num(s.dati?.liv_concesso) || 0) > (num(vecchia.dati?.liv_concesso) || 0) && num(s.dati.liv_concesso) > (num(s.dati.livello) || 1)) toast(`🎁 Il DM ti ha concesso il ${num(s.dati.liv_concesso)}° livello: apri la tua scheda e premi «Sali di livello».`);
+    if (vecchia && !isDM() && s.giocatore && s.giocatore === T.me?.giocatore && (num(s.dati?.liv_concesso) || 0) > (num(vecchia.dati?.liv_concesso) || 0) && num(s.dati.liv_concesso) > (num(s.dati.livello) || 1)) festaLivello(s);
     if (p) s.dati = { ...s.dati, ...p.dati }; // ciò che sto ancora scrivendo resta mio
     T.schede.set(row.id, s); dopoScheda(row.id);
   }
   async function ricaricaSchede() {
     const r = await SB.from('tavolo_schede').select('*'); if (r.error) return;
     T.schede = new Map(r.data.map(s => [s.id, s])); dopoScheda();
+    festaInSospeso();
   }
   function dopoScheda(id, locale) {
     disegnaSchede(); disegnaToken();
@@ -4585,7 +4628,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         <div class="incG">${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(liv).join('')}</div>
         ${T.srd && (d.incantesimi || []).some(x => x.srd) ? `<p class="srdA">${esc(T.srd.attribuzione)}</p>` : ''}`;
     } else {
-      corpo = pg ? `<div class="bgT">${[['eta', 'Età'], ['altezza', 'Altezza'], ['peso', 'Peso'], ['occhi', 'Occhi'], ['pelle', 'Pelle'], ['capelli', 'Capelli']].map(([k, l]) => cella(inp(k, ''), l)).join('')}</div>
+      corpo = pg ? `<div class="bgT">${[['eta', 'Età'], ['altezza', 'Altezza'], ['peso', 'Peso'], ['occhi', 'Occhi'], ['pelle', 'Pelle'], ['capelli', 'Capelli']].map(([k, l]) => cella(inp(k, ''), l)).join('')}${cella(`<select data-f="genere" aria-label="Il personaggio è"${dis}><option value="">Lui</option><option value="f">Lei</option></select>`, 'Lui o lei')}</div>
         <div class="bgG">${box(area('aspetto', 'Come appare il personaggio…', 6), 'Aspetto del personaggio')}${box(area('alleati', 'Gilde, ordini, amici e nemici…', 6), 'Alleati e organizzazioni')}
           ${box(area('storia', 'La storia del personaggio…', 9), 'Storia del personaggio')}${box(area('tesoro', 'Gemme, oggetti di valore…', 9), 'Tesoro')}</div>${box(area('note', 'Appunti…', 5), 'Note')}`
         : `${box(area('note', 'Note del DM: tattiche, motivazioni, bottino…', 12), 'Note del DM')}`;
@@ -5525,7 +5568,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if ((num(s.dati.livello) || 0) !== (num(G.d0.livello) || 0)) return toast('Intanto la scheda è cambiata: chiudi e riapri la procedura.', 'err');
     if (G.tipo === 'crea' && !schedaVuota(s) && !await ask(`La scheda di **${s.nome}** ha già dei dati: verranno sostituiti (storia e note restano). Si può tornare indietro dalla Storia dei livelli.`, { ok: 'Sostituisci', danger: true, title: 'Nuovo personaggio' })) return;
     const r = applica(G), d = r.d, d0 = s.dati, patch = {}, prima = {};
-    const TIENI = ['storia_livelli', 'forma', 'storia', 'aspetto', 'alleati', 'tesoro', 'note', 'eta', 'altezza', 'peso', 'occhi', 'pelle', 'capelli', 'liv_concesso', 'condizioni', 'ispirazione'];
+    const TIENI = ['storia_livelli', 'forma', 'storia', 'aspetto', 'alleati', 'tesoro', 'note', 'eta', 'altezza', 'peso', 'occhi', 'pelle', 'capelli', 'liv_concesso', 'condizioni', 'ispirazione', 'genere'];
     for (const k of new Set([...Object.keys(d), ...(G.tipo === 'crea' ? Object.keys(d0) : [])])) {
       if (k === 'storia_livelli' || (!(k in d) && TIENI.includes(k))) continue;
       const nv = k in d ? d[k] ?? null : null; if (JSON.stringify(nv) === JSON.stringify(d0[k] ?? null)) continue;
