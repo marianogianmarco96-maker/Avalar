@@ -1257,6 +1257,28 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
 @keyframes tvfZoom{0%{transform:scale(3);opacity:0;filter:blur(8px)}100%{transform:scale(1);opacity:1;filter:none}}
 @keyframes tvfSale{0%{transform:translateY(0);opacity:0}15%{opacity:1}100%{transform:translateY(-110vh);opacity:0}}
 @media (max-width:620px){.tv-festa .fnum{font-size:7rem}.tv-festa h2{font-size:1.35rem}.tv-festa .fbt button{font-size:.72rem;padding:9px 13px}}
+.tv-guida .ga.arca{padding:12px}
+.tv-guida .arch{background:#fffaf0;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px #4a2a1222}
+.tv-guida .arch .ah{display:flex;align-items:center;gap:10px;padding:12px;color:#fff;background:linear-gradient(160deg,color-mix(in srgb,var(--c,#7a5a40) 70%,#fff),var(--c,#7a5a40) 60%,color-mix(in srgb,var(--c,#7a5a40) 70%,#000))}
+.tv-guida .arch .ah .gi{flex:none;width:44px;height:44px;border-radius:50%;border:2px solid #fff;display:grid;place-items:center;background:#0002}
+.tv-guida .arch .ah svg{width:24px;height:24px;filter:drop-shadow(0 1px 1px #0004)}
+.tv-guida .arch .ah b{display:block;font:700 1.05rem/1.2 var(--display)}
+.tv-guida .arch .ah span{font-size:.75rem;opacity:.9}
+.tv-guida .arch .ad{margin:0;padding:10px 12px;font-style:italic;font-size:.88rem;color:#4a3626;border-bottom:1px solid #e6d7b4}
+.tv-guida .arch ol{list-style:none;margin:0;padding:8px 12px 12px}
+.tv-guida .arch li{display:flex;gap:10px;padding:6px 0;position:relative}
+.tv-guida .arch li>i{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font:700 .8rem var(--body);background:#efe3c6;color:#5a4330;border:2px solid #d8c398;position:relative;z-index:1}
+.tv-guida .arch li:not(:last-child):before{content:'';position:absolute;left:17px;top:40px;bottom:-6px;width:2px;background:#e0cfa6}
+.tv-guida .arch li.ora>i{background:var(--c,#7d2530);color:#fff;border-color:#e2c27a}
+.tv-guida .arch li em{display:block;font-style:normal;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#7d2530;margin:2px 0}
+.tv-guida .arch li p{margin:0 0 5px;font-size:.84rem;line-height:1.38;color:#3b2a1e}
+.tv-guida .arch li p b{color:#2b1d14}
+.tv-guida .arch.vuoto{padding:16px;text-align:center;color:#5a4330}
+.tv-guida .arch.vuoto b{font:700 1.05rem var(--display)}
+.tv-guida .arch.vuoto p{font-size:.88rem;margin:6px 0 0}
+.tv-guida .arch-in{grid-column:1/-1}
+.tv-guida .arch-in.tel{display:none}
+@media (max-width:820px){.tv-guida .arch-in.tel{display:block}.tv-guida .ga.arca{display:none}}
 @media (max-width:820px){
   dialog.dlg.tv-guida{width:100vw;height:100dvh;border-radius:0;border:0;inset:0}
   .tv-guida .gb{grid-template-columns:minmax(0,1fr);overflow-y:auto;display:block}
@@ -4958,6 +4980,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const R = G.R, r = R.razze.find(x => x.id === G.cr.razza), sr = r?.sotto?.find(x => x.id === G.cr.sotto), out = [];
     (r?.scelte || []).forEach((sc, i) => out.push({ ...sc, key: 'r:' + i, fonte: r.nome }));
     (sr?.scelte || []).forEach((sc, i) => out.push({ ...sc, key: 'sr:' + i, fonte: sr.nome }));
+    if (/a scelta/.test(r?.lingue || '') && !out.some(sc => sc.tipo === 'lingua')) out.push({ tipo: 'lingua', n: 1, key: 'rl:0', fonte: r.nome, titolo: 'Lingua a scelta' });
     return out;
   }
   // le abilità del background che si hanno già dalla classe o dalla razza si sostituiscono con altre a scelta
@@ -4968,6 +4991,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const rip = b.abil.filter(x => gia.has(x)), out = [];
     if (b.abilScelta) out.push({ tipo: 'abilita', n: b.abilScelta, lista: b.abilLista, key: 'bg:0', fonte: b.nome, titolo: 'Abilità del background' });
     if (rip.length) out.push({ tipo: 'abilita', n: rip.length, key: 'bgx:0', fonte: b.nome, titolo: `Al posto di ${rip.map(nomeAb).join(' e ')} (le hai già)` });
+    if (b.lingue) out.push({ tipo: 'lingua', n: b.lingue, key: 'bgl:0', fonte: b.nome, titolo: b.lingue > 1 ? 'Lingue del background' : 'Lingua del background' });
     return out;
   }
   function tutteScelte(G, ctx) { return [...scelteLiv(ctx), ...(ctx && (ctx.asi || ctx.tal) ? scelteTal(G) : []), ...(G.tipo === 'crea' ? [...scelteRazza(G), ...scelteBg(G)] : [])]; }
@@ -5047,7 +5071,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     }
     if (bg) { for (const a of bg.abil || []) d['ab_' + a] = 1; if (bg.priv) tratto(bg.priv[0], bg.priv[1], 'Background: ' + bg.nome); }
     for (const a of C.abilC) d['ab_' + a] = Math.max(1, num(d['ab_' + a]) || 0);
-    const lingue = [r && `Lingue: ${r.lingue || 'Comune'}${C.lingue ? ', ' + C.lingue : ''}`, k && `Armature e armi: ${k.comp}`, [r?.comp, sr?.comp].filter(Boolean).length && `Dalla razza: ${[r?.comp, sr?.comp].filter(Boolean).join(', ')}`, bg?.strumenti && `Strumenti: ${bg.strumenti}`].filter(Boolean);
+    const lingue = [r && `Lingue: ${(r.lingue || 'Comune').replace(/,? e una a scelta/, '')}${C.lingue ? ', ' + C.lingue : ''}`, k && `Armature e armi: ${k.comp}`, [r?.comp, sr?.comp].filter(Boolean).length && `Dalla razza: ${[r?.comp, sr?.comp].filter(Boolean).join(', ')}`, bg?.strumenti && `Strumenti: ${bg.strumenti}`].filter(Boolean);
     d.lingue = lingue.join('\n');
     // equipaggiamento: le scelte della classe (o le monete) e quello del background
     const eq = [];
@@ -5121,6 +5145,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (sc.tipo === 'abilita') { v.forEach(x => d['ab_' + x] = Math.max(1, num(d['ab_' + x]) || 0)); righe.push(['Competenza', v.map(nomeAb).join(', ')]); }
       else if (sc.tipo === 'maestria') { v.forEach(x => d['ab_' + x] = 2); righe.push(['Maestria', v.map(nomeAb).join(', ')]); }
       else if (sc.tipo === 'inc') v.forEach(n => aggInc(n));
+      else if (sc.tipo === 'lingua') { const rr = String(d.lingue || '').split('\n').filter(Boolean), i = rr.findIndex(x => /^Lingue:/i.test(x)); if (i >= 0) rr[i] += ', ' + v.join(', '); else rr.unshift('Lingue: ' + v.join(', ')); d.lingue = rr.join('\n'); righe.push(['Lingue', v.join(', ')]); }
       else if (sc.tipo === 'testo') { const n = posseduto(d, sc.titolo) ? `${sc.titolo} (${sc.fonte})` : sc.titolo; P.push({ id: nuovoId(), nome: n, fonte: sc.fonte, testo: String(v) }); righe.push([sc.titolo, String(v)]); }
       else { const O = opzioniDi(G, sc, ctx); v.forEach(n => nuovoP(n, O.find(o => o.nome === n)?.testo || '', `${sc.titolo || 'Scelta'} · ${sc.fonte}`)); }
     }
@@ -5165,12 +5190,19 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const di = datiInc(G, ctx);
     return ['liv', ...(ctx.servS ? ['sotto'] : []), ...(ctx.asi ? ['asi'] : []), ...(scelteLiv(ctx).length ? ['scelte'] : []), ...(di.t || di.n || di.seg || di.arc || di.prep || di.swap ? ['inc'] : []), 'riep'];
   }
+  // le lingue dei manuali: prima le comuni, poi le esotiche
+  const LINGUE = ['Comune', 'Elfico', 'Gigante', 'Gnomesco', 'Goblin', 'Halfling', 'Nanico', 'Orchesco', 'Abissale', 'Celestiale', 'Draconico', 'Gergo delle Profondità', 'Infernale', 'Primordiale', 'Silvano', 'Sottocomune'];
+  const linguaIn = (t, l) => new RegExp(`(^|[^a-z])${norm(l)}([^a-z]|$)`).test(norm(t));
   const quanti = (G, sc, ctx) => sc.tipo === 'testo' ? 0 : Math.min(sc.n || 1, opzioniScelta(G, sc, ctx).filter(o => !o.no).length);
   function opzioniScelta(G, sc, ctx) {
     const d = ctx?.d || (G.tipo === 'crea' ? baseCrea(G) : G.d0), abil = new Set(ABIL.filter(([k]) => num(d['ab_' + k]) >= 1).map(([k]) => k));
     Object.entries(G.sc).forEach(([key, v]) => { if (key !== sc.key && Array.isArray(v)) v.forEach(x => abil.add(x)); });
     if (sc.tipo === 'abilita') return (sc.lista && sc.lista !== 'tutte' ? sc.lista : ABIL.map(x => x[0])).map(k => ({ nome: k, no: num(d['ab_' + k]) >= 1 ? 'Ce l\'hai già' : '' }));
     if (sc.tipo === 'maestria') return ABIL.map(([k]) => ({ nome: k, no: num(d['ab_' + k]) >= 2 ? 'Ce l\'hai già' : abil.has(k) ? '' : 'Serve la competenza' }));
+    if (sc.tipo === 'lingua') {
+      const r = G.tipo === 'crea' ? G.R.razze.find(x => x.id === G.cr.razza) : null, gia = [d.lingue, r?.lingue].filter(Boolean).join('\n');
+      return LINGUE.map(l => ({ nome: l, no: linguaIn(gia, l) ? 'La conosci già' : abil.has(l) ? 'Già scelta' : '' }));
+    }
     if (sc.tipo === 'inc') return (G.R.liste[sc.lista]?.[sc.liv] || []).map(n => ({ nome: n, no: (d.incantesimi || []).some(x => chiaveInc(x.nome) === chiaveInc(n)) ? 'Ce l\'hai già' : '' }));
     return opzioniDi(G, sc, ctx);
   }
@@ -5252,6 +5284,15 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     d.addEventListener('click', e => { const b = e.target.closest('[data-g]'); if (b && !b.disabled) azioneGuida(G, b); });
     d.addEventListener('input', e => { const el = e.target; if (el.dataset.gf === 'cerca') return filtraGuida(el); if (el.dataset.gi) campoGuida(G, el, false); });
     d.addEventListener('change', e => { const el = e.target; if (el.dataset.gi) campoGuida(G, el, true); });
+    const sopra = e => {
+      const a = d.querySelector('.ga'), b = e.target.closest?.('[data-g="sotto"]'), id = b && !b.disabled ? b.dataset.v : null, p = passiDi(G)[G.passo];
+      if (!a || id === (G.archH || null) || !['sotto', 'classe'].includes(p)) return;
+      if (!id && e.target.closest?.('.gso')) return; // nello spazio tra le carte non cambia nulla
+      G.archH = id;
+      if (id || p === 'sotto') { a.innerHTML = archAside(G, id); a.classList.add('arca'); }
+      else { try { a.innerHTML = anteprimaG(G); } catch (er) { console.error(er); } a.classList.remove('arca'); }
+    };
+    d.addEventListener('mouseover', sopra); d.addEventListener('focusin', sopra);
     disegnaGuida(G);
     if (G.ripresa) toast('Ho ripreso le scelte che avevi lasciato a metà.');
   }
@@ -5337,15 +5378,16 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
   function disegnaGuida(G) {
     const passi = passiDi(G); G.passo = clamp(G.passo, 0, passi.length - 1);
+    G.archH = null;
     const p = passi[G.passo], w = G.dlg.querySelector('.gw'), sm = w.querySelector('.gm')?.scrollTop || 0, sb = w.querySelector('.gb')?.scrollTop || 0;
     const primoKo = passi.findIndex(x => manca(G, x)), lim = primoKo < 0 ? passi.length - 1 : primoKo;
     const cerca = w.querySelector('[data-gf=cerca]:focus'), cv = cerca?.value, ck = cerca?.dataset.q;
     let corpo = ''; try { corpo = corpoPasso(G, p); } catch (e) { console.error(e); corpo = `<p class="hint">Qualcosa non va in questo passo: ${esc(e.message)}</p>`; }
-    let ant = ''; try { ant = anteprimaG(G); } catch (e) { console.error(e); }
+    let ant = ''; try { ant = p === 'sotto' ? archAside(G) : anteprimaG(G); } catch (e) { console.error(e); }
     const lv = clamp(num(G.d0.livello) || 1, 1, 20), ultimo = G.passo === passi.length - 1;
     w.innerHTML = `<div class="gh"><b>${G.tipo === 'crea' ? 'Nuovo personaggio' : `Livello ${lv} → ${lv + 1}`}</b><span class="who">${esc(G.nome)}</span><span class="sp"></span><button type="button" class="x" data-g="chiudi" aria-label="Chiudi" title="Chiudi: le scelte restano per la prossima volta">✕</button></div>
       <div class="gs">${passi.map((x, i) => `<button type="button" data-g="vai" data-v="${i}" class="${i === G.passo ? 'on' : i < G.passo && !manca(G, x) ? 'ok' : ''}"${i > lim ? ' disabled' : ''}><i>${i < G.passo && !manca(G, x) ? '✓' : i + 1}</i><span>${NOMIP[x]}</span></button>`).join('')}</div>
-      <div class="gb"><div class="gm">${corpo}</div><aside class="ga">${ant}</aside></div>
+      <div class="gb"><div class="gm">${corpo}</div><aside class="ga${p === 'sotto' ? ' arca' : ''}">${ant}</aside></div>
       <div class="gf"><button type="button" class="gbtn" data-g="indietro"${G.passo ? '' : ' disabled'}>‹ Indietro</button><span class="gmsg"></span>${ultimo ? `<button type="button" class="gbtn p" data-g="conferma">${G.tipo === 'crea' ? '✓ Crea il personaggio' : `✓ Sali al ${lv + 1}° livello`}</button>` : '<button type="button" class="gbtn p" data-g="avanti">Avanti ›</button>'}</div>`;
     w.querySelector('.gm').scrollTop = sm; w.querySelector('.gb').scrollTop = sb;
     if (ck != null) { const c = w.querySelector(`[data-gf=cerca][data-q="${ck}"]`); if (c) { c.value = cv; c.focus(); filtraGuida(c); } }
@@ -5376,8 +5418,22 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const fonte = sc.fonte ? ` <small>· ${esc(sc.fonte)}</small>` : '';
     if (sc.tipo === 'testo') return `<div class="gsez"><h5>${esc(tit)}${fonte}</h5><input type="text" data-gi="sc" data-key="${sc.key}" value="${esc(v)}" placeholder="${esc(sc.ph || '')}" style="width:100%"></div>`;
     const n = quanti(G, sc, ctx), O = opzioniScelta(G, sc, ctx), cnt = `<span class="cnt${v.length >= n ? ' ok' : ''}">${v.length}/${n}</span>`;
-    if (['abilita', 'maestria', 'inc'].includes(sc.tipo)) return `<div class="gsez"><h5>${esc(tit)}${fonte}${cnt}</h5><div class="chips">${O.map(o => `<button type="button" class="chip${v.includes(o.nome) ? ' on' : ''}" data-g="sc" data-key="${sc.key}" data-v="${esc(o.nome)}" data-max="${sc.n || 1}"${o.no && !v.includes(o.nome) ? ` disabled title="${esc(o.no)}"` : ''}>${esc(sc.tipo === 'inc' ? o.nome : nomeAb(o.nome))}</button>`).join('')}</div></div>`;
+    if (['abilita', 'maestria', 'inc', 'lingua'].includes(sc.tipo)) return `<div class="gsez"><h5>${esc(tit)}${fonte}${cnt}</h5><div class="chips">${O.map(o => `<button type="button" class="chip${v.includes(o.nome) ? ' on' : ''}" data-g="sc" data-key="${sc.key}" data-v="${esc(o.nome)}" data-max="${sc.n || 1}"${o.no && !v.includes(o.nome) ? ` disabled title="${esc(o.no)}"` : ''}>${esc(sc.tipo === 'inc' || sc.tipo === 'lingua' ? o.nome : nomeAb(o.nome))}</button>`).join('')}</div></div>`;
     return `<div class="gsez"><h5>${esc(tit)}${fonte}${cnt}</h5>${O.length > 12 ? cercaBox(sc.key, 'Cerca…') : ''}<div class="gcards">${O.map(o => `<button type="button" class="gc${v.includes(o.nome) ? ' on' : ''}${o.no && !v.includes(o.nome) ? ' no' : ''}" data-g="sc" data-key="${sc.key}" data-v="${esc(o.nome)}" data-max="${sc.n || 1}" data-n="${esc(norm(o.nome + ' ' + (o.testo || '')))}"${o.no && !v.includes(o.nome) ? ' disabled' : ''}><b>${esc(o.nome)}</b>${o.fonte ? `<span class="src">${esc(o.fonte)}</span>` : ''}${o.testo ? `<small>${esc(o.testo)}</small>` : ''}${o.req ? `<small><i>${esc(o.req)}</i></small>` : ''}${o.no ? `<small class="no">${esc(o.no)}</small>` : ''}</button>`).join('')}</div></div>`;
+  }
+  // la sottoclasse livello per livello, come la scheda di un archetipo su Roll20
+  function archHtml(R, cid, x, lc) {
+    const k = R.classi[cid];
+    if (!x) return `<div class="arch vuoto"><b>${esc(k?.sotto.nome || 'Sottoclasse')}</b><p>Passa sopra una carta o toccala: qui vedi la descrizione e cosa ti dà a ogni livello, così capisci come crescerà il personaggio.</p></div>`;
+    const lv = [...new Set([...Object.keys(x.liv || {}), ...Object.keys(x.inc || {})])].map(Number).sort((a, b) => a - b);
+    return `<div class="arch"${coloreCl(cid)}><div class="ah">${emblema(cid)}<div><b>${esc(x.nome)}</b><span>${esc(k.sotto.nome)} · ${esc(x.fonte)}</span></div></div><p class="ad">${esc(x.desc)}</p>
+      <ol>${lv.map(l => `<li class="${l <= lc ? 'ora' : ''}"><i>${l}°</i><div>${l <= lc ? '<em>Lo ottieni subito</em>' : ''}${(x.liv?.[l] || []).map(([n, t]) => `<p><b>${esc(n)}</b> ${esc(t)}</p>`).join('')}${x.inc?.[l] ? `<p><b>Incantesimi sempre preparati</b> ${esc(x.inc[l].join(', '))}</p>` : ''}</div></li>`).join('')}</ol></div>`;
+  }
+  // nel passo della sottoclasse il riquadro a destra mostra quella sotto il puntatore, altrimenti quella scelta
+  function archAside(G, id) {
+    const ctx = ctxDi(G); if (!ctx) return '';
+    const L = G.R.sotto[ctx.cid] || [], x = L.find(y => y.id === (id || G.sotto));
+    return archHtml(G.R, ctx.cid, x, ctx.lc);
   }
   function talentiHtml(G, ctx) {
     const R = G.R, { st } = statDopo(G, { ...ctx, asi: false, tal: false }), f = talScelto(G);
@@ -5446,9 +5502,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     }
     if (p === 'sotto') {
       const k = ctx.k, L = R.sotto[ctx.cid] || [];
-      return `<h4>${esc(k.sotto.nome)}</h4><p class="hint">Al ${ctx.lc}° livello da ${k.nome.toLowerCase()} scegli la tua strada: ci sono tutte quelle dei manuali ufficiali.</p>${L.length > 8 ? cercaBox('sotto', 'Cerca…') : ''}
-        <div class="gcards">${L.map(x => { const pri = Object.entries(x.liv || {}).filter(([lv]) => +lv <= ctx.lc).flatMap(([, a]) => a.map(y => y[0])); return `<button type="button" class="gc${G.sotto === x.id ? ' on' : ''}" data-g="sotto" data-v="${x.id}"${coloreCl(ctx.cid)} data-n="${esc(norm(x.nome + ' ' + x.desc))}"><b>${esc(x.nome)}</b><span class="src">${esc(x.fonte)}</span><small>${esc(x.desc)}</small>${pri.length ? `<small><i>Subito: ${esc(pri.join(', '))}</i></small>` : ''}</button>`; }).join('')}</div>
-        ${ctx.sb ? `<div class="box"><h5>${esc(ctx.sb.nome)}</h5><ul class="nov">${Object.entries(ctx.sb.liv || {}).map(([lv, a]) => a.map(([n, t]) => `<li><b>${lv}°: ${esc(n)}</b> · ${esc(t)}</li>`).join('')).join('')}</ul></div>` : ''}`;
+      return `<h4>${esc(k.sotto.nome)}</h4><p class="hint">Al ${ctx.lc}° livello da ${k.nome.toLowerCase()} scegli la tua strada: ci sono tutte quelle dei manuali ufficiali. Passa sopra una carta o toccala per vedere cosa ti dà, livello per livello.</p>${L.length > 8 ? cercaBox('sotto', 'Cerca…') : ''}
+        <div class="gcards gso">${L.map(x => { const pri = Object.entries(x.liv || {}).filter(([lv]) => +lv <= ctx.lc).flatMap(([, a]) => a.map(y => y[0])); return `<button type="button" class="gc${G.sotto === x.id ? ' on' : ''}" data-g="sotto" data-v="${x.id}"${coloreCl(ctx.cid)} data-n="${esc(norm(x.nome + ' ' + x.desc))}"><b>${esc(x.nome)}</b><span class="src">${esc(x.fonte)}</span><small>${esc(x.desc)}</small>${pri.length ? `<small><i>Subito: ${esc(pri.join(', '))}</i></small>` : ''}</button>${G.sotto === x.id ? `<div class="arch-in tel">${archHtml(R, ctx.cid, x, ctx.lc)}</div>` : ''}`; }).join('')}</div>`;
     }
     if (p === 'asi') {
       const st = Object.fromEntries(CAR.map(([x]) => [x, num(ctx.d[x]) ?? 10])), pp = G.asi.p, tot = Object.values(pp).reduce((a, n) => a + n, 0);
@@ -5481,7 +5536,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (!k) return h;
       const ab = k.abil[1] === 'tutte' ? ABIL.map(x => x[0]) : k.abil[1], base = baseCrea({ ...G, cr: { ...C, abilC: [] } });
       h += `<h5>Abilità della classe <span class="cnt${C.abilC.length >= k.abil[0] ? ' ok' : ''}">${C.abilC.length}/${k.abil[0]}</span></h5><div class="chips">${ab.map(a => `<button type="button" class="chip${C.abilC.includes(a) ? ' on' : ''}" data-g="abilc" data-v="${a}"${num(base['ab_' + a]) && !C.abilC.includes(a) ? ' disabled title="Ce l\'hai già dalla razza o dal background"' : ''}>${esc(nomeAb(a))}</button>`).join('')}</div>`;
-      if (k.sotto.liv === 1) h += `<h5>${esc(k.sotto.nome)}</h5><div class="gcards">${(R.sotto[C.cl] || []).map(x => card('sotto', x.id, G.sotto === x.id, x.nome, x.desc, x.fonte, '', coloreCl(C.cl))).join('')}</div>`;
+      if (k.sotto.liv === 1) h += `<h5>${esc(k.sotto.nome)}</h5><p class="hint">Passa sopra una carta o toccala per vedere cosa ti dà, livello per livello.</p><div class="gcards gso">${(R.sotto[C.cl] || []).map(x => card('sotto', x.id, G.sotto === x.id, x.nome, x.desc, x.fonte, '', coloreCl(C.cl)) + (G.sotto === x.id ? `<div class="arch-in">${archHtml(R, C.cl, x, 1)}</div>` : '')).join('')}</div>`;
       h += scelteLiv(ctx).map(sc => sceltaHtml(G, sc, ctx)).join('');
       h += `<div class="box"><h5>Al 1° livello</h5><ul class="nov">${(k.liv[1] || []).map(([n, t]) => `<li><b>${esc(n)}</b> · ${esc(t)}</li>`).join('')}<li><b>Competenze</b> · ${esc(k.comp)}</li></ul></div>`;
       return h;
@@ -5509,7 +5564,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       const bg = R.background.find(x => x.id === C.bg);
       const tutti = !bg || G.vedi === 'bg';
       let h = `<h4>Background${tutti ? '' : ' <button type="button" class="chip" data-g="vedi" data-v="bg">Cambia background</button>'}</h4>${tutti ? cercaBox('bg', 'Cerca un background…') : ''}<div class="gcards">${R.background.filter(x => tutti || x.id === C.bg).map(x => `<button type="button" class="gc${C.bg === x.id ? ' on' : ''}" data-g="bg" data-v="${x.id}" data-n="${esc(norm(x.nome))}"><b>${esc(x.nome)}</b><span class="src">${esc(x.fonte)}</span><small>${esc([x.abil.map(nomeAb).join(', '), x.abilScelta ? `${x.abilScelta} a scelta` : '', x.priv?.[0]].filter(Boolean).join(' · '))}</small></button>`).join('')}</div>`;
-      if (bg) h += scelteBg(G).map(sc => sceltaHtml(G, sc, ctx)).join('') + `<div class="box"><ul class="nov"><li><b>${esc(bg.priv?.[0] || 'Privilegio')}</b> · ${esc(bg.priv?.[1] || bg.testo || '')}</li>${bg.strumenti ? `<li><b>Strumenti</b> · ${esc(bg.strumenti)}</li>` : ''}${bg.lingue ? `<li><b>Lingue</b> · ${bg.lingue} a scelta (le scrivi nei dettagli)</li>` : ''}<li><b>Equipaggiamento</b> · ${esc(bg.equip || '')}, ${bg.mo || 0} mo</li></ul></div>`;
+      if (bg) h += scelteBg(G).map(sc => sceltaHtml(G, sc, ctx)).join('') + `<div class="box"><ul class="nov"><li><b>${esc(bg.priv?.[0] || 'Privilegio')}</b> · ${esc(bg.priv?.[1] || bg.testo || '')}</li>${bg.strumenti ? `<li><b>Strumenti</b> · ${esc(bg.strumenti)}</li>` : ''}<li><b>Equipaggiamento</b> · ${esc(bg.equip || '')}, ${bg.mo || 0} mo</li></ul></div>`;
       return h;
     }
     if (p === 'equip') {
@@ -5524,10 +5579,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       return h;
     }
     if (p === 'dett') {
-      const bg = R.background.find(x => x.id === C.bg), r = R.razze.find(x => x.id === C.razza), maxL = isDM() ? 20 : Math.max(1, num(G.d0.liv_concesso) || 1);
+      const maxL = isDM() ? 20 : Math.max(1, num(G.d0.liv_concesso) || 1);
       const ALL = ['Legale buono', 'Neutrale buono', 'Caotico buono', 'Legale neutrale', 'Neutrale puro', 'Caotico neutrale', 'Legale malvagio', 'Neutrale malvagio', 'Caotico malvagio'];
       return `<h4>Dettagli</h4><div class="riga"><label>Allineamento <select data-gi="all"><option value="">—</option>${ALL.map(a => `<option${C.all === a ? ' selected' : ''}>${a}</option>`).join('')}</select></label></div>
-        <div class="riga"><label style="flex:1">Lingue in più${bg?.lingue ? ` (${bg.lingue} dal background)` : ''}${r ? ` · già: ${esc(r.lingue || 'Comune')}` : ''}<input type="text" data-gi="lingue" value="${esc(C.lingue)}" placeholder="Elfico, Nanico…" style="width:100%"></label></div>
         ${[['pers', 'Tratti caratteriali'], ['ideali', 'Ideali'], ['legami', 'Legami'], ['difetti', 'Difetti']].map(([k, l]) => `<h5>${l}</h5><textarea data-gi="${k}" rows="2">${esc(C[k])}</textarea>`).join('')}
         ${maxL > 1 ? `<h4>Livello di partenza</h4><div class="riga"><select data-gi="fino">${Array.from({ length: maxL }, (_, i) => `<option value="${i + 1}"${(G.fino || 1) === i + 1 ? ' selected' : ''}>${i + 1}° livello</option>`).join('')}</select><span class="hint">Si crea al 1° livello, poi si sale un livello alla volta con le stesse scelte guidate.</span></div>` : ''}`;
     }
