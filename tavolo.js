@@ -2195,12 +2195,12 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       else if (e.tipo === 'ghiaccio') parti.push(`<path class="pi" style="animation-delay:${del}s" d="M${x} ${y - 10 * k}l${4 * k} ${10 * k} ${-4 * k} ${10 * k} ${-4 * k} ${-10 * k}z" fill="${c2}" transform="rotate(${(rnd() * 360).toFixed(0)} ${x} ${y})"/>`);
       else if (e.tipo === 'fulmine' && i < n / 3) { let px = x, py = y - R * 0.3, dd = `M${px} ${py}`; for (let j = 0; j < 5; j++) { px += (rnd() - .5) * 34; py += 9 + rnd() * 14; dd += `L${px.toFixed(1)} ${py.toFixed(1)}`; } parti.push(`<path class="pl" style="animation-delay:${del}s;animation-duration:${(0.9 + rnd() * 1.6).toFixed(2)}s" d="${dd}" fill="none" stroke="${rnd() < .5 ? c1 : c2}" stroke-width="${((2 + rnd() * 2) * 1.5).toFixed(1)}" stroke-linecap="round" stroke-linejoin="round"/>`); }
     }
-    // fuoco, fulmini, ghiaccio, acido e veleno brillano sopra la mappa
-    const luce = ['fuoco', 'fulmine', 'ghiaccio', 'acido', 'veleno'].includes(e.tipo), bordo = Math.max(3, R * 0.025);
+    // niente fusioni di colore né sfocature sul bordo: su Safari pesano tanto da far sparire anche i token
+    const bordo = Math.max(3, R * 0.025);
     const st = scuro ? [.95, .92, .9] : nube ? [.6, .55, .5] : [.85, .7, .6];
     return `<g class="ef ef-${e.tipo}${sel ? ' sel' : ''}" data-id="${esc(e.id)}"><defs><clipPath id="${id}c">${forma}</clipPath><radialGradient id="${id}g"><stop offset="0" stop-color="${c2}" stop-opacity="${op(st[0])}"/><stop offset=".55" stop-color="${c1}" stop-opacity="${op(st[1])}"/><stop offset="1" stop-color="${c3}" stop-opacity="${op(st[2])}"/></radialGradient><filter id="${id}f" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="${(R * 0.06).toFixed(1)}"/></filter></defs>
-      ${forma.replace('/>', ` fill="none" stroke="${c1}" stroke-width="${(bordo * 2.7).toFixed(1)}" opacity="${op(.55)}" filter="url(#${id}f)"/>`)}
-      <g clip-path="url(#${id}c)"><g class="base">${forma.replace('/>', ` fill="url(#${id}g)"/>`)}</g><g opacity="${Math.min(1, ki).toFixed(2)}"${nube || scuro ? ` filter="url(#${id}f)"` : ''}${luce ? ' style="mix-blend-mode:screen"' : ''}>${parti.join('')}</g></g>
+      ${forma.replace('/>', ` fill="none" stroke="${c1}" stroke-width="${(bordo * 4).toFixed(1)}" opacity="${op(.25)}"/>`)}${forma.replace('/>', ` fill="none" stroke="${c1}" stroke-width="${(bordo * 2.2).toFixed(1)}" opacity="${op(.4)}"/>`)}
+      <g clip-path="url(#${id}c)"><g class="base">${forma.replace('/>', ` fill="url(#${id}g)"/>`)}</g><g opacity="${Math.min(1, ki).toFixed(2)}"${nube || scuro ? ` filter="url(#${id}f)"` : ''}>${parti.join('')}</g></g>
       ${forma.replace('/>', ` fill="none" stroke="${scuro ? c2 : c1}" stroke-width="${bordo.toFixed(1)}" opacity="${op(.95)}"/>`)}
       ${roundRestanti(e) ? `<text class="dur" x="${e.x}" y="${e.y + R + Math.max(16, sc.griglia * 0.28)}" text-anchor="middle">⏳ ${roundRestanti(e)} round</text>` : ''}
       ${sel ? `<g class="sel">${forma.replace('/>', ' fill="none" stroke="#f2b51d" stroke-width="3" stroke-dasharray="10 6"/>')}<circle class="man" cx="${e.x + R}" cy="${e.y}" r="${Math.max(8, sc.griglia * 0.14)}"/><text x="${e.x + R + 14}" y="${e.y - 12}">${String((+e.m || 3).toLocaleString('it-IT'))} m</text></g>` : ''}</g>`;
