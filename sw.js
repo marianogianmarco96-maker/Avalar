@@ -1,5 +1,5 @@
-const VERSION = '1793800000';
-const CORE = ['./', 'index.html', 'copie.js', 'local.js', 'idee.js', 'manuali.js', 'tavolo.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'data.json', 'data.enc', 'versione.json'];
+const VERSION = '1793900000';
+const CORE = ['./', 'index.html', 'copie.js', 'local.js', 'idee.js', 'manuali.js', 'tavolo.js', 'regole.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'data.json', 'data.enc', 'versione.json'];
 const CACHE = 'campagna-' + VERSION, FONTS = 'campagna-fonts';
 self.addEventListener('install', e => {
   e.waitUntil((async () => {
@@ -50,7 +50,7 @@ self.addEventListener('fetch', e => {
     return;
   }
   if (url.origin !== location.origin) return;
-  const core = req.mode === 'navigate' || /\/(index\.html|copie\.js|local\.js|idee\.js|manuali\.js|tavolo\.js|data\.json|data\.enc|versione\.json|giocatori\/[a-z0-9-]+\.enc|manifest\.webmanifest)?$/.test(url.pathname);
+  const core = req.mode === 'navigate' || /\/(index\.html|copie\.js|local\.js|idee\.js|manuali\.js|tavolo\.js|regole\.js|data\.json|data\.enc|versione\.json|giocatori\/[a-z0-9-]+\.enc|manifest\.webmanifest)?$/.test(url.pathname);
   e.respondWith((async () => {
     const c = await caches.open(CACHE);
     if (core) {

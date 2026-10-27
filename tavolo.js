@@ -1065,6 +1065,135 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
   .tv-sch .tbar .piu{display:flex}
   .tv-sch .tbar .x{margin-left:0}
 }
+/* personaggi guidati: creazione e level up */
+.tv-sp .r .lvup{flex:none;color:#e7cf9a;font-weight:700;padding:0 3px}
+.tv-sch .gbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:6px 12px;background:#f3e8cc;border-bottom:1px solid #dccaa0}
+.tv-sch .gbar button{font:600 .82rem/1.2 var(--body);border-radius:16px;padding:4px 12px;cursor:pointer;border:1px solid #c4ae80;background:#fffdf7;color:#2b1d14}
+.tv-sch .gbar button:hover{border-color:#7d2530}
+.tv-sch .gbar .su{background:#7d2530;color:#fff;border-color:#561820;box-shadow:0 1px 6px #7d253055}
+.tv-sch .gbar .gmsg{font-weight:700;color:#7d2530}
+.tv-sch .gbar .gnote{font-size:.8rem;color:#75614d;font-style:italic}
+.tv-scuro .tv-sch .gbar{background:#2a221c;border-color:#5a4d3e}
+.tv-scuro .tv-sch .gbar button{background:#1d1814;color:#efe5d0;border-color:#5a4d3e}
+.tv-scuro .tv-sch .gbar .su{background:#7d2530;color:#fff;border-color:#a7343b}
+.tv-scuro .tv-sch .gbar .gmsg{color:#e7a0a6}.tv-scuro .tv-sch .gbar .gnote{color:#b9a88c}
+dialog.dlg.tv-storia{width:min(460px,calc(100vw - 24px))}
+.tv-storia-l{display:flex;flex-direction:column;gap:6px;max-height:55vh;overflow-y:auto;margin:6px 0 10px}
+.tv-storia-l details{border:1px solid var(--line2,#c4ae80);border-radius:8px;padding:6px 10px}
+.tv-storia-l summary{cursor:pointer}.tv-storia-l small{opacity:.7}
+.tv-storia-l ul{margin:6px 0 2px 18px;font-size:.9rem}
+dialog.dlg.tv-guida{position:fixed;inset:0;margin:auto;width:min(1120px,calc(100vw - 20px));height:min(820px,calc(100vh - 20px));max-width:none;max-height:none;padding:0;border:1px solid #2b2620;border-radius:12px;overflow:hidden;background:#fbf5e3;color:#2b1d14;box-shadow:0 18px 60px #000c;z-index:70;font:16px/1.3 var(--body)}
+dialog.dlg.tv-guida[open]{display:flex}
+.tv-guida .gw{display:flex;flex-direction:column;width:100%;min-height:0;min-width:0}
+.tv-guida .gh{display:flex;align-items:center;gap:12px;padding:9px 14px;background:#33241b;color:#f1e3c5;flex:none}
+.tv-guida .gh b{font:600 .9rem var(--display);letter-spacing:.1em;text-transform:uppercase}
+.tv-guida .gh .who{font-style:italic;color:#d9c39a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tv-guida .gh .sp{flex:1}
+.tv-guida .gh .x{all:unset;cursor:pointer;width:32px;height:32px;display:grid;place-items:center;border-radius:6px;color:#f1e3c5;flex:none}
+.tv-guida .gh .x:hover{background:#ffffff1a}
+.tv-guida .gs{display:flex;gap:4px;padding:7px 12px;background:#f6ecd2;border-bottom:1px solid #dccaa0;overflow-x:auto;scrollbar-width:thin;flex:none}
+.tv-guida .gs button{all:unset;cursor:pointer;display:flex;align-items:center;gap:6px;padding:4px 11px 4px 5px;border-radius:20px;font:600 .72rem var(--display);letter-spacing:.05em;color:#75614d;border:1px solid transparent;white-space:nowrap}
+.tv-guida .gs i{font-style:normal;width:21px;height:21px;border-radius:50%;display:grid;place-items:center;background:#dccaa0;color:#5a4636;font:600 .75rem var(--body);flex:none}
+.tv-guida .gs .ok{color:#3f6b46}.tv-guida .gs .ok i{background:#3f6b46;color:#fff}
+.tv-guida .gs .on{color:#7d2530;border-color:#7d2530;background:#fffb}.tv-guida .gs .on i{background:#7d2530;color:#fff}
+.tv-guida .gs button:disabled{opacity:.45;cursor:default}
+.tv-guida .gb{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 300px;min-height:0}
+.tv-guida .gm{padding:14px 18px 28px;overflow-y:auto;min-height:0;min-width:0}
+.tv-guida .ga{border-left:1px solid #dccaa0;background:#f3e8cc;padding:14px;overflow-y:auto;min-height:0}
+.tv-guida .gf{display:flex;align-items:center;gap:10px;padding:9px 14px;border-top:1px solid #dccaa0;background:#f6ecd2;flex:none}
+.tv-guida .gf .gmsg{flex:1;text-align:center;color:#a3262f;font-style:italic;font-size:.9rem;min-width:0}
+.tv-guida .gbtn{border:1px solid #c4ae80;border-radius:7px;padding:7px 16px;background:#fffdf7;font:600 .95rem var(--body);color:#2b1d14;cursor:pointer;white-space:nowrap}
+.tv-guida .gbtn.p{background:#7d2530;color:#fff;border-color:#561820}
+.tv-guida .gbtn:disabled{opacity:.45;cursor:default}
+.tv-guida h4{font:600 1.05rem var(--display);letter-spacing:.05em;color:#7d2530;margin:16px 0 6px}
+.tv-guida .gm>h4:first-child,.tv-guida .gm>.box:first-child+h4{margin-top:0}
+.tv-guida h5{font:600 .7rem var(--display);letter-spacing:.1em;text-transform:uppercase;color:#5a4636;margin:14px 0 6px}
+.tv-guida h5 small{font:italic 400 .85rem var(--body);letter-spacing:0;text-transform:none;color:#75614d}
+.tv-guida .ga h5:first-child{margin-top:0}
+.tv-guida p{margin:4px 0}
+.tv-guida .hint{color:#75614d;font-style:italic;font-size:.92rem;margin:4px 0}
+.tv-guida .gcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:7px}
+.tv-guida .gc{all:unset;box-sizing:border-box;cursor:pointer;border:1px solid #dccaa0;border-radius:9px;background:#fffc;padding:8px 10px;position:relative;min-width:0;display:block}
+.tv-guida .gc:hover{border-color:#a98334}
+.tv-guida .gc b{display:block;font:600 .9rem var(--display);letter-spacing:.02em;padding-right:52px}
+.tv-guida .gc small{display:block;color:#5a4636;font-size:.86rem;line-height:1.25;margin-top:3px}
+.tv-guida .gc .src{position:absolute;right:8px;top:7px;font:600 .6rem var(--display);color:#75614d;letter-spacing:.04em}
+.tv-guida .gc.on{border:2px solid #7d2530;background:#fff;padding:7px 9px;box-shadow:0 2px 10px #7d253022}
+.tv-guida .gc.no,.tv-guida .gc:disabled{opacity:.5;cursor:default}
+.tv-guida .gc .no{color:#a3262f;font-style:italic}
+.tv-guida .chips{display:flex;flex-wrap:wrap;gap:5px}
+.tv-guida .chip{all:unset;cursor:pointer;border:1px solid #c4ae80;border-radius:20px;padding:3px 11px;font-size:.92rem;background:#fffc}
+.tv-guida .chip.on{background:#7d2530;border-color:#7d2530;color:#fff}
+.tv-guida .chip:disabled{opacity:.4;cursor:default}
+.tv-guida .seg{display:inline-flex;border:1px solid #c4ae80;border-radius:8px;overflow:hidden;flex-wrap:wrap;background:#fffc;margin:2px 0 6px}
+.tv-guida .seg button{all:unset;cursor:pointer;padding:6px 13px;font-weight:600;border-right:1px solid #c4ae80}
+.tv-guida .seg button:last-child{border-right:0}
+.tv-guida .seg button.on{background:#7d2530;color:#fff}
+.tv-guida .box{border:1px solid #dccaa0;border-radius:9px;background:#fffc;padding:10px 12px;margin:10px 0}
+.tv-guida .box.ko{border-color:#a3262f;color:#a3262f}
+.tv-guida .box h5:first-child{margin-top:0}
+.tv-guida .gsez{margin-bottom:6px}
+.tv-guida .ab6{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px}
+.tv-guida .ab{border:1px solid #c4ae80;border-radius:8px;background:#fff;text-align:center;padding:4px 2px 5px;min-width:0}
+.tv-guida .ab small{display:block;font:600 .6rem var(--display);letter-spacing:.05em;color:#5a4636}
+.tv-guida .ab b{display:block;font:600 1.2rem var(--display)}
+.tv-guida .ab span{display:block;font-size:.78rem;color:#75614d}
+.tv-guida .ab select,.tv-guida .ab input{margin-top:3px;max-width:100%}
+.tv-guida .ab.up{border-color:#3f6b46;background:#eef5ea}.tv-guida .ab.up b{color:#3f6b46}
+.tv-guida .ab6.pic b{font-size:1rem}
+.tv-guida .pm{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:3px}
+.tv-guida .pm button{all:unset;cursor:pointer;width:24px;height:24px;border:1px solid #c4ae80;border-radius:5px;background:#fff;text-align:center;font-weight:700;line-height:24px}
+.tv-guida .pm button:disabled{opacity:.35;cursor:default}
+.tv-guida .kv{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:.92rem;margin:10px 0}
+.tv-guida .kv dt{color:#75614d}.tv-guida .kv dd{margin:0}
+.tv-guida .nov{list-style:none;padding:0;margin:6px 0;display:flex;flex-direction:column;gap:4px;font-size:.9rem}
+.tv-guida .nov li{padding-left:14px;position:relative}
+.tv-guida .nov li:before{content:'◆';position:absolute;left:0;top:2px;font-size:.6rem;color:#a98334}
+.tv-guida .pv{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.tv-guida .pv i{width:48px;height:48px;border-radius:50%;background:#7a5a40 center/cover;border:2px solid #d4b06a;display:grid;place-items:center;color:#fff;font:600 1.1rem var(--display);font-style:normal;flex:none}
+.tv-guida .pv b{font:600 1rem var(--display);display:block}
+.tv-guida .pv small{color:#5a4636}
+.tv-guida .spls{border:1px solid #e6d7b4;border-radius:8px;background:#fffc;max-height:420px;overflow-y:auto}
+.tv-guida .spl{all:unset;box-sizing:border-box;display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:1px 9px;width:100%;padding:6px 9px;border-bottom:1px solid #eee2c6;cursor:pointer}
+.tv-guida .spl:last-child{border-bottom:0}
+.tv-guida .spl:hover{background:#fff}
+.tv-guida .spl .ck{width:16px;height:16px;border:1.5px solid #c4ae80;border-radius:4px;background:#fff;margin-top:2px;display:grid;place-items:center;color:#fff;font-size:.7rem}
+.tv-guida .spl.on{background:#fff}.tv-guida .spl.on .ck{background:#7d2530;border-color:#7d2530}
+.tv-guida .spl small{grid-column:2/4;color:#75614d;font-size:.84rem;line-height:1.2}
+.tv-guida .spl em{font-style:normal;font:600 .64rem var(--display);color:#75614d;white-space:nowrap}
+.tv-guida .spl:disabled{opacity:.45;cursor:default}
+.tv-guida .cnt{display:inline-block;font:600 .68rem var(--display);padding:2px 8px;border-radius:12px;background:#dccaa0;margin-left:8px;vertical-align:1px;letter-spacing:.04em}
+.tv-guida .cnt.ok{background:#3f6b46;color:#fff}
+.tv-guida input[type=search],.tv-guida input[type=text],.tv-guida input[type=number],.tv-guida select,.tv-guida textarea{font:inherit;font-size:.95rem;color:#2b1d14;background:#fff;border:1px solid #c4ae80;border-radius:6px;padding:5px 8px;box-sizing:border-box;max-width:100%}
+.tv-guida input[type=checkbox]{accent-color:#7d2530;width:16px;height:16px;margin:2px 0 0;flex:none}
+.tv-guida .gck{display:flex;gap:8px;align-items:flex-start;margin:8px 0;cursor:pointer}
+.tv-guida textarea{width:100%;resize:vertical}
+.tv-guida input[type=search]{width:100%;margin-bottom:6px}
+.tv-guida table.dif{border-collapse:collapse;width:100%;font-size:.95rem}
+.tv-guida table.dif td,.tv-guida table.dif th{padding:5px 7px;border-bottom:1px solid #e6d7b4;text-align:left}
+.tv-guida table.dif th{font:600 .66rem var(--display);letter-spacing:.08em;color:#5a4636}
+.tv-guida table.dif td:nth-child(2){color:#75614d}.tv-guida table.dif td:last-child{color:#3f6b46;font-weight:600}
+.tv-guida .riga{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:7px 0}
+.tv-guida .riga select{width:auto;min-width:0;flex:0 1 auto}
+.tv-guida details.box summary{cursor:pointer;font:600 .9rem var(--display);color:#5a4636}
+.tv-guida details.box[open] summary{margin-bottom:6px}
+.tv-guida .lvl{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0 6px}
+.tv-guida .lvl button{all:unset;cursor:pointer;font:600 .68rem var(--display);padding:3px 8px;border-radius:4px;background:#dccaa0;color:#5a4636}
+.tv-guida .lvl button.on{background:#7d2530;color:#fff}
+.tv-guida .dado{font:600 1.5rem var(--display);color:#7d2530;min-width:30px;text-align:center}
+@media (max-width:820px){
+  dialog.dlg.tv-guida{width:100vw;height:100dvh;border-radius:0;border:0;inset:0}
+  .tv-guida .gb{grid-template-columns:minmax(0,1fr);overflow-y:auto;display:block}
+  .tv-guida .gm{overflow:visible;padding:12px 12px 18px}
+  .tv-guida .ga{border-left:0;border-top:1px solid #dccaa0;overflow:visible}
+  .tv-guida .gs button span{display:none}.tv-guida .gs button.on span{display:inline}
+  .tv-guida .gcards{grid-template-columns:minmax(0,1fr)}
+  .tv-guida .ab6{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .tv-guida .ab6.pic{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .tv-guida .gf{padding:8px 10px;gap:6px}.tv-guida .gbtn{padding:7px 11px}
+  .tv-guida .gf .gmsg{font-size:.8rem}
+  .tv-guida .spls{max-height:none}
+}
 `;
   const css = () => { if (cssDone) return; cssDone = true; const s = document.createElement('style'); s.textContent = CSS + '\n' + CSS2; document.head.append(s); };
 
@@ -3777,7 +3906,8 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
   }
   function arrivaScheda(row) {
     if (!T.schede) return;
-    const s = completaS(T.schede.get(row.id), row), p = pend.get(row.id);
+    const vecchia = T.schede.get(row.id), s = completaS(vecchia, row), p = pend.get(row.id);
+    if (vecchia && !isDM() && s.giocatore && s.giocatore === T.me?.giocatore && (num(s.dati?.liv_concesso) || 0) > (num(vecchia.dati?.liv_concesso) || 0) && num(s.dati.liv_concesso) > (num(s.dati.livello) || 1)) toast(`🎁 Il DM ti ha concesso il ${num(s.dati.liv_concesso)}° livello: apri la tua scheda e premi «Sali di livello».`);
     if (p) s.dati = { ...s.dati, ...p.dati }; // ciò che sto ancora scrivendo resta mio
     T.schede.set(row.id, s); dopoScheda(row.id);
   }
@@ -3827,20 +3957,22 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     }
     const cerca = p.querySelector('[data-k=cerca]')?.value || '';
     const v = [...T.schede.values()].sort((a, b) => a.nome.localeCompare(b.nome, 'it'));
-    const riga = s => `<div class="r" data-id="${s.id}">${tondo(s)}<button type="button" class="nm" data-k="apri">${esc(s.nome)}<small>${esc(riass(s)) || '&nbsp;'}</small></button>${isDM() && s.tipo === 'png' ? `<button type="button" class="s" data-k="vis" title="${s.nascosta ? 'I giocatori non la vedono: clicca per mostrarla' : 'I giocatori la vedono: clicca per nasconderla'}">${s.nascosta ? '🙈' : '👁'}</button><button type="button" class="s" data-k="via" title="Elimina la scheda">✕</button>` : ''}</div>`;
+    const riga = s => `<div class="r" data-id="${s.id}">${tondo(s)}<button type="button" class="nm" data-k="apri">${esc(s.nome)}<small>${esc(riass(s)) || '&nbsp;'}</small></button>${formaPg(s) && num(s.dati.liv_concesso) > (num(s.dati.livello) || 1) ? `<span class="lvup" title="Può salire fino al ${num(s.dati.liv_concesso)}° livello">⬆</span>` : ''}${isDM() && s.tipo === 'pg' && (num(s.dati.livello) || 1) < 20 ? '<button type="button" class="s" data-k="liv" title="Concedi un livello: il giocatore sale da solo con la procedura guidata">🎁</button>' : ''}${isDM() && s.tipo === 'png' ? `<button type="button" class="s" data-k="vis" title="${s.nascosta ? 'I giocatori non la vedono: clicca per mostrarla' : 'I giocatori la vedono: clicca per nasconderla'}">${s.nascosta ? '🙈' : '👁'}</button><button type="button" class="s" data-k="via" title="Elimina la scheda">✕</button>` : ''}</div>`;
     const pg = v.filter(s => s.tipo === 'pg'), png = v.filter(s => s.tipo === 'png');
     p.innerHTML = hd + `${isDM() && png.length > 5 ? `<input type="search" data-k="cerca" placeholder="Cerca…" value="${esc(cerca)}" aria-label="Cerca una scheda">` : ''}<div class="tv-tl">
       <h5>Party</h5>${pg.map(riga).join('') || `<div class="tv-tvuoto">${isDM() ? 'Si creano da sole all\'apertura del tavolo, una per giocatore.' : 'La tua scheda compare quando il DM apre il tavolo.'}</div>`}
       <h5>Personaggi</h5>${png.map(riga).join('') || `<div class="tv-tvuoto">${isDM() ? 'Nessun personaggio. Creane uno qui sotto.' : 'Il DM non vi ha ancora mostrato nessun personaggio.'}</div>`}</div>
-      ${isDM() ? '<div class="tv-tf"><button type="button" data-k="nuovo">+ Nuovo personaggio</button></div>' : ''}`;
+      ${isDM() ? `<div class="tv-tf"><button type="button" data-k="nuovo">+ Nuovo personaggio</button>${pg.length ? '<button type="button" data-k="party" title="Ogni giocatore potrà salire di un livello con la procedura guidata">🎁 Un livello al party</button>' : ''}</div>` : ''}`;
     p.querySelector('[data-k=x]').onclick = () => apriSchede(false);
     const q = p.querySelector('[data-k=cerca]');
     const filtra = () => { const s = norm(q.value); p.querySelectorAll('.r').forEach(r => r.hidden = !!s && T.schede.get(r.dataset.id)?.tipo === 'png' && !norm(r.textContent).includes(s)); };
     if (q) { q.oninput = filtra; if (cerca) filtra(); }
     p.querySelector('[data-k=nuovo]')?.addEventListener('click', dlgNuovoPng);
+    p.querySelector('[data-k=party]')?.addEventListener('click', async () => { if (await ask('Concedere un livello a tutto il party? Ognuno salirà dalla propria scheda, con la procedura guidata.', { ok: 'Concedi', title: 'Un livello al party' })) concediLivello(pg); });
     p.querySelectorAll('.r').forEach(r => {
       const s = T.schede.get(r.dataset.id);
       r.querySelector('[data-k=apri]').onclick = () => apriScheda(s.id);
+      r.querySelector('[data-k=liv]')?.addEventListener('click', () => concediLivello([s]));
       const vis = r.querySelector('[data-k=vis]');
       if (vis) vis.onclick = async () => {
         const u = await SB.from('tavolo_schede').update({ nascosta: !s.nascosta }).eq('id', s.id).select().single();
@@ -4413,6 +4545,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
           <div class="ban">${isDM() ? inp('nome', 'Nome', 'nm') : `<b class="nm">${esc(s.nome)}</b>`}<small>${pg ? 'Nome del personaggio' : 'Nome del PNG'}</small></div></div>
         <div class="info">${info}</div></div>
       <div class="tabs" role="tablist">${[['pri', pg ? 'Personaggio' : 'Statistiche'], ['inc', 'Incantesimi'], ['bg', pg ? 'Background e note' : 'Note']].map(([k, l]) => `<button type="button" role="tab" data-tab="${k}" aria-selected="${sv.tab === k}" class="${sv.tab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+      ${pg ? barraGuida(s, w) : ''}
       <div class="corpo">${corpo}</div>
       ${isDM() ? `<div class="fd">${s.tipo === 'png' ? `<button type="button" class="mini" data-k="forma" title="${pg ? 'Passa al blocco delle statistiche da PNG' : 'Passa alla scheda completa, come quella di un giocatore'}">${pg ? '📋 Scheda da PNG' : '📜 Scheda completa'}</button><button type="button" class="mini" data-k="vis">${s.nascosta ? '🙈 Nascosta ai giocatori' : '👁 La vedono i giocatori'}</button>${scena() ? '<button type="button" class="mini" data-k="metti">＋ Metti un token sulla mappa</button>' : ''}` : '<span class="vuoto">La compila anche il giocatore, dal vivo.</span>'}</div>` : (w ? '' : '<p class="vuoto fd">Scheda mostrata dal DM: puoi solo leggerla.</p>')}`;
     riempi(); applicaZoomScheda(); sv.d.classList.toggle('tv-scuro', schedaScura());
@@ -4468,6 +4601,11 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
     if (k === 'seg') { sv.seg = b.checked; return; }
     if (k === 'tema') { try { localStorage.setItem(TEMAS, schedaScura() ? 'chiaro' : 'scuro'); } catch { } return disegnaScheda(); }
     if (k === 'za') { try { localStorage.setItem(ZOOMS, clamp(Math.round((zoomScheda() + +b.dataset.d) * 10) / 10, 0.8, 1.6)); } catch { } return applicaZoomScheda(); }
+    if (k === 'g-crea') return apriGuida(s, 'crea');
+    if (k === 'g-liv') return apriGuida(s, 'liv');
+    if (k === 'g-concedi' && isDM()) return concediLivello([s]);
+    if (k === 'g-ritira' && isDM()) return concediLivello([s], true);
+    if (k === 'g-storia') return apriStoria(s);
     if (sv.pag && (b.dataset.roll || ['prv-dadi', 'inc-lancia', 'inc-chat', 'tirapf', 'bevi'].includes(k))) return;
     const P = d.privilegi || [], pi = +b.dataset.i, pv = P[pi], chiave = pv && (pv.id || 'i' + pi);
     if (k === 'prv-apri' && pv) { sv.aperti = sv.aperti || new Set(); sv.aperti.has(chiave) ? sv.aperti.delete(chiave) : sv.aperti.add(chiave); return disegnaScheda(); }
@@ -4587,6 +4725,784 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
       catch (e) { toast(e.message, 'err'); }
     }
   }
+  /* ---------- personaggi guidati: creazione al 1° livello e level up ----------
+     Le regole (classi, sottoclassi, talenti, razze, background, liste degli incantesimi) sono in regole.js, caricato solo qui.
+     Tutto finisce nei dati della scheda; ogni passo salva cosa c'era prima (dati.storia_livelli), così l'ultimo si può annullare.
+     Il giocatore sale di livello quando il DM glielo concede (dati.liv_concesso); il DM può sempre. */
+  let REGP = null;
+  function regole() {
+    if (window.__regole) return Promise.resolve(window.__regole);
+    return REGP = REGP || new Promise((ok, ko) => {
+      const sc = document.createElement('script'); sc.src = 'regole.js';
+      sc.onload = () => window.__regole ? ok(window.__regole) : ko(new Error('Il file delle regole non è valido.'));
+      sc.onerror = () => { REGP = null; sc.remove(); ko(new Error('Non riesco a caricare le regole: controlla la connessione e riprova.')); };
+      document.head.append(sc);
+    });
+  }
+  const compL = l => 2 + Math.floor((clamp(l, 1, 20) - 1) / 4);
+  const modV = v => Math.floor(((num(v) ?? 10) - 10) / 2);
+  const t20 = (v, l) => Array.isArray(v) ? v[clamp(l, 1, 20) - 1] ?? null : v ?? null;
+  const NOMEC = Object.fromEntries(CAR.map(([k, , n]) => [k, n])), SIGLA = Object.fromEntries(CAR.map(([k, s]) => [k, s]));
+  const nomeAb = k => ABIL.find(x => x[0] === k)?.[1] || k;
+  const metriT = m => String(Math.round(m * 10) / 10).replace('.', ',') + ' m';
+  const segnoP = n => n ? (n > 0 ? '+' : '−') + Math.abs(n) : '';
+  const corto = (t, n = 130) => { const x = String(t || '').replace(/\*\*/g, '').replace(/\s+/g, ' ').trim(); return x.length > n ? x.slice(0, n - 1) + '…' : x; };
+  // «Cammino del berserker» → «Berserker»: il nome breve che va tra parentesi accanto alla classe
+  const nomeBreve = n => { const x = String(n || '').replace(/^(Cammino|Collegio|Dominio|Circolo|Giuramento|Tradizione|Via|Scuola|Specializzazione|Archetipo)\s+(?:(?:dell'|dei|degli|delle|della|dello|del|di|d')\s*)?/i, ''); return x ? x[0].toUpperCase() + x.slice(1) : x; };
+  const sottoDi = (R, c) => c?.sotto ? (R.sotto[c.id] || []).find(x => x.id === c.sotto) || null : null;
+  const testoClassi = (R, L) => L.map(c => { const sb = sottoDi(R, c); return `${R.classi[c.id].nome}${sb ? ` (${nomeBreve(sb.nome)})` : ''}${L.length > 1 ? ' ' + c.livello : ''}`; }).join(' / ');
+  const dadiVitaDi = (R, L) => { const m = new Map(); for (const c of L) { const dv = R.classi[c.id].dv; m.set(dv, (m.get(dv) || 0) + c.livello); } return [...m].sort((a, b) => b[0] - a[0]).map(([dv, n]) => `${n}d${dv}`).join(' + '); };
+  // le classi della scheda: quelle salvate dalla procedura, oppure lette dal testo («Stregone (Magia selvaggia)», «Guerriero 3 / Ladro 2»)
+  function classiDi(R, d) {
+    if (Array.isArray(d.classi) && d.classi.length) return { L: d.classi.filter(c => R.classi[c.id]).map(c => ({ ...c })), dedotte: false };
+    const tot = clamp(num(d.livello) || 1, 1, 20), L = [];
+    for (const p of String(d.classe || '').split(/\s*[/,;+]\s*/).map(x => x.trim()).filter(Boolean)) {
+      const n = norm(p), id = Object.keys(R.classi).find(k => n.includes(norm(R.classi[k].nome)));
+      if (!id || L.some(c => c.id === id)) continue;
+      const resto = norm(p.replace(new RegExp(R.classi[id].nome, 'i'), '').replace(/[()\d]/g, ' '));
+      const sb = resto ? (R.sotto[id] || []).find(x => norm(x.nome).includes(resto) || resto.includes(norm(nomeBreve(x.nome)))) : null;
+      L.push({ id, livello: +(p.match(/\b(\d{1,2})\b/)?.[1] || 0), sotto: sb?.id || null });
+    }
+    const noti = L.reduce((a, c) => a + c.livello, 0), senza = L.filter(c => !c.livello);
+    if (L.length === 1) L[0].livello = tot; else senza.forEach((c, i) => c.livello = i ? 1 : Math.max(1, tot - noti - (senza.length - 1)));
+    return { L, dedotte: true };
+  }
+  const razzaDi = (R, d) => { const r = R.razze.find(x => x.id === d.razza_id); return r ? { r, s: r.sotto?.find(x => x.id === d.sottorazza) || null } : null; };
+  const razzaE = (R, d, rid) => {
+    if (d.razza_id === rid || d.sottorazza === rid) return true;
+    const x = R.razze.find(r => r.id === rid) || R.razze.flatMap(r => r.sotto || []).find(s => s.id === rid), t = norm(d.razza);
+    return !!x && !!t && (t.includes(norm(x.nome)) || norm(x.nome).includes(t));
+  };
+  const posseduto = (d, nome) => (d.privilegi || []).some(p => norm(p.nome) === norm(nome));
+
+  /* incantesimi: come li lancia una classe, quanti slot, quali si possono scegliere */
+  const incDi = (R, c) => { const k = R.classi[c.id]; if (k.inc) return k.inc; const sb = sottoDi(R, c); return sb?.inc3 ? { ...sb.inc3, tipo: 'conosciuti', slot: 'terzo' } : null; };
+  const livSlot = (t, l) => t === 'pieno' ? l : t === 'mezzo' ? (l >= 2 ? Math.ceil(l / 2) : 0) : t === 'mezzo+' ? Math.ceil(l / 2) : t === 'terzo' ? (l >= 3 ? Math.ceil(l / 3) : 0) : 0;
+  const maxLivInc = (R, inf, l) => !inf ? 0 : inf.slot === 'patto' ? R.patto[clamp(l, 1, 20)][1] : (R.slot[livSlot(inf.slot, l)] || []).length;
+  // multiclasse: si sommano i livelli da incantatore (mezzi incantatori per difetto, l'artefice per eccesso); il patto va a parte
+  function slotDi(R, L) {
+    const cs = L.map(c => ({ inf: incDi(R, c), l: c.livello })).filter(x => x.inf), out = Array(10).fill(0);
+    if (!cs.length) return null;
+    const pieni = cs.filter(x => x.inf.slot !== 'patto');
+    const lv = pieni.length === 1 ? livSlot(pieni[0].inf.slot, pieni[0].l) : pieni.reduce((a, { inf, l }) => a + (inf.slot === 'pieno' ? l : inf.slot === 'mezzo+' ? Math.ceil(l / 2) : Math.floor(l / (inf.slot === 'terzo' ? 3 : 2))), 0);
+    (R.slot[Math.min(20, lv)] || []).forEach((n, i) => out[i + 1] += n);
+    const pt = cs.find(x => x.inf.slot === 'patto'); if (pt) { const [n, lp] = R.patto[clamp(pt.l, 1, 20)]; out[lp] += n; }
+    return out;
+  }
+  function indiceInc(R) {
+    if (R._idx && R._srd === !!T.srd) return R._idx;
+    const m = new Map(); for (const x of T.srd?.incantesimi || []) m.set(chiaveInc(x.nome), x);
+    for (const x of R.extraInc) if (!m.has(chiaveInc(x.nome))) m.set(chiaveInc(x.nome), x);
+    R._srd = !!T.srd; return R._idx = m;
+  }
+  const incNome = (R, n) => indiceInc(R).get(chiaveInc(n)) || null;
+  const voceIncDa = (R, nome, prep) => { const x = incNome(R, nome); return x ? daManuale({ nome: x.nome, ...(prep ? { prep: true } : {}) }, x) : { id: nuovoId(), nome, livello: 0, ...(prep ? { prep: true } : {}) }; };
+
+  /* risorse che crescono col livello (ira, ki, punti stregoneria, dadi di superiorità…) */
+  function usiProg(u, l, st, lt) {
+    if (u == null) return null; if (typeof u === 'number') return u; if (Array.isArray(u)) return t20(u, l);
+    const m = k => Math.max(1, modV(st[k]));
+    return u === 'car' ? m('car') : u === 'car+1' ? 1 + Math.max(0, modV(st.car)) : u === 'int' ? m('int') : u === 'sag' ? m('sag') : u === 'comp' ? compL(lt) : u === 'comp2' ? 2 * compL(lt) : null;
+  }
+  const dadiProg = (v, l) => { const x = Array.isArray(v) ? (Array.isArray(v[0]) ? v.filter(([da]) => l >= da).pop()?.[1] : t20(v, l)) : v; return x ? String(x).replace(/^d/, '1d') : null; };
+  function mettiProg(P, p, l, st, lt, fonte) {
+    if (l < (p.min || 1)) return null;
+    const usi = usiProg(p.usi, l, st, lt), dadi = dadiProg(p.dadi, l), val = p.valore ? t20(p.valore, l) : null;
+    if (!usi && !dadi && !val) return null;
+    const ill = usi >= 99, riposo = p.riposo5 && l >= 5 ? p.riposo5 : p.riposo || 'lungo';
+    const testo = [val, ill ? 'Usi illimitati' : ''].filter(Boolean).map(x => x + '. ').join('') + (p.testo || '');
+    const descr = [usi && !ill ? usi + ' usi' : ill ? 'illimitata' : '', dadi, val].filter(Boolean).join(', ');
+    const i = P.findIndex(x => norm(x.nome) === norm(p.nome));
+    if (i < 0) { P.push({ id: nuovoId(), nome: p.nome, fonte, testo, ...(usi && !ill ? { usi, usati: 0, riposo } : {}), ...(dadi ? { dadi } : {}), ...(p.extra ? { extra: true } : {}) }); return `${p.nome} (${descr})`; }
+    const x = { ...P[i] }, prima = JSON.stringify(x);
+    if (ill) { delete x.usi; delete x.usati; } else if (usi) { x.usi = usi; x.usati = Math.min(num(x.usati) || 0, usi); x.riposo = riposo; }
+    if (dadi) x.dadi = dadi; if (val || ill) x.testo = testo;
+    P[i] = x; return JSON.stringify(x) === prima ? null : `${p.nome}: ${descr}`;
+  }
+  const piuVel = (v, m) => { const x = String(v || '9 m').match(/\d+(?:[.,]\d+)?/); return metriT((x ? parseFloat(x[0].replace(',', '.')) : 9) + m); };
+  const armaDi = (R, n) => { const k = norm(n); return k ? R.armi.find(a => k.includes(norm(a[0]))) || null : null; };
+  const statArma = (a, st) => /accurata/.test(a[4]) ? (st.des >= st.for ? 'des' : 'for') : /a distanza/.test(a[4]) ? 'des' : 'for';
+
+  /* lo stato della procedura: G.tipo 'liv' (level up) o 'crea' (nuovo personaggio al 1° livello) */
+  const talScelto = G => G.asi.modo === 'talento' ? G.R.talenti.find(f => f.id === G.asi.tal) || null : null;
+  function statDopo(G, ctx) {
+    const st0 = Object.fromEntries(CAR.map(([x]) => [x, num(ctx.d[x]) ?? 10])), st = { ...st0 };
+    if (ctx.asi && G.asi.modo === 'asi') for (const [x, n] of Object.entries(G.asi.p)) st[x] = Math.min(20, st[x] + n);
+    const f = (ctx.asi || ctx.tal) && talScelto(G);
+    if (f) for (const [x, n] of Object.entries(Array.isArray(f.asi) ? (G.asi.tk ? { [G.asi.tk]: 1 } : {}) : f.asi || {})) st[x] = Math.min(20, st[x] + n);
+    return { st0, st, f };
+  }
+  function ctxLiv(G) {
+    const R = G.R, prima = G.classi.find(c => c.id === G.cl), k = R.classi[G.cl]; if (!k) return null;
+    const c = { id: G.cl, livello: (prima?.livello || 0) + 1, sotto: prima?.sotto || null };
+    const servS = !c.sotto && c.livello >= k.sotto.liv && !!(R.sotto[G.cl] || []).length;
+    if (servS && G.sotto) c.sotto = G.sotto;
+    const L = prima ? G.classi.map(x => x.id === G.cl ? c : { ...x }) : [...G.classi.map(x => ({ ...x })), c];
+    return { R, k, c, cid: G.cl, lc: c.livello, lt: L.reduce((a, x) => a + x.livello, 0), L, sb: sottoDi(R, c), servS, subNuova: servS && !!c.sotto, asi: k.asi.includes(c.livello), nuova: !prima, d: G.d0 };
+  }
+  function ctxCrea(G) {
+    const R = G.R, k = G.cr.cl && R.classi[G.cr.cl]; if (!k) return null;
+    const c = { id: G.cr.cl, livello: 1, sotto: k.sotto.liv === 1 ? G.sotto : null }, rz = R.razze.find(x => x.id === G.cr.razza), sr = rz?.sotto?.find(x => x.id === G.cr.sotto);
+    return { R, k, c, cid: c.id, lc: 1, lt: 1, L: [c], sb: sottoDi(R, c), servS: k.sotto.liv === 1, subNuova: !!c.sotto, asi: false, tal: !!(rz?.talento || sr?.talento), primo: true, d: baseCrea(G) };
+  }
+  const ctxDi = G => G.tipo === 'crea' ? ctxCrea(G) : ctxLiv(G);
+  function scelteLiv(ctx) {
+    const out = [], add = (pre, a, fonte) => (a || []).forEach((sc, i) => out.push({ ...sc, key: pre + ':' + i, fonte }));
+    if (!ctx) return out;
+    add('c' + ctx.lc, ctx.k.scelte?.[ctx.lc], `${ctx.k.nome} ${ctx.lc}`);
+    if (ctx.sb) for (const [lv, a] of Object.entries(ctx.sb.scelte || {})) if (+lv === ctx.lc || (ctx.subNuova && +lv <= ctx.lc)) add('s' + lv, a, `${nomeBreve(ctx.sb.nome)} ${lv}`);
+    return out;
+  }
+  const scelteTal = G => { const f = talScelto(G); return f ? (f.scelte || []).map((sc, i) => ({ ...sc, key: 'f:' + i, fonte: 'Talento: ' + f.nome })) : []; };
+  function scelteRazza(G) {
+    const R = G.R, r = R.razze.find(x => x.id === G.cr.razza), sr = r?.sotto?.find(x => x.id === G.cr.sotto), out = [];
+    (r?.scelte || []).forEach((sc, i) => out.push({ ...sc, key: 'r:' + i, fonte: r.nome }));
+    (sr?.scelte || []).forEach((sc, i) => out.push({ ...sc, key: 'sr:' + i, fonte: sr.nome }));
+    return out;
+  }
+  // le abilità del background che si hanno già dalla classe o dalla razza si sostituiscono con altre a scelta
+  function scelteBg(G) {
+    const R = G.R, C = G.cr, b = R.background.find(x => x.id === C.bg); if (!b) return [];
+    const r = R.razze.find(x => x.id === C.razza), sr = r?.sotto?.find(x => x.id === C.sotto), gia = new Set([...C.abilC, ...(r?.abil || []), ...(sr?.abil || [])]);
+    scelteRazza(G).filter(sc => sc.tipo === 'abilita').forEach(sc => (G.sc[sc.key] || []).forEach(x => gia.add(x)));
+    const rip = b.abil.filter(x => gia.has(x)), out = [];
+    if (b.abilScelta) out.push({ tipo: 'abilita', n: b.abilScelta, lista: b.abilLista, key: 'bg:0', fonte: b.nome, titolo: 'Abilità del background' });
+    if (rip.length) out.push({ tipo: 'abilita', n: rip.length, key: 'bgx:0', fonte: b.nome, titolo: `Al posto di ${rip.map(nomeAb).join(' e ')} (le hai già)` });
+    return out;
+  }
+  function tutteScelte(G, ctx) { return [...scelteLiv(ctx), ...(ctx && (ctx.asi || ctx.tal) ? scelteTal(G) : []), ...(G.tipo === 'crea' ? [...scelteRazza(G), ...scelteBg(G)] : [])]; }
+  // le opzioni di una scelta (stili, metamagia, invocazioni…), con il motivo se non si può prendere
+  function opzioniDi(G, sc, ctx) {
+    if (sc.voci) return sc.voci.map(v => ({ nome: v, testo: '', no: '' }));
+    const d = ctx?.d || (G.tipo === 'crea' ? baseCrea(G) : G.d0), scelto = n => Object.values(G.sc).some(v => Array.isArray(v) && v.includes(n));
+    const patto = p => posseduto(d, 'Patto della ' + p) || posseduto(d, 'Patto del ' + p) || scelto('Patto della ' + p) || scelto('Patto del ' + p);
+    return (G.R.opzioni[sc.lista] || []).map(o => {
+      let no = '';
+      if (o.classi && ctx?.cid && sc.lista === 'stili' && !String(o.classi).split(/\s+/).includes(ctx.cid)) no = 'Non per questa classe';
+      else if (o.liv && ctx && (sc.lista === 'invocazioni' ? (ctx.L.find(c => c.id === 'warlock')?.livello || 0) : ctx.lc) < o.liv) no = `Dal ${o.liv}° livello`;
+      else if (o.patto && !patto(o.patto)) no = `Serve il Patto ${/^(lama|catena)$/.test(o.patto) ? 'della' : 'del'} ${o.patto}`;
+      else if (posseduto(d, o.nome)) no = 'Ce l\'hai già';
+      return { ...o, no };
+    });
+  }
+  function talentoNo(G, f, st, d) {
+    if (f.car && !(f.reqO ? f.car.some(([k, n]) => st[k] >= n) : f.car.every(([k, n]) => st[k] >= n))) return 'Serve ' + f.car.map(([k, n]) => `${NOMEC[k]} ${n}`).join(f.reqO ? ' o ' : ' e ');
+    if (f.razze && !f.razze.some(r => razzaE(G.R, d, r))) return 'Solo per alcune razze';
+    if (f.inc && !(d.incantesimi || []).length && !num(d.slot_1) && !(G.tipo === 'crea' && incDi(G.R, { id: G.cr.cl || 'barbaro' }))) return 'Serve saper lanciare incantesimi';
+    if (posseduto(d, f.nome)) return 'Ce l\'hai già';
+    return '';
+  }
+  // cosa si può imparare in questo livello
+  function datiInc(G, ctx) {
+    const R = G.R, inf = ctx && incDi(R, ctx.c), out = { inf, max: 0, t: 0, n: 0, seg: 0, arc: 0, arcLiv: 0, prep: 0, swap: false, lista: [], sempre: new Set() };
+    if (!inf) return out;
+    const lc = ctx.lc, prev = tab => lc > 1 ? t20(tab, lc - 1) || 0 : 0, { st } = statDopo(G, ctx);
+    out.max = maxLivInc(R, inf, lc);
+    out.t = inf.trucchi ? Math.max(0, (t20(inf.trucchi, lc) || 0) - prev(inf.trucchi)) : 0;
+    if (inf.tipo === 'conosciuti') { out.n = Math.max(0, (t20(inf.conosciuti, lc) || 0) - prev(inf.conosciuti)); out.swap = !ctx.primo && !ctx.nuova && out.max > 0 && lc > 1; }
+    if (inf.tipo === 'libro') out.n = lc === 1 ? 6 : 2;
+    if (inf.tipo === 'preparati' && out.max) out.prep = Math.max(1, inf.prep(lc) + modV(st[inf.car]));
+    out.seg = (inf.segreti?.[lc] || 0) + (ctx.sb ? Object.entries(ctx.sb.segreti || {}).filter(([lv]) => +lv === lc || (ctx.subNuova && +lv <= lc)).reduce((a, [, n]) => a + n, 0) : 0);
+    if (inf.arcano?.[lc]) { out.arc = 1; out.arcLiv = inf.arcano[lc]; }
+    const nomi = new Set();
+    (R.liste[inf.lista] || []).forEach((a, lv) => { if (lv <= out.max) a.forEach(n => nomi.add(n)); });
+    if (ctx.sb?.lista) for (const [lv, a] of Object.entries(ctx.sb.lista)) if (+lv <= lc) a.forEach(n => nomi.add(n));
+    if (ctx.sb?.listaExtra) (R.liste[ctx.sb.listaExtra] || []).forEach((a, lv) => { if (lv <= out.max) a.forEach(n => nomi.add(n)); });
+    out.lista = [...nomi].map(n => incNome(R, n)).filter(Boolean).sort((a, b) => (a.livello - b.livello) || a.nome.localeCompare(b.nome, 'it'));
+    if (ctx.sb?.inc) for (const [lv, a] of Object.entries(ctx.sb.inc)) if (+lv <= lc) a.forEach(n => out.sempre.add(chiaveInc(n)));
+    return out;
+  }
+  const tuttiInc = (R, max) => { const s = new Set(); for (const l of Object.values(R.liste)) l.forEach((a, lv) => { if (lv && lv <= max) a.forEach(n => s.add(n)); }); return [...s].map(n => incNome(R, n)).filter(Boolean).sort((a, b) => (a.livello - b.livello) || a.nome.localeCompare(b.nome, 'it')); };
+
+  /* creazione: i dati di partenza (razza, punteggi, background, equipaggiamento) prima del 1° livello di classe */
+  function puntiBase(G) {
+    const C = G.cr, vals = C.metodo === 'tiri' ? C.tiri : G.R.standard;
+    if (C.metodo === 'manuale') return Object.fromEntries(CAR.map(([k]) => [k, clamp(num(C.man[k]) ?? 10, 1, 20)]));
+    if (C.metodo === 'pb') return { ...C.pb };
+    return Object.fromEntries(CAR.map(([k]) => [k, C.ass[k] != null && vals[C.ass[k]] != null ? vals[C.ass[k]] : 10]));
+  }
+  function bonusRazza(G) {
+    const R = G.R, C = G.cr, r = R.razze.find(x => x.id === C.razza), sr = r?.sotto?.find(x => x.id === C.sotto), b = {};
+    if (!r) return b;
+    if (r.asi === 'libero' || C.libero) return { ...C.asiL };
+    for (const [k, n] of Object.entries(sr?.togliAsi ? {} : r.asi || {})) b[k] = (b[k] || 0) + n;
+    for (const [k, n] of Object.entries(sr?.asi || {})) b[k] = (b[k] || 0) + n;
+    const sch = sr?.asiScelta || r.asiScelta; if (sch) for (const k of C.asiS) b[k] = (b[k] || 0) + sch[0];
+    return b;
+  }
+  function baseCrea(G) {
+    const R = G.R, C = G.cr, r = R.razze.find(x => x.id === C.razza), sr = r?.sotto?.find(x => x.id === C.sotto), bg = R.background.find(x => x.id === C.bg), k = C.cl && R.classi[C.cl];
+    const st = puntiBase(G), b = bonusRazza(G); for (const x in b) st[x] = Math.min(20, st[x] + b[x]);
+    const d = { ...(G.d0.forma ? { forma: G.d0.forma } : {}), livello: 0, ...st, razza: r ? (sr && !/^umano/.test(sr.id) ? sr.nome : r.nome) : '', razza_id: r?.id || null, sottorazza: sr?.id || null,
+      background: bg?.nome || '', bg_id: bg?.id || null, allineamento: C.all || '', velocita: metriT(sr?.vel || r?.vel || 9), pf_max: 0, pf: 0, pf_liv: (r?.pfLiv || 0) + (sr?.pfLiv || 0) || null,
+      personalita: C.pers || '', ideali: C.ideali || '', legami: C.legami || '', difetti: C.difetti || '', privilegi: [], incantesimi: [], attacchi: [] };
+    const P = d.privilegi, tratto = (n, t, f) => { if (!P.some(x => norm(x.nome) === norm(n))) P.push({ id: nuovoId(), nome: n, fonte: f, testo: t }); };
+    if (r) {
+      for (const [n, t] of r.tratti || []) tratto(n, t, r.nome);
+      for (const [n, t] of sr?.tratti || []) tratto(n, t, sr.nome);
+      const scuro = sr?.scuro || r.scuro; if (scuro && !P.some(x => /scurovisione/i.test(x.nome))) tratto('Scurovisione', `Vedi al buio entro ${scuro} m.`, r.nome);
+      if (r.nuoto || sr?.nuoto) tratto('Nuotare', `Velocità di nuoto ${metriT(r.nuoto || sr.nuoto)}.`, r.nome);
+      if (r.vola) tratto('Volare', `Velocità di volo ${metriT(r.vola)}.`, r.nome);
+      for (const a of [...(r.abil || []), ...(sr?.abil || [])]) d['ab_' + a] = 1;
+    }
+    if (bg) { for (const a of bg.abil || []) d['ab_' + a] = 1; if (bg.priv) tratto(bg.priv[0], bg.priv[1], 'Background: ' + bg.nome); }
+    for (const a of C.abilC) d['ab_' + a] = Math.max(1, num(d['ab_' + a]) || 0);
+    const lingue = [r && `Lingue: ${r.lingue || 'Comune'}${C.lingue ? ', ' + C.lingue : ''}`, k && `Armature e armi: ${k.comp}`, [r?.comp, sr?.comp].filter(Boolean).length && `Dalla razza: ${[r?.comp, sr?.comp].filter(Boolean).join(', ')}`, bg?.strumenti && `Strumenti: ${bg.strumenti}`].filter(Boolean);
+    d.lingue = lingue.join('\n');
+    // equipaggiamento: le scelte della classe (o le monete) e quello del background
+    const eq = [];
+    if (k && !C.oro) k.equip.forEach((riga, i) => { const o = riga.split(' oppure '); eq.push(o[Math.min(C.eq[i] || 0, o.length - 1)]); });
+    if (bg?.equip) eq.push(bg.equip);
+    d.equip = eq.join('\n'); d.mo = num(C.mo) ?? (bg?.mo || 0);
+    // classe armatura e attacchi
+    const dm = modV(st.des), a = R.armature.find(x => x[0] === C.arm), sbc = k && k.sotto.liv === 1 ? sottoDi(R, { id: C.cl, sotto: G.sotto }) : null;
+    let ca;
+    if (a) ca = a[2] === 'leggera' ? a[1] + dm : a[2] === 'media' ? a[1] + Math.min(2, dm) : a[1];
+    else {
+      const op = [10 + dm]; if (C.cl === 'barbaro') op.push(10 + dm + modV(st.cos)); if (C.cl === 'monaco' && !C.scudo) op.push(10 + dm + modV(st.sag));
+      if (sbc?.caSenza) op.push(sbc.caSenza + dm); const rc = String(r?.ca || ''); if (rc === '13+des') op.push(13 + dm); else if (+rc) op.push(+rc);
+      ca = Math.max(...op);
+    }
+    d.ca = ca + (C.scudo ? 2 : 0) + (r?.caPiu || 0);
+    d.attacchi = C.armi.filter(Boolean).map(n => { const w = R.armi.find(x => x[0] === n); if (!w) return null; const kk = statArma(w, st), m = modV(st[kk]); return { nome: w[0], colpire: 2 + m, danni: w[1] + segnoP(m), tipo: [w[2], w[4]].filter(Boolean).join(' · ') }; }).filter(Boolean);
+    // incantesimi della razza al 1° livello
+    if (r) for (const [n, lv] of [...(r.inc || []), ...(sr?.inc || [])]) if (lv <= 1 && !d.incantesimi.some(x => chiaveInc(x.nome) === chiaveInc(n))) d.incantesimi.push(voceIncDa(R, n));
+    if (d.incantesimi.length) d.car_inc = sr?.car_inc || r?.car_inc || 'car';
+    for (const p of [r?.prog, sr?.prog].filter(Boolean)) mettiProg(P, p, 1, st, 1, r.nome);
+    return d;
+  }
+
+  /* un livello in più (o il primo, nella creazione): i dati nuovi e le righe del riepilogo */
+  function applica(G) {
+    const R = G.R, ctx = ctxDi(G); if (!ctx) return null;
+    const { k, c, lc, lt, sb, L } = ctx, crea = G.tipo === 'crea';
+    const d = JSON.parse(JSON.stringify(ctx.d)), righe = [], P = d.privilegi = [...(d.privilegi || [])];
+    const nuovoP = (nome, testo, fonte, x) => { if (P.some(p => norm(p.nome) === norm(nome))) return false; P.push({ id: nuovoId(), nome, fonte, testo: testo || '', ...x }); righe.push(['Privilegio', nome]); return true; };
+    const I = d.incantesimi = [...(d.incantesimi || [])], ha = n => I.some(x => chiaveInc(x.nome) === chiaveInc(n));
+    const inf = incDi(R, c);
+    const aggInc = (n, prep) => { if (!n || ha(n)) return; I.push(voceIncDa(R, n, prep)); righe.push(['Incantesimo', n]); };
+    // punteggi di caratteristica e talento
+    const { st0, st, f } = statDopo(G, ctx);
+    for (const [x] of CAR) if (st[x] !== st0[x]) { d[x] = st[x]; righe.push([NOMEC[x], `${st0[x]} → ${st[x]}`]); }
+    // classi, livello, dadi vita
+    d.classi = L; d.classe = testoClassi(R, L); d.livello = lt; d.dadi_vita = dadiVitaDi(R, L);
+    d.dv_rest = crea ? 1 : Math.min(lt, (num(d.dv_rest) ?? lt - 1) + 1);
+    if (crea) { k.ts.forEach(x => d['ts_' + x] = true); }
+    else if (ctx.nuova && k.multiComp && k.multiComp !== 'Nessuna') d.lingue = [d.lingue, `Da ${k.nome} (multiclasse): ${k.multiComp}`].filter(Boolean).join('\n');
+    // punti ferita: dado (o media) + Costituzione, più i bonus per livello (nano delle colline, Robusto, stirpe draconica)
+    const pl0 = num(d.pf_liv) || 0; let pl = pl0;
+    if (f?.pfLiv) pl += f.pfLiv; if (ctx.subNuova && sb?.pfPiu) pl += sb.pfPiu;
+    d.pf_liv = pl || null;
+    const dado = crea ? k.dv : G.pf.modo === 'media' ? k.dv / 2 + 1 : clamp(num(G.pf.v) || 1, 1, k.dv);
+    const guad = Math.max(1, dado + modV(st.cos)) + pl + (crea ? 0 : (modV(st.cos) - modV(st0.cos) + pl - pl0) * (lt - 1));
+    const pm0 = num(d.pf_max) || 0; d.pf_max = pm0 + guad; d.pf = crea ? d.pf_max : Math.min(d.pf_max, (num(d.pf) ?? pm0) + guad);
+    righe.unshift(['Punti ferita', crea ? String(d.pf_max) : `${pm0} → ${d.pf_max} (+${guad})`]);
+    // privilegi della classe e della sottoclasse
+    for (const [nome, testo] of k.liv[lc] || []) {
+      if (norm(nome) === norm(k.sotto.nome)) { if (sb) nuovoP(`${k.sotto.nome}: ${sb.nome}`, sb.desc, `${k.nome} ${lc}`); continue; }
+      nuovoP(nome, testo, `${k.nome} ${lc}`);
+    }
+    if (sb) for (const [lv, a] of Object.entries(sb.liv || {})) if (+lv === lc || (ctx.subNuova && +lv <= lc)) for (const [nome, testo] of a) nuovoP(nome, testo, `${nomeBreve(sb.nome)} ${lv}`);
+    for (const p of [...(k.prog || []), ...(sb?.prog || [])]) { const r = mettiProg(P, p, lc, st, lt, k.nome); if (r) righe.push(['Risorsa', r]); }
+    const rz = razzaDi(R, d);
+    if (rz && !crea) { for (const p of [rz.r.prog, rz.s?.prog].filter(Boolean)) { const r = mettiProg(P, p, lt, st, lt, rz.r.nome); if (r) righe.push(['Risorsa', r]); } for (const [n, lv] of [...(rz.r.inc || []), ...(rz.s?.inc || [])]) if (lv === lt) aggInc(n); }
+    // talento
+    if (f) {
+      nuovoP(f.nome, f.testo, crea ? 'Talento' : `Talento (${lt}° livello)`);
+      if (f.vel) d.velocita = piuVel(d.velocita, f.vel);
+      if (f.tsDaAsi && G.asi.tk) d['ts_' + G.asi.tk] = true;
+      if (f.comp) d.lingue = [d.lingue, `Dal talento ${f.nome}: ${f.comp}`].filter(Boolean).join('\n');
+      if (f.prog) mettiProg(P, f.prog, lt, st, lt, 'Talento');
+      (f.incPlus || []).forEach(n => aggInc(n));
+    }
+    // scelte (stili, metamagia, invocazioni, abilità, maestria, note)
+    for (const sc of tutteScelte(G, ctx)) {
+      const v = G.sc[sc.key]; if (v == null || v === '' || (Array.isArray(v) && !v.length)) continue;
+      if (sc.tipo === 'abilita') { v.forEach(x => d['ab_' + x] = Math.max(1, num(d['ab_' + x]) || 0)); righe.push(['Competenza', v.map(nomeAb).join(', ')]); }
+      else if (sc.tipo === 'maestria') { v.forEach(x => d['ab_' + x] = 2); righe.push(['Maestria', v.map(nomeAb).join(', ')]); }
+      else if (sc.tipo === 'inc') v.forEach(n => aggInc(n));
+      else if (sc.tipo === 'testo') { const n = posseduto(d, sc.titolo) ? `${sc.titolo} (${sc.fonte})` : sc.titolo; P.push({ id: nuovoId(), nome: n, fonte: sc.fonte, testo: String(v) }); righe.push([sc.titolo, String(v)]); }
+      else { const O = opzioniDi(G, sc, ctx); v.forEach(n => nuovoP(n, O.find(o => o.nome === n)?.testo || '', `${sc.titolo || 'Scelta'} · ${sc.fonte}`)); }
+    }
+    // incantesimi: nuovi, sostituiti, preparati, sempre preparati della sottoclasse
+    const prepT = inf?.tipo === 'preparati' || inf?.tipo === 'libro';
+    if (G.inc.via) { const i = I.findIndex(x => chiaveInc(x.nome) === chiaveInc(G.inc.via)); if (i >= 0) { I.splice(i, 1); righe.push(['Dimenticato', G.inc.via]); } }
+    [...G.inc.t, ...G.inc.n, ...G.inc.seg, ...G.inc.arc, ...G.inc.sw].forEach(n => aggInc(n, prepT && incNome(R, n)?.livello > 0));
+    if (sb?.inc) for (const [lv, a] of Object.entries(sb.inc)) if (+lv === lc || (ctx.subNuova && +lv <= lc)) a.forEach(n => aggInc(n, true));
+    if (inf?.tipo === 'preparati' && G.inc.prepS) {
+      const di = datiInc(G, ctx), inLista = new Set(di.lista.filter(x => x.livello > 0).map(x => chiaveInc(x.nome))), scelti = new Set(G.inc.prepS.map(chiaveInc));
+      for (let i = I.length - 1; i >= 0; i--) { const kk = chiaveInc(I[i].nome); if (inLista.has(kk) && !di.sempre.has(kk) && !scelti.has(kk) && I[i].prep !== false) { righe.push(['Non più preparato', I[i].nome]); I.splice(i, 1); } }
+      G.inc.prepS.forEach(n => aggInc(n, true));
+    }
+    if (inf && (crea || !d.car_inc || !(G.d0.incantesimi || []).length)) d.car_inc = inf.car;
+    // slot degli incantesimi
+    const sl = slotDi(R, L);
+    if (sl) {
+      const prima = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => num(d['slot_' + i]) || 0).join('/');
+      for (let i = 1; i <= 9; i++) { d['slot_' + i] = sl[i] || null; d['usati_' + i] = Math.min(num(d['usati_' + i]) || 0, sl[i]) || null; }
+      if (sl.slice(1).join('/') !== prima) righe.push(['Slot', sl.map((n, i) => n ? `${i}°: ${n}` : '').filter(Boolean).join(' · ')]);
+    }
+    // gli attacchi seguono il bonus di competenza e i modificatori
+    if (!crea) {
+      const dc = compL(lt) - compL(lt - 1);
+      d.attacchi = (d.attacchi || []).map(a => {
+        const w = armaDi(R, a.nome), kk = w && statArma(w, st), dm = kk ? modV(st[kk]) - modV(st0[kk]) : 0;
+        if ((!dc && !dm) || num(a.colpire) == null) return a;
+        return { ...a, colpire: num(a.colpire) + dc + dm, ...(dm ? { danni: String(a.danni || '').replace(/\s*[+\-−]\s*\d+\s*$/, '') + segnoP(modV(st[kk])) } : {}) };
+      });
+      if (dc) righe.push(['Bonus di competenza', `+${compL(lt - 1)} → +${compL(lt)}`]);
+    }
+    if (num(d.liv_concesso) && num(d.liv_concesso) <= lt) d.liv_concesso = null;
+    return { d, righe, ctx };
+  }
+
+  /* ---------- la finestra della procedura ---------- */
+  const NOMIP = { liv: 'Classe e PF', sotto: 'Sottoclasse', asi: 'Punteggi o talento', scelte: 'Scelte', inc: 'Incantesimi', riep: 'Riepilogo', razza: 'Razza', classe: 'Classe', car: 'Caratteristiche', bg: 'Background', equip: 'Equipaggiamento', dett: 'Dettagli' };
+  function passiDi(G) {
+    const ctx = ctxDi(G);
+    if (G.tipo === 'crea') { const di = ctx ? datiInc(G, ctx) : null; return ['razza', 'classe', 'car', 'bg', 'equip', ...(di && (di.t || di.n || di.prep) ? ['inc'] : []), 'dett', 'riep']; }
+    if (!G.cl) return ['liv', 'riep'];
+    const di = datiInc(G, ctx);
+    return ['liv', ...(ctx.servS ? ['sotto'] : []), ...(ctx.asi ? ['asi'] : []), ...(scelteLiv(ctx).length ? ['scelte'] : []), ...(di.t || di.n || di.seg || di.arc || di.prep || di.swap ? ['inc'] : []), 'riep'];
+  }
+  const quanti = (G, sc, ctx) => sc.tipo === 'testo' ? 0 : Math.min(sc.n || 1, opzioniScelta(G, sc, ctx).filter(o => !o.no).length);
+  function opzioniScelta(G, sc, ctx) {
+    const d = ctx?.d || (G.tipo === 'crea' ? baseCrea(G) : G.d0), abil = new Set(ABIL.filter(([k]) => num(d['ab_' + k]) >= 1).map(([k]) => k));
+    Object.entries(G.sc).forEach(([key, v]) => { if (key !== sc.key && Array.isArray(v)) v.forEach(x => abil.add(x)); });
+    if (sc.tipo === 'abilita') return (sc.lista && sc.lista !== 'tutte' ? sc.lista : ABIL.map(x => x[0])).map(k => ({ nome: k, no: num(d['ab_' + k]) >= 1 ? 'Ce l\'hai già' : '' }));
+    if (sc.tipo === 'maestria') return ABIL.map(([k]) => ({ nome: k, no: num(d['ab_' + k]) >= 2 ? 'Ce l\'hai già' : abil.has(k) ? '' : 'Serve la competenza' }));
+    if (sc.tipo === 'inc') return (G.R.liste[sc.lista]?.[sc.liv] || []).map(n => ({ nome: n, no: (d.incantesimi || []).some(x => chiaveInc(x.nome) === chiaveInc(n)) ? 'Ce l\'hai già' : '' }));
+    return opzioniDi(G, sc, ctx);
+  }
+  function mancaScelte(G, L, ctx) {
+    for (const sc of L) { const v = G.sc[sc.key] || [], n = quanti(G, sc, ctx); if (sc.tipo !== 'testo' && v.length < n) return `${sc.titolo || (sc.tipo === 'abilita' ? 'Abilità' : sc.tipo === 'maestria' ? 'Maestria' : 'Scelta')}: scegline ${n - v.length}`; }
+    return '';
+  }
+  function mancaInc(G, ctx) {
+    const di = datiInc(G, ctx), I = ctx.d.incantesimi || [], no = x => I.some(y => chiaveInc(y.nome) === chiaveInc(x.nome));
+    const disp = (q, f) => di.lista.filter(f).filter(x => !no(x)).length;
+    const need = [['t', Math.min(di.t, disp('t', x => !x.livello)), 'trucchetti'], ['n', Math.min(di.n, disp('n', x => x.livello > 0)), 'incantesimi'], ['seg', di.seg, 'segreti magici'], ['arc', di.arc, 'arcanum mistico'], ['sw', G.inc.via ? 1 : 0, 'incantesimo al posto di quello dimenticato']];
+    for (const [q, n, l] of need) if (G.inc[q].length < n) return `Scegli ancora ${n - G.inc[q].length} ${l}`;
+    if (di.prep && (G.inc.prepS || []).length > di.prep) return `Puoi preparare al massimo ${di.prep} incantesimi`;
+    return '';
+  }
+  function manca(G, p) {
+    const R = G.R, ctx = ctxDi(G), C = G.cr;
+    if (p === 'liv') {
+      if (G.dedotte) { const tot = G.classi.reduce((a, c) => a + (+c.livello || 0), 0), lv = clamp(num(G.d0.livello) || 1, 1, 20); if (G.classi.length && tot !== lv) return `Le classi attuali devono sommare il livello ${lv} (ora fanno ${tot})`; }
+      if (!G.classi.length) return 'Indica la classe di adesso (per una scheda nuova usa la creazione guidata)';
+      if (!G.cl) return 'Scegli in quale classe sali';
+      if (G.pf.modo !== 'media' && !num(G.pf.v)) return G.pf.modo === 'tiro' ? 'Tira il dado dei punti ferita' : 'Scrivi i punti ferita guadagnati';
+      return '';
+    }
+    if (p === 'sotto') return ctx?.servS && !G.sotto ? 'Scegli la sottoclasse' : '';
+    if (p === 'asi') {
+      if (G.asi.modo === 'asi') { const t = Object.values(G.asi.p).reduce((a, n) => a + n, 0); return t < 2 ? `Distribuisci ancora ${2 - t} punt${2 - t === 1 ? 'o' : 'i'}` : ''; }
+      const f = talScelto(G); if (!f) return 'Scegli un talento';
+      if (Array.isArray(f.asi) && !G.asi.tk) return 'Scegli dove va il +1 del talento';
+      return mancaScelte(G, scelteTal(G), ctx);
+    }
+    if (p === 'scelte') return mancaScelte(G, scelteLiv(ctx), ctx);
+    if (p === 'inc') return ctx ? mancaInc(G, ctx) : '';
+    if (p === 'razza') {
+      const r = R.razze.find(x => x.id === C.razza); if (!r) return 'Scegli la razza';
+      if (r.sotto?.length && !C.sotto) return 'Scegli la sottorazza';
+      const sr = r.sotto?.find(x => x.id === C.sotto);
+      if (r.asi === 'libero' || C.libero) { const v = Object.values(C.asiL); if (C.schema === '21' ? !(v.includes(2) && v.includes(1) && v.length === 2) : v.filter(n => n === 1).length !== 3) return 'Scegli dove vanno i bonus della razza'; }
+      else { const sch = sr?.asiScelta || r.asiScelta; if (sch && C.asiS.length < sch[1]) return `Scegli ${sch[1]} caratteristiche per il +${sch[0]}`; }
+      return mancaScelte(G, scelteRazza(G), ctx);
+    }
+    if (p === 'classe') {
+      if (!C.cl) return 'Scegli la classe';
+      const k = R.classi[C.cl], n = k.abil[0]; if (C.abilC.length < n) return `Scegli ancora ${n - C.abilC.length} abilità della classe`;
+      if (k.sotto.liv === 1 && !G.sotto) return `Scegli: ${k.sotto.nome.toLowerCase()}`;
+      return mancaScelte(G, scelteLiv(ctx), ctx);
+    }
+    if (p === 'car') {
+      if (C.metodo === 'tiri' && C.tiri.length < 6) return 'Tira i 6 punteggi';
+      if (['standard', 'tiri'].includes(C.metodo) && CAR.some(([k]) => C.ass[k] == null)) return 'Assegna un valore a ogni caratteristica';
+      if (C.metodo === 'pb' && costoPb(G) > 27) return 'Hai speso più di 27 punti';
+      if (ctx?.tal) { const f = talScelto(G); if (!f) return 'Scegli il talento della razza'; if (Array.isArray(f.asi) && !G.asi.tk) return 'Scegli dove va il +1 del talento'; return mancaScelte(G, scelteTal(G), ctx); }
+      return '';
+    }
+    if (p === 'bg') return !C.bg ? 'Scegli il background' : mancaScelte(G, scelteBg(G), ctx);
+    return '';
+  }
+  const costoPb = G => CAR.reduce((a, [k]) => a + (G.R.pointBuy[G.cr.pb[k]] ?? 99), 0);
+  const BOZZA = G => `tavolo-guida-${G.tipo}-${G.id}`;
+  function salvaBozza(G) {
+    try { localStorage.setItem(BOZZA(G), JSON.stringify({ liv: num(G.d0.livello) || 0, passo: G.passo, sc: G.sc, inc: G.inc, asi: G.asi, pf: G.pf, sotto: G.sotto, cl: G.cl, classi: G.classi, dedotte: G.dedotte, cr: G.cr, fino: G.fino })); } catch { }
+  }
+  const incVuoto = () => ({ t: [], n: [], seg: [], arc: [], sw: [], via: '', prepS: null, f: {} });
+
+  async function apriGuida(s, tipo, fino) {
+    if (!s || !puoScrivere(s)) return;
+    const lv = clamp(num(s.dati.livello) || 1, 1, 20);
+    if (tipo === 'liv' && lv >= 20) return toast('Il personaggio è già al 20° livello.');
+    if (tipo === 'liv' && !isDM() && !(num(s.dati.liv_concesso) > lv)) return toast('Il prossimo livello lo concede il DM.');
+    let R; try { R = await regole(); await manuale(); } catch (e) { return toast(e.message, 'err'); }
+    document.querySelectorAll('dialog.tv-guida[open]').forEach(x => x.close());
+    const d0 = JSON.parse(JSON.stringify(s.dati || {}));
+    const G = { tipo, id: s.id, nome: s.nome, R, d0, passo: 0, sc: {}, inc: incVuoto(), asi: { modo: 'asi', p: {}, tal: null, tk: null }, pf: { modo: 'media', v: null }, sotto: null, fino: fino || 0, classi: [], cl: null };
+    if (tipo === 'liv') { const { L, dedotte } = classiDi(R, d0); G.classi = L; G.dedotte = dedotte; G.cl = L.length === 1 ? L[0].id : L[0]?.id || null; }
+    else G.cr = { razza: null, sotto: null, libero: false, schema: '21', asiL: {}, asiS: [], metodo: 'standard', ass: {}, tiri: [], pb: { for: 8, des: 8, cos: 8, int: 8, sag: 8, car: 8 }, man: { for: 10, des: 10, cos: 10, int: 10, sag: 10, car: 10 }, cl: null, abilC: [], bg: null, eq: {}, oro: false, mo: null, arm: '', scudo: false, armi: ['', '', ''], all: '', lingue: '', pers: '', ideali: '', legami: '', difetti: '' };
+    try { const b = JSON.parse(localStorage.getItem(BOZZA(G)) || 'null'); if (b && b.liv === (num(d0.livello) || 0)) { Object.assign(G, { passo: b.passo, sc: b.sc, inc: { ...incVuoto(), ...b.inc }, asi: b.asi, pf: b.pf, sotto: b.sotto, cl: b.cl, classi: b.classi?.length ? b.classi : G.classi, dedotte: b.dedotte ?? G.dedotte, fino: b.fino || G.fino }); if (b.cr) G.cr = { ...G.cr, ...b.cr }; G.ripresa = true; } } catch { }
+    const d = finestra('<div class="gw"></div>', 'tv-guida'); G.dlg = d;
+    d.setAttribute('aria-label', (tipo === 'crea' ? 'Creazione di ' : 'Level up di ') + s.nome);
+    d.addEventListener('click', e => { const b = e.target.closest('[data-g]'); if (b && !b.disabled) azioneGuida(G, b); });
+    d.addEventListener('input', e => { const el = e.target; if (el.dataset.gf === 'cerca') return filtraGuida(el); if (el.dataset.gi) campoGuida(G, el, false); });
+    d.addEventListener('change', e => { const el = e.target; if (el.dataset.gi) campoGuida(G, el, true); });
+    disegnaGuida(G);
+    if (G.ripresa) toast('Ho ripreso le scelte che avevi lasciato a metà.');
+  }
+  function filtraGuida(el) {
+    const q = norm(el.value), box = el.closest('.gsez') || el.parentElement;
+    box.querySelectorAll('[data-n]').forEach(r => r.hidden = !!q && !r.dataset.n.includes(q));
+  }
+  // un campo di testo o una tendina: aggiorna lo stato; ridisegna solo quando cambia qualcosa che si vede altrove
+  function campoGuida(G, el, fine) {
+    const k = el.dataset.gi, v = el.type === 'number' ? num(el.value) : el.value, C = G.cr;
+    if (k === 'sc') G.sc[el.dataset.key] = v;
+    else if (k === 'pfv') G.pf.v = v == null ? null : clamp(v, 1, G.R.classi[G.cl]?.dv || 12);
+    else if (k === 'fino') G.fino = +v || 0;
+    else if (k === 'dc') { const [i, f] = el.dataset.i.split('.'), c = G.classi[+i]; if (!c) return; if (f === 'id') { c.id = v; c.sotto = null; } else if (f === 'sotto') c.sotto = v || null; else c.livello = clamp(+v || 1, 1, 20); if (!G.classi.some(x => x.id === G.cl)) G.cl = G.classi[0]?.id || null; }
+    else if (k === 'ass') { const x = el.dataset.k; if (v === '') delete C.ass[x]; else { const i = +v; for (const y in C.ass) if (C.ass[y] === i) delete C.ass[y]; C.ass[x] = i; } }
+    else if (k === 'man') C.man[el.dataset.k] = v;
+    else if (k === 'eq') C.eq[+el.dataset.i] = +v;
+    else if (k === 'arma') C.armi[+el.dataset.i] = v;
+    else if (k === 'mo') C.mo = v;
+    else if (['all', 'lingue', 'pers', 'ideali', 'legami', 'difetti', 'arm'].includes(k)) C[k] = v;
+    salvaBozza(G);
+    if (fine || el.tagName === 'SELECT') disegnaGuida(G); else aggiornaPiede(G);
+  }
+  function aggiornaPiede(G) {
+    const passi = passiDi(G), p = passi[G.passo], m = manca(G, p), f = G.dlg.querySelector('.gf');
+    if (!f) return; f.querySelector('.gmsg').textContent = m; const av = f.querySelector('[data-g=avanti],[data-g=conferma]'); if (av) av.disabled = p === 'riep' ? passi.some(x => manca(G, x)) : !!m;
+  }
+  async function azioneGuida(G, b) {
+    const a = b.dataset.g, v = b.dataset.v, C = G.cr, R = G.R;
+    const passi = passiDi(G);
+    if (a === 'chiudi') return G.dlg.close();
+    if (a === 'vai') G.passo = +v;
+    else if (a === 'avanti') { if (manca(G, passi[G.passo])) return; G.passo++; }
+    else if (a === 'indietro') G.passo = Math.max(0, G.passo - 1);
+    else if (a === 'conferma') return confermaGuida(G);
+    else if (a === 'cl') { if (G.cl !== v) { G.cl = v; G.sotto = null; G.asi = { modo: 'asi', p: {}, tal: null, tk: null }; G.sc = {}; G.inc = incVuoto(); G.pf = { modo: G.pf.modo, v: null }; } }
+    else if (a === 'pf') { if (G.pf.tirato) return toast('Hai già tirato il dado: vale il tiro.'); G.pf = { modo: v, v: null, tirato: false }; }
+    else if (a === 'pftira') {
+      if (G.pf.tirato) return; const k = R.classi[G.cl], c0 = G.classi.find(c => c.id === G.cl), lt = G.classi.reduce((x, c) => x + c.livello, 0) + 1;
+      b.disabled = true; const t = await tira(`1d${k.dv}`, null, false, `${G.nome} · punti ferita del ${lt}° livello (${k.nome} ${(c0?.livello || 0) + 1})`);
+      if (t?.totale != null) { G.pf.v = +t.totale; G.pf.tirato = true; } else b.disabled = false;
+    }
+    else if (a === 'dcapri') G.dcApri = true;
+    else if (a === 'dc+') G.classi.push({ id: Object.keys(R.classi).find(k => !G.classi.some(c => c.id === k)), livello: 1, sotto: null });
+    else if (a === 'dc-') { G.classi.splice(+v, 1); if (!G.classi.some(x => x.id === G.cl)) G.cl = G.classi[0]?.id || null; }
+    else if (a === 'sotto') { if (G.sotto !== v) { G.sotto = v; for (const key in G.sc) if (/^s\d/.test(key)) delete G.sc[key]; G.inc = incVuoto(); } }
+    else if (a === 'asim') G.asi.modo = v;
+    else if (a === 'asi') { const n = +b.dataset.d, p = G.asi.p, tot = Object.values(p).reduce((x, y) => x + y, 0), st = num(ctxDi(G).d[v]) ?? 10; const nv = (p[v] || 0) + n; if (nv < 0 || nv > 2 || (n > 0 && (tot >= 2 || st + nv > 20))) return; if (nv) p[v] = nv; else delete p[v]; }
+    else if (a === 'tal') { if (G.asi.tal !== v) { G.asi.tal = v; G.asi.tk = null; for (const key in G.sc) if (key.startsWith('f:')) delete G.sc[key]; } }
+    else if (a === 'talk') G.asi.tk = v;
+    else if (a === 'sc') {
+      const key = b.dataset.key, n = +b.dataset.max || 1, L = Array.isArray(G.sc[key]) ? [...G.sc[key]] : [];
+      const i = L.indexOf(v); if (i >= 0) L.splice(i, 1); else if (L.length < n) L.push(v); else if (n === 1) L.splice(0, 1, v); else return toast(`Ne hai già scelti ${n}: togline uno per cambiarlo.`);
+      G.sc[key] = L;
+    }
+    else if (a === 'inc') {
+      const q = b.dataset.q, ctx = ctxDi(G), di = datiInc(G, ctx), max = { t: di.t, n: di.n, seg: di.seg, arc: di.arc, sw: G.inc.via ? 1 : 0 }[q];
+      if (q === 'prep') { const L = G.inc.prepS || [], i = L.findIndex(n => chiaveInc(n) === chiaveInc(v)); if (i >= 0) L.splice(i, 1); else { if (L.length >= di.prep) return toast(`Puoi prepararne al massimo ${di.prep}.`); L.push(v); } G.inc.prepS = L; }
+      else { const L = G.inc[q], i = L.indexOf(v); if (i >= 0) L.splice(i, 1); else if (L.length < max) L.push(v); else if (max === 1) L.splice(0, 1, v); else return toast(`Ne hai già scelti ${max}: togline uno per cambiarlo.`); }
+    }
+    else if (a === 'incf') G.inc.f[b.dataset.q] = v === '' ? null : +v;
+    else if (a === 'via') { G.inc.via = G.inc.via === v ? '' : v; G.inc.sw = []; }
+    else if (a === 'vedi') G.vedi = v;
+    else if (a === 'razza') { G.vedi = null; if (C.razza !== v) { Object.assign(C, { razza: v, sotto: null, asiL: {}, asiS: [], libero: false }); for (const key in G.sc) if (/^s?r:/.test(key) || key.startsWith('f:')) delete G.sc[key]; G.asi = { modo: R.razze.find(x => x.id === v)?.talento ? 'talento' : 'asi', p: {}, tal: null, tk: null }; } }
+    else if (a === 'sottor') { if (C.sotto !== v) { C.sotto = v; C.asiS = []; for (const key in G.sc) if (key.startsWith('sr:') || key.startsWith('f:')) delete G.sc[key]; const sr = R.razze.find(x => x.id === C.razza)?.sotto?.find(x => x.id === v); G.asi = { modo: sr?.talento || R.razze.find(x => x.id === C.razza)?.talento ? 'talento' : 'asi', p: {}, tal: null, tk: null }; } }
+    else if (a === 'libero') { C.libero = !C.libero; C.asiL = {}; C.asiS = []; }
+    else if (a === 'schema') { C.schema = v; C.asiL = {}; }
+    else if (a === 'asil') { const n = +b.dataset.d, L = C.asiL; if (L[v] === n) delete L[v]; else { if (C.schema === '21') { for (const x in L) if (L[x] === n) delete L[x]; } else if (Object.keys(L).length >= 3 && !L[v]) return; L[v] = n; } }
+    else if (a === 'asis') { const r = R.razze.find(x => x.id === C.razza), sr = r?.sotto?.find(x => x.id === C.sotto), sch = sr?.asiScelta || r?.asiScelta, i = C.asiS.indexOf(v); if (!sch) return; if (i >= 0) C.asiS.splice(i, 1); else if (C.asiS.length < sch[1]) C.asiS.push(v); else if (sch[1] === 1) C.asiS = [v]; }
+    else if (a === 'classe') { if (C.cl !== v) { C.cl = v; C.abilC = []; G.sotto = null; C.eq = {}; for (const key in G.sc) if (/^[cs]\d/.test(key)) delete G.sc[key]; G.inc = incVuoto(); } }
+    else if (a === 'abilc') { const n = R.classi[C.cl].abil[0], i = C.abilC.indexOf(v); if (i >= 0) C.abilC.splice(i, 1); else if (C.abilC.length < n) C.abilC.push(v); else return toast(`Ne hai già scelte ${n}: togline una per cambiarla.`); }
+    else if (a === 'metodo') C.metodo = v;
+    else if (a === 'pb') { const n = +b.dataset.d, x = C.pb[v] + n; if (x < 8 || x > 15) return; const prova = { ...C.pb, [v]: x }; if (CAR.reduce((t, [k]) => t + R.pointBuy[prova[k]], 0) > 27) return; C.pb[v] = x; }
+    else if (a === 'tiri') {
+      b.disabled = true; const out = [];
+      for (let i = 0; i < 6; i++) { const t = await tira('4d6kh3', null, false, `${G.nome} · punteggio ${i + 1} di 6 (4d6, si tengono i 3 più alti)`); if (t?.totale == null) { b.disabled = false; return; } out.push(+t.totale); }
+      C.tiri = out.sort((x, y) => y - x); C.ass = {};
+    }
+    else if (a === 'bg') { G.vedi = null; if (C.bg !== v) { C.bg = v; delete G.sc['bg:0']; delete G.sc['bgx:0']; C.mo = null; } }
+    else if (a === 'oro') C.oro = !C.oro;
+    else if (a === 'scudo') C.scudo = !C.scudo;
+    salvaBozza(G); disegnaGuida(G);
+  }
+  function disegnaGuida(G) {
+    const passi = passiDi(G); G.passo = clamp(G.passo, 0, passi.length - 1);
+    const p = passi[G.passo], w = G.dlg.querySelector('.gw'), sm = w.querySelector('.gm')?.scrollTop || 0, sb = w.querySelector('.gb')?.scrollTop || 0;
+    const primoKo = passi.findIndex(x => manca(G, x)), lim = primoKo < 0 ? passi.length - 1 : primoKo;
+    const cerca = w.querySelector('[data-gf=cerca]:focus'), cv = cerca?.value, ck = cerca?.dataset.q;
+    let corpo = ''; try { corpo = corpoPasso(G, p); } catch (e) { console.error(e); corpo = `<p class="hint">Qualcosa non va in questo passo: ${esc(e.message)}</p>`; }
+    let ant = ''; try { ant = anteprimaG(G); } catch (e) { console.error(e); }
+    const lv = clamp(num(G.d0.livello) || 1, 1, 20), ultimo = G.passo === passi.length - 1;
+    w.innerHTML = `<div class="gh"><b>${G.tipo === 'crea' ? 'Nuovo personaggio' : `Livello ${lv} → ${lv + 1}`}</b><span class="who">${esc(G.nome)}</span><span class="sp"></span><button type="button" class="x" data-g="chiudi" aria-label="Chiudi" title="Chiudi: le scelte restano per la prossima volta">✕</button></div>
+      <div class="gs">${passi.map((x, i) => `<button type="button" data-g="vai" data-v="${i}" class="${i === G.passo ? 'on' : i < G.passo && !manca(G, x) ? 'ok' : ''}"${i > lim ? ' disabled' : ''}><i>${i < G.passo && !manca(G, x) ? '✓' : i + 1}</i><span>${NOMIP[x]}</span></button>`).join('')}</div>
+      <div class="gb"><div class="gm">${corpo}</div><aside class="ga">${ant}</aside></div>
+      <div class="gf"><button type="button" class="gbtn" data-g="indietro"${G.passo ? '' : ' disabled'}>‹ Indietro</button><span class="gmsg"></span>${ultimo ? `<button type="button" class="gbtn p" data-g="conferma">${G.tipo === 'crea' ? '✓ Crea il personaggio' : `✓ Sali al ${lv + 1}° livello`}</button>` : '<button type="button" class="gbtn p" data-g="avanti">Avanti ›</button>'}</div>`;
+    w.querySelector('.gm').scrollTop = sm; w.querySelector('.gb').scrollTop = sb;
+    if (ck != null) { const c = w.querySelector(`[data-gf=cerca][data-q="${ck}"]`); if (c) { c.value = cv; c.focus(); filtraGuida(c); } }
+    aggiornaPiede(G);
+  }
+  const card = (g, v, on, titolo, sotto, src, no, extra = '') => `<button type="button" class="gc${on ? ' on' : ''}${no && !on ? ' no' : ''}" data-g="${g}" data-v="${esc(v)}"${extra}${no && !on ? ' disabled' : ''}><b>${esc(titolo)}</b>${src ? `<span class="src">${esc(src)}</span>` : ''}${sotto ? `<small>${esc(sotto)}</small>` : ''}${no ? `<small class="no">${esc(no)}</small>` : ''}</button>`;
+  const cercaBox = (q, ph) => `<input type="search" data-gf="cerca" data-q="${q}" placeholder="${esc(ph)}" aria-label="${esc(ph)}">`;
+  function sceltaHtml(G, sc, ctx) {
+    const v = G.sc[sc.key] ?? (sc.tipo === 'testo' ? '' : []), tit = sc.titolo || (sc.tipo === 'abilita' ? 'Competenza nelle abilità' : sc.tipo === 'maestria' ? 'Maestria (competenza doppia)' : 'Scelta');
+    const fonte = sc.fonte ? ` <small>· ${esc(sc.fonte)}</small>` : '';
+    if (sc.tipo === 'testo') return `<div class="gsez"><h5>${esc(tit)}${fonte}</h5><input type="text" data-gi="sc" data-key="${sc.key}" value="${esc(v)}" placeholder="${esc(sc.ph || '')}" style="width:100%"></div>`;
+    const n = quanti(G, sc, ctx), O = opzioniScelta(G, sc, ctx), cnt = `<span class="cnt${v.length >= n ? ' ok' : ''}">${v.length}/${n}</span>`;
+    if (['abilita', 'maestria', 'inc'].includes(sc.tipo)) return `<div class="gsez"><h5>${esc(tit)}${fonte}${cnt}</h5><div class="chips">${O.map(o => `<button type="button" class="chip${v.includes(o.nome) ? ' on' : ''}" data-g="sc" data-key="${sc.key}" data-v="${esc(o.nome)}" data-max="${sc.n || 1}"${o.no && !v.includes(o.nome) ? ` disabled title="${esc(o.no)}"` : ''}>${esc(sc.tipo === 'inc' ? o.nome : nomeAb(o.nome))}</button>`).join('')}</div></div>`;
+    return `<div class="gsez"><h5>${esc(tit)}${fonte}${cnt}</h5>${O.length > 12 ? cercaBox(sc.key, 'Cerca…') : ''}<div class="gcards">${O.map(o => `<button type="button" class="gc${v.includes(o.nome) ? ' on' : ''}${o.no && !v.includes(o.nome) ? ' no' : ''}" data-g="sc" data-key="${sc.key}" data-v="${esc(o.nome)}" data-max="${sc.n || 1}" data-n="${esc(norm(o.nome + ' ' + (o.testo || '')))}"${o.no && !v.includes(o.nome) ? ' disabled' : ''}><b>${esc(o.nome)}</b>${o.fonte ? `<span class="src">${esc(o.fonte)}</span>` : ''}${o.testo ? `<small>${esc(o.testo)}</small>` : ''}${o.req ? `<small><i>${esc(o.req)}</i></small>` : ''}${o.no ? `<small class="no">${esc(o.no)}</small>` : ''}</button>`).join('')}</div></div>`;
+  }
+  function talentiHtml(G, ctx) {
+    const R = G.R, { st } = statDopo(G, { ...ctx, asi: false, tal: false }), f = talScelto(G);
+    const L = [...R.talenti].sort((a, b) => a.nome.localeCompare(b.nome, 'it')).map(x => ({ x, no: talentoNo(G, x, st, ctx.d) })).sort((a, b) => !!a.no - !!b.no);
+    const asiT = x => Array.isArray(x.asi) ? `+1 a ${x.asi.length === 6 ? 'una caratteristica' : x.asi.map(k => SIGLA[k]).join('/')}` : x.asi ? Object.entries(x.asi).map(([k, n]) => `+${n} ${SIGLA[k]}`).join(' ') : '';
+    return `<div class="gsez">${cercaBox('tal', 'Cerca un talento…')}<div class="gcards">${L.map(({ x, no }) => `<button type="button" class="gc${f?.id === x.id ? ' on' : ''}${no && f?.id !== x.id ? ' no' : ''}" data-g="tal" data-v="${x.id}" data-n="${esc(norm(x.nome + ' ' + x.testo))}"${no && f?.id !== x.id ? ' disabled' : ''}><b>${esc(x.nome)}</b><span class="src">${esc(x.fonte)}</span><small>${esc(x.testo)}</small>${asiT(x) || x.req ? `<small><i>${esc([asiT(x), x.req].filter(Boolean).join(' · '))}</i></small>` : ''}${no ? `<small class="no">${esc(no)}</small>` : ''}</button>`).join('')}</div></div>
+      ${f ? `<div class="box"><h5>${esc(f.nome)}</h5>${Array.isArray(f.asi) ? `<div class="riga"><span>+1 a:</span><div class="chips">${f.asi.map(k => `<button type="button" class="chip${G.asi.tk === k ? ' on' : ''}" data-g="talk" data-v="${k}"${st[k] >= 20 ? ' disabled' : ''}>${NOMEC[k]} (${st[k]})</button>`).join('')}</div></div>` : ''}${scelteTal(G).map(sc => sceltaHtml(G, sc, ctx)).join('')}</div>` : ''}`;
+  }
+  const corto2 = x => corto(x.testo, 110);
+  function righeInc(G, di, q, filtro, I) {
+    const sel = q === 'prep' ? G.inc.prepS || [] : G.inc[q], fl = G.inc.f[q], L = (q === 'seg' ? tuttiInc(G.R, di.max) : q === 'arc' ? (G.R.liste.warlock[di.arcLiv] || []).map(n => incNome(G.R, n)).filter(Boolean) : di.lista).filter(filtro);
+    const livs = [...new Set(L.map(x => x.livello))].sort((a, b) => a - b), ce = x => I.some(y => chiaveInc(y.nome) === chiaveInc(x.nome));
+    const vis = L.filter(x => fl == null || x.livello === fl);
+    return `${livs.length > 1 ? `<div class="lvl"><button type="button" data-g="incf" data-q="${q}" data-v="" class="${fl == null ? 'on' : ''}">Tutti</button>${livs.map(l => `<button type="button" data-g="incf" data-q="${q}" data-v="${l}" class="${fl === l ? 'on' : ''}">${l ? l + '°' : 'Trucchetti'}</button>`).join('')}</div>` : ''}
+      ${L.length > 10 ? cercaBox(q, 'Cerca un incantesimo…') : ''}<div class="spls">${vis.map(x => {
+        const on = sel.some(n => chiaveInc(n) === chiaveInc(x.nome)), sempre = di.sempre.has(chiaveInc(x.nome)), gia = q !== 'prep' && ce(x);
+        const no = sempre ? 'Sempre preparato (sottoclasse)' : gia ? 'È già nella scheda' : '';
+        return `<button type="button" class="spl${on || (q === 'prep' && sempre) ? ' on' : ''}" data-g="inc" data-q="${q}" data-v="${esc(x.nome)}" data-n="${esc(norm(x.nome + ' ' + (x.en || '')))}"${no ? ' disabled' : ''}><span class="ck">${on || (q === 'prep' && sempre) ? '✓' : ''}</span><span class="nm"><b>${esc(x.nome)}</b>${x.conc ? ' <em>conc.</em>' : ''}${x.riassunto ? ' <em>riassunto</em>' : ''}</span><em>${x.livello ? x.livello + '°' : 'T'} · ${esc(x.scuola || '')}</em><small>${esc(no || corto2(x))}</small></button>`;
+      }).join('') || '<p class="hint">Niente da scegliere qui.</p>'}</div>`;
+  }
+  function corpoInc(G, ctx) {
+    const di = datiInc(G, ctx), I = ctx.d.incantesimi || [], cnt = (a, n) => `<span class="cnt${a >= n ? ' ok' : ''}">${a}/${n}</span>`, inf = di.inf;
+    const libro = inf.tipo === 'libro', car = NOMEC[inf.car];
+    let h = `<h4>Incantesimi</h4><p class="hint">${inf.tipo === 'preparati' ? `Prepari gli incantesimi ogni giorno con ${car}: puoi tenerne pronti ${di.prep} (oltre a quelli sempre preparati).` : libro ? `Li scrivi nel libro degli incantesimi; ogni giorno ne prepari un numero pari al livello da mago + modificatore di ${car}.` : `Li conosci per sempre e li lanci con ${car}.`} Livello massimo: ${di.max ? di.max + '°' : 'solo trucchetti'}.</p>`;
+    if (di.t) h += `<div class="gsez"><h5>Nuovi trucchetti ${cnt(G.inc.t.length, di.t)}</h5>${righeInc(G, di, 't', x => !x.livello, I)}</div>`;
+    if (di.n) h += `<div class="gsez"><h5>${libro ? 'Nel libro degli incantesimi' : 'Nuovi incantesimi'} ${cnt(G.inc.n.length, di.n)}</h5>${righeInc(G, di, 'n', x => x.livello > 0, I)}</div>`;
+    if (di.seg) h += `<div class="gsez"><h5>Segreti magici: da qualsiasi lista ${cnt(G.inc.seg.length, di.seg)}</h5>${righeInc(G, di, 'seg', () => true, I)}</div>`;
+    if (di.arc) h += `<div class="gsez"><h5>Arcanum mistico (${di.arcLiv}° livello, una volta per riposo lungo) ${cnt(G.inc.arc.length, 1)}</h5>${righeInc(G, di, 'arc', () => true, I)}</div>`;
+    if (di.swap) {
+      const mie = I.filter(x => num(x.livello) > 0 && di.lista.some(y => chiaveInc(y.nome) === chiaveInc(x.nome)));
+      h += `<div class="gsez"><h5>Vuoi sostituirne uno? <small>· facoltativo</small></h5><div class="chips">${mie.map(x => `<button type="button" class="chip${G.inc.via === x.nome ? ' on' : ''}" data-g="via" data-v="${esc(x.nome)}">${esc(x.nome)}</button>`).join('') || '<span class="hint">Nessuno.</span>'}</div>
+        ${G.inc.via ? `<p class="hint">Al posto di ${esc(G.inc.via)}:</p>${righeInc(G, di, 'sw', x => x.livello > 0, I)}` : ''}</div>`;
+    }
+    if (di.prep) {
+      if (!G.inc.prepS) G.inc.prepS = I.filter(x => num(x.livello) > 0 && !di.sempre.has(chiaveInc(x.nome)) && di.lista.some(y => chiaveInc(y.nome) === chiaveInc(x.nome))).map(x => x.nome);
+      h += `<div class="gsez"><h5>Preparati ${cnt(G.inc.prepS.length, di.prep)}</h5><p class="hint">Li puoi cambiare dopo ogni riposo lungo: qui scegli quelli di partenza.</p>${righeInc(G, di, 'prep', x => x.livello > 0, I)}</div>`;
+    }
+    return h;
+  }
+  function corpoPasso(G, p) {
+    const R = G.R, C = G.cr, ctx = ctxDi(G);
+    if (p === 'liv') {
+      const lv = clamp(num(G.d0.livello) || 1, 1, 20), st = Object.fromEntries(CAR.map(([x]) => [x, num(G.d0[x]) ?? 10]));
+      const okMulti = id => { const m = R.classi[id].multi, o = m.includes('o'), req = m.filter(x => Array.isArray(x)); return o ? req.some(([k, n]) => st[k] >= n) : req.every(([k, n]) => st[k] >= n); };
+      const reqT = id => { const m = R.classi[id].multi, req = m.filter(x => Array.isArray(x)); return req.map(([k, n]) => `${NOMEC[k]} ${n}`).join(m.includes('o') ? ' o ' : ' e '); };
+      const mieOk = G.classi.every(c => okMulti(c.id));
+      let h = '';
+      const somma = G.classi.reduce((a, c) => a + (+c.livello || 0), 0);
+      if (G.dedotte && !G.dcApri && G.classi.length && somma === lv) h += `<div class="riga"><span class="hint">Classi lette dalla scheda: ${esc(testoClassi(R, G.classi))}${G.classi.length > 1 ? '' : ' ' + lv}.</span><button type="button" class="chip" data-g="dcapri">✎ Correggi</button></div>`;
+      else if (G.dedotte) h += `<div class="box"><h5>Le classi di adesso</h5><p class="hint">${G.d0.classe ? `Le ho lette dalla scheda («${esc(G.d0.classe)}»): controlla che siano giuste.` : 'La scheda non dice la classe: indicala qui.'} Da qui in poi le ricordo io.</p>
+        ${G.classi.map((c, i) => `<div class="riga"><select data-gi="dc" data-i="${i}.id" aria-label="Classe">${Object.entries(R.classi).map(([k, x]) => `<option value="${k}"${k === c.id ? ' selected' : ''}>${esc(x.nome)}</option>`).join('')}</select>
+          <select data-gi="dc" data-i="${i}.sotto" aria-label="Sottoclasse"><option value="">— sottoclasse —</option>${(R.sotto[c.id] || []).map(x => `<option value="${x.id}"${x.id === c.sotto ? ' selected' : ''}>${esc(x.nome)}</option>`).join('')}</select>
+          <label>liv. <input type="number" min="1" max="20" value="${c.livello}" data-gi="dc" data-i="${i}.liv" style="width:60px"></label>${G.classi.length > 1 ? `<button type="button" class="chip" data-g="dc-" data-v="${i}">✕</button>` : ''}</div>`).join('')}
+        <button type="button" class="chip" data-g="dc+">+ Un'altra classe</button></div>`;
+      const altre = Object.entries(R.classi).filter(([k]) => !G.classi.some(c => c.id === k)), nuova = G.cl && !G.classi.some(c => c.id === G.cl);
+      h += `<h4>In quale classe sali?</h4><div class="gcards">${G.classi.map(c => card('cl', c.id, G.cl === c.id, `${R.classi[c.id].nome} ${c.livello} → ${c.livello + 1}`, sottoDi(R, c)?.nome || R.classi[c.id].sotto.nome + ' dal ' + R.classi[c.id].sotto.liv + '°', `d${R.classi[c.id].dv}`, '')).join('')}${nuova ? card('cl', G.cl, true, `${R.classi[G.cl].nome} 1 (nuova)`, 'Multiclasse', `d${R.classi[G.cl].dv}`, '') : ''}</div>`;
+      if (G.classi.length) h += `<details class="box"${nuova ? ' open' : ''}><summary><b>Oppure una nuova classe (multiclasse)</b></summary><p class="hint">Serve il punteggio minimo sia nella classe nuova sia in quelle che hai già.</p><div class="gcards">${altre.map(([k, x]) => card('cl', k, G.cl === k, x.nome, `Richiede ${reqT(k)}`, `d${x.dv}`, !okMulti(k) || !mieOk ? 'Punteggi insufficienti' : '')).join('')}</div></details>`;
+      if (G.cl) {
+        const k = R.classi[G.cl], med = k.dv / 2 + 1, cm = modV(G.d0.cos);
+        h += `<h4>Punti ferita</h4><div class="seg"><button type="button" data-g="pf" data-v="media" class="${G.pf.modo === 'media' ? 'on' : ''}">Media: ${med}</button>${T.pag ? '' : `<button type="button" data-g="pf" data-v="tiro" class="${G.pf.modo === 'tiro' ? 'on' : ''}">Tira 1d${k.dv}</button>`}<button type="button" data-g="pf" data-v="man" class="${G.pf.modo === 'man' ? 'on' : ''}">Lo scrivo io</button></div>
+          ${G.pf.modo === 'tiro' ? `<div class="riga">${G.pf.tirato ? `<span class="dado">${G.pf.v}</span><span class="hint">Tirato al Tavolo: lo vedono tutti in chat.</span>` : `<button type="button" class="gbtn" data-g="pftira">🎲 Tira 1d${k.dv}</button><span class="hint">Il tiro esce in chat e vale quello.</span>`}</div>` : ''}
+          ${G.pf.modo === 'man' ? `<div class="riga"><label>Dado: <input type="number" min="1" max="${k.dv}" value="${G.pf.v ?? ''}" data-gi="pfv" style="width:70px"></label><span class="hint">Per esempio se hai tirato i dadi veri.</span></div>` : ''}
+          <p class="hint">${T.pag ? 'Fuori dal Tavolo non si tirano dadi: scegli la media o scrivi il risultato. ' : ''}Si aggiunge il modificatore di Costituzione (${segnoP(cm) || '+0'})${num(G.d0.pf_liv) ? ` e ${num(G.d0.pf_liv)} per i bonus di razza o talento` : ''}.</p>`;
+      }
+      return h;
+    }
+    if (p === 'sotto') {
+      const k = ctx.k, L = R.sotto[ctx.cid] || [];
+      return `<h4>${esc(k.sotto.nome)}</h4><p class="hint">Al ${ctx.lc}° livello da ${k.nome.toLowerCase()} scegli la tua strada: ci sono tutte quelle dei manuali ufficiali.</p>${L.length > 8 ? cercaBox('sotto', 'Cerca…') : ''}
+        <div class="gcards">${L.map(x => { const pri = Object.entries(x.liv || {}).filter(([lv]) => +lv <= ctx.lc).flatMap(([, a]) => a.map(y => y[0])); return `<button type="button" class="gc${G.sotto === x.id ? ' on' : ''}" data-g="sotto" data-v="${x.id}" data-n="${esc(norm(x.nome + ' ' + x.desc))}"><b>${esc(x.nome)}</b><span class="src">${esc(x.fonte)}</span><small>${esc(x.desc)}</small>${pri.length ? `<small><i>Subito: ${esc(pri.join(', '))}</i></small>` : ''}</button>`; }).join('')}</div>
+        ${ctx.sb ? `<div class="box"><h5>${esc(ctx.sb.nome)}</h5><ul class="nov">${Object.entries(ctx.sb.liv || {}).map(([lv, a]) => a.map(([n, t]) => `<li><b>${lv}°: ${esc(n)}</b> · ${esc(t)}</li>`).join('')).join('')}</ul></div>` : ''}`;
+    }
+    if (p === 'asi') {
+      const st = Object.fromEntries(CAR.map(([x]) => [x, num(ctx.d[x]) ?? 10])), pp = G.asi.p, tot = Object.values(pp).reduce((a, n) => a + n, 0);
+      return `<h4>Aumento dei punteggi o talento</h4><div class="seg"><button type="button" data-g="asim" data-v="asi" class="${G.asi.modo === 'asi' ? 'on' : ''}">+2 a una o +1 a due caratteristiche</button><button type="button" data-g="asim" data-v="talento" class="${G.asi.modo === 'talento' ? 'on' : ''}">Un talento</button></div>
+        ${G.asi.modo === 'asi' ? `<p class="hint">Punti da distribuire: ${2 - tot}. Nessun punteggio può superare 20.</p><div class="ab6">${CAR.map(([k, s]) => `<div class="ab${pp[k] ? ' up' : ''}"><small>${s}</small><b>${st[k] + (pp[k] || 0)}</b><span>${segnoP(modV(st[k] + (pp[k] || 0))) || '+0'}</span><div class="pm"><button type="button" data-g="asi" data-v="${k}" data-d="-1"${pp[k] ? '' : ' disabled'} aria-label="Meno ${s}">−</button><button type="button" data-g="asi" data-v="${k}" data-d="1"${tot >= 2 || st[k] + (pp[k] || 0) >= 20 ? ' disabled' : ''} aria-label="Più ${s}">+</button></div></div>`).join('')}</div>` : talentiHtml(G, ctx)}`;
+    }
+    if (p === 'scelte') return `<h4>Le scelte di questo livello</h4>${scelteLiv(ctx).map(sc => sceltaHtml(G, sc, ctx)).join('')}`;
+    if (p === 'inc') return corpoInc(G, ctx);
+    if (p === 'razza') {
+      const r = R.razze.find(x => x.id === C.razza), sr = r?.sotto?.find(x => x.id === C.sotto);
+      const asiT = x => x.asi === 'libero' ? '+2 e +1 a scelta' : [Object.entries(x.asi || {}).map(([k, n]) => `+${n} ${SIGLA[k]}`).join(' '), x.asiScelta ? `+${x.asiScelta[0]} a ${x.asiScelta[1]} a scelta` : ''].filter(Boolean).join(', ');
+      const tutte = !r || G.vedi === 'razza';
+      let h = `<h4>Razza${tutte ? '' : ' <button type="button" class="chip" data-g="vedi" data-v="razza">Cambia razza</button>'}</h4>${tutte ? cercaBox('razza', 'Cerca una razza…') : ''}<div class="gcards">${R.razze.filter(x => tutte || x.id === C.razza).map(x => `<button type="button" class="gc${C.razza === x.id ? ' on' : ''}" data-g="razza" data-v="${x.id}" data-n="${esc(norm(x.nome))}"><b>${esc(x.nome)}</b><span class="src">${esc(x.fonte)}</span><small>${esc([asiT(x), x.vel !== 9 ? metriT(x.vel) : '', ...(x.tratti || []).slice(0, 3).map(t => t[0])].filter(Boolean).join(' · '))}</small></button>`).join('')}</div>`;
+      if (!r) return h;
+      if (r.sotto?.length) h += `<h5>Sottorazza</h5><div class="gcards">${r.sotto.map(x => card('sottor', x.id, C.sotto === x.id, x.nome, [asiT(x), ...(x.tratti || []).map(t => t[0])].filter(Boolean).join(' · '), x.fonte || '', '')).join('')}</div>`;
+      const fisso = r.asi !== 'libero' && !(sr?.togliAsi), sch = sr?.asiScelta || r.asiScelta;
+      h += `<h5>Bonus ai punteggi</h5>`;
+      if (r.asi === 'libero' || C.libero) h += `<div class="seg"><button type="button" data-g="schema" data-v="21" class="${C.schema === '21' ? 'on' : ''}">+2 e +1</button><button type="button" data-g="schema" data-v="111" class="${C.schema === '111' ? 'on' : ''}">+1, +1 e +1</button></div>
+        ${C.schema === '21' ? `<div class="riga"><span>+2 a</span><div class="chips">${CAR.map(([k, s]) => `<button type="button" class="chip${C.asiL[k] === 2 ? ' on' : ''}" data-g="asil" data-v="${k}" data-d="2">${s}</button>`).join('')}</div></div><div class="riga"><span>+1 a</span><div class="chips">${CAR.map(([k, s]) => `<button type="button" class="chip${C.asiL[k] === 1 ? ' on' : ''}" data-g="asil" data-v="${k}" data-d="1"${C.asiL[k] === 2 ? ' disabled' : ''}>${s}</button>`).join('')}</div></div>`
+          : `<div class="riga"><span>+1 a tre</span><div class="chips">${CAR.map(([k, s]) => `<button type="button" class="chip${C.asiL[k] === 1 ? ' on' : ''}" data-g="asil" data-v="${k}" data-d="1">${s}</button>`).join('')}</div></div>`}`;
+      else h += `<p>${esc(asiT({ asi: { ...(sr?.togliAsi ? {} : r.asi), ...(sr?.asi || {}) } }) || '—')}</p>${sch ? `<div class="riga"><span>+${sch[0]} a ${sch[1]} a scelta</span><div class="chips">${CAR.filter(([k]) => !sch[2].includes(k)).map(([k, s]) => `<button type="button" class="chip${C.asiS.includes(k) ? ' on' : ''}" data-g="asis" data-v="${k}">${s}</button>`).join('')}</div></div>` : ''}`;
+      if (r.asi !== 'libero' && fisso && !/^umano/.test(C.sotto || '')) h += `<label class="gck"><input type="checkbox" data-g="libero"${C.libero ? ' checked' : ''}><span>Sposta i bonus dove vuoi (regola del Calderone di Tasha)</span></label>`;
+      h += scelteRazza(G).map(sc => sceltaHtml(G, sc, ctx)).join('');
+      h += `<div class="box"><h5>Tratti</h5><ul class="nov">${[...(r.tratti || []), ...(sr?.tratti || [])].map(([n, t]) => `<li><b>${esc(n)}</b> · ${esc(t)}</li>`).join('')}<li><b>Velocità</b> · ${metriT(sr?.vel || r.vel)}${r.lingue ? ` · <b>Lingue</b> · ${esc(r.lingue)}` : ''}</li></ul></div>`;
+      return h;
+    }
+    if (p === 'classe') {
+      const k = C.cl && R.classi[C.cl];
+      let h = `<h4>Classe</h4><div class="gcards">${Object.entries(R.classi).map(([id, x]) => card('classe', id, C.cl === id, x.nome, `${x.prim} · TS ${x.ts.map(t => SIGLA[t]).join(', ')}${x.inc ? ' · incantesimi' : ''}`, `d${x.dv} · ${x.fonte}`, '')).join('')}</div>`;
+      if (!k) return h;
+      const ab = k.abil[1] === 'tutte' ? ABIL.map(x => x[0]) : k.abil[1], base = baseCrea({ ...G, cr: { ...C, abilC: [] } });
+      h += `<h5>Abilità della classe <span class="cnt${C.abilC.length >= k.abil[0] ? ' ok' : ''}">${C.abilC.length}/${k.abil[0]}</span></h5><div class="chips">${ab.map(a => `<button type="button" class="chip${C.abilC.includes(a) ? ' on' : ''}" data-g="abilc" data-v="${a}"${num(base['ab_' + a]) && !C.abilC.includes(a) ? ' disabled title="Ce l\'hai già dalla razza o dal background"' : ''}>${esc(nomeAb(a))}</button>`).join('')}</div>`;
+      if (k.sotto.liv === 1) h += `<h5>${esc(k.sotto.nome)}</h5><div class="gcards">${(R.sotto[C.cl] || []).map(x => card('sotto', x.id, G.sotto === x.id, x.nome, x.desc, x.fonte, '')).join('')}</div>`;
+      h += scelteLiv(ctx).map(sc => sceltaHtml(G, sc, ctx)).join('');
+      h += `<div class="box"><h5>Al 1° livello</h5><ul class="nov">${(k.liv[1] || []).map(([n, t]) => `<li><b>${esc(n)}</b> · ${esc(t)}</li>`).join('')}<li><b>Competenze</b> · ${esc(k.comp)}</li></ul></div>`;
+      return h;
+    }
+    if (p === 'car') {
+      const b = bonusRazza(G), pb = puntiBase(G), vals = C.metodo === 'tiri' ? C.tiri : R.standard;
+      let h = `<h4>Caratteristiche</h4><div class="seg"><button type="button" data-g="metodo" data-v="standard" class="${C.metodo === 'standard' ? 'on' : ''}">Serie standard</button><button type="button" data-g="metodo" data-v="pb" class="${C.metodo === 'pb' ? 'on' : ''}">Acquisto a punti</button>${T.pag ? '' : `<button type="button" data-g="metodo" data-v="tiri" class="${C.metodo === 'tiri' ? 'on' : ''}">Tira 4d6</button>`}<button type="button" data-g="metodo" data-v="manuale" class="${C.metodo === 'manuale' ? 'on' : ''}">Li scrivo io</button></div>`;
+      if (C.metodo === 'standard') h += `<p class="hint">Assegna 15, 14, 13, 12, 10 e 8: un valore per caratteristica.</p>`;
+      if (C.metodo === 'pb') h += `<p class="hint">27 punti: da 8 a 15 prima dei bonus della razza. Spesi: ${costoPb(G)}/27.</p>`;
+      if (C.metodo === 'tiri') h += C.tiri.length ? `<p class="hint">Risultati: ${C.tiri.join(', ')}. Ora assegnali.</p>` : `<div class="riga"><button type="button" class="gbtn p" data-g="tiri">🎲 Tira 6 volte 4d6 (tieni i 3 più alti)</button><span class="hint">I tiri escono in chat al Tavolo.</span></div>`;
+      if (C.metodo === 'manuale') h += `<p class="hint">Scrivi i punteggi prima dei bonus della razza.</p>`;
+      const usati = new Set(Object.values(C.ass));
+      h += `<div class="ab6">${CAR.map(([k, s]) => {
+        let ctl = '';
+        if (['standard', 'tiri'].includes(C.metodo) && vals.length) ctl = `<select data-gi="ass" data-k="${k}" aria-label="${s}"><option value="">—</option>${vals.map((v, i) => `<option value="${i}"${C.ass[k] === i ? ' selected' : ''}${usati.has(i) && C.ass[k] !== i ? ' disabled' : ''}>${v}</option>`).join('')}</select>`;
+        if (C.metodo === 'pb') ctl = `<div class="pm"><button type="button" data-g="pb" data-v="${k}" data-d="-1"${C.pb[k] <= 8 ? ' disabled' : ''}>−</button><button type="button" data-g="pb" data-v="${k}" data-d="1"${C.pb[k] >= 15 ? ' disabled' : ''}>+</button></div>`;
+        if (C.metodo === 'manuale') ctl = `<input type="number" min="3" max="20" value="${C.man[k] ?? ''}" data-gi="man" data-k="${k}" aria-label="${s}" style="width:58px">`;
+        const tot = Math.min(20, pb[k] + (b[k] || 0));
+        return `<div class="ab${b[k] ? ' up' : ''}"><small>${s}</small><b>${tot}</b><span>${segnoP(modV(tot)) || '+0'}${b[k] ? ` · razza +${b[k]}` : ''}</span>${ctl}</div>`;
+      }).join('')}</div>`;
+      if (ctx?.tal) h += `<h4>Talento della razza</h4>${talentiHtml(G, ctx)}`;
+      return h;
+    }
+    if (p === 'bg') {
+      const bg = R.background.find(x => x.id === C.bg);
+      const tutti = !bg || G.vedi === 'bg';
+      let h = `<h4>Background${tutti ? '' : ' <button type="button" class="chip" data-g="vedi" data-v="bg">Cambia background</button>'}</h4>${tutti ? cercaBox('bg', 'Cerca un background…') : ''}<div class="gcards">${R.background.filter(x => tutti || x.id === C.bg).map(x => `<button type="button" class="gc${C.bg === x.id ? ' on' : ''}" data-g="bg" data-v="${x.id}" data-n="${esc(norm(x.nome))}"><b>${esc(x.nome)}</b><span class="src">${esc(x.fonte)}</span><small>${esc([x.abil.map(nomeAb).join(', '), x.abilScelta ? `${x.abilScelta} a scelta` : '', x.priv?.[0]].filter(Boolean).join(' · '))}</small></button>`).join('')}</div>`;
+      if (bg) h += scelteBg(G).map(sc => sceltaHtml(G, sc, ctx)).join('') + `<div class="box"><ul class="nov"><li><b>${esc(bg.priv?.[0] || 'Privilegio')}</b> · ${esc(bg.priv?.[1] || bg.testo || '')}</li>${bg.strumenti ? `<li><b>Strumenti</b> · ${esc(bg.strumenti)}</li>` : ''}${bg.lingue ? `<li><b>Lingue</b> · ${bg.lingue} a scelta (le scrivi nei dettagli)</li>` : ''}<li><b>Equipaggiamento</b> · ${esc(bg.equip || '')}, ${bg.mo || 0} mo</li></ul></div>`;
+      return h;
+    }
+    if (p === 'equip') {
+      const k = R.classi[C.cl], bg = R.background.find(x => x.id === C.bg), d = ctx.d;
+      let h = `<h4>Equipaggiamento</h4><label class="gck"><input type="checkbox" data-g="oro"${C.oro ? ' checked' : ''}><span>Al posto dell'equipaggiamento della classe prendo le monete d'oro (${esc(k.oro)} mo)</span></label>`;
+      if (!C.oro) h += k.equip.map((riga, i) => { const o = riga.split(' oppure '); return `<div class="riga">${o.length > 1 ? `<select data-gi="eq" data-i="${i}" aria-label="Scelta ${i + 1}">${o.map((x, j) => `<option value="${j}"${(C.eq[i] || 0) === j ? ' selected' : ''}>${esc(x)}</option>`).join('')}</select>` : `<span>• ${esc(riga)}</span>`}</div>`; }).join('');
+      if (bg) h += `<p class="hint">Dal background: ${esc(bg.equip)}.</p>`;
+      h += `<div class="riga"><label>Monete d'oro <input type="number" min="0" value="${C.mo ?? (bg?.mo || 0)}" data-gi="mo" style="width:90px"></label></div>
+        <h5>Armatura e armi in mano</h5><div class="riga"><select data-gi="arm" aria-label="Armatura"><option value="">Nessuna armatura</option>${R.armature.filter(a => a[2] !== 'scudo').map(a => `<option${C.arm === a[0] ? ' selected' : ''}>${esc(a[0])}</option>`).join('')}</select><label class="gck"><input type="checkbox" data-g="scudo"${C.scudo ? ' checked' : ''}><span>Scudo</span></label><span>CA <b>${d.ca}</b></span></div>
+        <div class="riga">${[0, 1, 2].map(i => `<select data-gi="arma" data-i="${i}" aria-label="Arma ${i + 1}"><option value="">— arma ${i + 1} —</option>${['semplice', 'guerra'].map(c => `<optgroup label="${c === 'guerra' ? 'Armi da guerra' : 'Armi semplici'}">${R.armi.filter(a => a[3] === c).map(a => `<option${C.armi[i] === a[0] ? ' selected' : ''}>${esc(a[0])}</option>`).join('')}</optgroup>`).join('')}</select>`).join('')}</div>
+        <p class="hint">Le armi scelte diventano attacchi nella scheda, con bonus e danni già calcolati. Competenze della classe: ${esc(k.comp)}.</p>`;
+      return h;
+    }
+    if (p === 'dett') {
+      const bg = R.background.find(x => x.id === C.bg), r = R.razze.find(x => x.id === C.razza), maxL = isDM() ? 20 : Math.max(1, num(G.d0.liv_concesso) || 1);
+      const ALL = ['Legale buono', 'Neutrale buono', 'Caotico buono', 'Legale neutrale', 'Neutrale puro', 'Caotico neutrale', 'Legale malvagio', 'Neutrale malvagio', 'Caotico malvagio'];
+      return `<h4>Dettagli</h4><div class="riga"><label>Allineamento <select data-gi="all"><option value="">—</option>${ALL.map(a => `<option${C.all === a ? ' selected' : ''}>${a}</option>`).join('')}</select></label></div>
+        <div class="riga"><label style="flex:1">Lingue in più${bg?.lingue ? ` (${bg.lingue} dal background)` : ''}${r ? ` · già: ${esc(r.lingue || 'Comune')}` : ''}<input type="text" data-gi="lingue" value="${esc(C.lingue)}" placeholder="Elfico, Nanico…" style="width:100%"></label></div>
+        ${[['pers', 'Tratti caratteriali'], ['ideali', 'Ideali'], ['legami', 'Legami'], ['difetti', 'Difetti']].map(([k, l]) => `<h5>${l}</h5><textarea data-gi="${k}" rows="2">${esc(C[k])}</textarea>`).join('')}
+        ${maxL > 1 ? `<h4>Livello di partenza</h4><div class="riga"><select data-gi="fino">${Array.from({ length: maxL }, (_, i) => `<option value="${i + 1}"${(G.fino || 1) === i + 1 ? ' selected' : ''}>${i + 1}° livello</option>`).join('')}</select><span class="hint">Si crea al 1° livello, poi si sale un livello alla volta con le stesse scelte guidate.</span></div>` : ''}`;
+    }
+    if (p === 'riep') {
+      const r = applica(G); if (!r) return '<p class="hint">Mancano ancora delle scelte.</p>';
+      const d0 = G.tipo === 'crea' ? null : G.d0, d = r.d, ko = passiDi(G).map(x => [x, manca(G, x)]).filter(([, m]) => m);
+      const righe = d0 ? [['Livello', d0.livello || 1, d.livello], ['Classe', d0.classe || '—', d.classe], ['PF massimi', d0.pf_max ?? '—', d.pf_max], ['Dadi vita', d0.dadi_vita || '—', d.dadi_vita], ['Bonus di competenza', '+' + compL(num(d0.livello) || 1), '+' + compL(d.livello)], ...CAR.filter(([k]) => num(d0[k]) !== num(d[k])).map(([k, , n]) => [n, d0[k] ?? 10, d[k]])].filter(([, a, b]) => String(a) !== String(b) || /Classe|PF/.test(String(a)))
+        : [['Razza', '', d.razza], ['Classe', '', d.classe], ['Background', '', d.background], ['PF', '', d.pf_max], ['CA', '', d.ca], ['Velocità', '', d.velocita]];
+      return `<h4>Riepilogo</h4>${ko.length ? `<div class="box ko">${ko.map(([x, m]) => `<p>⚠ ${NOMIP[x]}: ${esc(m)}</p>`).join('')}</div>` : ''}
+        <table class="dif"><thead><tr><th></th>${d0 ? '<th>Prima</th>' : ''}<th>${d0 ? 'Dopo' : ''}</th></tr></thead><tbody>${righe.map(([l, a, b]) => `<tr><td>${esc(l)}</td>${d0 ? `<td>${esc(a)}</td>` : ''}<td>${esc(b)}</td></tr>`).join('')}</tbody></table>
+        <h5>Novità</h5><ul class="nov">${r.righe.filter(([l]) => !['Punti ferita', ...CAR.map(x => x[2])].includes(l)).map(([l, t]) => `<li><b>${esc(l)}</b> · ${esc(t)}</li>`).join('') || '<li>Niente di nuovo da segnare.</li>'}</ul>
+        <p class="hint">Confermando la scheda si aggiorna da sola${T.pag ? '' : ' e il Tavolo lo annuncia in chat'}. Se qualcosa non torna, l'ultimo livello si può annullare dalla «Storia dei livelli».${G.fino > (d.livello || 1) ? ` Dopo si passa al ${(d.livello || 1) + 1}° livello, fino al ${G.fino}°.` : ''}</p>`;
+    }
+    return '';
+  }
+  function anteprimaG(G) {
+    const R = G.R; let r = null; try { r = applica(G); } catch (e) { console.warn(e); }
+    const d = r?.d || (G.tipo === 'crea' ? baseCrea(G) : G.d0), d0 = G.tipo === 'crea' ? null : G.d0, s = T.schede.get(G.id), foto = s && fotoScheda(s);
+    const sub = [d.razza, d.classe ? `${d.classe} ${d.livello || ''}`.trim() : ''].filter(Boolean).join(' · ') || 'Ancora da scegliere';
+    const ab = CAR.map(([k, sg]) => { const v = num(d[k]) ?? 10, up = d0 ? v > (num(d0[k]) ?? 10) : false; return `<div class="ab${up ? ' up' : ''}"><small>${sg}</small><b>${v}</b><span>${segnoP(modV(v)) || '+0'}</span></div>`; }).join('');
+    const kv = [['PF', d0 ? `${d0.pf_max ?? '—'} → ${d.pf_max ?? '—'}` : d.pf_max || '—'], ['CA', d.ca ?? '—'], ['Competenza', '+' + compL(num(d.livello) || 1)], ['Velocità', d.velocita || '—'], ['Dadi vita', d.dadi_vita || '—']];
+    const nov = (r?.righe || []).filter(([l]) => l !== 'Punti ferita').slice(0, 14);
+    return `<h5>Anteprima della scheda</h5><div class="pv"><i style="${foto ? `background-image:url('${esc(foto)}')` : ''}">${foto ? '' : esc(iniziali(G.nome))}</i><div><b>${esc(G.nome)}</b><small>${esc(sub)}</small></div></div>
+      <div class="ab6 pic">${ab}</div><dl class="kv">${kv.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
+      ${nov.length ? `<h5>Novità</h5><ul class="nov">${nov.map(([l, t]) => `<li><b>${esc(l)}</b> · ${esc(t)}</li>`).join('')}</ul>` : ''}`;
+  }
+  // un messaggio in chat anche dalla pagina del personaggio (fuori dal Tavolo non c'è la chat aperta)
+  function diInChat(testo) {
+    if (T.chat && !T.pag) return annuncia(testo).catch(() => { });
+    return SB.rpc('tavolo_scrivi', { p_testo: testo, p_per: null }).then(() => { }, () => { });
+  }
+  async function confermaGuida(G) {
+    const s = T.schede.get(G.id); if (!s) return;
+    const passi = passiDi(G), ko = passi.find(x => manca(G, x)); if (ko) { G.passo = passi.indexOf(ko); return disegnaGuida(G); }
+    const lv0 = clamp(num(s.dati.livello) || 1, 1, 20);
+    if (G.tipo === 'liv' && !isDM() && !(num(s.dati.liv_concesso) > lv0)) return toast('Il DM non ti ha ancora concesso il prossimo livello.', 'err');
+    if ((num(s.dati.livello) || 0) !== (num(G.d0.livello) || 0)) return toast('Intanto la scheda è cambiata: chiudi e riapri la procedura.', 'err');
+    if (G.tipo === 'crea' && !schedaVuota(s) && !await ask(`La scheda di **${s.nome}** ha già dei dati: verranno sostituiti (storia e note restano). Si può tornare indietro dalla Storia dei livelli.`, { ok: 'Sostituisci', danger: true, title: 'Nuovo personaggio' })) return;
+    const r = applica(G), d = r.d, d0 = s.dati, patch = {}, prima = {};
+    const TIENI = ['storia_livelli', 'forma', 'storia', 'aspetto', 'alleati', 'tesoro', 'note', 'eta', 'altezza', 'peso', 'occhi', 'pelle', 'capelli', 'liv_concesso', 'condizioni', 'ispirazione'];
+    for (const k of new Set([...Object.keys(d), ...(G.tipo === 'crea' ? Object.keys(d0) : [])])) {
+      if (k === 'storia_livelli' || (!(k in d) && TIENI.includes(k))) continue;
+      const nv = k in d ? d[k] ?? null : null; if (JSON.stringify(nv) === JSON.stringify(d0[k] ?? null)) continue;
+      patch[k] = nv; prima[k] = d0[k] ?? null;
+    }
+    const voce = { liv: d.livello, data: new Date().toISOString(), ...(G.tipo === 'crea' ? { crea: true } : { classe: `${R_nome(G)} ${r.ctx.lc}` }), riepilogo: r.righe.map(([a, b]) => `${a}: ${b}`).slice(0, 40), prima };
+    patch.storia_livelli = [...(d0.storia_livelli || []), voce].slice(-20);
+    await salvaScheda(s.id, patch, true);
+    try { localStorage.removeItem(BOZZA(G)); } catch { }
+    G.dlg.close();
+    if (G.tipo === 'crea') { diInChat(`✨ Nuovo personaggio: ${s.nome}, ${d.razza.toLowerCase()} ${d.classe.toLowerCase()} di 1° livello${d.background ? ' (' + d.background.toLowerCase() + ')' : ''}.`); toast('Personaggio creato.'); }
+    else { diInChat(`⬆ ${s.nome} sale al ${d.livello}° livello (${R_nome(G)} ${r.ctx.lc})! PF massimi ${num(d0.pf_max) ?? '—'} → ${d.pf_max}.`); toast(`${s.nome} è al ${d.livello}° livello.`); }
+    if (G.fino > d.livello) setTimeout(() => apriGuida(T.schede.get(s.id), 'liv', G.fino), 350);
+  }
+  const R_nome = G => G.R.classi[G.tipo === 'crea' ? G.cr.cl : G.cl]?.nome || '';
+  const schedaVuota = s => { const d = s.dati || {}; return !String(d.classe || '').trim() && !(d.classi || []).length && !String(d.razza || '').trim() && !(d.privilegi || []).length && !(d.incantesimi || []).length; };
+
+  /* storia dei livelli, annulla l'ultimo, il DM concede i livelli */
+  async function annullaLivello(s) {
+    const L = s.dati.storia_livelli || [], u = L[L.length - 1]; if (!u) return;
+    if (!await ask(`Annullare ${u.crea ? 'la creazione guidata' : `il ${u.liv}° livello`} di **${s.nome}**? La scheda torna com'era prima.`, { ok: 'Annulla', danger: true, title: 'Storia dei livelli' })) return;
+    await salvaScheda(s.id, { ...u.prima, storia_livelli: L.slice(0, -1) }, true);
+    diInChat(`↩ ${s.nome} torna ${u.crea ? 'alla scheda di prima' : `al ${num(u.prima.livello) || u.liv - 1}° livello`}.`);
+  }
+  function apriStoria(s) {
+    const L = [...(s.dati.storia_livelli || [])].reverse(), data = x => { try { return new Date(x).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' }); } catch { return ''; } };
+    document.querySelectorAll('dialog.tv-storia[open]').forEach(x => x.close());
+    const d = finestra(`<form method="dialog"><h3>Storia dei livelli · ${esc(s.nome)}</h3><div class="tv-storia-l">${L.map((u, i) => `<details${i ? '' : ' open'}><summary><b>${u.crea ? 'Creazione guidata' : u.liv + '° livello'}</b>${u.classe ? ' · ' + esc(u.classe) : ''} <small>${esc(data(u.data))}</small></summary><ul>${(u.riepilogo || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul></details>`).join('') || '<p class="hint">Ancora niente.</p>'}</div>
+      ${puoScrivere(s) && L.length ? `<p class="hint">Si può annullare solo l'ultimo passo, uno alla volta.</p><button type="button" class="btn" data-k="annulla">↩ Annulla ${L[0].crea ? 'la creazione' : `il ${L[0].liv}° livello`}</button>` : ''}<menu><button value="cancel" class="btn ghost">Chiudi</button></menu></form>`, 'tv-side tv-centro tv-storia');
+    d.querySelector('[data-k=annulla]')?.addEventListener('click', async () => { d.close(); const x = T.schede.get(s.id); if (x) await annullaLivello(x); });
+  }
+  async function concediLivello(L, togli) {
+    const fatti = [];
+    for (const s of L) {
+      const lv = clamp(num(s.dati.livello) || 1, 1, 20); if (lv >= 20 && !togli) continue;
+      const c = togli ? null : Math.min(20, Math.max(num(s.dati.liv_concesso) || 0, lv) + 1);
+      await salvaScheda(s.id, { liv_concesso: c }, true); fatti.push([s, c]);
+    }
+    if (togli || !fatti.length) return;
+    diInChat(fatti.length > 1 ? '🎁 Il DM concede un livello a tutto il party! Ognuno sale dal pulsante ⬆ della propria scheda.' : `🎁 ${fatti[0][0].nome} può salire fino al ${fatti[0][1]}° livello!`);
+    toast(fatti.length > 1 ? 'Livello concesso a tutto il party.' : `${fatti[0][0].nome} può salire fino al ${fatti[0][1]}° livello.`);
+  }
+  // la barra sotto le schede della scheda: crea, sali di livello, concedi, storia
+  function barraGuida(s, w) {
+    const d = s.dati, lv = clamp(num(d.livello) || 1, 1, 20), conc = num(d.liv_concesso) || 0, vuota = schedaVuota(s), st = (d.storia_livelli || []).length, b = [];
+    if (w && vuota) b.push('<button type="button" class="su" data-k="g-crea">✨ Crea il personaggio passo passo</button>');
+    else if (lv < 20 && w) { if (isDM() || conc > lv) b.push(`<button type="button" class="${conc > lv ? 'su' : ''}" data-k="g-liv">⬆ Sali al ${lv + 1}° livello</button>`); else b.push(`<span class="gnote">⬆ Il ${lv + 1}° livello lo sblocca il DM</span>`); }
+    if (isDM() && lv < 20 && !vuota) b.push(`<button type="button" data-k="g-concedi" title="Il giocatore potrà salire di livello da solo, con la procedura guidata">🎁 ${conc > lv ? `Concesso fino al ${conc}° · +1` : 'Concedi un livello'}</button>${conc > lv ? '<button type="button" data-k="g-ritira" title="Ritira il livello concesso" aria-label="Ritira il livello concesso">✕</button>' : ''}`);
+    if (st) b.push('<button type="button" data-k="g-storia">📜 Storia dei livelli</button>');
+    if (isDM() && w && !vuota) b.push('<button type="button" class="pic" data-k="g-crea" title="Rifà la scheda da capo con la procedura guidata (si può annullare)">✨ Rifai da capo</button>');
+    return b.length ? `<div class="gbar">${conc > lv && !isDM() && w ? '<span class="gmsg">🎁 Il DM ti ha concesso un livello!</span>' : ''}${b.join('')}</div>` : '';
+  }
+
   /* ---------- la scheda del Tavolo nella pagina del personaggio ----------
      Il segnalino in alto a destra nella pagina anagrafica apre la stessa scheda del Tavolo, accanto al testo:
      si legge, si tira e si modifica come al tavolo (senza mappa, quindi senza token né turni). */
