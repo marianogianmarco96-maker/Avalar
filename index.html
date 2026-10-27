@@ -442,9 +442,10 @@ body{min-width:0}
 /* schede: ritratto più grande, sul telefono diventa la copertina */
 .ehead .eheadacts{margin-top:12px}
 .ehead{position:relative}
-.schtag{position:absolute;top:12px;right:12px;z-index:3;display:flex;align-items:center;gap:6px;font:600 .78rem/1 var(--display);letter-spacing:.06em;text-transform:uppercase;padding:7px 12px;border-radius:999px;border:1px solid var(--gold);background:var(--paper2);color:var(--wine);cursor:pointer;box-shadow:0 2px 8px #0003}
-.schtag:hover,.schtag:focus-visible{background:var(--gold);color:#2b1d14}
-.schtag.on{background:var(--wine);color:#fbeccb;border-color:var(--wine)}
+/* bordeaux in tutti e due i temi, come la barra in alto */
+.schtag{position:absolute;top:12px;right:12px;z-index:3;display:flex;align-items:center;gap:6px;font:600 .78rem/1 var(--display);letter-spacing:.06em;text-transform:uppercase;padding:7px 12px;border-radius:999px;border:1px solid #c9a24a;background:#7d2530;color:#fbeccb;cursor:pointer;box-shadow:0 2px 8px #0004}
+.schtag:hover,.schtag:focus-visible{background:#96303c;border-color:#e7cf9a}
+.schtag.on{background:#5a1820;border-color:#e7cf9a;box-shadow:inset 0 1px 4px #0006}
 @media (min-width:621px){.ehead:has(.schtag:not([hidden])) .ehb{padding-right:120px}}
 .page.consch{max-width:1960px}
 .ewrap.open{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:24px;align-items:start}
