@@ -31,6 +31,7 @@ def esempio():
                                                       {'id': 'violet', 'name': 'Violet', 'pg': None, 'code': 'z'}]}
     S['meta']['segnalazioni'] = {'k': 'segnalazioni', 'v': {'token': 'tok'}}
     S['meta']['generalHist'] = {'k': 'generalHist', 'v': []}
+    S['meta']['scaletta:99'] = {'k': 'scaletta:99', 'v': {'n': 99, 'title': 'Prova', 'text': '### Scene\n1. **Segreto.** solo DM'}}
     S['meta']['general']['v']['text'] += '\n\n[DM]segreto[/DM] [PER Sam]per Sam[/PER] [PER livion, SAM, violet]tutti[/PER] [DM]senza chiusura\n'
     ents = list(S['entities'])
     for i, k in enumerate(ents):
@@ -88,6 +89,9 @@ def main():
     errori = 0
     for c, j in zip(chi, json.loads(js)):
         p = json.loads(json.dumps(copia(copy.deepcopy(d), c)))
+        if any(k.startswith('scaletta:') for k in p['stores']['meta']):
+            errori += 1
+            print(f"{c or 'ospiti':8} la scaletta del DM è rimasta nella copia")
         if p == j:
             print(f"{c or 'ospiti':8} uguali ({len(json.dumps(p)) // 1024} KB)")
             continue
