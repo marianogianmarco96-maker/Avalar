@@ -114,6 +114,12 @@
 .tv-empty code{background:#0006;padding:1px 5px;border-radius:4px}
 .tv-chat{width:310px;flex:none;display:flex;flex-direction:column;border-left:1px solid #000;background:var(--paper);min-height:0;z-index:8}
 .tv-chat[hidden]{display:none!important}
+/* scaletta del DM (scaletta.js) nella colonna della chat */
+.tv-chat.scal{width:390px}.tv-chat.scal .tv-log,.tv-chat.scal .tv-dk{display:none}
+.tv-scal{display:none;flex:1;overflow-y:auto;min-height:60px}.tv-chat.scal .tv-scal{display:block}
+.tv-dtab{display:flex;gap:2px}
+.tv-dtab button{all:unset;cursor:pointer;padding:3px 9px 4px;border-bottom:2px solid transparent;color:var(--mute);font:600 .95rem/1.2 var(--display)}
+.tv-dtab button.on{color:inherit;border-bottom-color:currentColor}
 .tv-cx{all:unset;cursor:pointer;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:600 .9rem var(--body);color:var(--ink2,#6b5a48)}
 .tv-cx:hover,.tv-cx:focus-visible{background:#0000000f}
 .tv-dh{display:flex;align-items:center;justify-content:space-between;padding:8px 10px 6px;font-family:var(--display);color:var(--wine);font-weight:600;border-bottom:1px solid var(--line)}
@@ -763,6 +769,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
 @media (max-width:820px){
   .tv-turno{width:min(250px,calc(100% - 20px));max-height:45%}
   .tv-rail{width:44px}.tv-rail button{width:34px;height:34px}
+  .tv-chat.scal{width:auto;height:72%;max-height:72%}
   .tv-chat{position:absolute;right:0;bottom:0;left:0;width:auto;max-height:62%;z-index:12;border-left:0;border-top:2px solid var(--gold);box-shadow:0 -8px 24px #0008;border-radius:12px 12px 0 0}
   .tv-ctab{top:auto;bottom:calc(62% + 8px);transform:none;width:40px;height:34px;border-radius:9px 0 0 9px}
   .tv-ctab.chiusa{bottom:12px}.tv-ctab:not(.chiusa){display:none}
@@ -1439,7 +1446,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   /* ---------- pagina ---------- */
   route(/^\/tavolo$/, async () => {
     await claude.use('db'); css();
-    T.pag = false; T.diceInit = false; T.drag = null; T.online = []; T.live = false; T.tool = 'muovi';
+    T.pag = false; T.diceInit = false; T.scal = undefined; T.drag = null; T.online = []; T.live = false; T.tool = 'muovi';
     setView(`<h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Tavolo</h1>
       <div class="tv"><nav class="tv-rail" id="tv-rail" aria-label="Strumenti del tavolo"><span class="sp"></span><span class="tv-on" id="tv-on" title="Connessione…"></span></nav>
       <div class="tv-wrap"><div class="tv-stage" id="tv-stage"><div class="tv-empty"><div><p>Apro il tavolo…</p></div></div></div><div class="tv-strip" id="tv-strip" hidden></div><div class="tv-hud" id="tv-hud" hidden></div><div class="tv-top" id="tv-top"></div><div class="tv-mbar" id="tv-mbar" hidden></div><div class="tv-ts" id="tv-ts" hidden></div><div class="tv-turno" id="tv-turno" hidden></div><div class="tv-tdp" id="tv-tdp" hidden></div><div class="tv-sp" id="tv-sp" hidden></div><button type="button" class="tv-ctab" id="tv-ctab" data-act="tv-dadi"></button></div>
@@ -1653,6 +1660,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     pag: '<rect x="3" y="7" width="13" height="13" rx="1.5"/><path d="M7 4h12.5A1.5 1.5 0 0 1 21 5.5V17"/><path d="M5.5 17l3.5-4 2.5 2.5 1.5-1.5 2 3"/>'
   };
   ICO.chat = '<path d="M4 5h16v11H9.5L5 20v-4H4z"/>';
+  ICO.scal = '<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 11h7M9 14.5h7M9 18h4"/>';
   // i dadi disegnati, per la chat e il tiradadi
   const DADO = {
     4: '<path d="M12 3l9 16H3z"/><path d="M12 3v16"/>',
@@ -1668,13 +1676,15 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function disegnaBarra() { disegnaRail(); disegnaTop(); setActs(azioni()); }
   function disegnaRail() {
     const r = $('#tv-rail'); if (!r) return;
-    const RL = { 'tv-sel': 'Seleziona', 'tv-mano': 'Sposta', 'tv-righello': 'Righello', 'tv-tiradadi': 'Dadi', 'tv-turno': 'Turno', 'tv-schede': 'Schede', 'tv-dadi': 'Chat', 'tv-maschera': 'Maschera', 'tv-muri': 'Muri', 'tv-difficile': 'Terreno', 'tv-effetti': 'Effetti', 'tv-token': 'Token', 'tv-griglia': 'Griglia', 'tv-liv-seg': 'Tutti', 'tv-liv-mas': 'Solo io' };
+    const RL = { 'tv-sel': 'Seleziona', 'tv-mano': 'Sposta', 'tv-righello': 'Righello', 'tv-tiradadi': 'Dadi', 'tv-turno': 'Turno', 'tv-schede': 'Schede', 'tv-dadi': 'Chat', 'tv-scaletta': 'Scaletta', 'tv-maschera': 'Maschera', 'tv-muri': 'Muri', 'tv-difficile': 'Terreno', 'tv-effetti': 'Effetti', 'tv-token': 'Token', 'tv-griglia': 'Griglia', 'tv-liv-seg': 'Tutti', 'tv-liv-mas': 'Solo io' };
     const b = (act, tip, k, on) => `<button type="button" data-act="${act}" data-tip="${esc(tip)}" aria-label="${esc(tip)}" class="${on ? 'on' : ''}">${svg(k)}<span class="rl" aria-hidden="true">${RL[act] || ''}</span></button>`;
     let h = b('tv-sel', 'Seleziona e sposta i token (S)', 'sel', T.tool === 'muovi') + b('tv-mano', 'Sposta la mappa (M)', 'mano', T.tool === 'mano')
       + b('tv-righello', 'Righello (R)', 'rig', T.tool === 'righello') + b('tv-tiradadi', 'Tiradadi', 'dado', !$('#tv-tdp')?.hidden)
       + b('tv-turno', 'Ordine del turno', 'tur', !$('#tv-turno')?.hidden) + b('tv-schede', 'Schede dei personaggi e dei PNG', 'sch', !$('#tv-sp')?.hidden)
       + b('tv-dadi', 'Chat e dadi', 'chat', !$('#tv-dice')?.hidden).replace('class="', 'class="tel '); // solo sul telefono, al posto della linguetta
-    if (isDM() && scena()) h += '<hr><span class="lbl">DM</span>' + b('tv-maschera', 'Maschera: nascondi e svela la mappa', 'mas', T.tool === 'maschera') + b('tv-muri', 'Muri, porte e nebbia automatica', 'muro', T.tool === 'muri') + b('tv-difficile', 'Terreno difficile: il movimento costa il doppio', 'dif', T.tool === 'difficile') + b('tv-effetti', 'Effetti sulla mappa: fuoco, gas, veleno…', 'efx', T.tool === 'effetti') + b('tv-token', 'Aggiungi un token', 'tok') + b('tv-griglia', 'Impostazioni della pagina', 'gri');
+    const bSc = isDM() && window.__scaletta ? b('tv-scaletta', 'Scaletta della sessione: la vedi solo tu', 'scal', !!T.scal && !$('#tv-dice')?.hidden) : '';
+    if (isDM() && !scena() && bSc) h += '<hr><span class="lbl">DM</span>' + bSc;
+    if (isDM() && scena()) h += '<hr><span class="lbl">DM</span>' + bSc + b('tv-maschera', 'Maschera: nascondi e svela la mappa', 'mas', T.tool === 'maschera') + b('tv-muri', 'Muri, porte e nebbia automatica', 'muro', T.tool === 'muri') + b('tv-difficile', 'Terreno difficile: il movimento costa il doppio', 'dif', T.tool === 'difficile') + b('tv-effetti', 'Effetti sulla mappa: fuoco, gas, veleno…', 'efx', T.tool === 'effetti') + b('tv-token', 'Aggiungi un token', 'tok') + b('tv-griglia', 'Impostazioni della pagina', 'gri');
     h += '<span class="sp"></span>';
     if (isDM() && scena()) h += '<span class="lbl">Livelli</span>' + b('tv-liv-seg', 'Livello Segnalini: i token che vedono tutti', 'lseg', T.livello === 'segnalini').replace('class="', 'class="liv ') + b('tv-liv-mas', 'Livello Master: i token che vedi solo tu', 'lmas', T.livello === 'master').replace('class="', 'class="liv ');
     h += `<span class="tv-cnt" id="tv-cnt">${T.online.length > 1 ? T.online.length : ''}</span><span class="tv-on ${T.live ? 'ok' : ''}" id="tv-on" title="${T.live ? esc('Al tavolo ora: ' + T.online.join(', ')) : 'Connessione…'}"></span>`;
@@ -1692,7 +1702,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function azioni() {
     return {
       'tv-sel': () => strumento('muovi'), 'tv-mano': () => strumento('mano'), 'tv-righello': () => strumento(T.tool === 'righello' ? 'muovi' : 'righello'),
-      'tv-dadi': () => apriChat($('#tv-dice').hidden, true),
+      'tv-dadi': () => { if (T.scal && !$('#tv-dice').hidden && matchMedia('(max-width:820px)').matches) return apriScaletta(false); apriChat($('#tv-dice').hidden, true); },
+      'tv-scaletta': () => apriScaletta(!(T.scal && !$('#tv-dice').hidden)), 'tv-chatab': () => apriScaletta(false),
       'tv-porta': () => porta(T.vista),
       'tv-pagine': () => pannelloMappe($('#tv-pages').hidden), 'tv-nuova': () => dlgNuovaScena(),
       'tv-token': () => dlgToken(), 'tv-griglia': () => dlgGriglia(),
@@ -2674,7 +2685,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const box = $('#tv-dice'); if (!box) return;
     if (!T.diceInit) { let v = null; try { v = localStorage.getItem(CHAT); } catch { } apriChat(v ? v === '1' : matchMedia('(min-width:821px)').matches); }
     T.diceInit = true;
-    box.innerHTML = `<div class="tv-dh"><span>Chat</span><span class="dx"><button type="button" class="tv-cx tv-anim ${animazioni() ? 'on' : ''}" data-act="tv-anim" title="Animazioni degli attacchi: ${animazioni() ? 'accese' : 'spente'}" aria-label="Animazioni degli attacchi" aria-pressed="${animazioni()}">✨</button><button type="button" class="tv-cx" data-act="tv-dadi" title="Chiudi la chat" aria-label="Chiudi la chat">✕</button></span></div><div class="tv-log" id="tv-log"></div>
+    const tabSc = isDM() && window.__scaletta;
+    box.innerHTML = `<div class="tv-dh">${tabSc ? '<span class="tv-dtab" role="tablist"><button type="button" role="tab" data-act="tv-chatab">Chat</button><button type="button" role="tab" data-act="tv-scaletta">Scaletta</button></span>' : '<span>Chat</span>'}<span class="dx"><button type="button" class="tv-cx tv-anim ${animazioni() ? 'on' : ''}" data-act="tv-anim" title="Animazioni degli attacchi: ${animazioni() ? 'accese' : 'spente'}" aria-label="Animazioni degli attacchi" aria-pressed="${animazioni()}">✨</button><button type="button" class="tv-cx" data-act="tv-dadi" title="Chiudi la chat" aria-label="Chiudi la chat">✕</button></span></div><div class="tv-log" id="tv-log"></div>${tabSc ? '<div class="tv-scal" id="tv-scal"></div>' : ''}
       <div class="tv-dk"><div class="dd">${DADI.map(f => `<button type="button" data-df="${f}" title="Tira 1d${f}${f === 20 ? ' (con il vantaggio scelto sotto)' : ''}">${dado(f)}d${f}</button>`).join('')}</div>
       <div class="op"><span class="sg" title="Vale per il d20">${[['', 'Normale'], ['kh1', 'Vantaggio'], ['kl1', 'Svantaggio']].map(([v, l]) => `<button type="button" data-cadv="${v}" class="${(T.cadv || '') === v ? 'on' : ''}">${l}</button>`).join('')}</span><input class="md" type="number" data-k="cmod" placeholder="+0" aria-label="Modificatore" value="${esc(T.cmod || '')}"><button type="button" class="sgr ${T.tdpriv ? 'on' : ''}" data-k="cpriv" aria-label="Tiri nascosti">🙈</button></div>
       <div class="in"><input type="text" id="tv-f" placeholder="Scrivi… (/w nome per sussurrare)" autocomplete="off" aria-label="Scrivi un messaggio"><button type="button" data-act="tv-tira" title="Invia" aria-label="Invia">➤</button></div></div>`;
@@ -2689,6 +2701,22 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       tira((adv ? '2d20' + adv : '1d' + f) + piuMod(Math.trunc(+cm.value || 0)), adv ? (adv === 'kh1' ? 'vantaggio' : 'svantaggio') : null, T.tdpriv, '');
     });
     segnaPriv(); disegnaBarra(); disegnaLog();
+    if (T.scal === undefined) T.scal = !!(isDM() && window.__scaletta?.daAprire());
+    if (T.scal && isDM()) apriScaletta(true); else disegnaScaletta();
+  }
+  // la scaletta del DM (scaletta.js) prende il posto della chat nella stessa colonna; i dadi si tirano nascosti
+  function apriScaletta(on) {
+    T.scal = !!on && isDM();
+    if (T.scal) { if ($('#tv-dice')?.hidden) apriChat(true); $('#tv-tdp') && ($('#tv-tdp').hidden = true); }
+    disegnaScaletta(); disegnaRail();
+  }
+  function disegnaScaletta() {
+    const box = $('#tv-dice'), host = $('#tv-scal'); if (!box) return;
+    const on = !!T.scal && !!host;
+    box.classList.toggle('scal', on);
+    box.querySelectorAll('.tv-dtab button').forEach(x => { const s = x.dataset.act === 'tv-scaletta' ? on : !on; x.classList.toggle('on', s); x.setAttribute('aria-selected', s); });
+    if (on) window.__scaletta.pannello(host, { tira: (f, m) => tira(f, null, true, m ? 'Scaletta · ' + m : 'Scaletta') });
+    else if (!T.scal) { const l = $('#tv-log'); if (l) l.scrollTop = 1e9; }
   }
   function segnaPriv() {
     const b = $('#tv-dice [data-k=cpriv]'); if (!b) return;
