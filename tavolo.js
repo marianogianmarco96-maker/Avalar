@@ -3396,6 +3396,11 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const dx = Math.max(0, Math.abs(a.x + la / 2 - b.x - lb / 2) - (la + lb) / 2), dy = Math.max(0, Math.abs(a.y + la / 2 - b.y - lb / 2) - (la + lb) / 2);
     return (Math.round(Math.max(dx, dy) / g) + 1) * (sc.metri || 1.5);
   }
+  // Tattica del branco (banditi, lupi, coboldi…): vantaggio se un alleato non incapacitato è entro 1,5 m dal bersaglio
+  const tatticaBranco = s => /tattic\w* (?:del|di) branco/i.test([s.dati.tratti, s.dati.azioni, ...(s.dati.privilegi || []).map(p => p.nome)].join('\n'));
+  const latoTok = t => t.giocatore || schedaDi(t)?.tipo === 'pg' ? 'pg' : 'png';
+  const alleatoVicino = (a, b, sc) => [...T.tok.values()].find(t => t.scena === sc.id && t.id !== a.id && t.id !== b.id && latoTok(t) === latoTok(a)
+    && !condTok(t).some(c => FERMO.includes(c)) && distanza(t, b, sc) <= (sc.metri || 1.5) + 0.01);
   // si può attaccare? con che modo (mischia o distanza) e con vantaggio o svantaggio, spiegando perché
   function valuta(m, b) {
     const sc = scena(), a = T.tok.get(m.tok), s = T.schede?.get(m.sid), at = armaMira(m);
@@ -3419,6 +3424,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (cb.includes('Invisibile')) contro.push(`${nb} è invisibile`);
     const ai = aiutoPer(a); if (ai) pro.push(`aiutato da ${ai.h.nome}`);
     if (schiva(b)) contro.push(`${nb} sta schivando`);
+    const br = s && tatticaBranco(s) && alleatoVicino(a, b, sc); if (br) pro.push(`tattica del branco: ${br.nome || 'un alleato'} è accanto a ${nb}`);
     if (m.adv === 1) pro.push('scelto dalla scheda'); if (m.adv === 2) contro.push('scelto dalla scheda');
     const adv = pro.length && !contro.length ? 1 : contro.length && !pro.length ? 2 : 0;
     return { ok: true, modo, d, adv, pro, contro, anim: modo === 'mischia' ? 'spada' : p.col ? 'magia' : p.lancio ? 'lancio' : 'freccia', col: p.col, ritorna: modo === 'distanza' && p.ritorna, aiuto: ai };
@@ -4117,7 +4123,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     // il bonus magico si legge anche dal nome («Spada lunga +1»)
     const mg = a.magia != null && a.magia !== '' ? num(a.magia) || 0 : +(String(a.nome || '').match(/\+\s?([1-3])\b/) || [])[1] || 0;
     const dd = w ? (a.duemani && versatile(w)) || (w[1] === '1' ? '' : w[1]) : dadoAtt(a);
-    const cp = a.comp_att === 'si' ? true : a.comp_att === 'no' || a.nocomp ? false : w ? competenteArma(s, w) : true;
+    const cp = a.comp_att === 'si' ? true : a.comp_att === 'no' || a.nocomp ? false : w && formaPg(s) ? competenteArma(s, w) : true; // i PNG si considerano competenti nelle loro armi
     return { k, m, mg, w, cp, colpire: m + (cp ? comp(s) : 0) + mg, danni: dd ? dd + piu(m + mg) : w?.[1] === '1' ? String(Math.max(1, 1 + m + mg)) : '' };
   }
   function attacchiCalcolati(s) {
@@ -4869,7 +4875,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
           ${w && sv.matt === i ? (wa => `<div class="atcfg"><label class="lg"><span>Descrizione dell'oggetto (armi particolari, proprietà magiche…)</span><textarea data-f="att.${i}.desc" class="auto" rows="2" placeholder="Es. lama di ghiaccio forgiata dai nani: brilla al buio e…"></textarea></label>${R ? `<label class="lg"><span>Arma del manuale</span><select data-f="att.${i}.arma"><option value="">${wa && !x.arma ? 'Riconosciuta dal nome: ' + esc(wa[0]) : 'Dal nome (nessuna arma riconosciuta)'}</option>${opzArmi}</select></label>` : ''}
             <label><span>Caratteristica</span><select data-f="att.${i}.car">${CAR_ATT.map(([v, l]) => `<option value="${v}">${v === '' ? (wa ? `Automatica: ${nomeCar(carArma(s, wa))}` : 'Automatica: nessuna arma, scrivi tu') : l}</option>`).join('')}</select></label>
             ${wa ? (versatile(wa) ? `<label class="ck"><input type="checkbox" data-f="att.${i}.duemani"> Impugnata a due mani: ${esc(versatile(wa))} invece di ${esc(wa[1])}</label>` : '') : `<label><span>Dado dei danni</span>${inp(`att.${i}.dado`, '1d8')}</label>`}
-            <label><span>Competenza</span><select data-f="att.${i}.comp_att"><option value="">${wa ? `Automatica: ${calcAtt(s, x)?.cp ? 'sì' : 'no'} (classe e razza)` : 'Sì'}</option><option value="si">Sì, competente</option><option value="no">No, non competente</option></select></label>
+            <label><span>Competenza</span><select data-f="att.${i}.comp_att"><option value="">${wa ? `Automatica: ${calcAtt(s, x)?.cp ? 'sì' : 'no'} (${formaPg(s) ? 'classe e razza' : 'PNG, sempre competente'})` : 'Sì'}</option><option value="si">Sì, competente</option><option value="no">No, non competente</option></select></label>
             <label><span>Bonus magico</span>${inp(`att.${i}.magia`, '+0', '', 'number')}</label>
             <label><span>Danni bonus</span>${inp(`att.${i}.bdadi`, '1d6')}</label><label><span>Tipo dei danni bonus</span><select data-f="att.${i}.btipo"><option value="">—</option>${TIPI_DANNO.map(([v]) => `<option value="${v}">${v[0].toUpperCase() + v.slice(1)}</option>`).join('')}</select></label>
             <p class="conto" data-c="att:${i}"></p></div>`)(armaAtt(s, x)) : ''}</div>`).join('');
