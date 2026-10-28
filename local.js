@@ -921,7 +921,7 @@ html.review #view :is(p,li,h1,h2,h3,h4,h5,dd,dt,td,th,figcaption,blockquote):hov
       bar.querySelector('button').onclick = () => setReview(false); document.body.append(bar);
     }
   }
-  const SKIPK = new Set(['id', 'aid', 'k', 'type', 'color', 'thumb', 'from', 'to', 'mapId', 'entityId', 'parent', 'arc', 'ents', 'sessions', 'upd', 'ts', 'points', 'cat', 'imp', 'shape']);
+  const SKIPK = new Set(['id', 'aid', 'k', 'type', 'color', 'thumb', 'from', 'to', 'mapId', 'entityId', 'parent', 'arc', 'ents', 'sessions', 'upd', 'ts', 'points', 'cat', 'imp', 'faz', 'shape']);
   const nl = s => String(s).replace(/\*/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
   const rline = s => s.replace(/\[\/?DM\]/g, '').replace(/^#{1,4}\s+/, '').replace(/^\s*[-*•]\s+/, '').replace(/\[\[([^\]|]+?)(?:\|([^\]]+?))?\]\]/g, (m, a, b) => b || (MEM.entities && MEM.entities.get(a) && MEM.entities.get(a).name) || a);
   function strings(v, path, cb) {

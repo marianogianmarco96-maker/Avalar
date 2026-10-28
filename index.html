@@ -120,6 +120,8 @@ label.chk input{width:auto}
 :root[data-theme=dark] .badge{color:#16100c}
 .pill{display:inline-block;padding:0 9px;border:1px solid var(--line2);border-radius:12px;font-size:.85rem;color:var(--ink2);background:var(--paper2)}
 .pill.warn{color:var(--warn);border-color:var(--warn)}
+.pill.faz{color:var(--t-fazione);border-color:var(--t-fazione);background:color-mix(in srgb,var(--t-fazione) 8%,transparent);text-decoration:none}
+a.pill.faz:hover{background:color-mix(in srgb,var(--t-fazione) 18%,transparent)}
 /* parti «Solo per DM»: il DM le vede evidenziate, ai giocatori non arrivano */
 .pill.dm{color:#7a3d8a;border-color:#7a3d8a88;background:#7a3d8a14;font-family:var(--body);font-size:.75rem;letter-spacing:0;text-transform:none}
 .dmonly{background:repeating-linear-gradient(135deg,#7a3d8a1c 0 6px,#7a3d8a0d 6px 12px);box-shadow:inset 0 -1px 0 #7a3d8a99;border-radius:3px;padding:0 2px}
@@ -562,6 +564,9 @@ html.ro .moreacts{display:none}
 .relc:hover{border-color:var(--gold)}
 .relc a{flex:1;min-width:0;display:flex;align-items:center;gap:10px;padding:8px 10px;color:var(--ink);text-decoration:none!important}
 .relc .av{width:40px;height:40px}
+.relc a>span{min-width:0}
+.relcards.wide{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.filters .fbr{display:block;flex-basis:100%;width:100%;height:0}
 .relc .noav{display:flex;align-items:center;justify-content:center;background:var(--t-lore);color:#fff;font-family:var(--display);font-size:1.05rem}
 .noav.t-pg{background:var(--t-pg)}.noav.t-png{background:var(--t-png)}.noav.t-luogo{background:var(--t-luogo)}.noav.t-oggetto{background:var(--t-oggetto)}.noav.t-fazione{background:var(--t-fazione)}.noav.t-missione{background:var(--t-missione)}
 :root[data-theme=dark] .relc .noav{color:#16100c}
@@ -736,7 +741,11 @@ const TYPES = { pg: 'Membro del party', png: 'Personaggio', luogo: 'Luogo', ogge
 const TYPE_PL = { pg: 'Party', png: 'Personaggi', luogo: 'Luoghi', oggetto: 'Oggetti', fazione: 'Fazioni', missione: 'Missioni', lore: 'Lore' };
 const TYPE_ORDER = ['pg', 'png', 'luogo', 'oggetto', 'fazione', 'missione', 'lore'];
 const PNG_ATT = { alleato: 'Alleati', nemico: 'Nemici', neutrale: 'Neutrali' }, PNG_IMP = { importante: 'Principali', minore: 'Secondari' }, LUOGO_CAT = { regione: 'Regioni', citta: 'Città e quartieri', edificio: 'Locali ed edifici', dungeon: 'Dungeon e sotterranei', altro: 'Altro' };
-const catPills = e => { const a = e.type === 'png' ? [PNG_ATT[e.cat] && e.cat, PNG_IMP[e.imp] && (e.imp === 'minore' ? 'secondario' : 'principale')] : e.type === 'luogo' ? [LUOGO_CAT[e.cat] && LUOGO_CAT[e.cat].toLowerCase()] : []; return a.filter(Boolean).map(x => `<span class="pill">${esc(x)}</span>`).join(' '); };
+// fazione di un personaggio (campo faz: id di una scheda Fazione); la scheda Fazione resta la pagina con le info generali
+const fazOf = e => { const f = e.type === 'png' && e.faz && S.ents.get(e.faz); return f && f.type === 'fazione' ? f : null; };
+const fazList = () => [...S.ents.values()].filter(x => x.type === 'fazione').sort((a, b) => a.name.localeCompare(b.name, 'it'));
+const fazPill = (e, link) => { const f = fazOf(e); if (!f) return ''; const t = `⚑ ${esc(f.name)}${e.fazDm && !window.__RO ? ' 🔒' : ''}`, tt = e.fazDm && !window.__RO ? ' title="Appartenenza solo per DM"' : ''; return link ? `<a class="pill faz" href="#/scheda/${encodeURIComponent(f.id)}"${tt}>${t}</a>` : `<span class="pill faz"${tt}>${t}</span>`; };
+const catPills = (e, link) => { const a = e.type === 'png' ? [PNG_ATT[e.cat] && e.cat, PNG_IMP[e.imp] && (e.imp === 'minore' ? 'secondario' : 'principale')] : e.type === 'luogo' ? [LUOGO_CAT[e.cat] && LUOGO_CAT[e.cat].toLowerCase()] : []; return [fazPill(e, link), ...a.filter(Boolean).map(x => `<span class="pill">${esc(x)}</span>`)].filter(Boolean).join(' '); };
 const TYPE_COLOR = { pg: '#8f2d3a', png: '#3b5f8a', luogo: '#3f7a4a', oggetto: '#b0802a', fazione: '#6a4a8c', missione: '#b4541c', lore: '#5b6670' };
 const TYPE_ALIAS = {
   pg: 'pg', pc: 'pg', personaggio: 'pg', giocatore: 'pg', 'personaggio giocante': 'pg', party: 'pg', 'membro del party': 'pg',
@@ -767,6 +776,7 @@ const PLAYERS = () => { const g = getMeta('giocatori', null); return g?.length ?
 const visNames = v => v.length ? v.map(id => PLAYERS().find(p => p[0] === id)?.[1] || id).join(', ') : 'nessun giocatore';
 const visPill = o => !window.__RO && Array.isArray(o?.vis) ? ` <span class="pill vis" title="Mostra a: ${esc(visNames(o.vis))}">👁 ${esc(visNames(o.vis))}</span>` : '';
 const setVis = (o, v) => { if (v) o.vis = v; else delete o.vis; return o; };
+const cleanFaz = (o, keep) => { if (!keep || !o.faz) { delete o.faz; delete o.fazDm; } else if (!o.fazDm) delete o.fazDm; return o; };
 // quest personale: sezione «quest: true» nella scheda di un PG, che vedono solo il suo giocatore e il DM (pubblica.py la toglie dalle altre copie)
 const QUEST_STATI = { 'in corso': '⏳ In corso', completata: '✔ Completata', fallita: '✕ Fallita', abbandonata: '— Abbandonata' };
 const questOwner = id => { const g = getMeta('giocatori', null)?.find(x => x.pg === id); if (g) return g.id; const p = PLAYERS().find(x => 'pg-' + x[0] === id); return p ? p[0] : null; };
@@ -1864,10 +1874,10 @@ route(/^\/sessioni\/(\d+)$/, async ([ns]) => {
 });
 
 /* ================= SCHEDE: elenco ================= */
-const ES = { types: [], q: '', sort: 'name', cats: [], imps: [], selMode: false, sel: new Set() };
+const ES = { types: [], q: '', sort: 'name', cats: [], imps: [], fazs: [], selMode: false, sel: new Set() };
 route(/^\/schede$/, async (_, q) => {
   // il tipo indicato nel link si applica una volta sola, poi lo si cambia dai filtri
-  if (q.has('tipo')) { ES.types = [q.get('tipo')]; ES.cats = []; ES.imps = []; history.replaceState(null, '', '#/schede'); }
+  if (q.has('tipo')) { ES.types = [q.get('tipo')]; ES.cats = []; ES.imps = []; ES.fazs = []; history.replaceState(null, '', '#/schede'); }
   const cnt = {}; for (const e of S.ents.values()) cnt[e.type] = (cnt[e.type] || 0) + 1;
   setView(`<div class="pagehead"><h1>Schede</h1><div class="acts"><button class="btn ${ES.selMode ? 'on' : ''}" data-act="selmode">${ES.selMode ? 'Fine selezione' : 'Seleziona'}</button><button class="btn" data-act="newent">+ Nuova scheda</button></div></div>
     <div class="fwrap" id="fwrap"><div class="filters ftypes"><div class="chips" id="tchips"><a class="chip" data-t="">Tutte <em>${S.ents.size}</em></a>${TYPE_ORDER.filter(t => cnt[t]).map(t => `<a class="chip" data-t="${t}">${TYPE_PL[t]} <em>${cnt[t]}</em></a>`).join('')}</div></div>
@@ -1883,10 +1893,12 @@ route(/^\/schede$/, async (_, q) => {
       const qq = norm(ES.q); const terms = qq.split(' ').filter(Boolean);
       const ck = e => { const m = e.type === 'png' ? PNG_ATT : e.type === 'luogo' ? LUOGO_CAT : null; if (!m) return true; const sel = ES.cats.filter(k => k in m); return !sel.length || sel.includes(e.cat); };
       const ik = e => { if (e.type !== 'png') return true; const sel = ES.imps.filter(k => k in PNG_IMP); return !sel.length || sel.includes(e.imp); };
-      let l = [...S.ents.values()].filter(e => (!ES.types.length || ES.types.includes(e.type)) && ck(e) && ik(e) && terms.every(w => S.sidx.get(e.id).includes(w)));
+      // «senza fazione» è la chiave vuota '-'
+      const fk = e => e.type !== 'png' || !ES.fazs.length || ES.fazs.includes(fazOf(e)?.id || '-');
+      let l = [...S.ents.values()].filter(e => (!ES.types.length || ES.types.includes(e.type)) && ck(e) && ik(e) && fk(e) && terms.every(w => S.sidx.get(e.id).includes(w)));
       if (ES.sort === 'recent') l.sort((a, b) => (b.upd || 0) - (a.upd || 0)); else if (ES.sort === 'first') l.sort((a, b) => (a.sessions?.[0] ?? 1e9) - (b.sessions?.[0] ?? 1e9) || a.name.localeCompare(b.name)); else l.sort((a, b) => a.name.localeCompare(b.name, 'it'));
       shown = l; vl.setItems(l); $('#ecnt').textContent = l.length + ' schede'; selInfo();
-      const nf = ES.types.length + ES.cats.length + ES.imps.length + (ES.sort !== 'name' ? 1 : 0); $('#fcnt').textContent = nf ? ' · ' + nf : '';
+      const nf = ES.types.length + ES.cats.length + ES.imps.length + ES.fazs.length + (ES.sort !== 'name' ? 1 : 0); $('#fcnt').textContent = nf ? ' · ' + nf : '';
       $$('#tchips .chip').forEach(c => c.classList.toggle('on', c.dataset.t ? ES.types.includes(c.dataset.t) : !ES.types.length));
       subChips();
     };
@@ -1894,16 +1906,21 @@ route(/^\/schede$/, async (_, q) => {
       const host = $('#cchips'); let h = '';
       const base = t => [...S.ents.values()].filter(e => e.type === t), cn = (t, f, k) => base(t).filter(e => e[f] === k).length;
       const grp = (t, f, label, map, arr) => `<span class="hint">${label}:</span>` + Object.entries(map).filter(([k]) => cn(t, f, k)).map(([k, l]) => `<a class="chip ${arr.includes(k) ? 'on' : ''}" data-f="${f}" data-v="${k}">${l} <em>${cn(t, f, k)}</em></a>`).join('');
-      if (ES.types.includes('png')) h += grp('png', 'cat', 'Atteggiamento', PNG_ATT, ES.cats) + ' ' + grp('png', 'imp', 'Ruolo', PNG_IMP, ES.imps) + ' ';
+      if (ES.types.includes('png')) {
+        h += grp('png', 'cat', 'Atteggiamento', PNG_ATT, ES.cats) + ' ' + grp('png', 'imp', 'Ruolo', PNG_IMP, ES.imps) + ' ';
+        const fz = {}; for (const e of base('png')) { const k = fazOf(e)?.id || '-'; fz[k] = (fz[k] || 0) + 1; }
+        const fl = fazList().filter(f => fz[f.id]);
+        if (fl.length) h += '<span class="fbr"></span><span class="hint">Fazione:</span>' + [...fl.map(f => [f.id, f.name]), ...(fz['-'] ? [['-', 'Senza fazione']] : [])].map(([k, l]) => `<a class="chip ${ES.fazs.includes(k) ? 'on' : ''}" data-f="faz" data-v="${esc(k)}">${esc(l)} <em>${fz[k]}</em></a>`).join('') + ' ';
+      }
       if (ES.types.includes('luogo')) h += grp('luogo', 'cat', 'Luoghi', LUOGO_CAT, ES.cats);
-      if (ES.types.length || ES.cats.length || ES.imps.length) h += ' <a class="chip" data-reset="1">✕ Azzera filtri</a>';
+      if (ES.types.length || ES.cats.length || ES.imps.length || ES.fazs.length) h += ' <a class="chip" data-reset="1">✕ Azzera filtri</a>';
       host.innerHTML = h; host.style.display = h ? '' : 'none';
     };
     const tog = (a, v) => { const i = a.indexOf(v); i >= 0 ? a.splice(i, 1) : a.push(v); };
     // un filtro alla volta: scegliendone un altro, il precedente si spegne; ricliccandolo si torna a «Tutte»
     const one = (a, v) => a.length === 1 && a[0] === v ? [] : [v];
-    $('#cchips').onclick = e => { const c = e.target.closest('.chip'); if (!c) return; if (c.dataset.reset) { ES.types = []; ES.cats = []; ES.imps = []; } else if (c.dataset.f === 'imp') ES.imps = one(ES.imps, c.dataset.v); else ES.cats = one(ES.cats, c.dataset.v); apply(); };
-    $('#tchips').onclick = e => { const c = e.target.closest('.chip'); if (!c) return; ES.types = c.dataset.t ? one(ES.types, c.dataset.t) : []; ES.cats = []; ES.imps = []; apply(); };
+    $('#cchips').onclick = e => { const c = e.target.closest('.chip'); if (!c) return; if (c.dataset.reset) { ES.types = []; ES.cats = []; ES.imps = []; ES.fazs = []; } else if (c.dataset.f === 'imp') ES.imps = one(ES.imps, c.dataset.v); else if (c.dataset.f === 'faz') ES.fazs = one(ES.fazs, c.dataset.v); else ES.cats = one(ES.cats, c.dataset.v); apply(); };
+    $('#tchips').onclick = e => { const c = e.target.closest('.chip'); if (!c) return; ES.types = c.dataset.t ? one(ES.types, c.dataset.t) : []; ES.cats = []; ES.imps = []; ES.fazs = []; apply(); };
     const ftog = () => { const w = $('#fwrap'), o = !w.classList.contains('open'); w.classList.toggle('open', o); $('.fbtn').setAttribute('aria-expanded', o); };
     $('.fbtn').onclick = ftog;
     const pick = r => { const id = r.dataset.pick; ES.sel.has(id) ? ES.sel.delete(id) : ES.sel.add(id); vl.repaint(); selInfo(); };
@@ -1921,8 +1938,8 @@ route(/^\/schede$/, async (_, q) => {
         if (!ids.length) { toast(ES.sel.size ? 'Le schede selezionate sono già di questo tipo' : 'Seleziona prima almeno una scheda', 'err'); return; }
         const names = ids.map(id => S.ents.get(id).name);
         if (!await ask(`Spostare in **${TYPE_PL[t]}** ${ids.length === 1 ? 'questa scheda' : `queste ${ids.length} schede`}?\n\n${names.map(n => '- ' + n).join('\n')}`, { ok: 'Sposta' })) return;
-        await runBatch(['entities'], '', async b => { for (const id of ids) { const e = { ...S.ents.get(id), type: t, upd: Date.now() }; if (!['png', 'luogo'].includes(t)) delete e.cat; if (t !== 'png') delete e.imp; await b.put('entities', e); } });
-        ES.sel.clear(); ES.types = [t]; ES.cats = []; ES.imps = []; rerender();
+        await runBatch(['entities'], '', async b => { for (const id of ids) { const e = { ...S.ents.get(id), type: t, upd: Date.now() }; if (!['png', 'luogo'].includes(t)) delete e.cat; if (t !== 'png') { delete e.imp; delete e.faz; delete e.fazDm; } await b.put('entities', e); } });
+        ES.sel.clear(); ES.types = [t]; ES.cats = []; ES.imps = []; ES.fazs = []; rerender();
       }
     });
     return;
@@ -1977,15 +1994,19 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
   // le sottosezioni (sub: true) vanno dentro la sezione precedente
   const tops = [], quests = []; b.sections.forEach((s, i) => { if (s.quest) quests.push(i); else if (s.sub && tops.length) tops[tops.length - 1].subs.push(i); else tops.push({ i, subs: [] }); });
   const owner = e.type === 'pg' ? questOwner(id) : null;
-  const toc = [...quests.map(i => ['Quest personale', 'sec-' + i]), ...tops.map(({ i }) => [b.sections[i].title.replace(/\s*\(.*\)$/, ''), 'sec-' + i]), ...(photos.length ? [['Foto', 'sec-foto']] : []), ['Collegamenti', 'sec-rel'], ...(evs.length ? [['Eventi', 'sec-ev']] : [])];
+  // scheda Fazione: i personaggi che ne fanno parte (campo «Fazione» nei dati della scheda)
+  const membri = e.type === 'fazione' ? [...S.ents.values()].filter(x => fazOf(x)?.id === id).sort((a, c) => a.name.localeCompare(c.name, 'it')) : [];
+  const toc = [...quests.map(i => ['Quest personale', 'sec-' + i]), ...tops.map(({ i }) => [b.sections[i].title.replace(/\s*\(.*\)$/, ''), 'sec-' + i]), ...(membri.length ? [['Membri', 'sec-membri']] : []), ...(photos.length ? [['Foto', 'sec-foto']] : []), ['Collegamenti', 'sec-rel'], ...(evs.length ? [['Eventi', 'sec-ev']] : [])];
   // la scheda del Tavolo (combattimento, da PNG o completa) si apre accanto, dal segnalino in alto a destra
   const conSch = ['pg', 'png'].includes(e.type) && !!window.__schedaSito;
-  setView(`<div class="ewrap"><div class="ecol"><div class="card ehead ${e.portrait ? 'hasp' : ''}">${conSch ? '<button type="button" class="schtag" data-act="tvsch" hidden aria-pressed="false"></button>' : ''}${e.portrait ? `<img class="portrait" src="${e.portrait.thumb}" data-act="viewportrait" alt="${esc(e.name)}" title="Ingrandisci">` : ''}<div class="ehb"><div class="meta">${badge(e.type)}${e.status ? `<span class="pill">${esc(e.status)}</span>` : ''}${catPills(e)}${e.discovered === false ? '<span class="pill dm">🔒 solo DM · nascosta ai giocatori</span>' : ''}${visPill(e)}<span class="hint">${esc(rangeTxt(e.sessions))}</span></div>
+  setView(`<div class="ewrap"><div class="ecol"><div class="card ehead ${e.portrait ? 'hasp' : ''}">${conSch ? '<button type="button" class="schtag" data-act="tvsch" hidden aria-pressed="false"></button>' : ''}${e.portrait ? `<img class="portrait" src="${e.portrait.thumb}" data-act="viewportrait" alt="${esc(e.name)}" title="Ingrandisci">` : ''}<div class="ehb"><div class="meta">${badge(e.type)}${e.status ? `<span class="pill">${esc(e.status)}</span>` : ''}${catPills(e, true)}${e.discovered === false ? '<span class="pill dm">🔒 solo DM · nascosta ai giocatori</span>' : ''}${visPill(e)}<span class="hint">${esc(rangeTxt(e.sessions))}</span></div>
       <h1>${esc(e.name)}</h1>${e.alias?.length ? `<div class="hint">Detto anche: ${e.alias.map(esc).join(', ')}</div>` : ''}${e.brief ? `<div class="brief">${inl(e.brief)}</div>` : ''}
       </div><div class="row eheadacts"><button class="btn sm" data-act="edit">Modifica dati</button>${[...M.regions.values()].filter(r => r.entityId === id).map(r => `<a class="btn sm" href="#/mappe/${encodeURIComponent(r.mapId)}?reg=${encodeURIComponent(r.id)}">Vedi sulla mappa</a>`).join('')}${moreActs(`${owner && !quests.length ? '<button class="btn sm" data-act="addQuest">🎯 + Quest personale</button>' : ''}<button class="btn sm" data-act="addSec">+ Sezione</button><button class="btn sm" data-act="portrait">${e.portrait ? 'Cambia ritratto' : '+ Ritratto'}</button><button class="btn sm ghost" data-act="copyEnt">Copia per Claude</button><button class="btn sm ghost" data-act="merge">Unisci in un'altra scheda</button><button class="btn sm danger" data-act="del">Elimina</button>`)}</div></div>
     ${toc.length > 2 ? `<nav class="toc" aria-label="Sezioni della scheda">${toc.map(([t, k]) => `<button type="button" data-act="goto" data-to="${k}">${esc(t)}</button>`).join('')}</nav>` : ''}
     ${quests.length ? `<div class="card questcard">${quests.map(i => entrySecHtml(b.sections[i], i)).join('')}</div>` : ''}
     <div class="card">${tops.length ? tops.map(({ i, subs }) => entrySecHtml(b.sections[i], i, true, subs.map(j => entrySecHtml(b.sections[j], j)).join(''))).join('') : `<p class="empty">${window.__RO ? 'Nessuna informazione su questa scheda, per ora.' : 'Nessun contenuto ancora. Verrà riempita dalle importazioni, oppure aggiungi una sezione a mano.'}</p>`}</div>
+    ${e.type === 'fazione' && (membri.length || !window.__RO) ? `<div class="card" id="sec-membri"><div class="spread"><h2>Membri${membri.length ? ` <small>(${membri.length})</small>` : ''}</h2>${window.__RO ? '' : '<button class="btn sm" data-act="addMembro">+ Aggiungi membro</button>'}</div>
+      ${membri.length ? `<div class="relcards wide">${membri.map(x => `<div class="relc${x.fazDm ? ' dment' : ''}"><a href="#/scheda/${encodeURIComponent(x.id)}">${x.portrait ? `<img class="av" src="${x.portrait.thumb}" alt="">` : `<span class="av noav t-${x.type}">${esc(x.name[0])}</span>`}<span><b>${esc(x.name)}</b><small>${x.fazDm && !window.__RO ? '🔒 solo DM · ' : ''}${esc([x.brief, x.status].filter(Boolean).join(' · ') || TYPES[x.type])}</small></span></a>${window.__RO ? '' : `<button class="icb rdm" data-act="dmMembro" data-id="${esc(x.id)}" aria-pressed="${!!x.fazDm}" title="${x.fazDm ? 'Appartenenza solo per DM: premi per mostrarla ai giocatori' : 'Appartenenza visibile ai giocatori: premi per renderla solo per DM'}">${x.fazDm ? '🔒' : '🔓'}</button><button class="icb" data-act="delMembro" data-id="${esc(x.id)}" title="Togli dalla fazione">✕</button>`}</div>`).join('')}</div>` : '<p class="hint">Nessun personaggio in questa fazione. Si assegna da «+ Aggiungi membro» o da «Modifica dati» di un personaggio.</p>'}</div>` : ''}
     ${photos.length || !window.__RO ? `<div class="card" id="sec-foto"><div class="spread"><h2>Foto${photos.length ? ` <small>(${photos.length})</small>` : ''}</h2><button class="btn sm" data-act="addphotos">+ Aggiungi foto</button></div>
       ${photos.length ? `<div class="gallery big">${photos.map((ph, i) => `<div class="gph">${phImg(ph, `data-act="viewphoto" data-i="${i}" alt="${esc(ph.name ? ph.name.replace(/\.[a-z0-9]+$/i, '') : 'Foto di ' + e.name)}" title="Ingrandisci"`)}${window.__RO ? '' : `<button class="x" data-act="delphoto" data-i="${i}" title="Rimuovi foto">✕</button>`}</div>`).join('')}</div>` : ''}
       ${window.__RO ? '' : `<p class="hint">${photos.length ? '' : 'Nessuna foto, per ora. '}<span class="dz">Trascina qui una o più immagini dal computer, oppure usa «+ Aggiungi foto».</span></p>`}</div>` : ''}
@@ -2051,9 +2072,18 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
     ...evActs(evs),
     tvsch: () => tvsch?.(),
     edit: async () => {
-      const r = await formDlg({ title: 'Dati della scheda', fields: [{ k: 'type', label: 'Tipo', type: 'select', value: e.type, options: TYPE_ORDER.map(t => [t, TYPES[t]]) }, { k: 'name', label: 'Nome', value: e.name, req: true }, { k: 'brief', label: 'Riga breve', value: e.brief }, { k: 'status', label: 'Stato', value: e.status }, ...(e.type === 'png' ? [{ k: 'cat', label: 'Atteggiamento', type: 'select', value: e.cat || '', options: [['', '— non assegnato —'], ...Object.entries(PNG_ATT)] }, { k: 'imp', label: 'Ruolo nella storia', type: 'select', value: e.imp || '', options: [['', '— non assegnato —'], ['importante', 'Principale (nel Tavolo scheda completa, come un giocatore)'], ['minore', 'Secondario (nel Tavolo scheda da PNG)']] }] : e.type === 'luogo' ? [{ k: 'cat', label: 'Categoria del luogo', type: 'select', value: e.cat || '', options: [['', '— non assegnata —'], ...Object.entries(LUOGO_CAT)] }] : []), { k: 'alias', label: 'Alias (separati da virgola)', value: (e.alias || []).join(', ') }, { k: 'dm', label: '🔒 Solo per DM (scheda nascosta ai giocatori)', type: 'check', value: e.discovered === false }, { k: 'vis', type: 'players', value: e.vis }] });
-      if (!r) return; await runBatch(['entities'], '', async t => t.put('entities', { ...setVis({ ...e }, r.vis), type: r.type, name: r.name.trim(), brief: r.brief.trim(), status: r.status.trim(), alias: r.alias.split(',').map(x => x.trim()).filter(Boolean), discovered: !r.dm, ...('cat' in r ? { cat: r.cat } : {}), ...('imp' in r ? { imp: r.imp } : {}), upd: Date.now() })); rerender();
+      const r = await formDlg({ title: 'Dati della scheda', fields: [{ k: 'type', label: 'Tipo', type: 'select', value: e.type, options: TYPE_ORDER.map(t => [t, TYPES[t]]) }, { k: 'name', label: 'Nome', value: e.name, req: true }, { k: 'brief', label: 'Riga breve', value: e.brief }, { k: 'status', label: 'Stato', value: e.status }, ...(e.type === 'png' ? [{ k: 'cat', label: 'Atteggiamento', type: 'select', value: e.cat || '', options: [['', '— non assegnato —'], ...Object.entries(PNG_ATT)] }, { k: 'imp', label: 'Ruolo nella storia', type: 'select', value: e.imp || '', options: [['', '— non assegnato —'], ['importante', 'Principale (nel Tavolo scheda completa, come un giocatore)'], ['minore', 'Secondario (nel Tavolo scheda da PNG)']] }, { k: 'faz', label: 'Fazione', type: 'select', value: fazOf(e)?.id || '', options: [['', fazList().length ? '— nessuna —' : '— nessuna (crea prima una scheda di tipo Fazione) —'], ...fazList().map(f => [f.id, f.name])] }, { k: 'fazDm', label: '🔒 Appartenenza alla fazione solo per DM (i giocatori non la vedono)', type: 'check', value: !!e.fazDm }] : e.type === 'luogo' ? [{ k: 'cat', label: 'Categoria del luogo', type: 'select', value: e.cat || '', options: [['', '— non assegnata —'], ...Object.entries(LUOGO_CAT)] }] : []), { k: 'alias', label: 'Alias (separati da virgola)', value: (e.alias || []).join(', ') }, { k: 'dm', label: '🔒 Solo per DM (scheda nascosta ai giocatori)', type: 'check', value: e.discovered === false }, { k: 'vis', type: 'players', value: e.vis }] });
+      if (!r) return; await runBatch(['entities'], '', async t => t.put('entities', cleanFaz({ ...setVis({ ...e }, r.vis), type: r.type, name: r.name.trim(), brief: r.brief.trim(), status: r.status.trim(), alias: r.alias.split(',').map(x => x.trim()).filter(Boolean), discovered: !r.dm, ...('cat' in r ? { cat: r.cat } : {}), ...('imp' in r ? { imp: r.imp } : {}), ...('faz' in r ? { faz: r.faz, fazDm: r.fazDm } : {}), upd: Date.now() }, r.type === 'png'))); rerender();
     },
+    addMembro: async () => {
+      const liberi = [...S.ents.values()].filter(x => x.type === 'png' && fazOf(x)?.id !== id).sort((a, c) => a.name.localeCompare(c.name, 'it'));
+      if (!liberi.length) { toast('Non ci sono altri personaggi da aggiungere', 'err'); return; }
+      const r = await formDlg({ title: 'Aggiungi a ' + e.name, fields: [{ k: 'who', label: 'Personaggio', type: 'select', value: liberi[0].id, options: liberi.map(x => [x.id, x.name + (fazOf(x) ? ` (ora: ${fazOf(x).name})` : '')]) }, { k: 'fazDm', label: '🔒 Appartenenza solo per DM (i giocatori non la vedono)', type: 'check', value: false }], ok: 'Aggiungi' });
+      if (!r) return; const x = S.ents.get(r.who); if (!x) return;
+      await runBatch(['entities'], '', async t => t.put('entities', cleanFaz({ ...x, faz: id, fazDm: r.fazDm, upd: Date.now() }, true))); rerender();
+    },
+    dmMembro: async a => { const x = S.ents.get(a.dataset.id); if (!x) return; await runBatch(['entities'], '', async t => t.put('entities', cleanFaz({ ...x, fazDm: !x.fazDm, upd: Date.now() }, true))); rerender(); },
+    delMembro: async a => { const x = S.ents.get(a.dataset.id); if (!x) return; await runBatch(['entities'], '', async t => t.put('entities', cleanFaz({ ...x, upd: Date.now() }, false))); rerender(); },
     // apparizioni: le sessioni in cui compare la scheda (anche quelle non ancora importate restano spuntate)
     editApp: () => {
       const cur = new Set(e.sessions || []), all = [...new Set([...S.sess.map(s => s.n), ...cur])].sort((x, y) => x - y);
@@ -2133,6 +2163,8 @@ async function mergeEntity(src, dst) {
     await t.put('entities', light); await t.put('bodies', nb); await t.del('entities', src); await t.del('bodies', src);
     for (const l of outL) { await t.del('links', l.k); if (l.to !== dst) await t.put('links', { ...l, k: dst + '|' + l.to + '|' + norm(l.label), from: dst }); }
     for (const l of inL) { await t.del('links', l.k); if (l.from !== dst) await t.put('links', { ...l, k: l.from + '|' + dst + '|' + norm(l.label), to: dst }); }
+    // i membri della fazione unita passano a quella che resta
+    for (const x of S.ents.values()) if (x.faz === src && x.id !== src) await t.put('entities', { ...x, faz: dst, upd: Date.now() });
     for (const v of evs) await t.put('events', { ...v, ents: [...new Set(v.ents.map(x => x === src ? dst : x))] });
     for (const p of pins) await t.put('pins', { ...p, entityId: dst });
   });

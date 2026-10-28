@@ -123,6 +123,11 @@ def copia(d, chi=None):
     pulisci = lambda o, campi: senza({**o, **{c: frase(o[c]).strip() for c in campi if isinstance(o.get(c), str)}})
     E = {k: pulisci(e, ('brief', 'status')) for k, e in S['entities'].items() if e.get('discovered') is not False and vede(e)}
     nascoste = {k: e['name'] for k, e in S['entities'].items() if k not in E}
+    # fazione del personaggio: solo se la scheda della fazione è visibile e l'appartenenza non è solo per DM
+    for e in E.values():
+        if e.get('faz') and (e.get('fazDm') or e['faz'] not in E):
+            del e['faz']
+        e.pop('fazDm', None)
 
     def testo(t):
         t = re.sub(r'\[\[([^\]|]+?)(?:\|([^\]]+?))?\]\]', lambda m: (m.group(2) or nascoste[m.group(1)]) if m.group(1) in nascoste else m.group(0), t)
