@@ -4408,7 +4408,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
   async function creaPng(o) {
     // scheda letta da una foto: i suoi valori al posto di quelli di partenza
-    if (o.forma && typeof o.forma === 'object') { const f = o.forma; o = { ...o, forma: 'png', nome: f.nome || o.nome, dati: { ...(o.dati || BASE), ...f.dati } }; toast('Scheda compilata dalla foto: controlla i valori (✎ Modifica).'); }
+    if (o.forma && typeof o.forma === 'object') { const f = o.forma; o = { ...o, forma: 'png', nome: o.nome && o.nome !== 'PNG' ? o.nome : f.nome || o.nome, dati: { ...(o.dati || BASE), ...f.dati } }; toast('Scheda compilata dalla foto: controlla i valori (✎ Modifica).'); }
     const dati = { ...(o.dati || BASE), ...(o.forma === 'pg' ? { forma: 'pg', livello: 1 } : {}) };
     if (!o.entita) o.entita = await nuovoNellArchivio(String(o.nome || 'PNG').slice(0, 80), dati);
     const r = await SB.from('tavolo_schede').insert({ tipo: 'png', nome: String(o.nome || 'PNG').slice(0, 80), entita: o.entita || null, immagine: o.immagine || null, nascosta: true, dati }).select().single();
@@ -4446,7 +4446,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       .filter(r => /[A-Za-zÀ-ÿ]{3}|\d/.test(r));
     const T0 = righe.join('\n'), val = re => (T0.match(re) || [])[1], d = { ...BASE }, numF = x => parseFloat(String(x).replace(',', '.'));
     const CHIAVI = /^(classe armatura|punti ferita|velocit|iniziativa|tiri salvezza|abilit|sensi|linguaggi|sfida|resistenz|immunit|vulnerabilit|for\b|bonus di competenza)/i;
-    const nome = (righe.find(r => !CHIAVI.test(r)) || '').replace(/^[^A-Za-zÀ-ÿ0-9]+/, '').replace(/^[A-Za-z]{1,2}[,.;:]\s*/, '').replace(/^\d+\s*x\s*/i, '').trim();
+    // la riga «Umanoide Medio, caotico malvagio» non è il nome (succede se la foto taglia il titolo)
+    const TGL = /\b(minuscol|piccol|medi|grand|enorm|mastodont)\w*\b.*(,|legale|caotic|neutral|malvag|buon|qualsiasi|senza allineamento)/i;
+    const ck = righe.findIndex(r => CHIAVI.test(r)), nome = (righe.slice(0, ck < 0 ? righe.length : ck).find(r => !TGL.test(r)) || '').replace(/^[^A-Za-zÀ-ÿ0-9]+/, '').replace(/^[A-Za-z]{1,2}[,.;:]\s*/, '').replace(/^\d+\s*x\s*/i, '').trim();
     const tg = righe.find(r => /\b(minuscol|piccol|medi|grand|enorm|mastodont)\w*/i.test(r) && !CHIAVI.test(r) && r !== nome);
     if (tg) { const [a, b] = tg.split(','); d.taglia_tipo = a.trim(); if (b) d.allineamento = b.replace(/\s+\S{1,2}$/, '').trim(); }
     const ca = val(/Classe Armatura[^\d\n]*(\d+)/i); if (ca) d.ca = +ca;
@@ -5342,7 +5344,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       const e = s.entita && S.ents?.get(s.entita), f = await sceltaForma(s.nome, e); if (!f) return;
       const p = pend.get(s.id); if (p) { clearTimeout(p.t); pend.delete(s.id); }
       const dati = typeof f === 'object' ? { ...BASE, ...f.dati } : { ...BASE, ...(f === 'pg' ? { forma: 'pg', livello: 1 } : {}) };
-      const r = await SB.from('tavolo_schede').update({ nome: String((typeof f === 'object' && f.nome) || s.nome).slice(0, 80), dati }).eq('id', s.id).select().single();
+      const r = await SB.from('tavolo_schede').update({ dati }).eq('id', s.id).select().single();
       if (r.error) return toast(r.error.message, 'err');
       T.schede.set(s.id, r.data);
       // i token del PNG riprendono i punti ferita della nuova scheda
