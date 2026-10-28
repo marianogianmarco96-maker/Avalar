@@ -230,6 +230,24 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
 .tv-stage.rul .tv-porta{pointer-events:none}
 .tv-stage.muri,.tv-stage.mira{cursor:crosshair}
 .tv-fx{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:100000}
+.tv-segn{position:absolute;left:0;top:0}
+.tv-sg{position:absolute;width:0;height:0;--s:40px}
+.tv-sg .pin{position:absolute;box-sizing:border-box;display:grid;place-items:center;left:calc(var(--s) * -.5);top:calc(var(--s) * -1.22);width:var(--s);height:var(--s);border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:radial-gradient(circle at 35% 35%,color-mix(in srgb,var(--c) 70%,#fff),var(--c) 60%,color-mix(in srgb,var(--c) 70%,#000));border:calc(var(--s) * .06) solid #fff3dc;box-shadow:0 calc(var(--s) * .08) calc(var(--s) * .18) #000b}
+.tv-sg .ic{transform:rotate(45deg);font-size:calc(var(--s) * .5);line-height:1;filter:drop-shadow(0 1px 1px #0009)}
+.tv-sg .nm{position:absolute;left:0;top:calc(var(--s) * .1);transform:translateX(-50%);white-space:nowrap;font:700 calc(var(--s) * .34) var(--body);color:#fff;paint-order:stroke;-webkit-text-stroke:calc(var(--s) * .09) #000c;pointer-events:none}
+.tv-sg .ns{position:absolute;left:calc(var(--s) * .14);top:calc(var(--s) * -1.5);width:calc(var(--s) * .5);height:calc(var(--s) * .5);border-radius:50%;background:#1b1512;border:2px solid #f2b51d;display:grid;place-items:center}
+.tv-sg .ns svg{width:70%;height:70%;fill:none;stroke:#f2b51d;stroke-width:2.4;stroke-linecap:round}
+.tv-sg.nasc .pin{opacity:.6}.tv-sg.nasc .pin{border-style:dashed;border-color:#f2b51d}
+.tv-sg.sel .pin{box-shadow:0 0 0 calc(var(--s) * .08) #f2b51d,0 0 calc(var(--s) * .4) #f2b51d}
+.tv-stage.segni .tv-sg .pin{cursor:move}
+.tv-sg.app .pin{animation:tvSgAppP .7s cubic-bezier(.3,1.6,.5,1)}
+@keyframes tvSgAppP{0%{transform:translateY(calc(var(--s) * -.6)) rotate(-45deg) scale(.2);opacity:0}100%{transform:rotate(-45deg);opacity:1}}
+.tv-ping{position:absolute;width:0;height:0;pointer-events:none;z-index:100001;--r:50px}
+.tv-ping i{position:absolute;left:calc(var(--r) * -1);top:calc(var(--r) * -1);width:calc(var(--r) * 2);height:calc(var(--r) * 2);border-radius:50%;border:calc(var(--r) * .1) solid var(--c);box-shadow:0 0 calc(var(--r) * .3) var(--c),inset 0 0 calc(var(--r) * .3) var(--c);opacity:0;animation:tvPing 1.3s ease-out 2}
+.tv-ping i:nth-child(2){animation-delay:.22s}.tv-ping i:nth-child(3){animation-delay:.44s;background:color-mix(in srgb,var(--c) 25%,transparent)}
+.tv-ping b{position:absolute;left:0;top:calc(var(--r) * 1.1);transform:translateX(-50%);white-space:nowrap;font:700 calc(var(--r) * .32) var(--body);color:#fff;paint-order:stroke;-webkit-text-stroke:calc(var(--r) * .08) #000c;animation:tvPingT 2.6s ease-out forwards}
+@keyframes tvPing{0%{transform:scale(.15);opacity:1}70%{opacity:.9}100%{transform:scale(1);opacity:0}}
+@keyframes tvPingT{0%,75%{opacity:1}100%{opacity:0}}
 .tv-fx .tx{font-family:var(--display)}
 .tv-stage.mira .tv-tok.mira-si{cursor:crosshair;box-shadow:0 0 0 3px #ff5a4e,0 0 16px 4px #ff5a4e99}
 .tv-stage.mira .tv-tok.mira-no{opacity:.55;cursor:not-allowed}
@@ -721,7 +739,9 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
 .tv-mbar .g.sl>span{font:600 .76rem var(--body);color:var(--pan-mute)}
 .tv-mbar .g.sl>svg{width:16px;height:16px;fill:none;stroke:var(--pan-mute);stroke-width:2}
 .tv-mbar .g.sl input{width:92px}
-.tv-mbar .g.sl input[type=number]{height:26px;box-sizing:border-box;background:#0006;border:1px solid #ffffff2a;border-radius:6px;color:var(--pan-ink);font:600 .8rem var(--body);padding:0 6px}
+.tv-mbar .g.seg.sgt{flex-wrap:wrap;max-width:min(470px,100%);justify-content:center}
+.tv-mbar .g.seg.sgt button{padding:0 7px;font-size:1.05rem}
+.tv-mbar .g.sl input[type=text],.tv-mbar .g.sl input[type=number]{height:26px;box-sizing:border-box;background:#0006;border:1px solid #ffffff2a;border-radius:6px;color:var(--pan-ink);font:600 .8rem var(--body);padding:0 6px}
 .tv-mbar output{font:700 .72rem var(--body);color:var(--gold2);min-width:54px;text-align:right;white-space:nowrap}
 .tv-mbar output[data-m=tv]{min-width:30px}
 .tv-mbar button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:8px;font:600 .8rem var(--body);white-space:nowrap;color:var(--pan-ink);transition:background .12s}
@@ -1510,7 +1530,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function stato(cls, txt) { const o = $('#tv-on'); if (!o) return; o.className = 'tv-on ' + cls; o.title = txt; }
 
   async function carica() {
-    const [st, sc, tk, tr, mb, ms, tu, ct, sh, mu, pg, sv] = await Promise.all([
+    const [st, sc, tk, tr, mb, ms, tu, ct, sh, mu, pg, sv, sg] = await Promise.all([
       SB.from('tavolo_stato').select('*').eq('id', 1).maybeSingle(),
       SB.from('tavolo_scene').select('*').order('creata'),
       SB.from('tavolo_token').select('*'),
@@ -1522,7 +1542,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       SB.from('tavolo_schede').select('*'),
       SB.from('tavolo_muri').select('*'),
       SB.from('tavolo_pf_gruppo').select('*'),
-      SB.from('tavolo_salvezze').select('*').is('esito', null).order('creato')
+      SB.from('tavolo_salvezze').select('*').is('esito', null).order('creato'),
+      SB.from('tavolo_segnalini').select('*').order('creato')
     ]);
     for (const r of [ms, tu, ct]) if (r.error && sqlMancante(r.error)) throw errore('sql2');
     T.stato = chk(st) || { scena: null, canale: 'avalar' };
@@ -1540,6 +1561,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     // senza tavolo/tappa-6.sql i giocatori non vedono la salute dei compagni
     T.pfg = new Map(pg.error ? [] : pg.data.map(x => [x.giocatore, x]));
     // senza tavolo/tappa-7.sql i tiri salvezza si fanno ancora tutti in automatico
+    // senza tavolo/tappa-11.sql niente segnalini sulla mappa
+    T.segn = sg.error ? null : sg.data;
     T.salvOk = !sv.error; T.salv = new Map(sv.error ? [] : sv.data.map(x => [x.id, x])); disegnaSalvezze();
     if (!isDM() || !T.scene.has(T.vista)) T.vista = T.stato.scena;
   }
@@ -1599,6 +1622,16 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       else { const i = T.muri.findIndex(m => m.id === p.new.id); if (i >= 0) T.muri[i] = { ...T.muri[i], ...p.new }; else T.muri.push(p.new); }
       T.wver++; programmaMaschera(); if (T.tool === 'muri') barraMaschera();
     });
+    pg('tavolo_segnalini', p => {
+      if (!T.segn) return;
+      if (p.eventType === 'DELETE') T.segn = T.segn.filter(x => x.id !== p.old.id);
+      else if (!isDM() && (p.new.nascosto || p.new.scena !== T.stato.scena)) T.segn = T.segn.filter(x => x.id !== p.new.id);
+      else { const i = T.segn.findIndex(x => x.id === p.new.id); if (i >= 0) T.segn[i] = { ...T.segn[i], ...p.new }; else { T.segn.push(p.new); if (!isDM()) T.sgApp = p.new.id; } }
+      disegnaSegnalini(); if (T.tool === 'segni') barraMaschera();
+    });
+    // un segnalino appena nascosto: ai giocatori il database non manda più niente, glielo dico io
+    ch.on('broadcast', { event: 'segnalino' }, ({ payload: m }) => { if (isDM() || !T.segn) return; T.segn = T.segn.filter(x => x.id !== m.id); disegnaSegnalini(); });
+    ch.on('broadcast', { event: 'ping' }, ({ payload: m }) => mostraPing(m));
     // il DM ha fatto dimenticare le zone esplorate
     ch.on('broadcast', { event: 'esplorato' }, ({ payload: m }) => { if (!isDM()) dimenticaEsplorato(m.scena); });
     pg('tavolo_turno', p => {
@@ -1672,6 +1705,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     luna: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
     muro: '<path d="M3 5h18v14H3zM3 9.7h18M3 14.3h18M9 5v4.7M15 5v4.7M6 9.7v4.6M12 9.7v4.6M18 9.7v4.6M9 14.3V19M15 14.3V19"/>',
     dif: '<path d="M3 3h18v18H3zM3 9l6-6M3 15 15 3M3 21 21 3M9 21l12-12M15 21l6-6"/>',
+    pin: '<path d="M12 21.5s-6.5-6.2-6.5-11.5a6.5 6.5 0 0 1 13 0c0 5.3-6.5 11.5-6.5 11.5z"/><circle cx="12" cy="10" r="2.4"/>',
     efx: '<path d="M12 3c1 3 4 4.5 4 8.5a4 4 0 0 1-8 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 0-7.5zM5 19c2-1.3 4-1.3 7 0s5 1.3 7 0"/>',
     porta: '<path d="M6 21V4.5L15 3v18M15 5h3.5V21M3.5 21h17"/><circle cx="12.3" cy="12.5" r=".6"/>',
     portaAp: '<path d="M4.5 21V4h14v17M3 21h18"/><path d="M4.5 4L11 6.5V22l-6.5-1"/>',
@@ -1696,7 +1730,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function disegnaBarra() { disegnaRail(); disegnaTop(); setActs(azioni()); }
   function disegnaRail() {
     const r = $('#tv-rail'); if (!r) return;
-    const RL = { 'tv-sel': 'Seleziona', 'tv-mano': 'Sposta', 'tv-righello': 'Righello', 'tv-tiradadi': 'Dadi', 'tv-turno': 'Turno', 'tv-schede': 'Schede', 'tv-dadi': 'Chat', 'tv-scaletta': 'Scaletta', 'tv-maschera': 'Maschera', 'tv-muri': 'Muri', 'tv-difficile': 'Terreno', 'tv-effetti': 'Effetti', 'tv-token': 'Token', 'tv-griglia': 'Griglia', 'tv-liv-seg': 'Tutti', 'tv-liv-mas': 'Solo io' };
+    const RL = { 'tv-sel': 'Seleziona', 'tv-mano': 'Sposta', 'tv-righello': 'Righello', 'tv-tiradadi': 'Dadi', 'tv-turno': 'Turno', 'tv-schede': 'Schede', 'tv-dadi': 'Chat', 'tv-scaletta': 'Scaletta', 'tv-maschera': 'Maschera', 'tv-muri': 'Muri', 'tv-difficile': 'Terreno', 'tv-effetti': 'Effetti', 'tv-segni': 'Segnalini', 'tv-token': 'Token', 'tv-griglia': 'Griglia', 'tv-liv-seg': 'Tutti', 'tv-liv-mas': 'Solo io' };
     const b = (act, tip, k, on) => `<button type="button" data-act="${act}" data-tip="${esc(tip)}" aria-label="${esc(tip)}" class="${on ? 'on' : ''}">${svg(k)}<span class="rl" aria-hidden="true">${RL[act] || ''}</span></button>`;
     let h = b('tv-sel', 'Seleziona e sposta i token (S)', 'sel', T.tool === 'muovi') + b('tv-mano', 'Sposta la mappa (M)', 'mano', T.tool === 'mano')
       + b('tv-righello', 'Righello (R)', 'rig', T.tool === 'righello') + b('tv-tiradadi', 'Tiradadi', 'dado', !$('#tv-tdp')?.hidden)
@@ -1704,7 +1738,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       + b('tv-dadi', 'Chat e dadi', 'chat', !$('#tv-dice')?.hidden).replace('class="', 'class="tel '); // solo sul telefono, al posto della linguetta
     const bSc = isDM() && window.__scaletta ? b('tv-scaletta', 'Scaletta della sessione: la vedi solo tu', 'scal', !!T.scal && !$('#tv-dice')?.hidden) : '';
     if (isDM() && !scena() && bSc) h += '<hr><span class="lbl">DM</span>' + bSc;
-    if (isDM() && scena()) h += '<hr><span class="lbl">DM</span>' + bSc + b('tv-maschera', 'Maschera: nascondi e svela la mappa', 'mas', T.tool === 'maschera') + b('tv-muri', 'Muri, porte e nebbia automatica', 'muro', T.tool === 'muri') + b('tv-difficile', 'Terreno difficile: il movimento costa il doppio', 'dif', T.tool === 'difficile') + b('tv-effetti', 'Effetti sulla mappa: fuoco, gas, veleno…', 'efx', T.tool === 'effetti') + b('tv-token', 'Aggiungi un token', 'tok') + b('tv-griglia', 'Impostazioni della pagina', 'gri');
+    if (isDM() && scena()) h += '<hr><span class="lbl">DM</span>' + bSc + b('tv-maschera', 'Maschera: nascondi e svela la mappa', 'mas', T.tool === 'maschera') + b('tv-muri', 'Muri, porte e nebbia automatica', 'muro', T.tool === 'muri') + b('tv-difficile', 'Terreno difficile: il movimento costa il doppio', 'dif', T.tool === 'difficile') + b('tv-effetti', 'Effetti sulla mappa: fuoco, gas, veleno…', 'efx', T.tool === 'effetti') + b('tv-segni', 'Segnalini: bauli, porte, trappole, punti d\'interesse', 'pin', T.tool === 'segni') + b('tv-token', 'Aggiungi un token', 'tok') + b('tv-griglia', 'Impostazioni della pagina', 'gri');
     h += '<span class="sp"></span>';
     if (isDM() && scena()) h += '<span class="lbl">Livelli</span>' + b('tv-liv-seg', 'Livello Segnalini: i token che vedono tutti', 'lseg', T.livello === 'segnalini').replace('class="', 'class="liv ') + b('tv-liv-mas', 'Livello Master: i token che vedi solo tu', 'lmas', T.livello === 'master').replace('class="', 'class="liv ');
     h += `<span class="tv-cnt" id="tv-cnt">${T.online.length > 1 ? T.online.length : ''}</span><span class="tv-on ${T.live ? 'ok' : ''}" id="tv-on" title="${T.live ? esc('Al tavolo ora: ' + T.online.join(', ')) : 'Connessione…'}"></span>`;
@@ -1729,7 +1763,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       'tv-token': () => dlgToken(), 'tv-griglia': () => dlgGriglia(),
       'tv-turno': () => apriTurno($('#tv-turno').hidden), 'tv-schede': () => apriSchede($('#tv-sp').hidden),
       'tv-tiradadi': () => { const p = $('#tv-tdp'); p.hidden = !p.hidden; if (!p.hidden) { disegnaTdp(); $('#tv-sp').hidden = true; $('#tv-turno').hidden = true; if (matchMedia('(max-width:820px)').matches) apriChat(false); } disegnaRail(); },
-      'tv-liv-seg': () => livello('segnalini'), 'tv-liv-mas': () => livello('master'), 'tv-maschera': () => strumento(T.tool === 'maschera' ? 'muovi' : 'maschera'), 'tv-muri': () => strumento(T.tool === 'muri' ? 'muovi' : 'muri'), 'tv-difficile': () => strumento(T.tool === 'difficile' ? 'muovi' : 'difficile'), 'tv-effetti': () => strumento(T.tool === 'effetti' ? 'muovi' : 'effetti'),
+      'tv-liv-seg': () => livello('segnalini'), 'tv-liv-mas': () => livello('master'), 'tv-maschera': () => strumento(T.tool === 'maschera' ? 'muovi' : 'maschera'), 'tv-muri': () => strumento(T.tool === 'muri' ? 'muovi' : 'muri'), 'tv-difficile': () => strumento(T.tool === 'difficile' ? 'muovi' : 'difficile'), 'tv-effetti': () => strumento(T.tool === 'effetti' ? 'muovi' : 'effetti'), 'tv-segni': () => strumento(T.tool === 'segni' ? 'muovi' : 'segni'),
       ...dadiActs()
     };
   }
@@ -1738,11 +1772,12 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function strumento(t) {
     const prima = T.tool; T.tool = t; if (T.mira && t !== 'muovi') fineMira();
     // le barre degli strumenti del DM stanno in alto a sinistra: chiudo i pannelli che le coprirebbero
-    if (t === 'maschera' || t === 'allinea' || t === 'muri' || t === 'griglia' || t === 'difficile' || t === 'effetti') { const p = $('#tv-tdp'), sp = $('#tv-sp'); if (p) p.hidden = true; if (sp && !sp.hidden) apriSchede(false); }
-    const st = $('#tv-stage'); if (st) { st.classList.toggle('rul', ['righello', 'maschera', 'allinea', 'muri', 'difficile', 'effetti'].includes(t)); st.classList.toggle('mano', t === 'mano'); st.classList.toggle('muri', t === 'muri'); st.classList.toggle('gmano', t === 'griglia'); }
+    if (t === 'maschera' || t === 'allinea' || t === 'muri' || t === 'griglia' || t === 'difficile' || t === 'effetti' || t === 'segni') { const p = $('#tv-tdp'), sp = $('#tv-sp'); if (p) p.hidden = true; if (sp && !sp.hidden) apriSchede(false); }
+    const st = $('#tv-stage'); if (st) { st.classList.toggle('rul', ['righello', 'maschera', 'allinea', 'muri', 'difficile', 'effetti', 'segni'].includes(t)); st.classList.toggle('segni', t === 'segni'); st.classList.toggle('mano', t === 'mano'); st.classList.toggle('muri', t === 'muri'); st.classList.toggle('gmano', t === 'griglia'); }
     if (prima === 'griglia' && t !== 'griglia' && T.gm) annullaGriglia();
     if (prima === 'muri' && t !== 'muri') T.mu = T.mdown = T.mhov = T.mgom = null;
-    disegnaRail(); barraMaschera(); disegnaMuri(); disegnaRighelli();
+    if (prima === 'segni' && t !== 'segni') T.sgSel = null;
+    disegnaRail(); disegnaSegnalini(); barraMaschera(); disegnaMuri(); disegnaRighelli();
   }
   function tasti(e) {
     if (e.key === 'Escape' && T.mira) return fineMira(); // anche con la scheda aperta (nascosta) mentre si mira
@@ -1871,7 +1906,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       return;
     }
     st.innerHTML = `<div class="tv-world" id="tv-world"><img class="tv-map" id="tv-map" alt="" draggable="false" width="${sc.larghezza}" height="${sc.altezza}" style="width:${sc.larghezza}px;height:${sc.altezza}px">
-      <svg class="tv-grid" id="tv-grid" width="${sc.larghezza}" height="${sc.altezza}"></svg><svg class="tv-dif" id="tv-dif" width="${sc.larghezza}" height="${sc.altezza}"></svg><svg class="tv-efx" id="tv-efx" width="${sc.larghezza}" height="${sc.altezza}"></svg><div id="tv-toks"></div><canvas class="tv-fog" id="tv-fog" style="width:${sc.larghezza}px;height:${sc.altezza}px"></canvas>
+      <svg class="tv-grid" id="tv-grid" width="${sc.larghezza}" height="${sc.altezza}"></svg><svg class="tv-dif" id="tv-dif" width="${sc.larghezza}" height="${sc.altezza}"></svg><svg class="tv-efx" id="tv-efx" width="${sc.larghezza}" height="${sc.altezza}"></svg><div class="tv-segn" id="tv-segn"></div><div id="tv-toks"></div><canvas class="tv-fog" id="tv-fog" style="width:${sc.larghezza}px;height:${sc.altezza}px"></canvas>
       <svg class="tv-walls" id="tv-walls" width="${sc.larghezza}" height="${sc.altezza}"></svg><div class="tv-porte" id="tv-porte"></div><svg class="tv-fx" id="tv-fx" width="${sc.larghezza}" height="${sc.altezza}"></svg></div>
       <svg class="tv-ov" id="tv-ov"></svg><div class="tv-zoom" role="group" aria-label="Zoom"><button type="button" data-z="1.25" data-tip="Ingrandisci" aria-label="Ingrandisci">${svg('piu')}</button>
         <div class="tv-zs" id="tv-zs" role="slider" tabindex="0" aria-label="Zoom" aria-valuemin="5" aria-valuemax="600" data-tip="Trascina per lo zoom"><span class="tr"><i></i></span>${[0.25, 0.5, 1, 2, 4].map(z => `<span class="tk ${z === 1 ? 'uno' : ''}" style="--q:${(Math.log(z) - Z_MIN) / (Z_MAX - Z_MIN)}"></span>`).join('')}<span class="kn"></span></div>
@@ -1893,7 +1928,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const img = $('#tv-map');
     if (sc.mappa) urlMappa(sc.mappa).then(u => { if (img.isConnected) img.src = u; }).catch(e => toast('Mappa non caricata: ' + e.message, 'err'));
     else img.removeAttribute('src');
-    disegnaGriglia(); disegnaDifficile(); disegnaEffetti(); disegnaMaschera(); disegnaToken(); interazioni(st); barraMaschera();
+    disegnaGriglia(); disegnaDifficile(); disegnaEffetti(); disegnaSegnalini(); disegnaMaschera(); disegnaToken(); interazioni(st); barraMaschera();
     if (centra || !T.viewOk) adatta(); else applicaVista();
   }
   function disegnaGriglia() {
@@ -2013,7 +2048,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       punti.set(e.pointerId, { x: e.clientX, y: e.clientY });
       try { st.setPointerCapture(e.pointerId); } catch { }
       if (punti.size === 2) { // due dita: ingrandimento, annullo il resto
-        annullaDrag(); rul = fineRighello(rul, true); pan = null; T.mdown = T.mgom = null; if (mas) { mas = null; disegnaMaschera(); disegnaRighelli(); }
+        annullaDrag(); rul = fineRighello(rul, true); pan = null; clearTimeout(T.pingT); T.sgm = null; T.mdown = T.mgom = null; if (mas) { mas = null; disegnaMaschera(); disegnaRighelli(); }
         const [a, b] = [...punti.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), z: T.view.z, v: { ...T.view } }; return;
       }
       if (punti.size > 2) return;
@@ -2024,6 +2059,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (T.tool === 'muri' && isDM()) { inizioMuro(p, e); return; }
       if (T.tool === 'difficile' && isDM()) { inizioDif(p); return; }
       if (T.tool === 'effetti' && isDM()) { inizioEff(p, e); return; }
+      if (T.tool === 'segni' && isDM()) { inizioSegn(p, e); return; }
       if (T.tool === 'griglia' && isDM()) { const sc = scena(); T.gd = { sx: e.clientX, sy: e.clientY, x: sc.griglia_x, y: sc.griglia_y }; return; }
       if (T.tool === 'allinea' && isDM()) { T.al = { a: p, b: p }; disegnaRighelli(); return; }
       if (T.tool === 'righello') { const sc = scena(); const a = { x: centroCasella(p.x, sc.griglia_x), y: centroCasella(p.y, sc.griglia_y) }; rul = { pts: [a, a] }; mostraRighello(rul.pts); return; }
@@ -2035,6 +2071,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (t && T.tool !== 'mano' && puoMuovere(t)) { T.drag = { id: t.id, dx: p.x - t.x, dy: p.y - t.y, x0: da ? da.x0 : t.x, y0: da ? da.y0 : t.y, sx: e.clientX, sy: e.clientY, mosso: false }; el.classList.add('drag'); return; }
       if (t && T.tool !== 'mano') T.clic = { id: t.id, sx: e.clientX, sy: e.clientY };
       pan = { sx: e.clientX, sy: e.clientY, x: T.view.x, y: T.view.y }; st.classList.add('pan');
+      // tenendo premuto senza muoversi compare il segnale, anche sugli schermi degli altri (il DM con Maiusc li porta tutti lì)
+      clearTimeout(T.pingT); const dm = isDM() && e.shiftKey;
+      T.pingT = setTimeout(() => { if (!pan || punti.size !== 1) return; pan = null; T.clic = null; st.classList.remove('pan'); faiPing(p, dm); }, 450);
     });
     st.addEventListener('pointermove', e => {
       if (!punti.has(e.pointerId)) return;
@@ -2049,6 +2088,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (T.mdown || T.mgom) { muoviMuro(p, e); return; }
       if (T.dif) { muoviDif(p); return; }
       if (T.efm) { muoviEff(p); return; }
+      if (T.sgm) { muoviSegn(p, e); return; }
       if (T.gd) { const sc = scena(); sc.griglia_x = T.gd.x; sc.griglia_y = T.gd.y; spostaGriglia((e.clientX - T.gd.sx) / T.view.z, (e.clientY - T.gd.sy) / T.view.z); return; }
       if (T.al) { T.al.b = p; disegnaRighelli(); return; }
       if (rul) {
@@ -2065,17 +2105,19 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         const now = Date.now(); if (now - ultimo > 50) { ultimo = now; manda('trascina', { id: d.id, x: d.x, y: d.y }); }
         return;
       }
+      if (pan && Math.hypot(e.clientX - pan.sx, e.clientY - pan.sy) > 6) clearTimeout(T.pingT);
       if (pan) { T.view.x = pan.x + e.clientX - pan.sx; T.view.y = pan.y + e.clientY - pan.sy; applicaVista(); if (T.clic && Math.hypot(e.clientX - T.clic.sx, e.clientY - T.clic.sy) > 5) T.clic = null; }
     });
     const su = async e => {
       if (!punti.has(e.pointerId)) return;
-      punti.delete(e.pointerId);
+      punti.delete(e.pointerId); clearTimeout(T.pingT);
       if (pinch) { if (punti.size < 2) pinch = null; return; }
       st.classList.remove('pan'); pan = null;
       if (mas) { const m = mas; mas = null; fineMaschera(m); return; }
       if (T.gd) { T.gd = null; return; }
       if (T.dif) { fineDif(); return; }
       if (T.efm) { fineEff(); return; }
+      if (T.sgm) { fineSegn(); return; }
       if (T.mdown || T.mgom) { if (e.type === 'pointerup') fineMuro(mondo(st, e), e); else T.mdown = T.mgom = null; return; }
       if (T.al) { const a = T.al; T.al = null; fineAllinea(a).catch(err => toast(err.message, 'err')); return; }
       if (rul) { rul = fineRighello(rul); return; }
@@ -2120,7 +2162,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     // strumento dei muri: il punto agganciato segue il mouse; il tasto destro chiude la serie di muri
     st.addEventListener('pointermove', e => { if (!T.mira?.area || e.pointerType !== 'mouse' || punti.size || !scena()) return; T.mira.p = mondo(st, e); cancelAnimationFrame(T.araf); T.araf = requestAnimationFrame(disegnaArea); });
     st.addEventListener('pointermove', e => { if (!isDM() || T.tool !== 'muri' || T.mdown || T.mgom || e.pointerType !== 'mouse' || !scena()) return; const p = mondo(st, e); T.mhov = T.mtool === 'gomma' ? p : punta(p, e); disegnaRighelli(); });
-    st.addEventListener('contextmenu', e => { if (T.tool === 'muri') { e.preventDefault(); T.mu = null; disegnaRighelli(); } });
+    st.addEventListener('contextmenu', e => { const sg = isDM() && e.target.closest('.tv-sg'); if (sg) { e.preventDefault(); menuSegnalino(sg.dataset.id, e); return; } if (T.tool === 'muri') { e.preventDefault(); T.mu = null; disegnaRighelli(); } });
     function annullaDrag() { const d = T.drag; if (!d) return; T.drag = null; const t = T.tok.get(d.id); if (t) { disegnaToken(); manda('trascina', { id: t.id, x: t.x, y: t.y }); } }
     function fineRighello(r, subito) {
       if (!r) return null;
@@ -2307,6 +2349,117 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     // cambiare la durata la fa ripartire da adesso
     const du = b.querySelector('[data-e=dur]');
     du.onchange = () => { const v = clamp(Math.round(+du.value || 0), 0, 999); T.efDur = v; if (sel) return cambia({ durata: v, inizio: { round: +T.stato?.round || 1, turno: T.stato?.turno || null } }); barraEffetti(b); };
+  }
+
+  /* ---------- segnalini sulla mappa (bauli, porte, trappole…) e segnale col mouse ---------- */
+  const SEGNI = {
+    punto: ['⭐', 'Punto d\'interesse', '#c0392b'], baule: ['🧰', 'Baule', '#a0662b'], tesoro: ['💰', 'Tesoro', '#d9a21b'], porta: ['🚪', 'Porta', '#8a5a2b'],
+    segreta: ['🧱', 'Porta segreta', '#6f6a62'], chiave: ['🗝️', 'Chiave', '#b8902e'], leva: ['⚙️', 'Leva o meccanismo', '#5b6b7a'], trappola: ['⚠️', 'Trappola', '#d35400'],
+    pericolo: ['☠️', 'Pericolo', '#3d3d3d'], fossa: ['🕳️', 'Botola o fossa', '#4a3b30'], scale: ['🔼', 'Scale', '#4f6d8a'], indizio: ['📜', 'Indizio o nota', '#9c7b45'],
+    pozione: ['🧪', 'Pozione o alchimia', '#3a9a6a'], magia: ['✨', 'Magia o runa', '#7d4fc0'], altare: ['🕯️', 'Altare o santuario', '#8f6c3e'], fuoco: ['🔥', 'Falò o accampamento', '#d2601a'],
+    acqua: ['💧', 'Fonte o acqua', '#2f7fc1'], cadavere: ['💀', 'Resti o cadavere', '#6b6058'], png: ['💬', 'Personaggio da incontrare', '#2e8b8b'], obiettivo: ['🚩', 'Obiettivo o uscita', '#2f8f3a']
+  };
+  const segnaliniScena = sc => (T.segn || []).filter(x => x.scena === sc.id);
+  function disegnaSegnalini() {
+    const box = $('#tv-segn'), sc = scena(); if (!box || !sc) return;
+    const L = T.sgm?.l || segnaliniScena(sc), s = Math.max(30, sc.griglia * 0.8), sel = isDM() && T.tool === 'segni' ? T.sgSel : null;
+    box.innerHTML = L.filter(x => isDM() || !x.nascosto).map(x => {
+      const [ic, l, c] = SEGNI[x.tipo] || SEGNI.punto, tip = (x.nome || l) + (isDM() ? (x.nascosto ? ' · nascosto ai giocatori' : ' · lo vedono i giocatori') + ' · tasto destro: rivela, nascondi o togli' : '');
+      return `<div class="tv-sg${x.nascosto ? ' nasc' : ''}${x.id === sel ? ' sel' : ''}${x.id === T.sgApp && animazioni() ? ' app' : ''}" data-id="${x.id}" style="left:${x.x}px;top:${x.y}px;--s:${s}px;--c:${c}" data-tip="${esc(tip)}"><span class="pin"><span class="ic">${ic}</span></span>${x.nome ? `<span class="nm">${esc(x.nome)}</span>` : ''}${x.nascosto && isDM() ? `<i class="ns">${svg('velo')}</i>` : ''}</div>`;
+    }).join('');
+    T.sgApp = null;
+  }
+  async function nuovoSegnalino(sc, p) {
+    const r = await SB.from('tavolo_segnalini').insert({ scena: sc.id, tipo: T.sgTipo || 'punto', x: Math.round(p.x), y: Math.round(p.y), nascosto: T.sgNasc !== false }).select().single();
+    if (r.error) return toast(r.error.message, 'err');
+    if (!T.segn.some(x => x.id === r.data.id)) T.segn.push(r.data);
+    disegnaSegnalini(); barraMaschera();
+  }
+  async function cambiaSegnalino(x, ch) {
+    const prima = { ...x }; Object.assign(x, ch); disegnaSegnalini(); if (T.tool === 'segni') barraMaschera();
+    if (ch.nascosto) manda('segnalino', { id: x.id });
+    const r = await SB.from('tavolo_segnalini').update(ch).eq('id', x.id);
+    if (r.error) { Object.assign(x, prima); disegnaSegnalini(); if (T.tool === 'segni') barraMaschera(); toast(r.error.message, 'err'); }
+  }
+  async function togliSegnalini(ids) {
+    const via = T.segn.filter(x => ids.includes(x.id)); if (!via.length) return;
+    T.segn = T.segn.filter(x => !ids.includes(x.id)); if (ids.includes(T.sgSel)) T.sgSel = null;
+    disegnaSegnalini(); if (T.tool === 'segni') barraMaschera(); ids.forEach(id => manda('segnalino', { id }));
+    const r = await SB.from('tavolo_segnalini').delete().in('id', ids);
+    if (r.error) { T.segn.push(...via); disegnaSegnalini(); if (T.tool === 'segni') barraMaschera(); toast(r.error.message, 'err'); }
+  }
+  function inizioSegn(p, e) {
+    const sc = scena(); if (!sc) return;
+    if (!T.segn) return toast('Per i segnalini esegui tavolo/tappa-11.sql in Supabase.', 'err');
+    const el = e.target.closest('.tv-sg'), x = el && T.segn.find(y => y.id === el.dataset.id);
+    if (x) { T.sgSel = x.id; T.sgm = { id: x.id, dx: p.x - x.x, dy: p.y - x.y, sx: e.clientX, sy: e.clientY, l: segnaliniScena(sc).map(y => ({ ...y })), mosso: false }; disegnaSegnalini(); barraMaschera(); return; }
+    // clic sul vuoto: un segnalino nuovo del tipo scelto (quello scelto prima resta com'è)
+    T.sgSel = null; nuovoSegnalino(sc, p);
+  }
+  function muoviSegn(p, e) {
+    const m = T.sgm; if (!m) return;
+    if (!m.mosso && Math.hypot(e.clientX - m.sx, e.clientY - m.sy) < 4) return;
+    const x = m.l.find(y => y.id === m.id); if (!x) return;
+    m.mosso = true; x.x = Math.round(p.x - m.dx); x.y = Math.round(p.y - m.dy);
+    const el = $(`#tv-segn .tv-sg[data-id="${m.id}"]`); if (el) { el.style.left = x.x + 'px'; el.style.top = x.y + 'px'; }
+  }
+  function fineSegn() {
+    const m = T.sgm; T.sgm = null; if (!m) return;
+    const n = m.l.find(y => y.id === m.id), x = T.segn?.find(y => y.id === m.id);
+    if (m.mosso && n && x) cambiaSegnalino(x, { x: n.x, y: n.y }); else disegnaSegnalini();
+  }
+  function barraSegnalini(b) {
+    const sc = scena();
+    if (!T.segn) { b.innerHTML = '<div class="g"><b class="tit">📍 Segnalini</b><span class="avv">Per usarli esegui <b>tavolo/tappa-11.sql</b> nell\'SQL Editor di Supabase, poi ricarica la pagina.</span></div>'; b.classList.remove('spenta'); b.hidden = false; return; }
+    const L = segnaliniScena(sc), sel = L.find(x => x.id === T.sgSel) || null, tipo = sel?.tipo || T.sgTipo || 'punto', nasc = sel ? sel.nascosto : T.sgNasc !== false, quanti = L.filter(x => x.nascosto).length;
+    b.innerHTML = `<div class="g"><b class="tit">📍 Segnalini</b><span class="avv">${sel ? 'Stai modificando questo segnalino: il tipo e il nome cambiano lui. Trascinalo per spostarlo.' : 'Scegli un segnalino e clicca sulla mappa per metterlo. Clicca un segnalino già messo per modificarlo, tasto destro per rivelarlo o toglierlo.'}</span></div>
+      <div class="g seg sgt">${Object.entries(SEGNI).map(([k, [ic, l]]) => `<button type="button" data-s="tipo" data-v="${k}" class="${tipo === k ? 'on' : ''}" data-tip="${esc(l)}" aria-label="${esc(l)}"><span>${ic}</span></button>`).join('')}</div>
+      <div class="g"><b class="tit">${(SEGNI[tipo] || SEGNI.punto)[0]} ${esc((SEGNI[tipo] || SEGNI.punto)[1])}</b><label class="sw" title="${sel ? 'Se è nascosto lo vedi solo tu' : 'I nuovi segnalini partono nascosti: li riveli quando i giocatori li trovano'}"><input type="checkbox" data-s="nasc" ${nasc ? 'checked' : ''}><span class="tg" aria-hidden="true"></span>${sel ? 'Nascosto ai giocatori' : 'Mettili nascosti ai giocatori'}</label></div>
+      ${sel ? `<div class="g sl"><span>Nome</span><input type="text" data-s="nome" maxlength="120" value="${esc(sel.nome || '')}" placeholder="${esc((SEGNI[sel.tipo] || SEGNI.punto)[1])}" aria-label="Nome del segnalino" style="width:170px"></div>` : ''}
+      <div class="g">${sel ? '<button type="button" data-s="via"><span>🗑 Togli questo</span></button><button type="button" data-s="desel"><span>Fatto</span></button>' : ''}<button type="button" data-s="rivela"${quanti ? '' : ' disabled'} title="Rivela ai giocatori tutti i segnalini nascosti di questa mappa"><span>👁 Rivela tutti (${quanti})</span></button><button type="button" data-s="svuota"${L.length ? '' : ' disabled'}><span>Svuota (${L.length})</span></button></div>`;
+    b.classList.remove('spenta'); b.hidden = false;
+    b.querySelectorAll('button[data-s]').forEach(x => x.onclick = async () => {
+      const k = x.dataset.s, v = x.dataset.v;
+      if (k === 'tipo') { T.sgTipo = v; if (sel) return cambiaSegnalino(sel, { tipo: v }); }
+      if (k === 'via' && sel) return togliSegnalini([sel.id]);
+      if (k === 'desel') { T.sgSel = null; disegnaSegnalini(); }
+      if (k === 'rivela') { for (const y of L.filter(y => y.nascosto)) await cambiaSegnalino(y, { nascosto: false }); return; }
+      if (k === 'svuota') { if (!await ask('Togliere tutti i segnalini da questa mappa?', { ok: 'Svuota', danger: true, title: 'Segnalini' })) return; return togliSegnalini(L.map(y => y.id)); }
+      barraSegnalini(b);
+    });
+    b.querySelector('[data-s=nasc]').onchange = e => { if (sel) return cambiaSegnalino(sel, { nascosto: e.target.checked }); T.sgNasc = e.target.checked; };
+    const nm = b.querySelector('[data-s=nome]');
+    if (nm) { nm.onchange = () => cambiaSegnalino(sel, { nome: nm.value.trim().slice(0, 120) }); nm.onkeydown = e => { if (e.key === 'Enter') nm.blur(); }; }
+  }
+  function menuSegnalino(id, e) {
+    const x = T.segn?.find(y => y.id === id), st = $('#tv-stage'); if (!x || !st) return;
+    chiudiPop();
+    const [ic, l] = SEGNI[x.tipo] || SEGNI.punto, r = st.getBoundingClientRect(), pop = document.createElement('div'); pop.className = 'tv-pop';
+    pop.innerHTML = `<b>${ic} ${esc(x.nome || l)}</b><button class="btn sm" data-k="nasc">${x.nascosto ? '👁 Rivela ai giocatori' : '🙈 Nascondi ai giocatori'}</button><button class="btn sm" data-k="mod">✏️ Modifica</button><button class="btn sm danger" data-k="via">Togli il segnalino</button>`;
+    st.append(pop);
+    pop.style.left = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6) + 'px'; pop.style.top = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6) + 'px';
+    pop.querySelector('[data-k=nasc]').onclick = () => { chiudiPop(); cambiaSegnalino(x, { nascosto: !x.nascosto }); };
+    pop.querySelector('[data-k=mod]').onclick = () => { chiudiPop(); T.sgSel = x.id; if (T.tool !== 'segni') strumento('segni'); else { disegnaSegnalini(); barraMaschera(); } };
+    pop.querySelector('[data-k=via]').onclick = () => { chiudiPop(); togliSegnalini([x.id]); };
+  }
+  function coloreMio() {
+    if (isDM()) return '#f2b51d';
+    const t = [...T.tok.values()].find(y => y.giocatore && y.giocatore === T.me.giocatore);
+    return /^#[0-9a-f]{6}$/i.test(t?.colore || '') ? t.colore : '#3d9bff';
+  }
+  function faiPing(p, centra) {
+    const sc = scena(); if (!sc) return;
+    const m = { scena: sc.id, x: Math.round(p.x), y: Math.round(p.y), nome: T.me.nome || '', col: coloreMio(), centra: !!centra };
+    mostraPing(m, true); manda('ping', m);
+  }
+  function mostraPing(m, mio) {
+    const w = $('#tv-world'), sc = scena(); if (!w || !sc || m.scena !== sc.id) return;
+    // il DM con Maiusc porta lo sguardo di tutti sul punto
+    if (m.centra && !mio && !isDM()) { const r = $('#tv-stage')?.getBoundingClientRect(); if (r) { T.view.x = r.width / 2 - m.x * T.view.z; T.view.y = r.height / 2 - m.y * T.view.z; applicaVista(); } }
+    const el = document.createElement('div'), c = /^#[0-9a-f]{6}$/i.test(m.col || '') ? m.col : '#3d9bff';
+    el.className = 'tv-ping'; el.style.cssText = `left:${+m.x}px;top:${+m.y}px;--c:${c};--r:${Math.max(sc.griglia * 1.2, 60 / T.view.z)}px`;
+    el.innerHTML = `<i></i><i></i><i></i>${m.nome && !mio ? `<b>${esc(m.nome)}</b>` : ''}`;
+    w.append(el); setTimeout(() => el.remove(), 2700);
   }
 
   /* ---------- movimento in combattimento: righello mentre si trascina, poi conferma ---------- */
@@ -3014,7 +3167,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function programmaMaschera() { cancelAnimationFrame(T.mraf); T.mraf = requestAnimationFrame(() => { disegnaMaschera(); disegnaToken(); }); }
   function barraMaschera() {
     const b = $('#tv-mbar'), sc = scena(); if (!b) return;
-    b.dataset.t = T.mira ? '' : { maschera: 'Maschera', muri: 'Muri, porte e nebbia', difficile: 'Terreno difficile', effetti: 'Effetti sulla mappa', griglia: 'Griglia', allinea: 'Allinea la griglia', righello: 'Righello' }[T.tool] || '';
+    b.dataset.t = T.mira ? '' : { maschera: 'Maschera', muri: 'Muri, porte e nebbia', difficile: 'Terreno difficile', effetti: 'Effetti sulla mappa', segni: 'Segnalini', griglia: 'Griglia', allinea: 'Allinea la griglia', righello: 'Righello' }[T.tool] || '';
     if (T.tool === 'allinea' && isDM() && sc) return barraAllinea(b);
     if (T.mira && sc) { const s2 = T.schede?.get(T.mira.sid), tk = T.tok.get(T.mira.tok); if (s2 && tk) return barraMira(armaMira(T.mira) || {}, tk); }
     if (T.critico && sc && !b.hidden) return; // la conferma del critico aspetta una risposta
@@ -3024,6 +3177,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (T.tool === 'griglia' && isDM() && sc) return barraGriglia(b);
     if (T.tool === 'difficile' && isDM() && sc) return barraDifficile(b);
     if (T.tool === 'effetti' && isDM() && sc) return barraEffetti(b);
+    if (T.tool === 'segni' && isDM() && sc) return barraSegnalini(b);
     if (T.tool !== 'maschera' || !isDM() || !sc) { b.hidden = true; disegnaRighelli(); return; }
     if (!T.mraggio) T.mraggio = sc.griglia;
     const on = sc.maschera, dis = on ? '' : 'disabled', bt = (k, ic, l, sel, tip) => `<button type="button" data-m="${k}" class="${sel ? 'on' : ''}" ${dis} title="${esc(tip || l)}">${ic ? svg(ic) : ''}<span>${l}</span></button>`;
