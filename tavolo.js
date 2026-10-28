@@ -675,6 +675,8 @@ input.tv-rg:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 4px #e7cf9a40}
 input.tv-rg:disabled{opacity:.4;cursor:default}
 dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wine)}
 /* zoom */
+.tv-incolla{position:absolute;right:64px;top:62px;z-index:7;display:flex;gap:6px;align-items:center;padding:6px;border-radius:12px;background:var(--pan);border:1px solid var(--pan-b);box-shadow:var(--ombra);max-width:calc(100% - 32px)}
+.tv-incolla .pri{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tv-zoom{position:absolute;right:12px;top:62px;display:flex;flex-direction:column;align-items:center;gap:2px;z-index:6;border-radius:16px;padding:6px 5px}
 .tv-zoom button{all:unset;box-sizing:border-box;cursor:pointer;width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--pan-ink);transition:background .12s}
 .tv-zoom button svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -1503,7 +1505,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function esci() {
     if (T.ch) { try { SB.removeChannel(T.ch); } catch { } T.ch = null; }
     T.live = false; T.rulers.clear(); clearTimeout(T.rt);
-    removeEventListener('keydown', tasti);
+    removeEventListener('keydown', tasti); removeEventListener('pointermove', segui);
   }
   function stato(cls, txt) { const o = $('#tv-on'); if (!o) return; o.className = 'tv-on ' + cls; o.title = txt; }
 
@@ -1640,7 +1642,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         primo = false;
       } else if (s === 'CHANNEL_ERROR' || s === 'TIMED_OUT' || s === 'CLOSED') { T.live = false; if (T.ch === ch) stato('ko', 'Riconnessione…'); }
     });
-    addEventListener('keydown', tasti);
+    addEventListener('keydown', tasti); addEventListener('pointermove', segui, { passive: true });
   }
   // Postgres non rimanda i valori lunghi rimasti uguali (come l'immagine del token): li tengo da prima
   const completa = (prima, nuovo) => { const o = { ...(prima || {}), ...nuovo }; if (prima?.immagine && !nuovo.immagine) o.immagine = prima.immagine; return o; };
@@ -1745,6 +1747,13 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function tasti(e) {
     if (e.key === 'Escape' && T.mira) return fineMira(); // anche con la scheda aperta (nascosta) mentre si mira
     if (e.key === 'Enter' && T.mira?.area && !e.target.closest('input,textarea,select')) return lanciaArea();
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && isDM() && /^[cv]$/i.test(e.key) && !e.target.closest('input,textarea,select,[contenteditable]') && !document.querySelector('dialog[open]') && !getSelection()?.toString()) {
+      // Ctrl+C sul token sotto il mouse, Ctrl+V dove c'è il mouse
+      const sotto = cursore && document.elementFromPoint(cursore.x, cursore.y)?.closest('.tv-tok'), t = sotto && T.tok.get(sotto.dataset.id);
+      if (e.key.toLowerCase() === 'c' && t) { e.preventDefault(); copiaToken(t); }
+      else if (e.key.toLowerCase() === 'v' && T.copia) { e.preventDefault(); incollaToken(true); }
+      return;
+    }
     if (e.target.closest('input,textarea,select,[contenteditable]') || e.ctrlKey || e.metaKey || e.altKey || document.querySelector('dialog[open]')) return;
     const k = e.key.toLowerCase();
     if (k === 'r') strumento(T.tool === 'righello' ? 'muovi' : 'righello');
@@ -1868,6 +1877,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         <div class="tv-zs" id="tv-zs" role="slider" tabindex="0" aria-label="Zoom" aria-valuemin="5" aria-valuemax="600" data-tip="Trascina per lo zoom"><span class="tr"><i></i></span>${[0.25, 0.5, 1, 2, 4].map(z => `<span class="tk ${z === 1 ? 'uno' : ''}" style="--q:${(Math.log(z) - Z_MIN) / (Z_MAX - Z_MIN)}"></span>`).join('')}<span class="kn"></span></div>
         <button type="button" data-z="0.8" data-tip="Rimpicciolisci" aria-label="Rimpicciolisci">${svg('meno')}</button><span class="sep"></span>
         <button type="button" data-z="0" data-tip="Mostra tutta la mappa" aria-label="Mostra tutta la mappa">${svg('adatta')}</button><button type="button" class="zp" id="tv-zp" data-z="1" data-tip="Torna al 100%" aria-label="Torna al 100%"></button></div>`;
+    barraCopia();
     st.querySelectorAll('[data-z]').forEach(b => b.onclick = () => { const z = b.id === 'tv-zp' ? 1 / T.view.z : +b.dataset.z; if (!z) adatta(); else { const r = st.getBoundingClientRect(); zoom(z, r.width / 2, r.height / 2); } });
     // il cursore va in scala logaritmica: ogni tratto ingrandisce della stessa proporzione
     const zs = $('#tv-zs'), aZoom = z => { const r = st.getBoundingClientRect(); zoom(z / T.view.z, r.width / 2, r.height / 2); };
@@ -1998,7 +2008,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const punti = new Map(); let pan = null, pinch = null, rul = null, mas = null, ultimo = 0;
     st.addEventListener('wheel', e => { e.preventDefault(); const r = st.getBoundingClientRect(); const dy = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY; zoom(Math.exp(-(e.ctrlKey ? dy * 0.01 : clamp(dy, -100, 100) * 0.0005)), e.clientX - r.left, e.clientY - r.top); }, { passive: false });
     st.addEventListener('pointerdown', e => {
-      if (e.button > 0 || !scena() || e.target.closest('.tv-zoom,.tv-pop,.tv-porta')) return;
+      if (e.button > 0 || !scena() || e.target.closest('.tv-zoom,.tv-pop,.tv-porta,.tv-incolla')) return;
       chiudiPop();
       punti.set(e.pointerId, { x: e.clientX, y: e.clientY });
       try { st.setPointerCapture(e.pointerId); } catch { }
@@ -2429,7 +2439,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const gr = tsch + (ft ? tile('foto', '🖼', 'Foto', 'Solo sul tuo schermo') + tile('mostra', '📣', 'Mostra a tutti', 'Si apre a schermo intero a tutti i giocatori') : '')
       + (t.nascosto ? tile('nasc', '⬆', 'Rendi visibile', 'Sposta nei Segnalini: lo vedono tutti') : tile('nasc', '👑', 'Solo per me', 'Sposta nel livello Master: lo vedi solo tu'))
       + (!t.giocatore && pf ? (t.barra ? tile('barra', '🙈', 'Nascondi salute', 'I giocatori vedono la barra della salute di questo token') : tile('barra', '❤', 'Mostra salute', 'Per ora la barra della salute la vedi solo tu')) : '')
-      + tile('via', '🗑', 'Elimina', '', 'via');
+      + tile('copia', '📋', 'Copia', 'Poi «Incolla» (o Ctrl+V sulla mappa) per metterne altri uguali') + tile('via', '🗑', 'Elimina', '', 'via');
     pop.innerHTML = `${testa}${bfine}${rpf}<div class="gr">${gr}</div>${rcond}${ini}
       <details><summary>Altro: misura, chi lo muove${vista ? ', vista' : ''}</summary>
       <div class="row"><span>Misura</span><button type="button" class="tv-b sec ico" data-k="meno">−</button><span>${t.misura.toLocaleString('it-IT')}</span><button type="button" class="tv-b sec ico" data-k="piu">+</button></div>
@@ -2452,6 +2462,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (r2.error) return toast(/barra/i.test(r2.error.message) || sqlMancante(r2.error) ? 'Per la barra della salute esegui tavolo/tappa-6.sql in Supabase.' : r2.error.message, 'err');
       T.tok.set(id, r2.data); disegnaToken(); chiudiPop();
     });
+    pop.querySelector('[data-k=copia]').onclick = () => { chiudiPop(); copiaToken(t); };
     pop.querySelector('[data-k=nasc]').onclick = async () => { await salva({ nascosto: !t.nascosto }); if (!t.nascosto) manda('nascosto', { id }); };
     pop.querySelector('[data-k=meno]').onclick = () => salva({ misura: t.misura > 1 ? t.misura - 1 : 0.5 });
     pop.querySelector('[data-k=piu]').onclick = () => salva({ misura: t.misura < 1 ? 1 : Math.min(10, t.misura + 1) });
@@ -2552,6 +2563,54 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (r.error) { toast(r.error.message, 'err'); return null; }
     T.tok.set(r.data.id, r.data); disegnaToken(); toast('Token aggiunto: ' + (row.nome || 'senza nome'));
     return r.data;
+  }
+
+  /* ---------- copia e incolla dei token (DM): le copie usano la stessa scheda, ognuna con i suoi punti ferita ---------- */
+  let cursore = null;
+  const segui = e => { cursore = { x: e.clientX, y: e.clientY }; };
+  function copiaToken(t) {
+    T.copia = { ...t }; barraCopia();
+    toast(`Token copiato: ${t.nome || 'senza nome'}. Premi «Incolla» o Ctrl+V sulla mappa, anche più volte.`);
+  }
+  function barraCopia() {
+    const st = $('#tv-stage'); if (!st) return; st.querySelector('.tv-incolla')?.remove();
+    if (!T.copia || !isDM() || !scena()) return;
+    const b = document.createElement('div'); b.className = 'tv-incolla';
+    b.innerHTML = `<button type="button" class="tv-b pri" data-k="inc" title="Mette sulla mappa un altro token uguale, accanto all'originale">📋 Incolla «${esc(T.copia.nome || 'token')}»</button><button type="button" class="tv-b sec ico" data-k="noc" title="Svuota gli appunti" aria-label="Smetti di incollare">✕</button>`;
+    b.querySelector('[data-k=inc]').onclick = () => incollaToken(false);
+    b.querySelector('[data-k=noc]').onclick = () => { T.copia = null; barraCopia(); };
+    st.append(b);
+  }
+  // «Bandito 1» → «Bandito 2», «Bandito 3»…: il primo numero libero tra i token della mappa
+  function nomeCopia(nome, sc) {
+    const base = String(nome || '').replace(/\s*\d+$/, '').trim(); if (!base) return nome || '';
+    const usati = new Set([...T.tok.values()].filter(t => t.scena === sc.id).map(t => String(t.nome || '').trim()));
+    let n = 2; while (usati.has(`${base} ${n}`)) n++;
+    return `${base} ${n}`;
+  }
+  async function incollaToken(alMouse) {
+    const o = T.copia, sc = scena(); if (!o || !sc) return;
+    const lato = o.misura * sc.griglia, passo = o.misura < 1 ? sc.griglia / 2 : sc.griglia, st = $('#tv-stage').getBoundingClientRect();
+    let x = o.x, y = o.y;
+    if (alMouse && cursore && cursore.x >= st.left && cursore.x <= st.right && cursore.y >= st.top && cursore.y <= st.bottom) {
+      x = (cursore.x - st.left - T.view.x) / T.view.z - lato / 2; y = (cursore.y - st.top - T.view.y) / T.view.z - lato / 2;
+    } else if (o.scena !== sc.id) { x = (st.width / 2 - T.view.x) / T.view.z - lato / 2; y = (st.height / 2 - T.view.y) / T.view.z - lato / 2; }
+    x = aggancia(clamp(x, 0, sc.larghezza - lato), sc.griglia_x, o.misura); y = aggancia(clamp(y, 0, sc.altezza - lato), sc.griglia_y, o.misura);
+    // la prima casella libera attorno al punto scelto
+    const altri = [...T.tok.values()].filter(t => t.scena === sc.id), libera = (px, py) => !altri.some(t => { const l = t.misura * sc.griglia, m = 0.5; return px < t.x + l - m && px + lato > t.x + m && py < t.y + l - m && py + lato > t.y + m; });
+    let pos = null;
+    for (let r = 0; r <= 8 && !pos; r++) for (let i = -r; i <= r && !pos; i++) for (let j = -r; j <= r && !pos; j++) {
+      if (Math.max(Math.abs(i), Math.abs(j)) !== r) continue;
+      const px = x + i * passo, py = y + j * passo;
+      if (px >= 0 && py >= 0 && px + lato <= sc.larghezza + 0.5 && py + lato <= sc.altezza + 0.5 && libera(px, py)) pos = { x: px, y: py };
+    }
+    pos = pos || { x, y };
+    const sch = schedaDi(o), max = sch && sch.tipo === 'png' ? num(sch.dati.pf_max) || null : o.pf_max ?? null;
+    const row = { scena: sc.id, nome: nomeCopia(o.nome, sc), immagine: o.immagine || null, colore: o.colore, misura: o.misura, giocatore: null, scheda: o.scheda || null, nascosto: !!o.nascosto, x: pos.x, y: pos.y, pf: max, pf_max: max };
+    if ('barra' in o) row.barra = !!o.barra;
+    const r = await SB.from('tavolo_token').insert(row).select().single();
+    if (r.error) return toast(r.error.message, 'err');
+    T.tok.set(r.data.id, r.data); disegnaToken(); toast('Token incollato: ' + (row.nome || 'senza nome'));
   }
 
   /* ---------- scene (DM) ---------- */
@@ -4340,10 +4399,18 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
 
   /* nuovo PNG (DM): da un modello, da un PNG del sito o vuoto */
+  // ogni scheda nata nel Tavolo diventa anche un personaggio dell'archivio del sito (o si lega a quello con lo stesso nome)
+  async function nuovoNellArchivio(nome, dati) {
+    if (!isDM() || window.__RO || typeof createEntity !== 'function' || !S.ents) return null;
+    const gia = [...S.ents.values()].find(e => e.type === 'png' && norm(e.name) === norm(nome)); if (gia) return gia.id;
+    try { return await createEntity({ type: 'png', name: nome, brief: String(dati.taglia_tipo || '').trim() || 'Creato dal Tavolo' }); }
+    catch (e) { toast('Scheda creata, ma non sono riuscito ad aggiungerla all\'archivio: ' + e.message, 'err'); return null; }
+  }
   async function creaPng(o) {
     // scheda letta da una foto: i suoi valori al posto di quelli di partenza
     if (o.forma && typeof o.forma === 'object') { const f = o.forma; o = { ...o, forma: 'png', nome: f.nome || o.nome, dati: { ...(o.dati || BASE), ...f.dati } }; toast('Scheda compilata dalla foto: controlla i valori (✎ Modifica).'); }
     const dati = { ...(o.dati || BASE), ...(o.forma === 'pg' ? { forma: 'pg', livello: 1 } : {}) };
+    if (!o.entita) o.entita = await nuovoNellArchivio(String(o.nome || 'PNG').slice(0, 80), dati);
     const r = await SB.from('tavolo_schede').insert({ tipo: 'png', nome: String(o.nome || 'PNG').slice(0, 80), entita: o.entita || null, immagine: o.immagine || null, nascosta: true, dati }).select().single();
     if (r.error) { toast(r.error.message, 'err'); return null; }
     T.schede.set(r.data.id, r.data); disegnaSchede(); return r.data;
