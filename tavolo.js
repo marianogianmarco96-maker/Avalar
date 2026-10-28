@@ -5094,7 +5094,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       <div class="tabs" role="tablist">${[['pri', pg ? 'Personaggio' : 'Statistiche'], ['inc', 'Incantesimi'], ['bg', pg ? 'Background e note' : 'Note']].map(([k, l]) => `<button type="button" role="tab" data-tab="${k}" aria-selected="${sv.tab === k}" class="${sv.tab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
       ${pg ? barraGuida(s, w) : ''}
       <div class="corpo">${corpo}</div>
-      ${isDM() ? `<div class="fd">${s.tipo === 'png' ? `<button type="button" class="mini" data-k="forma" title="${pg ? 'Passa al blocco delle statistiche da PNG' : 'Passa alla scheda completa, come quella di un giocatore'}">${pg ? '📋 Scheda da PNG' : '📜 Scheda completa'}</button><button type="button" class="mini" data-k="vis">${s.nascosta ? '🙈 Nascosta ai giocatori' : '👁 La vedono i giocatori'}</button>${scena() ? '<button type="button" class="mini" data-k="metti">＋ Metti un token sulla mappa</button>' : ''}` : '<span class="vuoto">La compila anche il giocatore, dal vivo.</span>'}</div>` : (w ? '' : '<p class="vuoto fd">Scheda mostrata dal DM: puoi solo leggerla.</p>')}`;
+      ${isDM() ? `<div class="fd">${s.tipo === 'png' ? `<button type="button" class="mini" data-k="forma" title="${pg ? 'Passa al blocco delle statistiche da PNG' : 'Passa alla scheda completa, come quella di un giocatore'}">${pg ? '📋 Scheda da PNG' : '📜 Scheda completa'}</button><button type="button" class="mini" data-k="vis">${s.nascosta ? '🙈 Nascosta ai giocatori' : '👁 La vedono i giocatori'}</button>${scena() ? '<button type="button" class="mini" data-k="metti">＋ Metti un token sulla mappa</button>' : ''}<button type="button" class="mini" data-k="svuota" title="Cancella tutto e ricrea la scheda da capo: vuota, completa o da una foto">🧹 Svuota scheda</button>` : '<span class="vuoto">La compila anche il giocatore, dal vivo.</span>'}</div>` : (w ? '' : '<p class="vuoto fd">Scheda mostrata dal DM: puoi solo leggerla.</p>')}`;
     riempi(); applicaZoomScheda(); sv.d.classList.toggle('tv-scuro', schedaScura());
   }
   function campo(el, scelto = false) {
@@ -5268,6 +5268,22 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       const t = await tira(dv, null, true, s.nome + ' · Punti ferita'); if (!t?.totale) return;
       const tk = tokScheda(); if (tk) { const r = await SB.from('tavolo_token').update({ pf: t.totale, pf_max: t.totale }).eq('id', tk.id).select().single(); if (!r.error) { T.tok.set(tk.id, completa(tk, r.data)); disegnaToken(); } return aggiornaFinestra(); }
       return salvaScheda(s.id, { pf: t.totale, pf_max: t.totale }, true);
+    }
+    if (k === 'svuota') {
+      // la scheda resta la stessa (token e foto restano collegati), i suoi dati ripartono da capo
+      if (s.tipo !== 'png' || !await ask(`Svuotare la scheda di **${s.nome}**? Statistiche, tratti, attacchi e note si cancellano e la ricrei da capo: vuota, completa o da una foto. I token restano collegati.`, { ok: 'Svuota', danger: true, title: 'Svuota scheda' })) return;
+      const e = s.entita && S.ents?.get(s.entita), f = await sceltaForma(s.nome, e); if (!f) return;
+      const p = pend.get(s.id); if (p) { clearTimeout(p.t); pend.delete(s.id); }
+      const dati = typeof f === 'object' ? { ...BASE, ...f.dati } : { ...BASE, ...(f === 'pg' ? { forma: 'pg', livello: 1 } : {}) };
+      const r = await SB.from('tavolo_schede').update({ nome: String((typeof f === 'object' && f.nome) || s.nome).slice(0, 80), dati }).eq('id', s.id).select().single();
+      if (r.error) return toast(r.error.message, 'err');
+      T.schede.set(s.id, r.data);
+      // i token del PNG riprendono i punti ferita della nuova scheda
+      for (const t of T.tok.values()) if (!t.giocatore && schedaDi(t)?.id === s.id && t.pf_max != null) {
+        const m = num(dati.pf_max) || null, u = await SB.from('tavolo_token').update({ pf: m, pf_max: m }).eq('id', t.id).select().single(); if (!u.error) T.tok.set(t.id, completa(t, u.data));
+      }
+      sv.tab = 'pri'; sv.edit = typeof f !== 'object'; dopoScheda(s.id); disegnaSchede(); disegnaToken(); disegnaScheda(); manda('schede', {});
+      return toast(typeof f === 'object' ? 'Scheda ricompilata dalla foto: controlla i valori (✎ Modifica).' : 'Scheda svuotata: compilala da capo.');
     }
     if (k === 'forma') { sv.tab = 'pri'; sv.edit = false; await salvaScheda(s.id, { forma: formaPg(s) ? null : 'pg' }, true); return disegnaScheda(); }
     if (k === 'vis') {
