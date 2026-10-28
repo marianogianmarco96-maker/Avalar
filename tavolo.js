@@ -193,6 +193,13 @@
 .tv-forme button b{font-family:var(--display);color:var(--wine)}
 .tv-forme button small{opacity:.8;line-height:1.3}
 .tv-forme button.cons{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+.tv-dafoto{display:flex;flex-direction:column;gap:3px;padding:12px;border-radius:6px;border:2px dashed var(--line2);background:var(--paper2);cursor:pointer;margin-bottom:8px}
+.tv-dafoto b{font-family:var(--display);color:var(--wine)}
+.tv-dafoto small{opacity:.8;line-height:1.3}
+.tv-dafoto.su{border-color:var(--gold);background:var(--paper)}
+.tv-dafoto.va{cursor:progress;border-style:solid;border-color:var(--gold)}
+.tv-dafoto .st{font-weight:700;font-size:.85rem;color:var(--wine)}
+.tv-dafoto .st:empty{display:none}
 .tv-forme button:hover,.tv-forme button:focus-visible{border-color:var(--gold)}
 .tv-pick i{width:58px;height:58px;border-radius:50%;background:var(--c,#7d2530) center/cover no-repeat;border:2px solid var(--c,#7d2530);box-shadow:0 1px 4px #0006;display:flex;align-items:center;justify-content:center;font:700 1.3rem var(--display);color:#fff;font-style:normal}
 .tv-f{display:grid;grid-template-columns:auto 1fr;gap:8px 10px;align-items:center;margin:8px 0}
@@ -4334,21 +4341,119 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
 
   /* nuovo PNG (DM): da un modello, da un PNG del sito o vuoto */
   async function creaPng(o) {
+    // scheda letta da una foto: i suoi valori al posto di quelli di partenza
+    if (o.forma && typeof o.forma === 'object') { const f = o.forma; o = { ...o, forma: 'png', nome: f.nome || o.nome, dati: { ...(o.dati || BASE), ...f.dati } }; toast('Scheda compilata dalla foto: controlla i valori (✎ Modifica).'); }
     const dati = { ...(o.dati || BASE), ...(o.forma === 'pg' ? { forma: 'pg', livello: 1 } : {}) };
     const r = await SB.from('tavolo_schede').insert({ tipo: 'png', nome: String(o.nome || 'PNG').slice(0, 80), entita: o.entita || null, immagine: o.immagine || null, nascosta: true, dati }).select().single();
     if (r.error) { toast(r.error.message, 'err'); return null; }
     T.schede.set(r.data.id, r.data); disegnaSchede(); return r.data;
   }
-  // il DM sceglie che scheda dare a un personaggio: completa (come un giocatore) o da PNG. Risponde 'pg', 'png' o nulla (annullato)
+  /* ---------- scheda da una foto: il testo si legge nel browser (Tesseract, in italiano) e diventa la scheda di un PNG ---------- */
+  const TESS = 'https://cdn.jsdelivr.net/npm/';
+  let tessP = null;
+  const caricaTess = () => tessP || (tessP = new Promise((ok, ko) => {
+    if (window.Tesseract) return ok(window.Tesseract);
+    const x = document.createElement('script'); x.src = TESS + 'tesseract.js@5.1.1/dist/tesseract.min.js';
+    x.onload = () => ok(window.Tesseract); x.onerror = () => { tessP = null; ko(new Error('Non riesco a caricare il lettore di testo: controlla la connessione.')); };
+    document.head.appendChild(x);
+  }));
+  // in scala di grigi, ingrandita se piccola e al chiaro se è uno screenshot scuro: Tesseract legge meglio il nero su bianco
+  async function preparaFoto(file) {
+    const bmp = await createImageBitmap(file), k = Math.min(3, Math.max(1, 1800 / bmp.width));
+    const c = document.createElement('canvas'); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+    const g = c.getContext('2d'); g.imageSmoothingQuality = 'high'; g.drawImage(bmp, 0, 0, c.width, c.height);
+    const im = g.getImageData(0, 0, c.width, c.height), px = im.data; let tot = 0;
+    for (let i = 0; i < px.length; i += 4) { const y = 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]; px[i] = px[i + 1] = px[i + 2] = y; tot += y; }
+    if (tot / (px.length / 4) < 128) for (let i = 0; i < px.length; i += 4) px[i] = px[i + 1] = px[i + 2] = 255 - px[i];
+    g.putImageData(im, 0, 0); return c;
+  }
+  async function leggiFoto(file, avanti) {
+    const Tz = await caricaTess();
+    const w = await Tz.createWorker('ita', 1, { workerPath: TESS + 'tesseract.js@5.1.1/dist/worker.min.js', corePath: TESS + 'tesseract.js-core@5.1.1', langPath: TESS + '@tesseract.js-data/ita@1.0.0/4.0.0_best_int', logger: m => m.status === 'recognizing text' && avanti?.(m.progress) });
+    try { return (await w.recognize(await preparaFoto(file))).data.text; } finally { w.terminate(); }
+  }
+  // dal testo di un blocco delle statistiche (Manuale dei mostri, schede scritte da un'IA…) ai campi della scheda
+  function schedaDaTesto(txt) {
+    const righe = String(txt || '').replace(/\r/g, '').split('\n')
+      .map(r => r.replace(/^(?:[©®°•·○●◦*\-–—‘’'"`,.~|>»]+\s*|[oe]\s+(?=[A-ZÀ-Ý]))+/, '').replace(/\bll\b/g, 'Il').replace(/[−–]/g, '-').replace(/\s+/g, ' ').trim())
+      .filter(r => /[A-Za-zÀ-ÿ]{3}|\d/.test(r));
+    const T0 = righe.join('\n'), val = re => (T0.match(re) || [])[1], d = { ...BASE }, numF = x => parseFloat(String(x).replace(',', '.'));
+    const CHIAVI = /^(classe armatura|punti ferita|velocit|iniziativa|tiri salvezza|abilit|sensi|linguaggi|sfida|resistenz|immunit|vulnerabilit|for\b|bonus di competenza)/i;
+    const nome = (righe.find(r => !CHIAVI.test(r)) || '').replace(/^[^A-Za-zÀ-ÿ0-9]+/, '').replace(/^[A-Za-z]{1,2}[,.;:]\s*/, '').replace(/^\d+\s*x\s*/i, '').trim();
+    const tg = righe.find(r => /\b(minuscol|piccol|medi|grand|enorm|mastodont)\w*/i.test(r) && !CHIAVI.test(r) && r !== nome);
+    if (tg) { const [a, b] = tg.split(','); d.taglia_tipo = a.trim(); if (b) d.allineamento = b.replace(/\s+\S{1,2}$/, '').trim(); }
+    const ca = val(/Classe Armatura[^\d\n]*(\d+)/i); if (ca) d.ca = +ca;
+    const pf = T0.match(/Punti Ferita[^\d\n]*(\d+)\s*(?:\(([^)\n]*)\))?/i);
+    if (pf) { d.pf_max = d.pf = +pf[1]; const dv = String(pf[2] || '').replace(/\s+/g, ''); if (/^\d+d\d+([+-]\d+)?$/i.test(dv)) d.dadi_vita = dv; }
+    const vel = val(/Velocit\S*\s*:?\s*([^\n]+)/i); if (vel) d.velocita = vel.replace(/(\d)\s*m\b/g, '$1 m').trim();
+    // caratteristiche: «13 (+1)» in fila dopo FOR DES COS…; se il punteggio è illeggibile basta il modificatore
+    const iF = righe.findIndex(r => /\bFOR\b/i.test(r) && /\bDES\b/i.test(r)), zona = iF >= 0 ? righe.slice(iF, iF + 4).join(' ') : T0;
+    const cop = [...zona.matchAll(/(\d{1,2})?\s*\(\s*([+-]?\s*\d{1,2})\s*\)/g)].map(m => { const mo = parseInt(m[2].replace(/\s+/g, ''), 10), v = m[1] ? +m[1] : null; return v != null && Math.floor((v - 10) / 2) === mo ? v : 10 + 2 * mo; });
+    if (cop.length >= 6) CAR.forEach(([k], i) => d[k] = cop[i]);
+    else CAR.forEach(([k, ab, n]) => { const v = val(new RegExp(`\\b(?:${ab}|${n})\\b\\s*:?\\s*(\\d{1,2})`, 'i')); if (v) d[k] = +v; });
+    const tsr = val(/Tiri salvezza\s*:?\s*([^\n]+)/i); if (tsr) CAR.forEach(([k, ab, n]) => { if (new RegExp(`\\b(?:${ab}|${n.slice(0, 3)})\\w*\\s*[+-]`, 'i').test(tsr)) d['ts_' + k] = true; });
+    const abr = norm(val(/Abilit\S*\s*:?\s*([^\n]+)/i) || ''); if (abr) ABIL.forEach(([k, n]) => { if (abr.includes(norm(n).split(' ')[0])) d['ab_' + k] = 1; });
+    const se = val(/Sensi\s*:?\s*([^\n]+)/i); if (se) { const x = se.replace(/,?\s*Percezione passiva\s*\d+/i, '').replace(/^[,\s]+|[,\s]+$/g, ''); if (x) d.sensi = x; }
+    const li = val(/Linguaggi\s*:?\s*([^\n]+)/i); if (li) d.linguaggi = li.trim();
+    const gs = val(/Sfida\s*:?\s*(\d+\/\d+|\d+)/i); if (gs) d.gs = gs;
+    const dif = righe.filter(r => /^(Resistenz|Immunit|Vulnerabilit)/i.test(r)); if (dif.length) d.difese = dif.join('. ');
+    // tratti, azioni, reazioni: «Nome: testo» (o «Nome. testo»), le righe che seguono continuano la voce
+    const sez = { tratti: [], azioni: [], bonus: [], reazioni: [], legg: [] }; let cur = null, voce = null;
+    const fatte = new Set(righe.filter(r => CHIAVI.test(r) || r === nome || r === tg || /\bFOR\b.*\bDES\b/i.test(r) || /\(\s*[+-]?\d+\s*\)/.test(r) && !/[a-z]{4}/.test(r)));
+    for (const r of righe) {
+      const h = norm(r).replace(/[^a-z ]/g, '').trim();
+      const nuova = /^tratti( speciali)?$|^capacita( speciali)?$|^privilegi$/.test(h) ? 'tratti' : /^azioni bonus$/.test(h) ? 'bonus' : /^azioni leggendarie$/.test(h) ? 'legg' : /^azioni$/.test(h) ? 'azioni' : /^reazioni$/.test(h) ? 'reazioni' : null;
+      if (nuova) { cur = nuova; voce = null; continue; }
+      if (fatte.has(r)) { if (/^Sfida/i.test(r) && !cur) cur = 'tratti'; continue; }
+      if (!cur) continue;
+      const m = r.match(/^([A-ZÀ-Ý][^:.]{1,60}?)\s*[:.]\s+(.+)$/);
+      if (m && !(voce && /^colpi(?:sce|to)$/i.test(m[1].trim()))) { voce = { nome: m[1].trim(), testo: m[2].trim() }; sez[cur].push(voce); }
+      else if (voce) voce.testo += ' ' + r;
+    }
+    const TIPI = { taglio: 'taglienti', taglienti: 'taglienti', perforanti: 'perforanti', perforazione: 'perforanti', contundenti: 'contundenti', botta: 'contundenti' };
+    const attacco = v => {
+      const t = v.testo, col = t.match(/([+-]\s*\d+)\s*(?:al|per|a)\s*colpire/i); if (!col) return null;
+      const dm = t.match(/Colpi\w*\s*:?\s*(?:\d+\s*\()?\s*(\d+\s*d\s*\d+(?:\s*[+-]\s*\d+)?)\s*\)?\s*(?:danni\s+(?:da\s+)?([a-zà-ù]+))?/i);
+      let por = t.match(/portata\s*(?:di\s*)?(\d+(?:[.,]\d+)?)\s*m/i)?.[1]; if (por && !/[.,]/.test(por) && +por >= 10) por = String(+por / 10).replace('.', ',');
+      const git = t.match(/gittata\s*(?:di\s*)?(\d+(?:[.,]\d+)?)\s*\/\s*(\d+(?:[.,]\d+)?)\s*m/i), ber = t.match(/\b(un bersaglio|una creatura|un solo bersaglio)\b/i)?.[1];
+      const resto = dm ? t.slice(dm.index + dm[0].length).replace(/^[\s.,;]+/, '').trim() : '';
+      const tipo = dm?.[2] ? TIPI[dm[2].toLowerCase()] || dm[2].toLowerCase() : '';
+      return { nome: v.nome, colpire: parseInt(col[1].replace(/\s+/g, ''), 10), danni: dm ? dm[1].replace(/\s+/g, '') : '', tipo: [tipo, por ? `portata ${por} m` : '', git ? `gittata ${git[1]}/${git[2]} m` : '', ber, resto].filter(Boolean).join(', ') };
+    };
+    d.attacchi = []; const az = [];
+    for (const v of sez.azioni) { const a = attacco(v); if (a) d.attacchi.push(a); else az.push(`${v.nome}: ${v.testo}`); }
+    sez.bonus.forEach(v => az.push(`${v.nome} (azione bonus): ${v.testo}`)); sez.reazioni.forEach(v => az.push(`${v.nome} (reazione): ${v.testo}`)); sez.legg.forEach(v => az.push(`${v.nome} (azione leggendaria): ${v.testo}`));
+    if (az.length) d.azioni = az.join('\n');
+    d.privilegi = sez.tratti.map(v => ({ id: nuovoId(), nome: v.nome, fonte: '', testo: v.testo }));
+    const letti = ['ca', 'pf_max', 'gs'].filter(k => d[k] != null).length + (cop.length >= 6 ? 1 : 0) + d.attacchi.length;
+    return { nome, dati: d, letti };
+  }
+  // il DM sceglie che scheda dare a un personaggio: completa (come un giocatore) o da PNG. Risponde 'pg', 'png', { forma: 'png', nome, dati } (letta da una foto) o nulla (annullato)
   function sceltaForma(nome, e) {
     return new Promise(res => {
       const cons = formaPer(e), b = (f, t, sub) => `<button type="button" data-f="${f}" class="${f === cons ? 'cons' : ''}"><b>${t}${f === cons ? ' · consigliata' : ''}</b><small>${sub}</small></button>`;
       const d = finestra(`<form method="dialog"><h3>Scheda di ${esc(nome)}</h3>
         <div class="tv-forme">${b('png', 'Scheda da PNG', 'Blocco delle statistiche come nel Manuale dei mostri: per i personaggi secondari, che compaiono poco.')}${b('pg', 'Scheda completa', 'Come quella di un giocatore (classe, livello, privilegi, incantesimi): per i personaggi principali della storia.')}</div>
         ${e ? `<p class="hint">${e.imp === 'importante' ? 'Nel sito è segnato come personaggio principale.' : e.imp === 'minore' ? 'Nel sito è segnato come personaggio secondario.' : 'Nel sito non ha ancora un ruolo: lo scegli da «Modifica dati» della sua scheda.'} Potrai cambiare tipo anche dopo, dalla scheda.</p>` : ''}
+        <div class="tv-dafoto" tabindex="0" role="button"><b>📷 Scheda da PNG compilata da una foto</b><small>Trascina qui uno screenshot o una foto del blocco delle statistiche, incollalo (Ctrl+V) o clicca per sceglierlo: il sito legge il testo e compila la scheda. Poi controlli i valori.</small><input type="file" accept="image/*" hidden><div class="st" aria-live="polite"></div></div>
         <menu><button value="cancel" class="btn ghost">Annulla</button></menu></form>`, 'tv-side tv-np' + (T.pag ? ' tv-centro' : ''));
-      let scelta = null;
+      let scelta = null, va = false;
       d.querySelectorAll('[data-f]').forEach(x => x.onclick = () => { scelta = x.dataset.f; d.close(); });
+      const z = d.querySelector('.tv-dafoto'), fi = z.querySelector('input'), st = z.querySelector('.st');
+      const usa = async file => {
+        if (!file || va) return; if (!/^image\//.test(file.type)) { st.textContent = 'Serve un\'immagine (PNG, JPG…).'; return; }
+        va = true; z.classList.add('va'); st.textContent = 'Carico il lettore di testo…';
+        try {
+          const t = await leggiFoto(file, p => st.textContent = `Leggo la scheda… ${Math.round(p * 100)}%`), x = schedaDaTesto(t);
+          if (x.letti < 2) { st.textContent = 'Non riesco a leggere le statistiche: prova con un\'immagine più nitida o più grande.'; return; }
+          scelta = { forma: 'png', nome: x.nome, dati: x.dati }; d.close();
+        } catch (e) { st.textContent = e.message || 'Lettura non riuscita.'; } finally { va = false; z.classList.remove('va'); }
+      };
+      z.onclick = e => { if (e.target !== fi) fi.click(); }; z.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fi.click(); } };
+      fi.onchange = () => usa(fi.files[0]);
+      z.ondragover = e => { e.preventDefault(); z.classList.add('su'); }; z.ondragleave = () => z.classList.remove('su');
+      z.ondrop = e => { e.preventDefault(); z.classList.remove('su'); usa(e.dataTransfer.files[0]); };
+      d.addEventListener('paste', e => { const f = [...(e.clipboardData?.files || [])][0]; if (f) usa(f); });
       d.addEventListener('close', () => res(scelta));
     });
   }
