@@ -42,6 +42,10 @@ def esempio():
             e['vis'] = []
         if i % 13 == 3:
             e['discovered'] = False
+        if e.get('type') == 'png':  # fazione: visibile, segreta (fazDm) o di una scheda nascosta
+            e['faz'] = [f for f in ents if f.startswith('fazione-')][i % 3]
+            if i % 4 == 1:
+                e['fazDm'] = True
         if i % 5 == 0:
             e['brief'] = (e.get('brief') or '') + ' [DM]nascosto[/DM] [PER Violet]per Violet'
         b = S['bodies'].get(k)

@@ -41,6 +41,8 @@
     for (const [k, e] of Object.entries(S.entities)) {
       if (e.discovered !== false && vede(e)) E[k] = pulisci(e, ['brief', 'status']); else nascoste[k] = e.name;
     }
+    // fazione del personaggio: solo se la scheda della fazione è visibile e l'appartenenza non è solo per DM
+    for (const e of Object.values(E)) { if (e.faz && (e.fazDm || !has(E, e.faz))) delete e.faz; delete e.fazDm; }
     const testo = t => frase(t.replace(LINK, (m, id, alias) => has(nascoste, id) ? (alias || nascoste[id]) : m).replace(NOTA_DM, ''));
 
     // quest personale (quest: true nella scheda di un PG): solo il giocatore di quel PG, qualunque cosa dica «Mostra a:»
