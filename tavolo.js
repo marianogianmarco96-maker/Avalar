@@ -3872,8 +3872,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (!L.length) { s.innerHTML = ''; disegnaHud(); return; }
     const avanti = isDM() || L.some(x => x.id === att && x.giocatore === T.me.giocatore);
     s.innerHTML = `<div class="rd"><small>Round</small>${T.stato?.round || 1}</div><div class="ls">${L.map((x, i) => `<span class="p${i === ia ? ' on' : ''}${ia >= 0 && i < ia ? ' gia' : ''}${x.giocatore ? '' : ' nem'}${x.nascosto ? ' hid' : ''}" title="${esc(x.nome)} · iniziativa ${x.valore}${x.nascosto ? ' (nascosto ai giocatori)' : ''}"><i style="--c:${esc(x.colore || '#7d2530')};${x.immagine ? `background-image:url('${x.immagine}')` : ''}">${x.immagine ? '' : esc(iniziali(x.nome))}</i><b>${esc(String(x.nome || '').split(/\s+/)[0])}</b><em>${x.valore}</em></span>`).join('')}</div>
-      <div class="ac"><button type="button" class="tv-b pri" data-k="av" title="Passa al prossimo (chi è a 0 PF viene saltato)"${avanti ? '' : ' hidden'}>Finisci il turno ▶</button><button type="button" class="tv-b sec ico" data-k="ed" title="${isDM() ? 'Modifica l\'ordine del turno' : 'Ordine del turno'}" aria-label="Ordine del turno">✎</button></div>`;
+      <div class="ac"><button type="button" class="tv-b pri" data-k="av" title="Passa al prossimo (chi è a 0 PF viene saltato)"${avanti ? '' : ' hidden'}>Finisci il turno ▶</button><button type="button" class="tv-b sec ico" data-k="ed" title="${isDM() ? 'Modifica l\'ordine del turno' : 'Ordine del turno'}" aria-label="Ordine del turno">✎</button>${isDM() ? '<button type="button" class="tv-b sec ico" data-k="x" title="Fine combattimento: svuota l\'ordine del turno e chiude la barra" aria-label="Fine combattimento">✕</button>' : ''}</div>`;
     s.querySelector('[data-k=av]').onclick = finisciTurno;
+    s.querySelector('[data-k=x]')?.addEventListener('click', () => fineCombattimento());
     s.querySelector('[data-k=ed]').onclick = () => apriTurno($('#tv-turno').hidden);
     const on = s.querySelector('.p.on'), ls = s.querySelector('.ls');
     if (on) ls.scrollLeft = on.offsetLeft - ls.clientWidth / 2 + on.offsetWidth / 2;
@@ -3935,12 +3936,14 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (!T.turno.some(y => y.id === r.data.id)) T.turno.push(r.data); disegnaTurno();
     };
     const sv = b.querySelector('[data-k=svuota]');
-    if (sv) sv.onclick = async () => {
-      if (!T.turno.length || !await ask('Svuotare l\'ordine del turno?', { ok: 'Svuota', title: 'Ordine del turno' })) return;
-      const r = await SB.from('tavolo_turno').delete().in('id', T.turno.map(y => y.id)); if (r.error) return toast(r.error.message, 'err');
-      await SB.from('tavolo_stato').update({ turno: null, round: 1 }).eq('id', 1);
-      T.turno = []; T.stato.turno = null; T.stato.round = 1; disegnaTurno(); disegnaToken(); manda('turno', {});
-    };
+    if (sv) sv.onclick = () => fineCombattimento('Svuotare l\'ordine del turno?', 'Svuota', 'Ordine del turno');
+  }
+  // svuota l'ordine del turno: la striscia in alto sparisce per tutti
+  async function fineCombattimento(dom = 'Il combattimento è finito? L\'ordine del turno si svuota e la barra in alto sparisce per tutti.', ok = 'Fine combattimento', title = 'Fine del combattimento') {
+    if (!T.turno.length || !await ask(dom, { ok, title })) return;
+    const r = await SB.from('tavolo_turno').delete().in('id', T.turno.map(y => y.id)); if (r.error) return toast(r.error.message, 'err');
+    await SB.from('tavolo_stato').update({ turno: null, round: 1 }).eq('id', 1);
+    T.turno = []; T.stato.turno = null; T.stato.round = 1; disegnaTurno(); disegnaToken(); manda('turno', {});
   }
   async function salvaTurno(id, ch) {
     const r = await SB.from('tavolo_turno').update(ch).eq('id', id).select().single();
