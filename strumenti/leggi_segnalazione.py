@@ -1,4 +1,4 @@
-"""Legge una segnalazione di un giocatore («Segnala un bug» / «Proponi una miglioria») arrivata su GitHub.
+"""Legge una segnalazione di un giocatore («Segnala un bug» / «Proponi una miglioria» / il questionario della sua scheda) arrivata su GitHub.
 
 Il sito la cifra con la chiave del giocatore (quella della sua password); il DM conosce le password,
 quindi con il codice del DM si apre data.enc, si prende la password del giocatore e si decifra il blocco.
@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from pubblica import chiave, giocatori  # noqa: E402
 
 ESTENSIONI = {'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp', 'image/gif': '.gif'}
-TIPI = {'bug': 'Bug', 'idea': 'Miglioria'}
+TIPI = {'bug': 'Bug', 'idea': 'Miglioria', 'questionario': 'Questionario'}
 
 
 def leggi(codice, richiesta):
