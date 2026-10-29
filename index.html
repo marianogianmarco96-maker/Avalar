@@ -699,6 +699,35 @@ details.older[open]>summary{display:none}
 .subtrail{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:.85rem;margin-bottom:6px;color:var(--mute)}
 .subtrail a{color:var(--ink2)}.subtrail b{color:var(--wine2);font-weight:600}
 .subh{display:flex;align-items:center;gap:8px}.subh .pk{width:26px;height:26px}
+/* ---------- sezione Mappe: barra unica in alto, comandi sopra la mappa ---------- */
+.mapnav{padding:8px 12px;background:linear-gradient(var(--paper),var(--paper2))}
+.mn-dm{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:none}
+.mn-dm:empty{display:none}
+.stage{background:radial-gradient(ellipse at center,#2a2018 0%,#140f0b 75%)}
+.stage .layer img{box-shadow:0 0 0 1px #d4b06a55,0 10px 40px #000a}
+.mctl{position:absolute;right:12px;bottom:14px;display:flex;flex-direction:column;border-radius:10px;overflow:hidden;background:#1b1511e6;border:1px solid #d4b06a66;box-shadow:0 4px 14px #0008;z-index:9}
+.mctl button{width:40px;height:40px;display:grid;place-items:center;background:transparent;border:0;color:#f3e2bb;font:600 1.25rem/1 var(--body);cursor:pointer}
+.mctl button+button{border-top:1px solid #d4b06a33}
+.mctl button:hover{background:#ffffff14;color:#fff}
+.mctl svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.mlay{position:absolute;right:12px;top:12px;display:flex;gap:0;border-radius:16px;overflow:hidden;background:#1b1511e6;border:1px solid #d4b06a66;box-shadow:0 4px 14px #0008;z-index:9}
+.mlay button{background:transparent;border:0;color:#cdb98f;padding:6px 12px;font-family:var(--display);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.mlay button+button{border-left:1px solid #d4b06a33}
+.mlay button.on{background:#7c1f2bcc;color:#fbeccb}
+.mctl button:focus-visible,.mlay button:focus-visible{outline:2px solid #ffd76a;outline-offset:-2px}
+.mt-pop input{width:100%;box-sizing:border-box;margin:0 0 8px;padding:8px 10px;border:1px solid var(--line2);border-radius:6px;background:var(--paper2);color:var(--ink);font:inherit}
+.mt-pop input:focus{outline:2px solid var(--gold);outline-offset:0}
+#mt-list.flat .mt-row{padding-left:8px}#mt-list.flat .mt-br{display:none}
+.mt-row[hidden]{display:none}
+.mt-pop .btn{margin:8px 8px 2px}
+.mt-pop .hint{margin:6px 8px}
+.stage:fullscreen .mctl,.stage:fullscreen .mlay{position:fixed}
+@media (max-width:900px){
+  .mctl{right:10px;bottom:10px}.mctl button{width:36px;height:36px}
+  .mlay{right:10px;top:10px}
+  .mapnav{flex-wrap:wrap}.mn-dm{order:3;width:100%}
+  .mgo{max-width:calc(100% - 130px)}
+}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 
 </style>
@@ -2220,7 +2249,7 @@ const mapPath = m => { const p = []; let c = m, g = 0; while (c && g++ < 20) { p
 /* navigazione tra le mappe: percorso in alto, elenco a albero, mappe collegate nel pannello */
 const mapKids = (id, pl) => S.maps.filter(c => (c.parent || null) === id && (!(pl || window.__RO) || c.discovered !== false));
 const mapThumb = (x, cls = 'mth') => `<i class="${cls}" style="background-image:url('${x.thumb || ''}')"></i>`;
-const mapTree = cur => { const walk = (pid, d) => mapKids(pid).map(x => { const k = mapKids(x.id).length; return `<a class="mt-row ${x.id === cur.id ? 'cur' : ''}" style="--d:${d}" href="#/mappe/${encodeURIComponent(x.id)}">${d ? '<span class="mt-br"></span>' : ''}${mapThumb(x)}<span class="mt-n">${esc(x.name)}${x.discovered === false ? ' <small>non scoperta</small>' : ''}</span>${x.id === cur.id ? '<small class="mt-here">sei qui</small>' : k ? `<small>${k} ${k === 1 ? 'dettaglio' : 'dettagli'}</small>` : ''}</a>` + walk(x.id, d + 1); }).join(''); return walk(null, 0); };
+const mapTree = cur => { const walk = (pid, d) => mapKids(pid).map(x => { const k = mapKids(x.id).length; return `<a class="mt-row ${x.id === cur.id ? 'cur' : ''}" data-name="${esc(x.name)}" style="--d:${d}" href="#/mappe/${encodeURIComponent(x.id)}">${d ? '<span class="mt-br"></span>' : ''}${mapThumb(x)}<span class="mt-n">${esc(x.name)}${x.discovered === false ? ' <small>non scoperta</small>' : ''}</span>${x.id === cur.id ? '<small class="mt-here">sei qui</small>' : k ? `<small>${k} ${k === 1 ? 'dettaglio' : 'dettagli'}</small>` : ''}</a>` + walk(x.id, d + 1); }).join(''); return walk(null, 0); };
 let lastMap = null; // da quale mappa arrivo, per l'animazione (entro in un dettaglio o torno su)
 const PIN_PATH = 'M14 35C14 35 2 21 2 13a12 12 0 0 1 24 0c0 8-12 22-12 22z';
 /* simboli dei segnalini: il DM lo sceglie nel segnaposto, altrimenti lo deduco dal luogo */
@@ -2265,8 +2294,9 @@ async function uploadMapDlg(pre = {}) {
 }
 
 route(/^\/mappe$/, async () => {
-  const root = S.maps.filter(m => !m.parent && m.discovered !== false);
-  if (window.__RO && root.length === 1) { location.replace('#/mappe/' + encodeURIComponent(root[0].id)); return; }
+  // la sezione si apre sulla mappa principale del gioco: le altre si raggiungono da lì (o dal menù «Cerca una mappa»)
+  const root = S.maps.filter(m => !m.parent && (!window.__RO || m.discovered !== false)), main = root.find(m => m.locked) || root[0];
+  if (main) { location.replace('#/mappe/' + encodeURIComponent(main.id)); return; }
   const ordered = []; const walk = (pid, depth) => { for (const m of S.maps.filter(x => (x.parent || null) === pid)) { ordered.push({ m, depth }); walk(m.id, depth + 1); } };
   walk(null, 0); for (const m of S.maps) if (!ordered.some(o => o.m.id === m.id)) ordered.push({ m, depth: 0 });
   const pinCount = {}; for (const p of await dbAll('pins')) pinCount[p.mapId] = (pinCount[p.mapId] || 0) + 1;
@@ -2291,19 +2321,21 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
   const came = lastMap && Date.now() - lastMap.t < 2500 ? mapById(lastMap.id) : null, zdir = came ? (came.parent === m.id ? 'out' : m.parent === came.id ? 'in' : 'fade') : '';
   onCleanup(() => { lastMap = { id: m.id, t: Date.now() }; });
   setView(`<div class="mapview" id="mv"><div class="mapmain"><div class="mapnav">${par ? `<a class="mn-back" href="#/mappe/${encodeURIComponent(par.id)}" title="Torna a «${esc(par.name)}»">‹<span> ${esc(par.name)}</span></a>` : ''}<nav class="mn-path">${crumb}</nav>
-      <div class="mn-tree"><button class="mn-all" data-act="mtree" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg><span>Tutte le mappe</span> ▾</button><div class="mt-pop" id="mtpop" hidden><h4>Mappe della campagna</h4>${mapTree(m)}</div></div></div>
-    <div class="maptools">
-      <button class="btn sm" data-act="zout" title="Riduci">−</button><button class="btn sm" data-act="zin" title="Ingrandisci">+</button><button class="btn sm" data-act="fit">Adatta</button>
-      <button class="btn sm" data-act="labels" id="b-lab">Nomi</button><button class="btn sm" data-act="regs" id="b-reg">Regioni</button>
-      <span class="seg" id="seg"><button data-act="vdm" class="on">DM</button><button data-act="vpl">Giocatori</button></span>
-      <button class="btn sm" data-act="edit" id="b-edit">Modifica</button><button class="btn sm primary" data-act="addpin" id="b-add" style="display:none">+ Segnaposto</button><button class="btn sm primary" data-act="addreg" id="b-addreg" style="display:none">+ Regione</button><span id="drawbar" style="display:none" class="row"><button class="btn sm primary" data-act="drawok">✓ Chiudi regione</button><button class="btn sm" data-act="drawundo">↶ Togli punto</button><button class="btn sm" data-act="drawcancel">Annulla</button></span>
-      <button class="btn sm" data-act="fs" title="Schermo intero">⛶</button></div>
+      <div class="mn-dm"><span class="seg" id="seg"><button data-act="vdm" class="on">DM</button><button data-act="vpl">Giocatori</button></span>
+      <button class="btn sm" data-act="edit" id="b-edit">Modifica</button><button class="btn sm primary" data-act="addpin" id="b-add" style="display:none">+ Segnaposto</button><button class="btn sm primary" data-act="addreg" id="b-addreg" style="display:none">+ Regione</button><span id="drawbar" style="display:none" class="row"><button class="btn sm primary" data-act="drawok">✓ Chiudi regione</button><button class="btn sm" data-act="drawundo">↶ Togli punto</button><button class="btn sm" data-act="drawcancel">Annulla</button></span></div>
+      <div class="mn-tree"><button class="mn-all" data-act="mtree" aria-expanded="false"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5.5 5.5"/></svg><span>Cerca una mappa</span> ▾</button><div class="mt-pop" id="mtpop" hidden><input type="search" id="mt-q" placeholder="Nome della mappa…" autocomplete="off" aria-label="Cerca una mappa"><div id="mt-list">${mapTree(m)}</div><p class="hint" id="mt-none" hidden>Nessuna mappa con questo nome.</p>${window.__RO ? '' : '<button class="btn sm" data-act="mtup">+ Carica una nuova mappa</button>'}</div></div></div>
     <div class="stage${zdir ? ' mz-' + zdir : ''}" id="stage"><div class="zwrap"><div class="layer" id="layer" style="width:${MW}px;height:${MH}px">${url ? `<img src="${url}" width="${MW}" height="${MH}" alt="${esc(m.name)}" draggable="false">` : ''}<svg id="regsvg" viewBox="0 0 ${MW} ${MH}" preserveAspectRatio="none"></svg><div id="pinsbox" style="position:absolute;inset:0"></div></div></div>
-      ${url ? '' : `<div class="noimg"><div><p>L'immagine di questa mappa non è presente (forse hai ripristinato un backup «solo dati»).</p><button class="btn" data-act="reimg">Carica di nuovo l'immagine</button></div></div>`}<div class="hud" id="hud"></div><a class="mgo" id="mgo" hidden></a></div></div>
+      ${url ? '' : `<div class="noimg"><div><p>L'immagine di questa mappa non è presente (forse hai ripristinato un backup «solo dati»).</p><button class="btn" data-act="reimg">Carica di nuovo l'immagine</button></div></div>`}<div class="hud" id="hud"></div><a class="mgo" id="mgo" hidden></a>
+      <div class="mlay"><button data-act="labels" id="b-lab" title="Mostra o nascondi i nomi">Nomi</button><button data-act="regs" id="b-reg" title="Mostra o nascondi le regioni">Regioni</button></div>
+      <div class="mctl"><button data-act="zin" title="Ingrandisci" aria-label="Ingrandisci">+</button><button data-act="zout" title="Riduci" aria-label="Riduci">−</button><button data-act="fit" title="Adatta allo schermo" aria-label="Adatta allo schermo"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button><button data-act="fs" title="Schermo intero" aria-label="Schermo intero"><svg viewBox="0 0 24 24"><path d="M3 8V3h5M16 3h5v5M21 16v5h-5M8 21H3v-5M8 8l-4-4M16 8l4-4M16 16l4 4M8 16l-4 4"/></svg></button></div></div></div>
     <aside class="mapside" id="mside"></aside></div>`, 'raw');
   const stage = $('#stage'), layer = $('#layer'), box = $('#pinsbox'), mv = $('#mv');
   // passando sopra una mappa collegata si illumina il segnaposto che la apre
   $('#mside').addEventListener('mouseover', e => { const l = e.target.closest('.mlink[data-via]'); $$('.pin.via', box).forEach(x => x.classList.remove('via')); if (l) box.querySelector(`.pin[data-pin="${CSS.escape(l.dataset.via)}"]`)?.classList.add('via'); });
+  // ricerca nel menù delle mappe: mentre scrivi restano solo quelle col nome giusto, Invio apre la prima
+  const filt = v => { const t = norm(v.trim()); let n = 0; $$('#mt-list .mt-row').forEach(r => { const ok = !t || norm(r.dataset.name).includes(t); r.hidden = !ok; if (ok) n++; }); $('#mt-list').classList.toggle('flat', !!t); $('#mt-none').hidden = n > 0; };
+  $('#mt-q').addEventListener('input', e => filt(e.target.value));
+  $('#mt-q').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); const r = $('#mt-list .mt-row:not([hidden])'); if (r) location.hash = r.getAttribute('href'); } else if (e.key === 'Escape') { $('#mtpop').hidden = true; } });
   $('#mside').addEventListener('mouseleave', () => $$('.pin.via', box).forEach(x => x.classList.remove('via')));
   const entOf = p => p.entityId ? S.ents.get(p.entityId) : null;
   const visible = p => !(p.discovered === false || (entOf(p) && entOf(p).discovered === false));
@@ -2485,7 +2517,7 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
   const ptr = new Map(); let drag = null;
   const dist = () => { const [a, b] = [...ptr.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
   stage.addEventListener('pointerdown', e => {
-    if (e.button > 0 || e.target.closest('.mgo,.noimg button')) return; // i tasti sopra la mappa non devono diventare un trascinamento
+    if (e.button > 0 || e.target.closest('.mgo,.mctl,.mlay,.noimg button')) return; // i tasti sopra la mappa non devono diventare un trascinamento
     try { stage.setPointerCapture(e.pointerId); } catch { }
     ptr.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (ptr.size === 2) { drag = { type: 'pinch', d0: dist(), k0: st.k }; return; }
@@ -2526,7 +2558,7 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
   stage.addEventListener('wheel', e => { e.preventDefault(); const r = stage.getBoundingClientRect(); zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0016))); }, { passive: false });
   stage.addEventListener('dblclick', async e => {
     if (st.vedit && st.edit && !st.draw && e.target.closest('[data-reg]')) { const sel = curReg(); if (sel) { const c = toPct(e.clientX, e.clientY); let bi = 0, bd = 1e9; sel.points.forEach((a, i) => { const b = sel.points[(i + 1) % sel.points.length]; const dx = b[0] - a[0], dy = b[1] - a[1]; const t = clamp(((c.x - a[0]) * dx + (c.y - a[1]) * dy) / (dx * dx + dy * dy || 1), 0, 1); const d = Math.hypot(a[0] + t * dx - c.x, a[1] + t * dy - c.y); if (d < bd) { bd = d; bi = i; } }); const pts = sel.points.map(q => q.slice()); pts.splice(bi + 1, 0, [+c.x.toFixed(2), +c.y.toFixed(2)]); await saveReg({ ...sel, points: pts }); refresh(); } return; }
-    if (st.add || st.draw || e.target.closest('.pin')) return; const r = stage.getBoundingClientRect(); zoomAt(e.clientX - r.left, e.clientY - r.top, 1.8); });
+    if (st.add || st.draw || e.target.closest('.pin,.mctl,.mlay,.mgo')) return; const r = stage.getBoundingClientRect(); zoomAt(e.clientX - r.left, e.clientY - r.top, 1.8); });
   const onKey = e => { if (e.key === 'Escape' && st.draw) { st.draw = null; refresh(); syncUI(); } else if (e.key === 'Escape' && st.add) { st.add = false; syncUI(); } else if (e.key === 'Enter' && st.draw) acts.drawok(); };
   addEventListener('keydown', onKey); onCleanup(() => removeEventListener('keydown', onKey));
   const onRes = () => { if (!document.fullscreenElement) return; };
@@ -2562,7 +2594,8 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
     subpin: a => { selectPin(a.dataset.pin, true); st.sub = [a.dataset.id]; renderSide(); },
     subadd: async a => { ensureEntList(); const r = await formDlg({ title: 'Metti un luogo qui dentro', intro: 'Il luogo resta una scheda a sé, ma sulla mappa sta dentro questo segnalino: così la mappa non si riempie.', fields: [{ k: 'to', label: 'Luogo (digita il nome)', list: 'dl-ents', req: true }] }); if (!r) return; const t = pickEntity(r.to), from = a.dataset.id; if (!t || t.id === from) { toast('Scheda non trovata', 'err'); return; } await runBatch(['links'], '', async x => x.put('links', { k: from + '|' + t.id + '|comprende', from, to: t.id, label: 'comprende' })); refresh(); },
     subdel: async a => { await runBatch(['links'], '', async x => x.del('links', a.dataset.k)); refresh(); },
-    mtree: a => { const pop = $('#mtpop'), open = pop.hidden; pop.hidden = !open; a.setAttribute('aria-expanded', open); if (open) { const off = e => { if (!e.target.closest('.mn-tree')) { pop.hidden = true; a.setAttribute('aria-expanded', false); document.removeEventListener('pointerdown', off); } }; setTimeout(() => document.addEventListener('pointerdown', off)); onCleanup(() => document.removeEventListener('pointerdown', off)); } },
+    mtree: a => { const pop = $('#mtpop'), open = pop.hidden; pop.hidden = !open; a.setAttribute('aria-expanded', open); if (open) { const q = $('#mt-q'); q.value = ''; filt(''); if (!matchMedia('(pointer:coarse)').matches) q.focus(); const off = e => { if (!e.target.closest('.mn-tree')) { pop.hidden = true; a.setAttribute('aria-expanded', false); document.removeEventListener('pointerdown', off); } }; setTimeout(() => document.addEventListener('pointerdown', off)); onCleanup(() => document.removeEventListener('pointerdown', off)); } },
+    mtup: async () => { $('#mtpop').hidden = true; const nid = await uploadMapDlg({ parent: m.id }); if (nid) location.hash = '#/mappe/' + encodeURIComponent(nid); },
     selpin: a => selectPin(a.dataset.id, true), desel: () => selectPin(null),
     editpin: () => pinDlg(pins.find(p => p.id === st.sel)),
     addphotos: async () => {
