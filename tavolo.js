@@ -232,16 +232,17 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
 .tv-fx{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:100000}
 .tv-segn{position:absolute;left:0;top:0}
 .tv-sg{position:absolute;width:0;height:0;--s:40px}
-.tv-sg .pin{position:absolute;box-sizing:border-box;display:grid;place-items:center;left:calc(var(--s) * -.5);top:calc(var(--s) * -1.22);width:var(--s);height:var(--s);border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:radial-gradient(circle at 35% 35%,color-mix(in srgb,var(--c) 70%,#fff),var(--c) 60%,color-mix(in srgb,var(--c) 70%,#000));border:calc(var(--s) * .06) solid #fff3dc;box-shadow:0 calc(var(--s) * .08) calc(var(--s) * .18) #000b}
-.tv-sg .ic{transform:rotate(45deg);font-size:calc(var(--s) * .5);line-height:1;filter:drop-shadow(0 1px 1px #0009)}
-.tv-sg .nm{position:absolute;left:0;top:calc(var(--s) * .1);transform:translateX(-50%);white-space:nowrap;font:700 calc(var(--s) * .34) var(--body);color:#fff;paint-order:stroke;-webkit-text-stroke:calc(var(--s) * .09) #000c;pointer-events:none}
-.tv-sg .ns{position:absolute;left:calc(var(--s) * .14);top:calc(var(--s) * -1.5);width:calc(var(--s) * .5);height:calc(var(--s) * .5);border-radius:50%;background:#1b1512;border:2px solid #f2b51d;display:grid;place-items:center}
+.tv-sg .gt{position:absolute;box-sizing:border-box;left:calc(var(--s) * -.5);top:calc(var(--s) * -.5);width:var(--s);height:var(--s);border-radius:50%;display:grid;place-items:center;color:#2b1a0f;background:radial-gradient(circle at 40% 35%,#f7ecd3,#e6d4ad);border:calc(var(--s) * .05) solid #2b1a0f;box-shadow:inset 0 0 0 calc(var(--s) * .07) #efe2c4,inset 0 0 0 calc(var(--s) * .11) var(--c),0 calc(var(--s) * .05) calc(var(--s) * .12) #000a}
+.tv-sg .gt svg{width:54%;height:54%;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tv-sg .nm{position:absolute;left:0;top:calc(var(--s) * .58);transform:translateX(-50%);white-space:nowrap;font:700 calc(var(--s) * .3) var(--display);letter-spacing:.05em;color:#f4ead2;paint-order:stroke;-webkit-text-stroke:calc(var(--s) * .08) #1b100a;pointer-events:none}
+.tv-sg .ns{position:absolute;left:calc(var(--s) * .2);top:calc(var(--s) * -.68);width:calc(var(--s) * .42);height:calc(var(--s) * .42);border-radius:50%;background:#1b1512;border:2px solid #f2b51d;display:grid;place-items:center}
 .tv-sg .ns svg{width:70%;height:70%;fill:none;stroke:#f2b51d;stroke-width:2.4;stroke-linecap:round}
-.tv-sg.nasc .pin{opacity:.6}.tv-sg.nasc .pin{border-style:dashed;border-color:#f2b51d}
-.tv-sg.sel .pin{box-shadow:0 0 0 calc(var(--s) * .08) #f2b51d,0 0 calc(var(--s) * .4) #f2b51d}
-.tv-stage.segni .tv-sg .pin{cursor:move}
-.tv-sg.app .pin{animation:tvSgAppP .7s cubic-bezier(.3,1.6,.5,1)}
-@keyframes tvSgAppP{0%{transform:translateY(calc(var(--s) * -.6)) rotate(-45deg) scale(.2);opacity:0}100%{transform:rotate(-45deg);opacity:1}}
+.tv-sg.nasc .gt{opacity:.55;border-style:dashed;border-color:#f2b51d}
+.tv-sg.sel .gt{box-shadow:inset 0 0 0 calc(var(--s) * .07) #efe2c4,inset 0 0 0 calc(var(--s) * .11) var(--c),0 0 0 calc(var(--s) * .07) #f2b51d,0 0 calc(var(--s) * .35) #f2b51d}
+.tv-stage.segni .tv-sg .gt{cursor:move}
+.tv-sg.app .gt{animation:tvSgApp .6s cubic-bezier(.3,1.6,.5,1)}
+@keyframes tvSgApp{0%{transform:scale(.2);opacity:0}100%{transform:scale(1);opacity:1}}
+.sgi{width:1.15em;height:1.15em;vertical-align:-.2em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .tv-ping{position:absolute;width:0;height:0;pointer-events:none;z-index:100001;--r:50px}
 .tv-ping i{position:absolute;left:calc(var(--r) * -1);top:calc(var(--r) * -1);width:calc(var(--r) * 2);height:calc(var(--r) * 2);border-radius:50%;border:calc(var(--r) * .1) solid var(--c);box-shadow:0 0 calc(var(--r) * .3) var(--c),inset 0 0 calc(var(--r) * .3) var(--c);opacity:0;animation:tvPing 1.3s ease-out 2}
 .tv-ping i:nth-child(2){animation-delay:.22s}.tv-ping i:nth-child(3){animation-delay:.44s;background:color-mix(in srgb,var(--c) 25%,transparent)}
@@ -2360,20 +2361,37 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
 
   /* ---------- segnalini sulla mappa (bauli, porte, trappole…) e segnale col mouse ---------- */
+  // le icone sono disegnate (tratti su 24×24): uguali su ogni computer e telefono, a differenza delle emoji
+  const sgi = d => `<svg class="sgi" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
   const SEGNI = {
-    punto: ['⭐', 'Punto d\'interesse', '#c0392b'], baule: ['🧰', 'Baule', '#a0662b'], tesoro: ['💰', 'Tesoro', '#d9a21b'], porta: ['🚪', 'Porta', '#8a5a2b'],
-    segreta: ['🧱', 'Porta segreta', '#6f6a62'], chiave: ['🗝️', 'Chiave', '#b8902e'], leva: ['⚙️', 'Leva o meccanismo', '#5b6b7a'], trappola: ['⚠️', 'Trappola', '#d35400'],
-    pericolo: ['☠️', 'Pericolo', '#3d3d3d'], fossa: ['🕳️', 'Botola o fossa', '#4a3b30'], scale: ['🔼', 'Scale', '#4f6d8a'], indizio: ['📜', 'Indizio o nota', '#9c7b45'],
-    pozione: ['🧪', 'Pozione o alchimia', '#3a9a6a'], magia: ['✨', 'Magia o runa', '#7d4fc0'], altare: ['🕯️', 'Altare o santuario', '#8f6c3e'], fuoco: ['🔥', 'Falò o accampamento', '#d2601a'],
-    acqua: ['💧', 'Fonte o acqua', '#2f7fc1'], cadavere: ['💀', 'Resti o cadavere', '#6b6058'], png: ['💬', 'Personaggio da incontrare', '#2e8b8b'], obiettivo: ['🚩', 'Obiettivo o uscita', '#2f8f3a']
+    punto: [sgi('<path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8-4.3-4.1 5.9-.8z"/>'), 'Punto d\'interesse', '#c0392b'],
+    baule: [sgi('<path d="M4 11h16v8H4zM4 11V9a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v2"/><path d="M10.5 11v3h3v-3"/>'), 'Baule', '#a0662b'],
+    tesoro: [sgi('<path d="M9 5h6l-1.5 3h-3zM10.5 8C6 10 4.5 13.5 5 16c.5 2.5 3 3.5 7 3.5s6.5-1 7-3.5c.5-2.5-1-6-5.5-8"/><path d="M13.5 12.5c-.5-.7-1.3-1-2-.8-.9.3-1 1.4 0 1.8l1 .4c1 .4.9 1.6 0 1.8-.8.2-1.6-.1-2-.8M12 11v.7M12 16.3v.7"/>'), 'Tesoro', '#c99a17'],
+    porta: [sgi('<path d="M6 20V9a6 6 0 0 1 12 0v11M4 20h16"/><path d="M12 3v17"/><circle cx="14.5" cy="13" r=".6" fill="currentColor"/>'), 'Porta', '#8a5a2b'],
+    segreta: [sgi('<path d="M3.5 5h17v14h-17zM3.5 9.7h17M3.5 14.3h17M9 5v4.7M15 9.7v4.6M9 14.3V19"/>'), 'Porta segreta', '#6f6a62'],
+    chiave: [sgi('<circle cx="8" cy="8" r="4"/><path d="M11 11l8.5 8.5M16 16l2-2M18.5 18.5l2-2"/>'), 'Chiave', '#b8902e'],
+    leva: [sgi('<path d="M5 19h14M8 19a4 4 0 0 1 8 0"/><path d="M12 15L17 5"/><circle cx="17.5" cy="4.5" r="2"/>'), 'Leva o meccanismo', '#5b6b7a'],
+    trappola: [sgi('<path d="M3 15a9 9 0 0 1 18 0"/><path d="M3 15l2-2.5 2 2 2-3 2 3 2-3 2 3 2-2 2 2.5"/><path d="M2 18h20"/>'), 'Trappola', '#d35400'],
+    pericolo: [sgi('<path d="M12 3.5L21.5 20h-19z"/><path d="M12 9.5v5M12 17.3v.4"/>'), 'Pericolo', '#3d3d3d'],
+    fossa: [sgi('<ellipse cx="12" cy="13" rx="8.5" ry="5"/><path d="M6 13c1.5 2 3.5 3 6 3s4.5-1 6-3" fill="currentColor" fill-opacity=".35"/>'), 'Botola o fossa', '#4a3b30'],
+    scale: [sgi('<path d="M4 20h4v-4h4v-4h4V8h4V4"/>'), 'Scale', '#4f6d8a'],
+    indizio: [sgi('<path d="M7 4h11a2 2 0 0 1 0 4h-1v10a2 2 0 0 1-2 2H6a2 2 0 0 1 0-4h1z"/><path d="M10 9h4M10 12.5h4"/>'), 'Indizio o nota', '#9c7b45'],
+    pozione: [sgi('<path d="M10 3h4M10.5 3v5L5.5 17a2.5 2.5 0 0 0 2.2 3.5h8.6a2.5 2.5 0 0 0 2.2-3.5L13.5 8V3"/><path d="M7.5 14h9"/>'), 'Pozione o alchimia', '#3a9a6a'],
+    magia: [sgi('<path d="M12 3l1.8 5.7L19.5 10.5l-5.7 1.8L12 18l-1.8-5.7L4.5 10.5l5.7-1.8z"/><path d="M18.5 16.5l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>'), 'Magia o runa', '#7d4fc0'],
+    altare: [sgi('<path d="M10 9h4v8h-4zM6 20h12M7.5 17h9v3h-9z"/><path d="M12 3.5c1.2 1.3 1.5 2.4.9 3.3a1.1 1.1 0 0 1-1.8 0c-.6-.9-.3-2 .9-3.3z"/>'), 'Altare o santuario', '#8f6c3e'],
+    fuoco: [sgi('<path d="M12 3c1 3 4.5 4.5 4.5 9a4.5 4.5 0 0 1-9 0c0-2 1-3.5 2.2-4.5 0 2 1 3 2 3.2C11.2 8 11 5.5 12 3z"/><path d="M5 20l14-3M5 17l14 3"/>'), 'Falò o accampamento', '#d2601a'],
+    acqua: [sgi('<path d="M12 3.5S6 10 6 14a6 6 0 0 0 12 0c0-4-6-10.5-6-10.5z"/><path d="M9.5 14.5a2.6 2.6 0 0 0 2.5 2.5"/>'), 'Fonte o acqua', '#2f7fc1'],
+    cadavere: [sgi('<path d="M12 3.5a7 7 0 0 0-7 7c0 2.3 1 3.8 2.5 4.8V19h9v-3.7c1.5-1 2.5-2.5 2.5-4.8a7 7 0 0 0-7-7z"/><circle cx="9.3" cy="11" r="1.5"/><circle cx="14.7" cy="11" r="1.5"/><path d="M10.5 19v-2M13.5 19v-2"/>'), 'Resti o cadavere', '#6b6058'],
+    png: [sgi('<path d="M4 5h16v10H10l-4 4v-4H4z"/><path d="M8 9.5h8M8 12h5"/>'), 'Personaggio da incontrare', '#2e8b8b'],
+    obiettivo: [sgi('<path d="M6 21V4M6 4h11l-2.5 4L17 12H6"/>'), 'Obiettivo o uscita', '#2f8f3a']
   };
   const segnaliniScena = sc => (T.segn || []).filter(x => x.scena === sc.id);
   function disegnaSegnalini() {
     const box = $('#tv-segn'), sc = scena(); if (!box || !sc) return;
-    const L = T.sgm?.l || segnaliniScena(sc), s = Math.max(30, sc.griglia * 0.8), sel = isDM() && T.tool === 'segni' ? T.sgSel : null;
+    const L = T.sgm?.l || segnaliniScena(sc), s = Math.max(34, sc.griglia * 0.72), sel = isDM() && T.tool === 'segni' ? T.sgSel : null;
     box.innerHTML = L.filter(x => isDM() || !x.nascosto).map(x => {
       const [ic, l, c] = SEGNI[x.tipo] || SEGNI.punto, tip = (x.nome || l) + (isDM() ? (x.nascosto ? ' · nascosto ai giocatori' : ' · lo vedono i giocatori') + ' · tasto destro: rivela, nascondi o togli' : '');
-      return `<div class="tv-sg${x.nascosto ? ' nasc' : ''}${x.id === sel ? ' sel' : ''}${x.id === T.sgApp && animazioni() ? ' app' : ''}" data-id="${x.id}" style="left:${x.x}px;top:${x.y}px;--s:${s}px;--c:${c}" data-tip="${esc(tip)}"><span class="pin"><span class="ic">${ic}</span></span>${x.nome ? `<span class="nm">${esc(x.nome)}</span>` : ''}${x.nascosto && isDM() ? `<i class="ns">${svg('velo')}</i>` : ''}</div>`;
+      return `<div class="tv-sg${x.nascosto ? ' nasc' : ''}${x.id === sel ? ' sel' : ''}${x.id === T.sgApp && animazioni() ? ' app' : ''}" data-id="${x.id}" style="left:${x.x}px;top:${x.y}px;--s:${s}px;--c:${c}" data-tip="${esc(tip)}"><span class="gt">${ic}</span>${x.nome ? `<span class="nm">${esc(x.nome)}</span>` : ''}${x.nascosto && isDM() ? `<i class="ns">${svg('velo')}</i>` : ''}</div>`;
     }).join('');
     T.sgApp = null;
   }
