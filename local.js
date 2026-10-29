@@ -840,7 +840,9 @@ html.review #view :is(p,li,h1,h2,h3,h4,h5,dd,dt,td,th,figcaption,blockquote):hov
   /* ---------- Segnala un bug / Proponi una miglioria (giocatori) ----------
      Come «Segnala a Claude», ma non si applica da sola: arriva al DM e a Claude, che la valutano prima di fare qualcosa.
      Il testo e le foto viaggiano cifrati con la chiave del giocatore (solo il DM, che conosce le password, li apre). */
-  const PKIND = { bug: ['🐞', 'Segnala un bug', 'Descrivi cosa non funziona o si vede male. Il sito aggiunge da solo la pagina in cui ti trovi e il dispositivo che usi.', 'Es.: sul telefono il menu delle sessioni copre il titolo.', 'segnala un bug'], idea: ['💡', 'Proponi una miglioria', 'Descrivi la tua idea per migliorare il sito.', 'Es.: sarebbe comodo vedere nella scheda del mio PG gli oggetti che porto.', 'propone una miglioria'] };
+  const PKIND = { bug: ['🐞', 'Segnala un bug', 'Descrivi cosa non funziona o si vede male. Il sito aggiunge da solo la pagina in cui ti trovi e il dispositivo che usi.', 'Es.: sul telefono il menu delle sessioni copre il titolo.', 'segnala un bug'], idea: ['💡', 'Proponi una miglioria', 'Descrivi la tua idea per migliorare il sito.', 'Es.: sarebbe comodo vedere nella scheda del mio PG gli oggetti che porto.', 'propone una miglioria'], questionario: ['📝', 'Questionario', '', '', 'ha compilato il questionario'] };
+  // il questionario nella scheda del PG (index.html) usa lo stesso invio cifrato, senza foto
+  window.__playerSend = (kind, text) => kind === 'questionario' && PLAYER ? playerRequest(kind, text, []) : Promise.reject(new Error('non disponibile'));
   async function playerRequest(kind, text, photos) {
     const ph = {};
     for (const [i, p] of photos.entries()) ph['F' + (i + 1)] = { type: p.blob.type || 'image/jpeg', b64: b64e(new Uint8Array(await p.blob.arrayBuffer())) };

@@ -190,6 +190,11 @@ fieldset.visf{border:1px solid var(--line2);border-radius:8px;padding:6px 10px 2
 .card.questcard{border-color:var(--gold);box-shadow:inset 3px 0 0 var(--gold)}
 .sec.quest>summary{font-size:1.12rem;flex-wrap:wrap}
 .sec.quest>summary .qico{font-size:1.05em;filter:saturate(.8)}
+.qz>p.hint{margin:2px 0 12px}
+.qzq{margin:0 0 14px}.qzq label{display:block;font-weight:600;margin-bottom:2px}.qzq .hint{margin:0 0 6px}
+.qzq textarea{width:100%;box-sizing:border-box;min-height:4.5em;resize:vertical;font:inherit;padding:8px 10px;border:1px solid var(--line2);border-radius:8px;background:var(--paper);color:var(--ink)}
+.qzq textarea:focus{outline:2px solid var(--gold);outline-offset:1px}
+.qzgo{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:4px}
 .pill.qst{font-family:var(--body);font-size:.75rem;letter-spacing:0;text-transform:none;color:#8a6a1f;border-color:#8a6a1f88;background:#8a6a1f14}
 .pill.qst.q-completata{color:#2f6b3e;border-color:#2f6b3e88;background:#2f6b3e14}
 .pill.qst.q-fallita,.pill.qst.q-abbandonata{color:var(--mute);border-color:var(--line2);background:transparent}
@@ -1989,13 +1994,38 @@ async function createEntity({ type, name, brief = '', status = '', discovered = 
 
 /* ================= SCHEDA: dettaglio ================= */
 const questPill = sec => { const me = window.__RO && window.__player?.(); return ` <span class="pill vis" title="Gli altri giocatori non la vedono">🔒 ${me ? 'la vedi solo tu e il DM' : 'solo ' + esc(Array.isArray(sec.vis) && sec.vis.length ? visNames(sec.vis) : 'il suo giocatore') + ' e il DM'}</span>`; };
+// questionario (quest: true, questionario: true): ogni voce è una domanda. Il giocatore risponde nelle caselle (le bozze restano
+// in questo browser) e «Invia al DM» spedisce le risposte cifrate con la sua password, come «Segnala un bug»
+// domande uguali per tutti, che il DM aggiunge con «+ Questionario» (poi può modificarle e aggiungerne su misura)
+const QZ_BASE = [
+  '**Cosa vuole davvero il tuo personaggio, oggi?**\nE tu, cosa vorresti che ottenesse entro la fine della campagna?',
+  '**Qual è la sua paura più grande?**\nQuella che non direbbe mai ad alta voce.',
+  '**C\'è una persona del suo passato che non riesce a lasciarsi alle spalle?**\nViva o morta, amica o nemica.',
+  '**Cosa pensa davvero di ognuno dei compagni?**\nDi chi si fida, chi lo irrita, a chi deve qualcosa.',
+  '**Qual è il limite che non supererebbe mai?**\nE cosa potrebbe spingerlo a superarlo comunque?',
+  '**C\'è un segreto che non ha ancora raccontato al gruppo?**\nPuoi scriverlo qui: lo legge solo il DM.',
+  '**Quale momento delle sessioni finora ti è piaciuto di più?**\nE perché?',
+  '**Che scene vorresti vivere di più con il tuo personaggio?**\nCombattimenti, dialoghi, misteri, esplorazione, scelte morali, momenti personali…',
+  '**Come immagini il suo finale?**\nFelice, tragico, redenzione, caduta… e c\'è qualcosa che non vorresti mai che gli succedesse?'
+];
+const qzKey = id => 'cdnd_qz_' + id;
+const qzLoad = id => { try { return JSON.parse(localStorage.getItem(qzKey(id))) || {}; } catch { return {}; } };
+const qzSave = (id, v) => { try { localStorage.setItem(qzKey(id), JSON.stringify(v)); } catch { } };
+const qzQ = t => t.split('\n')[0].replace(/^\*\*|\*\*$/g, '');
+function questionarioHtml(sec, si, id) {
+  const st = qzLoad(id), ans = st.a || {};
+  return `<details class="sec quest qz" open id="sec-${si}"><summary><span class="qico" aria-hidden="true">📝</span>${esc(sec.title)}${questPill(sec)}</summary>
+    <p class="hint">Rispondi come preferisci: poche parole o un racconto, anche saltando le domande che non ti ispirano. Quello che scrivi resta salvato su questo dispositivo finché non premi «Invia al DM», e puoi tornare a completarlo quando vuoi.</p>
+    ${sec.entries.map((en, i) => `<div class="qzq"><label for="qz-${i}">${i + 1}. ${inl(qzQ(en.text))}</label>${en.text.includes('\n') ? `<div class="hint">${inl(en.text.split('\n').slice(1).join(' ').trim())}</div>` : ''}<textarea id="qz-${i}" data-qz="${esc(qzQ(en.text))}" rows="3">${esc(ans[qzQ(en.text)] || '')}</textarea></div>`).join('')}
+    <div class="qzgo"><button type="button" class="btn primary" data-act="qzSend">${st.sent ? 'Invia di nuovo al DM' : 'Invia al DM'}</button><span class="hint" id="qzm">${st.sent ? 'Inviato il ' + esc(new Date(st.sent).toLocaleString('it-IT', { dateStyle: 'medium', timeStyle: 'short' })) + '. Se cambi qualcosa, puoi rimandarlo.' : 'Le risposte arrivano cifrate: le leggono solo il DM e Claude.'}</span></div></details>`;
+}
 function entrySecHtml(sec, si, editable = true, subs = '') {
   const n = sec.entries.length, KEEP = 8;
   const ent = (en, ei) => `<div class="entry${en.dm ? ' dment' : ''}"><div class="tag${en.n != null ? '' : ' dot'}">${en.n != null ? sessLink(en.n) : '·'}</div><div class="tx">${en.dm ? '<span class="pill dm">🔒 solo DM</span>' : ''}${visPill(en)}${en.text.length > 1400 ? `<div class="fold">${prose(en.text)}</div><button type="button" class="more" data-act="unfold">Leggi tutto</button>` : prose(en.text)}</div><div class="eacts"><button class="icb" data-act="editEntry" data-si="${si}" data-ei="${ei}" title="Modifica">✎</button><button class="icb" data-act="delEntry" data-si="${si}" data-ei="${ei}" title="Elimina">✕</button></div></div>`;
   let body;
-  if (n > KEEP + 2) body = `<details class="older"><summary class="hint" style="cursor:pointer;margin:4px 0 8px">Mostra le ${n - KEEP} voci precedenti</summary>${sec.entries.slice(0, n - KEEP).map((e, i) => ent(e, i)).join('')}</details>${sec.entries.slice(n - KEEP).map((e, i) => ent(e, n - KEEP + i)).join('')}`;
+  if (n > KEEP + 2 && !sec.questionario) body = `<details class="older"><summary class="hint" style="cursor:pointer;margin:4px 0 8px">Mostra le ${n - KEEP} voci precedenti</summary>${sec.entries.slice(0, n - KEEP).map((e, i) => ent(e, i)).join('')}</details>${sec.entries.slice(n - KEEP).map((e, i) => ent(e, n - KEEP + i)).join('')}`;
   else body = sec.entries.map(ent).join('') || (subs ? '' : '<p class="hint">Sezione vuota.</p>');
-  return `<details class="sec${sec.sub ? ' sub' : ''}${sec.dm ? ' dmsec' : ''}${sec.quest ? ' quest' : ''}" open id="sec-${si}"><summary>${sec.quest ? '<span class="qico" aria-hidden="true">🎯</span>' : ''}${esc(sec.title)}${sec.quest && sec.stato ? ` <span class="pill qst q-${esc(sec.stato.replace(/\s+/g, '-'))}">${esc(QUEST_STATI[sec.stato] || sec.stato)}</span>` : ''}${sec.dm ? ' <span class="pill dm">🔒 solo DM</span>' : ''}${sec.quest ? questPill(sec) : visPill(sec)} <span class="cnt">${n > 1 ? n + ' voci' : ''}</span><span class="sp"></span><button class="icb" data-act="addEntry" data-si="${si}" title="Aggiungi voce">＋</button><button class="icb" data-act="renSec" data-si="${si}" title="Modifica sezione">✎</button><button class="icb" data-act="delSec" data-si="${si}" title="Elimina sezione">✕</button></summary>${body}${subs}</details>`;
+  return `<details class="sec${sec.sub ? ' sub' : ''}${sec.dm ? ' dmsec' : ''}${sec.quest ? ' quest' : ''}" open id="sec-${si}"><summary>${sec.quest ? `<span class="qico" aria-hidden="true">${sec.questionario ? '📝' : '🎯'}</span>` : ''}${esc(sec.title)}${sec.quest && sec.stato ? ` <span class="pill qst q-${esc(sec.stato.replace(/\s+/g, '-'))}">${esc(QUEST_STATI[sec.stato] || sec.stato)}</span>` : ''}${sec.dm ? ' <span class="pill dm">🔒 solo DM</span>' : ''}${sec.quest ? questPill(sec) : visPill(sec)} <span class="cnt">${n > 1 ? n + ' voci' : ''}</span><span class="sp"></span><button class="icb" data-act="addEntry" data-si="${si}" title="Aggiungi voce">＋</button><button class="icb" data-act="renSec" data-si="${si}" title="Modifica sezione">✎</button><button class="icb" data-act="delSec" data-si="${si}" title="Elimina sezione">✕</button></summary>${body}${subs}</details>`;
 }
 async function mutBody(id, fn) {
   await runBatch(['bodies', 'entities'], '', async t => {
@@ -2021,18 +2051,19 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
   };
   const photos = e.photos || [];
   // le sottosezioni (sub: true) vanno dentro la sezione precedente
-  const tops = [], quests = []; b.sections.forEach((s, i) => { if (s.quest) quests.push(i); else if (s.sub && tops.length) tops[tops.length - 1].subs.push(i); else tops.push({ i, subs: [] }); });
+  const tops = [], quests = [], qz = []; b.sections.forEach((s, i) => { if (s.questionario) qz.push(i); else if (s.quest) quests.push(i); else if (s.sub && tops.length) tops[tops.length - 1].subs.push(i); else tops.push({ i, subs: [] }); });
   const owner = e.type === 'pg' ? questOwner(id) : null;
   // scheda Fazione: i personaggi che ne fanno parte (campo «Fazione» nei dati della scheda)
   const membri = e.type === 'fazione' ? [...S.ents.values()].filter(x => fazOf(x)?.id === id).sort((a, c) => a.name.localeCompare(c.name, 'it')) : [];
-  const toc = [...quests.map(i => ['Quest personale', 'sec-' + i]), ...tops.map(({ i }) => [b.sections[i].title.replace(/\s*\(.*\)$/, ''), 'sec-' + i]), ...(membri.length ? [['Membri', 'sec-membri']] : []), ...(photos.length ? [['Foto', 'sec-foto']] : []), ['Collegamenti', 'sec-rel'], ...(evs.length ? [['Eventi', 'sec-ev']] : [])];
+  const toc = [...quests.map(i => ['Quest personale', 'sec-' + i]), ...qz.map(i => ['Questionario', 'sec-' + i]), ...tops.map(({ i }) => [b.sections[i].title.replace(/\s*\(.*\)$/, ''), 'sec-' + i]), ...(membri.length ? [['Membri', 'sec-membri']] : []), ...(photos.length ? [['Foto', 'sec-foto']] : []), ['Collegamenti', 'sec-rel'], ...(evs.length ? [['Eventi', 'sec-ev']] : [])];
   // la scheda del Tavolo (combattimento, da PNG o completa) si apre accanto, dal segnalino in alto a destra
   const conSch = ['pg', 'png'].includes(e.type) && !!window.__schedaSito;
   setView(`<div class="ewrap"><div class="ecol"><div class="card ehead ${e.portrait ? 'hasp' : ''}">${conSch ? '<button type="button" class="schtag" data-act="tvsch" hidden aria-pressed="false"></button>' : ''}${e.portrait ? `<img class="portrait" src="${e.portrait.thumb}" data-act="viewportrait" alt="${esc(e.name)}" title="Ingrandisci">` : ''}<div class="ehb"><div class="meta">${badge(e.type)}${e.status ? `<span class="pill">${esc(e.status)}</span>` : ''}${catPills(e, true)}${e.discovered === false ? '<span class="pill dm">🔒 solo DM · nascosta ai giocatori</span>' : ''}${visPill(e)}<span class="hint">${esc(rangeTxt(e.sessions))}</span></div>
       <h1>${esc(e.name)}</h1>${e.alias?.length ? `<div class="hint">Detto anche: ${e.alias.map(esc).join(', ')}</div>` : ''}${e.brief ? `<div class="brief">${inl(e.brief)}</div>` : ''}
-      </div><div class="row eheadacts"><button class="btn sm" data-act="edit">Modifica dati</button>${[...M.regions.values()].filter(r => r.entityId === id).map(r => `<a class="btn sm" href="#/mappe/${encodeURIComponent(r.mapId)}?reg=${encodeURIComponent(r.id)}">Vedi sulla mappa</a>`).join('')}${moreActs(`${owner && !quests.length ? '<button class="btn sm" data-act="addQuest">🎯 + Quest personale</button>' : ''}<button class="btn sm" data-act="addSec">+ Sezione</button><button class="btn sm" data-act="portrait">${e.portrait ? 'Cambia ritratto' : '+ Ritratto'}</button><button class="btn sm ghost" data-act="copyEnt">Copia per Claude</button><button class="btn sm ghost" data-act="merge">Unisci in un'altra scheda</button><button class="btn sm danger" data-act="del">Elimina</button>`)}</div></div>
+      </div><div class="row eheadacts"><button class="btn sm" data-act="edit">Modifica dati</button>${[...M.regions.values()].filter(r => r.entityId === id).map(r => `<a class="btn sm" href="#/mappe/${encodeURIComponent(r.mapId)}?reg=${encodeURIComponent(r.id)}">Vedi sulla mappa</a>`).join('')}${moreActs(`${owner && !quests.length ? '<button class="btn sm" data-act="addQuest">🎯 + Quest personale</button>' : ''}${owner && !qz.length ? '<button class="btn sm" data-act="addQz">📝 + Questionario</button>' : ''}<button class="btn sm" data-act="addSec">+ Sezione</button><button class="btn sm" data-act="portrait">${e.portrait ? 'Cambia ritratto' : '+ Ritratto'}</button><button class="btn sm ghost" data-act="copyEnt">Copia per Claude</button><button class="btn sm ghost" data-act="merge">Unisci in un'altra scheda</button><button class="btn sm danger" data-act="del">Elimina</button>`)}</div></div>
     ${toc.length > 2 ? `<nav class="toc" aria-label="Sezioni della scheda">${toc.map(([t, k]) => `<button type="button" data-act="goto" data-to="${k}">${esc(t)}</button>`).join('')}</nav>` : ''}
     ${quests.length ? `<div class="card questcard">${quests.map(i => entrySecHtml(b.sections[i], i)).join('')}</div>` : ''}
+    ${qz.length ? `<div class="card questcard qzcard">${qz.map(i => window.__RO && window.__player?.() ? questionarioHtml(b.sections[i], i, id) : entrySecHtml(b.sections[i], i)).join('')}</div>` : ''}
     <div class="card">${tops.length ? tops.map(({ i, subs }) => entrySecHtml(b.sections[i], i, true, subs.map(j => entrySecHtml(b.sections[j], j)).join(''))).join('') : `<p class="empty">${window.__RO ? 'Nessuna informazione su questa scheda, per ora.' : 'Nessun contenuto ancora. Verrà riempita dalle importazioni, oppure aggiungi una sezione a mano.'}</p>`}</div>
     ${e.type === 'fazione' && (membri.length || !window.__RO) ? `<div class="card" id="sec-membri"><div class="spread"><h2>Membri${membri.length ? ` <small>(${membri.length})</small>` : ''}</h2>${window.__RO ? '' : '<button class="btn sm" data-act="addMembro">+ Aggiungi membro</button>'}</div>
       ${membri.length ? `<div class="relcards wide">${membri.map(x => `<div class="relc${x.fazDm ? ' dment' : ''}"><a href="#/scheda/${encodeURIComponent(x.id)}">${x.portrait ? `<img class="av" src="${x.portrait.thumb}" alt="">` : `<span class="av noav t-${x.type}">${esc(x.name[0])}</span>`}<span><b>${esc(x.name)}</b><small>${x.fazDm && !window.__RO ? '🔒 solo DM · ' : ''}${esc([x.brief, x.status].filter(Boolean).join(' · ') || TYPES[x.type])}</small></span></a>${window.__RO ? '' : `<button class="icb rdm" data-act="dmMembro" data-id="${esc(x.id)}" aria-pressed="${!!x.fazDm}" title="${x.fazDm ? 'Appartenenza solo per DM: premi per mostrarla ai giocatori' : 'Appartenenza visibile ai giocatori: premi per renderla solo per DM'}">${x.fazDm ? '🔒' : '🔓'}</button><button class="icb" data-act="delMembro" data-id="${esc(x.id)}" title="Togli dalla fazione">✕</button>`}</div>`).join('')}</div>` : '<p class="hint">Nessun personaggio in questa fazione. Si assegna da «+ Aggiungi membro» o da «Modifica dati» di un personaggio.</p>'}</div>` : ''}
@@ -2094,9 +2125,12 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
     if (!r) return; const en = setVis({ n: r.n, text: r.text.trim(), ...(r.dm ? { dm: true } : {}) }, r.vis); await mutBody(id, bd => { if (add) bd.sections[si].entries.push(en); else bd.sections[si].entries[ei] = en; }); rerender();
   };
   const renQuest = async si => {
-    const q = b.sections[si]; const r = await formDlg({ title: 'Quest personale', fields: [{ k: 't', label: 'Titolo', value: q.title, req: true }, { k: 'stato', label: 'Stato', type: 'select', value: q.stato || 'in corso', options: Object.entries(QUEST_STATI) }] }); if (!r) return;
-    await mutBody(id, bd => { const sc = bd.sections[si]; sc.title = r.t.trim(); sc.stato = r.stato; if (owner) sc.vis = [owner]; }); rerender();
+    const q = b.sections[si]; const r = await formDlg({ title: q.questionario ? 'Questionario' : 'Quest personale', fields: [{ k: 't', label: 'Titolo', value: q.title, req: true }, ...(q.questionario ? [] : [{ k: 'stato', label: 'Stato', type: 'select', value: q.stato || 'in corso', options: Object.entries(QUEST_STATI) }])] }); if (!r) return;
+    await mutBody(id, bd => { const sc = bd.sections[si]; sc.title = r.t.trim(); if (r.stato) sc.stato = r.stato; if (owner) sc.vis = [owner]; }); rerender();
   };
+  // questionario del giocatore: le risposte si salvano a ogni tasto, in questo browser
+  const qzForm = $('.qz');
+  if (qzForm) qzForm.addEventListener('input', ev => { const t = ev.target.closest('textarea[data-qz]'); if (!t) return; const st = qzLoad(id); st.a = { ...st.a, [t.dataset.qz]: t.value }; qzSave(id, st); });
   setActs({
     ...evActs(evs),
     tvsch: () => tvsch?.(),
@@ -2150,6 +2184,26 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
       if (!await ask(`Unire **${e.name}** dentro **${dst.name}**?`, { ok: 'Unisci' })) return; await mergeEntity(id, dst.id); location.hash = '#/scheda/' + encodeURIComponent(dst.id);
     },
     addSec: async () => { const r = await formDlg({ title: 'Nuova sezione', wide: true, fields: [{ k: 'title', label: 'Titolo', req: true, placeholder: 'Background, Storia personale…' }, { k: 'text', label: 'Testo', type: 'textarea', rows: 8, dm: true }, { k: 'n', label: 'Sessione (vuoto = nessuna)', type: 'number', value: null }, { k: 'sub', label: '↳ Sottosezione: va dentro la sezione precedente', type: 'check', value: false }, { k: 'dm', label: '🔒 Solo per DM: tutta la sezione è nascosta ai giocatori', type: 'check', value: false }, { k: 'vis', type: 'players', value: null }] }); if (!r) return; await mutBody(id, bd => { bd.sections.push(setVis({ title: r.title.trim(), ...(r.sub ? { sub: true } : {}), ...(r.dm ? { dm: true } : {}), entries: r.text.trim() ? [{ n: r.n, text: r.text.trim() }] : [] }, r.vis)); }); rerender(); },
+    addQz: async () => {
+      if (!await ask(`Aggiungere il questionario alla scheda di **${e.name}**?\n\nCi metto ${QZ_BASE.length} domande uguali per tutti: poi puoi modificarle e aggiungerne di su misura con ＋. Lo vedono solo ${visNames([owner])} e il DM.`, { ok: 'Aggiungi' })) return;
+      await mutBody(id, bd => { const i = bd.sections.findIndex(x => x.quest && !x.questionario); bd.sections.splice(i + 1, 0, { title: 'Questionario', quest: true, questionario: true, vis: [owner], entries: QZ_BASE.map(text => ({ n: null, text })) }); }); rerender();
+    },
+    qzSend: async a => {
+      const st = qzLoad(id), ans = st.a || {}, si = qz[0], sec = b.sections[si], m = $('#qzm');
+      const rows = sec.entries.map((en, i) => [i + 1, qzQ(en.text), (ans[qzQ(en.text)] || '').trim()]);
+      if (!rows.some(r => r[2])) { m.textContent = 'Rispondi almeno a una domanda prima di inviare.'; return; }
+      const text = `Questionario di ${e.name}\n\n` + rows.map(([n, q, r]) => `**${n}. ${q}**\n${r || '(nessuna risposta)'}`).join('\n\n');
+      a.disabled = true; m.textContent = 'Invio…';
+      try {
+        const res = await window.__playerSend('questionario', text);
+        if (res.file) { const u = URL.createObjectURL(res.file), l = document.createElement('a'); l.href = u; l.download = 'segnalazione-avalar.txt'; document.body.append(l); l.click(); l.remove(); setTimeout(() => URL.revokeObjectURL(u), 60000); }
+        if (res.url) window.open(res.url, '_blank', 'noopener');
+        qzSave(id, { ...st, sent: Date.now() });
+        m.textContent = res.done ? 'Inviato al DM. Grazie!' : res.file ? 'Su GitHub allega il file «segnalazione-avalar.txt» e premi «Create». Grazie!' : 'Su GitHub premi «Create» per inviarlo. Grazie!';
+        a.textContent = 'Invia di nuovo al DM';
+      } catch { m.textContent = 'Non sono riuscito a inviarlo: riprova tra poco (le risposte restano salvate).'; }
+      a.disabled = false;
+    },
     addQuest: async () => {
       const pn = visNames([owner]);
       const r = await formDlg({ title: 'Quest personale di ' + e.name, wide: true, intro: `L'obiettivo personale del personaggio. Lo vedono solo ${pn} e il DM: agli altri giocatori non arriva.`, fields: [{ k: 'text', label: 'Obiettivo', type: 'textarea', rows: 8, req: true, dm: true, placeholder: 'Cosa vuole ottenere, perché, e cosa sa finora…' }, { k: 'stato', label: 'Stato', type: 'select', value: 'in corso', options: Object.entries(QUEST_STATI) }, { k: 'n', label: 'Sessione (vuoto = nessuna)', type: 'number', value: null }] });
