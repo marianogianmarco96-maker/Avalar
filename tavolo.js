@@ -2179,7 +2179,15 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const set = new Set(difScena(sc)); if (T.dif) for (const k of T.dif.celle) T.dif.togli ? set.delete(k) : set.add(k);
     const q = sc.griglia, ox = sc.griglia_x, oy = sc.griglia_y, w = q / 4;
     const celle = [...set].map(k => { const [c, r] = k.split(',').map(Number); return `<rect x="${ox + c * q}" y="${oy + r * q}" width="${q}" height="${q}"/>`; }).join('');
-    g.innerHTML = set.size ? `<defs><pattern id="tv-difp" width="${w}" height="${w}" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="${w}" height="${w}" fill="#8a5a2b" fill-opacity=".28"/><path d="M0 0V${w}" stroke="#3a1f06" stroke-opacity=".65" stroke-width="${Math.max(1.5, q / 26)}"/></pattern></defs><g fill="url(#tv-difp)" stroke="#4a2a0c" stroke-opacity=".3" stroke-width="1">${celle}</g>` : '';
+    // il bordo segue solo il contorno della zona: un tratto scuro sotto e uno arancio sopra, si vede su ogni mappa
+    const bordi = [];
+    for (const k of set) {
+      const [c, r] = k.split(',').map(Number), x = ox + c * q, y = oy + r * q;
+      if (!set.has(`${c},${r - 1}`)) bordi.push(`M${x} ${y}h${q}`); if (!set.has(`${c},${r + 1}`)) bordi.push(`M${x} ${y + q}h${q}`);
+      if (!set.has(`${c - 1},${r}`)) bordi.push(`M${x} ${y}v${q}`); if (!set.has(`${c + 1},${r}`)) bordi.push(`M${x + q} ${y}v${q}`);
+    }
+    const lb = Math.max(2.5, q / 20), d = bordi.join('');
+    g.innerHTML = set.size ? `<defs><pattern id="tv-difp" width="${w}" height="${w}" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="${w}" height="${w}" fill="#e08a1e" fill-opacity=".38"/><path d="M${w * .3} 0V${w}" stroke="#2a1404" stroke-opacity=".85" stroke-width="${w * .28}"/><path d="M${w * .62} 0V${w}" stroke="#ffd27a" stroke-opacity=".5" stroke-width="${Math.max(1, q / 60)}"/></pattern></defs><g fill="url(#tv-difp)">${celle}</g><path d="${d}" fill="none" stroke="#1b0d02" stroke-opacity=".8" stroke-width="${lb * 2}" stroke-linecap="square"/><path d="${d}" fill="none" stroke="#ffb02e" stroke-width="${lb}" stroke-linecap="square"/>` : '';
   }
   function celleDif(p) {
     const sc = scena(), [c, r] = casella(sc, p.x, p.y), n = T.dpenn || 1, h = Math.floor((n - 1) / 2), out = [];
