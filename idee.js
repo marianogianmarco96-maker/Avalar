@@ -28,7 +28,17 @@
   };
   const TONES = ['Avventura', 'Mistero e indagine', 'Horror', 'Intrigo politico', 'Esplorazione', 'Azione e combattimento', 'Dramma personale', 'Comico'];
   const LENGTHS = { serata: 'una serata di gioco (3–4 ore)', breve: 'una sessione breve (1–2 ore)', lunga: 'una sessione lunga o divisa in due serate' };
-  const DEF = { kind: 'next', count: 3, length: 'serata', tones: [], focus: [], level: '', note: '', ctx: 'recent', docs: false };
+  // sezioni facoltative da aggiungere a ogni proposta: [chiave, etichetta, istruzione per Claude]
+  const EXTRAS = [
+    ['bottino', 'Bottino', '### Bottino\nCosa si trova scena per scena: monete, gemme, armi, armature, pozioni, oggetti magici, risorse e materiali. Per ogni oggetto: nome, dove si trova, valore in monete, rarità secondo la 5e e proprietà meccaniche, adatti al livello del party. Segna «Novità» gli oggetti inventati.'],
+    ['stat', 'Statistiche dei nemici', '### Statistiche dei nemici\nPer ogni nemico e PNG combattente: CA, PF, velocità, caratteristiche principali, attacchi con bonus e danni, capacità speciali e CD, oppure il mostro del Manuale dei Mostri da usare e come modificarlo.'],
+    ['leggi', 'Testi da leggere', '### Testi da leggere\nPer ogni scena un breve testo descrittivo da leggere ad alta voce ai giocatori, in seconda persona plurale.'],
+    ['dialoghi', 'Dialoghi dei PNG', '### Dialoghi dei PNG\nPer ogni PNG importante: come parla, un tic o un gesto, e 2–3 battute pronte da usare.'],
+    ['dispense', 'Dispense', '### Dispense\nIl testo completo di lettere, biglietti, avvisi, pagine di diario o mappe descritte da consegnare ai giocatori, già scritti come li leggerebbero i PG.'],
+    ['immagini', 'Prompt per immagini', '### Prompt per immagini\nPer ogni luogo principale un prompt in inglese per un generatore di immagini, con uno stile comune per tutte (dark fantasy, illustrazione pittorica, senza testo), seguito da una frase in italiano da leggere al tavolo.'],
+    ['musica', 'Musica e atmosfera', '### Musica e atmosfera\nPer ogni scena il tipo di musica e di suoni d\'ambiente adatti, con qualche esempio di brano o di ricerca da fare su YouTube.'],
+  ];
+  const DEF = { kind: 'next', count: 3, length: 'serata', tones: [], extras: ['bottino'], focus: [], level: '', note: '', ctx: 'recent', docs: false };
   const RECENT = 3; // sessioni recenti raccontate per intero nel contesto «Ultime sessioni»
 
   const now = () => new Date().toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -124,6 +134,8 @@ Se ti chiedo modifiche o approfondimenti su una proposta, rispondi con la propos
     if (o.tones.length) r.push(`Toni e generi preferiti: ${o.tones.join(', ')}.`);
     const f = o.focus.map(id => S.ents.get(id)).filter(Boolean);
     if (f.length) r.push(`Metti al centro queste schede: ${f.map(e => `${e.name} [${e.id}]`).join(', ')}.`);
+    const ex = EXTRAS.filter(x => (o.extras || []).includes(x[0]));
+    if (ex.length) r.push('', 'Aggiungi a ogni proposta anche queste sezioni, dopo «Conseguenze per la campagna»:', ...ex.map(x => x[2]));
     if (o.note.trim()) r.push('', 'Indicazioni del DM:', o.note.trim());
     return r.join('\n');
   }
@@ -231,6 +243,7 @@ Se ti chiedo modifiche o approfondimenti su una proposta, rispondi con la propos
           <label class="f"><span>Party (facoltativo)</span><input type="text" id="i-level" value="${esc(o.level)}" placeholder="es. 4 PG di livello 3" autocomplete="off"></label>
         </div>
         <label class="f"><span>Toni e generi</span><div class="idee-tones" id="i-tones">${TONES.map(t => `<span class="chip ${o.tones.includes(t) ? 'on' : ''}" role="checkbox" tabindex="0" aria-checked="${o.tones.includes(t)}" data-tone="${esc(t)}">${esc(t)}</span>`).join('')}</div></label>
+        <label class="f"><span>Aggiungi alla risposta</span><div class="idee-tones" id="i-extras">${EXTRAS.map(([k, t]) => `<span class="chip ${o.extras.includes(k) ? 'on' : ''}" role="checkbox" tabindex="0" aria-checked="${o.extras.includes(k)}" data-extra="${k}">${esc(t)}</span>`).join('')}</div></label>
         <label class="f"><span>Schede da mettere al centro (facoltativo)</span><input type="text" id="i-fadd" list="dl-ents" placeholder="Scrivi un nome: PG, PNG, luogo, fazione…" autocomplete="off"><div class="idee-focus" id="i-focus"></div></label>
         <label class="f"><span>Indicazioni per Claude (facoltativo)</span><textarea id="i-note" rows="3" placeholder="es. Vorrei una oneshot su Violet e l'uovo di drago, ambientata prima della prigione.">${esc(o.note)}</textarea></label>
         <details><summary class="hint" style="cursor:pointer">Quanta storia mandare a Claude (accorciala qui se la richiesta è troppo lunga)</summary>
@@ -243,7 +256,7 @@ Se ti chiedo modifiche o approfondimenti su una proposta, rispondi con la propos
       <div id="i-conv"></div>
       <div class="card"><h2>Idee salvate</h2>${saved.length ? `<div class="idee-list">${saved.map(i => `<a class="erow" href="#/idee/${encodeURIComponent(i.id)}"><div class="main"><div class="t">${esc(i.title)}</div><div class="b">${esc(i.kindLabel || '')}${i.kindLabel ? ' · ' : ''}${esc(new Date(i.ts).toLocaleDateString('it-IT'))}</div></div></a>`).join('')}</div>` : '<p class="empty" style="padding:12px">Nessuna idea salvata. Quando una proposta ti piace, premi «Salva tra le idee».</p>'}<p class="hint" style="margin-bottom:0">Le idee restano in questo browser, separate dai dati della campagna: i giocatori non le vedono mai.</p></div>`);
 
-    const read = () => ({ kind: $('#i-kind').value, count: +$('#i-count').value, length: $('#i-length').value, level: $('#i-level').value.trim(), note: $('#i-note').value, ctx: $('#i-ctx').value, docs: $('#i-docs').checked, tones: [...document.querySelectorAll('#i-tones .chip.on')].map(c => c.dataset.tone), focus: o.focus, v: 2 });
+    const read = () => ({ kind: $('#i-kind').value, count: +$('#i-count').value, length: $('#i-length').value, level: $('#i-level').value.trim(), note: $('#i-note').value, ctx: $('#i-ctx').value, docs: $('#i-docs').checked, tones: [...document.querySelectorAll('#i-tones .chip.on')].map(c => c.dataset.tone), extras: [...document.querySelectorAll('#i-extras .chip.on')].map(c => c.dataset.extra), focus: o.focus, v: 2 });
     let sizeT = null;
     const size = () => { clearTimeout(sizeT); sizeT = setTimeout(async () => { const f = read(); saveForm(f); const p = await buildPrompt(f); const t = tokOf(p.system + p.user); const m = MODELS.find(x => x[0] === (api?.model || MODELS[0][0])); const c = (t * m[2] + 8000 * m[3]) / 1e6; const el = $('#i-size'); if (el) el.textContent = `Circa ${Math.round(t / 1000)} mila token di storia${t > BIG ? ' (lunga: meglio «Scarica per Claude» o un contesto più breve)' : ''}${api ? ` · circa ${c.toFixed(2).replace('.', ',')} $ a richiesta` : ''}`; }, 250); };
     const paintFocus = () => { $('#i-focus').innerHTML = o.focus.map(id => { const e = S.ents.get(id); return `<span class="chip">${badge(e.type)} ${esc(e.name)}<button type="button" data-unfocus="${esc(id)}" aria-label="Togli ${esc(e.name)}">×</button></span>`; }).join(''); size(); };
@@ -253,8 +266,10 @@ Se ti chiedo modifiche o approfondimenti su una proposta, rispondi con la propos
     fadd.addEventListener('change', addFocus); fadd.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); addFocus(); } });
     $('#i-focus').addEventListener('click', ev => { const b = ev.target.closest('[data-unfocus]'); if (!b) return; o.focus = o.focus.filter(x => x !== b.dataset.unfocus); paintFocus(); });
     const tog = c => { c.classList.toggle('on'); c.setAttribute('aria-checked', c.classList.contains('on')); size(); };
-    $('#i-tones').addEventListener('click', ev => { const c = ev.target.closest('.chip'); if (c) tog(c); });
-    $('#i-tones').addEventListener('keydown', ev => { const c = ev.target.closest('.chip'); if (c && (ev.key === ' ' || ev.key === 'Enter')) { ev.preventDefault(); tog(c); } });
+    for (const g of ['#i-tones', '#i-extras']) {
+      $(g).addEventListener('click', ev => { const c = ev.target.closest('.chip'); if (c) tog(c); });
+      $(g).addEventListener('keydown', ev => { const c = ev.target.closest('.chip'); if (c && (ev.key === ' ' || ev.key === 'Enter')) { ev.preventDefault(); tog(c); } });
+    }
     for (const el of document.querySelectorAll('#i-kind,#i-count,#i-length,#i-ctx,#i-docs,#i-level,#i-note')) el.addEventListener('change', size);
 
     const paintConv = () => {
