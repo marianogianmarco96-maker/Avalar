@@ -16,7 +16,7 @@
   --line:#dccaa0; --line2:#c4ae80; --ok:#3f6b46; --warn:#a8641c; --bad:#a3262f;
   --shadow:0 1px 0 #fff9 inset,0 2px 10px #4a2f1a24;
   --tex:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .1 0 0 0 .10 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  --t-pg:#8f2d3a; --t-png:#3b5f8a; --t-luogo:#3f7a4a; --t-oggetto:#9a7022; --t-fazione:#6a4a8c; --t-missione:#b4541c; --t-lore:#5b6670;
+  --t-pg:#a8283a; --t-png:#2a5ea8; --t-luogo:#2e7a3c; --t-oggetto:#806b00; --t-fazione:#7a3ea6; --t-missione:#b54c0c; --t-lore:#167a85;
   color-scheme:light;
 }
 :root[data-theme=dark]{
@@ -25,7 +25,7 @@
   --line:#3a2d24; --line2:#55402f; --ok:#7bb383; --warn:#e0a05a; --bad:#e8707a;
   --shadow:0 1px 0 #ffffff0a inset,0 2px 12px #00000066;
   --tex:none;
-  --t-pg:#c4606c; --t-png:#6f98c8; --t-luogo:#6fb27b; --t-oggetto:#cfa24f; --t-fazione:#a58bd0; --t-missione:#e08a52; --t-lore:#97a3ae;
+  --t-pg:#e8788a; --t-png:#7aaaf0; --t-luogo:#72c47e; --t-oggetto:#e8cb45; --t-fazione:#bd96e8; --t-missione:#f29a55; --t-lore:#5ec6cf;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -505,6 +505,13 @@ body{min-width:0}
 :root[data-theme=dark] body::before{background:radial-gradient(ellipse at 15% 0%,#7d25301c 0,transparent 55%),var(--tex)}
 .prose .xref{border-bottom:0;font-weight:600}
 .prose .xref:hover{text-decoration:underline}
+/* collegamenti alle schede colorati secondo la categoria: luogo verde, personaggio blu, oggetto giallo… */
+.t-pg{--tc:var(--t-pg)}.t-png{--tc:var(--t-png)}.t-luogo{--tc:var(--t-luogo)}.t-oggetto{--tc:var(--t-oggetto)}.t-fazione{--tc:var(--t-fazione)}.t-missione{--tc:var(--t-missione)}.t-lore{--tc:var(--t-lore)}
+a.xref[class*=" t-"]{color:var(--tc)}
+a.chip[class*=" t-"]{border-color:color-mix(in srgb,var(--tc) 45%,var(--line2))}
+a.chip[class*=" t-"]::before{content:'';flex:none;width:8px;height:8px;border-radius:50%;background:var(--tc)}
+a.chip[class*=" t-"]:hover{border-color:var(--tc)}
+@media (max-width:620px){.ehead.hasp .brief a.xref[class*=" t-"]{color:color-mix(in srgb,var(--tc) 40%,#fff)}}
 .num{font-family:var(--body);font-variant-numeric:lining-nums;font-weight:600}
 .statline b,.card.tl .entry .tag::before,.sessfab a{font-family:var(--body);font-weight:600}
 .card.tl .entry .tag::before{font-size:1rem}
@@ -573,7 +580,7 @@ html.ro .moreacts{display:none}
 .relcards.wide{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
 .filters .fbr{display:block;flex-basis:100%;width:100%;height:0}
 .relc .noav{display:flex;align-items:center;justify-content:center;background:var(--t-lore);color:#fff;font-family:var(--display);font-size:1.05rem}
-.noav.t-pg{background:var(--t-pg)}.noav.t-png{background:var(--t-png)}.noav.t-luogo{background:var(--t-luogo)}.noav.t-oggetto{background:var(--t-oggetto)}.noav.t-fazione{background:var(--t-fazione)}.noav.t-missione{background:var(--t-missione)}
+.noav.t-pg{background:var(--t-pg)}.noav.t-png{background:var(--t-png)}.noav.t-luogo{background:var(--t-luogo)}.noav.t-oggetto{background:var(--t-oggetto)}.noav.t-fazione{background:var(--t-fazione)}.noav.t-missione{background:var(--t-missione)}.noav.t-lore{background:var(--t-lore)}
 :root[data-theme=dark] .relc .noav{color:#16100c}
 .relc b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-weight:600;line-height:1.2;overflow:hidden}
 .relc small{display:block;font-size:.82rem;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -663,6 +670,7 @@ details.older[open]>summary{display:none}
 .mgo .mth{width:34px;height:26px;border-radius:14px;border-color:#e9cf9a88}
 .mgo span:not(.arr){overflow:hidden;text-overflow:ellipsis}.mgo b{font-family:var(--display);letter-spacing:.03em}
 .mgo .arr{font-size:1.3rem;line-height:1;color:var(--gold2)}
+.mgo .pk{width:28px;height:28px;flex:none;margin-left:-1px}.mgo .pk circle{stroke:#fbeccb;stroke-width:1.4}
 .mgo:hover{background:var(--wine2)}
 @keyframes mgoin{from{opacity:0;transform:translate(-50%,8px)}}
 .pin.via{z-index:7;transform:translate(-50%,-100%) scale(calc(var(--inv,1) * 1.3));filter:drop-shadow(0 0 7px #ffd76a) drop-shadow(0 0 2px #ffd76a);animation:pvia 1s ease-in-out infinite alternate}
@@ -780,7 +788,7 @@ const fazOf = e => { const f = e.type === 'png' && e.faz && S.ents.get(e.faz); r
 const fazList = () => [...S.ents.values()].filter(x => x.type === 'fazione').sort((a, b) => a.name.localeCompare(b.name, 'it'));
 const fazPill = (e, link) => { const f = fazOf(e); if (!f) return ''; const t = `⚑ ${esc(f.name)}${e.fazDm && !window.__RO ? ' 🔒' : ''}`, tt = e.fazDm && !window.__RO ? ' title="Appartenenza solo per DM"' : ''; return link ? `<a class="pill faz" href="#/scheda/${encodeURIComponent(f.id)}"${tt}>${t}</a>` : `<span class="pill faz"${tt}>${t}</span>`; };
 const catPills = (e, link) => { const a = e.type === 'png' ? [PNG_ATT[e.cat] && e.cat, PNG_IMP[e.imp] && (e.imp === 'minore' ? 'secondario' : 'principale')] : e.type === 'luogo' ? [LUOGO_CAT[e.cat] && LUOGO_CAT[e.cat].toLowerCase()] : []; return [fazPill(e, link), ...a.filter(Boolean).map(x => `<span class="pill">${esc(x)}</span>`)].filter(Boolean).join(' '); };
-const TYPE_COLOR = { pg: '#8f2d3a', png: '#3b5f8a', luogo: '#3f7a4a', oggetto: '#b0802a', fazione: '#6a4a8c', missione: '#b4541c', lore: '#5b6670' };
+const TYPE_COLOR = { pg: '#a8283a', png: '#2a5ea8', luogo: '#2e7a3c', oggetto: '#806b00', fazione: '#7a3ea6', missione: '#b54c0c', lore: '#167a85' };
 const TYPE_ALIAS = {
   pg: 'pg', pc: 'pg', personaggio: 'pg', giocatore: 'pg', 'personaggio giocante': 'pg', party: 'pg', 'membro del party': 'pg',
   png: 'png', npc: 'png', 'personaggio non giocante': 'png',
@@ -838,7 +846,7 @@ function autoLinks(h, seen) {
   // fuori dai collegamenti già fatti con [[…]] e dall'intestazione [PER …]
   return h.split(/(<a\b[\s\S]*?<\/a>|<span class="xref dead">[\s\S]*?<\/span>|\[PER [^\]]*\])/).map((p, i) => i % 2 ? p : p.replace(N.rx, m => {
     const id = N.ids.get(m.replace(/\s+/g, ' ')); if (!id || id === AUTO_SELF || seen.has(id)) return m;
-    seen.add(id); return `<a class="xref auto" href="#/scheda/${encodeURIComponent(id)}">${m}</a>`;
+    seen.add(id); return `<a class="xref auto t-${esc(S.ents.get(id)?.type || 'lore')}" href="#/scheda/${encodeURIComponent(id)}">${m}</a>`;
   })).join('');
 }
 function inl(s) {
@@ -848,7 +856,7 @@ function inl(s) {
     const e = findEnt(unesc(a));
     const t = b || (e ? esc(e.name) : a);
     if (e) seen.add(e.id);
-    return e ? `<a class="xref" href="#/scheda/${encodeURIComponent(e.id)}">${t}</a>` : window.__RO ? `<span class="xref dead ro">${t}</span>` : `<span class="xref dead">${t}</span>`;
+    return e ? `<a class="xref t-${esc(e.type)}" href="#/scheda/${encodeURIComponent(e.id)}">${t}</a>` : window.__RO ? `<span class="xref dead ro">${t}</span>` : `<span class="xref dead">${t}</span>`;
   });
   if (AUTO !== false) h = autoLinks(h, seen);
   h = h.replace(/\[DM\]([\s\S]*?)(?:\[\/DM\]|$)/g, '<span class="dmonly" title="Solo per DM: i giocatori non lo vedono">$1</span>');
@@ -1883,8 +1891,8 @@ route(/^\/sessioni\/(\d+)$/, async ([ns]) => {
       <div class="acts">${window.__scaletta?.dellaSessione(n) ? `<a class="btn" href="#/scaletta/${window.__scaletta.dellaSessione(n)}" title="La scaletta che hai preparato: la vedi solo tu">📜 Scaletta</a>` : ''}<button class="btn" data-act="edit">Modifica</button>${moreActs('<button class="btn" data-act="rensess" data-n="' + n + '">Rinomina</button><button class="btn danger" data-act="del">Elimina</button>')}</div></div><div class="orn"></div>
     ${b.summary && evs.length ? `<div class="stabs" role="tablist"><button type="button" role="tab" data-act="stab" data-t="racc"${mom ? '' : ' class="on"'} aria-selected="${!mom}">Racconto</button><button type="button" role="tab" data-act="stab" data-t="mom"${mom ? ' class="on"' : ''} aria-selected="${mom}">Momenti chiave</button></div>` : ''}
     <div class="card cap" data-tab="racc"${mom ? ' hidden' : ''}><h2>Riassunto</h2>${b.summary ? prose(b.summary) : '<p class="empty">Nessun riassunto.</p>'}</div>
-    ${evs.length || !window.__RO ? `<div class="card tl" data-tab="mom"${b.summary && evs.length && !mom ? ' hidden' : ''}><div class="spread"><h2>Momenti chiave</h2><button class="btn sm" data-act="addEv">+ Evento</button></div>${evs.length ? '' : '<p class="hint">Nessun evento, per ora. Aggiungine uno con «+ Evento».</p>'}${evs.map((e, i) => `<div class="entry${e.dm ? ' dment' : ''}"><div class="tag" data-n="${i + 1}">${i + 1}</div><div class="tx"><b>${esc(e.title)}</b>${evPills(e)}${e.gameDate ? ` <small>${esc(e.gameDate)}</small>` : ''}${prose(e.text)}${e.ents?.length ? `<div class="chips">${e.ents.filter(i => S.ents.has(i)).map(i => `<a class="chip" href="#/scheda/${encodeURIComponent(i)}">${esc(S.ents.get(i).name)}</a>`).join('')}</div>` : ''}</div>${evActBtns(e)}</div>`).join('')}</div>` : ''}
-    ${grp.length ? `<div class="card"><h2>Schede di questa sessione</h2>${grp.map(([t, l]) => `<p>${badge(t)} <span class="chips" style="display:inline-flex">${l.map(e => `<a class="chip" href="#/scheda/${encodeURIComponent(e.id)}">${esc(e.name)}</a>`).join('')}</span></p>`).join('')}</div>` : ''}
+    ${evs.length || !window.__RO ? `<div class="card tl" data-tab="mom"${b.summary && evs.length && !mom ? ' hidden' : ''}><div class="spread"><h2>Momenti chiave</h2><button class="btn sm" data-act="addEv">+ Evento</button></div>${evs.length ? '' : '<p class="hint">Nessun evento, per ora. Aggiungine uno con «+ Evento».</p>'}${evs.map((e, i) => `<div class="entry${e.dm ? ' dment' : ''}"><div class="tag" data-n="${i + 1}">${i + 1}</div><div class="tx"><b>${esc(e.title)}</b>${evPills(e)}${e.gameDate ? ` <small>${esc(e.gameDate)}</small>` : ''}${prose(e.text)}${e.ents?.length ? `<div class="chips">${e.ents.filter(i => S.ents.has(i)).map(i => `<a class="chip t-${esc(S.ents.get(i).type)}" href="#/scheda/${encodeURIComponent(i)}">${esc(S.ents.get(i).name)}</a>`).join('')}</div>` : ''}</div>${evActBtns(e)}</div>`).join('')}</div>` : ''}
+    ${grp.length ? `<div class="card"><h2>Schede di questa sessione</h2>${grp.map(([t, l]) => `<p>${badge(t)} <span class="chips" style="display:inline-flex">${l.map(e => `<a class="chip t-${esc(e.type)}" href="#/scheda/${encodeURIComponent(e.id)}">${esc(e.name)}</a>`).join('')}</span></p>`).join('')}</div>` : ''}
     ${!window.__RO || b.docs?.length ? `<div class="card"><div class="spread"><h2>Documenti allegati</h2><button class="btn sm" data-act="attach">+ Allega testo</button></div>
       ${b.docs?.length ? b.docs.map((d, i) => `<details class="arc"><summary>${esc(d.name)}<small>${fmtSize(d.text.length)}</small></summary><div class="row" style="margin:6px 0"><button class="btn sm" data-act="delDoc" data-i="${i}">Rimuovi</button><button class="btn sm ghost" data-act="cpDoc" data-i="${i}">Copia testo</button></div><div class="prose"><p style="white-space:pre-wrap">${esc(d.text.length > 20000 ? d.text.slice(0, 20000) + '\n\n[… testo troncato nella visualizzazione: ' + d.text.length + ' caratteri totali]' : d.text)}</p></div></details>`).join('') : '<p class="hint">Qui puoi tenere il testo originale della sessione (.txt, .md, .docx, oppure incollato) come riferimento. I PDF vanno copiati e incollati.</p>'}</div>` : ''}
     ${prev || next ? `<nav class="endnav" aria-label="Continua a leggere">${prev ? `<a href="#/sessioni/${prev.n}" rel="prev"><small>← Sessione precedente</small><b><span class="num">${prev.n}.</span> ${esc(prev.title || 'Sessione ' + prev.n)}</b></a>` : '<span></span>'}${next ? `<a href="#/sessioni/${next.n}" rel="next" class="nx"><small>Sessione successiva →</small><b><span class="num">${next.n}.</span> ${esc(next.title || 'Sessione ' + next.n)}</b></a>` : ''}</nav>` : ''}`);
@@ -2040,7 +2048,7 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
   const [body, outL, inL, evs, pins] = await Promise.all([dbGet('bodies', id), dbIdx('links', 'from', id), dbIdx('links', 'to', id), dbIdx('events', 'ents', id), dbIdx('pins', 'entityId', id)]);
   const b = body || { id, sections: [] };
   evs.sort((a, c) => a.n - c.n || a.idx - c.idx);
-  const chipE = (i, lab) => { const x = S.ents.get(i); return x ? `<a class="chip" href="#/scheda/${encodeURIComponent(i)}">${esc(x.name)}</a>` : ''; };
+  const chipE = (i, lab) => { const x = S.ents.get(i); return x ? `<a class="chip t-${esc(x.type)}" href="#/scheda/${encodeURIComponent(i)}">${esc(x.name)}</a>` : ''; };
   const mapsOf = pins.map(p => ({ p, m: S.maps.find(m => m.id === p.mapId) })).filter(x => x.m);
   // collegamenti: una carta per scheda collegata (ritratto, nome, relazione), raggruppate per tipo
   const relCards = (outs, ins) => {
@@ -2262,7 +2270,7 @@ route(/^\/cronologia$/, async () => {
   const vl = vlist($('#tlist'), [], 92, v => `<div class="erow ev" data-ev="${esc(v.id)}"><div class="num">${v.n}</div><div class="main"><div class="t">${esc(v.title)}${evPills(v)} ${v.gameDate ? `<small>· ${esc(v.gameDate)}</small>` : ''}</div><div class="b clamp2" style="white-space:normal">${esc(v.text)}</div></div></div>`);
   const apply = () => { const q = fold($('#tq').value), s = $('#ts').value; let l = all.filter(v => (!s || v.n === +s) && (!q || fold(v.title + ' ' + v.text).includes(q))); if (rev) l = [...l].reverse(); vl.setItems(l); $('#tcnt').textContent = l.length + ' eventi'; };
   $('#tq').oninput = apply; $('#ts').onchange = apply; $('#trev').onclick = () => { rev = !rev; apply(); }; apply();
-  $('#tlist').addEventListener('click', e => { const r = e.target.closest('[data-ev]'); if (!r) return; const v = byId.get(r.dataset.ev); const d = showInfo(`${v.title}`, `<p class="hint">${sessLink(v.n)}${v.gameDate ? ' · ' + esc(v.gameDate) : ''}${evPills(v)}</p>${prose(v.text)}${v.ents?.length ? `<div class="chips">${v.ents.filter(i => S.ents.has(i)).map(i => `<a class="chip" href="#/scheda/${encodeURIComponent(i)}" onclick="this.closest('dialog').close()">${esc(S.ents.get(i).name)}</a>`).join('')}</div>` : ''}`);
+  $('#tlist').addEventListener('click', e => { const r = e.target.closest('[data-ev]'); if (!r) return; const v = byId.get(r.dataset.ev); const d = showInfo(`${v.title}`, `<p class="hint">${sessLink(v.n)}${v.gameDate ? ' · ' + esc(v.gameDate) : ''}${evPills(v)}</p>${prose(v.text)}${v.ents?.length ? `<div class="chips">${v.ents.filter(i => S.ents.has(i)).map(i => `<a class="chip t-${esc(S.ents.get(i).type)}" href="#/scheda/${encodeURIComponent(i)}" onclick="this.closest('dialog').close()">${esc(S.ents.get(i).name)}</a>`).join('')}</div>` : ''}`);
     if (!window.__RO) { const m = $('menu', d); m.insertAdjacentHTML('afterbegin', '<button type="button" class="btn" data-evact="edit">✎ Modifica</button><button type="button" class="btn danger" data-evact="del">Elimina</button>'); m.onclick = async ev => { const b = ev.target.closest('[data-evact]'); if (!b) return; ev.preventDefault(); d.close(); if (await (b.dataset.evact === 'edit' ? editEventDlg(v) : delEventDlg(v))) rerender(); }; }
   });
 });
@@ -2456,7 +2464,12 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
   const renderPins = () => { box.innerHTML = pins.map(pinHtml).join('') + vhHtml(); stage.classList.toggle('nolabels', !st.labels); declutter(); };
   function renderSide() {
     const sel = pins.find(p => p.id === st.sel && (!st.players || visible(p)));
-    { const tm = sel?.targetMapId ? mapById(sel.targetMapId) : null, go = $('#mgo'), ok = tm && (!st.players || tm.discovered !== false); go.hidden = !ok; if (ok) { go.href = '#/mappe/' + encodeURIComponent(tm.id); go.innerHTML = `${mapThumb(tm)}<span>Entra in <b>${esc(tm.name)}</b></span><span class="arr">›</span>`; } }
+    { // in basso: «Apri scheda» del segnalino (o del luogo interno aperto); senza scheda resta «Entra in…» per la mappa di dettaglio
+      const go = $('#mgo'), e = sel && !st.players ? (st.sub.length ? S.ents.get(st.sub[st.sub.length - 1]) : null) || entOf(sel) : null, tm = !e && sel?.targetMapId ? mapById(sel.targetMapId) : null, okm = tm && (!st.players || tm.discovered !== false);
+      go.hidden = !e && !okm;
+      if (e) { go.href = '#/scheda/' + encodeURIComponent(e.id); go.innerHTML = `${kindIcon(pinKind(st.sub.length ? null : sel, e), e)}<span>Apri scheda <b>${esc(e.name)}</b></span><span class="arr">›</span>`; }
+      else if (okm) { go.href = '#/mappe/' + encodeURIComponent(tm.id); go.innerHTML = `${mapThumb(tm)}<span>Entra in <b>${esc(tm.name)}</b></span><span class="arr">›</span>`; }
+    }
     const children = S.maps.filter(c => c.parent === m.id && (!st.players || c.discovered !== false));
     const vis = pins.filter(p => !st.players || visible(p)).sort((a, b) => pname(a).localeCompare(pname(b), 'it'));
     let h = '';
@@ -2468,7 +2481,7 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
         h += `<nav class="subtrail"><button class="icb" data-act="subback" title="Indietro">‹</button>${trail.slice(0, -1).map((x, i) => `<a href="#" data-act="subto" data-i="${i}">${esc(x.name)}</a><span>›</span>`).join('')}<b>${esc(se.name)}</b></nav>
           <div class="spread"><h2 class="subh">${kindIcon(pinKind(null, se), se)}${esc(se.name)}</h2><button class="icb" data-act="desel" title="Chiudi">✕</button></div>
           <p class="hint">Fa parte di «${esc(trail[trail.length - 2].name)}»: sulla mappa è nello stesso segnalino.</p>
-          ${!st.players ? `${se.brief ? `<p><i>${inl(se.brief)}</i></p>` : ''}${se.status ? `<p class="hint">Stato: ${esc(se.status)}</p>` : ''}<div class="row" style="margin:10px 0"><a class="btn sm" href="#/scheda/${encodeURIComponent(se.id)}">Apri scheda</a></div>` : ''}
+          ${!st.players ? `${se.brief ? `<p><i>${inl(se.brief)}</i></p>` : ''}${se.status ? `<p class="hint">Stato: ${esc(se.status)}</p>` : ''}` : ''}
           ${subList(se.id)}<div class="orn"></div>`;
         $('#mside').innerHTML = h; return;
       }
@@ -2480,7 +2493,6 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
         ${e && !st.players ? `${e.brief ? `<p><i>${inl(e.brief)}</i></p>` : ''}${e.status ? `<p class="hint">Stato: ${esc(e.status)}</p>` : ''}` : ''}
         ${sel.photos?.length ? `<div class="gallery">${sel.photos.map((ph, i) => `<div class="gph">${phImg(ph, `data-act="viewphoto" data-i="${i}" alt="${esc(ph.name || '')}" title="Ingrandisci"`)}${st.edit && !st.players ? `<button class="x" data-act="delphoto" data-i="${i}" title="Rimuovi foto">✕</button>` : ''}</div>`).join('')}</div>` : ''}
         ${st.edit && !st.players ? '<button class="btn sm" data-act="addphotos" style="margin-top:6px">+ Aggiungi foto</button>' : ''}
-        <div class="row" style="margin:10px 0">${e && !st.players ? `<a class="btn sm" href="#/scheda/${encodeURIComponent(e.id)}">Apri scheda</a>` : ''}</div>
         ${tm && (!st.players || tm.discovered !== false) ? `<a class="mportal" href="#/mappe/${encodeURIComponent(tm.id)}">${mapThumb(tm, 'mp-im')}<span class="mp-tx"><small>Mappa di dettaglio</small><b>${esc(tm.name)}</b><span class="btn sm primary">Entra nella mappa ›</span></span></a>` : ''}
         ${e ? subList(e.id) : ''}
         ${st.edit && !st.players ? `<div class="row"><button class="btn sm" data-act="editpin">Modifica segnaposto</button><button class="btn sm danger" data-act="delpin">Elimina</button></div><p class="hint">Trascina il segnaposto sulla mappa per spostarlo.</p>` : ''}<div class="orn"></div>`;
@@ -2568,7 +2580,16 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
   };
 
   /* ----- interazione ----- */
-  const ptr = new Map(); let drag = null;
+  const ptr = new Map(); let drag = null, lastTap = null;
+  // doppio clic (o doppio tocco) su un segnalino: entra nella mappa di dettaglio se c'è (es. Solaria), altrimenti apre la scheda
+  const pinTap = pid => {
+    const now = Date.now(), dbl = lastTap && lastTap.id === pid && now - lastTap.t < 400; lastTap = dbl ? null : { id: pid, t: now };
+    if (!dbl) { selectPin(pid); return; }
+    const p = pins.find(x => x.id === pid), tm = p?.targetMapId ? mapById(p.targetMapId) : null, e = p && entOf(p);
+    if (tm && (!st.players || tm.discovered !== false)) location.hash = '#/mappe/' + encodeURIComponent(tm.id);
+    else if (e && !st.players) location.hash = '#/scheda/' + encodeURIComponent(e.id);
+    else selectPin(pid);
+  };
   const dist = () => { const [a, b] = [...ptr.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
   stage.addEventListener('pointerdown', e => {
     if (e.button > 0 || e.target.closest('.mgo,.mctl,.mlay,.noimg button')) return; // i tasti sopra la mappa non devono diventare un trascinamento
@@ -2601,11 +2622,11 @@ route(/^\/mappe\/(.+)$/, async ([id], q) => {
     if (d.type === 'pan' && !d.moved && e.type === 'pointerup') {
       if (st.draw) { const pos = toPct(e.clientX, e.clientY); st.draw.pts.push([+pos.x.toFixed(2), +pos.y.toFixed(2)]); renderPins(); renderRegs(); syncUI(); }
       else if (st.add && !st.players) { const pos = toPct(e.clientX, e.clientY); st.add = false; syncUI(); await pinDlg(null, pos); }
-      else if (d.pin) selectPin(d.pin); else if (d.reg) selectReg(d.reg); else if (st.sel || st.reg) { st.sel = null; selectReg(null); }
+      else if (d.pin) pinTap(d.pin); else if (d.reg) selectReg(d.reg); else if (st.sel || st.reg) { st.sel = null; selectReg(null); }
     } else if (d.type === 'pin') {
       d.el.classList.remove('drag');
       if (d.moved && d.pos) { const p = pins.find(x => x.id === d.id); const np = { ...p, x: +d.pos.x.toFixed(2), y: +d.pos.y.toFixed(2) }; await savePin(np); pins = pins.map(x => x.id === p.id ? np : x); selectPin(np.id); }
-      else selectPin(d.id);
+      else pinTap(d.id);
     }
   };
   stage.addEventListener('pointerup', end); stage.addEventListener('pointercancel', e => { ptr.delete(e.pointerId); drag = null; stage.classList.remove('panning'); });
