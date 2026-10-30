@@ -840,7 +840,6 @@ const slug = s => norm(s).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').sl
 const uid = (p = '') => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const clone = o => (typeof structuredClone === 'function' ? structuredClone(o) : JSON.parse(JSON.stringify(o)));
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-const sleep = ms => new Promise(r => setTimeout(r, ms));
 const fmtDate = ts => ts ? new Date(ts).toLocaleString('it-IT', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
 const fmtSize = b => b > 1e6 ? (b / 1e6).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1e3)) + ' KB';
 
@@ -1038,6 +1037,18 @@ async function slimPhotos(list, t) {
   const out = [];
   for (const ph of list) { if (!ph.thumb) { out.push(ph); continue; } const { thumb, ...rest } = ph; const tid = ph.id + '-t'; await t.put('blobs', { id: tid, blob: dataURLtoBlob(thumb), type: 'image/jpeg' }); out.push({ ...rest, tid }); }
   return out;
+}
+// all'apertura del DM porta fuori tutte insieme le miniature delle foto vecchie: i dati e le copie dei giocatori
+// pesano circa un terzo in meno (resta da premere «Salva» una volta, come per ogni modifica)
+async function slimOldPhotos() {
+  const old = o => (o.photos || []).some(ph => ph.thumb);
+  const ents = (await dbAll('entities')).filter(old), pins = (await dbAll('pins')).filter(old);
+  if (!ents.length && !pins.length) return;
+  await runBatch(['entities', 'pins', 'blobs'], '', async t => {
+    for (const e of ents) await t.put('entities', { ...e, photos: await slimPhotos(e.photos, t) });
+    for (const p of pins) await t.put('pins', { ...p, photos: await slimPhotos(p.photos, t) });
+  });
+  toast('Ho alleggerito le foto vecchie di ' + (ents.length + pins.length) + ' schede e segnaposto: premi «Salva» per pubblicarle.');
 }
 function photoReport(ph) { if (ph.errors.length) showInfo('Alcune foto non sono state aggiunte', '<ul>' + ph.errors.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul><p class="hint">Formati accettati: PNG, JPG, WebP (le foto HEIC/HEIF dell\'iPhone vanno prima convertite in JPG).</p>'); }
 function showPhotos(title, list, i) {
@@ -2116,7 +2127,6 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
   const [body, outL, inL, evs, pins] = await Promise.all([dbGet('bodies', id), dbIdx('links', 'from', id), dbIdx('links', 'to', id), dbIdx('events', 'ents', id), dbIdx('pins', 'entityId', id)]);
   const b = body || { id, sections: [] };
   evs.sort((a, c) => a.n - c.n || a.idx - c.idx);
-  const chipE = (i, lab) => { const x = S.ents.get(i); return x ? `<a class="chip t-${esc(x.type)}" href="#/scheda/${encodeURIComponent(i)}">${esc(x.name)}</a>` : ''; };
   const mapsOf = pins.map(p => ({ p, m: S.maps.find(m => m.id === p.mapId) })).filter(x => x.m);
   // collegamenti: una carta per scheda collegata (ritratto, nome, relazione), raggruppate per tipo
   const relCards = (outs, ins) => {
@@ -2911,6 +2921,7 @@ async function checkAccess(PERM) {
     setView(`<div class="card"><h2>Impossibile aprire i dati</h2><p>${esc(e.message || e)}</p><p class="hint">Ricarica la pagina; se il problema resta, apri il sito almeno una volta con internet attivo.</p></div>`); return;
   }
   setupQuickSearch(); addEventListener('hashchange', navigate); navigate();
+  if (document.documentElement.classList.contains('adm')) slimOldPhotos().catch(() => { });
   window.__cronache = { S, planImport, applyImport, buildContext, runBatch, dbAll, dbGet, loadCaches, processImage, rerender, dmTool };
 })();
 

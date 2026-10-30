@@ -124,7 +124,7 @@
     else { raw = await kvGet('key'); if (!raw) throw new Error('nokey'); }
     let payload = null;
     if (enc) {
-      try { payload = JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64d(enc.iv) }, await aesKey(raw), b64d(enc.ct)))); }
+      try { payload = await openEnc(enc, raw); }
       catch { throw new Error(code != null ? 'Codice non corretto.' : 'nokey'); }
     } else if (!have) throw new Error('Impossibile aprire i dati: serve internet al primo accesso.');
     RAW = raw; ITER = enc ? enc.it : null;
@@ -428,7 +428,7 @@
     try {
       // i dati salvati dal DM su Supabase: è cambiato qualcosa se c'è una cartella nuova
       const prima = FONTE && FONTE.base, ora = (await fonte(true)).base;
-      const files = ['index.html', 'local.js', 'copie.js', 'sw.js'].concat(ora ? [] : [ROLE === 'admin' ? 'data.enc' : PLAYER ? 'giocatori/' + PLAYER.id + '.enc' : 'data.json']);
+      const files = ['index.html', 'local.js', 'copie.js', 'sw.js'].concat(ora ? [] : [ROLE === 'admin' ? 'data.enc' : 'giocatori/' + PLAYER.id + '.enc']);
       const fresh = await Promise.all(files.map(async f => { const r = await fetch(f + '?v=' + Date.now(), { cache: 'reload' }); if (!r.ok) throw new Error(); return r.text(); }));
       const reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : null;
       if (reg) await reg.update().catch(() => { });
@@ -474,7 +474,7 @@
   async function serverData() {
     await fonte(true);
     const enc = await (await dataFetch('data.enc')).json();
-    if (!SERVER || SERVER.iv !== enc.iv) SERVER = { iv: enc.iv, env: { it: enc.it, salt: enc.salt }, d: JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64d(enc.iv) }, await aesKey(RAW), b64d(enc.ct)))) };
+    if (!SERVER || SERVER.iv !== enc.iv) SERVER = { iv: enc.iv, env: { it: enc.it, salt: enc.salt }, d: await openEnc(enc, RAW) };
     return SERVER.d;
   }
   async function buildRequest() {
@@ -512,7 +512,7 @@
     try {
       await fonte(true);
       const enc = await (await dataFetch('data.enc')).json();
-      const payload = JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64d(enc.iv) }, await aesKey(RAW), b64d(enc.ct))));
+      const payload = await openEnc(enc, RAW);
       const t = DB.transaction('files', 'readwrite'); for (const aid of PFILES) t.objectStore('files').delete(aid); for (const b of BUGS) for (const aid of b.photos || []) t.objectStore('files').delete(aid); await done(t);
       await seedAdmin(payload, RAW); location.reload();
     } catch { if (btn) btn.disabled = false; notice('Non riesco a scaricare i dati pubblicati: controlla la connessione e riprova.'); }
@@ -586,8 +586,9 @@
     for (const g of giocatori(d)) if (!g.salt) g.salt = b64e(crypto.getRandomValues(new Uint8Array(16)));
     const cartella = 'v/' + Date.now().toString(36) + '-' + newId().slice(0, 10);
     passo('Cifro i dati del DM…');
-    const e = await cifra(RAW, new TextEncoder().encode(JSON.stringify(d)));
-    file.push([cartella + '/data.enc', JSON.stringify({ v: 1, it: env.it, salt: env.salt, iv: b64e(e.iv), ct: b64e(e.ct) }), 'application/json']);
+    // compressi prima di cifrare (z: 1), come le copie dei giocatori
+    const e = await cifra(RAW, await gzip(new TextEncoder().encode(JSON.stringify(d))));
+    file.push([cartella + '/data.enc', JSON.stringify({ v: 1, z: 1, it: env.it, salt: env.salt, iv: b64e(e.iv), ct: b64e(e.ct) }), 'application/json']);
     for (const g of giocatori(d)) {
       if (!g.code) continue;
       passo('Preparo la copia di ' + g.name + '…');
