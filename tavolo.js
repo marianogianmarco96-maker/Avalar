@@ -877,6 +877,13 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
 .tv-strip .tv-b.on{background:#e7cf9a33;color:var(--gold2)}
 .tv-strip.vert{flex-direction:column;align-items:stretch;gap:0;padding:0;width:262px;max-width:calc(100% - 24px);max-height:calc(100% - 20px);overflow:hidden;border-radius:14px}
 .tv-strip.vert.ed{width:300px}
+.tv-strip.col{flex-direction:column;align-items:center;gap:8px;padding:6px 6px 8px;max-height:calc(100% - 20px);max-width:none;width:80px;box-sizing:border-box}
+.tv-strip.col .mv{margin:0;padding:2px 0;align-self:stretch;justify-content:center}
+.tv-strip.col .rd{padding:0 0 8px;border-right:0;border-bottom:1px solid #ffffff1f;align-self:stretch}
+.tv-strip.col .ls{flex-direction:column;align-items:center;overflow-x:hidden;overflow-y:auto;padding:6px 0 0;min-height:0;flex:0 1 auto}
+.tv-strip.col .ac{flex-direction:column;align-items:stretch;padding:8px 0 0;border-left:0;border-top:1px solid #ffffff1f;align-self:stretch}
+.tv-strip.col .ac .tv-b{justify-content:center}
+.tv-strip.col .ac .tv-b.pri{padding:0 6px;font-size:.74rem}
 .tv-strip.vert .tt{display:flex;align-items:center;gap:8px;padding:6px 8px;background:linear-gradient(#ffffff0a,#ffffff00);border-bottom:1px solid #ffffff14}
 .tv-strip.vert .tt b{flex:1;font:700 1.05rem/1 var(--display);color:var(--gold2);white-space:nowrap}
 .tv-strip.vert .tt b small{font:600 .6rem/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--pan-mute)}
@@ -885,9 +892,9 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
 .tv-strip .tv-b[hidden]{display:none}
 .tv-strip.vert .tv-tl{max-height:min(460px,60vh)}
 .tv-strip.vert .tv-tr.gia{opacity:.55}
-.tv-strip.vert .tv-tf.av{justify-content:flex-end}
-.tv-strip.vert .tv-tf.av .tv-b[hidden]{display:none}
-.tv-strip.vert .tv-tf.av:has(.tv-b[hidden]){display:none}
+.tv-strip.vert .pie{display:flex;justify-content:stretch;padding:8px 10px 10px;border-top:1px solid #ffffff1a}
+.tv-strip.vert .pie .tv-b{flex:1;justify-content:center;height:38px}
+.tv-strip.vert .pie:has(.tv-b[hidden]){display:none}
 .tv-wrap.con-turno .tv-tdp,.tv-wrap.con-turno .tv-sp{top:96px;max-height:calc(100% - 106px)}
 
 /* il pannello del turno, in basso al centro */
@@ -934,7 +941,19 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
 body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
 .tv-mvr.finito{border-color:#e7cf9a66;background:#00000026;box-shadow:none}
 .tv-mvr span{position:absolute;left:50%;bottom:0;transform:translate(-50%,60%);background:#1d1613;color:#e7cf9a;border:1px solid #e7cf9a88;border-radius:9px;padding:2px 9px;font:700 var(--fs,14px)/1.3 var(--body);white-space:nowrap}
-.tv-tok .az{display:none!important}
+.tv-tok .az{all:unset;position:absolute;inset:0;pointer-events:none;z-index:5;display:block}
+.tv-tok .az[hidden]{display:none}
+.tv-tok .az button{all:unset;box-sizing:border-box;position:absolute;pointer-events:auto;cursor:pointer;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 calc(var(--fs,13px)*.95)/1 var(--body);color:#fff;background:#2f8a3c;box-shadow:0 0 0 2px #1d1613,0 0 0 3px #e7cf9a99,0 2px 5px #000a;transition:transform .12s,background .15s}
+.tv-tok .az button.c.no{background:#5b544e;color:#b4aaa0;box-shadow:0 0 0 2px #1d1613,0 2px 4px #0008}
+.tv-tok .az button.c.no::after{content:"";position:absolute;left:18%;right:18%;top:50%;height:2px;background:#d9cfc4;transform:rotate(-40deg);border-radius:1px}
+.tv-tok .az button:hover:not([disabled]){transform:scale(1.12)}
+.tv-tok .az button:focus-visible{outline:2px solid #e7cf9a;outline-offset:2px}
+.tv-tok .az button[disabled]{cursor:default}
+.tv-tok .az .mt{left:50%;transform:translateX(-50%);height:auto;border-radius:10px;padding:2px 8px;gap:3px;white-space:nowrap;background:#1d1613;color:#e7cf9a;border:1px solid #e7cf9a99;box-shadow:0 2px 6px #000a;font:700 calc(var(--fs,13px)*.9)/1.25 var(--body)}
+.tv-tok .az .mt small{font-size:.8em;color:#bfae8a;font-weight:600}
+.tv-tok .az .mt.ko{color:#ff8a7d;border-color:#ff8a7d99}
+.tv-tok .az .mt .dd{font-size:.75em;margin-left:2px;opacity:.8}
+.tv-tok .az .mt:hover:not([disabled]){transform:translateX(-50%) scale(1.06)}
 .tv-tok.turno{box-shadow:0 0 0 4px #e7cf9a,0 0 22px 6px #e7cf9acc}
 
 /* token: barra della salute sotto, nome più leggibile */
@@ -1030,6 +1049,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
 .tv-pop.nuovo select{font:600 .8rem var(--body);padding:6px 8px;border-radius:8px;border:1px solid #ffffff2a;background:#0006;color:var(--pan-ink);min-width:0}
 .tv-pop.nuovo .ini{display:flex;align-items:center;gap:6px;padding:10px 12px;border-top:1px solid #ffffff14;font:600 .85rem var(--body)}
 .tv-pop.nuovo .ini span{flex:1}
+.tv-pop.nuovo .ini .gia{min-width:40px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#c9a24a;color:#1d1613;font:700 1rem var(--display)}
 .tv-pop.nuovo .ini input{width:56px;height:32px;box-sizing:border-box;border-radius:8px;border:1px solid #ffffff2a;background:#0006;color:#fff;text-align:center;font:inherit}
 .tv-pop.nuovo details{border-top:1px solid #ffffff14;padding:8px 12px;font-size:.84rem;color:var(--pan-mute)}
 .tv-pop.nuovo details summary{cursor:pointer;padding:2px 0}
@@ -1121,6 +1141,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
   .tv-strip .p b{display:none}.tv-strip .p.on b{display:block}
   .tv-strip .ac{padding-left:6px}
   .tv-strip.vert{right:auto;width:min(262px,calc(100% - 16px))}
+  .tv-strip.col{right:auto;width:64px}
   .tv-strip .ac .tv-b.pri{padding:0 9px;font-size:.74rem}
   .tv-wrap.con-turno .tv-top{top:84px}
   .tv-wrap.con-turno .tv-zoom{top:132px}
@@ -2035,7 +2056,17 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       // nel suo turno: quanto movimento resta e quali azioni ha ancora
       const hud = el.querySelector('.az'), mio = suoTurno(t);
       hud.hidden = !mio;
-      if (mio) { const a = azioniDi(t), mv = movimentoDi(t); hud.innerHTML = `<b class="${mv.resta < 0 ? 'ko' : ''}">${metri(mv.resta)}</b>${AZ.map(([k, ic, l]) => `<i class="${a[k] ? 'usata' : ''}" title="${l}${a[k] ? ': usata' : ''}">${ic}</i>`).join('')}`; }
+      // tre bollini a sinistra del token (azione, azione bonus, reazione) e sotto il nome i metri che restano
+      if (mio) {
+        const mv = movimentoDi(t), mia = puoMuovere(t), fs = Math.max(11, sc.griglia * 0.22), d = Math.max(18, fs * 1.75), R = lato / 2 + d * 0.62;
+        const bol = AZ.map(([k, ic, l], j) => { const g = (220 - j * 40) * Math.PI / 180, u = usata(t, k); return `<button type="button" class="c${u ? ' no' : ''}" data-z="${k}" style="left:${lato / 2 + R * Math.cos(g) - d / 2}px;top:${lato / 2 + R * Math.sin(g) - d / 2}px;width:${d}px;height:${d}px" title="${l}: ${u ? 'usata' : 'disponibile'}${mia ? (u ? ' (tocca per ridarla)' : ' (tocca quando la usi)') : ''}" aria-label="${l}${u ? ' usata' : ''}"${mia ? '' : ' disabled'}>${ic}</button>`; }).join('');
+        hud.innerHTML = `${bol}<button type="button" class="mt${mv.resta < 0 ? ' ko' : ''}" data-k="azm" style="top:${el.querySelector('b').hidden ? 'calc(100% + 6px)' : 'calc(100% + 16px + var(--fs,13px) * 1.15 + 6px)'}" title="${mia ? 'Movimento rimasto · tocca per Scatto, Disimpegno, Schivata…' : 'Movimento rimasto'}"${mia ? '' : ' disabled'}>🏃 ${metri(Math.max(0, mv.resta))}<small> / ${metri(mv.tot)}</small>${mia ? '<span class="dd">▾</span>' : ''}</button>`;
+        if (mia) {
+          hud.querySelectorAll('button').forEach(b => { b.onpointerdown = e => e.stopPropagation(); b.ondblclick = e => e.stopPropagation(); });
+          hud.querySelectorAll('[data-z]').forEach(b => b.onclick = e => { e.stopPropagation(); cambiaAz(t, b.dataset.z); });
+          hud.querySelector('[data-k=azm]').onclick = e => { e.stopPropagation(); menuAzioni(t, e.currentTarget); };
+        }
+      }
       box.append(el); // l'ordine nel riquadro decide chi sta sopra
     });
     // fin dove arriva chi gioca (le diagonali contano 1, come sul regolamento): lo vede chi lo muove
@@ -2607,7 +2638,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const t = T.tok.get(id), st = $('#tv-stage'); if (!t || !st) return;
     chiudiPop();
     const r = st.getBoundingClientRect(), pop = document.createElement('div'); pop.className = 'tv-pop nuovo';
-    const ini = `<div class="ini"><span>🎲 Iniziativa</span><input type="number" data-k="imod" placeholder="mod" aria-label="Modificatore d'iniziativa"><button type="button" class="tv-b sec" data-k="ini" title="Tira 1d20 + modificatore e aggiungi all'ordine del turno">Tira</button></div>`;
+    const giaIn = T.turno.find(x => x.token === t.id);
+    const ini = giaIn ? `<div class="ini"><span>🎲 Iniziativa</span><b class="gia" title="Già nell'ordine del turno${isDM() ? ': la cambi con la matita della tabella del turno' : ''}">${giaIn.valore}</b></div>` : `<div class="ini"><span>🎲 Iniziativa</span><input type="number" data-k="imod" placeholder="mod" aria-label="Modificatore d'iniziativa"><button type="button" class="tv-b sec" data-k="ini" title="Tira 1d20 + modificatore e aggiungi all'ordine del turno">Tira</button></div>`;
     const ft = haFoto(t), sch = schedaDi(t), pf = (isDM() || puoMuovere(t)) && pfDi(t);
     const quota = pf ? clamp(pf.pf / Math.max(1, pf.max), 0, 1) : 0;
     const rpf = pf ? `<div class="pfr"><div class="rr"><span>PF <b>${pf.pf}</b> / ${pf.max}</span><button type="button" class="tv-b ko ico" data-k="pfm" title="Danni">−</button><input type="number" data-k="pfq" value="1" min="1" aria-label="Quanti punti"><button type="button" class="tv-b ok ico" data-k="pfp" title="Cura">+</button></div><div class="bar"><s style="width:${Math.round(quota * 100)}%;--b:${quota > 0.5 ? '#3f9a4a' : quota > 0.25 ? '#c9a24a' : '#b8322c'}"></s></div></div>` : '';
@@ -2651,7 +2683,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       st.append(pop); extra();
       pop.style.left = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6) + 'px'; pop.style.top = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6) + 'px';
       if (ft) pop.querySelector('[data-k=foto]').onclick = () => { chiudiPop(); apriFoto(fotoDi(t)); };
-      if (mio) pop.querySelector('[data-k=ini]').onclick = () => { chiudiPop(); iniziativa(t, pop.querySelector('[data-k=imod]').value); };
+      if (mio && !giaIn) pop.querySelector('[data-k=ini]').onclick = () => { chiudiPop(); iniziativa(t, pop.querySelector('[data-k=imod]').value); };
       return;
     }
     const gioc = (T.info.giocatori || []).map(g => `<option value="${esc(g.id)}" ${t.giocatore === g.id ? 'selected' : ''}>${esc(g.name)}</option>`).join('');
@@ -2688,7 +2720,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     pop.querySelector('[data-k=piu]').onclick = () => salva({ misura: t.misura < 1 ? 1 : Math.min(10, t.misura + 1) });
     pop.querySelector('[data-k=gioc]').onchange = ev => salva({ giocatore: ev.target.value || null });
     pop.querySelector('[data-k=vista]')?.addEventListener('change', ev => salva({ vista: ev.target.value === '' ? null : +ev.target.value }));
-    pop.querySelector('[data-k=ini]').onclick = () => { chiudiPop(); iniziativa(t, pop.querySelector('[data-k=imod]').value); };
+    pop.querySelector('[data-k=ini]')?.addEventListener('click', () => { chiudiPop(); iniziativa(t, pop.querySelector('[data-k=imod]').value); });
     const rin = pop.querySelector('[data-k=rin]');
     const rinomina = () => { const n = rin.value.trim().slice(0, 60); if (n !== (t.nome || '')) salva({ nome: n }); };
     rin.onkeydown = ev => { if (ev.key === 'Enter') { ev.preventDefault(); rinomina(); } else if (ev.key === 'Escape') chiudiPop(); };
@@ -4221,6 +4253,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   // la matita (solo DM) la apre in modifica: iniziative, nascondi, togli, aggiungi.
   var TVERT = 'tavolo-turno-vert', TPOS = 'tavolo-turno-pos';
   function turnoVert() { try { return localStorage.getItem('tavolo-turno-vert') === '1'; } catch { return false; } }
+  function turnoStretta() { try { return localStorage.getItem('tavolo-turno-stretta') === '1'; } catch { return false; } }
   function turnoPos() { try { return JSON.parse(localStorage.getItem('tavolo-turno-pos') || 'null'); } catch { return null; } }
   function giraTurno() { try { localStorage.setItem(TVERT, turnoVert() ? '0' : '1'); } catch { } disegnaStriscia(); disegnaRail(); }
   function apriTurno(apri) {
@@ -4257,36 +4290,40 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function disegnaStriscia() {
     const s = $('#tv-strip'), w = $('.tv-wrap'); if (!s) return;
     const L = ordinati(), att = T.stato?.turno, ia = L.findIndex(x => x.id === att);
-    const ed = isDM() && !!T.turnoEd, vert = ed || turnoVert(), pos = turnoPos();
+    const ed = isDM() && !!T.turnoEd, col = !ed && turnoVert() && turnoStretta(), vert = !col && (ed || turnoVert()), pos = turnoPos();
     // la tabella si vede solo sulla mappa del combattimento (il DM può guardarne un'altra)
     const qui = !L.length || !T.vista || scenaCombattimento() === T.vista;
-    s.hidden = (!L.length || !qui) && !ed; s.classList.toggle('vert', vert); s.classList.toggle('ed', ed);
-    w?.classList.toggle('con-turno', !s.hidden && !vert && !pos);
+    s.hidden = (!L.length || !qui) && !ed; s.classList.toggle('vert', vert); s.classList.toggle('col', col); s.classList.toggle('ed', ed);
+    w?.classList.toggle('con-turno', !s.hidden && !vert && !col && !pos);
     if (s.hidden) { s.innerHTML = ''; disegnaHud(); return; }
     const avanti = L.length && (isDM() || L.some(x => x.id === att && x.giocatore === T.me.giocatore));
     const faccia = x => `<i style="--c:${esc(x.colore || '#7d2530')};${x.immagine ? `background-image:url('${x.immagine}')` : ''}">${x.immagine ? '' : esc(iniziali(x.nome))}</i>`;
     const grip = '<span class="mv" title="Trascina per spostare (doppio click: torna al suo posto)" aria-hidden="true">⠿</span>';
     const bottoni = `<button type="button" class="tv-b sec ico" data-k="gira" title="${vert ? 'Barra orizzontale' : 'Tabella classica (verticale)'}" aria-label="${vert ? 'Barra orizzontale' : 'Tabella classica'}"${ed ? ' hidden' : ''}>${vert ? '⇄' : '⇅'}</button>${isDM() ? `<button type="button" class="tv-b sec ico${ed ? ' on' : ''}" data-k="ed" title="${ed ? 'Fine modifica' : 'Modifica l\'ordine del turno'}" aria-label="Modifica l'ordine del turno">✎</button><button type="button" class="tv-b sec ico" data-k="x" title="Fine combattimento: svuota l'ordine del turno e chiude la tabella" aria-label="Fine combattimento">✕</button>` : ''}`;
-    const bav = `<button type="button" class="tv-b pri" data-k="av" title="Passa al prossimo (chi è a 0 PF viene saltato)"${avanti ? '' : ' hidden'}>Finisci il turno ▶</button>`;
+    const bav = `<button type="button" class="tv-b pri" data-k="av" title="Passa al prossimo (chi è a 0 PF viene saltato)"${avanti ? '' : ' hidden'}>${col ? 'Fine ▶' : 'Finisci il turno ▶'}</button>`;
+    // in verticale si può stringere: le facce una sotto l'altra, come la barra
+    const bstr = ed ? '' : `<button type="button" class="tv-b sec ico" data-k="str" title="${col ? 'Allarga: tabella con i nomi' : 'Stringi: solo le facce'}" aria-label="${col ? 'Allarga la tabella' : 'Stringi la tabella'}">${col ? '⇥' : '⇤'}</button>`;
     if (!vert) {
       s.innerHTML = `${grip}<div class="rd"><small>Round</small>${T.stato?.round || 1}</div><div class="ls">${L.map((x, i) => `<span class="p${i === ia ? ' on' : ''}${ia >= 0 && i < ia ? ' gia' : ''}${x.giocatore ? '' : ' nem'}${x.nascosto ? ' hid' : ''}" title="${esc(x.nome)} · iniziativa ${x.valore}${x.nascosto ? ' (nascosto ai giocatori)' : ''}">${faccia(x)}<b>${esc(String(x.nome || '').split(/\s+/)[0])}</b><em>${x.valore}</em></span>`).join('')}</div>
-      <div class="ac">${bav}${bottoni}</div>`;
+      <div class="ac">${bav}${col ? bstr : ''}${bottoni}</div>`;
     } else {
-      s.innerHTML = `<div class="tt">${grip}<b><small>Round</small> ${T.stato?.round || 1}</b><span class="ac">${bottoni}</span></div>
+      s.innerHTML = `<div class="tt">${grip}<b><small>Round</small> ${T.stato?.round || 1}</b><span class="ac">${bstr}${bottoni}</span></div>
       <div class="tv-tl">${L.map((x, i) => `<div class="tv-tr${x.id === att ? ' att' : ''}${ia >= 0 && i < ia ? ' gia' : ''}${x.nascosto ? ' hid' : ''}" data-id="${x.id}">${faccia(x)}<span title="${esc(x.nome)}">${esc(x.nome)}${x.id === att ? '<small class="ora">sta giocando</small>' : ''}</span>
         ${ed ? `<input type="number" step="1" value="${x.valore}" aria-label="Iniziativa di ${esc(x.nome)}"><button type="button" data-k="nasc" title="${x.nascosto ? 'Mostra ai giocatori' : 'Nascondi ai giocatori'}">${x.nascosto ? '🙈' : '👁'}</button><button type="button" data-k="via" title="Togli dall'ordine">✕</button>` : `<em>${x.valore}</em>`}</div>`).join('')
         || '<div class="tv-tvuoto">Nessuno ancora. Clicca un token e premi «Tira» accanto a Iniziativa, o aggiungilo qui sotto.</div>'}</div>
-      ${ed ? '<div class="tv-tf"><input type="text" data-k="nn" placeholder="Nome" style="flex:1;width:auto"><input type="number" data-k="nv" placeholder="0"><button type="button" data-k="add">+ Aggiungi</button><button type="button" data-k="svuota">Svuota</button></div>' : `<div class="tv-tf av">${bav}</div>`}`;
+      ${ed ? '<div class="tv-tf"><input type="text" data-k="nn" placeholder="Nome" style="flex:1;width:auto"><input type="number" data-k="nv" placeholder="0"><button type="button" data-k="add">+ Aggiungi</button><button type="button" data-k="svuota">Svuota</button></div>' : `<div class="pie">${bav}</div>`}`;
     }
     s.querySelector('[data-k=av]')?.addEventListener('click', finisciTurno);
     s.querySelector('[data-k=x]')?.addEventListener('click', () => fineCombattimento());
     s.querySelector('[data-k=ed]')?.addEventListener('click', () => apriTurno(!T.turnoEd));
     s.querySelector('[data-k=gira]').onclick = giraTurno;
+    s.querySelector('[data-k=str]')?.addEventListener('click', () => { try { localStorage.setItem('tavolo-turno-stretta', col ? '0' : '1'); } catch { } disegnaStriscia(); });
     if (ed) legaModificaTurno(s);
     trascinaTurno(s, s.querySelector('.mv'));
     piazzaTurno(s, pos);
     const on = s.querySelector('.p.on'), ls = s.querySelector('.ls');
-    if (on) ls.scrollLeft = on.offsetLeft - ls.clientWidth / 2 + on.offsetWidth / 2;
+    if (on && col) ls.scrollTop = on.offsetTop - ls.clientHeight / 2 + on.offsetHeight / 2;
+    else if (on) ls.scrollLeft = on.offsetLeft - ls.clientWidth / 2 + on.offsetWidth / 2;
     disegnaHud();
   }
   // dove l'ha lasciata chi guarda, senza farla uscire dal tavolo
@@ -4342,7 +4379,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function disegnaHud() {
     const h = $('#tv-hud'), w = $('.tv-wrap'); if (!h) return;
     const att = T.turno?.find(x => x.id === T.stato?.turno), t = att?.token && T.tok.get(att.token);
-    const vedo = !!t && t.scena === T.vista && puoMuovere(t);
+    // le azioni ora stanno sul token (bollini e metri): il pannello in basso resta spento
+    const vedo = false && !!t && t.scena === T.vista && puoMuovere(t);
     h.hidden = !vedo; w?.classList.toggle('con-hud', vedo);
     // la striscia mostra «Finisci il turno» solo quando non c'è il pannello
     const sa = $('#tv-strip [data-k=av]'); if (sa) sa.hidden = vedo || !(isDM() || att?.giocatore === T.me.giocatore);
@@ -4382,6 +4420,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
   // 1d20 + modificatore, tirato dal server come ogni dado, e il risultato entra (o si aggiorna) nell'ordine del turno
   async function iniziativa(t, mod) {
+    // l'iniziativa si tira una volta sola: per cambiarla il DM usa la matita della tabella del turno
+    const gia = T.turno.find(x => x.token === t.id);
+    if (gia && scenaCombattimento() === t.scena) return toast(`${t.nome || 'Il token'} ha già tirato l'iniziativa: ${gia.valore}.`);
     // un combattimento per mappa: tirare su un'altra mappa ne apre uno nuovo
     const cs = scenaCombattimento();
     if (isDM() && cs && t.scena && cs !== t.scena) {
@@ -5575,7 +5616,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const sc = scena(), mod = modC(s.dati.des), tk = tokScheda();
     const toks = tk ? [tk] : sc ? [...T.tok.values()].filter(t => t.scena === sc.id && schedaDi(t)?.id === s.id && puoMuovere(t)) : [];
     if (!toks.length) return tiroD20(s, mod, 'Iniziativa');
-    for (const t of toks) await iniziativa(t, mod);
+    const da = toks.filter(t => !T.turno.some(x => x.token === t.id));
+    if (!da.length) return iniziativa(toks[0], mod);
+    for (const t of da) await iniziativa(t, mod);
   }
   const critico = f => String(f).replace(/(\d*)d(\d+)/gi, (_, n, fc) => (2 * (+n || 1)) + 'd' + fc);
   async function azioneScheda(b) {
