@@ -1,9 +1,11 @@
 """Pubblica i dati della campagna: dai dati completi del DM ricava data.enc (cifrato), una copia cifrata per ogni
-giocatore (giocatori/<id>.enc, ognuna con la password di quel giocatore) e data.json (copia pubblica per gli ospiti).
+giocatore (giocatori/<id>.enc, ognuna con la password di quel giocatore).
+L'accesso come ospite non c'è più: la copia «per tutti» (copia(d) senza giocatore) serve solo a decidere quali immagini
+restano in chiaro in blobs/.
 
 Uso:
   python3 strumenti/pubblica.py apri    CODICE  dm.json     # decifra i dati più recenti in dm.json (da NON committare)
-  python3 strumenti/pubblica.py salva   CODICE  dm.json     # riscrive data.enc, giocatori/*.enc e data.json da dm.json
+  python3 strumenti/pubblica.py salva   CODICE  dm.json     # riscrive data.enc e giocatori/*.enc da dm.json
   python3 strumenti/pubblica.py account CODICE  dm.json     # crea gli account mancanti dei giocatori e ne stampa le password
 
 Gli account stanno nei dati del DM (meta «giocatori»: id, nome, scheda del PG, password, sale), quindi solo il DM li legge.
@@ -89,14 +91,19 @@ def chiave(codice, enc):
     return hashlib.pbkdf2_hmac('sha256', codice.encode(), base64.b64decode(enc['salt']), enc['it'], 32)
 
 
+def decifra(k, enc):
+    """Il contenuto di data.enc o di una copia dei giocatori (z: 1 = compresso prima di cifrare)."""
+    pt = AESGCM(k).decrypt(base64.b64decode(enc['iv']), base64.b64decode(enc['ct']), None)
+    return gzip.decompress(pt) if enc.get('z') else pt
+
+
 def apri(codice, out):
     enc = json.load(open('data.enc'))
     sb = su_supabase()
     if sb:
         print(f"Apro i dati salvati dal DM sul sito ({time.strftime('%d/%m/%Y %H:%M', time.localtime(sb['versione'] / 1000))}, Supabase {sb['cartella']})")
         enc = json.loads(scarica(SB_URL + '/storage/v1/object/public/sito/' + sb['cartella'] + '/data.enc'))
-    pt = AESGCM(chiave(codice, enc)).decrypt(base64.b64decode(enc['iv']), base64.b64decode(enc['ct']), None)
-    open(out, 'wb').write(pt)
+    open(out, 'wb').write(decifra(chiave(codice, enc), enc))
 
 
 def giocatori(d):
@@ -265,10 +272,9 @@ def salva(codice, src):
     for g in giocatori(d):
         g.setdefault('salt', base64.b64encode(os.urandom(16)).decode())
     json.dump(d, open(src, 'w', encoding='utf-8'), ensure_ascii=False)
-    pt = json.dumps(d, ensure_ascii=False, separators=(',', ':')).encode()
-    iv, ct = cifra(k, pt)
-    json.dump({'v': 1, 'it': enc['it'], 'salt': enc['salt'], 'iv': base64.b64encode(iv).decode(), 'ct': base64.b64encode(ct).decode()}, open('data.enc', 'w'))
-    json.dump(copia(d), open('data.json', 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
+    # compressi prima di cifrare (z: 1), come le copie dei giocatori
+    iv, ct = cifra(k, gzip.compress(json.dumps(d, ensure_ascii=False, separators=(',', ':')).encode(), 9, mtime=0))
+    json.dump({'v': 1, 'z': 1, 'it': enc['it'], 'salt': enc['salt'], 'iv': base64.b64encode(iv).decode(), 'ct': base64.b64encode(ct).decode()}, open('data.enc', 'w'))
     # una copia per giocatore, cifrata con la sua password
     os.makedirs('giocatori', exist_ok=True)
     fatti = set()

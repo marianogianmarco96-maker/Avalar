@@ -1,7 +1,7 @@
 /* Campagna D&D — «Idee»: Claude propone oneshot e sessioni partendo dalla storia della campagna.
    Solo per il Dungeon Master. Usa le funzioni della pagina principale (route, setView, S, md…).
    Le idee salvate e la chiave di Claude stanno in un database separato di questo browser
-   ('campagna-dnd-idee'): non finiscono mai in data.json né nella copia per i giocatori. */
+   ('campagna-dnd-idee'): non finiscono mai nei dati pubblicati (data.enc) né nelle copie per i giocatori. */
 (() => {
   'use strict';
   const rq = r => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });

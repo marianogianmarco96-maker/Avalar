@@ -1,12 +1,12 @@
-const VERSION = '1795710040';
-const CORE = ['./', 'index.html', 'copie.js', 'local.js', 'idee.js', 'scaletta.js', 'manuali.js', 'tavolo.js', 'regole.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'data.json', 'data.enc', 'versione.json'];
+const VERSION = '1795710050';
+const CORE = ['./', 'index.html', 'copie.js', 'local.js', 'idee.js', 'scaletta.js', 'manuali.js', 'tavolo.js', 'regole.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'versione.json'];
 const CACHE = 'campagna-' + VERSION, FONTS = 'campagna-fonts';
 self.addEventListener('install', e => {
   e.waitUntil((async () => {
     const c = await caches.open(CACHE);
     await Promise.all(CORE.map(u => c.add(new Request(u, { cache: 'reload' })).catch(() => { })));
-    // le immagini non si scaricano tutte in anticipo (sono molti MB su rete mobile):
-    // vengono salvate per l'uso offline la prima volta che si aprono
+    // le immagini e i dati (data.enc per il DM, giocatori/<id>.enc per ogni giocatore: diversi MB) non si scaricano
+    // in anticipo, perché a ognuno serve solo il suo: vengono salvati per l'uso offline la prima volta che si aprono
     await self.skipWaiting();
   })());
 });
@@ -15,7 +15,7 @@ self.addEventListener('activate', e => {
     const keep = await caches.open(CACHE);
     for (const k of await caches.keys()) {
       if (k === CACHE || k === FONTS) continue;
-      if (k.startsWith('campagna-')) { const old = await caches.open(k); for (const r of await old.keys()) if (/\/(blobs|priv)\/|\/sito\/v\//.test(r.url) && !(await keep.match(r))) await keep.put(r, await old.match(r)); }
+      if (k.startsWith('campagna-')) { const old = await caches.open(k); for (const r of await old.keys()) if (/\/(blobs|priv)\/|\/sito\/v\/|\/(data|giocatori\/[a-z0-9-]+)\.enc$/.test(r.url) && !(await keep.match(r))) await keep.put(r, await old.match(r)); }
       await caches.delete(k);
     }
     await self.clients.claim();
@@ -50,7 +50,7 @@ self.addEventListener('fetch', e => {
     return;
   }
   if (url.origin !== location.origin) return;
-  const core = req.mode === 'navigate' || /\/(index\.html|copie\.js|local\.js|idee\.js|manuali\.js|tavolo\.js|regole\.js|data\.json|data\.enc|versione\.json|giocatori\/[a-z0-9-]+\.enc|manifest\.webmanifest)?$/.test(url.pathname);
+  const core = req.mode === 'navigate' || /\/(index\.html|copie\.js|local\.js|idee\.js|scaletta\.js|manuali\.js|tavolo\.js|regole\.js|data\.enc|versione\.json|giocatori\/[a-z0-9-]+\.enc|manifest\.webmanifest)?$/.test(url.pathname);
   e.respondWith((async () => {
     const c = await caches.open(CACHE);
     if (core) {

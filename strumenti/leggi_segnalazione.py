@@ -20,7 +20,7 @@ import time
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from pubblica import chiave, giocatori  # noqa: E402
+from pubblica import chiave, decifra, giocatori  # noqa: E402
 
 ESTENSIONI = {'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp', 'image/gif': '.gif'}
 TIPI = {'bug': 'Bug', 'idea': 'Miglioria', 'questionario': 'Questionario'}
@@ -34,7 +34,7 @@ def leggi(codice, richiesta):
     righe = (r.strip() for r in m.group(2).splitlines())
     gid, dati = m.group(1), base64.b64decode(''.join(r for r in righe if re.fullmatch(r'[A-Za-z0-9+/=]+', r)))
     enc = json.load(open('data.enc'))
-    d = json.loads(AESGCM(chiave(codice, enc)).decrypt(base64.b64decode(enc['iv']), base64.b64decode(enc['ct']), None))
+    d = json.loads(decifra(chiave(codice, enc), enc))
     g = next((g for g in giocatori(d) if g['id'] == gid), None)
     if not g:
         sys.exit('Giocatore sconosciuto: ' + gid)

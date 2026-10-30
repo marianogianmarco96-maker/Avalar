@@ -1,9 +1,9 @@
 """Converte in WebP le immagini pubbliche troppo pesanti e aggiorna i riferimenti nei dati.
 
-Uso:  python3 strumenti/comprimi_immagini.py data.json
+Uso:  python3 strumenti/comprimi_immagini.py dm.json
 
-Funziona sia su data.json sia sui dati del DM decifrati da data.enc. I file originali
-non vengono cancellati: si possono togliere quando nessuno dei due file di dati li usa più.
+Funziona sui dati del DM decifrati da data.enc (`pubblica.py apri`). I file originali non vengono cancellati:
+li toglie `pubblica.py salva`, che elimina i file di blobs/ e priv/ che nessuna immagine usa più.
 """
 import hashlib
 import io

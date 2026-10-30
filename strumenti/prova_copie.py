@@ -1,8 +1,8 @@
 """Controlla che copie.js (le copie preparate dal browser del DM) dia lo stesso risultato di copia() in pubblica.py.
 
 Uso:
-  python3 strumenti/prova_copie.py            # prova su dati di esempio ricavati da data.json (serve node)
-  python3 strumenti/prova_copie.py dm.json    # prova sui dati veri del DM (dopo `pubblica.py apri`)
+  python3 strumenti/prova_copie.py dm.json              # prova sui dati veri del DM (dopo `pubblica.py apri`; serve node)
+  python3 strumenti/prova_copie.py --esempio dm.json    # come sopra, con aggiunto un po' di tutto ciò che la copia deve togliere
 """
 import copy
 import json
@@ -22,9 +22,9 @@ let s = ''; process.stdin.on('data', c => s += c).on('end', () => {
 """
 
 
-def esempio():
-    """data.json con dentro un po' di tutto ciò che la copia deve togliere o lasciare."""
-    d = json.load(open(os.path.join(RADICE, 'data.json'), encoding='utf-8'))
+def esempio(src):
+    """I dati di src con dentro un po' di tutto ciò che la copia deve togliere o lasciare."""
+    d = json.load(open(src, encoding='utf-8'))
     S = d['stores']
     S['meta']['giocatori'] = {'k': 'giocatori', 'v': [{'id': 'livion', 'name': 'Livion', 'pg': 'pg-livion', 'code': 'x'},
                                                       {'id': 'sam', 'name': 'Sam', 'pg': 'pg-sam', 'code': 'y'},
@@ -86,7 +86,10 @@ def esempio():
 
 
 def main():
-    d = json.load(open(sys.argv[1], encoding='utf-8')) if len(sys.argv) > 1 else esempio()
+    args = [a for a in sys.argv[1:] if a != '--esempio']
+    if len(args) != 1:
+        sys.exit(__doc__)
+    d = esempio(args[0]) if '--esempio' in sys.argv else json.load(open(args[0], encoding='utf-8'))
     chi = [None] + [g['id'] for g in giocatori(d)]
     js = subprocess.run(['node', '-e', NODE, os.path.join(RADICE, 'copie.js')], input=json.dumps({'d': d, 'chi': chi}),
                         capture_output=True, text=True, check=True).stdout
