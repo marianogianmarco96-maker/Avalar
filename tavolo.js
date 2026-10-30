@@ -1843,6 +1843,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
   async function porta(id) {
     const s = T.scene.get(id); if (!s) return;
+    // cambiando mappa il combattimento di quella vecchia finisce: sulla nuova si tira di nuovo l'iniziativa
+    const cs = scenaCombattimento();
+    if (cs && cs !== id && await svuotaTurno()) toast(`Combattimento su «${T.scene.get(cs)?.nome || 'la mappa di prima'}» finito: l'ordine del turno è stato svuotato.`);
     chk(await SB.from('tavolo_stato').update({ scena: id }).eq('id', 1));
     T.stato.scena = id; disegnaTop(); if (!$('#tv-pages').hidden) pannelloMappe(true);
     toast('I giocatori ora vedono: ' + s.nome);
@@ -1927,7 +1930,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
   async function mostraScena(centra) {
     const st = $('#tv-stage'); if (!st) return;
-    chiudiPop();
+    chiudiPop(); disegnaStriscia();
     const sc = scena();
     if (!sc) {
       st.innerHTML = `<div class="tv-empty"><div>${isDM() ? (T.scene.size ? '<h2>Nessuna mappa aperta</h2><p>Scegline una dal pannello delle mappe, in alto a destra.</p><p><button class="btn primary" data-act="tv-pagine">Apri le mappe</button></p>' : '<h2>Il tavolo è pronto</h2><p>Crea la prima mappa: carica l\'immagine del combattimento o del luogo, poi aggiungi i token.</p><p><button class="btn primary" data-act="tv-nuova">Crea una mappa</button></p>') : '<h2>Il tavolo è vuoto</h2><p>Aspetta che il DM vi porti in una scena: apparirà qui da sola.</p>'}</div></div>`;
@@ -4255,7 +4258,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const s = $('#tv-strip'), w = $('.tv-wrap'); if (!s) return;
     const L = ordinati(), att = T.stato?.turno, ia = L.findIndex(x => x.id === att);
     const ed = isDM() && !!T.turnoEd, vert = ed || turnoVert(), pos = turnoPos();
-    s.hidden = !L.length && !ed; s.classList.toggle('vert', vert); s.classList.toggle('ed', ed);
+    // la tabella si vede solo sulla mappa del combattimento (il DM può guardarne un'altra)
+    const qui = !L.length || !T.vista || scenaCombattimento() === T.vista;
+    s.hidden = (!L.length || !qui) && !ed; s.classList.toggle('vert', vert); s.classList.toggle('ed', ed);
     w?.classList.toggle('con-turno', !s.hidden && !vert && !pos);
     if (s.hidden) { s.innerHTML = ''; disegnaHud(); return; }
     const avanti = L.length && (isDM() || L.some(x => x.id === att && x.giocatore === T.me.giocatore));
@@ -4357,9 +4362,18 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   // svuota l'ordine del turno: la striscia in alto sparisce per tutti
   async function fineCombattimento(dom = 'Il combattimento è finito? L\'ordine del turno si svuota e la barra in alto sparisce per tutti.', ok = 'Fine combattimento', title = 'Fine del combattimento') {
     if (!T.turno.length || !await ask(dom, { ok, title })) return;
-    const r = await SB.from('tavolo_turno').delete().in('id', T.turno.map(y => y.id)); if (r.error) return toast(r.error.message, 'err');
+    await svuotaTurno();
+  }
+  async function svuotaTurno() {
+    const r = await SB.from('tavolo_turno').delete().in('id', T.turno.map(y => y.id)); if (r.error) { toast(r.error.message, 'err'); return false; }
     await SB.from('tavolo_stato').update({ turno: null, round: 1 }).eq('id', 1);
     T.turno = []; T.stato.turno = null; T.stato.round = 1; disegnaTurno(); disegnaToken(); manda('turno', {});
+    return true;
+  }
+  // il combattimento appartiene alla mappa dei suoi token (chi è aggiunto a mano sta sulla mappa dei giocatori)
+  function scenaCombattimento() {
+    for (const x of ordinati()) { const t = x.token && T.tok.get(x.token); if (t?.scena) return t.scena; }
+    return T.turno.length ? T.stato?.scena || null : null;
   }
   async function salvaTurno(id, ch) {
     const r = await SB.from('tavolo_turno').update(ch).eq('id', id).select().single();
@@ -4368,6 +4382,12 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
   // 1d20 + modificatore, tirato dal server come ogni dado, e il risultato entra (o si aggiorna) nell'ordine del turno
   async function iniziativa(t, mod) {
+    // un combattimento per mappa: tirare su un'altra mappa ne apre uno nuovo
+    const cs = scenaCombattimento();
+    if (isDM() && cs && t.scena && cs !== t.scena) {
+      if (!await ask(`C'è un combattimento in corso su «${T.scene.get(cs)?.nome || 'un\'altra mappa'}». Lo chiudo e ne inizio uno nuovo qui?`, { ok: 'Nuovo combattimento', title: 'Combattimento su un\'altra mappa' })) return;
+      if (!await svuotaTurno()) return;
+    }
     const m = Math.trunc(+mod || 0), f = '1d20' + (m ? (m > 0 ? '+' : '') + m : '');
     const r = await SB.rpc('tavolo_tira', { p_formula: f, p_motivo: 'Iniziativa · ' + (t.nome || 'token'), p_privato: !!t.nascosto });
     if (r.error) return toast(r.error.message, 'err');
