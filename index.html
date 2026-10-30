@@ -789,6 +789,25 @@ details.older[open]>summary{display:none}
   :root[data-theme=dark] .explore .chip em{color:var(--gold2)}
   .homelinks{display:none}
 }
+/* riquadri: una sola cornice sottile e angoli più morbidi */
+.card::before{display:none}
+.card{border-color:var(--line);border-radius:10px;box-shadow:0 1px 2px #4a2f1a14,0 6px 18px #4a2f1a12}
+:root[data-theme=dark] .card{box-shadow:0 1px 2px #0006,0 6px 18px #0004}
+/* scritte piccole (sessioni, stato, date) più grandi e più scure */
+.hint{color:var(--ink2)}
+.erow .r{font-size:.9rem;color:var(--ink2)}
+.vl.flow .erow .d{font-size:.9rem;font-variant:normal;letter-spacing:0;color:var(--ink2)}
+.card:not(.tl) .entry .tag{font-size:.74rem}
+.card:not(.tl) .entry .tag,.card:not(.tl) .entry .tag a{color:var(--ink2)}
+.arc summary small{font-size:.88rem;color:var(--ink2)}
+/* linguette «Racconto / Momenti chiave»: quella attiva si unisce al riquadro sotto, le altre restano un po' più indietro */
+.stabs{gap:6px;margin:0 0 -1px;align-items:flex-end;z-index:2}
+.stabs button{position:relative;padding:8px 20px 7px;border:1px solid var(--line);border-bottom:0;border-radius:10px 10px 0 0;background:linear-gradient(180deg,var(--paper2),color-mix(in srgb,var(--paper2) 88%,#4a2f1a));color:var(--ink2);box-shadow:inset 0 -7px 8px -7px #4a2f1a40;transition:color .15s}
+.stabs button:hover{color:var(--wine)}
+.stabs button.on{padding:11px 22px 10px;background:var(--paper);color:var(--wine);border-color:var(--line);box-shadow:0 -4px 10px -6px #4a2f1a55;z-index:2}
+.stabs button.on::before{content:"";position:absolute;left:10px;right:10px;top:-1px;height:3px;border-radius:0 0 3px 3px;background:linear-gradient(90deg,var(--gold),var(--gold2),var(--gold))}
+.stabs button.on::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:3px;background:var(--paper)}
+.stabs+.card,.stabs~[data-tab]{border-top-left-radius:0}
 </style>
 </head><body>
 <header class="top">

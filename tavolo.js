@@ -74,6 +74,22 @@
 .tv-tdp .hd b{font-family:var(--display);color:var(--gold2);letter-spacing:.04em}
 .tv-tdp .hd button{all:unset;cursor:pointer;padding:2px 7px;border-radius:6px;font-size:1rem}
 .tv-tdp .hd button:hover{background:#ffffff1a}
+.tv-tdp .hdx{display:flex;align-items:center;gap:4px}
+.tv-tdp .hd button.mio{display:flex;white-space:nowrap;align-items:center;gap:5px;font:600 .8rem var(--body);padding:3px 8px;border:1px solid #e7cf9a55;border-radius:7px;color:var(--gold2)}
+.tv-tdp .hd .hdx button.mio{width:auto;height:auto;padding:3px 9px}
+.tv-tdp .hd button.mio svg{width:18px;height:18px}
+.tv-tdp .hd button.mio svg text{display:none}
+.tv-tdp>.lb{text-align:left;margin:4px 12px 4px;font:600 .7rem var(--display);letter-spacing:.08em;text-transform:uppercase;color:#e7cf9aaa}
+.tv-tdp .sws{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;margin:0 10px 6px}
+.tv-tdp .sws button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;justify-content:center;padding:3px;border-radius:7px;border:2px solid transparent}
+.tv-tdp .sws button:hover{background:#ffffff14}
+.tv-tdp .sws button.on{border-color:var(--gold2);background:#7d253066}
+.tv-tdp .sws svg{width:100%;max-width:34px;height:auto}
+.tv-tdp .nm{margin:0 12px 6px;font-weight:400;font-size:.84rem;color:#e9dcc0}.tv-tdp .nm b{color:var(--gold2);font-weight:600}
+.tv-tdp .pv{display:flex;align-items:flex-end;justify-content:center;gap:8px;margin:2px 10px 6px;padding:12px 6px;border-radius:9px;background:radial-gradient(ellipse at 50% 80%,#4a3a2c,#16110e)}
+.tv-tdp .pv span{display:block;filter:drop-shadow(0 5px 5px #0009)}.tv-tdp .pv svg{width:100%;height:auto;overflow:visible}
+.tv-tdp .pv text{font:800 30px var(--body);text-anchor:middle;dominant-baseline:central;paint-order:stroke;stroke-width:3px}
+.tv-tdp .nt{margin:0 12px 8px;font-weight:400;font-size:.8rem;color:#e7cf9aaa}
 .tv-tdp .tabs{display:flex;margin:0 10px 8px;background:#0005;border-radius:7px;padding:3px;gap:3px}
 .tv-tdp .tabs button{all:unset;flex:1;text-align:center;cursor:pointer;padding:5px 4px;border-radius:5px;font-size:.85rem}
 .tv-tdp .tabs button.on{background:#7d2530;box-shadow:inset 0 0 0 1px #e7cf9a66}
@@ -1719,13 +1735,14 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     });
     ch.on('presence', { event: 'sync' }, () => {
       T.online = Object.values(ch.presenceState()).map(a => a[0]?.nome).filter(Boolean);
+      T.dadi = Object.fromEntries(Object.entries(ch.presenceState()).map(([k, a]) => [k, a[0]?.dado]).filter(x => x[1]));
       if (T.live) stato('ok', 'Al tavolo ora: ' + T.online.join(', '));
       const c = $('#tv-cnt'); if (c) c.textContent = T.online.length > 1 ? T.online.length : '';
     });
     let primo = true;
     ch.subscribe(async s => {
       if (s === 'SUBSCRIBED') {
-        T.live = true; stato('ok', 'Collegato'); ch.track({ nome: T.me.nome });
+        T.live = true; stato('ok', 'Collegato'); tracciaDado();
         // dopo un'interruzione riprendo tutto: nel frattempo qualcuno può aver mosso o tirato
         if (!primo) { await carica().catch(() => { }); disegnaBarra(); mostraScena(false); disegnaLog(); disegnaTurno(); if (T.schede) dopoScheda(); }
         primo = false;
@@ -2985,13 +3002,15 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const p = $('#tv-tdp'); if (!p || p.hidden) return;
     const mod = p.querySelector('[data-k=mod]')?.value || '', mot = p.querySelector('[data-k=mot]')?.value || '';
     const c = T.tdc || (T.tdc = {}), adv = T.tdadv || '', f = formulaTdp(Math.trunc(+mod || 0));
-    p.innerHTML = `<div class="hd"><b>Tiradadi</b><button type="button" data-act="tv-tiradadi" aria-label="Chiudi">✕</button></div>
+    if (T.tdmio) return disegnaMioDado(p);
+    p.innerHTML = `<div class="hd"><b>Tiradadi</b><span class="hdx"><button type="button" class="mio" data-k="mio" title="Scegli lo stile e la misura dei tuoi dadi">${svgDado(20, '', coloreDi(T.me?.uid), mioDado().s === 'auto' ? null : mioDado().s)}Il mio dado</button><button type="button" data-act="tv-tiradadi" aria-label="Chiudi">✕</button></span></div>
       <div class="tabs"><button type="button" data-v="0" class="${T.tdpriv ? '' : 'on'}">Tutti</button><button type="button" data-v="1" class="${T.tdpriv ? 'on' : ''}">${isDM() ? '🙈 Solo io' : '🙈 Solo al DM'}</button></div>
       <div class="dz">${DADI.map(n => `<button type="button" data-f="${n}" class="${c[n] ? 'on' : ''}" title="Aggiungi 1d${n}">${dado(n)}d${n}${c[n] ? `<em>${c[n]}</em><span class="meno" data-meno="${n}" role="button" aria-label="Togli 1d${n}">−</span>` : ''}</button>`).join('')}</div>
       <div class="fx"><code class="${f ? '' : 'vuota'}">${f ? esc(f.replace(/\+/g, ' + ').replace(/kh1/g, ' vant.').replace(/kl1/g, ' svant.')) : 'Tocca i dadi per comporre il tiro'}</code><span>+</span><input type="number" data-k="mod" placeholder="0" aria-label="Modificatore" value="${esc(mod)}"></div>
       <div class="adv">${[['', 'Normale'], ['kh1', 'Vantaggio'], ['kl1', 'Svantaggio']].map(([v, l]) => `<button type="button" data-adv="${v}" class="${adv === v ? 'on' : ''}" title="${v ? 'Vale per un solo d20' : ''}">${l}</button>`).join('')}</div>
       <div class="mot"><input type="text" data-k="mot" placeholder="Per cosa? (facoltativo)" maxlength="80" value="${esc(mot)}"></div>
       <div class="go"><button type="button" class="tv-b sec" data-k="svuota">Svuota</button><button type="button" class="tv-b pri" data-k="tira" ${f ? '' : 'disabled'}>🎲 Tira ${f ? esc(f) : ''}</button></div>`;
+    p.querySelector('[data-k=mio]').onclick = () => { T.tdmio = true; disegnaTdp(); };
     p.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { T.tdpriv = b.dataset.v === '1'; disegnaTdp(); segnaPriv(); });
     p.querySelectorAll('.dz button').forEach(b => b.onclick = e => {
       const n = +b.dataset.f, meno = e.target.closest('[data-meno]');
@@ -3004,6 +3023,28 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       const x = formulaTdp(Math.trunc(+p.querySelector('[data-k=mod]').value || 0)); if (!x) return;
       const mt = p.querySelector('[data-k=mot]'), ad = T.tdadv && /k[hl]1/.test(x) ? (T.tdadv === 'kh1' ? 'vantaggio' : 'svantaggio') : null;
       if (await tira(x, ad, T.tdpriv, mt.value.trim())) { T.tdc = {}; T.tdadv = ''; mt.value = ''; p.querySelector('[data-k=mod]').value = ''; disegnaTdp(); }
+    };
+  }
+
+  // «Il mio dado»: stile e misura dei dadi che rotolano sulla mappa; restano salvati su questo dispositivo
+  function disegnaMioDado(p) {
+    const md = mioDado(), col = coloreDi(T.me?.uid), k = md.s === 'auto' ? null : md.s, st = stileDado(md.s);
+    p.innerHTML = `<div class="hd"><b>Il mio dado</b><span class="hdx"><button type="button" class="mio" data-k="torna">‹ Tira</button><button type="button" data-act="tv-tiradadi" aria-label="Chiudi">✕</button></span></div>
+      <div class="lb">Stile</div><div class="sws">${STILI_DADI.map(([key, nome, desc]) => `<button type="button" data-s="${key}" class="${key === md.s ? 'on' : ''}" title="${esc(nome)}: ${esc(desc)}" aria-label="${esc(nome)}" aria-pressed="${key === md.s}">${svgDado(20, '', col, key === 'auto' ? null : key)}</button>`).join('')}</div>
+      <div class="nm"><b>${esc(st[1])}</b> · ${esc(st[2])}</div>
+      <div class="lb">Misura</div><div class="tabs">${Object.entries(MISURE_DADI).map(([d, [n]]) => `<button type="button" data-d="${d}" class="${d === md.d ? 'on' : ''}">${n}</button>`).join('')}</div>
+      <div class="pv">${[[20, 20], [8, 6], [6, 5]].map(([f, v], i) => `<span style="width:${Math.round(MISURE_DADI[md.d][1] * [0.85, 0.62, 0.55][i])}px">${svgDado(f, v, col, k)}</span>`).join('')}</div>
+      <p class="nt">Gli altri al tavolo vedono rotolare i tuoi dadi così.</p>
+      <div class="go"><button type="button" class="tv-b sec" data-k="prova">🎲 Prova sulla mappa</button></div>`;
+    const salva = v => { try { localStorage.setItem(DADO_K, JSON.stringify({ ...mioDado(), ...v })); } catch { } tracciaDado(); disegnaMioDado(p); };
+    p.querySelector('[data-k=torna]').onclick = () => { T.tdmio = false; disegnaTdp(); };
+    p.querySelectorAll('[data-s]').forEach(b => b.onclick = () => salva({ s: b.dataset.s }));
+    p.querySelectorAll('[data-d]').forEach(b => b.onclick = () => salva({ d: b.dataset.d }));
+    // un lancio di prova solo sul proprio schermo, per vedere l'effetto
+    p.querySelector('[data-k=prova]').onclick = () => {
+      if (!scena()) return toast('Apri una mappa per vedere i dadi rotolare.');
+      const v = n => 1 + Math.floor(Math.random() * n);
+      lancia({ autore: T.me?.uid, dettaglio: `1d20 [${v(20)}] + 1d8 [${v(8)}] + 1d6 [${v(6)}]` });
     };
   }
 
@@ -3223,11 +3264,61 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   };
   const COL_DADI = ['#3b5bdb', '#c2255c', '#2b8a3e', '#e8590c', '#7048e8', '#0b7285', '#a61e4d', '#5f3dc4'];
   const coloreDi = uid => { let h = 0; for (const c of String(uid)) h = (h * 31 + c.charCodeAt(0)) | 0; return COL_DADI[Math.abs(h) % COL_DADI.length]; };
-  function svgDado(f, v, col) {
-    const s = FORME[f] || FORME[20], id = 'g' + Math.random().toString(36).slice(2, 8);
-    return `<svg viewBox="0 0 100 100"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient></defs>
+  // stili dei dadi: ognuno sceglie il suo nel tiradadi («Il mio dado») e gli altri lo vedono dalla presenza sul canale
+  // [chiave, nome, descrizione, [luce, colore, ombra, numeri, effetto]]
+  const STILI_DADI = [
+    ['auto', 'Automatico', 'il colore assegnato a te', null],
+    ['avalar', 'Avalar', 'bordeaux e oro', ['#c9505d', '#7c1f2b', '#3a0a12', '#f0cf7c', 'lucido']],
+    ['rubino', 'Rubino', 'gemma, numeri d\'oro', ['#ff8a95', '#c0182f', '#5c0613', '#ffd77a', 'gemma']],
+    ['zaffiro', 'Zaffiro', 'gemma, numeri d\'argento', ['#8fb4ff', '#1f48b8', '#0a1a52', '#eef3ff', 'gemma']],
+    ['smeraldo', 'Smeraldo', 'gemma, numeri d\'oro', ['#8ff0b4', '#14894a', '#043d1f', '#ffe39a', 'gemma']],
+    ['ametista', 'Ametista', 'viola con brillantini', ['#d7a8ff', '#7a2fc0', '#2e0a52', '#ffffff', 'brillantini']],
+    ['ossidiana', 'Ossidiana', 'nero lucido, numeri d\'oro', ['#5a5560', '#1b181d', '#050405', '#e6c36a', 'lucido']],
+    ['oro', 'Oro antico', 'metallo', ['#fff1b8', '#c99a2e', '#6b4a0c', '#4a2f05', 'metallo']],
+    ['argento', 'Argento', 'acciaio lucidato', ['#ffffff', '#a9b2bd', '#4b545e', '#1e252c', 'metallo']],
+    ['rame', 'Rame', 'metallo caldo', ['#ffc9a3', '#b8622e', '#5a250a', '#2e1203', 'metallo']],
+    ['osso', 'Osso', 'avorio, numeri incisi', ['#fffaf0', '#e6d9bd', '#a8946b', '#3a2a14', 'opaco']],
+    ['legno', 'Legno', 'quercia con venature', ['#d9a36b', '#9b6332', '#4f2c10', '#fbe8c8', 'legno']],
+    ['marmo', 'Marmo', 'bianco venato', ['#ffffff', '#e9e6e1', '#a9a39b', '#7c1f2b', 'marmo']],
+    ['fiamma', 'Fiamma', 'dal giallo al rosso', ['#ffe36b', '#ff6a1a', '#9e1006', '#ffffff', 'fiamma']],
+    ['ghiaccio', 'Ghiaccio', 'azzurro trasparente', ['#ffffff', '#9fe3ff', '#2f86b8', '#0b3b5c', 'gemma']],
+    ['veleno', 'Veleno', 'verde acido che brilla', ['#e6ff8a', '#5fd11c', '#1d5e05', '#0f2a02', 'luce']],
+    ['nebulosa', 'Nebulosa', 'galassia con stelle', ['#e08cff', '#4b2fb8', '#0b0730', '#ffffff', 'stelle']]
+  ];
+  const MISURE_DADI = { p: ['Piccolo', 58], m: ['Medio', 78], g: ['Grande', 108] }, DADO_K = 'tavolo-dado';
+  const stileDado = k => STILI_DADI.find(x => x[0] === k) || STILI_DADI[0];
+  function mioDado() {
+    let v = null; try { v = JSON.parse(localStorage.getItem(DADO_K)); } catch { }
+    return { s: stileDado(v?.s)[0], d: MISURE_DADI[v?.d] ? v.d : 'm' };
+  }
+  const dadoDi = uid => uid && uid === T.me?.uid ? mioDado() : { s: stileDado(T.dadi?.[uid]?.s)[0], d: MISURE_DADI[T.dadi?.[uid]?.d] ? T.dadi[uid].d : 'm' };
+  // la presenza sul canale porta il nome e lo stile del dado
+  const tracciaDado = () => { if (T.ch && T.live) T.ch.track({ nome: T.me.nome, dado: mioDado() }).catch(() => { }); };
+  // brillantini, stelle e venature sempre uguali per lo stesso stile (non tremano mentre il dado gira)
+  function decori(fx, k) {
+    let h = 7; for (const c of k) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+    const r = (a, b) => { h = (h * 1664525 + 1013904223) >>> 0; return a + (h / 4294967296) * (b - a); };
+    const n = (x, d = 1) => x.toFixed(d);
+    if (fx === 'brillantini' || fx === 'stelle') return Array.from({ length: fx === 'stelle' ? 30 : 40 }, () => `<circle cx="${n(r(5, 95))}" cy="${n(r(5, 95))}" r="${n(r(0.5, 1.6))}" fill="#fff" opacity="${n(r(0.4, 1), 2)}"/>`).join('') + (fx === 'stelle' ? '<ellipse cx="60" cy="40" rx="35" ry="14" fill="#ff7ad9" opacity=".25" transform="rotate(-25 60 40)"/>' : '');
+    if (fx === 'legno') return Array.from({ length: 14 }, (_, i) => `<path d="M-5 ${8 + i * 7}C25 ${2 + i * 7} 55 ${15 + i * 7} 105 ${5 + i * 7}" stroke="#3b1f08" stroke-opacity=".35" stroke-width="${n(r(0.6, 1.8))}" fill="none"/>`).join('');
+    if (fx === 'marmo') return Array.from({ length: 6 }, () => `<path d="M${n(r(-10, 40), 0)} ${n(r(0, 100), 0)}C${n(r(20, 60), 0)} ${n(r(0, 100), 0)} ${n(r(40, 80), 0)} ${n(r(0, 100), 0)} ${n(r(80, 110), 0)} ${n(r(0, 100), 0)}" stroke="#6f6a63" stroke-opacity=".45" stroke-width="${n(r(0.5, 1.4))}" fill="none"/>`).join('');
+    if (fx === 'gemma') return '<polygon points="20,15 45,10 30,40" fill="#fff" opacity=".28"/>';
+    return '';
+  }
+  function svgDado(f, v, col, k) {
+    const s = FORME[f] || FORME[20], id = 'g' + Math.random().toString(36).slice(2, 8), st = k && stileDado(k)[3];
+    const forma = f === 6 ? '<rect x="10" y="10" width="80" height="80" rx="14"/>' : `<polygon points="${s.p}" stroke-linejoin="round"/>`;
+    if (!st) return `<svg viewBox="0 0 100 100"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient></defs>
       ${f === 6 ? `<rect x="10" y="10" width="80" height="80" rx="14" fill="${col}" stroke="#0007" stroke-width="3"/><rect x="10" y="10" width="80" height="80" rx="14" fill="url(#${id})"/>` : `<polygon points="${s.p}" fill="${col}" stroke="#0007" stroke-width="3" stroke-linejoin="round"/><polygon points="${s.p}" fill="url(#${id})"/>`}
       ${s.l ? `<path d="${s.l}" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="2"/>` : ''}<text x="50" y="${s.y}">${v}</text></svg>`;
+    const [a, b, c, num, fx] = st;
+    const grad = fx === 'metallo' ? `<linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${a}"/><stop offset=".3" stop-color="${b}"/><stop offset=".5" stop-color="${a}"/><stop offset=".72" stop-color="${b}"/><stop offset="1" stop-color="${c}"/></linearGradient>`
+      : fx === 'fiamma' ? `<linearGradient id="${id}" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="${c}"/><stop offset=".5" stop-color="${b}"/><stop offset="1" stop-color="${a}"/></linearGradient>`
+      : `<radialGradient id="${id}" cx="32%" cy="26%" r="85%"><stop offset="0" stop-color="${a}"/><stop offset=".55" stop-color="${b}"/><stop offset="1" stop-color="${c}"/></radialGradient>`;
+    const scuro = !['metallo', 'opaco', 'marmo', 'luce'].includes(fx);
+    return `<svg viewBox="0 0 100 100"${fx === 'luce' ? ` style="filter:drop-shadow(0 0 7px ${a})"` : ''}><defs>${grad}<clipPath id="${id}c">${forma}</clipPath></defs>
+      <g clip-path="url(#${id}c)"><g fill="url(#${id})"${fx === 'gemma' ? ' fill-opacity=".9"' : ''}>${forma}</g>${decori(fx, k)}${s.l ? `<path d="${s.l}" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="1.8"/>` : ''}</g>
+      <g fill="none" stroke="#0008" stroke-width="2.4">${forma}</g><text x="50" y="${s.y}" style="fill:${num};stroke:${scuro ? '#0008' : '#fff6'}">${v}</text></svg>`;
   }
   // i dadi entrano da un angolo, rimbalzano e si fermano sul risultato vero (deciso dal server)
   function lancia(t) {
@@ -3243,10 +3334,12 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (!dadi.length) return;
     let box = $('.tv-d3', st); if (!box) { box = document.createElement('div'); box.className = 'tv-d3'; st.append(box); }
     const W = st.clientWidth, H = st.clientHeight, col = coloreDi(t.autore), mostra = dadi.slice(0, 20);
+    const md = dadoDi(t.autore), k = md.s === 'auto' ? null : md.s, px = MISURE_DADI[md.d][1], sc = px / 78;
     const da = { x: -40, y: H + 40 }, cx = W * (0.3 + Math.random() * 0.4), cy = H * (0.35 + Math.random() * 0.3);
     mostra.forEach((d, i) => {
       const el = document.createElement('div'); el.className = 'dd' + (d.via ? ' via' : ''); box.append(el);
-      const ang = (i / mostra.length) * Math.PI * 2 + Math.random(), r = mostra.length > 1 ? 56 + mostra.length * 9 : 0;
+      if (px !== 78) el.style.cssText = `width:${px}px;height:${px}px;margin:${-px / 2}px 0 0 ${-px / 2}px`;
+      const ang = (i / mostra.length) * Math.PI * 2 + Math.random(), r = mostra.length > 1 ? (56 + mostra.length * 9) * sc : 0;
       const x = clamp(cx + Math.cos(ang) * r, 50, W - 50), y = clamp(cy + Math.sin(ang) * r, 50, H - 50);
       const mx = (da.x + x) / 2 + (Math.random() - 0.5) * 120, rot = 360 * (2 + Math.floor(Math.random() * 2)), fin = (Math.random() - 0.5) * 40, dur = 2000 + Math.random() * 400;
       el.animate([
@@ -3257,9 +3350,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         { transform: `translate(${x}px,${y}px) rotate(${rot + fin}deg) scale(1)` }
       ], { duration: dur, easing: 'cubic-bezier(.2,.7,.3,1)', fill: 'forwards' });
       // durante il volo le facce cambiano, poi resta il risultato
-      const gira = setInterval(() => { el.innerHTML = svgDado(d.f, 1 + Math.floor(Math.random() * d.f), col); }, 110);
-      el.innerHTML = svgDado(d.f, d.v, col);
-      setTimeout(() => { clearInterval(gira); el.innerHTML = svgDado(d.f, d.v, col); }, dur * 0.8);
+      const gira = setInterval(() => { el.innerHTML = svgDado(d.f, 1 + Math.floor(Math.random() * d.f), col, k); }, 110);
+      el.innerHTML = svgDado(d.f, d.v, col, k);
+      setTimeout(() => { clearInterval(gira); el.innerHTML = svgDado(d.f, d.v, col, k); }, dur * 0.8);
       setTimeout(() => el.animate([{ opacity: d.via ? 0.45 : 1 }, { opacity: 0 }], { duration: 500, fill: 'forwards' }).onfinish = () => el.remove(), dur + 3200);
     });
   }
