@@ -262,8 +262,6 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
 .tv-mbar .tit{font:600 .86rem var(--display);color:var(--gold2);padding:0 6px;white-space:nowrap}
 .tv-mbar .avv{font:600 .82rem var(--body);padding:4px 8px;white-space:normal;max-width:460px}
 .tv-tok.turno{box-shadow:0 0 0 4px #f2b51d,0 0 18px 6px #f2b51daa}
-.tv-turno{position:absolute;left:10px;bottom:10px;z-index:8;width:270px;max-height:min(420px,70%);display:flex;flex-direction:column;background:#211a16f2;color:#f1e4c8;border:1px solid #e7cf9a44;border-radius:10px;box-shadow:0 6px 24px #000a}
-.tv-turno[hidden]{display:none!important}
 .tv-th{display:flex;align-items:center;gap:6px;padding:8px 8px 6px 12px;border-bottom:1px solid #ffffff1a}
 .tv-th b{flex:1;font-family:var(--display);font-size:.85rem;letter-spacing:.05em;color:var(--gold2)}
 .tv-th small{color:#c9b89a;font-size:.8rem}
@@ -630,8 +628,8 @@ dialog.tv-pag .tv-sch .at .riga.az .tp{flex:1 1 0}
 .tv-pick button small{color:var(--mute);font-size:.75rem}
 /* ---- aspetto: pannelli di vetro scuro, cursori, zoom e barra della maschera ---- */
 .tv{--pan:#1b1512e6;--pan2:#2a211c;--pan-b:#e7cf9a2b;--pan-ink:#f1e4c8;--pan-mute:#b8a78a;--acc:#8e2a36;--acc2:#a8323f;--ombra:0 12px 32px #000000a6,inset 0 1px 0 #ffffff0f}
-.tv-tdp,.tv-turno,.tv-sp,.tv-mbar,.tv-zoom,.tv-chip,.tv-liv{background:var(--pan);border:1px solid var(--pan-b);box-shadow:var(--ombra);-webkit-backdrop-filter:blur(10px) saturate(1.1);backdrop-filter:blur(10px) saturate(1.1)}
-.tv-tdp,.tv-turno,.tv-sp{border-radius:14px;overflow:hidden}
+.tv-tdp,.tv-sp,.tv-mbar,.tv-zoom,.tv-chip,.tv-liv{background:var(--pan);border:1px solid var(--pan-b);box-shadow:var(--ombra);-webkit-backdrop-filter:blur(10px) saturate(1.1);backdrop-filter:blur(10px) saturate(1.1)}
+.tv-tdp,.tv-sp{border-radius:14px;overflow:hidden}
 .tv-tdp .hd,.tv-th{background:linear-gradient(#ffffff0a,#ffffff00);border-bottom:1px solid #ffffff14}
 .tv-tdp .hd b,.tv-th b{font:600 .82rem/1.2 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--gold2)}
 .tv-tdp .hd button,.tv-th button[data-k=x],.tv-sp .tv-th button{all:unset;cursor:pointer;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--pan-mute);font-size:.9rem}
@@ -812,7 +810,6 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
 .tv-scuro .tv-sch .sb{--sbr:#e59a7f;--sbl:#c4553a;border-top-color:#8a7240;border-bottom-color:#8a7240}
 @media (max-width:820px){.tv-sch .sb{padding:10px}.tv-sch .sb .sbc{grid-template-columns:repeat(3,1fr);row-gap:6px}}
 @media (max-width:820px){
-  .tv-turno{width:min(250px,calc(100% - 20px));max-height:45%}
   .tv-rail{width:44px}.tv-rail button{width:34px;height:34px}
   .tv-chat.scal,.tv-chat.sch{width:auto;height:72%;max-height:72%}.tv-crz{display:none}
   .tv-chat{position:absolute;right:0;bottom:0;left:0;width:auto;max-height:62%;z-index:12;border-left:0;border-top:2px solid var(--gold);box-shadow:0 -8px 24px #0008;border-radius:12px 12px 0 0}
@@ -874,9 +871,24 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
 .tv-strip .p.on b{color:var(--gold2);font-size:.72rem}
 .tv-strip .p.on em{background:#c9a24a;color:#1d1613;border-color:#fff}
 .tv-strip .ac{display:flex;gap:6px;padding-left:10px;border-left:1px solid #ffffff1f;flex:none}
+.tv-strip .mv{flex:none;align-self:stretch;display:flex;align-items:center;margin:-6px 0 -6px -8px;padding:0 2px 0 6px;color:var(--pan-mute);cursor:grab;touch-action:none;user-select:none;font-size:.9rem}
+.tv-strip .mv:hover{color:var(--gold2)}
+.tv-strip.tira{opacity:.92;box-shadow:0 14px 40px #000c}.tv-strip.tira .mv{cursor:grabbing}
+.tv-strip .tv-b.on{background:#e7cf9a33;color:var(--gold2)}
+.tv-strip.vert{flex-direction:column;align-items:stretch;gap:0;padding:0;width:262px;max-width:calc(100% - 24px);max-height:calc(100% - 20px);overflow:hidden;border-radius:14px}
+.tv-strip.vert.ed{width:300px}
+.tv-strip.vert .tt{display:flex;align-items:center;gap:8px;padding:6px 8px;background:linear-gradient(#ffffff0a,#ffffff00);border-bottom:1px solid #ffffff14}
+.tv-strip.vert .tt b{flex:1;font:700 1.05rem/1 var(--display);color:var(--gold2);white-space:nowrap}
+.tv-strip.vert .tt b small{font:600 .6rem/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--pan-mute)}
+.tv-strip.vert .tt .mv{margin:-6px 0 -6px -8px;padding:0 0 0 8px}
+.tv-strip.vert .tt .ac{padding-left:0;border:0}
+.tv-strip .tv-b[hidden]{display:none}
+.tv-strip.vert .tv-tl{max-height:min(460px,60vh)}
+.tv-strip.vert .tv-tr.gia{opacity:.55}
+.tv-strip.vert .tv-tf.av{justify-content:flex-end}
+.tv-strip.vert .tv-tf.av .tv-b[hidden]{display:none}
+.tv-strip.vert .tv-tf.av:has(.tv-b[hidden]){display:none}
 .tv-wrap.con-turno .tv-tdp,.tv-wrap.con-turno .tv-sp{top:96px;max-height:calc(100% - 106px)}
-.tv-turno{left:12px;top:96px;bottom:auto;max-height:calc(100% - 200px)}
-.tv-wrap:not(.con-turno) .tv-turno{top:10px}
 
 /* il pannello del turno, in basso al centro */
 .tv-hud{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:9;display:flex;align-items:center;gap:12px;background:var(--pan);border:1px solid #e7cf9a55;border-radius:16px;padding:8px 10px 8px 8px;box-shadow:var(--ombra);color:var(--pan-ink);max-width:calc(100% - 24px);box-sizing:border-box;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
@@ -1108,10 +1120,11 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
   .tv-strip .p.on{width:50px}.tv-strip .p.on i{width:42px;height:42px}
   .tv-strip .p b{display:none}.tv-strip .p.on b{display:block}
   .tv-strip .ac{padding-left:6px}
+  .tv-strip.vert{right:auto;width:min(262px,calc(100% - 16px))}
   .tv-strip .ac .tv-b.pri{padding:0 9px;font-size:.74rem}
   .tv-wrap.con-turno .tv-top{top:84px}
   .tv-wrap.con-turno .tv-zoom{top:132px}
-  .tv-wrap.con-turno .tv-tdp,.tv-wrap.con-turno .tv-sp,.tv-turno{top:84px}
+  .tv-wrap.con-turno .tv-tdp,.tv-wrap.con-turno .tv-sp{top:84px}
   .tv-hud{left:6px;right:6px;transform:none;bottom:6px;gap:6px;padding:5px 6px;border-radius:12px;max-width:none}
   .tv-hud .fo,.tv-hud .t>b,.tv-hud .fzr,.tv-hud .lg{display:none}
   .tv-hud .sh{display:inline}
@@ -1504,7 +1517,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     T.pag = false; T.diceInit = false; T.scal = undefined; T.drag = null; T.online = []; T.live = false; T.tool = 'muovi';
     setView(`<h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Tavolo</h1>
       <div class="tv"><nav class="tv-rail" id="tv-rail" aria-label="Strumenti del tavolo"><span class="sp"></span><span class="tv-on" id="tv-on" title="Connessione…"></span></nav>
-      <div class="tv-wrap"><div class="tv-stage" id="tv-stage"><div class="tv-empty"><div><p>Apro il tavolo…</p></div></div></div><div class="tv-strip" id="tv-strip" hidden></div><div class="tv-hud" id="tv-hud" hidden></div><div class="tv-top" id="tv-top"></div><div class="tv-mbar" id="tv-mbar" hidden></div><div class="tv-ts" id="tv-ts" hidden></div><div class="tv-turno" id="tv-turno" hidden></div><div class="tv-tdp" id="tv-tdp" hidden></div><div class="tv-sp" id="tv-sp" hidden></div><button type="button" class="tv-ctab" id="tv-ctab" data-act="tv-dadi"></button></div>
+      <div class="tv-wrap"><div class="tv-stage" id="tv-stage"><div class="tv-empty"><div><p>Apro il tavolo…</p></div></div></div><div class="tv-strip" id="tv-strip" hidden></div><div class="tv-hud" id="tv-hud" hidden></div><div class="tv-top" id="tv-top"></div><div class="tv-mbar" id="tv-mbar" hidden></div><div class="tv-ts" id="tv-ts" hidden></div><div class="tv-tdp" id="tv-tdp" hidden></div><div class="tv-sp" id="tv-sp" hidden></div><button type="button" class="tv-ctab" id="tv-ctab" data-act="tv-dadi"></button></div>
       <aside class="tv-chat" id="tv-dice" hidden></aside><div class="tv-pages" id="tv-pages" hidden></div></div>`);
     suggerimenti($('.tv'));
     const fit = () => {
@@ -1749,7 +1762,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const b = (act, tip, k, on) => `<button type="button" data-act="${act}" data-tip="${esc(tip)}" aria-label="${esc(tip)}" class="${on ? 'on' : ''}">${svg(k)}<span class="rl" aria-hidden="true">${RL[act] || ''}</span></button>`;
     let h = b('tv-sel', 'Seleziona e sposta i token (S)', 'sel', T.tool === 'muovi') + b('tv-mano', 'Sposta la mappa (M)', 'mano', T.tool === 'mano')
       + b('tv-righello', 'Righello (R)', 'rig', T.tool === 'righello') + b('tv-tiradadi', 'Tiradadi', 'dado', !$('#tv-tdp')?.hidden)
-      + b('tv-turno', 'Ordine del turno', 'tur', !$('#tv-turno')?.hidden) + b('tv-schede', 'Schede dei personaggi e dei PNG', 'sch', !$('#tv-sp')?.hidden)
+      + b('tv-turno', isDM() ? 'Modifica l\'ordine del turno' : 'Ordine del turno: barra o tabella classica', 'tur', isDM() ? !!T.turnoEd : turnoVert()) + b('tv-schede', 'Schede dei personaggi e dei PNG', 'sch', !$('#tv-sp')?.hidden)
       + b('tv-dadi', 'Chat e dadi', 'chat', !$('#tv-dice')?.hidden).replace('class="', 'class="tel '); // solo sul telefono, al posto della linguetta
     const bSc = isDM() && window.__scaletta ? b('tv-scaletta', 'Scaletta della sessione: la vedi solo tu', 'scal', !!T.scal && !$('#tv-dice')?.hidden) : '';
     if (isDM() && !scena() && bSc) h += '<hr><span class="lbl">DM</span>' + bSc;
@@ -1776,8 +1789,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       'tv-porta': () => porta(T.vista),
       'tv-pagine': () => pannelloMappe($('#tv-pages').hidden), 'tv-nuova': () => dlgNuovaScena(),
       'tv-token': () => dlgToken(), 'tv-griglia': () => dlgGriglia(),
-      'tv-turno': () => apriTurno($('#tv-turno').hidden), 'tv-schede': () => apriSchede($('#tv-sp').hidden),
-      'tv-tiradadi': () => { const p = $('#tv-tdp'); p.hidden = !p.hidden; if (!p.hidden) { disegnaTdp(); $('#tv-sp').hidden = true; $('#tv-turno').hidden = true; if (matchMedia('(max-width:820px)').matches) apriChat(false); } disegnaRail(); },
+      'tv-turno': () => apriTurno(!T.turnoEd), 'tv-schede': () => apriSchede($('#tv-sp').hidden),
+      'tv-tiradadi': () => { const p = $('#tv-tdp'); p.hidden = !p.hidden; if (!p.hidden) { disegnaTdp(); $('#tv-sp').hidden = true; if (T.turnoEd) apriTurno(false); if (matchMedia('(max-width:820px)').matches) apriChat(false); } disegnaRail(); },
       'tv-liv-seg': () => livello('segnalini'), 'tv-liv-mas': () => livello('master'), 'tv-maschera': () => strumento(T.tool === 'maschera' ? 'muovi' : 'maschera'), 'tv-muri': () => strumento(T.tool === 'muri' ? 'muovi' : 'muri'), 'tv-difficile': () => strumento(T.tool === 'difficile' ? 'muovi' : 'difficile'), 'tv-effetti': () => strumento(T.tool === 'effetti' ? 'muovi' : 'effetti'), 'tv-segni': () => strumento(T.tool === 'segni' ? 'muovi' : 'segni'),
       ...dadiActs()
     };
@@ -1830,6 +1843,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
   async function porta(id) {
     const s = T.scene.get(id); if (!s) return;
+    // cambiando mappa il combattimento di quella vecchia finisce: sulla nuova si tira di nuovo l'iniziativa
+    const cs = scenaCombattimento();
+    if (cs && cs !== id && await svuotaTurno()) toast(`Combattimento su «${T.scene.get(cs)?.nome || 'la mappa di prima'}» finito: l'ordine del turno è stato svuotato.`);
     chk(await SB.from('tavolo_stato').update({ scena: id }).eq('id', 1));
     T.stato.scena = id; disegnaTop(); if (!$('#tv-pages').hidden) pannelloMappe(true);
     toast('I giocatori ora vedono: ' + s.nome);
@@ -1914,7 +1930,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
   async function mostraScena(centra) {
     const st = $('#tv-stage'); if (!st) return;
-    chiudiPop();
+    chiudiPop(); disegnaStriscia();
     const sc = scena();
     if (!sc) {
       st.innerHTML = `<div class="tv-empty"><div>${isDM() ? (T.scene.size ? '<h2>Nessuna mappa aperta</h2><p>Scegline una dal pannello delle mappe, in alto a destra.</p><p><button class="btn primary" data-act="tv-pagine">Apri le mappe</button></p>' : '<h2>Il tavolo è pronto</h2><p>Crea la prima mappa: carica l\'immagine del combattimento o del luogo, poi aggiungi i token.</p><p><button class="btn primary" data-act="tv-nuova">Crea una mappa</button></p>') : '<h2>Il tavolo è vuoto</h2><p>Aspetta che il DM vi porti in una scena: apparirà qui da sola.</p>'}</div></div>`;
@@ -4201,10 +4217,17 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function effettoPF(t, delta) { if (!t || !delta) return; const m = { id: t.id, delta }; manda('pf', m); mostraPF(m); }
 
   /* ---------- ordine del turno ---------- */
+  // una sola tabella: barra orizzontale in alto (o classica in verticale, a scelta di ognuno), trascinabile dove si vuole.
+  // la matita (solo DM) la apre in modifica: iniziative, nascondi, togli, aggiungi.
+  var TVERT = 'tavolo-turno-vert', TPOS = 'tavolo-turno-pos';
+  function turnoVert() { try { return localStorage.getItem('tavolo-turno-vert') === '1'; } catch { return false; } }
+  function turnoPos() { try { return JSON.parse(localStorage.getItem('tavolo-turno-pos') || 'null'); } catch { return null; } }
+  function giraTurno() { try { localStorage.setItem(TVERT, turnoVert() ? '0' : '1'); } catch { } disegnaStriscia(); disegnaRail(); }
   function apriTurno(apri) {
-    const b = $('#tv-turno'); if (!b) return; b.hidden = !apri;
+    if (!isDM()) return giraTurno();
+    T.turnoEd = !!apri;
     if (apri) { const t = $('#tv-tdp'), p = $('#tv-sp'); if (t) t.hidden = true; if (p) p.hidden = true; }
-    disegnaTurno(); disegnaRail();
+    disegnaStriscia(); disegnaRail();
   }
   const ordinati = () => [...T.turno].sort((a, b) => b.valore - a.valore || (a.creato < b.creato ? -1 : 1));
   // passa al prossimo nell'ordine del turno (tappa-7.sql salta chi è a 0 PF)
@@ -4230,21 +4253,83 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       })();
     }
   }
-  // la striscia in alto: le facce in ordine di iniziativa, chi gioca in grande
+  // la tabella del turno: le facce in ordine di iniziativa, chi gioca in grande
   function disegnaStriscia() {
     const s = $('#tv-strip'), w = $('.tv-wrap'); if (!s) return;
     const L = ordinati(), att = T.stato?.turno, ia = L.findIndex(x => x.id === att);
-    s.hidden = !L.length; w?.classList.toggle('con-turno', !!L.length);
-    if (!L.length) { s.innerHTML = ''; disegnaHud(); return; }
-    const avanti = isDM() || L.some(x => x.id === att && x.giocatore === T.me.giocatore);
-    s.innerHTML = `<div class="rd"><small>Round</small>${T.stato?.round || 1}</div><div class="ls">${L.map((x, i) => `<span class="p${i === ia ? ' on' : ''}${ia >= 0 && i < ia ? ' gia' : ''}${x.giocatore ? '' : ' nem'}${x.nascosto ? ' hid' : ''}" title="${esc(x.nome)} · iniziativa ${x.valore}${x.nascosto ? ' (nascosto ai giocatori)' : ''}"><i style="--c:${esc(x.colore || '#7d2530')};${x.immagine ? `background-image:url('${x.immagine}')` : ''}">${x.immagine ? '' : esc(iniziali(x.nome))}</i><b>${esc(String(x.nome || '').split(/\s+/)[0])}</b><em>${x.valore}</em></span>`).join('')}</div>
-      <div class="ac"><button type="button" class="tv-b pri" data-k="av" title="Passa al prossimo (chi è a 0 PF viene saltato)"${avanti ? '' : ' hidden'}>Finisci il turno ▶</button><button type="button" class="tv-b sec ico" data-k="ed" title="${isDM() ? 'Modifica l\'ordine del turno' : 'Ordine del turno'}" aria-label="Ordine del turno">✎</button>${isDM() ? '<button type="button" class="tv-b sec ico" data-k="x" title="Fine combattimento: svuota l\'ordine del turno e chiude la barra" aria-label="Fine combattimento">✕</button>' : ''}</div>`;
-    s.querySelector('[data-k=av]').onclick = finisciTurno;
+    const ed = isDM() && !!T.turnoEd, vert = ed || turnoVert(), pos = turnoPos();
+    // la tabella si vede solo sulla mappa del combattimento (il DM può guardarne un'altra)
+    const qui = !L.length || !T.vista || scenaCombattimento() === T.vista;
+    s.hidden = (!L.length || !qui) && !ed; s.classList.toggle('vert', vert); s.classList.toggle('ed', ed);
+    w?.classList.toggle('con-turno', !s.hidden && !vert && !pos);
+    if (s.hidden) { s.innerHTML = ''; disegnaHud(); return; }
+    const avanti = L.length && (isDM() || L.some(x => x.id === att && x.giocatore === T.me.giocatore));
+    const faccia = x => `<i style="--c:${esc(x.colore || '#7d2530')};${x.immagine ? `background-image:url('${x.immagine}')` : ''}">${x.immagine ? '' : esc(iniziali(x.nome))}</i>`;
+    const grip = '<span class="mv" title="Trascina per spostare (doppio click: torna al suo posto)" aria-hidden="true">⠿</span>';
+    const bottoni = `<button type="button" class="tv-b sec ico" data-k="gira" title="${vert ? 'Barra orizzontale' : 'Tabella classica (verticale)'}" aria-label="${vert ? 'Barra orizzontale' : 'Tabella classica'}"${ed ? ' hidden' : ''}>${vert ? '⇄' : '⇅'}</button>${isDM() ? `<button type="button" class="tv-b sec ico${ed ? ' on' : ''}" data-k="ed" title="${ed ? 'Fine modifica' : 'Modifica l\'ordine del turno'}" aria-label="Modifica l'ordine del turno">✎</button><button type="button" class="tv-b sec ico" data-k="x" title="Fine combattimento: svuota l'ordine del turno e chiude la tabella" aria-label="Fine combattimento">✕</button>` : ''}`;
+    const bav = `<button type="button" class="tv-b pri" data-k="av" title="Passa al prossimo (chi è a 0 PF viene saltato)"${avanti ? '' : ' hidden'}>Finisci il turno ▶</button>`;
+    if (!vert) {
+      s.innerHTML = `${grip}<div class="rd"><small>Round</small>${T.stato?.round || 1}</div><div class="ls">${L.map((x, i) => `<span class="p${i === ia ? ' on' : ''}${ia >= 0 && i < ia ? ' gia' : ''}${x.giocatore ? '' : ' nem'}${x.nascosto ? ' hid' : ''}" title="${esc(x.nome)} · iniziativa ${x.valore}${x.nascosto ? ' (nascosto ai giocatori)' : ''}">${faccia(x)}<b>${esc(String(x.nome || '').split(/\s+/)[0])}</b><em>${x.valore}</em></span>`).join('')}</div>
+      <div class="ac">${bav}${bottoni}</div>`;
+    } else {
+      s.innerHTML = `<div class="tt">${grip}<b><small>Round</small> ${T.stato?.round || 1}</b><span class="ac">${bottoni}</span></div>
+      <div class="tv-tl">${L.map((x, i) => `<div class="tv-tr${x.id === att ? ' att' : ''}${ia >= 0 && i < ia ? ' gia' : ''}${x.nascosto ? ' hid' : ''}" data-id="${x.id}">${faccia(x)}<span title="${esc(x.nome)}">${esc(x.nome)}${x.id === att ? '<small class="ora">sta giocando</small>' : ''}</span>
+        ${ed ? `<input type="number" step="1" value="${x.valore}" aria-label="Iniziativa di ${esc(x.nome)}"><button type="button" data-k="nasc" title="${x.nascosto ? 'Mostra ai giocatori' : 'Nascondi ai giocatori'}">${x.nascosto ? '🙈' : '👁'}</button><button type="button" data-k="via" title="Togli dall'ordine">✕</button>` : `<em>${x.valore}</em>`}</div>`).join('')
+        || '<div class="tv-tvuoto">Nessuno ancora. Clicca un token e premi «Tira» accanto a Iniziativa, o aggiungilo qui sotto.</div>'}</div>
+      ${ed ? '<div class="tv-tf"><input type="text" data-k="nn" placeholder="Nome" style="flex:1;width:auto"><input type="number" data-k="nv" placeholder="0"><button type="button" data-k="add">+ Aggiungi</button><button type="button" data-k="svuota">Svuota</button></div>' : `<div class="tv-tf av">${bav}</div>`}`;
+    }
+    s.querySelector('[data-k=av]')?.addEventListener('click', finisciTurno);
     s.querySelector('[data-k=x]')?.addEventListener('click', () => fineCombattimento());
-    s.querySelector('[data-k=ed]').onclick = () => apriTurno($('#tv-turno').hidden);
+    s.querySelector('[data-k=ed]')?.addEventListener('click', () => apriTurno(!T.turnoEd));
+    s.querySelector('[data-k=gira]').onclick = giraTurno;
+    if (ed) legaModificaTurno(s);
+    trascinaTurno(s, s.querySelector('.mv'));
+    piazzaTurno(s, pos);
     const on = s.querySelector('.p.on'), ls = s.querySelector('.ls');
     if (on) ls.scrollLeft = on.offsetLeft - ls.clientWidth / 2 + on.offsetWidth / 2;
     disegnaHud();
+  }
+  // dove l'ha lasciata chi guarda, senza farla uscire dal tavolo
+  function piazzaTurno(s, pos) {
+    if (!pos) { s.style.left = s.style.top = s.style.right = ''; return; }
+    const w = s.parentElement; if (!w) return;
+    s.style.right = 'auto';
+    s.style.left = Math.round(clamp(pos.x, 0, Math.max(0, w.clientWidth - s.offsetWidth))) + 'px';
+    s.style.top = Math.round(clamp(pos.y, 0, Math.max(0, w.clientHeight - s.offsetHeight))) + 'px';
+  }
+  function trascinaTurno(s, h) {
+    if (!h) return;
+    h.onpointerdown = e => {
+      if (e.button) return; e.preventDefault();
+      const w = s.parentElement.getBoundingClientRect(), r = s.getBoundingClientRect(), dx = e.clientX - r.left, dy = e.clientY - r.top;
+      let pos = null; h.setPointerCapture(e.pointerId); s.classList.add('tira');
+      h.onpointermove = m => { pos = { x: m.clientX - w.left - dx, y: m.clientY - w.top - dy }; piazzaTurno(s, pos); $('.tv-wrap')?.classList.remove('con-turno'); };
+      h.onpointerup = h.onpointercancel = () => {
+        h.onpointermove = h.onpointerup = h.onpointercancel = null; s.classList.remove('tira');
+        if (pos) { try { localStorage.setItem(TPOS, JSON.stringify({ x: parseInt(s.style.left), y: parseInt(s.style.top) })); } catch { } }
+      };
+    };
+    h.ondblclick = () => { try { localStorage.removeItem(TPOS); } catch { } disegnaStriscia(); };
+  }
+  function legaModificaTurno(b) {
+    b.querySelectorAll('.tv-tr').forEach(row => {
+      const x = T.turno.find(y => y.id === row.dataset.id); if (!x) return;
+      const inp = row.querySelector('input');
+      if (inp) inp.onchange = () => salvaTurno(x.id, { valore: +inp.value || 0 });
+      const v = row.querySelector('[data-k=via]');
+      if (v) v.onclick = async () => { const r = await SB.from('tavolo_turno').delete().eq('id', x.id); if (r.error) return toast(r.error.message, 'err'); T.turno = T.turno.filter(y => y.id !== x.id); disegnaTurno(); disegnaToken(); manda('turno', {}); };
+      const n = row.querySelector('[data-k=nasc]');
+      if (n) n.onclick = async () => { await salvaTurno(x.id, { nascosto: !x.nascosto }); manda('turno', {}); };
+    });
+    const add = b.querySelector('[data-k=add]');
+    if (add) add.onclick = async () => {
+      const nome = b.querySelector('[data-k=nn]').value.trim(); if (!nome) { b.querySelector('[data-k=nn]').focus(); return; }
+      const r = await SB.from('tavolo_turno').insert({ nome: nome.slice(0, 60), valore: +b.querySelector('[data-k=nv]').value || 0, colore: '#5b6670' }).select().single();
+      if (r.error) return toast(r.error.message, 'err');
+      if (!T.turno.some(y => y.id === r.data.id)) T.turno.push(r.data); disegnaTurno(); manda('turno', {});
+    };
+    const sv = b.querySelector('[data-k=svuota]');
+    if (sv) sv.onclick = () => fineCombattimento('Svuotare l\'ordine del turno?', 'Svuota', 'Ordine del turno');
   }
   // il pannello in basso di chi sta giocando: azione, azione bonus, reazione, movimento rimasto
   // gli avvisi in basso salgono sopra il pannello del turno, così non lo coprono
@@ -4273,43 +4358,22 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     h.querySelector('[data-k=azm]').onclick = e => menuAzioni(t, e.currentTarget);
     h.querySelector('[data-k=fine]').onclick = finisciTurno;
   }
-  function disegnaTurno() {
-    disegnaStriscia();
-    const b = $('#tv-turno'); if (!b || b.hidden) return;
-    const L = ordinati(), att = T.stato?.turno, mia = x => isDM() || (!!x.giocatore && x.giocatore === T.me.giocatore);
-    b.innerHTML = `<div class="tv-th"><b>Ordine del turno</b><button type="button" data-k="x" aria-label="Chiudi">✕</button></div>
-      <div class="tv-tl">${L.map(x => `<div class="tv-tr ${x.id === att ? 'att' : ''} ${x.nascosto ? 'hid' : ''}" data-id="${x.id}"><i style="--c:${esc(x.colore || '#7d2530')};${x.immagine ? `background-image:url('${x.immagine}')` : ''}">${x.immagine ? '' : esc(iniziali(x.nome))}</i><span title="${esc(x.nome)}">${esc(x.nome)}${x.id === att ? '<small class="ora">sta giocando</small>' : ''}</span>
-        ${mia(x) ? `<input type="number" step="1" value="${x.valore}" aria-label="Iniziativa di ${esc(x.nome)}">${isDM() ? `<button type="button" data-k="nasc" title="${x.nascosto ? 'Mostra ai giocatori' : 'Nascondi ai giocatori'}">${x.nascosto ? '🙈' : '👁'}</button>` : ''}<button type="button" data-k="via" title="Togli dall'ordine">✕</button>` : `<em>${x.valore}</em>`}</div>`).join('')
-        || '<div class="tv-tvuoto">Nessuno ancora. Clicca un token e premi «Tira» accanto a Iniziativa.</div>'}</div>
-      ${isDM() ? '<div class="tv-tf"><input type="text" data-k="nn" placeholder="Nome" style="flex:1;width:auto"><input type="number" data-k="nv" placeholder="0"><button type="button" data-k="add">+ Aggiungi</button><button type="button" data-k="svuota">Svuota</button></div>' : ''}`;
-    b.querySelector('[data-k=x]').onclick = () => apriTurno(false);
-    const av = b.querySelector('[data-k=av]');
-    if (av) av.onclick = finisciTurno;
-    b.querySelectorAll('.tv-tr').forEach(row => {
-      const x = T.turno.find(y => y.id === row.dataset.id); if (!x) return;
-      const inp = row.querySelector('input');
-      if (inp) inp.onchange = () => salvaTurno(x.id, { valore: +inp.value || 0 });
-      const v = row.querySelector('[data-k=via]');
-      if (v) v.onclick = async () => { const r = await SB.from('tavolo_turno').delete().eq('id', x.id); if (r.error) return toast(r.error.message, 'err'); T.turno = T.turno.filter(y => y.id !== x.id); disegnaTurno(); disegnaToken(); manda('turno', {}); };
-      const n = row.querySelector('[data-k=nasc]');
-      if (n) n.onclick = async () => { await salvaTurno(x.id, { nascosto: !x.nascosto }); manda('turno', {}); };
-    });
-    const add = b.querySelector('[data-k=add]');
-    if (add) add.onclick = async () => {
-      const nome = b.querySelector('[data-k=nn]').value.trim(); if (!nome) { b.querySelector('[data-k=nn]').focus(); return; }
-      const r = await SB.from('tavolo_turno').insert({ nome: nome.slice(0, 60), valore: +b.querySelector('[data-k=nv]').value || 0, colore: '#5b6670' }).select().single();
-      if (r.error) return toast(r.error.message, 'err');
-      if (!T.turno.some(y => y.id === r.data.id)) T.turno.push(r.data); disegnaTurno();
-    };
-    const sv = b.querySelector('[data-k=svuota]');
-    if (sv) sv.onclick = () => fineCombattimento('Svuotare l\'ordine del turno?', 'Svuota', 'Ordine del turno');
-  }
+  function disegnaTurno() { disegnaStriscia(); }
   // svuota l'ordine del turno: la striscia in alto sparisce per tutti
   async function fineCombattimento(dom = 'Il combattimento è finito? L\'ordine del turno si svuota e la barra in alto sparisce per tutti.', ok = 'Fine combattimento', title = 'Fine del combattimento') {
     if (!T.turno.length || !await ask(dom, { ok, title })) return;
-    const r = await SB.from('tavolo_turno').delete().in('id', T.turno.map(y => y.id)); if (r.error) return toast(r.error.message, 'err');
+    await svuotaTurno();
+  }
+  async function svuotaTurno() {
+    const r = await SB.from('tavolo_turno').delete().in('id', T.turno.map(y => y.id)); if (r.error) { toast(r.error.message, 'err'); return false; }
     await SB.from('tavolo_stato').update({ turno: null, round: 1 }).eq('id', 1);
     T.turno = []; T.stato.turno = null; T.stato.round = 1; disegnaTurno(); disegnaToken(); manda('turno', {});
+    return true;
+  }
+  // il combattimento appartiene alla mappa dei suoi token (chi è aggiunto a mano sta sulla mappa dei giocatori)
+  function scenaCombattimento() {
+    for (const x of ordinati()) { const t = x.token && T.tok.get(x.token); if (t?.scena) return t.scena; }
+    return T.turno.length ? T.stato?.scena || null : null;
   }
   async function salvaTurno(id, ch) {
     const r = await SB.from('tavolo_turno').update(ch).eq('id', id).select().single();
@@ -4318,6 +4382,12 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
   // 1d20 + modificatore, tirato dal server come ogni dado, e il risultato entra (o si aggiorna) nell'ordine del turno
   async function iniziativa(t, mod) {
+    // un combattimento per mappa: tirare su un'altra mappa ne apre uno nuovo
+    const cs = scenaCombattimento();
+    if (isDM() && cs && t.scena && cs !== t.scena) {
+      if (!await ask(`C'è un combattimento in corso su «${T.scene.get(cs)?.nome || 'un\'altra mappa'}». Lo chiudo e ne inizio uno nuovo qui?`, { ok: 'Nuovo combattimento', title: 'Combattimento su un\'altra mappa' })) return;
+      if (!await svuotaTurno()) return;
+    }
     const m = Math.trunc(+mod || 0), f = '1d20' + (m ? (m > 0 ? '+' : '') + m : '');
     const r = await SB.rpc('tavolo_tira', { p_formula: f, p_motivo: 'Iniziativa · ' + (t.nome || 'token'), p_privato: !!t.nascosto });
     if (r.error) return toast(r.error.message, 'err');
@@ -4615,7 +4685,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   /* elenco delle schede (pannello a sinistra) */
   function apriSchede(apri) {
     const p = $('#tv-sp'); if (!p) return; p.hidden = !apri;
-    if (apri) { const t = $('#tv-tdp'), u = $('#tv-turno'); if (t) t.hidden = true; if (u) u.hidden = true; }
+    if (apri) { const t = $('#tv-tdp'); if (t) t.hidden = true; if (T.turnoEd) apriTurno(false); }
     disegnaSchede(); disegnaRail(); posizionaScheda();
   }
   const riass = s => {
