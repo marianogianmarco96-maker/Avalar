@@ -650,6 +650,7 @@ dialog.tv-pag .tv-sch .at .riga.az .tp{flex:1 1 0}
 .tv-scuro .tv-sch .spl .st{color:#e8a0a6}
 .tv-sch .bgT{display:grid;grid-template-columns:repeat(7,1fr);gap:4px 10px;border:2px solid var(--lin);border-radius:8px;padding:6px 10px;background:var(--box);margin-bottom:8px}
 .tv-sch .bgG{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px;margin-bottom:8px}
+.tv-sch .fd .aff{display:inline-flex;align-items:center;gap:5px}.tv-sch .fd .aff select{font:inherit;border:1px solid var(--ul);border-radius:4px;background:transparent;color:inherit;padding:1px 4px}
 .tv-sch .fd{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--ul)}
 .tv-scuro .tv-sch .nm,.tv-scuro .tv-sch h4{color:var(--gold2)}
 .tv-pick button small{color:var(--mute);font-size:.75rem}
@@ -2840,7 +2841,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const gia = sch ? sul.filter(t => schedaDi(t)?.id === sch.id).length : 0;
     const row = { scena: sc.id, nome: gia ? `${o.nome} ${gia + 1}` : o.nome, immagine: o.img || null, colore: o.colore, misura: mis, giocatore: o.giocatore || null, scheda: o.scheda || null, nascosto: !!master,
       x: aggancia(clamp(cx, 0, sc.larghezza - lato), sc.griglia_x, mis), y: aggancia(clamp(cy, 0, sc.altezza - lato), sc.griglia_y, mis) };
-    if (max != null) { row.pf = max; row.pf_max = max; }
+    if (max != null && !row.giocatore) { row.pf = max; row.pf_max = max; }
     if (row.giocatore) { const l = postoLibero({ ...row, id: null }, row.x, row.y); if (l) { row.x = l.x; row.y = l.y; } }
     const r = await SB.from('tavolo_token').insert(row).select().single();
     if (r.error) { toast(r.error.message, 'err'); return null; }
@@ -4621,7 +4622,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (t.giocatore) { const s = v.find(x => x.giocatore === t.giocatore); if (s) return s; }
     return t.scheda ? v.find(x => x.entita === t.scheda) || null : null;
   };
-  const puoScrivere = s => isDM() || (!!s.giocatore && s.giocatore === T.me.giocatore);
+  // il giocatore compila la propria scheda e quelle che il DM gli affida (assegnata: per esempio Edward)
+  const puoScrivere = s => isDM() || (!!T.me.giocatore && (s.giocatore === T.me.giocatore || s.assegnata === T.me.giocatore));
   // scheda completa, come quella di un giocatore: i PG e i personaggi principali del DM (dati.forma = 'pg');
   // gli altri personaggi hanno la scheda da PNG (blocco delle statistiche)
   const formaPg = s => s.tipo === 'pg' || s.dati?.forma === 'pg';
@@ -4881,9 +4883,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const cerca = p.querySelector('[data-k=cerca]')?.value || '';
     const v = [...T.schede.values()].sort((a, b) => a.nome.localeCompare(b.nome, 'it'));
     const riga = s => `<div class="r" data-id="${s.id}">${tondo(s)}<button type="button" class="nm" data-k="apri">${esc(s.nome)}<small>${esc(riass(s)) || '&nbsp;'}</small></button>${formaPg(s) && num(s.dati.liv_concesso) > (num(s.dati.livello) || 1) ? `<span class="lvup" title="Può salire fino al ${num(s.dati.liv_concesso)}° livello">⬆</span>` : ''}${isDM() && s.tipo === 'pg' && (num(s.dati.livello) || 1) < 20 ? '<button type="button" class="s" data-k="liv" title="Concedi un livello: il giocatore sale da solo con la procedura guidata">🎁</button>' : ''}${isDM() && s.tipo === 'png' ? `<button type="button" class="s" data-k="vis" title="${s.nascosta ? 'I giocatori non la vedono: clicca per mostrarla' : 'I giocatori la vedono: clicca per nasconderla'}">${s.nascosta ? '🙈' : '👁'}</button><button type="button" class="s" data-k="via" title="Elimina la scheda">✕</button>` : ''}</div>`;
-    const pg = v.filter(s => s.tipo === 'pg'), png = v.filter(s => s.tipo === 'png');
+    const pg = v.filter(s => s.tipo === 'pg'), png = v.filter(s => s.tipo === 'png' && !s.assegnata), aff = v.filter(s => s.tipo === 'png' && s.assegnata);
     p.innerHTML = hd + `${isDM() && png.length > 5 ? `<input type="search" data-k="cerca" placeholder="Cerca…" value="${esc(cerca)}" aria-label="Cerca una scheda">` : ''}<div class="tv-tl">
-      <h5>Party</h5>${pg.map(riga).join('') || `<div class="tv-tvuoto">${isDM() ? 'Si creano da sole all\'apertura del tavolo, una per giocatore.' : 'La tua scheda compare quando il DM apre il tavolo.'}</div>`}
+      <h5>Party</h5>${[...pg, ...aff].map(riga).join('') || `<div class="tv-tvuoto">${isDM() ? 'Si creano da sole all\'apertura del tavolo, una per giocatore.' : 'La tua scheda compare quando il DM apre il tavolo.'}</div>`}
       <h5>Personaggi</h5>${png.map(riga).join('') || `<div class="tv-tvuoto">${isDM() ? 'Nessun personaggio. Creane uno qui sotto.' : 'Il DM non vi ha ancora mostrato nessun personaggio.'}</div>`}</div>
       ${isDM() ? `<div class="tv-tf"><button type="button" data-k="nuovo">+ Nuovo personaggio</button>${pg.length ? '<button type="button" data-k="party" title="Ogni giocatore potrà salire di un livello con la procedura guidata">🎁 Un livello al party</button>' : ''}</div>` : ''}`;
     p.querySelector('[data-k=x]').onclick = () => apriSchede(false);
@@ -4912,6 +4914,20 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
 
   /* nuovo PNG (DM): da un modello, da un PNG del sito o vuoto */
+  /* il DM affida la scheda di un PNG (Edward…) a un giocatore: lui la compila e muove i suoi token, i PF stanno sulla scheda */
+  async function affidaScheda(s, g) {
+    const toks = [...T.tok.values()].filter(t => schedaDi(t)?.id === s.id && (!t.giocatore || t.giocatore === s.assegnata));
+    const u = await SB.from('tavolo_schede').update({ assegnata: g }).eq('id', s.id).select().single();
+    if (u.error) { toast(/assegnata/i.test(u.error.message) || sqlMancante(u.error) ? 'Per affidare una scheda esegui tavolo/tappa-12.sql in Supabase.' : u.error.message, 'err'); return disegnaScheda(); }
+    arrivaScheda(u.data);
+    for (const t of toks) {
+      const r = await SB.from('tavolo_token').update({ giocatore: g, scheda: 'tv:' + s.id, ...(g ? { pf: null, pf_max: null } : {}) }).eq('id', t.id).select().single();
+      if (!r.error) T.tok.set(t.id, completa(t, r.data));
+    }
+    disegnaToken(); disegnaSchede(); manda('schede', {});
+    const chi = (T.info.giocatori || []).find(x => x.id === g)?.name;
+    toast(g ? `Ora ${chi || 'il giocatore'} usa la scheda di ${s.nome}${toks.length ? ' e ne muove i token' : ''}.` : `La scheda di ${s.nome} torna solo tua.`);
+  }
   // ogni scheda nata nel Tavolo diventa anche un personaggio dell'archivio del sito (o si lega a quello con lo stesso nome)
   async function nuovoNellArchivio(nome, dati) {
     if (!isDM() || window.__RO || typeof createEntity !== 'function' || !S.ents) return null;
@@ -5706,7 +5722,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       <div class="tabs" role="tablist">${[['pri', pg ? 'Personaggio' : 'Statistiche'], ['inc', 'Incantesimi'], ['bg', pg ? 'Background e note' : 'Note']].map(([k, l]) => `<button type="button" role="tab" data-tab="${k}" aria-selected="${sv.tab === k}" class="${sv.tab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
       ${pg ? barraGuida(s, w) : ''}
       <div class="corpo">${corpo}</div>
-      ${isDM() ? `<div class="fd">${s.tipo === 'png' ? `<button type="button" class="mini" data-k="forma" title="${pg ? 'Passa al blocco delle statistiche da PNG' : 'Passa alla scheda completa, come quella di un giocatore'}">${pg ? '📋 Scheda da PNG' : '📜 Scheda completa'}</button><button type="button" class="mini" data-k="vis">${s.nascosta ? '🙈 Nascosta ai giocatori' : '👁 La vedono i giocatori'}</button>${scena() ? '<button type="button" class="mini" data-k="metti">＋ Metti un token sulla mappa</button>' : ''}<button type="button" class="mini" data-k="svuota" title="Cancella tutto e ricrea la scheda da capo: vuota, completa o da una foto">🧹 Svuota scheda</button>` : '<span class="vuoto">La compila anche il giocatore, dal vivo.</span>'}</div>` : (w ? '' : '<p class="vuoto fd">Scheda mostrata dal DM: puoi solo leggerla.</p>')}`;
+      ${isDM() ? `<div class="fd">${s.tipo === 'png' ? `<button type="button" class="mini" data-k="forma" title="${pg ? 'Passa al blocco delle statistiche da PNG' : 'Passa alla scheda completa, come quella di un giocatore'}">${pg ? '📋 Scheda da PNG' : '📜 Scheda completa'}</button><button type="button" class="mini" data-k="vis">${s.nascosta ? '🙈 Nascosta ai giocatori' : '👁 La vedono i giocatori'}</button>${scena() ? '<button type="button" class="mini" data-k="metti">＋ Metti un token sulla mappa</button>' : ''}<button type="button" class="mini" data-k="svuota" title="Cancella tutto e ricrea la scheda da capo: vuota, completa o da una foto">🧹 Svuota scheda</button>
+          <label class="mini aff" title="Il giocatore scelto la vede, la compila e muove i suoi token, oltre al proprio personaggio">🎮 La usa <select data-k="affida" aria-label="Affida la scheda a un giocatore"><option value="">solo il DM</option>${(T.info.giocatori || []).map(g => `<option value="${esc(g.id)}"${s.assegnata === g.id ? ' selected' : ''}>${esc(g.name)}</option>`).join('')}</select></label>` : '<span class="vuoto">La compila anche il giocatore, dal vivo.</span>'}</div>` : (w ? '' : '<p class="vuoto fd">Scheda mostrata dal DM: puoi solo leggerla.</p>')}`;
     riempi(); applicaZoomScheda(); sv.d.classList.toggle('tv-scuro', schedaScura());
   }
   function campo(el, scelto = false) {
@@ -5924,7 +5941,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       const u = await SB.from('tavolo_schede').update({ nascosta: !s.nascosta }).eq('id', s.id).select().single();
       if (u.error) return toast(u.error.message, 'err'); arrivaScheda(u.data); manda('schede', {}); return;
     }
-    if (k === 'metti') { const t = await piazza({ nome: s.nome, img: fotoScheda(s), scheda: 'tv:' + s.id, colore: '#7d2530', sch: s }, num(d.misura) || 1, T.livello === 'master'); if (t) { sv.tok = t.id; disegnaScheda(); } return; }
+    if (k === 'affida') return affidaScheda(s, b.value || null);
+    if (k === 'metti') { const t = await piazza({ nome: s.nome, img: fotoScheda(s), scheda: 'tv:' + s.id, colore: '#7d2530', sch: s, giocatore: s.assegnata || null }, num(d.misura) || 1, T.livello === 'master'); if (t) { sv.tok = t.id; disegnaScheda(); } return; }
     if (k === 'img') {
       const f = b.files?.[0]; if (!f) return;
       try {
