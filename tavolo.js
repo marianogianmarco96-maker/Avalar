@@ -510,6 +510,13 @@ dialog.tv-sw>.rz:hover{background-color:#7d253033}
 .tv-sch .tz .mini.on{background:#7d2530;color:#fff}
 .tv-sch .tz .fine{all:unset;box-sizing:border-box;cursor:pointer;flex:1;text-align:center;padding:6px 10px;border-radius:6px;background:#7d2530;color:#fff;font:700 .82rem var(--body)}
 .tv-sch .tz .fine:hover{background:#962c3a}
+.tv-sch .dxs .dx{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:.8rem;border-bottom:1px solid var(--ul)}
+.tv-sch .dxs .dx:last-of-type{border-bottom:0}
+.tv-sch .dxs .dxn{flex:1;min-width:0}.tv-sch .dxs .dxd{width:58px;flex:none;font-weight:700;text-align:center}
+.tv-sch .dxs .dxc{width:16px;height:16px;margin:0;flex:none;accent-color:#7d2530;cursor:pointer}
+.tv-sch .dxs .dx .mini,.tv-sch .dxs .dx .ing{flex:none;padding:2px 6px}
+.tv-sch .dxs input.dxn,.tv-sch .dxs input.dxd{border:1px solid var(--ul);border-radius:4px;padding:2px 5px;background:transparent;color:inherit;font:inherit}
+.tv-sch .dxs .dx:not(.on) .dxn,.tv-sch .dxs .dx:not(.on) .dxd{opacity:.65}
 .tv-sch .poz .pz{display:flex;align-items:center;gap:6px;padding:2px 0;font-size:.8rem}
 .tv-sch .poz .pz span{flex:1}.tv-sch .poz .pz small{text-transform:none;letter-spacing:0;font-weight:400}
 .tv-sch .poz input{width:42px;border:1px solid var(--ul);border-radius:4px}
@@ -3940,7 +3947,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function iniziaMira(s, i, tok, inc = null, liv = null) {
     const sv = T.sv, at = inc != null ? attDaInc(s, s.dati.incantesimi?.[inc]) : s.dati.attacchi[i]; if (!at) return;
     const pa = portata(at); T.critico = null;
-    T.mira = { sid: s.id, i: inc != null ? 0 : i, inc, liv: liv > (num(s.dati.incantesimi?.[inc]?.livello) || 0) ? liv : null, slot: liv || null, tok: tok.id, adv: sv?.adv || 0, seg: !!sv?.seg, area: pa.area, dist: pa.dist, col: pa.col, extra: new Set(inc != null ? [] : (s.dati.privilegi || []).map((x, j) => x.extra && x.dadi && x.attivo ? j : -1).filter(j => j >= 0)) };
+    T.mira = { sid: s.id, i: inc != null ? 0 : i, inc, liv: liv > (num(s.dati.incantesimi?.[inc]?.livello) || 0) ? liv : null, slot: liv || null, tok: tok.id, adv: sv?.adv || 0, seg: !!sv?.seg, area: pa.area, dist: pa.dist, col: pa.col, extra: new Set(inc != null ? [] : extraDi(s).filter(x => x.attivo && x.dadi).map(x => x.id)) };
     // la scheda coprirebbe la mappa: sul telefono si chiude, sul computer sparisce finché non si è scelto il bersaglio
     if (sv?.d.open) { if (innerWidth <= 820) sv.d.close(); else { sv.d.style.visibility = 'hidden'; T.mira.d = sv.d; } }
     strumento('muovi'); $('#tv-stage')?.classList.add('mira'); barraMira(at, tok); disegnaToken();
@@ -3954,20 +3961,39 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const b = $('#tv-mbar'), m = T.mira; if (!b || !m) return;
     const p = portata(at), arr = p.dist ? `gittata ${metri(p.dist[0])}${p.dist[1] > p.dist[0] ? ' / ' + metri(p.dist[1]) : ''}${p.mischia ? ' · anche in mischia' : ''}` : p.area ? 'da chi lancia' : `mischia · ${metri(p.reach)}`;
     // i privilegi con dadi da aggiungere ai danni (attacco furtivo, punizione…) si accendono qui
-    const s = T.schede?.get(m.sid), ex = (s?.dati.privilegi || []).map((x, i) => [x, i]).filter(([x]) => x.extra && x.dadi);
+    const s = T.schede?.get(m.sid), ex = extraDi(s).filter(x => x.dadi).map(x => [x, x.id]);
     const forma = p.area && { cerchio: 'sfera', cubo: 'cubo', cono: 'cono', linea: 'linea' }[p.area.forma] + ' di ' + metri(p.area.m);
     b.innerHTML = `<div class="g"><b class="tit">🎯 ${esc(at.nome || 'Attacco')}${m.inc != null && m.slot ? ` · slot di ${m.slot}°` : ''}</b><span class="avv">di ${esc(tok.nome || '')} · ${arr}${forma ? ' · ' + forma : ''}. ${p.area ? (m.f ? (m.f.lontano ? '<b>Troppo lontano.</b>' : `Dentro: ${m.bers.length ? m.bers.map(id => esc(T.tok.get(id)?.nome || '?')).join(', ') : 'nessuno'}.`) : 'Clicca sulla mappa il punto dove lanciarlo.') : 'Clicca il bersaglio sulla mappa.'}</span></div>
-      ${ex.length && !p.area && m.inc == null ? `<div class="g">${ex.map(([x, i]) => `<label class="sw" title="Aggiunge ${esc(x.dadi)} ai danni se colpisci"><input type="checkbox" data-x="${i}" ${m.extra.has(i) ? 'checked' : ''}><span class="tg" aria-hidden="true"></span>＋ ${esc(x.nome)} (${esc(x.dadi)})</label>`).join('')}</div>` : ''}
+      ${ex.length && !p.area && m.inc == null ? `<div class="g">${ex.map(([x, i]) => `<label class="sw" title="Aggiunge ${esc(x.dadi)} ai danni se colpisci"><input type="checkbox" data-x="${esc(i)}" ${m.extra.has(i) ? 'checked' : ''}><span class="tg" aria-hidden="true"></span>＋ ${esc(x.nome)} (${esc(x.dadi)})</label>`).join('')}</div>` : ''}
       <div class="g">${p.area ? `<button type="button" data-k="lancia" class="on"${m.f && !m.f.lontano ? '' : ' disabled'}>🔥 Lancia qui</button>` : ''}<button type="button" data-k="annulla">Annulla (Esc)</button></div>`;
     b.classList.remove('spenta'); b.hidden = false;
     b.querySelector('[data-k=annulla]').onclick = () => fineMira();
     b.querySelector('[data-k=lancia]')?.addEventListener('click', lanciaArea);
-    b.querySelectorAll('[data-x]').forEach(x => x.onchange = () => { x.checked ? m.extra.add(+x.dataset.x) : m.extra.delete(+x.dataset.x); attivaExtra(s, +x.dataset.x, x.checked); });
+    b.querySelectorAll('[data-x]').forEach(x => x.onchange = () => { x.checked ? m.extra.add(x.dataset.x) : m.extra.delete(x.dataset.x); attivaExtra(s, x.dataset.x, x.checked); });
   }
+  /* «Modificatore danno aggiuntivo» (come in Roll20): dadi che, se accesi, si sommano ai danni di ogni attacco.
+     Stanno in dati.danni_extra; i privilegi segnati «si aggiungono ai danni» (attacco furtivo…) ci compaiono da soli
+     e, finché sono legati al privilegio (da), ne seguono i dadi quando si sale di livello. */
+  function extraDi(s) {
+    const d = s?.dati || {}, L = Array.isArray(d.danni_extra) ? d.danni_extra : [], P = d.privilegi || [];
+    const out = L.map(x => { const p = x.da && P.find(q => q.id === x.da); return p?.dadi ? { ...x, dadi: p.dadi } : x; });
+    for (const p of P) if (p.extra && p.dadi && !L.some(x => (p.id && x.da === p.id) || norm(x.nome) === norm(p.nome))) out.push({ id: 'p-' + (p.id || norm(p.nome)), nome: p.nome, dadi: p.dadi, attivo: !!p.attivo, da: p.id || null });
+    return out;
+  }
+  const salvaExtra = (s, L) => salvaScheda(s.id, { danni_extra: L.map(x => ({ ...x })) }, true).then(() => { if (T.sv?.id === s.id) disegnaScheda(); });
   // attacco furtivo e simili restano accesi (o spenti) finché non si cambia: dalla mira o dalla scheda
-  function attivaExtra(s, i, on) {
-    if (!s || !puoScrivere(s)) return; const L = (s.dati.privilegi || []).map(x => ({ ...x })); if (!L[i] || !!L[i].attivo === on) return;
-    L[i].attivo = on; salvaScheda(s.id, { privilegi: L }, true).then(() => { if (T.sv?.id === s.id) disegnaScheda(); });
+  function attivaExtra(s, id, on) {
+    if (!s || !puoScrivere(s)) return; const L = extraDi(s), x = L.find(y => y.id === id); if (!x || !!x.attivo === on) return;
+    x.attivo = on; return salvaExtra(s, L);
+  }
+  function boxExtra(s, w, dis) {
+    const L = extraDi(s);
+    return `<div class="sez dxs">${L.map(x => `<div class="dx${x.attivo ? ' on' : ''}" data-id="${esc(x.id)}">
+        <input type="checkbox" class="dxc" data-k="dx-on" data-id="${esc(x.id)}" title="${x.attivo ? 'Acceso: quando colpisci si tirano e si sommano ai danni' : 'Spento: accendilo quando vale (per esempio una volta per turno)'}" aria-label="Acceso"${x.attivo ? ' checked' : ''}${dis}>
+        ${w ? `<input class="dxn" data-k="dx-nome" data-id="${esc(x.id)}" value="${esc(x.nome || '')}" placeholder="Nome (es. Attacco furtivo)" aria-label="Nome" maxlength="60"><input class="dxd" data-k="dx-dadi" data-id="${esc(x.id)}" value="${esc(x.dadi || '')}" placeholder="2d6" aria-label="Dadi" maxlength="30">`
+          : `<span class="dxn">${esc(x.nome || '')}</span><span class="dxd">${esc(x.dadi || '')}</span>`}
+        <button type="button" class="mini" data-k="dx-tira" data-id="${esc(x.id)}" title="Tira ${esc(x.dadi || '')}"${dis}>🎲</button>${w ? `<button type="button" class="ing" data-k="dx-via" data-id="${esc(x.id)}" title="Togli" aria-label="Togli">🗑</button>` : ''}</div>`).join('') || '<p class="vuoto">Nessuno: aggiungi attacco furtivo, punizione divina…</p>'}
+      ${w ? '<button type="button" class="mini agg" data-k="dx-add">+ Aggiungi un danno aggiuntivo</button>' : ''}<h6>Modificatore danno aggiuntivo</h6></div>`;
   }
   // un incantesimo senza tiro per colpire si può lanciare anche su di sé (Cura ferite)
   const suSe = m => { const sp = m.inc != null ? T.schede?.get(m.sid)?.dati.incantesimi?.[m.inc] : null; return !!sp && !sp.attacco; };
@@ -3979,7 +4005,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     // senza tiro per colpire: i danni arrivano e basta (Dardo incantato), altrimenti si annuncia su chi è lanciato
     if (sp && !sp.attacco) { fineMira(animazioni() ? 1800 : 700); return String(at.danni || '').trim() ? incantesimoTS(m, [b.id], null, v.col || '#ffb347', at) : incantesimoSu(m, sx, sp, b); }
     fineMira(animazioni() ? 1800 : 700);
-    const exP = [...m.extra].map(i => sx?.dati.privilegi?.[i]).filter(x => x?.dadi), bd = m.inc == null ? bonusDadi(at) : '';
+    const exP = extraDi(sx).filter(x => m.extra.has(x.id) && x.dadi), bd = m.inc == null ? bonusDadi(at) : '';
     const extra = [bd, ...exP.map(x => x.dadi)].filter(Boolean).join('+'), exN = [bd ? bonusNome(at) : '', ...exP.map(x => x.nome || 'danni in più')].filter(Boolean).join(' + ');
     const r = await SB.rpc('tavolo_attacca', { p_token: m.tok, p_bersaglio: b.id, p_attacco: m.i, p_adv: v.adv, p_privato: m.seg, ...(extra ? { p_extra: extra, p_extra_nome: exN } : {}), ...(m.inc != null ? { p_inc: m.inc } : {}), p_liv: m.liv || null });
     if (r.error) return toast(/candidate function/i.test(r.error.message) ? 'In Supabase è rimasta una versione vecchia della funzione: esegui di nuovo tavolo/tappa-9.sql.' : /p_liv/i.test(r.error.message) ? 'Per lanciare con uno slot più alto esegui tavolo/tappa-9.sql in Supabase.' : sqlMancante(r.error) ? 'Per gli attacchi sulla mappa esegui tavolo/tappa-5.sql in Supabase.' : extra && /p_extra|function/i.test(r.error.message) ? 'Per aggiungere i dadi in più esegui tavolo/tappa-7.sql in Supabase.' : r.error.message, 'err');
@@ -5155,7 +5181,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       const nasc = fl && !norm(`${p.nome} ${p.fonte} ${p.testo}`).includes(fl);
       return `<div class="pv${aperta ? ' ap' : ''}" data-ordi="${i}"${nasc ? ' hidden' : ''}>
         <div class="ph">${w ? '<span class="mano" title="Trascina per spostare" aria-hidden="true">⠿</span>' : ''}<button type="button" class="pt" data-k="prv-apri" data-i="${i}" aria-expanded="${!!aperta}">${esc(p.nome || 'Senza nome')}</button>
-          ${num(p.usi) > 0 ? `<span class="pu" title="Usi rimasti">${restanti(p)}/${num(p.usi)}</span>` : ''}${p.dadi ? `<button type="button" class="mini" data-k="prv-dadi" data-i="${i}" title="Tira ${esc(p.dadi)}"${dis}>🎲 ${esc(p.dadi)}</button>` : ''}${p.extra && p.dadi ? `<label class="sw2${p.attivo ? ' on' : ''}" title="Acceso: quando colpisci, ${esc(p.dadi)} si tirano da soli (a parte) e si sommano ai danni"><input type="checkbox" data-k="prv-att" data-i="${i}"${p.attivo ? ' checked' : ''}${dis}>${p.attivo ? 'attivo' : 'spento'}</label>` : ''}
+          ${num(p.usi) > 0 ? `<span class="pu" title="Usi rimasti">${restanti(p)}/${num(p.usi)}</span>` : ''}${p.dadi ? `<button type="button" class="mini" data-k="prv-dadi" data-i="${i}" title="Tira ${esc(p.dadi)}"${dis}>🎲 ${esc(p.dadi)}</button>` : ''}
           ${w ? `<button type="button" class="ing" data-k="prv-mod" data-i="${i}" title="Modifica" aria-label="Modifica">⚙</button>` : ''}</div>
         ${effettoDi(p) ? `<div class="pe">${chipEff(p, i, w)}</div>` : ''}
         ${p.fonte ? `<small class="pf2">${esc(p.fonte)}</small>` : ''}
@@ -5524,6 +5550,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
           ${pg ? boxRisorse(s, w, dis) : ''}
           <div class="sez atts"><div class="th"><span>Nome</span><span>Bonus</span><span>Danni</span></div><div data-ord="attacchi">${at || '<p class="vuoto">Nessun attacco.</p>'}</div>
             ${w ? '<button type="button" class="mini agg" data-k="addatt">+ Aggiungi un attacco</button>' : ''}${pg ? '' : area('azioni', 'Multiattacco, reazioni, azioni speciali…', 3)}<h6>Attacchi e incantesimi</h6></div>
+          ${boxExtra(s, w, dis)}
           ${pg ? `<div class="sez eq"><div class="mon"><label title="Monete d'oro"><span>MO</span>${n('mo', '0')}</label></div>${area('equip', 'Armi, armatura, oggetti…', 7)}<h6>Equipaggiamento</h6></div>${boxPozioni(s, w, dis)}` : ''}
         </div>
         <div class="colC">
@@ -5630,6 +5657,24 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (b.dataset.tab) { sv.tab = b.dataset.tab; return disegnaScheda(); }
     if (b.dataset.adv) { sv.adv = +b.dataset.adv; return riempi(); }
     if (k === 'seg') { sv.seg = b.checked; return; }
+    if (k && k.startsWith('dx-')) {
+      const L = extraDi(s), x = L.find(y => y.id === b.dataset.id);
+      if (k === 'dx-tira') return x?.dadi ? tira(x.dadi, null, sv.seg, `${s.nome} · ${x.nome || 'Danno aggiuntivo'}`) : toast('Scrivi prima i dadi, per esempio 2d6', 'err');
+      if (!w) return;
+      if (k === 'dx-add') { L.push({ id: nuovoId(), nome: '', dadi: '', attivo: false }); await salvaExtra(s, L); return sv.d.querySelector('.dxs .dx:last-of-type .dxn')?.focus(); }
+      if (!x) return;
+      if (k === 'dx-on') { x.attivo = b.checked; return salvaExtra(s, L); }
+      if (k === 'dx-nome') { x.nome = b.value.trim().slice(0, 60); return salvaExtra(s, L); }
+      // dadi scritti a mano: non seguono più quelli del privilegio
+      if (k === 'dx-dadi') { x.dadi = b.value.replace(/\s+/g, '').slice(0, 30); delete x.da; return salvaExtra(s, L); }
+      if (k === 'dx-via') {
+        if (!await ask(`Togliere **${x.nome || 'questo danno aggiuntivo'}** dal modificatore danno aggiuntivo?`, { ok: 'Togli', danger: true, title: 'Togli' })) return;
+        // se viene da un privilegio, il privilegio non lo aggiunge più
+        if (x.da || x.id.startsWith('p-')) { const P = (d.privilegi || []).map(p => (x.da ? p.id === x.da : norm(p.nome) === norm(x.nome)) ? { ...p, extra: false } : p); await salvaScheda(s.id, { privilegi: P }, true); }
+        return salvaExtra(s, L.filter(y => y !== x));
+      }
+      return;
+    }
     if (k === 'tema') { try { localStorage.setItem(TEMAS, schedaScura() ? 'chiaro' : 'scuro'); } catch { } return disegnaScheda(); }
     if (k === 'za') { try { localStorage.setItem(ZOOMS, clamp(Math.round((zoomScheda() + +b.dataset.d) * 10) / 10, 0.8, 1.6)); } catch { } return applicaZoomScheda(); }
     if (k === 'g-crea') return apriGuida(s, 'crea');
@@ -5672,6 +5717,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         const cr = r === 'cri' || T.maiusc, bd = bonusDadi(at); if (!String(at.danni || '').trim()) return toast('Scrivi i danni dell\'attacco, per esempio 1d8+3', 'err');
         const t = await tira(cr ? critico(at.danni) : at.danni, cr ? 'critico' : null, sv.seg, `${s.nome} · Danni: ${at.nome || 'arma'}${at.tipo ? ' (' + at.tipo + ')' : ''}`);
         if (t && bd) await tira(cr ? critico(bd) : bd, cr ? 'critico' : null, sv.seg, `${s.nome} · ${bonusNome(at)[0].toUpperCase() + bonusNome(at).slice(1)}: ${at.nome || 'arma'}`);
+        if (t) for (const x of extraDi(s).filter(x => x.attivo && x.dadi)) await tira(cr ? critico(x.dadi) : x.dadi, cr ? 'critico' : null, sv.seg, `${s.nome} · ${x.nome || 'Danno aggiuntivo'}: ${at.nome || 'arma'}`);
         return t;
       }
       return;
@@ -5699,7 +5745,6 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (!nuovi.length) return;
       await salvaScheda(s.id, { incantesimi: [...I, ...nuovi], ...via }, true); toast(`${nuovi.length} incantesimi trasformati in voci: apri ⚙ per completarli.`); return disegnaScheda();
     }
-    if (k === 'prv-att' && pv) return attivaExtra(s, pi, b.checked);
     if (k === 'prv-off' && pv) { const L = P.map(x => ({ ...x })); L[pi].off = !b.checked; await salvaScheda(s.id, { privilegi: L }, true); return disegnaScheda(); }
     if (k === 'prv-mod' && pv) { sv.mprv = sv.mprv === chiave ? null : chiave; if (!pv.id) { const L = P.map(x => ({ ...x })); L[pi].id = nuovoId(); if (sv.mprv) sv.mprv = L[pi].id; return salvaP(L); } return disegnaScheda(); }
     if (k === 'prv-via' && pv) { if (!await ask(`Eliminare **${pv.nome || 'questa voce'}**?`, { ok: 'Elimina', danger: true, title: 'Privilegi' })) return; sv.mprv = null; return salvaP(P.filter((_, i) => i !== pi)); }
