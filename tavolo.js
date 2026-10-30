@@ -4619,6 +4619,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (!t || !T.schede) return null;
     if (t.scheda?.startsWith('tv:')) return T.schede.get(t.scheda.slice(3)) || null;
     const v = [...T.schede.values()];
+    // un PNG mosso da un giocatore (Edward affidato a Livion) resta il PNG, non il personaggio del giocatore
+    if (t.giocatore && t.scheda) { const s = v.find(x => x.tipo === 'png' && x.entita === t.scheda); if (s) return s; }
     if (t.giocatore) { const s = v.find(x => x.giocatore === t.giocatore); if (s) return s; }
     return t.scheda ? v.find(x => x.entita === t.scheda) || null : null;
   };
@@ -4916,7 +4918,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   /* nuovo PNG (DM): da un modello, da un PNG del sito o vuoto */
   /* il DM affida la scheda di un PNG (Edward…) a un giocatore: lui la compila e muove i suoi token, i PF stanno sulla scheda */
   async function affidaScheda(s, g) {
-    const toks = [...T.tok.values()].filter(t => schedaDi(t)?.id === s.id && (!t.giocatore || t.giocatore === s.assegnata));
+    const toks = [...T.tok.values()].filter(t => t.scheda === 'tv:' + s.id || (!!s.entita && t.scheda === s.entita) || (schedaDi(t)?.id === s.id && (!t.giocatore || t.giocatore === s.assegnata)));
     const u = await SB.from('tavolo_schede').update({ assegnata: g }).eq('id', s.id).select().single();
     if (u.error) { toast(/assegnata/i.test(u.error.message) || sqlMancante(u.error) ? 'Per affidare una scheda esegui tavolo/tappa-12.sql in Supabase.' : u.error.message, 'err'); return disegnaScheda(); }
     arrivaScheda(u.data);
