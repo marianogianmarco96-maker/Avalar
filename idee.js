@@ -24,8 +24,21 @@
     next: ['Prossima sessione', 'la PROSSIMA SESSIONE della campagna: deve ripartire esattamente da dove si è interrotta l\'ultima sessione giocata e far avanzare i fili aperti'],
     oneshot: ['Oneshot', 'una ONESHOT autoconclusiva ambientata nel mondo della campagna: può usare i PG oppure altri personaggi (pregenerati, in un altro tempo o luogo, un flashback, il punto di vista di un PNG), senza contraddire la campagna principale e magari arricchendola'],
     side: ['Missione secondaria', 'una MISSIONE SECONDARIA da inserire nella campagna tra una sessione principale e l\'altra, legata ai luoghi e ai PNG che il party sta frequentando'],
-    arc: ['Arco narrativo', 'un ARCO NARRATIVO di 3–5 sessioni, con la scaletta sessione per sessione e il punto d\'arrivo']
+    arc: ['Arco narrativo', 'un ARCO NARRATIVO di 3–5 sessioni, con la scaletta sessione per sessione e il punto d\'arrivo'],
+    items: ['Oggetti', 'OGGETTI da dare ai PG'] // ha un modulo a parte: non compare in «Cosa ti serve»
   };
+  // sezione «Oggetti»: [chiave, etichetta, descrizione per Claude]
+  const ITEM_TYPES = [
+    ['armi', 'Armi', 'armi'],
+    ['armature', 'Armature e scudi', 'armature e scudi'],
+    ['equip', 'Equipaggiamento', 'equipaggiamento e attrezzi (anche non magici)'],
+    ['magici', 'Oggetti magici', 'oggetti meravigliosi: anelli, mantelli, amuleti, bacchette'],
+    ['consumabili', 'Pozioni e consumabili', 'pozioni, pergamene, unguenti e altri consumabili'],
+    ['maledetti', 'Maledetti', 'oggetti maledetti, utili ma con un prezzo nascosto'],
+    ['nosense', 'Senza senso', 'oggetti completamente SENZA SENSO: inutili, assurdi e comici, ma presentati in modo da illudere il party che nascondano un potere']
+  ];
+  const RARITIES = [['auto', 'Adatta al livello del party'], ['comune', 'Comune'], ['non comune', 'Non comune'], ['rara', 'Rara'], ['molto rara', 'Molto rara'], ['leggendaria', 'Leggendaria']];
+  const IDEF = { pgs: [], types: ['armi', 'magici'], rarity: 'auto', count: 3, level: '', note: '' };
   const TONES = ['Avventura', 'Mistero e indagine', 'Horror', 'Intrigo politico', 'Esplorazione', 'Azione e combattimento', 'Dramma personale', 'Comico'];
   const LENGTHS = { serata: 'una serata di gioco (3–4 ore)', breve: 'una sessione breve (1–2 ore)', lunga: 'una sessione lunga o divisa in due serate' };
   // sezioni facoltative da aggiungere a ogni proposta: [chiave, etichetta, istruzione per Claude]
@@ -140,8 +153,50 @@ Se ti chiedo modifiche o approfondimenti su una proposta, rispondi con la propos
     return r.join('\n');
   }
 
+  function itemInstructions(camp) {
+    return `Sei un co-autore esperto di Dungeons & Dragons 5e che aiuta il Dungeon Master della campagna «${camp}» a creare oggetti da dare ai personaggi. Più sotto trovi tutto quello che è successo finora: riassunti delle sessioni e schede di personaggi, PNG, luoghi, oggetti, fazioni e lore, comprese le informazioni che i giocatori non conoscono ancora.
+
+COME LAVORARE
+- Ogni oggetto deve nascere dalla campagna: legalo al background, ai segreti o alle scelte del PG che lo riceve, oppure a luoghi, PNG e fazioni che il party conosce.
+- Rispetta il regolamento della 5e: rarità, sintonia, bonus e CD adatti al livello del party. Non dare oggetti che rompono il gioco.
+- Gli oggetti utili devono essere usabili al tavolo: proprietà meccaniche chiare, cariche e ricariche, durata, CD.
+- Gli oggetti SENZA SENSO sono comici e non danno nessun vantaggio reale. Descrivi la loro proprietà con la serietà di un manuale (es. «Cappello al contrario: non importa come lo metti o lo regoli, appena lo lasci è di nuovo al contrario quando lo indossi»), e dai un indizio che faccia credere al party che nasconda un potere.
+- Gli oggetti MALEDETTI sembrano normali o utili finché non si scopre il prezzo.
+- Scrivi in italiano, in modo concreto e pronto da usare al tavolo.
+
+FORMATO DELLA RISPOSTA (Markdown semplice, niente tabelle)
+Per ogni oggetto:
+## Nome dell'oggetto
+*Tipo · rarità · sintonia sì/no* · Per: nome del PG (o «tutto il party»)
+**Aspetto:** come appare, 2–3 frasi.
+**Proprietà:** le regole, con bonus, cariche, CD e durata (per gli oggetti senza senso, l'effetto assurdo).
+**Storia:** da dove viene e come è legato alla campagna.
+**Perché proprio a questo PG:** il legame con il PG che lo riceve.
+**Come trovarlo:** dove e come il party può ottenerlo.
+**Valore:** in monete d'oro.
+Solo per gli oggetti maledetti o senza senso aggiungi anche:
+**Cosa crederanno i giocatori:** l'indizio che li illude.
+**La verità (solo DM):** cosa fa davvero, o cosa non fa.
+Quando citi una scheda esistente scrivi esattamente [[id]] oppure [[id|testo]] usando gli id tra parentesi quadre qui sotto: nel sito diventano link alla scheda.
+Se ti chiedo modifiche, rispondi con l'oggetto aggiornato nello stesso formato.`;
+  }
+
+  function itemRequest(o) {
+    const pgs = o.pgs.map(id => S.ents.get(id)).filter(Boolean);
+    const types = ITEM_TYPES.filter(t => o.types.includes(t[0]));
+    const r = [`Creami ${o.count == 1 ? 'UN oggetto, sviluppato in modo approfondito' : o.count + ' oggetti diversi tra loro'}.`];
+    r.push(pgs.length ? `Per: ${pgs.map(e => `${e.name} [${e.id}]`).join(', ')}${pgs.length > 1 ? ' (distribuisci gli oggetti tra loro)' : ''}.` : 'Per: tutto il party (scegli tu a chi va ogni oggetto).');
+    r.push(`Tipi di oggetti: ${types.length ? types.map(t => t[2]).join('; ') : 'scegli tu'}.`);
+    if (types.length > 1 && o.types.includes('nosense')) r.push('Mescola oggetti utili e oggetti senza senso, descritti in modo che i giocatori non capiscano quali sono quali.');
+    r.push(`Rarità: ${o.rarity === 'auto' ? 'adatta al livello del party' : o.rarity}.`);
+    if (o.level) r.push(`Party: ${o.level}.`);
+    if (o.note.trim()) r.push('', 'Indicazioni del DM:', o.note.trim());
+    return r.join('\n');
+  }
+
   async function buildPrompt(o) {
     const camp = getMeta('campaign', { name: 'Campagna' }).name;
+    if (o.kind === 'items') return { system: itemInstructions(camp) + '\n\n' + await campaignText({ ...o, focus: o.pgs }), user: itemRequest(o) };
     return { system: instructions(camp) + '\n\n' + await campaignText(o), user: requestText(o) };
   }
 
@@ -221,7 +276,9 @@ Se ti chiedo modifiche o approfondimenti su una proposta, rispondi con la propos
   let CONV = null, BUSY = null; // conversazione in corso: resta finché la pagina è aperta
   const loadForm = () => { const p = pref('idee-form', {}); if (p.v !== 2) { delete p.ctx; p.v = 2; } return { ...DEF, ...p }; }; // v2: il contesto predefinito non è più «Completo»
   const saveForm = o => setPref('idee-form', o);
-  const titleOf = (t, o) => (String(t).match(/^##\s+(.+)$/m)?.[1] || `${KINDS[o.kind][0]} · ${now()}`).replace(/\*\*/g, '').replace(/\[\[([^\]|]+?)(?:\|([^\]]+?))?\]\]/g, (m, a, b) => b || S.ents.get(a)?.name || a).slice(0, 120);
+  const loadItems = () => ({ ...IDEF, ...pref('idee-items', {}) });
+  const itemsForm = (main = loadForm()) => ({ ...loadItems(), kind: 'items', ctx: main.ctx, docs: false });
+  const titleOf = (t, o) => (o.kind === 'items' && (String(t).match(/^##\s+.+$/gm) || []).length > 1 ? 'Oggetti: ' + String(t).match(/^##\s+.+$/gm).map(h => h.replace(/^##\s+/, '')).join(', ') : String(t).match(/^##\s+(.+)$/m)?.[1] || `${KINDS[o.kind][0]} · ${now()}`).replace(/\*\*/g, '').replace(/\[\[([^\]|]+?)(?:\|([^\]]+?))?\]\]/g, (m, a, b) => b || S.ents.get(a)?.name || a).slice(0, 120);
 
   async function guard() {
     await claude.use('db');
@@ -233,11 +290,13 @@ Se ti chiedo modifiche o approfondimenti su una proposta, rispondi con la propos
     if (!await guard()) return; css(); ensureEntList();
     const o = loadForm(); o.focus = o.focus.filter(id => S.ents.has(id));
     const api = await kvGet('api'), saved = await ideasAll();
+    const io = loadItems(), pgs = [...S.ents.values()].filter(e => e.type === 'pg').sort((a, b) => a.name.localeCompare(b.name));
+    io.pgs = io.pgs.filter(id => S.ents.has(id));
     const sel = (k, opts, v) => `<select id="i-${k}">${opts.map(([a, b]) => `<option value="${esc(a)}" ${String(a) === String(v) ? 'selected' : ''}>${esc(b)}</option>`).join('')}</select>`;
     setView(`<div class="pagehead"><h1>Idee per le sessioni</h1><div class="acts"><button class="btn" data-act="ipaste">Salva una risposta di Claude</button><button class="btn" data-act="iset">${api ? 'Claude collegato ✓' : 'Collega Claude'}</button></div></div><div class="orn"></div>
       <div class="card"><p class="lead" style="margin-top:0">Chiedi a Claude di ideare oneshot, sessioni o missioni partendo da tutto quello che è successo nella campagna: riassunti, schede, PNG, luoghi e segreti. Lo vedi solo tu come DM.</p>
         <div class="idee-grid">
-          <label class="f"><span>Cosa ti serve</span>${sel('kind', Object.entries(KINDS).map(([k, v]) => [k, v[0]]), o.kind)}</label>
+          <label class="f"><span>Cosa ti serve</span>${sel('kind', Object.entries(KINDS).filter(([k]) => k !== 'items').map(([k, v]) => [k, v[0]]), o.kind)}</label>
           <label class="f"><span>Quante proposte</span>${sel('count', [[1, '1, molto dettagliata'], [3, '3 alternative'], [5, '5 spunti']], o.count)}</label>
           <label class="f"><span>Durata</span>${sel('length', Object.entries(LENGTHS), o.length)}</label>
           <label class="f"><span>Party (facoltativo)</span><input type="text" id="i-level" value="${esc(o.level)}" placeholder="es. 4 PG di livello 3" autocomplete="off"></label>
@@ -253,6 +312,17 @@ Se ti chiedo modifiche o approfondimenti su una proposta, rispondi con la propos
         <div class="row" style="margin-top:14px"><button class="btn primary" data-act="igen">Genera con Claude</button><button class="btn" data-act="icopy">Copia per Claude</button><button class="btn" data-act="itxt" title="Scarica la richiesta come file da allegare alla chat">Scarica per Claude</button><span class="hint" id="i-size"></span></div>
         ${api ? '' : '<p class="hint" style="margin-bottom:0">Per generare qui serve collegare Claude con una chiave API. In alternativa «Copia per Claude» prepara la richiesta da incollare in una chat con Claude; poi con «Salva una risposta di Claude» la conservi qui.</p>'}
       </div>
+      <div class="card"><h2>Oggetti</h2><p class="hint" style="margin-top:0">Claude crea oggetti su misura per i personaggi che scegli: armi, equipaggiamento, oggetti magici, ma anche oggetti maledetti o del tutto senza senso per depistare il party.</p>
+        <label class="f"><span>Per chi (nessuno = tutto il party)</span><div class="idee-tones" id="it-pgs">${pgs.map(e => `<span class="chip ${io.pgs.includes(e.id) ? 'on' : ''}" role="checkbox" tabindex="0" aria-checked="${io.pgs.includes(e.id)}" data-pg="${esc(e.id)}">${esc(e.name)}</span>`).join('') || '<span class="hint">Nessuna scheda di tipo PG.</span>'}</div></label>
+        <label class="f"><span>Tipi di oggetti</span><div class="idee-tones" id="it-types">${ITEM_TYPES.map(([k, t]) => `<span class="chip ${io.types.includes(k) ? 'on' : ''}" role="checkbox" tabindex="0" aria-checked="${io.types.includes(k)}" data-type="${k}">${esc(t)}</span>`).join('')}</div></label>
+        <div class="idee-grid">
+          <label class="f"><span>Quanti oggetti</span><select id="it-count">${[1, 3, 5].map(n => `<option value="${n}" ${n == io.count ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+          <label class="f"><span>Rarità</span>${sel('rarity', RARITIES, io.rarity).replace('id="i-rarity"', 'id="it-rarity"')}</label>
+          <label class="f"><span>Party (facoltativo)</span><input type="text" id="it-level" value="${esc(io.level)}" placeholder="es. 4 PG di livello 3" autocomplete="off"></label>
+        </div>
+        <label class="f"><span>Indicazioni per Claude (facoltativo)</span><textarea id="it-note" rows="2" placeholder="es. Una spada per Violet legata ai draghi, e qualcosa di inutile ma misterioso per Livion">${esc(io.note)}</textarea></label>
+        <div class="row" style="margin-top:6px"><button class="btn primary" data-act="itgen">Crea oggetti con Claude</button><button class="btn" data-act="itcopy">Copia per Claude</button><button class="btn" data-act="ittxt">Scarica per Claude</button></div>
+      </div>
       <div id="i-conv"></div>
       <div class="card"><h2>Idee salvate</h2>${saved.length ? `<div class="idee-list">${saved.map(i => `<a class="erow" href="#/idee/${encodeURIComponent(i.id)}"><div class="main"><div class="t">${esc(i.title)}</div><div class="b">${esc(i.kindLabel || '')}${i.kindLabel ? ' · ' : ''}${esc(new Date(i.ts).toLocaleDateString('it-IT'))}</div></div></a>`).join('')}</div>` : '<p class="empty" style="padding:12px">Nessuna idea salvata. Quando una proposta ti piace, premi «Salva tra le idee».</p>'}<p class="hint" style="margin-bottom:0">Le idee restano in questo browser, separate dai dati della campagna: i giocatori non le vedono mai.</p></div>`);
 
@@ -266,7 +336,8 @@ Se ti chiedo modifiche o approfondimenti su una proposta, rispondi con la propos
     fadd.addEventListener('change', addFocus); fadd.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); addFocus(); } });
     $('#i-focus').addEventListener('click', ev => { const b = ev.target.closest('[data-unfocus]'); if (!b) return; o.focus = o.focus.filter(x => x !== b.dataset.unfocus); paintFocus(); });
     const tog = c => { c.classList.toggle('on'); c.setAttribute('aria-checked', c.classList.contains('on')); size(); };
-    for (const g of ['#i-tones', '#i-extras']) {
+    const readItems = () => { const v = { pgs: [...document.querySelectorAll('#it-pgs .chip.on')].map(c => c.dataset.pg), types: [...document.querySelectorAll('#it-types .chip.on')].map(c => c.dataset.type), rarity: $('#it-rarity').value, count: +$('#it-count').value, level: $('#it-level').value.trim(), note: $('#it-note').value }; setPref('idee-items', v); return { ...v, kind: 'items', ctx: $('#i-ctx').value, docs: false }; };
+    for (const g of ['#i-tones', '#i-extras', '#it-pgs', '#it-types']) {
       $(g).addEventListener('click', ev => { const c = ev.target.closest('.chip'); if (c) tog(c); });
       $(g).addEventListener('keydown', ev => { const c = ev.target.closest('.chip'); if (c && (ev.key === ' ' || ev.key === 'Enter')) { ev.preventDefault(); tog(c); } });
     }
@@ -276,7 +347,7 @@ Se ti chiedo modifiche o approfondimenti su una proposta, rispondi con la propos
       const conv = $('#i-conv'); if (!conv) return;
       if (!CONV) { conv.innerHTML = ''; return; }
       const failed = CONV.turns[CONV.turns.length - 1].err;
-      conv.innerHTML = `<div class="card idee-out"><div class="spread"><h2 style="margin:0">${esc(KINDS[CONV.o.kind][0])}: le proposte di Claude</h2><button class="btn sm ghost" data-act="iclear">Chiudi</button></div>
+      conv.innerHTML = `<div class="card idee-out"><div class="spread"><h2 style="margin:0">${CONV.o.kind === 'items' ? 'Gli oggetti di Claude' : esc(KINDS[CONV.o.kind][0]) + ': le proposte di Claude'}</h2><button class="btn sm ghost" data-act="iclear">Chiudi</button></div>
         ${CONV.turns.map((t, i) => `<div class="idee-turn">${i ? `<div class="idee-q">${esc(t.q)}</div>` : ''}${t.err ? `<p style="color:var(--bad,#a3262f)">${esc(t.err)}</p><button class="btn sm" data-act="iretry">Riprova</button>` : `<div class="${t.live ? 'idee-live' : ''}" id="i-a${i}">${prose(t.a || '…')}</div>`}
           ${!t.live && t.a ? `<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="isave" data-i="${i}">${t.saved ? 'Salvata ✓' : 'Salva tra le idee'}</button><button class="btn sm" data-act="icp" data-i="${i}">Copia</button>${t.stop === 'max_tokens' ? '<span class="hint">La risposta è stata interrotta perché troppo lunga: chiedi di continuare.</span>' : t.stop === 'aborted' ? '<span class="hint">Interrotta da te: se vuoi, chiedi di continuare.</span>' : ''}</div>` : ''}</div>`).join('')}
         ${failed ? '' : BUSY ? `<div class="row" style="margin-top:12px"><button class="btn sm" data-act="istop">Interrompi</button><span class="hint">Claude sta scrivendo…</span></div>` : `<div class="idee-turn"><label class="f"><span>Continua con Claude</span><textarea id="i-follow" rows="2" placeholder="es. Sviluppa la seconda proposta con i dialoghi di Edward · rendila più cupa · aggiungi un incontro con i Predoni"></textarea></label><button class="btn" data-act="ifollow">Invia</button></div>`}</div>`;
@@ -297,16 +368,20 @@ Se ti chiedo modifiche o approfondimenti su una proposta, rispondi con la propos
       t.live = false; BUSY = null; if (!location.hash.startsWith('#/idee')) return; paintConv(); $('#i-a' + i)?.scrollIntoView({ block: 'nearest' });
     };
     paintConv();
+    const start = async f => {
+      if (BUSY) return toast('Claude sta ancora scrivendo.');
+      if (!await kvGet('api') && !await settingsDlg()) return;
+      const p = await buildPrompt(f);
+      CONV = { o: f, system: p.system, msgs: [{ role: 'user', content: p.user }], turns: [{ q: p.user, a: '' }] };
+      await run(); $('#i-conv')?.scrollIntoView({ block: 'start' });
+    };
 
     setActs({
       iset: async () => { if (await settingsDlg()) rerender(); },
-      igen: async () => {
-        if (BUSY) return toast('Claude sta ancora scrivendo.');
-        if (!await kvGet('api') && !await settingsDlg()) return;
-        const f = read(); saveForm(f); const p = await buildPrompt(f);
-        CONV = { o: f, system: p.system, msgs: [{ role: 'user', content: p.user }], turns: [{ q: p.user, a: '' }] };
-        await run();
-      },
+      igen: async () => { const f = read(); saveForm(f); await start(f); },
+      itgen: async () => { saveForm(read()); await start(readItems()); },
+      itcopy: async () => { const p = await buildPrompt(readItems()); await copyText(p.system + '\n\n=== LA MIA RICHIESTA ===\n' + p.user, 'Richiesta copiata: incollala in una chat con Claude'); },
+      ittxt: async () => { const p = await buildPrompt(readItems()); const dl = await claude.use('downloads'); await dl.save({ filename: 'oggetti-per-claude.txt', data: new Blob([p.system + '\n\n=== LA MIA RICHIESTA ===\n' + p.user], { type: 'text/plain' }) }); toast('File scaricato: allegalo in una chat con Claude e scrivi «Segui le istruzioni nel file»'); },
       ifollow: async () => {
         const q = $('#i-follow').value.trim(); if (!q) return toast('Scrivi cosa chiedere a Claude.');
         if (CONV.msgs[CONV.msgs.length - 1]?.role === 'user') CONV.msgs.pop();
@@ -347,7 +422,7 @@ Se ti chiedo modifiche o approfondimenti su una proposta, rispondi con la propos
       iren: async () => { const r = await formDlg({ title: 'Rinomina l\'idea', fields: [{ k: 't', label: 'Titolo', value: i.title, req: true }] }); if (!r || !r.t.trim()) return; i.title = r.t.trim(); await ideaPut(i); rerender(); },
       idev: async () => {
         // riapre la proposta come conversazione, per chiedere a Claude di svilupparla o modificarla
-        const o = { ...loadForm(), kind: i.kind || 'next' }; const p = await buildPrompt(o);
+        const o = i.kind === 'items' ? itemsForm() : { ...loadForm(), kind: i.kind || 'next' }; const p = await buildPrompt(o);
         const q = 'Riprendiamo una proposta che mi avevi preparato in passato: «' + i.title + '».';
         CONV = { o, system: p.system, msgs: [{ role: 'user', content: q }, { role: 'assistant', content: i.text }], turns: [{ q, a: i.text, saved: true }] };
         location.hash = '#/idee'; setTimeout(() => $('#i-follow')?.scrollIntoView({ block: 'center' }), 400);
