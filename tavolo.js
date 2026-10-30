@@ -3246,6 +3246,11 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       }
       viste.forEach(o => buca(g, o));
       if (!isDM() && !viste.length && T.avvisato !== sc.id) { T.avvisato = sc.id; toast('Non hai un token su questa mappa: vedi solo i posti già esplorati.'); }
+      // senza i token dei giocatori la nebbia coprirebbe tutto anche al DM: lui la mappa la vede chiara, e glielo dico una volta
+      if (isDM() && !viste.length) {
+        g.globalCompositeOperation = 'source-over'; g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, W, H); g.setTransform(k, 0, 0, k, 0, 0);
+        if (T.avvisatoDm !== sc.id) { T.avvisatoDm = sc.id; toast('Nebbia automatica accesa ma nessun personaggio dei giocatori su questa mappa: loro la vedono tutta buia. Tu la vedi chiara finché non metti i loro token.'); }
+      }
     }
     if (sc.maschera) {
       // la maschera del DM si somma alla nebbia: la disegno a parte e la appoggio sopra
