@@ -56,13 +56,16 @@
 
   const now = () => new Date().toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
   const tokOf = s => Math.round(s.length / 3.6);
-  const BIG = 40000;
+  // «Copia per Claude» deve stare in un solo messaggio: oltre circa 20 mila caratteri la chat taglia il testo
+  const CHAT_MAX = 18000;
   const flat = s => String(s || '').replace(/\s+/g, ' ').trim();
 
   /* ---------- contesto della campagna (completo: è solo per il DM) ---------- */
   async function campaignText(o) {
     // tre misure di contesto: «full» tutto, «recent» per intero solo le ultime sessioni e le schede che vi compaiono,
-    // «short» il minimo (brevi delle sessioni, schede in primo piano): resta piccolo anche per l'app di Claude
+    // «short» il minimo (brevi delle sessioni, schede in primo piano): resta piccolo anche per l'app di Claude.
+    // Per stare in un messaggio (fitChat) si stringe ancora: o.cap taglia ogni scheda completa a tanti caratteri,
+    // o.bare toglie le brevi dall'elenco delle altre schede, o.lean lascia solo le schede recenti e niente archi né idee
     const mode = ['full', 'short'].includes(o.ctx) ? o.ctx : 'recent', full = mode === 'full', focus = new Set(o.focus);
     const recentFrom = S.sess.length ? S.sess[Math.max(0, S.sess.length - (mode === 'short' ? 1 : RECENT))].n : 0;
     const camp = getMeta('campaign', { name: 'Campagna' }).name, gen = getMeta('general', null), arcs = getMeta('arcs', []);
@@ -71,7 +74,7 @@
     const bodies = new Map((await dbAll('bodies')).map(b => [b.id, b]));
     const links = await dbAll('links');
     const L = [`=== CAMPAGNA: ${camp} ===`, '', '--- RIASSUNTO GENERALE ---', gen?.text || '(vuoto)'];
-    if (arcs.length) { L.push('', '--- ARCHI NARRATIVI ---'); for (const a of arcs) L.push(`${a.title} (sessioni ${a.from ?? '?'}–${a.to ?? 'in corso'}): ${flat(a.summary)}`); }
+    if (arcs.length && !o.lean) { L.push('', '--- ARCHI NARRATIVI ---'); for (const a of arcs) L.push(`${a.title} (sessioni ${a.from ?? '?'}–${a.to ?? 'in corso'}): ${flat(a.summary)}`); }
     L.push('', `--- SESSIONI GIOCATE (${S.sess.length}) ---`);
     for (const s of S.sess) {
       L.push('', `## Sessione ${s.n}${s.title ? ' · ' + s.title : ''}${s.gameDate ? ' (in gioco: ' + s.gameDate + ')' : ''}`);
@@ -92,19 +95,21 @@
       if (e.brief) r.push(e.brief);
       for (const s of b?.sections || []) { const es = s.entries.filter(keep); if (!es.length) continue; r.push(`**${s.title}**`); for (const en of es) r.push((en.n != null ? `[Sess. ${en.n}] ` : '') + en.text.trim()); }
       if (out.length) r.push('Relazioni: ' + out.map(l => `${l.label || '→'} ${S.ents.get(l.to).name} [${l.to}]`).join('; '));
-      return r.join('\n');
+      const t = r.join('\n');
+      return o.cap && t.length > o.cap ? t.slice(0, t.lastIndexOf('\n', o.cap) > 0 ? t.lastIndexOf('\n', o.cap) : o.cap) + '\n(…scheda accorciata)' : t;
     };
     const deep = ents.filter(e => full || focus.has(e.id) || (mode === 'recent' && (e.type === 'pg' || (e.sessions || []).some(n => n >= recentFrom))));
     L.push('', `--- SCHEDE${full ? '' : mode === 'recent' ? ' DEI PERSONAGGI, IN PRIMO PIANO E DELLE ULTIME SESSIONI' : ' IN PRIMO PIANO'} (testo completo) ---`);
     if (!deep.length) L.push('(nessuna: vedi l\'elenco qui sotto)');
     for (const e of deep) L.push('', entText(e));
-    const rest = ents.filter(e => !deep.includes(e));
+    const recentEnt = e => e.type === 'pg' || (e.sessions || []).some(n => n >= recentFrom);
+    const rest = ents.filter(e => !deep.includes(e) && (!o.lean || recentEnt(e)));
     if (rest.length) {
-      const br = e => e.brief && (mode !== 'short' || e.type === 'pg' || (e.sessions || []).some(n => n >= recentFrom));
-      L.push('', `--- ALTRE SCHEDE (id | tipo | nome | stato${mode === 'short' ? ' | breve solo per PG e schede recenti' : ' | breve'}) ---`);
+      const br = e => !o.bare && e.brief && (mode !== 'short' || recentEnt(e));
+      L.push('', `--- ALTRE SCHEDE${o.lean ? ' DELLE ULTIME SESSIONI' : ''} (id | tipo | nome | stato${o.bare ? '' : mode === 'short' ? ' | breve solo per PG e schede recenti' : ' | breve'}) ---`);
       for (const e of rest) L.push(`${e.id} | ${e.type} | ${e.name}${e.alias?.length ? ' (' + e.alias.join(', ') + ')' : ''} | ${e.status || '—'}${e.discovered === false ? ' | NON scoperto' : ''}${br(e) ? ' | ' + flat(e.brief) : ''}`);
     }
-    const saved = await ideasAll();
+    const saved = o.lean ? [] : await ideasAll();
     if (saved.length) { L.push('', '--- IDEE GIÀ PROPOSTE IN PASSATO (evita di ripeterle) ---'); for (const i of saved.slice(0, 30)) L.push(`- ${i.title}`); }
     return L.join('\n');
   }
@@ -196,9 +201,27 @@ Se ti chiedo modifiche, rispondi con l'oggetto aggiornato nello stesso formato.`
 
   async function buildPrompt(o) {
     const camp = getMeta('campaign', { name: 'Campagna' }).name;
-    if (o.kind === 'items') return { system: itemInstructions(camp) + '\n\n' + await campaignText({ ...o, focus: o.pgs }), user: itemRequest(o) };
-    return { system: instructions(camp) + '\n\n' + await campaignText(o), user: requestText(o) };
+    // per gli oggetti le schede dei PG servono sempre per intero: quelli scelti, o tutti se gli oggetti vanno al party
+    const it = o.kind === 'items', focus = it ? (o.pgs.length ? o.pgs : [...S.ents.values()].filter(e => e.type === 'pg').map(e => e.id)) : o.focus;
+    const head = it ? itemInstructions(camp) : instructions(camp), ctx = await campaignText({ ...o, focus }), user = it ? itemRequest(o) : requestText(o);
+    return { head, ctx, user, system: head + '\n\n' + ctx };
   }
+  const fileText = p => p.system + '\n\n=== LA MIA RICHIESTA ===\n' + p.user;
+  // testo per «Copia per Claude»: la richiesta va subito dopo le istruzioni (se la chat taglia la fine, resta),
+  // e la storia si accorcia a gradini finché tutto sta in un messaggio. Restituisce anche il gradino usato (0 = nessun taglio)
+  async function fitChat(o) {
+    const steps = [{}, { ctx: 'short' }, { ctx: 'short', cap: 2500 }, { ctx: 'short', cap: 1500, bare: true }, { ctx: 'short', cap: 1500, bare: true, lean: true }, { ctx: 'short', cap: 900, bare: true, lean: true }, { ctx: 'short', cap: 500, bare: true, lean: true }];
+    const join = p => p.head + '\n\n=== LA MIA RICHIESTA ===\n' + p.user + '\n\n' + p.ctx;
+    let p, txt;
+    for (let i = 0; i < steps.length; i++) {
+      if (i && o.ctx === 'short' && !steps[i].cap) continue;
+      p = await buildPrompt({ ...o, ...steps[i], docs: i ? false : o.docs }); txt = join(p);
+      if (txt.length <= CHAT_MAX) return { txt, step: i };
+    }
+    const room = CHAT_MAX - (txt.length - p.ctx.length) - 60;
+    return { txt: join({ ...p, ctx: p.ctx.slice(0, Math.max(0, p.ctx.lastIndexOf('\n', room))) + '\n\n(…storia accorciata per stare in un messaggio)' }), step: steps.length };
+  }
+  const fitMsg = s => s ? 'Richiesta copiata e accorciata per stare in un messaggio. Per mandare tutta la storia usa «Scarica per Claude» e allega il file' : 'Richiesta copiata: incollala in una chat con Claude';
 
   /* ---------- chiamata diretta a Claude (con la chiave API del DM) ---------- */
   async function callClaude({ system, messages, model, key, onText, signal }) {
@@ -328,7 +351,7 @@ Se ti chiedo modifiche, rispondi con l'oggetto aggiornato nello stesso formato.`
 
     const read = () => ({ kind: $('#i-kind').value, count: +$('#i-count').value, length: $('#i-length').value, level: $('#i-level').value.trim(), note: $('#i-note').value, ctx: $('#i-ctx').value, docs: $('#i-docs').checked, tones: [...document.querySelectorAll('#i-tones .chip.on')].map(c => c.dataset.tone), extras: [...document.querySelectorAll('#i-extras .chip.on')].map(c => c.dataset.extra), focus: o.focus, v: 2 });
     let sizeT = null;
-    const size = () => { clearTimeout(sizeT); sizeT = setTimeout(async () => { const f = read(); saveForm(f); const p = await buildPrompt(f); const t = tokOf(p.system + p.user); const m = MODELS.find(x => x[0] === (api?.model || MODELS[0][0])); const c = (t * m[2] + 8000 * m[3]) / 1e6; const el = $('#i-size'); if (el) el.textContent = `Circa ${Math.round(t / 1000)} mila token di storia${t > BIG ? ' (lunga: meglio «Scarica per Claude» o un contesto più breve)' : ''}${api ? ` · circa ${c.toFixed(2).replace('.', ',')} $ a richiesta` : ''}`; }, 250); };
+    const size = () => { clearTimeout(sizeT); sizeT = setTimeout(async () => { const f = read(); saveForm(f); const p = await buildPrompt(f); const t = tokOf(p.system + p.user); const m = MODELS.find(x => x[0] === (api?.model || MODELS[0][0])); const c = (t * m[2] + 8000 * m[3]) / 1e6; const el = $('#i-size'); if (el) el.textContent = `Circa ${Math.round(t / 1000)} mila token di storia${(p.system + p.user).length > CHAT_MAX ? ' · «Copia» la accorcia per stare in un messaggio, «Scarica» la manda tutta' : ''}${api ? ` · circa ${c.toFixed(2).replace('.', ',')} $ a richiesta` : ''}`; }, 250); };
     const paintFocus = () => { $('#i-focus').innerHTML = o.focus.map(id => { const e = S.ents.get(id); return `<span class="chip">${badge(e.type)} ${esc(e.name)}<button type="button" data-unfocus="${esc(id)}" aria-label="Togli ${esc(e.name)}">×</button></span>`; }).join(''); size(); };
     paintFocus();
     const fadd = $('#i-fadd');
@@ -380,8 +403,8 @@ Se ti chiedo modifiche, rispondi con l'oggetto aggiornato nello stesso formato.`
       iset: async () => { if (await settingsDlg()) rerender(); },
       igen: async () => { const f = read(); saveForm(f); await start(f); },
       itgen: async () => { saveForm(read()); await start(readItems()); },
-      itcopy: async () => { const p = await buildPrompt(readItems()); await copyText(p.system + '\n\n=== LA MIA RICHIESTA ===\n' + p.user, 'Richiesta copiata: incollala in una chat con Claude'); },
-      ittxt: async () => { const p = await buildPrompt(readItems()); const dl = await claude.use('downloads'); await dl.save({ filename: 'oggetti-per-claude.txt', data: new Blob([p.system + '\n\n=== LA MIA RICHIESTA ===\n' + p.user], { type: 'text/plain' }) }); toast('File scaricato: allegalo in una chat con Claude e scrivi «Segui le istruzioni nel file»'); },
+      itcopy: async () => { const f = await fitChat(readItems()); await copyText(f.txt, fitMsg(f.step)); },
+      ittxt: async () => { const p = await buildPrompt(readItems()); const dl = await claude.use('downloads'); await dl.save({ filename: 'oggetti-per-claude.txt', data: new Blob([fileText(p)], { type: 'text/plain' }) }); toast('File scaricato: allegalo in una chat con Claude e scrivi «Segui le istruzioni nel file»'); },
       ifollow: async () => {
         const q = $('#i-follow').value.trim(); if (!q) return toast('Scrivi cosa chiedere a Claude.');
         if (CONV.msgs[CONV.msgs.length - 1]?.role === 'user') CONV.msgs.pop();
@@ -397,8 +420,8 @@ Se ti chiedo modifiche, rispondi con l'oggetto aggiornato nello stesso formato.`
         await ideaPut({ id, ts: Date.now(), title: titleOf(t.a, CONV.o), kind: CONV.o.kind, kindLabel: KINDS[CONV.o.kind][0], request: CONV.turns.slice(0, +a.dataset.i + 1).map(x => x.q).join('\n\n---\n\n'), text: t.a });
         t.saved = true; toast('Idea salvata'); rerender();
       },
-      icopy: async () => { const f = read(); saveForm(f); const p = await buildPrompt(f); const txt = p.system + '\n\n=== LA MIA RICHIESTA ===\n' + p.user; await copyText(txt, tokOf(txt) > BIG ? 'Richiesta copiata, ma è lunga: se la chat la rifiuta usa «Scarica per Claude» e allega il file, oppure scegli un contesto più breve' : 'Richiesta copiata: incollala in una chat con Claude'); },
-      itxt: async () => { const f = read(); saveForm(f); const p = await buildPrompt(f); const dl = await claude.use('downloads'); await dl.save({ filename: 'richiesta-per-claude.txt', data: new Blob([p.system + '\n\n=== LA MIA RICHIESTA ===\n' + p.user], { type: 'text/plain' }) }); toast('File scaricato: allegalo in una chat con Claude e scrivi «Segui le istruzioni nel file»'); },
+      icopy: async () => { const o = read(); saveForm(o); const f = await fitChat(o); await copyText(f.txt, fitMsg(f.step)); },
+      itxt: async () => { const f = read(); saveForm(f); const p = await buildPrompt(f); const dl = await claude.use('downloads'); await dl.save({ filename: 'richiesta-per-claude.txt', data: new Blob([fileText(p)], { type: 'text/plain' }) }); toast('File scaricato: allegalo in una chat con Claude e scrivi «Segui le istruzioni nel file»'); },
       ipaste: async () => {
         const r = await formDlg({ title: 'Salva una risposta di Claude', ok: 'Salva', wide: true, fields: [{ k: 't', label: 'Risposta di Claude', type: 'textarea', rows: 12, req: true, placeholder: 'Incolla qui le proposte che ti ha dato Claude' }, { k: 'n', label: 'Titolo (facoltativo)', placeholder: 'Se lo lasci vuoto uso il primo titolo della risposta' }, { k: 'k', label: 'Tipo', type: 'select', value: read().kind, options: Object.entries(KINDS).map(([k, v]) => [k, v[0]]) }] });
         if (!r || !r.t.trim()) return;
