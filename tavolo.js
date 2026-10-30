@@ -440,6 +440,10 @@ dialog.tv-sw>.rz:hover{background-color:#7d253033}
 .tv-sch .tabs button.on{border-color:var(--lin);background:var(--pp);color:var(--k)}
 .tv-sch .p1{display:grid;grid-template-columns:repeat(auto-fit,minmax(265px,1fr));gap:10px;align-items:start}
 .tv-sch .colA,.tv-sch .colB,.tv-sch .colC{display:flex;flex-direction:column;gap:8px;min-width:0}
+/* scheda stretta: due colonne con privilegi e tratti sotto la prima (niente buco sotto le caratteristiche), poi una sola colonna */
+.tv-sch{container:sch/inline-size}
+@container sch (max-width:839px){.tv-sch .p1{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:"a b" "c b"}.tv-sch .colA{grid-area:a}.tv-sch .colB{grid-area:b}.tv-sch .colC{grid-area:c}}
+@container sch (max-width:569px){.tv-sch .p1{grid-template-columns:minmax(0,1fr);grid-template-areas:"a" "b" "c"}}
 .tv-sch .dueA{display:grid;grid-template-columns:78px 1fr;gap:8px;background:var(--gr);border-radius:10px;padding:6px}
 .tv-sch .carcol{display:flex;flex-direction:column;gap:7px}
 .tv-sch .cbox{position:relative;border:2px solid var(--lin);border-radius:9px;background:var(--box);text-align:center;padding:4px 2px 16px;display:flex;flex-direction:column;align-items:center}
@@ -998,12 +1002,14 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
 .tv-dk .dd button:hover,.tv-dk .dd button:focus-visible{border-color:var(--wine);outline:none}
 .tv-dk .dd button:active{transform:scale(.94)}
 .tv-dk .op{display:flex;gap:4px;align-items:center}
+.tv-svuota.arm{width:auto!important;padding:0 11px;border-radius:15px;background:#a61e2d!important;color:#fff!important;font:700 .78rem var(--body)!important;white-space:nowrap}
 .tv-dk .sg{display:flex;background:var(--paper);border:1px solid var(--line2);border-radius:9px;padding:2px;gap:2px;flex:1;min-width:0}
-.tv-dk .sg button{all:unset;flex:1;text-align:center;cursor:pointer;font:600 .74rem/1 var(--body);padding:6px 2px;border-radius:7px;color:var(--ink2);white-space:nowrap}
+.tv-dk .sg button{all:unset;flex:1;text-align:center;cursor:pointer;font:600 .74rem/1 var(--body);padding:6px 1px;border-radius:7px;color:var(--ink2);white-space:nowrap}
 .tv-dk .sg button.on{background:var(--wine);color:#fff}
-.tv-dk .md{width:50px;height:30px;box-sizing:border-box;border:1px solid var(--line2);border-radius:9px;background:var(--paper);color:var(--ink);text-align:center;font:600 .8rem var(--body);flex:none}
-.tv-dk .sgr{all:unset;cursor:pointer;width:30px;height:30px;border-radius:9px;border:1px solid var(--line2);background:var(--paper);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex:none}
-.tv-dk .sgr.on{background:#6b3fa0;border-color:#6b3fa0}
+.tv-dk .md{width:40px;padding:0 2px;height:30px;box-sizing:border-box;border:1px solid var(--line2);border-radius:9px;background:var(--paper);color:var(--ink);text-align:center;font:600 .8rem var(--body);flex:none}
+.tv-dk .md{-moz-appearance:textfield;appearance:textfield}.tv-dk .md::-webkit-inner-spin-button,.tv-dk .md::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.tv-dk .sgr{all:unset;box-sizing:border-box;cursor:pointer;height:30px;padding:0 7px;border-radius:9px;border:1px solid var(--line2);background:var(--paper);display:flex;align-items:center;justify-content:center;font:700 .72rem var(--body);color:var(--ink2);white-space:nowrap;flex:none}
+.tv-dk .sgr.on{background:#6b3fa0;border-color:#6b3fa0;color:#fff}
 .tv-dk .in{display:flex;gap:6px}
 .tv-dk .in input{flex:1;min-width:0;height:38px;box-sizing:border-box;border:1px solid var(--line2);border-radius:19px;padding:0 14px;background:var(--paper);color:var(--ink);font:inherit}
 .tv-dk .in button{all:unset;cursor:pointer;width:38px;height:38px;border-radius:50%;background:linear-gradient(var(--acc2),var(--acc));color:#fff;display:flex;align-items:center;justify-content:center;font-size:1rem;box-shadow:0 2px 5px #0005;flex:none}
@@ -1091,7 +1097,8 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
 .tv-sch .seg3::before{content:"🎲 Tiri:";font:600 .72rem/26px var(--body);color:#bda983;padding:0 6px}
 .tv-sch .seg3 button{padding:5px 11px;border-radius:8px;font-size:.78rem}
 .tv-sch .seg3 button.on{background:linear-gradient(var(--acc2),var(--acc));box-shadow:inset 0 1px 0 #ffffff33}
-.tv-sch .tbar .sg{background:#ffffff12;border-radius:9px;padding:5px 9px;border:1px solid #ffffff1c}
+.tv-sch .tbar .sg{background:#ffffff12;border-radius:9px;padding:5px 10px;border:1px solid #ffffff1c;color:inherit;font:600 .8rem var(--body);white-space:nowrap}
+.tv-sch .tbar .sg.on{background:#6b3fa0;border-color:#a77bd6;color:#fff;box-shadow:0 0 0 2px #6b3fa055}
 .tv-sch .tbar .tema,.tv-sch .tbar .zt button{border-radius:8px;padding:5px 9px;background:#ffffff12;border:1px solid #ffffff1c}
 .tv-sch .tbar .x{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:#ffffff14;padding:0;box-sizing:border-box}
 .tv-sch .tbar .piu{all:unset;display:none;cursor:pointer;width:32px;height:32px;border-radius:9px;background:#ffffff14;align-items:center;justify-content:center;font-size:1.1rem}
@@ -3063,9 +3070,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (!T.diceInit) { let v = null; try { v = localStorage.getItem(CHAT); } catch { } apriChat(v ? v === '1' : matchMedia('(min-width:821px)').matches); }
     T.diceInit = true;
     const tabSc = isDM() && window.__scaletta, tabSh = !isDM() && !!T.schede;
-    box.innerHTML = `<i class="tv-crz" data-k="crz" title="Trascina per allargare o stringere la chat" aria-hidden="true"></i><div class="tv-dh">${tabSc ? '<span class="tv-dtab" role="tablist"><button type="button" role="tab" data-act="tv-chatab">Chat</button><button type="button" role="tab" data-act="tv-scaletta">Scaletta</button></span>' : tabSh ? '<span class="tv-dtab" role="tablist"><button type="button" role="tab" data-act="tv-chatab">Chat</button><button type="button" role="tab" data-act="tv-schtab">Scheda</button></span>' : '<span>Chat</span>'}<span class="dx"><button type="button" class="tv-cx tv-anim ${animazioni() ? 'on' : ''}" data-act="tv-anim" title="Animazioni degli attacchi: ${animazioni() ? 'accese' : 'spente'}" aria-label="Animazioni degli attacchi" aria-pressed="${animazioni()}">✨</button><button type="button" class="tv-cx" data-act="tv-dadi" title="Chiudi la chat" aria-label="Chiudi la chat">✕</button></span></div><div class="tv-log" id="tv-log"></div>${tabSc ? '<div class="tv-scal" id="tv-scal"></div>' : ''}${tabSh ? '<div class="tv-schc" id="tv-schc"></div>' : ''}
+    box.innerHTML = `<i class="tv-crz" data-k="crz" title="Trascina per allargare o stringere la chat" aria-hidden="true"></i><div class="tv-dh">${tabSc ? '<span class="tv-dtab" role="tablist"><button type="button" role="tab" data-act="tv-chatab">Chat</button><button type="button" role="tab" data-act="tv-scaletta">Scaletta</button></span>' : tabSh ? '<span class="tv-dtab" role="tablist"><button type="button" role="tab" data-act="tv-chatab">Chat</button><button type="button" role="tab" data-act="tv-schtab">Scheda</button></span>' : '<span>Chat</span>'}<span class="dx"><button type="button" class="tv-cx tv-anim ${animazioni() ? 'on' : ''}" data-act="tv-anim" title="Animazioni degli attacchi: ${animazioni() ? 'accese' : 'spente'}" aria-label="Animazioni degli attacchi" aria-pressed="${animazioni()}">✨</button>${isDM() ? '<button type="button" class="tv-cx tv-svuota" data-act="tv-svuota" title="Svuota la chat: cancella tutti i messaggi e i tiri, per tutti" aria-label="Svuota la chat">🗑</button>' : '<button type="button" class="tv-cx" data-act="tv-dadi" title="Chiudi la chat" aria-label="Chiudi la chat">✕</button>'}</span></div><div class="tv-log" id="tv-log"></div>${tabSc ? '<div class="tv-scal" id="tv-scal"></div>' : ''}${tabSh ? '<div class="tv-schc" id="tv-schc"></div>' : ''}
       <div class="tv-dk"><div class="dd">${DADI.map(f => `<button type="button" data-df="${f}" title="Tira 1d${f}${f === 20 ? ' (con il vantaggio scelto sotto)' : ''}">${dado(f)}d${f}</button>`).join('')}</div>
-      <div class="op"><span class="sg" title="Vale per il d20">${[['', 'Normale'], ['kh1', 'Vantaggio'], ['kl1', 'Svantaggio']].map(([v, l]) => `<button type="button" data-cadv="${v}" class="${(T.cadv || '') === v ? 'on' : ''}">${l}</button>`).join('')}</span><input class="md" type="number" data-k="cmod" placeholder="+0" aria-label="Modificatore" value="${esc(T.cmod || '')}"><button type="button" class="sgr ${T.tdpriv ? 'on' : ''}" data-k="cpriv" aria-label="Tiri nascosti">🙈</button></div>
+      <div class="op"><span class="sg" title="Vale per il d20">${[['', 'Normale'], ['kh1', 'Vantaggio'], ['kl1', 'Svantaggio']].map(([v, l]) => `<button type="button" data-cadv="${v}" class="${(T.cadv || '') === v ? 'on' : ''}">${l}</button>`).join('')}</span><input class="md" type="number" data-k="cmod" placeholder="+0" aria-label="Modificatore" value="${esc(T.cmod || '')}"><button type="button" class="sgr ${T.tdpriv ? 'on' : ''}" data-k="cpriv">${T.tdpriv ? '🙈 Nascosto' : '👁 Tutti'}</button></div>
       <div class="in"><input type="text" id="tv-f" placeholder="Scrivi… (/w nome per sussurrare)" autocomplete="off" aria-label="Scrivi un messaggio"><button type="button" data-act="tv-tira" title="Invia" aria-label="Invia">➤</button></div></div>`;
     $('#tv-f').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); scrivi(); } };
     $('#tv-log').onclick = e => { const b = e.target.closest('[data-del]'); if (b) cancella(b.dataset.del).catch(err => toast(err.message, 'err')); };
@@ -3141,12 +3148,23 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
   function segnaPriv() {
     const b = $('#tv-dice [data-k=cpriv]'); if (!b) return;
-    b.classList.toggle('on', !!T.tdpriv); b.setAttribute('aria-pressed', !!T.tdpriv);
+    b.classList.toggle('on', !!T.tdpriv); b.setAttribute('aria-pressed', !!T.tdpriv); b.textContent = T.tdpriv ? '🙈 Nascosto' : '👁 Tutti';
     b.title = T.tdpriv ? (isDM() ? 'Tiri nascosti: li vedi solo tu' : 'Tiri nascosti: li vedete solo tu e il DM') : 'Tiri visibili a tutti (tocca per nasconderli)';
   }
   function dadiActs() {
     return {
       'tv-tira': () => scrivi(),
+      // il DM svuota la chat di gioco (messaggi e tiri, per tutti): il primo tocco chiede conferma
+      'tv-svuota': async () => {
+        const b = $('.tv-svuota'); if (!b || b.disabled) return;
+        const riposo = () => { b.classList.remove('arm'); b.textContent = '🗑'; };
+        if (!b.classList.contains('arm')) { b.classList.add('arm'); b.textContent = 'Svuota tutto?'; clearTimeout(T.svT); T.svT = setTimeout(riposo, 4000); return; }
+        clearTimeout(T.svT); b.disabled = true;
+        const [a, c] = await Promise.all([SB.from('tavolo_tiri').delete().gt('id', 0), SB.from('tavolo_chat').delete().gt('id', 0)]);
+        b.disabled = false; riposo();
+        if (a.error || c.error) return toast((a.error || c.error).message, 'err');
+        T.tiri = []; T.chat = []; disegnaLog(); toast('Chat svuotata.');
+      },
       'tv-anim': () => { const on = !animazioni(); try { localStorage.setItem(ANIM, on ? '1' : '0'); } catch { } const b = $('.tv-anim'); if (b) { b.classList.toggle('on', on); b.title = 'Animazioni degli attacchi: ' + (on ? 'accese' : 'spente'); b.setAttribute('aria-pressed', on); } toast(on ? 'Animazioni accese.' : 'Animazioni spente: vedrai solo l\'esito dei colpi.'); }
     };
   }
@@ -5678,7 +5696,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     root.className = 'tv-sch ' + (pg ? 'pg' : 'png');
     root.innerHTML = `<div class="tbar"${sv.pag || sv.chat ? '' : ' title="Trascina per spostare la scheda"'}>${sv.pag || sv.chat ? '' : '<span class="grip">⠿</span>'}<span class="tt">${pg ? 'Scheda del personaggio' : 'Scheda del PNG'}</span>
         <span class="seg3">${w ? '<button type="button" data-adv="0" title="Tiro normale">Normale</button><button type="button" data-adv="1">Vantaggio</button><button type="button" data-adv="2">Svantaggio</button>' : ''}</span>
-        ${w ? `<label class="sg"><input type="checkbox" data-k="seg" ${sv.seg ? 'checked' : ''}> ${isDM() ? 'Nascosti' : 'Segreti'}</label>` : ''}
+        ${w ? `<button type="button" class="sg ${sv.seg ? 'on' : ''}" data-k="seg" aria-pressed="${!!sv.seg}" title="${segTitolo(sv.seg)}">${sv.seg ? '🙈 Tiri nascosti' : '👁 Tiri visibili'}</button>` : ''}
         <button type="button" class="tema" data-k="tema" title="Scheda chiara o scura, indipendente dal tema del sito (solo per te)" aria-label="Cambia il tema della scheda">${schedaScura() ? '☀' : '☾'}</button>
         <span class="zt" title="Grandezza del testo della scheda (solo per te)"><button type="button" data-k="za" data-d="-0.1" aria-label="Testo più piccolo">A−</button><span data-k="zv"></span><button type="button" data-k="za" data-d="0.1" aria-label="Testo più grande">A+</button></span>
         <button type="button" class="piu" data-k="piu" aria-label="Altre opzioni" title="Altre opzioni">⋯</button><button type="button" class="x" data-k="chiudi" aria-label="Chiudi la scheda">✕</button></div>
@@ -5740,6 +5758,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (!da.length) return iniziativa(toks[0], mod);
     for (const t of da) await iniziativa(t, mod);
   }
+  // i tiri fatti dalla scheda: visibili a tutti o nascosti (solo il DM, o il giocatore e il DM)
+  const segTitolo = on => on ? (isDM() ? 'I tiri di questa scheda li vedi solo tu. Tocca per mostrarli a tutti' : 'I tiri di questa scheda li vedete solo tu e il DM. Tocca per mostrarli a tutti') : 'I tiri di questa scheda li vedono tutti. Tocca per nasconderli';
   const critico = f => String(f).replace(/(\d*)d(\d+)/gi, (_, n, fc) => (2 * (+n || 1)) + 'd' + fc);
   async function azioneScheda(b) {
     const sv = T.sv, s = sv && T.schede.get(sv.id); if (!s) return;
@@ -5749,7 +5769,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (k === 'modifica' || k === 'fine') { sv.edit = k === 'modifica'; return disegnaScheda(); }
     if (b.dataset.tab) { sv.tab = b.dataset.tab; return disegnaScheda(); }
     if (b.dataset.adv) { sv.adv = +b.dataset.adv; return riempi(); }
-    if (k === 'seg') { sv.seg = b.checked; return; }
+    if (k === 'seg') { sv.seg = !sv.seg; b.classList.toggle('on', sv.seg); b.setAttribute('aria-pressed', sv.seg); b.title = segTitolo(sv.seg); b.textContent = sv.seg ? '🙈 Tiri nascosti' : '👁 Tiri visibili'; return; }
     if (k && k.startsWith('dx-')) {
       const L = extraDi(s), x = L.find(y => y.id === b.dataset.id);
       if (k === 'dx-tira') return x?.dadi ? tira(x.dadi, null, sv.seg, `${s.nome} · ${x.nome || 'Danno aggiuntivo'}`) : toast('Scrivi prima i dadi, per esempio 2d6', 'err');
