@@ -1394,6 +1394,64 @@ const lightSession = (s, oldS) => ({
 });
 
 /* ---------- import: costruisce il piano senza scrivere nulla ---------- */
+/* Nomi storpiati (riassunti dettati a voce: «Toby» per «Tobi», «Zadar» per «Zadarr»): prima di importare, ogni nome di
+   scheda che non esiste sul sito ma corrisponde a una scheda esistente (per "varianti" indicate, o differenza di una lettera,
+   due se il nome è lungo, stesso tipo, un solo candidato) viene sostituito ovunque nel testo con la grafia salvata sul sito. */
+function lev(a, b, max) {
+  if (Math.abs(a.length - b.length) > max) return max + 1;
+  let p = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const c = [i]; let lo = i;
+    for (let k = 1; k <= b.length; k++) { c[k] = Math.min(p[k] + 1, c[k - 1] + 1, p[k - 1] + (a[i - 1] === b[k - 1] ? 0 : 1)); lo = Math.min(lo, c[k]); }
+    if (lo > max) return max + 1; p = c;
+  }
+  return p[b.length];
+}
+function nearName(v, type) {
+  const k = norm(v); if (k.length < 4 || S.byName.has(k)) return null;
+  const max = k.length >= 8 ? 2 : 1; const hits = new Set();
+  for (const [n, ids] of S.byName) {
+    if (n.length < 4 || lev(k, n, max) > max) continue;
+    for (const id of ids) if (!type || S.ents.get(id)?.type === type) hits.add(id);
+  }
+  return hits.size === 1 ? [...hits][0] : null;
+}
+function fixNames(j, P) {
+  const fixes = new Map();
+  const add = (v, id) => { const e = S.ents.get(id); v = String(v || '').trim(); if (!e || !v || norm(v) === norm(e.name) || (e.alias || []).some(a => norm(a) === norm(v))) return; fixes.set(v, e.name); };
+  for (const [list, upd] of [[j.entita_nuove, false], [j.entita_aggiornate, true]]) for (const e of list || []) {
+    const t = typeOf(e.tipo) || (upd && e.id && S.ents.get(String(e.id))?.type) || null;
+    // in "entita_aggiornate" il campo "nome" è una richiesta di rinomina: lì contano solo id e varianti
+    const vs = [...(upd ? [e.id] : [e.nome]), ...(e.varianti || [])].filter(Boolean).map(String);
+    let hit = e.id && S.ents.has(String(e.id)) ? String(e.id) : null;
+    if (!hit) for (const v of vs) { const a = S.byName.get(norm(v)); if (a?.length) { hit = (t && a.find(id => S.ents.get(id).type === t)) || a[0]; break; } }
+    if (!hit) for (const v of vs) { hit = nearName(v, t); if (hit) break; }
+    if (!hit) continue;
+    for (const v of vs) add(v, hit);
+    if (upd && !S.ents.has(String(e.id))) e.id = hit;
+    delete e.varianti;
+  }
+  // anche i [[Nome]] e le "entita" degli eventi che non corrispondono a nessuna scheda
+  const refs = []; JSON.stringify(j, (k, v) => { if (typeof v === 'string') for (const m of v.matchAll(/\[\[([^\]|]+)(?:\|[^\]]*)?\]\]/g)) refs.push(m[1]); return v; });
+  for (const ev of j.eventi || []) refs.push(...(ev.entita || []).map(String));
+  const planned = new Set((j.entita_nuove || []).map(e => norm(e.nome)));
+  // e le parole con l'iniziale maiuscola nei testi ("Libion" per "Livion")
+  JSON.stringify(j, (k, v) => { if (typeof v === 'string' && k !== 'id' && k !== 'formato') for (const m of v.matchAll(/(?<![\p{L}\p{N}_])\p{Lu}[\p{L}']{3,}(?![\p{L}\p{N}_])/gu)) refs.push(m[0]); return v; });
+  for (const r of new Set(refs)) { const k = norm(r); if (!k || S.byName.has(k) || S.ents.has(r) || planned.has(k)) continue; const id = nearName(r); if (id) add(r, id); }
+  if (!fixes.size) return;
+  const keys = [...fixes.keys()].sort((a, b) => b.length - a.length).map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+'));
+  const rx = new RegExp(`(?<![\\p{L}\\p{N}_])(?:${keys.join('|')})(?![\\p{L}\\p{N}_])`, 'giu');
+  const byNorm = new Map([...fixes].map(([v, n]) => [norm(v), n]));
+  const fix = s => s.replace(rx, m => byNorm.get(norm(m)) ?? m);
+  const walk = (o, k) => {
+    if (typeof o === 'string') return k === 'id' || k === 'formato' ? o : fix(o);
+    if (Array.isArray(o)) return o.map(x => walk(x, k));
+    if (o && typeof o === 'object') { for (const x of Object.keys(o)) o[x] = walk(o[x], x); return o; }
+    return o;
+  };
+  walk(j);
+  P.warns.push('Nomi corretti come sono salvati sul sito: ' + [...fixes].map(([v, n]) => `«${v}» → «${n}»`).join(', ') + '.');
+}
 async function planImport(raw) {
   const P = { errors: [], warns: [], ents: [], sess: [], events: 0, evSessions: [], pins: [], misc: [], writes: [], general: null, label: '' };
   let j;
@@ -1422,6 +1480,7 @@ async function planImport(raw) {
     }
     return null;
   };
+  fixNames(j, P);
   const sNums = []; const sessList = Array.isArray(j.sessioni) ? j.sessioni : (j.sessione ? [j.sessione] : []);
   for (const s of sessList) { const n = Number(s.numero ?? s.n); if (Number.isFinite(n) && n > 0) sNums.push(Math.round(n)); }
   const curN = sNums.length ? Math.max(...sNums) : lastSessionN();
@@ -1594,6 +1653,7 @@ Il tuo compito: rispondere SOLO con un unico JSON valido, in un blocco di codice
 
 REGOLE
 - Niente duplicati: se un PNG/luogo/oggetto/fazione è già nell'elenco ENTITÀ (anche con nome scritto diversamente), aggiornalo in "entita_aggiornate" con il suo id esatto. Crea una "entita_nuova" solo se davvero non esiste.
+- I riassunti sono spesso dettati a voce e i nomi arrivano storpiati ("Toby" per "Tobi", "Zadar" per "Zadarr"): quando capisci di chi si parla, scrivi SEMPRE il nome esattamente come è salvato nell'elenco ENTITÀ, in tutti i testi. Se hai un dubbio, aggiungi all'entità "varianti": ["grafia storpiata"]: il sito la corregge da solo.
 - In "aggiunte" metti SOLO le novità di questa sessione: vengono accodate alla scheda con l'indicazione della sessione. Non riscrivere ciò che c'è già; usa "sostituzioni" solo per condensare una sezione diventata troppo lunga.
 - "breve" = una riga (max ~120 caratteri). "stato" = poche parole (vivo, morto, attiva, completata, distrutto, scomparso…).
 - Tipi: pg, png, luogo, oggetto, fazione, missione, lore (creature, divinità, concetti, eventi storici…).
