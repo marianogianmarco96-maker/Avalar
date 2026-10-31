@@ -1016,6 +1016,15 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
 .tv-dk .in button{all:unset;cursor:pointer;width:38px;height:38px;border-radius:50%;background:linear-gradient(var(--acc2),var(--acc));color:#fff;display:flex;align-items:center;justify-content:center;font-size:1rem;box-shadow:0 2px 5px #0005;flex:none}
 .tv-roll{border-radius:12px;padding:8px 10px}
 .tv-roll .t{min-width:44px;height:40px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:#fff;background:#7d2530;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);flex:none}
+.tv-roll .who small.gioc{font:600 .7rem var(--body);color:var(--mute);margin-left:6px;letter-spacing:.02em}
+.tv-att .ar{display:flex;align-items:center;gap:8px;margin-top:6px}
+.tv-att .ar .al{flex:none;min-width:84px;font:700 .74rem var(--body);letter-spacing:.03em;text-transform:uppercase;color:var(--ink2)}
+.tv-att .ar .al em{display:block;font:italic 600 .7rem var(--body);text-transform:none;letter-spacing:0;color:var(--mute)}
+.tv-att .ar .chips{flex:1;min-width:0}
+.tv-att .ar .t{min-width:38px;height:34px;font-size:1.1rem}
+.tv-att .ar.dn .t{background:#9a3b12}
+.tv-att .tot{display:flex;justify-content:flex-end;align-items:baseline;gap:8px;margin-top:6px;padding-top:6px;border-top:1px dashed #0000002a;font:700 .78rem var(--body);text-transform:uppercase;letter-spacing:.04em;color:var(--ink2)}
+.tv-att .tot b{font:700 1.2rem var(--display);color:#9a3b12}
 .tv-roll.crit .t{background:#2f8a3c;color:#fff}.tv-roll.fail .t{background:#b3261e;color:#fff}
 .tv-roll.priv .t{background:#6b3fa0}
 .tv-roll .chips i{border-radius:6px}
@@ -3272,7 +3281,31 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if ((m = mo.match(/^(.+?) · Danni: (.+)$/))) return { k: 'dan', l: '💥 Danni', d: `${m[2]} · ${m[1]}` };
     return null;
   }
-  const rigaTiro = t => { const tt = tipoTiro(t.motivo); return `<div class="tv-roll ${esito(t)} ${t.privato ? 'priv' : ''} ${t.autore === T.me.uid ? 'me' : ''}${tt ? ' k-' + tt.k : ''}">${tagTiro(t)}<div class="h"><span class="who">${avatar(t.autore, t.nome)}${esc(t.nome)}</span><span class="dx"><small>${ora(t.creato)}</small>${via('t', t)}</span></div>
+  // chi tira davvero: il personaggio scritto nel motivo («Edward → Gorgo», «Edward · Percezione»), non chi è al computer
+  function chiTira(t, tt) {
+    const mo = String(t.motivo || ''), nomi = new Set([...T.tok.values()].map(x => x.nome).concat([...(T.schede?.values() || [])].map(x => x.nome)).filter(Boolean).map(norm));
+    const cand = tt?.d?.includes(' → ') ? [tt.d.split(' → ')[0].split(' · ').pop()] : mo.split(' · ').slice(0, 2);
+    const n = cand.map(x => String(x || '').trim()).find(x => x && nomi.has(norm(x)));
+    return n && norm(n) !== norm(t.nome) ? n : null;
+  }
+  function chiHtml(t, tt) {
+    const p = chiTira(t, tt); if (!p) return `${avatar(t.autore, t.nome)}${esc(t.nome)}`;
+    const tk = [...T.tok.values()].find(x => norm(x.nome) === norm(p) && x.immagine);
+    const av = tk ? `<i class="av" style="background-image:url('${esc(tk.immagine)}')" aria-hidden="true"></i>` : avatar(t.autore, p);
+    return `${av}${esc(p)}<small class="gioc">${esc(t.nome)}</small>`;
+  }
+  // un attacco in un solo messaggio: tiro per colpire (con tutti e due i d20 se c'è vantaggio o svantaggio), esito e danni
+  function rigaAttacco(t, parti) {
+    const tt = tipoTiro(t.motivo), [arma, ab = ''] = tt.d.split(/ · (?=[^·]*→)/), adv = / · (vantaggio|svantaggio)/.exec(t.motivo)?.[1];
+    const tot = parti.filter(x => x.tt.k === 'dan' || x.tt.k === 'ext').reduce((a, x) => a + Math.max(0, x.r.totale), 0);
+    const riga = (l, r, cls = '') => `<div class="ar${cls}"><span class="al">${l}</span><span class="chips">${chips(r.dettaglio)}</span><span class="t">${r.totale}</span></div>`;
+    return `<div class="tv-roll tv-att ${esito(t)} ${t.privato ? 'priv' : ''} ${t.autore === T.me.uid ? 'me' : ''} k-att">${tagTiro(t)}<div class="h"><span class="who">${chiHtml(t, tt)}</span><span class="dx"><small>${ora(t.creato)}</small>${via('t', t)}</span></div>
+      <div class="kt"><b>⚔ ${esc(arma.replace(/ · .*$/, ''))}${ab.includes('→') ? ' → ' + esc(ab.split(' → ')[1].replace(/ · .*$/, '')) : ''}</b>${tt.es ? `<span class="es ${tt.es[0]}">${tt.es[1]}</span>` : ''}</div>
+      ${riga(`🎯 Colpire${adv ? ` <em>${adv}</em>` : ''}`, t)}
+      ${parti.map(x => riga(x.tt.k === 'ext' ? esc(x.tt.l) : x.tt.l.startsWith('🧪') ? '🧪 Danni in più (TS)' : '💥 Danni', x.r, ' dn')).join('')}
+      ${parti.length > 1 ? `<div class="tot">Danni totali <b>${tot}</b></div>` : ''}</div>`;
+  }
+  const rigaTiro = t => { const tt = tipoTiro(t.motivo); return `<div class="tv-roll ${esito(t)} ${t.privato ? 'priv' : ''} ${t.autore === T.me.uid ? 'me' : ''}${tt ? ' k-' + tt.k : ''}">${tagTiro(t)}<div class="h"><span class="who">${chiHtml(t, tt)}</span><span class="dx"><small>${ora(t.creato)}</small>${via('t', t)}</span></div>
     ${tt ? `<div class="kt"><b>${esc(tt.l)}</b>${tt.es ? `<span class="es ${tt.es[0]}">${tt.es[1]}</span>` : ''}</div><div class="m">${esc(tt.d)}</div>` : t.motivo ? `<div class="m">${esc(t.motivo)}</div>` : ''}<div class="fo">tira ${esc(t.formula)}</div><div class="r"><span class="chips">${chips(t.dettaglio)}</span><span class="t">${t.totale}</span></div></div>`; };
   const nomeGioc = id => id === 'dm' ? 'DM' : T.membri.find(x => x.giocatore === id)?.nome || id;
   const rigaMsg = m => `<div class="tv-roll tv-msg ${m.per ? 'w' : ''} ${m.autore === T.me.uid ? 'me' : ''}">${tagMsg(m)}<div class="h"><span class="who">${avatar(m.autore, m.nome)}${esc(m.nome)}</span><span class="dx"><small>${ora(m.creato)}</small>${via('c', m)}</span></div><div class="tx">${esc(m.testo)}</div></div>`;
@@ -3286,7 +3319,24 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
   function disegnaLog() {
     const l = $('#tv-log'); if (!l) return;
-    const tutto = [...T.tiri.map(t => [t.creato, rigaTiro(t)]), ...(T.chat || []).map(m => [m.creato, rigaMsg(m)])].sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
+    // i danni che seguono un tiro per colpire finiscono nello stesso messaggio
+    const usati = new Set(), tiri = [...T.tiri].sort((a, b) => a.id - b.id), righe = [];
+    tiri.forEach((t, i) => {
+      if (usati.has(t.id)) return;
+      const tt = tipoTiro(t.motivo);
+      if (tt?.k === 'att' && /^🎯/u.test(t.motivo) && tt.d.includes(' → ')) {
+        const chi = tt.d.split(' · ').find(x => x.includes(' → ')), parti = [];
+        for (const u of tiri.slice(i + 1, i + 6)) {
+          const tu = tipoTiro(u.motivo);
+          if (u.autore !== t.autore || !tu || !['dan', 'ext'].includes(tu.k) || !tu.d.includes(chi.split(' · ')[0])) continue;
+          if (Math.abs(new Date(u.creato) - new Date(t.creato)) > 15000) break;
+          usati.add(u.id); parti.push({ r: u, tt: tu });
+        }
+        righe.push([t.creato, rigaAttacco(t, parti)]); return;
+      }
+      righe.push([t.creato, rigaTiro(t)]);
+    });
+    const tutto = [...righe, ...(T.chat || []).map(m => [m.creato, rigaMsg(m)])].sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
     l.innerHTML = tutto.map(x => x[1]).join('') || '<p class="hint">Nessun messaggio ancora. Tiri e messaggi li vedono tutti al tavolo.</p>';
     l.scrollTop = 1e9;
   }
