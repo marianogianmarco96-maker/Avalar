@@ -3983,6 +3983,16 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   const latoTok = t => t.giocatore || schedaDi(t)?.tipo === 'pg' ? 'pg' : 'png';
   const alleatoVicino = (a, b, sc) => [...T.tok.values()].find(t => t.scena === sc.id && t.id !== a.id && t.id !== b.id && latoTok(t) === latoTok(a)
     && !condTok(t).some(c => FERMO.includes(c)) && distanza(t, b, sc) <= (sc.metri || 1.5) + 0.01);
+  // fiancheggiamento (regola facoltativa della Guida del DM): un alleato in mischia dal lato opposto del bersaglio
+  function fiancheggia(a, b, sc) {
+    const [bx, by] = centro(b, sc), [ax, ay] = centro(a, sc), r = (sc.metri || 1.5) + 0.01;
+    if (distanza(a, b, sc) > r) return null;
+    return [...T.tok.values()].find(t => {
+      if (t.scena !== sc.id || t.id === a.id || t.id === b.id || latoTok(t) !== latoTok(a) || t.nascosto && !isDM() || condTok(t).some(c => FERMO.includes(c)) || distanza(t, b, sc) > r) return false;
+      const [tx, ty] = centro(t, sc), u = [ax - bx, ay - by], v = [tx - bx, ty - by], n = Math.hypot(...u) * Math.hypot(...v);
+      return n > 0 && (u[0] * v[0] + u[1] * v[1]) / n <= -0.7; // almeno 135°: dalla parte opposta
+    }) || null;
+  }
   // si può attaccare? con che modo (mischia o distanza) e con vantaggio o svantaggio, spiegando perché
   function valuta(m, b) {
     const sc = scena(), a = T.tok.get(m.tok), s = T.schede?.get(m.sid), at = armaMira(m);
@@ -4007,12 +4017,13 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const ai = aiutoPer(a); if (ai) pro.push(`aiutato da ${ai.h.nome}`);
     if (schiva(b)) contro.push(`${nb} sta schivando`);
     const br = s && tatticaBranco(s) && alleatoVicino(a, b, sc); if (br) pro.push(`tattica del branco: ${br.nome || 'un alleato'} è accanto a ${nb}`);
+    const fi = modo === 'mischia' && !br && fiancheggia(a, b, sc); if (fi) pro.push(`fiancheggiamento con ${fi.nome || 'un alleato'}`);
     const sb = schedaDi(b);
     effetti(s, 'vant_att').forEach(p => pro.push(p.nome || 'un tratto')); effetti(s, 'svant_att').forEach(p => contro.push(p.nome || 'un tratto'));
     effetti(sb, 'vant_contro').forEach(p => pro.push(`${nb}: ${p.nome || 'un tratto'}`)); effetti(sb, 'svant_contro').forEach(p => contro.push(`${nb}: ${p.nome || 'un tratto'}`));
     if (m.adv === 1) pro.push('scelto dalla scheda'); if (m.adv === 2) contro.push('scelto dalla scheda');
     const adv = pro.length && !contro.length ? 1 : contro.length && !pro.length ? 2 : 0;
-    return { ok: true, modo, d, adv, pro, contro, anim: modo === 'mischia' ? 'spada' : p.col ? 'magia' : p.lancio ? 'lancio' : 'freccia', col: p.col, ritorna: modo === 'distanza' && p.ritorna, aiuto: ai };
+    return { ok: true, modo, d, adv, pro, contro, vicino: alleatoVicino(a, b, sc), anim: modo === 'mischia' ? 'spada' : p.col ? 'magia' : p.lancio ? 'lancio' : 'freccia', col: p.col, ritorna: modo === 'distanza' && p.ritorna, aiuto: ai };
   }
   // il token con cui attacca chi apre la scheda: il suo personaggio, o il PNG da cui il DM ha aperto la scheda
   function attaccante(s) {
@@ -4154,11 +4165,13 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const s = T.schede?.get(m.sid), ex = extraDi(s).filter(x => x.dadi).map(x => [x, x.id]);
     const forma = p.area && { cerchio: 'sfera', cubo: 'cubo', cono: 'cono', linea: 'linea' }[p.area.forma] + ' di ' + metri(p.area.m);
     b.innerHTML = `<div class="g"><b class="tit">🎯 ${esc(at.nome || 'Attacco')}${m.inc != null && m.slot ? ` · slot di ${m.slot}°` : ''}</b><span class="avv">di ${esc(tok.nome || '')} · ${arr}${forma ? ' · ' + forma : ''}. ${p.area ? (m.f ? (m.f.lontano ? '<b>Troppo lontano.</b>' : `Dentro: ${m.bers.length ? m.bers.map(id => esc(T.tok.get(id)?.nome || '?')).join(', ') : 'nessuno'}.`) : 'Clicca sulla mappa il punto dove lanciarlo.') : 'Clicca il bersaglio sulla mappa.'}</span></div>
+      ${!p.area && m.inc == null && p.mischia ? `<div class="g"><label class="sw" title="Se lo porti a 0 punti ferita resta svenuto invece che morto"><input type="checkbox" data-nl ${m.nl ? 'checked' : ''}><span class="tg" aria-hidden="true"></span>🤚 Non letale</label></div>` : ''}
       ${ex.length && !p.area && m.inc == null ? `<div class="g">${ex.map(([x, i]) => `<label class="sw" title="Aggiunge ${esc(x.dadi)} ai danni se colpisci"><input type="checkbox" data-x="${esc(i)}" ${m.extra.has(i) ? 'checked' : ''}><span class="tg" aria-hidden="true"></span>＋ ${esc(x.nome)} (${esc(x.dadi)})</label>`).join('')}</div>` : ''}
       <div class="g">${p.area ? `<button type="button" data-k="lancia" class="on"${m.f && !m.f.lontano ? '' : ' disabled'}>🔥 Lancia qui</button>` : ''}<button type="button" data-k="annulla">Annulla (Esc)</button></div>`;
     b.classList.remove('spenta'); b.hidden = false;
     b.querySelector('[data-k=annulla]').onclick = () => fineMira();
     b.querySelector('[data-k=lancia]')?.addEventListener('click', lanciaArea);
+    b.querySelector('[data-nl]')?.addEventListener('change', e => { m.nl = e.target.checked; });
     b.querySelectorAll('[data-x]').forEach(x => x.onchange = () => { x.checked ? m.extra.add(x.dataset.x) : m.extra.delete(x.dataset.x); attivaExtra(s, x.dataset.x, x.checked); });
   }
   /* «Modificatore danno aggiuntivo» (come in Roll20): dadi che, se accesi, si sommano ai danni di ogni attacco.
@@ -4198,6 +4211,10 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (at && portata(at).ts) { fineMira(animazioni() ? 1800 : 700); return incantesimoTS(m, [b.id], null, v.col || '#ffb347', at); }
     // senza tiro per colpire: i danni arrivano e basta (Dardo incantato), altrimenti si annuncia su chi è lanciato
     if (sp && !sp.attacco) { fineMira(animazioni() ? 1800 : 700); return String(at.danni || '').trim() ? incantesimoTS(m, [b.id], null, v.col || '#ffb347', at) : incantesimoSu(m, sx, sp, b); }
+    const fu = m.inc == null && extraDi(sx).find(x => x.dadi && /furtiv/i.test(x.nome || ''));
+    if (fu) { const puo = v.adv !== 2 && (v.adv === 1 || !!v.vicino), on = m.extra.has(fu.id);
+      if (puo && !on) { m.extra.add(fu.id); toast(`Attacco furtivo aggiunto: ${v.adv === 1 ? 'hai vantaggio' : `${v.vicino.nome || 'un alleato'} è accanto a ${b.nome || 'il bersaglio'}`}.`); }
+      else if (!puo && on) { m.extra.delete(fu.id); toast(`Attacco furtivo tolto: ${v.adv === 2 ? 'con lo svantaggio non vale' : 'serve il vantaggio o un alleato accanto al bersaglio'}.`); } }
     fineMira(animazioni() ? 1800 : 700);
     const exP = extraDi(sx).filter(x => m.extra.has(x.id) && x.dadi), bd = m.inc == null ? bonusDadi(at) : '';
     const extra = [bd, ...exP.map(x => x.dadi)].filter(Boolean).join('+'), exN = [bd ? bonusNome(at) : '', ...exP.map(x => x.nome || 'danni in più')].filter(Boolean).join(' + ');
@@ -4212,12 +4229,20 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     else if (a) await segnaReazione(a); // fuori dal suo turno si attacca solo con la reazione (attacco di opportunità)
     if (a && v.aiuto) usaAiuto(a, v.aiuto);
     if (x.critico && x.pf !== 0) barraCritico(x, a, b, mossa);
+    if (x.morto && m.nl) await nonLetale(m.tok, b);
     if (x.salvezza) toast(`${b.nome || 'Il bersaglio'} deve fare un tiro salvezza su ${nomeCar(x.salvezza.car)} (CD ${x.salvezza.cd}) per i danni in più.`);
     if (mossa.esito === 'si' && m.inc == null) for (const p of effetti(sx, 'ts_colpo')) chiediTSTratto(a, b, p);
     const perche = [v.adv === 1 ? 'vantaggio: ' + v.pro.join(', ') : v.adv === 2 ? 'svantaggio: ' + v.contro.join(', ') : ''].filter(Boolean).join('');
     toast(`${a?.nome || ''} → ${b.nome || ''}: ${mossa.esito === 'nd' ? `tiro ${x.totale}, senza CA nella scheda del bersaglio decide il DM` : mossa.esito === 'si' ? `${x.critico ? 'critico! ' : 'colpito, '}${x.danni} danni${x.danni_extra != null ? ` (di cui ${x.danni_extra} da ${exN})` : ''}` : x.fallito ? '1 naturale, mancato' : 'mancato'}${perche ? ' (' + perche + ')' : ''}${v.ritorna ? ' · il pugnale torna in mano' : ''}`);
   }
 
+  // attacco non letale: a 0 punti ferita il bersaglio resta svenuto invece che morto
+  async function nonLetale(da, b) {
+    const r = await SB.rpc('tavolo_non_letale', { p_token: da, p_bersaglio: b.id });
+    if (r.error) return toast(sqlMancante(r.error) || /tavolo_non_letale/.test(r.error.message) ? 'Per gli attacchi non letali esegui tavolo/tappa-15.sql in Supabase.' : r.error.message, 'err');
+    const t = T.tok.get(b.id); if (t && r.data?.condizioni) { t.condizioni = r.data.condizioni; disegnaToken(); }
+    await annuncia(`🤚 ${b.nome || 'Il bersaglio'} è messo fuori combattimento: resta svenuto, non muore.`);
+  }
   // un tratto «quando colpisce, TS…»: la richiesta arriva al bersaglio come per gli incantesimi
   async function chiediTSTratto(a, b, p) {
     const car = p.ts_car, cd = num(p.ts_cd); if (!a || !car || !cd) return;
@@ -4495,10 +4520,12 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (!isDM() || !T.turno?.length) return;
     for (const x of T.turno) {
       const t = x.token && T.tok.get(x.token); if (!t || togliendo.has(x.id)) continue;
-      const pf = pfDi(t), morto = condTok(t).includes('Morto') || (!t.giocatore && pf?.max > 0 && pf.pf === 0);
-      if (!morto) continue;
+      const morto = y => { const pf = pfDi(y), c = condTok(y); return c.includes('Morto') || (!y.giocatore && pf?.max > 0 && pf.pf === 0 && !c.includes('Svenuto')); };
+      if (!morto(t)) continue;
       togliendo.add(x.id);
       (async () => {
+        await new Promise(r => setTimeout(r, 1500));
+        const y = T.tok.get(t.id); if (!y || !morto(y)) { togliendo.delete(x.id); return; }
         if (T.stato?.turno === x.id && T.turno.length > 1) { const r = await SB.rpc('tavolo_turno_avanti'); if (r.error) toast(r.error.message, 'err'); }
         const r = await SB.from('tavolo_turno').delete().eq('id', x.id); togliendo.delete(x.id);
         if (r.error) return toast(r.error.message, 'err');
@@ -4743,7 +4770,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (p.tok || (isDM() && p.s.tipo === 'png')) {
       const pf = clamp(p.pf + delta, 0, p.max), ch = { pf, pf_max: p.max }, cc = condTok(t);
       // un nemico a 0 punti ferita è sconfitto: prende la condizione Morto, e la perde se lo si cura
-      if (!t.giocatore && 'condizioni' in t) { if (!pf && !cc.includes('Morto')) ch.condizioni = [...cc, 'Morto']; else if (pf && cc.includes('Morto')) ch.condizioni = cc.filter(c => c !== 'Morto'); }
+      if (!t.giocatore && 'condizioni' in t) { if (!pf && !cc.includes('Morto') && !cc.includes('Svenuto')) ch.condizioni = [...cc, 'Morto']; else if (pf && cc.includes('Morto')) ch.condizioni = cc.filter(c => c !== 'Morto'); }
       const r = await SB.from('tavolo_token').update(ch).eq('id', t.id).select().single();
       if (r.error) return toast(r.error.message, 'err');
       T.tok.set(t.id, completa(T.tok.get(t.id), r.data)); disegnaToken(); aggiornaFinestra(); effettoPF(t, pf - p.pf); return;
