@@ -2192,8 +2192,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       // riprendere il token mentre aspetta la conferma: si continua da dove è, misurando sempre dalla partenza
       let da = null;
       if (t && T.tool !== 'mano' && puoMuovere(t) && T.passo) { if (T.passo.id === t.id) { da = T.passo; T.passo = null; barraMaschera(); } else annullaPasso(); }
-      // nel suo turno, finito il movimento non si sposta più (il DM può forzare tenendo premuto Alt)
-      if (t && T.tool !== 'mano' && puoMuovere(t) && suoTurno(t) && !(isDM() && e.altKey) && movimentoDi(t).resta < 1.49) { avvisoFermo(t); return; }
+      // finito il movimento il token si prende lo stesso: se lo si sposta, si chiede conferma (per rimediare a un errore)
       if (t && T.tool !== 'mano' && puoMuovere(t)) { T.drag = { id: t.id, dx: p.x - t.x, dy: p.y - t.y, x0: da ? da.x0 : t.x, y0: da ? da.y0 : t.y, sx: e.clientX, sy: e.clientY, mosso: false }; el.classList.add('drag'); return; }
       if (t && T.tool !== 'mano') T.clic = { id: t.id, sx: e.clientX, sy: e.clientY };
       pan = { sx: e.clientX, sy: e.clientY, x: T.view.x, y: T.view.y }; st.classList.add('pan');
@@ -2267,10 +2266,12 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         const cm = suoTurno(t) ? costoMov(t, d.x0, d.y0, x, y) : { m: 0, dif: 0 }, m = cm.m;
         if (m) {
           const mv = movimentoDi(t);
-          const conScatto = puoScattare(t) && m <= mv.resta + velocitaDi(schedaDi(t)) + 0.01; // oltre il movimento, ma con lo Scatto ci arriva
-          if (!(isDM() && e.altKey) && !conScatto && m > mv.resta + 0.01) { tornaIndietro(t, d.x0, d.y0); mostraRighello(null); manda('righello', { uid: T.me.uid, pts: null }); toast(`Troppo lontano: ${t.nome || 'il token'} ha ancora ${metri(Math.max(mv.resta, 0))} di movimento.`, 'err'); return; }
+          // movimento a zigzag: ogni tratto si conta sulla griglia e si salva subito, senza conferme; il token resta dove lo lasci.
+          // si chiede solo se il tratto va oltre il movimento rimasto (si può spostare lo stesso) o provoca attacchi di opportunità
           t.x = x; t.y = y; disegnaToken(); manda('trascina', { id: t.id, x, y });
-          return chiediPasso(t, x, y, d.x0, d.y0, m, cm.dif);
+          const oltre = !(isDM() && e.altKey) && m > mv.resta + 0.01, opp = suoTurno(t) ? opportunita(t, d.x0, d.y0, x, y) : [];
+          if (oltre || opp.length) return chiediPasso(t, x, y, d.x0, d.y0, m, cm.dif);
+          T.passo = { id: t.id, x, y, x0: d.x0, y0: d.y0, m, dif: cm.dif }; return confermaPasso();
         }
         mostraRighello(null); manda('righello', { uid: T.me.uid, pts: null });
         t.x = x; t.y = y; disegnaToken(); manda('trascina', { id: t.id, x, y });
@@ -2643,21 +2644,16 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     return true;
   }
   // «Muovere Livion di 6 m?»: con la conferma il movimento si scala, altrimenti il token torna dov'era
-  function avvisoFermo(t) {
-    const mio = !isDM() && t.giocatore === T.me.giocatore;
-    const sc = puoScattare(t), dopo = sc ? ` Per muoverti ancora: «Azioni» → Scatto${sc === 'bon' ? ' (con l\'azione bonus)' : ''}.` : '';
-    toast(mio ? 'Hai esaurito il tuo movimento.' + (dopo || ' Non puoi muoverti oltre in questo turno.') : `${t.nome || 'Il token'} ha esaurito il movimento.${dopo || ' Non può muoversi oltre in questo turno.'}${isDM() ? ' (Alt + trascina per forzare)' : ''}`, 'err');
-  }
   function chiediPasso(t, x, y, x0, y0, m, dif) {
     const b = $('#tv-mbar'); if (!b) return;
     const mv = movimentoDi(t), dopo = mv.resta - m, opp = suoTurno(t) ? opportunita(t, x0, y0, x, y) : [], pd = opp.length && puoDisimpegnarsi(t);
     T.passo = { id: t.id, x, y, x0, y0, m, dif };
     const nomi = opp.map(o => o.nome || 'un nemico').join(', '), oppHtml = opp.length ? `<span class="avv opp">⚔️ <b>Attacco di opportunità:</b> ${esc(t.nome || 'il token')} esce dalla portata di ${esc(nomi)} senza Disimpegno. ${opp.length > 1 ? 'Possono' : 'Può'} attaccarlo con la reazione.</span>` : '';
-    b.innerHTML = `<div class="g"><b class="tit">🏃 ${esc(t.nome || 'Token')}: ${metri(m)}${dif ? ' 🪨' : ''}</b>${dif ? `<span class="avv">${dif} ${dif === 1 ? 'casella' : 'caselle'} di terreno difficile (contano doppio).</span>` : ''}<span class="avv">${dopo >= 0 ? `Dopo restano ${metri(dopo)} di ${metri(mv.tot)}.` : `<b>Oltre il movimento di ${metri(-dopo)}.</b>`} Confermi lo spostamento?</span>${oppHtml}</div><div class="g">${pd ? `<button type="button" data-k="dis" class="on" title="Usa ${pd === 'bon' ? 'l\'azione bonus' : 'l\'azione'} per il Disimpegno: niente attacchi di opportunità">🛡 Disimpegno${dopo >= 0 || isDM() ? ' e conferma' : ''}</button>` : ''}${dopo < 0 && suoTurno(t) && puoScattare(t) ? `<button type="button" data-k="scatta" class="on" title="Usa ${puoScattare(t) === 'bon' ? 'l\'azione bonus' : 'l\'azione'} per lo Scatto: altri ${metri(velocitaDi(schedaDi(t)))}">🏃 Scatta e conferma</button>` : ''}${dopo >= 0 || isDM() ? `<button type="button" data-k="ok" class="${dopo < 0 && suoTurno(t) && puoScattare(t) ? '' : 'on'}">✓ Conferma</button>` : ''}<button type="button" data-k="no">Annulla</button></div>`;
+    b.innerHTML = `<div class="g"><b class="tit">🏃 ${esc(t.nome || 'Token')}: ${metri(m)}${dif ? ' 🪨' : ''}</b>${dif ? `<span class="avv">${dif} ${dif === 1 ? 'casella' : 'caselle'} di terreno difficile (contano doppio).</span>` : ''}<span class="avv">${dopo >= 0 ? `Dopo restano ${metri(dopo)} di ${metri(mv.tot)}.` : `<b>Oltre il movimento di ${metri(-dopo)}.</b>`} Confermi lo spostamento?</span>${oppHtml}</div><div class="g">${pd ? `<button type="button" data-k="dis" class="on" title="Usa ${pd === 'bon' ? 'l\'azione bonus' : 'l\'azione'} per il Disimpegno: niente attacchi di opportunità">🛡 Disimpegno e conferma</button>` : ''}${dopo < 0 && suoTurno(t) && puoScattare(t) ? `<button type="button" data-k="scatta" class="on" title="Usa ${puoScattare(t) === 'bon' ? 'l\'azione bonus' : 'l\'azione'} per lo Scatto: altri ${metri(velocitaDi(schedaDi(t)))}">🏃 Scatta e conferma</button>` : ''}<button type="button" data-k="ok" class="${dopo < 0 && suoTurno(t) && puoScattare(t) ? '' : 'on'}" title="${dopo < 0 ? 'Sposta il token anche oltre il movimento (per esempio per rimediare a un errore)' : ''}">✓ ${dopo < 0 ? 'Sposta comunque' : 'Conferma'}</button><button type="button" data-k="no">Annulla</button></div>`;
     b.classList.remove('spenta'); b.hidden = false;
     const ok = b.querySelector('[data-k=ok]'); if (ok) ok.onclick = confermaPasso;
     const sc = b.querySelector('[data-k=scatta]'); if (sc) sc.onclick = () => faiAzione(t, 'scatto', puoScattare(t)); // conferma il passo e poi scatta
-    const di = b.querySelector('[data-k=dis]'); if (di) di.onclick = async () => { await faiAzione(t, 'dis', puoDisimpegnarsi(t)); if (dopo >= 0 || isDM()) confermaPasso(); };
+    const di = b.querySelector('[data-k=dis]'); if (di) di.onclick = async () => { await faiAzione(t, 'dis', puoDisimpegnarsi(t)); confermaPasso(); };
     disegnaToken(); // il pannello e l'area contano già questo passo
     b.querySelector('[data-k=no]').onclick = annullaPasso;
   }
