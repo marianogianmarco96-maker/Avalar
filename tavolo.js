@@ -1605,7 +1605,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function esci() {
     if (T.ch) { try { SB.removeChannel(T.ch); } catch { } T.ch = null; }
     T.live = false; T.rulers.clear(); clearTimeout(T.rt);
-    removeEventListener('keydown', tasti); removeEventListener('pointermove', segui);
+    removeEventListener('keydown', tasti); removeEventListener('pointermove', segui); document.removeEventListener('visibilitychange', riprendi);
   }
   function stato(cls, txt) { const o = $('#tv-on'); if (!o) return; o.className = 'tv-on ' + cls; o.title = txt; }
 
@@ -1662,6 +1662,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     pg('tavolo_schede', p => {
       if (!T.schede) return;
       if (p.eventType === 'DELETE') { T.schede.delete(p.old.id); dopoScheda(p.old.id); return; }
+      // una scheda grande arriva senza «dati» (il tempo reale taglia i valori lunghi): la riprendo intera, se no PF e condizioni restano vecchi
+      if (!p.new.dati) { riprendiScheda(p.new.id); return; }
       arrivaScheda(p.new); togliMorti();
     });
     // schede di PNG che il DM ha appena mostrato o nascosto: i giocatori ricaricano l'elenco
@@ -1730,9 +1732,11 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (!isDM() && t.giocatore !== T.me.giocatore && scena()) { const l = t.misura * scena().griglia; el.hidden = coperto(m.x + l / 2, m.y + l / 2); }
     });
     ch.on('broadcast', { event: 'attacco' }, ({ payload: m }) => mostraAttacco(m));
-    ch.on('broadcast', { event: 'pf' }, ({ payload: m }) => mostraPF(m));
+    ch.on('broadcast', { event: 'pf' }, ({ payload: m }) => { mostraPF(m); riallinea(m.id); });
     ch.on('broadcast', { event: 'area' }, ({ payload: m }) => mostraArea(m));
     ch.on('broadcast', { event: 'ts' }, ({ payload: m }) => mostraTS(m));
+    // il DM ha tolto una richiesta di tiro salvezza: sparisce anche dallo schermo del giocatore
+    ch.on('broadcast', { event: 'ts-via' }, ({ payload: m }) => { if (T.salv?.delete(m.id)) disegnaSalvezze(); });
     ch.on('broadcast', { event: 'foto' }, ({ payload: f }) => { if (!isDM()) apriFoto(f, true); });
     ch.on('broadcast', { event: 'righello' }, ({ payload: m }) => {
       if (m.pts) T.rulers.set(m.uid, m); else T.rulers.delete(m.uid);
@@ -1757,8 +1761,27 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       } else if (s === 'CHANNEL_ERROR' || s === 'TIMED_OUT' || s === 'CLOSED') { T.live = false; if (T.ch === ch) stato('ko', 'Riconnessione…'); }
     });
     addEventListener('keydown', tasti); addEventListener('pointermove', segui, { passive: true });
+    document.addEventListener('visibilitychange', riprendi);
+  }
+  // chi blocca il telefono o cambia scheda perde gli aggiornamenti di quel momento: al ritorno ricarico il tavolo
+  let nascostaDa = 0;
+  async function riprendi() {
+    if (document.hidden) { nascostaDa = Date.now(); return; }
+    if (!T.ch || !nascostaDa || Date.now() - nascostaDa < 5000) return; nascostaDa = 0;
+    await carica().catch(() => { }); disegnaBarra(); mostraScena(false); disegnaLog(); disegnaTurno(); if (T.schede) dopoScheda();
   }
   // Postgres non rimanda i valori lunghi rimasti uguali (come l'immagine del token): li tengo da prima
+  // dopo danni o cure riprendo token e scheda dal database: se il tempo reale si è perso un pezzo, qui si rimedia
+  const allineo = new Map();
+  function riallinea(id) {
+    clearTimeout(allineo.get(id));
+    allineo.set(id, setTimeout(async () => {
+      allineo.delete(id);
+      const r = await SB.from('tavolo_token').select('*').eq('id', id).maybeSingle(); if (r.error || !r.data) return;
+      const t = completa(T.tok.get(id), r.data); T.tok.set(id, t); disegnaToken();
+      const s = schedaDi(t); if (s) riprendiScheda(s.id);
+    }, 1500));
+  }
   const completa = (prima, nuovo) => { const o = { ...(prima || {}), ...nuovo }; if (prima?.immagine && !nuovo.immagine) o.immagine = prima.immagine; return o; };
   const manda = (event, payload) => { if (T.ch) T.ch.send({ type: 'broadcast', event, payload }).catch(() => { }); };
 
@@ -2072,7 +2095,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       el.querySelector('b').textContent = t.nome + (t.nascosto ? ' (nascosto)' : '');
       el.querySelector('b').hidden = !t.nome;
       el.title = t.nome || '';
-      const ai = aiutoPer(t), sg = [schiva(t) && ['🌀', 'Schivata'], ai && ['🤝', 'Aiutato da ' + ai.h.nome]].filter(Boolean);
+      const ai = aiutoPer(t), sg = [schiva(t) && ['🌀', 'Schivata'], suoTurno(t) && (azioniDi(t).fatte || []).some(f => f.k === 'dis') && ['🛡', 'Disimpegnato: niente attacchi di opportunità'], ai && ['🤝', 'Aiutato da ' + ai.h.nome]].filter(Boolean);
       const cl = condTok(t).filter(c => COND_FX[c]), ck = cl.join('|') + '#' + sg.map(x => x[1]).join('|');
       if (el.dataset.cnd !== ck) { // ridisegno gli effetti solo se cambiano, così le animazioni non ripartono
         el.dataset.cnd = ck;
@@ -2687,7 +2710,11 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const extra = () => {
       pop.querySelector('[data-k=chiudi]').onclick = chiudiPop;
       legaTurnoPop(pop, t);
-      const metti = async lista => { chiudiPop(); const s = t.giocatore ? schedaDi(t) : null; if (s && puoScrivere(s)) await cambiaCond(s, null, lista); else await condSuToken(t, lista); };
+      const metti = async lista => {
+        chiudiPop(); const s = t.giocatore ? schedaDi(t) : null;
+        if (s && puoScrivere(s)) { await cambiaCond(s, null, lista); if (!condTok(T.tok.get(t.id)).includes(lista.at(-1) ?? '')) await condSuToken(t, lista); }
+        else await condSuToken(t, lista);
+      };
       pop.querySelectorAll('[data-tc]').forEach(b => b.onclick = () => metti(cnow.filter(c => c !== b.dataset.tc)));
       const sc = pop.querySelector('[data-k=tcond]'); if (sc) sc.onchange = () => { if (sc.value) metti([...cnow, sc.value]); };
       pop.querySelector('[data-k=sch]')?.addEventListener('click', async () => {
@@ -4113,6 +4140,10 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const m = T.mira; if (!m) return;
     const sx = T.schede?.get(m.sid), at = armaMira(m), sp = m.inc != null ? sx?.dati.incantesimi?.[m.inc] : null;
     const v = suSe(m) && b.id === m.tok ? { ok: true, adv: 0, pro: [], contro: [], col: portata(at).col } : valuta(m, b); if (!v.ok) { if (v.motivo) toast(v.motivo, 'err'); return; }
+    // chi si è disimpegnato in questo turno non subisce attacchi di opportunità: lo blocco, salvo conferma (un'azione preparata resta possibile)
+    const att = T.tok.get(m.tok);
+    if (att && !suoTurno(att) && suoTurno(b) && (azioniDi(b).fatte || []).some(f => f.k === 'dis')
+      && !await ask(`${b.nome || 'Il bersaglio'} si è disimpegnato in questo turno: il suo movimento non provoca attacchi di opportunità. Attacchi lo stesso (per esempio con un'azione preparata)?`, { ok: 'Attacca lo stesso', title: 'Disimpegno' })) return fineMira(0);
     if (at && portata(at).ts) { fineMira(animazioni() ? 1800 : 700); return incantesimoTS(m, [b.id], null, v.col || '#ffb347', at); }
     // senza tiro per colpire: i danni arrivano e basta (Dardo incantato), altrimenti si annuncia su chi è lanciato
     if (sp && !sp.attacco) { fineMira(animazioni() ? 1800 : 700); return String(at.danni || '').trim() ? incantesimoTS(m, [b.id], null, v.col || '#ffb347', at) : incantesimoSu(m, sx, sp, b); }
@@ -4258,7 +4289,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     box.innerHTML = `<div class="h"><b>🛡 Tiro salvezza${l.length > 1 ? ` (${l.length})` : ''}</b>${isDM() && png.length > 1 ? '<button type="button" data-k="tutti">🎲 Tira tutti i PNG</button>' : ''}</div><div class="l">${l.map(riga).join('')}</div>`;
     box.querySelectorAll('.ts').forEach(el => el.querySelectorAll('button').forEach(b => b.onclick = () => {
       const id = el.dataset.id, k = b.dataset.k;
-      if (k === 'x') return SB.rpc('tavolo_salva_annulla', { p_id: id }).then(r => { if (r.error) toast(r.error.message, 'err'); else { T.salv.delete(id); disegnaSalvezze(); } });
+      if (k === 'x') return SB.rpc('tavolo_salva_annulla', { p_id: id }).then(r => { if (r.error) toast(r.error.message, 'err'); else { T.salv.delete(id); disegnaSalvezze(); manda('ts-via', { id }); } });
       tiraSalvezza(id, k === 'v' ? 1 : k === 's' ? 2 : 0);
     }));
     box.querySelector('[data-k=tutti]')?.addEventListener('click', async () => { for (const r of png) await tiraSalvezza(r.id, 0); });
@@ -4321,7 +4352,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function mostraAttaccoOra(m) {
     const sc = scena(), fx = $('#tv-fx'), a = T.tok.get(m.da), b = T.tok.get(m.a); if (!sc || !fx || !b) return;
     const vedeB = isDM() || !tokEl(b.id)?.hidden, vedeA = a && (isDM() || !tokEl(a.id)?.hidden);
-    if (!vedeB) return;
+    // nel buio non si svela dove sta il bersaglio, ma chi attacca (o chi muove l'attaccante) vede sempre il suo colpo
+    if (!vedeB && !(a && puoMuovere(a))) return;
     const u = sc.griglia, [bx, by, br] = centro(b, sc), esito = () => {
       if (m.esito === 'kill') { lampo(fx, bx, by, '#ff2d2d', br * 2.6); lampo(fx, bx, by, '#fff', br * 1.2); trema(b.id, u * 1.6); scritta(fx, bx, by - br - u * 0.25, '☠ Colpo mortale!', '#ff3b3b', u, true); }
       else if (m.esito === 'conf') scritta(fx, bx, by - br - u * 0.25, 'Conferma: ' + m.nat, '#f3e6c8', u);
@@ -4646,7 +4678,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     lista = [...new Set(lista)];
     if (tk) return condSuToken(tk, lista);
     if (s) await salvaScheda(s.id, { condizioni: lista }, true);
-    if (s?.giocatore) for (const t of [...T.tok.values()].filter(t => t.giocatore === s.giocatore && puoMuovere(t))) await condSuToken(t, lista);
+    if (s) for (const t of [...T.tok.values()].filter(t => schedaDi(t)?.id === s.id && (isDM() || puoMuovere(t)))) await condSuToken(t, lista);
   }
   // i punti ferita di un token: i suoi (ogni PNG ha i propri) o quelli della scheda del personaggio
   function pfDi(t) {
@@ -4836,6 +4868,10 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (vecchia && !isDM() && s.giocatore && s.giocatore === T.me?.giocatore && (num(s.dati?.liv_concesso) || 0) > (num(vecchia.dati?.liv_concesso) || 0) && num(s.dati.liv_concesso) > (num(s.dati.livello) || 1)) festaLivello(s);
     if (p) s.dati = { ...s.dati, ...p.dati }; // ciò che sto ancora scrivendo resta mio
     T.schede.set(row.id, s); dopoScheda(row.id);
+  }
+  async function riprendiScheda(id) {
+    const r = await SB.from('tavolo_schede').select('*').eq('id', id).maybeSingle();
+    if (!r.error && r.data) { arrivaScheda(r.data); togliMorti(); }
   }
   async function ricaricaSchede() {
     const r = await SB.from('tavolo_schede').select('*'); if (r.error) return;
@@ -6824,6 +6860,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     vivoPag = SB.channel('schede-pagina-' + Math.random().toString(36).slice(2, 8)).on('postgres_changes', { event: '*', schema: 'public', table: 'tavolo_schede' }, p => {
       if (!T.schede) return;
       if (p.eventType === 'DELETE') { T.schede.delete(p.old.id); dopoScheda(p.old.id); return; }
+      if (!p.new.dati) return riprendiScheda(p.new.id);
       arrivaScheda(p.new);
     }).subscribe();
   }
