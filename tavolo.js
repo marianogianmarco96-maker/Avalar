@@ -1615,7 +1615,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
 
   /* ---------- stato ---------- */
-  const T = { mvarchi: new Map(), mask: [], turno: [], chat: [], mmodo: 'svela', mforma: 'rett', mraggio: 0, mini: new Map(), me: null, info: null, stato: null, scene: new Map(), tok: new Map(), tiri: [], vista: null, view: { x: 0, y: 0, z: 1 }, tool: 'muovi', livello: 'segnalini', tdpriv: false, allN: 3, muri: [], mtool: 'muro', mfatti: [], wver: 0, schede: null, sv: null, ch: null, rulers: new Map(), salv: new Map(), live: false, url: new Map(), online: [] };
+  const T = { copRic: new Map(), mvarchi: new Map(), mask: [], turno: [], chat: [], mmodo: 'svela', mforma: 'rett', mraggio: 0, mini: new Map(), me: null, info: null, stato: null, scene: new Map(), tok: new Map(), tiri: [], vista: null, view: { x: 0, y: 0, z: 1 }, tool: 'muovi', livello: 'segnalini', tdpriv: false, allN: 3, muri: [], mtool: 'muro', mfatti: [], wver: 0, schede: null, sv: null, ch: null, rulers: new Map(), salv: new Map(), live: false, url: new Map(), online: [] };
   const isDM = () => T.me?.ruolo === 'dm';
   // nella pagina di un personaggio la scheda si apre senza mappa: niente token, turni né bersagli
   const scena = () => T.pag ? null : T.scene.get(T.vista) || null;
@@ -1757,6 +1757,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       else if (!T.mask.some(m => m.id === p.new.id)) T.mask.push(p.new);
       programmaMaschera();
     });
+    if (isDM()) pg('tavolo_coperture_richieste', p => { if (p.new?.scena) { T.copRic.set(p.new.scena, p.new); if (T.tool === 'muri') barraMaschera(); } });
     pg('tavolo_muri', p => {
       if (!T.muri) return;
       if (p.eventType === 'DELETE') T.muri = T.muri.filter(m => m.id !== p.old.id);
@@ -3838,26 +3839,29 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function copertura(a, b, sc) {
     if (!sc || !a || !b) return null;
     const g = sc.griglia, ins = g * 0.04, muri = muriScena(sc).filter(chiuso);
-    const ang = t => { const l = t.misura * g; return [[t.x + ins, t.y + ins], [t.x + l - ins, t.y + ins], [t.x + ins, t.y + l - ins], [t.x + l - ins, t.y + l - ins]]; };
+    // le creature grandi: chi attacca sceglie qualsiasi angolo delle sue caselle, e una qualsiasi casella del bersaglio
+    const n = t => Math.max(1, Math.round(t.misura || 1)), L = t => t.misura * g / n(t);
+    const puntiA = t => { const P = [], k = n(t), q = L(t); for (let i = 0; i <= k; i++) for (let j = 0; j <= k; j++) P.push([t.x + Math.min(Math.max(i * q, ins), k * q - ins), t.y + Math.min(Math.max(j * q, ins), k * q - ins)]); return P; };
+    const caselle = t => { const C = [], k = n(t), q = L(t); for (let i = 0; i < k; i++) for (let j = 0; j < k; j++) { const x = t.x + i * q, y = t.y + j * q; C.push([[x + ins, y + ins], [x + q - ins, y + ins], [x + ins, y + q - ins], [x + q - ins, y + q - ins]]); } return C; };
     // le creature in mezzo: un quadrato un po' più piccolo della casella
     const crea = [...T.tok.values()].filter(t => t.scena === sc.id && t.id !== a.id && t.id !== b.id && !t.nascosto && !condTok(t).includes('Morto')).map(t => {
       const l = t.misura * g, r = l * 0.3, cx = t.x + l / 2, cy = t.y + l / 2;
       return { t, seg: [[cx - r, cy - r, cx + r, cy - r], [cx + r, cy - r, cx + r, cy + r], [cx + r, cy + r, cx - r, cy + r], [cx - r, cy + r, cx - r, cy - r]] };
     });
     let best = null;
-    for (const c of ang(a)) {
-      const linee = ang(b).map(d => {
+    for (const cas of caselle(b)) for (const c of puntiA(a)) {
+      if (best?.n === 0) break;
+      const linee = cas.map(d => {
         let liv = 0, chi = null;
         for (const m of muri) if (taglia(c[0], c[1], d[0], d[1], m.punti)) { const v = m.tipo === 'meta' ? 1 : m.tipo === 'tre' ? 2 : 3; if (v > liv) { liv = v; chi = m.tipo ? (m.nome || NOMI_COP[m.tipo]) : 'muro'; } }
         if (liv < 1) for (const x of crea) if (x.seg.some(sg => taglia(c[0], c[1], d[0], d[1], sg))) { liv = 1; chi = x.t.nome || 'una creatura'; break; }
         return { d, liv, chi };
       });
       const bloc = linee.filter(l => l.liv), max = Math.max(0, ...linee.map(l => l.liv));
-      let n = 0;
-      if (bloc.length === 4 && linee.every(l => l.liv === 3)) n = 3;
-      else if (bloc.length) { n = bloc.length >= 3 ? 2 : 1; if (max === 1) n = 1; if (linee.some(l => l.liv === 2)) n = 2; }
-      if (!best || n < best.n) best = { n, c, linee, chi: [...new Set(bloc.map(l => l.chi))] };
-      if (n === 0) break;
+      let lv = 0;
+      if (bloc.length === 4 && linee.every(l => l.liv === 3)) lv = 3;
+      else if (bloc.length) { lv = bloc.length >= 3 ? 2 : 1; if (max === 1) lv = 1; if (linee.some(l => l.liv === 2)) lv = 2; }
+      if (!best || lv < best.n) best = { n: lv, c, linee, chi: [...new Set(bloc.map(l => l.chi))] };
     }
     return { ...COP[best.n], c: best.c, linee: best.linee, chi: best.chi };
   }
@@ -4026,7 +4030,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   async function salvaMuro(a, b) {
     const sc = scena(); if (!sc || Math.hypot(b.x - a.x, b.y - a.y) < 3) return;
     const r = await SB.from('tavolo_muri').insert({ scena: sc.id, punti: [a.x, a.y, b.x, b.y], porta: T.mtool === 'porta', ...(T.mtool === 'meta' || T.mtool === 'tre' ? { tipo: T.mtool } : {}) }).select().single();
-    if (r.error) return toast(sqlMancante(r.error) ? 'Per i muri esegui tavolo/tappa-4.sql in Supabase.' : r.error.message, 'err');
+    if (r.error) return toast(/tipo|column/i.test(r.error.message) ? 'Per muretti e feritoie esegui tavolo/tappa-16.sql in Supabase.' : sqlMancante(r.error) ? 'Per i muri esegui tavolo/tappa-4.sql in Supabase.' : r.error.message, 'err');
     if (!T.muri.some(m => m.id === r.data.id)) T.muri.push(r.data);
     T.mfatti.push(r.data.id);
     if (r.data.porta && a.m && a.m === b.m && T.muri.includes(a.m)) await apriVarco(a.m, a, b, r.data.id);
@@ -4087,6 +4091,28 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (a) { const [ax, ay] = S(a); h += `<line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="#000a" stroke-width="6" stroke-linecap="round"/><line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="${col}" stroke-width="3" stroke-dasharray="8 5" stroke-linecap="round"/><circle cx="${ax}" cy="${ay}" r="4" fill="${col}"/>`; }
     return h + `<circle cx="${bx}" cy="${by}" r="5" fill="none" stroke="${col}" stroke-width="2"/>`;
   }
+  /* ---------- coperture tracciate da Claude: la mappa va in lista d'attesa, Claude la analizza e salva i muri (tappa 16) ---------- */
+  const quando = d => new Date(d).toLocaleString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  function statoCoperture(sc) {
+    if (!T.copRic.has(sc.id)) { T.copRic.set(sc.id, null); caricaCoperture(sc.id); return ''; }
+    const r = T.copRic.get(sc.id); if (!r) return '';
+    const auto = muriScena(sc).filter(m => m.auto).length;
+    return r.stato === 'attesa' ? `⏳ In attesa dal ${quando(r.creata)}` : r.stato === 'fatta' ? `✓ Fatta il ${quando(r.fatta)}${auto ? ` · ${auto} tratti di Claude` : ''}` : `⚠ ${esc(r.nota || 'Non riuscita')}`;
+  }
+  async function caricaCoperture(id) {
+    const r = await SB.from('tavolo_coperture_richieste').select('*').eq('scena', id).order('creata', { ascending: false }).limit(1);
+    if (r.error || !r.data) return; T.copRic.set(id, r.data[0] || null);
+    const el = document.querySelector('#tv-mbar [data-w=cst]'); if (el && scena()?.id === id) el.innerHTML = statoCoperture(scena());
+  }
+  async function chiediCoperture(sc) {
+    if (!sc.mappa) return toast('Prima carica l\'immagine della mappa.', 'err');
+    const ok = await ask(`Mando **${sc.nome}** a Claude: traccerà muri, muretti (½) e feritoie (¾) come bozza. I muri che hai disegnato tu restano; quelli di un tracciamento precedente di Claude vengono sostituiti. Lo fa quando gli scrivi «analizza le mappe» oppure al controllo programmato.`, { ok: 'Manda', title: 'Coperture automatiche' });
+    if (!ok) return;
+    const u = await SB.storage.from(BUCKET).createSignedUrl(sc.mappa, 7 * 86400); if (u.error) return toast(u.error.message, 'err');
+    const r = await SB.rpc('tavolo_chiedi_coperture', { p_scena: sc.id, p_url: u.data.signedUrl });
+    if (r.error) return toast(sqlMancante(r.error) || /tavolo_chiedi_coperture/.test(r.error.message) ? 'Per le coperture automatiche esegui tavolo/tappa-16.sql in Supabase.' : r.error.message, 'err');
+    T.copRic.set(sc.id, r.data); toast('Mappa in lista d\'attesa: Claude la analizzerà e i muri compariranno da soli.'); barraMaschera();
+  }
   function barraMuri(b) {
     const sc = scena();
     if (!T.muri) {
@@ -4101,7 +4127,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       <div class="g">${bt('griglia', 'gri', '', aggancioGriglia(), 'Aggancia i punti agli angoli delle caselle (tieni Alt per staccarli)')}${bt('annulla', 'undo', '', false, 'Annulla l\'ultimo muro', !T.mfatti.some(id => T.muri.some(m => m.id === id)))}</div>
       <div class="g sl" title="Solo per te: i giocatori la vedono sempre nera">${svg('luna')}<input type="range" class="tv-rg" data-w="tono" min="0.1" max="0.95" step="0.05" value="${tono()}" aria-label="Opacità della nebbia (solo per te)"><output data-w="tv">${Math.round(tono() * 100)}%</output></div>
       <div class="g">${sw('cono', sc.cono !== false, 'Cono d\'ombra', 'Acceso: i muri proiettano l\'ombra e non si vede cosa c\'è dietro. Spento: restano buie solo le stanze chiuse in cui il token non è')}${sw('esplora', sc.esplora !== false, 'Zone viste', 'I posti già visti restano in penombra')}${sw('vista_condivisa', !!sc.vista_condivisa, 'Vista di gruppo', 'Ogni giocatore vede anche ciò che vedono i compagni')}</div>
-      <div class="g">${bt('dimentica', '', 'Dimentica le zone viste', false, 'Le zone già esplorate tornano buie per tutti')}${bt('svuota', '', `Cancella i muri${n ? ` (${n})` : ''}`, false, 'Cancella tutti i muri e le porte di questa mappa', !n)}</div>`;
+      <div class="g">${bt('dimentica', '', 'Dimentica le zone viste', false, 'Le zone già esplorate tornano buie per tutti')}${bt('svuota', '', `Cancella i muri${n ? ` (${n})` : ''}`, false, 'Cancella tutti i muri e le porte di questa mappa', !n)}</div>
+      <div class="g cop-ai">${bt('claude', '', '🤖 Chiedi le coperture a Claude', false, 'Claude guarda la mappa e traccia muri, muretti e feritoie come bozza da correggere. Non è immediato: lo fa quando gli scrivi «analizza le mappe» o al controllo programmato', !sc.mappa)}<span class="avv" data-w="cst">${statoCoperture(sc)}</span></div>`;
     b.classList.remove('spenta'); b.hidden = false;
     b.querySelectorAll('.tv-rg').forEach(pRange);
     const tn = b.querySelector('[data-w=tono]'); tn.oninput = () => { try { localStorage.setItem(TONO, tn.value); } catch { } const c = $('#tv-fog'); if (c) c.style.opacity = tn.value; b.querySelector('[data-w=tv]').value = Math.round(tn.value * 100) + '%'; };
@@ -4117,6 +4144,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (k === 'muro' || k === 'porta' || k === 'gomma' || k === 'meta' || k === 'tre') { T.mtool = k; T.mu = null; }
       else if (k === 'griglia') { try { localStorage.setItem(SNAP, aggancioGriglia() ? '0' : '1'); } catch { } }
       else if (k === 'annulla') { const id = [...T.mfatti].reverse().find(i => T.muri.some(m => m.id === i)), m = T.muri.find(x => x.id === id); if (m) { T.mfatti = T.mfatti.filter(i => i !== id); await cancellaMuro(m); await chiudiVarco(id); } }
+      else if (k === 'claude') return chiediCoperture(sc);
       else if (k === 'dimentica') {
         if (!await ask('Le zone già esplorate tornano buie per tutti i giocatori. Continuare?', { ok: 'Dimentica', title: 'Zone viste' })) return;
         manda('esplorato', { scena: sc.id }); toast('Fatto: i giocatori vedono di nuovo solo ciò che hanno davanti.');
@@ -4456,7 +4484,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const pu = m.pu && m.inc == null && v.modo === 'mischia' && slotLiberi(sx, m.pu) ? { lv: m.pu, dadi: `${Math.min(5, m.pu + 1) + (/non\s*mort|immond|demon|diavol/i.test(schedaDi(b)?.dati?.taglia_tipo || '') ? 1 : 0)}d8` } : null;
     const extra = [bd, ...exP.map(x => x.dadi), mkx?.dadi, pu?.dadi].filter(Boolean).join('+'), exN = [bd ? bonusNome(at) : '', ...exP.map(x => x.nome || 'danni in più'), mkx?.nome, pu && 'Punizione divina'].filter(Boolean).join(' + ');
     const r = await SB.rpc('tavolo_attacca', { p_token: m.tok, p_bersaglio: b.id, p_attacco: m.i, p_adv: v.adv, p_privato: m.seg, ...(v.cop?.ca ? { p_cop: v.cop.ca } : {}), ...(extra ? { p_extra: extra, p_extra_nome: exN } : {}), ...(m.inc != null ? { p_inc: m.inc } : {}), p_liv: m.liv || null });
-    if (r.error) return toast(/candidate function/i.test(r.error.message) ? 'In Supabase è rimasta una versione vecchia della funzione: esegui di nuovo tavolo/tappa-9.sql.' : /p_liv/i.test(r.error.message) ? 'Per lanciare con uno slot più alto esegui tavolo/tappa-9.sql in Supabase.' : sqlMancante(r.error) ? 'Per gli attacchi sulla mappa esegui tavolo/tappa-5.sql in Supabase.' : extra && /p_extra|function/i.test(r.error.message) ? 'Per aggiungere i dadi in più esegui tavolo/tappa-7.sql in Supabase.' : r.error.message, 'err');
+    if (r.error) return toast(v.cop?.ca && /p_cop|function|candidate/i.test(r.error.message) ? 'Per la copertura esegui tavolo/tappa-16.sql in Supabase (oppure scegli «nessuna» nella barra).' : /candidate function/i.test(r.error.message) ? 'In Supabase è rimasta una versione vecchia della funzione: esegui di nuovo tavolo/tappa-9.sql.' : /p_liv/i.test(r.error.message) ? 'Per lanciare con uno slot più alto esegui tavolo/tappa-9.sql in Supabase.' : sqlMancante(r.error) ? 'Per gli attacchi sulla mappa esegui tavolo/tappa-5.sql in Supabase.' : extra && /p_extra|function/i.test(r.error.message) ? 'Per aggiungere i dadi in più esegui tavolo/tappa-7.sql in Supabase.' : r.error.message, 'err');
     const x = Array.isArray(r.data) ? r.data[0] : r.data, a = T.tok.get(m.tok);
     const mossa = { da: m.tok, a: b.id, anim: v.anim, col: v.col, ritorna: !!v.ritorna, esito: x.colpito === true ? 'si' : x.colpito === false ? 'no' : 'nd', crit: !!x.critico, fallito: !!x.fallito, danni: x.danni || 0 };
     manda('attacco', mossa); mostraAttacco(mossa);
