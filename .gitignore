@@ -1,3 +1,6 @@
 # dati del DM decifrati con «pubblica.py apri»: non vanno mai pubblicati
 dm.json
 __pycache__/
+
+# mappe scaricate da strumenti/coperture.py
+coperture/
