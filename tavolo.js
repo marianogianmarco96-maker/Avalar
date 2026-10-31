@@ -124,6 +124,7 @@
 .tv-tok .ini{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:700 calc(var(--fs,13px)*1.6)/1 var(--display);color:#fff;text-shadow:0 1px 2px #000}
 .tv-ov{position:absolute;inset:0;pointer-events:none;overflow:visible}
 .tv-ov text{font:700 15px var(--body);paint-order:stroke;stroke:#000c;stroke-width:4px;fill:#fff}
+.tv-ov text.pt{font-size:12px;fill:#ffd84a}
 .tv-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center;color:#ecdcb4}
 .tv-empty div{max-width:440px;background:#00000066;border:1px solid #e7cf9a55;border-radius:10px;padding:22px 24px;line-height:1.45;font-size:1.05rem}
 .tv-empty h2{font-family:var(--display);color:var(--gold2)!important;margin:0 0 8px;font-size:1.25rem}
@@ -196,7 +197,7 @@ dialog.dlg.tv-side.tv-sw.tv-incol{position:relative;inset:auto;margin:0;width:10
 .tv-card.nuova{border:2px dashed #e7cf9a55;background:transparent;align-items:center;justify-content:center;min-height:120px;color:#e7cf9a;font-family:var(--display);gap:6px}
 .tv-card.nuova span{font-size:1.8rem;line-height:1}
 @media (hover:none){.tv-card .acts{opacity:1}}
-.tv-pop{position:absolute;z-index:8;background:var(--paper);color:var(--ink);border:1px solid var(--gold);border-radius:8px;box-shadow:0 10px 30px #000a;padding:8px;display:flex;flex-direction:column;gap:5px;min-width:190px}
+.tv-pop{position:absolute;z-index:8;overflow-y:auto;overscroll-behavior:contain;background:var(--paper);color:var(--ink);border:1px solid var(--gold);border-radius:8px;box-shadow:0 10px 30px #000a;padding:8px;display:flex;flex-direction:column;gap:5px;min-width:190px}
 .tv-pop b{font-family:var(--display);color:var(--wine);padding:2px 4px 4px}
 :root[data-theme=dark] .tv-pop b{color:var(--gold2)}
 .tv-pop .btn{justify-content:flex-start}
@@ -455,6 +456,24 @@ dialog.tv-sw>.rz:hover{background-color:#7d253033}
 .tv-sch .pill span{font:700 .6rem/1.15 var(--body);letter-spacing:.05em;text-transform:uppercase}
 .tv-sch .pill .pv{width:32px;height:28px;flex:none;border:2px solid var(--lin);border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 .95rem var(--display)}
 .tv-sch .pill.largo{border-radius:20px}
+.tv-sch .pill.merda{flex-wrap:wrap}
+.tv-sch .usab .pu,.tv-sch .legg .lg{border-bottom:1px dashed var(--lin);padding:5px 0;display:flex;flex-direction:column;gap:4px}
+.tv-sch .usab .pur{display:flex;flex-wrap:wrap;align-items:center;gap:5px}
+.tv-sch .usab .pur b{font:700 .9rem var(--display)}
+.tv-sch .usab .tag{font:700 .55rem/1 var(--body);letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--lin);border-radius:10px;padding:3px 6px}
+.tv-sch .usab .tag.bon{background:#c9a24a33}.tv-sch .usab .tag.rea{background:#5a7fb533}.tv-sch .usab .tag.az{background:#7d253022}
+.tv-sch .usab .pu2{font-size:.75rem;margin-left:auto}
+.tv-sch .usab select{max-width:170px}.tv-sch .usab input[type=number]{width:56px}
+.tv-sch .usab .nota,.tv-sch .legg .lgt{font-size:.72rem;opacity:.75;margin:4px 0}
+.tv-sch .legg .lgr{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tv-sch .legg .dots b{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid var(--lin);margin-right:3px}
+.tv-sch .legg .dots b.on{background:#c9a24a}
+.tv-sch .legg .lgn input{width:44px}
+.tv-sch .legg .lg p{margin:0}.tv-sch .legg .lg .mini{align-self:flex-start}
+.tv-sch .naz input{width:52px}
+.tv-sch .pill.merda.on{border-color:#8a5a2b;background:#8a5a2b22}
+.tv-sch .pill.merda span i{font-style:normal;color:#b5651d;text-transform:none;letter-spacing:0}
+.tv-sch .pill.merda .mq{display:flex;gap:3px;margin-left:auto}
 .tv-sch .pill.isp input.pv{padding:0;text-align:center;border-bottom:2px solid var(--lin);background:var(--box)}
 .tv-sch .tbar .tema{all:unset;cursor:pointer;padding:1px 7px;border-radius:4px;border:1px solid #f1e4c855;font-size:.85rem}
 .tv-sch .tbar .tema:hover{background:#f1e4c822}
@@ -631,6 +650,13 @@ dialog.tv-pag .tv-sch .at .riga.az .tp{flex:1 1 0}
 .tv-sch .spl:hover .mchat,.tv-sch .spl .mchat:focus-visible{opacity:.85}
 .tv-sch .spl .mchat:disabled{display:none}
 .tv-livd{width:min(440px,94vw)}
+.tv-oppd{width:min(460px,94vw)}
+.tv-oppd .opp-chi{display:flex;gap:12px;align-items:center;margin:10px 0 4px}.tv-oppd .opp-chi p{margin:0;line-height:1.4}
+.tv-oppd .opp-chi .av{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--c);color:#fff;font-weight:700;box-shadow:0 0 0 2px #fff,0 0 0 4px #c0392b}
+.tv-oppd .opp-l{display:grid;gap:8px;margin:14px 0}
+.tv-oppd .opp-l .btn{display:flex;align-items:center;gap:12px;height:auto;padding:10px 14px;text-align:left;justify-content:flex-start;text-transform:none;letter-spacing:0}
+.tv-oppd .opp-l .ic{font-size:1.4rem;width:28px;text-align:center}.tv-oppd .opp-l .tx{display:flex;flex-direction:column;gap:2px}
+.tv-oppd .opp-l b{font-size:1rem}.tv-oppd .opp-l small{font-size:.78rem;opacity:.8;font-weight:400}.tv-oppd .opp-l .btn.primary small{color:inherit;opacity:.85}
 .tv-liv{background:none;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;margin:12px 0}
 .tv-liv .btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;height:auto}
 .tv-liv .btn b{font-size:1.15rem}.tv-liv .btn small{font-size:.7rem;opacity:.85;white-space:nowrap}
@@ -765,6 +791,8 @@ dialog.tv-gd input.tv-rg{--t:var(--line2);--f:var(--wine);--k:#fff;--kb:var(--wi
 .tv-mbar{position:absolute;left:10px;top:10px;z-index:8;display:flex;flex-wrap:wrap;align-items:center;gap:6px;max-width:calc(100% - 250px);color:var(--pan-ink);border-radius:14px;padding:6px}
 .tv-mbar[hidden]{display:none!important}
 .tv-mbar .g{display:flex;align-items:center;gap:3px;padding:2px;border-radius:10px}
+.tv-mbar select{appearance:auto;background:#00000052;color:var(--pan-ink);border:1px solid var(--pan-b);border-radius:8px;padding:5px 6px;font:600 .8rem var(--body)}
+.tv-mbar select option{background:#211a16;color:#f1e4c8}
 .tv-mbar .g.seg{border:0;overflow:visible;background:#00000052;box-shadow:inset 0 1px 2px #0008;padding:3px}
 .tv-mbar .g.sl{gap:8px;padding:2px 8px;background:#ffffff0a;border-radius:10px;height:34px;box-sizing:border-box}
 .tv-mbar .g.sl>span{font:600 .76rem var(--body);color:var(--pan-mute)}
@@ -953,6 +981,10 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
 .tv-azm h5{margin:8px 8px 4px;font:600 .68rem/1.3 var(--display);letter-spacing:.1em;text-transform:uppercase;color:#e7cf9a}
 .tv-azm h5 small{letter-spacing:0;text-transform:none;font:italic 400 .76rem var(--body);color:#bda983;margin-left:4px}
 .tv-azm .gz{display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.tv-azm h5{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tv-azm h6{margin:8px 8px 2px;font:600 .62rem/1.3 var(--display);letter-spacing:.1em;text-transform:uppercase;color:#bda983}
+.tv-azm button.tg{width:auto;flex:none;display:inline-block;padding:3px 9px;border:1px solid #e7cf9a66;border-radius:99px;font:600 .7rem/1.2 var(--body);letter-spacing:0;text-transform:none;color:#f1e4c8}
+.tv-azm button.tutte{display:block;text-align:center;margin-top:6px;color:#e7cf9a;font-size:.78rem}
 .tv-azm button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:8px;align-items:flex-start;width:100%;padding:7px 7px;border-radius:9px;min-width:0}
 .tv-azm button>div{min-width:0}
 .tv-azm button:hover,.tv-azm button:focus-visible{background:#7d253099;outline:none}
@@ -971,17 +1003,19 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
 .tv-mvr span{position:absolute;left:50%;bottom:0;transform:translate(-50%,60%);background:#1d1613;color:#e7cf9a;border:1px solid #e7cf9a88;border-radius:9px;padding:2px 9px;font:700 var(--fs,14px)/1.3 var(--body);white-space:nowrap}
 .tv-tok .az{all:unset;position:absolute;inset:0;pointer-events:none;z-index:5;display:block}
 .tv-tok .az[hidden]{display:none}
-.tv-tok .az button{all:unset;box-sizing:border-box;position:absolute;pointer-events:auto;cursor:pointer;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 calc(var(--fs,13px)*.95)/1 var(--body);color:#fff;background:#2f8a3c;box-shadow:0 0 0 2px #1d1613,0 0 0 3px #e7cf9a99,0 2px 5px #000a;transition:transform .12s,background .15s}
-.tv-tok .az button.c.no{background:#5b544e;color:#b4aaa0;box-shadow:0 0 0 2px #1d1613,0 2px 4px #0008}
-.tv-tok .az button.c.no::after{content:"";position:absolute;left:18%;right:18%;top:50%;height:2px;background:#d9cfc4;transform:rotate(-40deg);border-radius:1px}
-.tv-tok .az button:hover:not([disabled]){transform:scale(1.12)}
+.tv-tok .az .rg{position:absolute;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:calc(var(--fs,13px)*.3);padding:calc(var(--fs,13px)*.22);border-radius:999px;background:#1d1613e6;box-shadow:0 0 0 1px #e7cf9a88,0 3px 8px #000a;white-space:nowrap}
+.tv-tok .az button{all:unset;box-sizing:border-box;pointer-events:auto;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;width:calc(var(--fs,13px)*1.75);height:calc(var(--fs,13px)*1.75);border-radius:50%;font:700 calc(var(--fs,13px)*.95)/1 var(--body);color:#fff;background:#2f8a3c;box-shadow:inset 0 1px 0 #ffffff40,0 0 0 1.5px #9be15d88;transition:transform .12s,background .15s}
+.tv-tok .az button.c[data-z=bon]{background:#2f6f8a;box-shadow:inset 0 1px 0 #ffffff40,0 0 0 1.5px #7cc8e888}
+.tv-tok .az button.c[data-z=rea]{background:#7a4a9a;box-shadow:inset 0 1px 0 #ffffff40,0 0 0 1.5px #c9a2e888}
+.tv-tok .az button.c[data-z=leg]{background:#9a7414;box-shadow:inset 0 1px 0 #ffffff40,0 0 0 1.5px #f2d27a99}
+.tv-tok .az .sep{display:block;width:1.5px;align-self:stretch;margin:2px 1px;background:#e7cf9a66;border-radius:1px}
+.tv-tok .az button.c.no{background:#3b3531;color:#7d746b;box-shadow:inset 0 0 0 1.5px #ffffff1a}
+.tv-tok .az button.c.no::after{content:"";position:absolute;left:20%;right:20%;top:50%;height:2px;background:#9a9087;transform:rotate(-40deg);border-radius:1px}
+.tv-tok .az button:hover:not([disabled]){transform:scale(1.15)}
 .tv-tok .az button:focus-visible{outline:2px solid #e7cf9a;outline-offset:2px}
 .tv-tok .az button[disabled]{cursor:default}
-.tv-tok .az .mt{left:50%;transform:translateX(-50%);height:auto;border-radius:10px;padding:2px 8px;gap:3px;white-space:nowrap;background:#1d1613;color:#e7cf9a;border:1px solid #e7cf9a99;box-shadow:0 2px 6px #000a;font:700 calc(var(--fs,13px)*.9)/1.25 var(--body)}
-.tv-tok .az .mt small{font-size:.8em;color:#bfae8a;font-weight:600}
-.tv-tok .az .mt.ko{color:#ff8a7d;border-color:#ff8a7d99}
-.tv-tok .az .mt .dd{font-size:.75em;margin-left:2px;opacity:.8}
-.tv-tok .az .mt:hover:not([disabled]){transform:translateX(-50%) scale(1.06)}
+.tv-tok .az .mt{width:auto;height:calc(var(--fs,13px)*1.75);border-radius:999px;padding:0 calc(var(--fs,13px)*.55);margin-left:calc(var(--fs,13px)*.15);background:none;box-shadow:none;color:#e7cf9a;font:700 calc(var(--fs,13px)*.95)/1 var(--body)}
+.tv-tok .az .mt.ko{color:#ff8a7d}
 .tv-tok.turno{box-shadow:0 0 0 4px #e7cf9a,0 0 22px 6px #e7cf9acc}
 
 /* token: barra della salute sotto, nome più leggibile */
@@ -1016,6 +1050,28 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
 .tv-dk .in button{all:unset;cursor:pointer;width:38px;height:38px;border-radius:50%;background:linear-gradient(var(--acc2),var(--acc));color:#fff;display:flex;align-items:center;justify-content:center;font-size:1rem;box-shadow:0 2px 5px #0005;flex:none}
 .tv-roll{border-radius:12px;padding:8px 10px}
 .tv-roll .t{min-width:44px;height:40px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:#fff;background:#7d2530;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);flex:none}
+.tv-roll .who small.gioc{font:600 .7rem var(--body);color:var(--mute);margin-left:6px;letter-spacing:.02em}
+.tv-att .hit{display:grid;grid-template-columns:1fr;gap:0;margin-top:8px;border:2px solid #2a201b;border-radius:12px;overflow:hidden;background:#17120f}
+.tv-att .hit.due{grid-template-columns:1fr 1fr}
+.tv-att .hit .b{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 6px;color:#f6ead2}
+.tv-att .hit.due .b+.b{border-left:2px solid #3a2e27}
+.tv-att .hit .b b{font:700 1.7rem/1 var(--display)}
+.tv-att .hit .b small{font:600 .72rem var(--body);color:#bda983;margin-top:3px}
+.tv-att .hit .b.no{opacity:.42}
+.tv-att .hit .b.no b{text-decoration:line-through;text-decoration-thickness:2px}
+.tv-att .hit.due .b.ok{background:#3b2a12;box-shadow:inset 0 0 0 2px #e7cf9a}
+.tv-att .hit .b.n20 b{color:#7be07b}.tv-att .hit .b.n1 b{color:#ff7a6b}
+.tv-att .cap{margin-top:4px;font:600 .74rem var(--body);color:var(--ink2);text-align:center}
+.tv-att .dmg{display:flex;flex-direction:column;align-items:center;margin-top:8px;padding:8px 4px 6px;border:2px solid #2a201b;border-radius:12px;background:#17120f;color:#ffb38a}
+.tv-att .dmg b{font:700 1.7rem/1 var(--display)}
+.tv-att .dmg small{font:600 .72rem var(--body);color:#bda983;margin-top:3px}
+.tv-att .dl{margin-top:6px;display:flex;flex-direction:column;gap:3px}
+.tv-att .dl>div{display:flex;align-items:center;gap:8px;font:600 .78rem var(--body);color:var(--ink2)}
+.tv-att .dl .l{flex:none;max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tv-att .dl .chips{flex:1;min-width:0}
+.tv-att .dl .v{flex:none;min-width:22px;text-align:right;font:700 .9rem var(--display);color:#9a3b12}
+.tv-att .dl .sum{border-top:1px dashed #0000002a;padding-top:4px;margin-top:2px}
+.tv-att .dl .sum .v{flex:1;text-align:right}
 .tv-roll.crit .t{background:#2f8a3c;color:#fff}.tv-roll.fail .t{background:#b3261e;color:#fff}
 .tv-roll.priv .t{background:#6b3fa0}
 .tv-roll .chips i{border-radius:6px}
@@ -1605,7 +1661,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function esci() {
     if (T.ch) { try { SB.removeChannel(T.ch); } catch { } T.ch = null; }
     T.live = false; T.rulers.clear(); clearTimeout(T.rt);
-    removeEventListener('keydown', tasti); removeEventListener('pointermove', segui);
+    removeEventListener('keydown', tasti); removeEventListener('pointermove', segui); document.removeEventListener('visibilitychange', riprendi);
   }
   function stato(cls, txt) { const o = $('#tv-on'); if (!o) return; o.className = 'tv-on ' + cls; o.title = txt; }
 
@@ -1662,6 +1718,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     pg('tavolo_schede', p => {
       if (!T.schede) return;
       if (p.eventType === 'DELETE') { T.schede.delete(p.old.id); dopoScheda(p.old.id); return; }
+      // una scheda grande arriva senza «dati» (il tempo reale taglia i valori lunghi): la riprendo intera, se no PF e condizioni restano vecchi
+      if (!p.new.dati) { riprendiScheda(p.new.id); return; }
       arrivaScheda(p.new); togliMorti();
     });
     // schede di PNG che il DM ha appena mostrato o nascosto: i giocatori ricaricano l'elenco
@@ -1678,7 +1736,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     });
     pg('tavolo_stato', async p => {
       const prima = T.stato.scena, primoTurno = T.stato.turno; T.stato = p.new;
-      if (primoTurno !== T.stato.turno || p.old?.round !== p.new.round) { disegnaTurno(); disegnaToken(); disegnaEffetti(); scadenzeEffetti(); }
+      if (primoTurno !== T.stato.turno || p.old?.round !== p.new.round) { disegnaTurno(); disegnaToken(); disegnaEffetti(); scadenzeEffetti(); if (primoTurno !== T.stato.turno) legInizioTurno(); }
       if (prima === T.stato.scena) return;
       if (isDM()) { disegnaBarra(); return; }
       // i giocatori seguono il DM nella nuova scena: scena e token arrivano solo ora che è attiva
@@ -1730,12 +1788,20 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (!isDM() && t.giocatore !== T.me.giocatore && scena()) { const l = t.misura * scena().griglia; el.hidden = coperto(m.x + l / 2, m.y + l / 2); }
     });
     ch.on('broadcast', { event: 'attacco' }, ({ payload: m }) => mostraAttacco(m));
-    ch.on('broadcast', { event: 'pf' }, ({ payload: m }) => mostraPF(m));
+    ch.on('broadcast', { event: 'pf' }, ({ payload: m }) => { mostraPF(m); riallinea(m.id); });
     ch.on('broadcast', { event: 'area' }, ({ payload: m }) => mostraArea(m));
     ch.on('broadcast', { event: 'ts' }, ({ payload: m }) => mostraTS(m));
+    ch.on('broadcast', { event: 'lampo' }, ({ payload: m }) => mostraLampo(m));
+    ch.on('broadcast', { event: 'opp' }, ({ payload: m }) => reazioneOpp(m));
+    // il DM ha tolto una richiesta di tiro salvezza: sparisce anche dallo schermo del giocatore
+    ch.on('broadcast', { event: 'ts-via' }, ({ payload: m }) => { if (T.salv?.delete(m.id)) disegnaSalvezze(); });
     ch.on('broadcast', { event: 'foto' }, ({ payload: f }) => { if (!isDM()) apriFoto(f, true); });
+    ch.on('broadcast', { event: 'bozza' }, ({ payload: m }) => { T.bozze ??= new Map(); if (m.legs) T.bozze.set(m.id, m); else T.bozze.delete(m.id); disegnaRighelli(); });
     ch.on('broadcast', { event: 'righello' }, ({ payload: m }) => {
-      if (m.pts) T.rulers.set(m.uid, m); else T.rulers.delete(m.uid);
+      // un righello remoto sparisce da solo se non arrivano aggiornamenti (un messaggio tardivo non lo lascia appeso)
+      T.rlT ??= new Map(); clearTimeout(T.rlT.get(m.uid));
+      if (m.pts) { T.rulers.set(m.uid, m); T.rlT.set(m.uid, setTimeout(() => { T.rulers.delete(m.uid); disegnaRighelli(); }, 4000)); }
+      else T.rulers.delete(m.uid);
       disegnaRighelli();
     });
     ch.on('broadcast', { event: 'nascosto' }, ({ payload: m }) => {
@@ -1757,8 +1823,27 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       } else if (s === 'CHANNEL_ERROR' || s === 'TIMED_OUT' || s === 'CLOSED') { T.live = false; if (T.ch === ch) stato('ko', 'Riconnessione…'); }
     });
     addEventListener('keydown', tasti); addEventListener('pointermove', segui, { passive: true });
+    document.addEventListener('visibilitychange', riprendi);
+  }
+  // chi blocca il telefono o cambia scheda perde gli aggiornamenti di quel momento: al ritorno ricarico il tavolo
+  let nascostaDa = 0;
+  async function riprendi() {
+    if (document.hidden) { nascostaDa = Date.now(); return; }
+    if (!T.ch || !nascostaDa || Date.now() - nascostaDa < 5000) return; nascostaDa = 0;
+    await carica().catch(() => { }); disegnaBarra(); mostraScena(false); disegnaLog(); disegnaTurno(); if (T.schede) dopoScheda();
   }
   // Postgres non rimanda i valori lunghi rimasti uguali (come l'immagine del token): li tengo da prima
+  // dopo danni o cure riprendo token e scheda dal database: se il tempo reale si è perso un pezzo, qui si rimedia
+  const allineo = new Map();
+  function riallinea(id) {
+    clearTimeout(allineo.get(id));
+    allineo.set(id, setTimeout(async () => {
+      allineo.delete(id);
+      const r = await SB.from('tavolo_token').select('*').eq('id', id).maybeSingle(); if (r.error || !r.data) return;
+      const t = completa(T.tok.get(id), r.data); T.tok.set(id, t); disegnaToken();
+      const s = schedaDi(t); if (s) riprendiScheda(s.id);
+    }, 1500));
+  }
   const completa = (prima, nuovo) => { const o = { ...(prima || {}), ...nuovo }; if (prima?.immagine && !nuovo.immagine) o.immagine = prima.immagine; return o; };
   const manda = (event, payload) => { if (T.ch) T.ch.send({ type: 'broadcast', event, payload }).catch(() => { }); };
 
@@ -2048,6 +2133,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   /* ---------- token ---------- */
   const tokEl = id => document.querySelector(`.tv-tok[data-id="${id}"]`);
   function disegnaToken() {
+    queueMicrotask(disegnaRighelli);
     const box = $('#tv-toks'), sc = scena(); if (!box || !sc) return;
     // se i token che guardano si sono mossi, prima ricalcolo la nebbia
     if (nebbiaQui(sc) && chiaveVista(sc) !== T.fogKey) disegnaMaschera();
@@ -2058,7 +2144,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       let el = tokEl(t.id);
       if (!el) { el = document.createElement('div'); el.className = 'tv-tok'; el.dataset.id = t.id; el.innerHTML = '<span class="fxs"></span><span class="ini"></span><b></b><i class="pf"><s></s></i><span class="cnd"></span><span class="az" hidden></span>'; }
       const lato = t.misura * sc.griglia, pos = T.drag?.id === t.id && T.drag.mosso ? T.drag : t;
-      el.style.cssText = `left:${pos.x}px;top:${pos.y}px;width:${lato}px;height:${lato}px;--c:${t.colore};--fs:${Math.max(11, sc.griglia * 0.22)}px;z-index:${i + 1}${t.immagine ? `;background-image:url("${t.immagine.replace(/"/g, '%22')}")` : ''}`;
+      el.style.cssText = `left:${pos.x}px;top:${pos.y}px;width:${lato}px;height:${lato}px;--c:${t.colore};--fs:${Math.max(11, sc.griglia * 0.22)}px;z-index:${att?.token === t.id ? lista.length + 1 : i + 1}${t.immagine ? `;background-image:url("${t.immagine.replace(/"/g, '%22')}")` : ''}`;
       if (T.drag?.id !== t.id) el.classList.remove('live');
       el.classList.toggle('turno', !!att && att.token === t.id);
       // mirando, i bersagli raggiungibili si accendono e gli altri si spengono
@@ -2072,7 +2158,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       el.querySelector('b').textContent = t.nome + (t.nascosto ? ' (nascosto)' : '');
       el.querySelector('b').hidden = !t.nome;
       el.title = t.nome || '';
-      const ai = aiutoPer(t), sg = [schiva(t) && ['🌀', 'Schivata'], ai && ['🤝', 'Aiutato da ' + ai.h.nome]].filter(Boolean);
+      const ai = aiutoPer(t), sg = [schiva(t) && ['🌀', 'Schivata'], suoTurno(t) && (azioniDi(t).fatte || []).some(f => f.k === 'dis') && ['🛡', 'Disimpegnato: niente attacchi di opportunità'], ai && ['🤝', 'Aiutato da ' + ai.h.nome], ...marchiatoDa(t).map(h => ['🎯', `${marchioDi(h).nome} di ${h.nome || '?'}`])].filter(Boolean);
       const cl = condTok(t).filter(c => COND_FX[c]), ck = cl.join('|') + '#' + sg.map(x => x[1]).join('|');
       if (el.dataset.cnd !== ck) { // ridisegno gli effetti solo se cambiano, così le animazioni non ripartono
         el.dataset.cnd = ck;
@@ -2086,17 +2172,20 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       bar.hidden = !pf; el.classList.toggle('barra', !!pf);
       if (pf) { const q = clamp(pf.pf / pf.max, 0, 1); bar.firstChild.style.width = q * 100 + '%'; bar.style.setProperty('--b', q > 0.5 ? '#3f9a4a' : q > 0.25 ? '#d9a21b' : '#c0392b'); bar.classList.toggle('dm-solo', isDM() && !t.giocatore && !t.barra); if (isDM() || t.giocatore) el.title += ` · PF ${pf.pf}/${pf.max}`; }
       // nel suo turno: quanto movimento resta e quali azioni ha ancora
-      const hud = el.querySelector('.az'), mio = suoTurno(t);
-      hud.hidden = !mio;
-      // tre bollini a sinistra del token (azione, azione bonus, reazione) e sotto il nome i metri che restano
-      if (mio) {
-        const mv = movimentoDi(t), mia = puoMuovere(t), fs = Math.max(11, sc.griglia * 0.22), d = Math.max(18, fs * 1.75), R = lato / 2 + d * 0.62;
-        const bol = AZ.map(([k, ic, l], j) => { const g = (220 - j * 40) * Math.PI / 180, u = usata(t, k); return `<button type="button" class="c${u ? ' no' : ''}" data-z="${k}" style="left:${lato / 2 + R * Math.cos(g) - d / 2}px;top:${lato / 2 + R * Math.sin(g) - d / 2}px;width:${d}px;height:${d}px" title="${l}: ${u ? 'usata' : 'disponibile'}${mia ? (u ? ' (tocca per ridarla)' : ' (tocca quando la usi)') : ''}" aria-label="${l}${u ? ' usata' : ''}"${mia ? '' : ' disabled'}>${ic}</button>`; }).join('');
-        hud.innerHTML = `${bol}<button type="button" class="mt${mv.resta < 0 ? ' ko' : ''}" data-k="azm" style="top:${el.querySelector('b').hidden ? 'calc(100% + 6px)' : 'calc(100% + 16px + var(--fs,13px) * 1.15 + 6px)'}" title="${mia ? 'Movimento rimasto · tocca per Scatto, Disimpegno, Schivata…' : 'Movimento rimasto'}"${mia ? '' : ' disabled'}>🏃 ${metri(Math.max(0, mv.resta))}<small> / ${metri(mv.tot)}</small>${mia ? '<span class="dd">▾</span>' : ''}</button>`;
+      const hud = el.querySelector('.az'), mio = suoTurno(t), sL = isDM() && inCombattimento() && T.turno.some(x => x.token === t.id) && schedaDi(t), nL = sL && sL.tipo !== 'pg' && leggDi(sL).length ? legN(sL) : 0;
+      hud.hidden = !mio && !nL;
+      // sotto il nome, una riga: un bollino per ogni azione, l'azione bonus, la reazione e i metri che restano.
+      // toccando un bollino si apre il menu di quello che si può fare con lui (azioni, attacchi, incantesimi)
+      if (mio || nL) {
+        const mv = movimentoDi(t), mia = puoMuovere(t), a = azioniDi(t), n = azioniTok(t), rL = nL ? legRest(sL) : 0;
+        const bol = (k, ic, l, u, j = 0) => `<button type="button" class="c${u ? ' no' : ''}" data-z="${k}" data-j="${j}" title="${l}: ${u ? 'usata' : 'disponibile'}${mia ? ' · tocca per scegliere cosa fare' : ''}" aria-label="${l}${u ? ' usata' : ''}"${mia ? '' : ' disabled'}>${ic}</button>`;
+        const az = Array.from({ length: n }, (_, j) => bol('az', '⚔', n > 1 ? `Azione ${j + 1}` : 'Azione', j === 0 ? !!a.az : j <= (a.azx || 0), j)).join('');
+        // le azioni leggendarie: una corona per punto, scure quelle spese (si usano alla fine del turno degli altri)
+        const leg = nL ? Array.from({ length: nL }, (_, j) => bol('leg', '♛', `Azione leggendaria (${rL} di ${nL} punti)`, j >= rL, j)).join('') : '';
+        hud.innerHTML = `<span class="rg" style="top:${el.querySelector('b').hidden ? 'calc(100% + 6px)' : 'calc(100% + 14px + var(--fs,13px) * 1.2)'}">${mio ? `${az}${bol('bon', '✚', 'Azione bonus', usata(t, 'bon'))}` : ''}${bol('rea', '↺', 'Reazione', usata(t, 'rea'))}${leg ? `<i class="sep"></i>${leg}` : ''}${mio ? `<button type="button" class="mt${mv.resta < 0 ? ' ko' : ''}" data-k="mv" title="Movimento rimasto: ${metri(Math.max(0, mv.resta))} di ${metri(mv.tot)}" disabled>🏃 ${metri(Math.max(0, mv.resta))}</button>` : ''}</span>`;
         if (mia) {
           hud.querySelectorAll('button').forEach(b => { b.onpointerdown = e => e.stopPropagation(); b.ondblclick = e => e.stopPropagation(); });
-          hud.querySelectorAll('[data-z]').forEach(b => b.onclick = e => { e.stopPropagation(); cambiaAz(t, b.dataset.z); });
-          hud.querySelector('[data-k=azm]').onclick = e => { e.stopPropagation(); menuAzioni(t, e.currentTarget); };
+          hud.querySelectorAll('[data-z]').forEach(b => b.onclick = e => { e.stopPropagation(); menuAzioni(t, e.currentTarget, b.dataset.z); });
         }
       }
       box.append(el); // l'ordine nel riquadro decide chi sta sopra
@@ -2135,7 +2224,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function interazioni(st) {
     if (st.__tv) return; st.__tv = true;
     const punti = new Map(); let pan = null, pinch = null, rul = null, mas = null, ultimo = 0;
-    st.addEventListener('wheel', e => { e.preventDefault(); const r = st.getBoundingClientRect(); const dy = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY; zoom(Math.exp(-(e.ctrlKey ? dy * 0.01 : clamp(dy, -100, 100) * 0.0005)), e.clientX - r.left, e.clientY - r.top); }, { passive: false });
+    st.addEventListener('wheel', e => { const pp = e.target.closest?.('.tv-pop'); if (pp && pp.scrollHeight > pp.clientHeight) return; e.preventDefault(); const r = st.getBoundingClientRect(); const dy = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY; zoom(Math.exp(-(e.ctrlKey ? dy * 0.01 : clamp(dy, -100, 100) * 0.0005)), e.clientX - r.left, e.clientY - r.top); }, { passive: false });
     st.addEventListener('pointerdown', e => {
       if (e.button > 0 || !scena() || e.target.closest('.tv-zoom,.tv-pop,.tv-porta,.tv-incolla')) return;
       chiudiPop();
@@ -2157,12 +2246,11 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (T.tool === 'griglia' && isDM()) { const sc = scena(); T.gd = { sx: e.clientX, sy: e.clientY, x: sc.griglia_x, y: sc.griglia_y }; return; }
       if (T.tool === 'allinea' && isDM()) { T.al = { a: p, b: p }; disegnaRighelli(); return; }
       if (T.tool === 'righello') { const sc = scena(); const a = { x: centroCasella(p.x, sc.griglia_x), y: centroCasella(p.y, sc.griglia_y) }; rul = { pts: [a, a] }; mostraRighello(rul.pts); return; }
-      // riprendere il token mentre aspetta la conferma: si continua da dove è, misurando sempre dalla partenza
+      // riprendere il token mentre aspetta la conferma: si aggiunge un tratto al percorso, che resta da confermare
       let da = null;
-      if (t && T.tool !== 'mano' && puoMuovere(t) && T.passo) { if (T.passo.id === t.id) { da = T.passo; T.passo = null; barraMaschera(); } else annullaPasso(); }
-      // nel suo turno, finito il movimento non si sposta più (il DM può forzare tenendo premuto Alt)
-      if (t && T.tool !== 'mano' && puoMuovere(t) && suoTurno(t) && !(isDM() && e.altKey) && movimentoDi(t).resta < 1.49) { avvisoFermo(t); return; }
-      if (t && T.tool !== 'mano' && puoMuovere(t)) { T.drag = { id: t.id, dx: p.x - t.x, dy: p.y - t.y, x0: da ? da.x0 : t.x, y0: da ? da.y0 : t.y, sx: e.clientX, sy: e.clientY, mosso: false }; el.classList.add('drag'); return; }
+      if (t && T.tool !== 'mano' && puoMuovere(t) && T.passo) { if (T.passo.id === t.id) da = T.passo; else annullaPasso(); }
+      // finito il movimento il token si prende lo stesso: se lo si sposta, si chiede conferma (per rimediare a un errore)
+      if (t && T.tool !== 'mano' && puoMuovere(t)) { T.drag = { id: t.id, dx: p.x - t.x, dy: p.y - t.y, x0: t.x, y0: t.y, prev: da, sx: e.clientX, sy: e.clientY, mosso: false }; el.classList.add('drag'); return; }
       if (t && T.tool !== 'mano') T.clic = { id: t.id, sx: e.clientX, sy: e.clientY };
       pan = { sx: e.clientX, sy: e.clientY, x: T.view.x, y: T.view.y }; st.classList.add('pan');
       // tenendo premuto senza muoversi compare il segnale, anche sugli schermi degli altri (il DM con Maiusc li porta tutti lì)
@@ -2221,7 +2309,6 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         if (el) el.classList.remove('drag');
         if (!t) return;
         if (!d.mosso) {
-          if (t.x !== d.x0 || t.y !== d.y0) { const cm = costoMov(t, d.x0, d.y0, t.x, t.y); if (cm.m) return chiediPasso(t, t.x, t.y, d.x0, d.y0, cm.m, cm.dif); }
           if (e.type === 'pointerup') menuToken(t.id, e); return;
         }
         const sc = scena(); let x = aggancia(d.x, sc.griglia_x, t.misura), y = aggancia(d.y, sc.griglia_y, t.misura);
@@ -2234,12 +2321,13 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         // nel suo turno il movimento (in caselle, come col righello) si conferma e poi si scala dalla scheda
         const cm = suoTurno(t) ? costoMov(t, d.x0, d.y0, x, y) : { m: 0, dif: 0 }, m = cm.m;
         if (m) {
-          const mv = movimentoDi(t);
-          const conScatto = puoScattare(t) && m <= mv.resta + velocitaDi(schedaDi(t)) + 0.01; // oltre il movimento, ma con lo Scatto ci arriva
-          if (!(isDM() && e.altKey) && !conScatto && m > mv.resta + 0.01) { tornaIndietro(t, d.x0, d.y0); mostraRighello(null); manda('righello', { uid: T.me.uid, pts: null }); toast(`Troppo lontano: ${t.nome || 'il token'} ha ancora ${metri(Math.max(mv.resta, 0))} di movimento.`, 'err'); return; }
-          t.x = x; t.y = y; disegnaToken(); manda('trascina', { id: t.id, x, y });
-          return chiediPasso(t, x, y, d.x0, d.y0, m, cm.dif);
+          // movimento a tratti: ogni tratto si conta sulla griglia e si aggiunge al percorso; si può provare, tornare indietro
+          // di un tratto o ricominciare, e solo alla conferma il movimento si scala e il percorso resta disegnato
+          t.x = x; t.y = y; disegnaToken(); manda('trascina', { id: t.id, x, y }); via();
+          const pr = d.prev?.id === t.id ? d.prev : null;
+          return chiediPasso(t, { id: t.id, x, y, x0: pr ? pr.x0 : d.x0, y0: pr ? pr.y0 : d.y0, m: (pr?.m || 0) + m, dif: (pr?.dif || 0) + cm.dif, legs: [...(pr?.legs || []), [x, y, m, cm.dif]] });
         }
+        if (d.prev?.id === t.id) { t.x = d.prev.x; t.y = d.prev.y; disegnaToken(); manda('trascina', { id: t.id, x: t.x, y: t.y }); via(); return; } // rimesso dov'era: il percorso resta
         mostraRighello(null); manda('righello', { uid: T.me.uid, pts: null });
         t.x = x; t.y = y; disegnaToken(); manda('trascina', { id: t.id, x, y });
         salvaPosto(t, x, y, d.x0, d.y0);
@@ -2564,7 +2652,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const [ic, l] = SEGNI[x.tipo] || SEGNI.punto, r = st.getBoundingClientRect(), pop = document.createElement('div'); pop.className = 'tv-pop';
     pop.innerHTML = `<b>${ic} ${esc(x.nome || l)}</b><button class="btn sm" data-k="nasc">${x.nascosto ? '👁 Rivela ai giocatori' : '🙈 Nascondi ai giocatori'}</button><button class="btn sm" data-k="mod">✏️ Modifica</button><button class="btn sm danger" data-k="via">Togli il segnalino</button>`;
     st.append(pop);
-    pop.style.left = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6) + 'px'; pop.style.top = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6) + 'px';
+    pop.style.left = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6) + 'px'; pop.style.top = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6) + 'px'; adattaPop(pop);
     pop.querySelector('[data-k=nasc]').onclick = () => { chiudiPop(); cambiaSegnalino(x, { nascosto: !x.nascosto }); };
     pop.querySelector('[data-k=mod]').onclick = () => { chiudiPop(); T.sgSel = x.id; if (T.tool !== 'segni') strumento('segni'); else { disegnaSegnalini(); barraMaschera(); } };
     pop.querySelector('[data-k=via]').onclick = () => { chiudiPop(); togliSegnalini([x.id]); };
@@ -2611,21 +2699,25 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     return true;
   }
   // «Muovere Livion di 6 m?»: con la conferma il movimento si scala, altrimenti il token torna dov'era
-  function avvisoFermo(t) {
-    const mio = !isDM() && t.giocatore === T.me.giocatore;
-    const sc = puoScattare(t), dopo = sc ? ` Per muoverti ancora: «Azioni» → Scatto${sc === 'bon' ? ' (con l\'azione bonus)' : ''}.` : '';
-    toast(mio ? 'Hai esaurito il tuo movimento.' + (dopo || ' Non puoi muoverti oltre in questo turno.') : `${t.nome || 'Il token'} ha esaurito il movimento.${dopo || ' Non può muoversi oltre in questo turno.'}${isDM() ? ' (Alt + trascina per forzare)' : ''}`, 'err');
+  // i punti del percorso in attesa: la partenza e la fine di ogni tratto
+  const puntiPasso = p => [[p.x0, p.y0], ...p.legs.map(l => [l[0], l[1]])];
+  // chi attacca di opportunità lungo tutto il percorso, con il punto da cui il bersaglio esce dalla portata
+  function oppPercorso(t, p) {
+    if (!suoTurno(t)) return []; const P = puntiPasso(p), out = new Map();
+    for (let i = 1; i < P.length; i++) for (const o of opportunita(t, P[i - 1][0], P[i - 1][1], P[i][0], P[i][1])) if (!out.has(o.id)) out.set(o.id, { o, x0: P[i - 1][0], y0: P[i - 1][1] });
+    return [...out.values()];
   }
-  function chiediPasso(t, x, y, x0, y0, m, dif) {
+  function chiediPasso(t, p) {
     const b = $('#tv-mbar'); if (!b) return;
-    const mv = movimentoDi(t), dopo = mv.resta - m, opp = suoTurno(t) ? opportunita(t, x0, y0, x, y) : [], pd = opp.length && puoDisimpegnarsi(t);
-    T.passo = { id: t.id, x, y, x0, y0, m, dif };
+    T.passo = p; const { m, dif } = p; manda('bozza', { id: t.id, x0: p.x0, y0: p.y0, legs: p.legs });
+    const mv = movimentoDi(t), dopo = mv.resta, opp = oppPercorso(t, p).map(x => x.o), pd = opp.length && puoDisimpegnarsi(t), n = p.legs.length;
     const nomi = opp.map(o => o.nome || 'un nemico').join(', '), oppHtml = opp.length ? `<span class="avv opp">⚔️ <b>Attacco di opportunità:</b> ${esc(t.nome || 'il token')} esce dalla portata di ${esc(nomi)} senza Disimpegno. ${opp.length > 1 ? 'Possono' : 'Può'} attaccarlo con la reazione.</span>` : '';
-    b.innerHTML = `<div class="g"><b class="tit">🏃 ${esc(t.nome || 'Token')}: ${metri(m)}${dif ? ' 🪨' : ''}</b>${dif ? `<span class="avv">${dif} ${dif === 1 ? 'casella' : 'caselle'} di terreno difficile (contano doppio).</span>` : ''}<span class="avv">${dopo >= 0 ? `Dopo restano ${metri(dopo)} di ${metri(mv.tot)}.` : `<b>Oltre il movimento di ${metri(-dopo)}.</b>`} Confermi lo spostamento?</span>${oppHtml}</div><div class="g">${pd ? `<button type="button" data-k="dis" class="on" title="Usa ${pd === 'bon' ? 'l\'azione bonus' : 'l\'azione'} per il Disimpegno: niente attacchi di opportunità">🛡 Disimpegno${dopo >= 0 || isDM() ? ' e conferma' : ''}</button>` : ''}${dopo < 0 && suoTurno(t) && puoScattare(t) ? `<button type="button" data-k="scatta" class="on" title="Usa ${puoScattare(t) === 'bon' ? 'l\'azione bonus' : 'l\'azione'} per lo Scatto: altri ${metri(velocitaDi(schedaDi(t)))}">🏃 Scatta e conferma</button>` : ''}${dopo >= 0 || isDM() ? `<button type="button" data-k="ok" class="${dopo < 0 && suoTurno(t) && puoScattare(t) ? '' : 'on'}">✓ Conferma</button>` : ''}<button type="button" data-k="no">Annulla</button></div>`;
+    b.innerHTML = `<div class="g"><b class="tit">🏃 ${esc(t.nome || 'Token')}: ${metri(m)}${n > 1 ? ` in ${n} tratti` : ''}${dif ? ' 🪨' : ''}</b>${dif ? `<span class="avv">${dif} ${dif === 1 ? 'casella' : 'caselle'} di terreno difficile (contano doppio).</span>` : ''}<span class="avv">${dopo >= 0 ? `Dopo restano ${metri(dopo)} di ${metri(mv.tot)}.` : `<b>Oltre il movimento di ${metri(-dopo)}.</b>`} Puoi trascinarlo ancora per provare un'altra strada, poi conferma.</span>${oppHtml}</div><div class="g">${pd ? `<button type="button" data-k="dis" class="on" title="Usa ${pd === 'bon' ? 'l\'azione bonus' : 'l\'azione'} per il Disimpegno: niente attacchi di opportunità">🛡 Disimpegno e conferma</button>` : ''}${dopo < 0 && suoTurno(t) && puoScattare(t) ? `<button type="button" data-k="scatta" class="on" title="Usa ${puoScattare(t) === 'bon' ? 'l\'azione bonus' : 'l\'azione'} per lo Scatto: altri ${metri(velocitaDi(schedaDi(t)))}">🏃 Scatta e conferma</button>` : ''}<button type="button" data-k="ok" class="${dopo < 0 && suoTurno(t) && puoScattare(t) ? '' : 'on'}" title="${dopo < 0 ? 'Sposta il token anche oltre il movimento (per esempio per rimediare a un errore)' : ''}">✓ ${dopo < 0 ? 'Sposta comunque' : 'Conferma'}</button>${n > 1 ? '<button type="button" data-k="giu" title="Toglie l\'ultimo tratto e riporta il token alla fine di quello prima">↶ Togli l\'ultimo tratto</button>' : ''}<button type="button" data-k="no" title="Il token torna da dove era partito">${n > 1 ? 'Ricomincia' : 'Annulla'}</button></div>`;
     b.classList.remove('spenta'); b.hidden = false;
     const ok = b.querySelector('[data-k=ok]'); if (ok) ok.onclick = confermaPasso;
     const sc = b.querySelector('[data-k=scatta]'); if (sc) sc.onclick = () => faiAzione(t, 'scatto', puoScattare(t)); // conferma il passo e poi scatta
-    const di = b.querySelector('[data-k=dis]'); if (di) di.onclick = async () => { await faiAzione(t, 'dis', puoDisimpegnarsi(t)); if (dopo >= 0 || isDM()) confermaPasso(); };
+    const di = b.querySelector('[data-k=dis]'); if (di) di.onclick = async () => { await faiAzione(t, 'dis', puoDisimpegnarsi(t)); confermaPasso(); };
+    const gi = b.querySelector('[data-k=giu]'); if (gi) gi.onclick = () => { const l = p.legs.slice(0, -1), u = l[l.length - 1], q = p.legs[p.legs.length - 1]; tornaIndietro(t, u[0], u[1]); chiediPasso(t, { ...p, x: u[0], y: u[1], m: p.m - q[2], dif: p.dif - (q[3] || 0), legs: l }); };
     disegnaToken(); // il pannello e l'area contano già questo passo
     b.querySelector('[data-k=no]').onclick = annullaPasso;
   }
@@ -2633,27 +2725,78 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const p = T.passo; if (!p) return; T.passo = null; barraMaschera();
     mostraRighello(null); manda('righello', { uid: T.me.uid, pts: null });
     const t = T.tok.get(p.id); if (!t) return;
-    const opp = suoTurno(t) ? opportunita(t, p.x0, p.y0, p.x, p.y) : [];
+    manda('bozza', { id: p.id, legs: null }); const opp = oppPercorso(t, p);
     if (!await salvaPosto(t, p.x, p.y, p.x0, p.y0)) return;
-    if (opp.length) annuncia(`⚔️ Attacco di opportunità: ${t.nome || 'Il token'} esce dalla portata di ${opp.map(o => o.nome || 'un nemico').join(', ')} senza Disimpegno. ${opp.length > 1 ? 'Possono' : 'Può'} usare la reazione per attaccarlo.`);
+    if (opp.length) {
+      annuncia(`⚔️ Attacco di opportunità: ${t.nome || 'Il token'} esce dalla portata di ${opp.map(x => x.o.nome || 'un nemico').join(', ')} senza Disimpegno.`);
+      // chi ha la reazione attacca subito: lo decide chi muove quel token (il giocatore, o il DM per i PNG)
+      for (const x of opp) { const m = { da: x.o.id, a: t.id, x0: x.x0, y0: x.y0 }; manda('opp', m); reazioneOpp(m); }
+    }
     const a = azioniDi(t);
-    await segnaAzioni(t, { mov: (a.mov || 0) + p.m, ...(a.ox == null ? { ox: p.x0, oy: p.y0 } : {}) });
+    // il percorso del turno resta disegnato: si vede che strada ha fatto e quanto è costata
+    const pp = [...(a.pp?.length ? a.pp : [[p.x0, p.y0, 0]]), ...p.legs.map(l => [l[0], l[1], l[2]])].slice(-40);
+    await segnaAzioni(t, { mov: (a.mov || 0) + p.m, pp, ...(a.ox == null ? { ox: p.x0, oy: p.y0 } : {}) });
+  }
+  // l'attacco di opportunità parte da solo se c'è un modo solo di farlo; con più armi o più reazioni si sceglie
+  const mioDaMuovere = o => o && (o.giocatore ? T.me?.giocatore === o.giocatore : isDM());
+  async function reazioneOpp(m) {
+    const o = T.tok.get(m.da), b = T.tok.get(m.a); if (!o || !b || !mioDaMuovere(o)) return;
+    if (reaUsata(o) || condTok(o).some(c => FERMO.includes(c))) return toast(`${o.nome || 'Il token'} non può reagire: ${reaUsata(o) ? 'la reazione è già usata' : 'non può agire'}.`);
+    const s = schedaDi(o); if (!s) return;
+    const armi = (s.dati.attacchi || []).map((x, i) => [x, i]).filter(([x]) => x && portata(x).mischia);
+    const R = window.__regole || await regole().catch(() => null), P = R ? [...privAzioni(R, s.dati).values()].filter(x => x.tempo === 'rea' && !x.std) : [];
+    const inc = (s.dati.incantesimi || []).map((x, i) => [x, i]).filter(([x]) => /reazione/i.test(x?.tempo || '') && (!num(x.livello) || x.prep !== false));
+    const prima = { ...b, x: m.x0, y: m.y0 }; // il bersaglio era ancora a portata quando è partito
+    const colpisci = i => { T.mira = { sid: s.id, i, inc: null, liv: null, slot: null, tok: o.id, adv: 0, seg: false, extra: new Set(extraDi(s).filter(x => x.attivo && x.dadi && !/furtiv/i.test(x.nome || '')).map(x => x.id)), opp: true }; return scegliBersaglio(prima); };
+    if (armi.length === 1 && !P.length && !inc.length) { toast(`↺ ${o.nome}: attacco di opportunità su ${b.nome || 'il bersaglio'}.`); return colpisci(armi[0][1]); }
+    if (!armi.length && !P.length && !inc.length) return toast(`${o.nome || 'Il token'} non ha armi da mischia per l'attacco di opportunità.`);
+    // come la scelta dello slot: una scheda per ogni modo di reagire, il nemico in alto
+    const opz = (k, v, ic, nome, sotto, cls = '') => `<button type="button" class="btn ${cls}" data-${k}="${v}"><span class="ic">${ic}</span><span class="tx"><b>${esc(nome)}</b><small>${esc(sotto)}</small></span></button>`;
+    const d = openDlg(`<form method="dialog"><h3>↺ Attacco di opportunità</h3>
+      <div class="opp-chi"><span class="av" style="--c:${esc(b.colore || '#7a2a2a')}">${esc(iniziali(b.nome))}</span><p><b>${esc(b.nome || 'Il bersaglio')}</b> esce dalla portata di <b>${esc(o.nome || '')}</b> senza Disimpegno.<br><span class="hint">Usi la reazione? Ne hai una per round.</span></p></div>
+      <div class="opp-l">${armi.map(([x, i], n) => opz('w', i, '🗡', x.nome || 'Attacco', [x.colpire !== '' && x.colpire != null ? 'colpire ' + (piuMod(num(x.colpire)) || '+0') : '', x.danni || ''].filter(Boolean).join(' · '), n ? '' : 'primary')).join('')}
+      ${P.map((x, j) => opz('p', j, '↺', x.nome, corto(x.testo || '', 70))).join('')}
+      ${inc.map(([x, i]) => opz('i', i, '✨', x.nome, 'incantesimo di reazione')).join('')}</div>
+      <menu><button type="button" class="btn ghost" data-no>Lascia stare</button></menu></form>`, 'tv-oppd');
+    const sc = await new Promise(res => { d.querySelectorAll('button').forEach(x => x.onclick = () => { res(x.dataset); d.close(); }); d.addEventListener('close', () => res({ no: '' }), { once: true }); });
+    if (sc.w != null) return colpisci(+sc.w);
+    if (sc.p != null) return usaPriv(o, P[+sc.p], 'rea');
+    if (sc.i != null) return lanciaInc(s, +sc.i, o);
   }
   function annullaPasso() {
-    const p = T.passo; if (!p) return; T.passo = null; barraMaschera();
+    const p = T.passo; if (!p) return; T.passo = null; barraMaschera(); manda('bozza', { id: p.id, legs: null });
     mostraRighello(null); manda('righello', { uid: T.me.uid, pts: null });
-    const t = T.tok.get(p.id); if (t) tornaIndietro(t, p.x0, p.y0);
+    const t = T.tok.get(p.id); if (t) tornaIndietro(t, p.x0, p.y0); disegnaRighelli();
   }
   function barraRighello(b) {
     b.innerHTML = `<div class="g"><label class="sw" title="In combattimento, mentre trascini un token compare il righello con il movimento che resta"><input type="checkbox" data-k="rigt" ${righelloAuto() ? 'checked' : ''}><span class="tg" aria-hidden="true"></span>Righello mentre trascini i token (in combattimento)</label></div>`;
     b.classList.remove('spenta'); b.hidden = false;
     b.querySelector('[data-k=rigt]').onchange = e => { try { localStorage.setItem(RIGT, e.target.checked ? 'si' : 'no'); } catch { } };
   }
+  // la strada fatta nel turno da chi agisce, a tratti gialli con i metri di ogni tratto
+  function percorsoTurno(sc, S) {
+    const att = T.turno?.find(x => x.id === T.stato?.turno), t = att?.token && T.tok.get(att.token);
+    if (!t || t.scena !== sc.id || (t.nascosto && !isDM())) return '';
+    // il percorso confermato in giallo; i tratti ancora da confermare (anche quelli che sta provando un altro) in bianco
+    const bz = T.passo?.id === t.id ? T.passo : T.bozze?.get(t.id), fatti = azioniDi(t).pp || [];
+    const pp = fatti.length ? fatti : bz ? [[bz.x0, bz.y0, 0]] : [], prov = bz?.legs || [];
+    if (pp.length + prov.length < 2) return '';
+    const l = t.misura * sc.griglia / 2, pt = ([x, y]) => S({ x: x + l, y: y + l }), f = m => (+m).toLocaleString('it-IT', { maximumFractionDigits: 1 }) + ' m';
+    const P = pp.map(pt), Q = [P[P.length - 1], ...prov.map(pt)], tot = pp.reduce((q, x) => q + (x[2] || 0), 0), totP = prov.reduce((q, x) => q + (x[2] || 0), 0);
+    const path = A => A.map(([x, y], i) => (i ? 'L' : 'M') + x + ' ' + y).join('');
+    const linea = (A, col) => A.length < 2 ? '' : `<path d="${path(A)}" fill="none" stroke="#000a" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="${path(A)}" fill="none" stroke="${col}" stroke-width="3" stroke-dasharray="10 6" stroke-linecap="round" stroke-linejoin="round"/>`;
+    const metriT = (A, L) => A.slice(1).map(([x, y], i) => { const [px, py] = A[i]; return L[i]?.[2] ? `<text x="${(x + px) / 2 + 6}" y="${(y + py) / 2 - 6}" class="pt">${f(L[i][2])}</text>` : ''; }).join('');
+    const [ex, ey] = Q[Q.length - 1];
+    return `<g class="perc">${linea(P, '#ffd84a')}${linea(Q, '#ffffff')}
+      ${P.map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i ? 4 : 5}" fill="#ffd84a" stroke="#000" stroke-width="1.5"/>`).join('')}${Q.slice(1).map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4" fill="#fff" stroke="#000" stroke-width="1.5"/>`).join('')}
+      ${metriT(P, pp.slice(1))}${metriT(Q, prov)}
+      <text x="${ex + 12}" y="${ey + 22}">${esc(t.nome || '')} · ${tot ? 'percorso ' + f(tot) : ''}${tot && totP ? ' + ' : ''}${totP ? f(totP) + ' da confermare' : ''}</text></g>`;
+  }
   function mostraRighello(pts) { if (pts) T.rulers.set('io', { nome: '', pts }); else T.rulers.delete('io'); disegnaRighelli(); }
   function disegnaRighelli() {
     const ov = $('#tv-ov'), sc = scena(); if (!ov || !sc) return;
     const v = T.view, S = p => [v.x + p.x * v.z, v.y + p.y * v.z];
-    ov.innerHTML = [...T.rulers.values()].map(r => {
+    ov.innerHTML = percorsoTurno(sc, S) + [...T.rulers.values()].map(r => {
       const [a, b] = r.pts, [ax, ay] = S(a), [bx, by] = S(b);
       // regola della 5ª edizione: ogni casella, anche in diagonale, conta 1
       const cas = Math.round(Math.max(Math.abs(b.x - a.x), Math.abs(b.y - a.y)) / sc.griglia), m = (cas * sc.metri).toLocaleString('it-IT', { maximumFractionDigits: 1 });
@@ -2666,6 +2809,12 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
 
   /* ---------- menu del token (DM) ---------- */
   function chiudiPop() { document.querySelectorAll('.tv-pop').forEach(p => p.remove()); }
+  // i menu sulla mappa restano dentro lo schermo: se si allungano (grandezza, chi lo muove…) risalgono, e se non c'è posto scorrono
+  function adattaPop(pop) {
+    const st = pop.parentElement; if (!st) return;
+    const fit = () => { const H = st.clientHeight; pop.style.maxHeight = (H - 12) + 'px'; const top = parseFloat(pop.style.top) || 0; if (top + pop.offsetHeight > H - 6) pop.style.top = Math.max(6, H - pop.offsetHeight - 6) + 'px'; };
+    fit(); if ('ResizeObserver' in window) { const ro = new ResizeObserver(() => { if (!pop.isConnected) return ro.disconnect(); fit(); }); ro.observe(pop); }
+  }
   function menuToken(id, e) {
     const t = T.tok.get(id), st = $('#tv-stage'); if (!t || !st) return;
     chiudiPop();
@@ -2687,7 +2836,11 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const extra = () => {
       pop.querySelector('[data-k=chiudi]').onclick = chiudiPop;
       legaTurnoPop(pop, t);
-      const metti = async lista => { chiudiPop(); const s = t.giocatore ? schedaDi(t) : null; if (s && puoScrivere(s)) await cambiaCond(s, null, lista); else await condSuToken(t, lista); };
+      const metti = async lista => {
+        chiudiPop(); const s = t.giocatore ? schedaDi(t) : null;
+        if (s && puoScrivere(s)) { await cambiaCond(s, null, lista); if (!condTok(T.tok.get(t.id)).includes(lista.at(-1) ?? '')) await condSuToken(t, lista); }
+        else await condSuToken(t, lista);
+      };
       pop.querySelectorAll('[data-tc]').forEach(b => b.onclick = () => metti(cnow.filter(c => c !== b.dataset.tc)));
       const sc = pop.querySelector('[data-k=tcond]'); if (sc) sc.onchange = () => { if (sc.value) metti([...cnow, sc.value]); };
       pop.querySelector('[data-k=sch]')?.addEventListener('click', async () => {
@@ -2713,7 +2866,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       const gr = tsch + (ft ? tile('foto', '🖼', 'Foto', 'Solo sul tuo schermo') : '');
       pop.innerHTML = `${testa}${mio ? bfine + tzp + rpf : ''}${gr ? `<div class="gr">${gr}</div>` : ''}${mio ? rcond + ini : ''}`;
       st.append(pop); extra();
-      pop.style.left = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6) + 'px'; pop.style.top = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6) + 'px';
+      pop.style.left = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6) + 'px'; pop.style.top = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6) + 'px'; adattaPop(pop);
       if (ft) pop.querySelector('[data-k=foto]').onclick = () => { chiudiPop(); apriFoto(fotoDi(t)); };
       if (mio && !giaIn) pop.querySelector('[data-k=ini]').onclick = () => { chiudiPop(); iniziativa(t, pop.querySelector('[data-k=imod]').value); };
       return;
@@ -2731,7 +2884,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       ${vista ? `<div class="row" title="Con la nebbia automatica: fin dove vede questo personaggio (18 m è la scurovisione)"><span>Vede fino a</span><select data-k="vista"><option value="">senza limite</option>${[0, 1.5, 3, 6, 9, 12, 18, 24, 36].map(n => `<option value="${n}" ${t.vista != null && +t.vista === n ? 'selected' : ''}>${n ? n.toLocaleString('it-IT') + ' m' + (n === 18 ? ' (scurovisione)' : '') : 'non vede'}</option>`).join('')}</select></div>` : ''}</details>`;
     st.append(pop); extra();
     const x = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6), y = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6);
-    pop.style.left = x + 'px'; pop.style.top = y + 'px';
+    pop.style.left = x + 'px'; pop.style.top = y + 'px'; adattaPop(pop);
     const salva = async ch => {
       const r2 = await SB.from('tavolo_token').update(ch).eq('id', id).select().single();
       if (r2.error) { toast(r2.error.message, 'err'); return; }
@@ -3245,7 +3398,49 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if ((m = mo.match(/^(.+?) · Danni: (.+)$/))) return { k: 'dan', l: '💥 Danni', d: `${m[2]} · ${m[1]}` };
     return null;
   }
-  const rigaTiro = t => { const tt = tipoTiro(t.motivo); return `<div class="tv-roll ${esito(t)} ${t.privato ? 'priv' : ''} ${t.autore === T.me.uid ? 'me' : ''}${tt ? ' k-' + tt.k : ''}">${tagTiro(t)}<div class="h"><span class="who">${avatar(t.autore, t.nome)}${esc(t.nome)}</span><span class="dx"><small>${ora(t.creato)}</small>${via('t', t)}</span></div>
+  // chi tira davvero: il personaggio scritto nel motivo («Edward → Gorgo», «Edward · Percezione»), non chi è al computer
+  function chiTira(t, tt) {
+    const mo = String(t.motivo || ''), nomi = new Set([...T.tok.values()].map(x => x.nome).concat([...(T.schede?.values() || [])].map(x => x.nome)).filter(Boolean).map(norm));
+    const cand = tt?.d?.includes(' → ') ? [tt.d.split(' → ')[0].split(' · ').pop()] : mo.split(' · ').slice(0, 2);
+    const n = cand.map(x => String(x || '').trim()).find(x => x && nomi.has(norm(x)));
+    return n && norm(n) !== norm(t.nome) ? n : null;
+  }
+  function chiHtml(t, tt) {
+    const p = chiTira(t, tt); if (!p) return `${avatar(t.autore, t.nome)}${esc(t.nome)}`;
+    const tk = [...T.tok.values()].find(x => norm(x.nome) === norm(p) && x.immagine);
+    const av = tk ? `<i class="av" style="background-image:url('${esc(tk.immagine)}')" aria-hidden="true"></i>` : avatar(t.autore, p);
+    return `${av}${esc(p)}<small class="gioc">${esc(t.nome)}</small>`;
+  }
+  // un attacco in un solo messaggio: tiro per colpire (con tutti e due i d20 se c'è vantaggio o svantaggio), esito e danni
+  /* un attacco in un solo riquadro, come su Roll20: i d20 affiancati (con vantaggio o svantaggio si vedono tutti e due,
+     quello che vale in evidenza), sotto i danni totali e da dove arrivano, dado per dado */
+  function rigaAttacco(t, parti) {
+    const tt = tipoTiro(t.motivo), [arma, ab = ''] = tt.d.split(/ · (?=[^·]*→)/), adv = / · (vantaggio|svantaggio)/.exec(t.motivo)?.[1];
+    const g = /(\d+)d20(k[hl]1)? \[([^\]]*)\]/.exec(t.dettaglio || ''), [tutti, tenuti] = (g?.[3] || '').split(' → ');
+    const dadi = tutti ? tutti.split(', ').map(Number) : [], kept = tenuti ? +tenuti : dadi[0], bonus = t.totale - (kept || 0);
+    let preso = dadi.indexOf(kept); if (preso < 0) preso = 0;
+    const nomeArma = esc(arma.replace(/ · .*$/, '')), su = ab.includes('→') ? esc(ab.split(' → ')[1].replace(/ · .*$/, '')) : '';
+    const box = (v, i) => `<div class="b${i === preso ? ' ok' : ' no'}${v === 20 ? ' n20' : v === 1 ? ' n1' : ''}"><b>${v + bonus}</b><small>${v}${bonus ? (bonus > 0 ? ' +' : ' −') + Math.abs(bonus) : ''}</small></div>`;
+    // i danni: ogni tiro, e dentro i dadi in più (marchio, furtivo, punizione…) uno per riga
+    const righe = [], valore = seg => (seg.match(/\[([^\]]*)\]/)?.[1] || '').split(', ').reduce((x, v) => x + (+v || 0), 0);
+    for (const x of parti) {
+      const crit = /critico ×2/.test(x.r.motivo || '');
+      if (x.tt.k === 'ext') {
+        const nomi = x.tt.l.replace(/^➕\s*/, '').split(' + '), seg = String(x.r.dettaglio || '').match(/\d+d\d+ \[[^\]]*\]/g) || [];
+        if (seg.length === nomi.length && nomi.length > 1) seg.forEach((d, i) => righe.push([esc(nomi[i]), chips(d), valore(d), crit]));
+        else righe.push([esc(nomi.join(' + ')), chips(x.r.dettaglio), x.r.totale, crit]);
+      } else righe.push([x.tt.l.startsWith('🧪') ? '🧪 Danni in più (TS)' : nomeArma, chips(x.r.dettaglio), x.r.totale, crit]);
+    }
+    const tot = parti.reduce((q, x) => q + Math.max(0, x.r.totale), 0), crit = righe.some(r => r[3]);
+    const nota = adv ? `${adv === 'vantaggio' ? 'Vantaggio: vale il più alto' : 'Svantaggio: vale il più basso'}` : '';
+    return `<div class="tv-roll tv-att ${esito(t)} ${t.privato ? 'priv' : ''} ${t.autore === T.me.uid ? 'me' : ''} k-att">${tagTiro(t)}<div class="h"><span class="who">${chiHtml(t, tt)}</span><span class="dx"><small>${ora(t.creato)}</small>${via('t', t)}</span></div>
+      <div class="kt"><b>⚔ ${nomeArma}${su ? ' → ' + su : ''}</b>${tt.es ? `<span class="es ${tt.es[0]}">${tt.es[1]}</span>` : ''}</div>
+      <div class="hit${dadi.length > 1 ? ' due' : ''}">${dadi.map(box).join('')}</div>
+      <div class="cap">🎯 Tiro per colpire${bonus ? ` · bonus ${bonus > 0 ? '+' : '−'}${Math.abs(bonus)}` : ''}${nota ? ' · ' + nota : ''}</div>
+      ${righe.length ? `<div class="dmg"><b>${tot}</b><small>danni${crit ? ' · critico, dadi raddoppiati' : ''}</small></div>
+      <div class="dl">${righe.map(([l, c, v]) => `<div><span class="l">${l}</span><span class="chips">${c}</span><span class="v">${v}</span></div>`).join('')}${righe.length > 1 ? `<div class="sum"><span class="l">Totale</span><span class="v">${righe.map(r => r[2]).join(' + ')} = ${tot}</span></div>` : ''}</div>` : ''}</div>`;
+  }
+  const rigaTiro = t => { const tt = tipoTiro(t.motivo); return `<div class="tv-roll ${esito(t)} ${t.privato ? 'priv' : ''} ${t.autore === T.me.uid ? 'me' : ''}${tt ? ' k-' + tt.k : ''}">${tagTiro(t)}<div class="h"><span class="who">${chiHtml(t, tt)}</span><span class="dx"><small>${ora(t.creato)}</small>${via('t', t)}</span></div>
     ${tt ? `<div class="kt"><b>${esc(tt.l)}</b>${tt.es ? `<span class="es ${tt.es[0]}">${tt.es[1]}</span>` : ''}</div><div class="m">${esc(tt.d)}</div>` : t.motivo ? `<div class="m">${esc(t.motivo)}</div>` : ''}<div class="fo">tira ${esc(t.formula)}</div><div class="r"><span class="chips">${chips(t.dettaglio)}</span><span class="t">${t.totale}</span></div></div>`; };
   const nomeGioc = id => id === 'dm' ? 'DM' : T.membri.find(x => x.giocatore === id)?.nome || id;
   const rigaMsg = m => `<div class="tv-roll tv-msg ${m.per ? 'w' : ''} ${m.autore === T.me.uid ? 'me' : ''}">${tagMsg(m)}<div class="h"><span class="who">${avatar(m.autore, m.nome)}${esc(m.nome)}</span><span class="dx"><small>${ora(m.creato)}</small>${via('c', m)}</span></div><div class="tx">${esc(m.testo)}</div></div>`;
@@ -3259,7 +3454,24 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
   function disegnaLog() {
     const l = $('#tv-log'); if (!l) return;
-    const tutto = [...T.tiri.map(t => [t.creato, rigaTiro(t)]), ...(T.chat || []).map(m => [m.creato, rigaMsg(m)])].sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
+    // i danni che seguono un tiro per colpire finiscono nello stesso messaggio
+    const usati = new Set(), tiri = [...T.tiri].sort((a, b) => a.id - b.id), righe = [];
+    tiri.forEach((t, i) => {
+      if (usati.has(t.id)) return;
+      const tt = tipoTiro(t.motivo);
+      if (tt?.k === 'att' && /^🎯/u.test(t.motivo) && tt.d.includes(' → ')) {
+        const chi = tt.d.split(' · ').find(x => x.includes(' → ')), parti = [];
+        for (const u of tiri.slice(i + 1, i + 6)) {
+          const tu = tipoTiro(u.motivo);
+          if (u.autore !== t.autore || !tu || !['dan', 'ext'].includes(tu.k) || !tu.d.includes(chi.split(' · ')[0])) continue;
+          if (Math.abs(new Date(u.creato) - new Date(t.creato)) > 15000) break;
+          usati.add(u.id); parti.push({ r: u, tt: tu });
+        }
+        righe.push([t.creato, rigaAttacco(t, parti)]); return;
+      }
+      righe.push([t.creato, rigaTiro(t)]);
+    });
+    const tutto = [...righe, ...(T.chat || []).map(m => [m.creato, rigaMsg(m)])].sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
     l.innerHTML = tutto.map(x => x[1]).join('') || '<p class="hint">Nessun messaggio ancora. Tiri e messaggi li vedono tutti al tavolo.</p>';
     l.scrollTop = 1e9;
   }
@@ -3719,7 +3931,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const r = st.getBoundingClientRect(), pop = document.createElement('div'); pop.className = 'tv-pop';
     pop.innerHTML = `<b>🚪 Porta</b><button class="btn sm" data-k="ap">${m.aperta ? 'Chiudi' : 'Apri'}</button><button class="btn sm" data-k="bl">${m.bloccata ? '🔓 Togli la chiave' : '🔒 Chiudi a chiave'}</button><button class="btn sm danger" data-k="via">Elimina la porta</button>`;
     st.append(pop);
-    pop.style.left = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6) + 'px'; pop.style.top = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6) + 'px';
+    pop.style.left = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6) + 'px'; pop.style.top = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6) + 'px'; adattaPop(pop);
     pop.querySelector('[data-k=ap]').onclick = () => { chiudiPop(); apriPorta(id); };
     pop.querySelector('[data-k=bl]').onclick = async () => {
       chiudiPop(); const ch = m.bloccata ? { bloccata: false } : { bloccata: true, aperta: false };
@@ -3872,6 +4084,10 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   const ELEM = [[/fuoco/i, '#ff7b2e'], [/fredd|gelo/i, '#7fd8ff'], [/fulmin|elettric/i, '#ffe45c'], [/acid/i, '#9be15d'], [/veleno/i, '#7bd66a'], [/radios/i, '#ffe8a3'], [/necrotic/i, '#b07cff'], [/forza/i, '#c58bff'], [/psichic/i, '#ff7ad9'], [/tuono/i, '#9fb4ff']];
   const FERMO = ['Incapacitato', 'Paralizzato', 'Pietrificato', 'Stordito', 'Svenuto', 'Morto'];
   const TS_RE = /\b(?:ts|tiro salvezza|salvezza)\s+(?:su\s+|di\s+)?(?:for|des|cos|int|sag|car)/i;
+  const tsDaNote = a => {
+    const t = String(a?.tipo || ''), c = t.match(/\b(?:ts|tiro salvezza|salvezza)\s+(?:su\s+|di\s+)?(for|des|cos|int|sag|car)/i), cd = t.match(/\bcd\s*(\d+)/i);
+    return c && cd ? { ts_car: c[1].toLowerCase(), ts_cd: +cd[1] } : null;
+  };
   const metri = n => n.toLocaleString('it-IT', { maximumFractionDigits: 1 }) + ' m';
   // fin dove arriva un attacco, letto da «tipo e note»: «gittata 24/96 m», «anche da lancio 6/18 m», «portata 3 m»
   function portata(a) {
@@ -3882,7 +4098,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const ar = tx.match(/\b(sfera|raggio|cilindro|emanazione|cubo|cono|linea)\s*(?:di\s*)?(\d+(?:[.,]\d+)?)\s*m\b/i);
     const area = ar ? { forma: /cubo/i.test(ar[1]) ? 'cubo' : /cono/i.test(ar[1]) ? 'cono' : /linea/i.test(ar[1]) ? 'linea' : 'cerchio', m: f(ar[2]) } : null;
     // «TS Destrezza CD 13»: niente tiro per colpire, il bersaglio tira il salvezza (ma «+ 2d8 da veleno (TS…)» resta un attacco)
-    const ts = TS_RE.test(tx) && !/\+\s*\d+\s*d\s*\d+/i.test(a.tipo || '');
+    // con un bonus al colpire scritto (Mannaia di Gorgo +8) il TS è quello di chi viene colpito: si tira per colpire prima
+    const colpo = a.colpire !== '' && a.colpire != null && num(a.colpire) !== 0;
+    const ts = TS_RE.test(tx) && !colpo && !/\+\s*\d+\s*d\s*\d+/i.test(a.tipo || '');
     // il pugnale boomerang si lancia (6/18 m, come un pugnale) e torna in mano
     const ritorna = /boomerang|ritorna|torna in mano/i.test(tx); if (ritorna && !dist) dist = [6, 18];
     const lancio = /lancio/i.test(tx) || ritorna;
@@ -3900,11 +4118,55 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     ['svant_contro', 'Chi lo attacca ha svantaggio'], ['vant_contro', 'Chi lo attacca ha vantaggio'], ['ts_colpo', 'Quando colpisce, il bersaglio fa un tiro salvezza'], ['vant_ts', 'Vantaggio ai suoi tiri salvezza']];
   const effettoDi = p => p.eff !== undefined ? p.eff : /tattic\w* (?:del|di) branco/.test(norm(p.nome)) ? 'branco' : /resistenza alla magia/.test(norm(p.nome)) ? 'vant_ts' : '';
   const effetti = (s, e) => s ? (s.dati.privilegi || []).filter(p => !p.off && effettoDi(p) === e) : [];
+  /* punti merda (regola della casa): il contrario dell'ispirazione. Li dà il DM e decide lui quando usarli:
+     usato, il prossimo tiro con il d20 di quel personaggio (prova, TS, attacco) ha svantaggio */
+  const merdaAttiva = s => !!s?.dati?.merda_attiva;
+  const consumaMerda = s => { if (s?.dati) { s.dati.merda_attiva = false; salvaScheda(s.id, { merda_attiva: false }, true)?.catch?.(() => { }); } };
+  function pillMerda(s) {
+    const d = s.dati, n = num(d.merda) || 0, on = !!d.merda_attiva, dm = isDM();
+    return `<div class="pill merda${on ? ' on' : ''}" title="Punti merda: li dà il DM e decide lui quando usarli. Usato, il prossimo tiro con il d20 ha svantaggio."><b class="pv">${n}</b><span>Punti merda${on ? ' · <i>svantaggio al prossimo tiro</i>' : ''}</span>
+      ${dm ? `<span class="mq"><button type="button" class="mini" data-k="merda-" title="Togli un punto"${n ? '' : ' disabled'}>−</button><button type="button" class="mini" data-k="merda+" title="Dai un punto">+</button>${on ? '<button type="button" class="mini" data-k="merda-no" title="Annulla: niente svantaggio">Annulla</button>' : `<button type="button" class="mini" data-k="merda-usa" title="Il prossimo tiro con il d20 ha svantaggio"${n ? '' : ' disabled'}>💩 Usa</button>`}</span>` : ''}</div>`;
+  }
   const vantTS = (s, car) => effetti(s, 'vant_ts').find(p => !p.ts_car || p.ts_car === car);
   const tatticaBranco = s => effetti(s, 'branco').length > 0 || /tattic\w* (?:del|di) branco/i.test([s.dati.tratti, s.dati.azioni].join('\n'));
   const latoTok = t => t.giocatore || schedaDi(t)?.tipo === 'pg' ? 'pg' : 'png';
   const alleatoVicino = (a, b, sc) => [...T.tok.values()].find(t => t.scena === sc.id && t.id !== a.id && t.id !== b.id && latoTok(t) === latoTok(a)
     && !condTok(t).some(c => FERMO.includes(c)) && distanza(t, b, sc) <= (sc.metri || 1.5) + 0.01);
+  /* Marchio del cacciatore e Maleficio: chi lancia aggiunge 1d6 ai danni dei suoi attacchi contro il bersaglio
+     (il Marchio solo con le armi). Se il bersaglio scende a 0 PF, con un'azione bonus il segno passa a un'altra creatura senza spendere slot. */
+  const MARCHI = /marchio del cacciatore|maleficio|hunter'?s mark|\bhex\b/i;
+  const marchioDi = a => segniDi(a).marchio || null;
+  const marchiatoDa = b => [...T.tok.values()].filter(h => h.id !== b.id && segniDi(h).marchio?.a === b.id);
+  const aTerra = t => { const p = pfDi(t), c = condTok(t); return c.includes('Morto') || (p?.max > 0 && p.pf === 0); };
+  const marchioLibero = a => { const g = marchioDi(a), b = g && T.tok.get(g.a); return !!g && (!b || b.scena !== a.scena || aTerra(b)); };
+  async function marchia(a, s, nome, b, opt = {}) {
+    if (!a || !b) return;
+    await segna(a, { marchio: { a: b.id, nome, dadi: '1d6', tutti: /maleficio|\bhex\b/i.test(nome) } });
+    if (!opt.sposta && opt.inc != null) usaSlot(s, opt.inc, opt.liv);
+    if (suoTurno(a)) await segnaAzioni(a, { bon: true });
+    const fx = { id: b.id, col: '#7cc8e8', txt: '🎯 ' + nome }; manda('lampo', fx); mostraLampo(fx);
+    await annuncia(`🎯 ${a.nome || 'Qualcuno'} ${opt.sposta ? 'sposta' : 'lancia'} ${nome} su ${b.nome || 'un bersaglio'} (azione bonus${opt.sposta ? ', senza slot' : ''}): +1d6 ai danni dei suoi attacchi${/maleficio|\bhex\b/i.test(nome) ? '' : ' con le armi'} contro di lui. Concentrazione.`);
+  }
+  // un lampo con una scritta sopra un token, per tutti (marchio, punizione…), anche dopo l'animazione dell'attacco
+  function mostraLampo(m) {
+    setTimeout(() => {
+      const fx = $('#tv-fx'), sc = scena(), t = T.tok.get(m.id); if (!fx || !sc || !t || (!isDM() && tokEl(t.id)?.hidden)) return;
+      const [x, y, r] = centro(t, sc); lampo(fx, x, y, m.col, r * 1.6); scritta(fx, x, y - r - sc.griglia * 0.3, m.txt, m.col, sc.griglia, false);
+    }, animazioni() ? m.dopo || 0 : 0);
+  }
+  // Punizione divina: dopo un colpo in mischia con un'arma, 2d8 radiosi più 1d8 per livello di slot sopra il 1° (max 5d8), +1d8 contro non morti e immondi
+  const haPunizione = s => !!s && (/punizione divina|divine smite/i.test((s.dati.privilegi || []).map(p => p.nome || '').join('|') + '|' + (s.dati.tratti || '')) || (/paladin/i.test(s.dati.classe || '') && (parseInt(s.dati.livello) || 0) >= 2));
+  const slotLiberi = (s, lv) => Math.max(0, (num(s?.dati['slot_' + lv]) || 0) - (num(s?.dati['usati_' + lv]) || 0));
+  // fiancheggiamento (regola facoltativa della Guida del DM): un alleato in mischia dal lato opposto del bersaglio
+  function fiancheggia(a, b, sc) {
+    const [bx, by] = centro(b, sc), [ax, ay] = centro(a, sc), r = (sc.metri || 1.5) + 0.01;
+    if (distanza(a, b, sc) > r) return null;
+    return [...T.tok.values()].find(t => {
+      if (t.scena !== sc.id || t.id === a.id || t.id === b.id || latoTok(t) !== latoTok(a) || t.nascosto && !isDM() || condTok(t).some(c => FERMO.includes(c)) || distanza(t, b, sc) > r) return false;
+      const [tx, ty] = centro(t, sc), u = [ax - bx, ay - by], v = [tx - bx, ty - by], n = Math.hypot(...u) * Math.hypot(...v);
+      return n > 0 && (u[0] * v[0] + u[1] * v[1]) / n <= -0.7; // almeno 135°: dalla parte opposta
+    }) || null;
+  }
   // si può attaccare? con che modo (mischia o distanza) e con vantaggio o svantaggio, spiegando perché
   function valuta(m, b) {
     const sc = scena(), a = T.tok.get(m.tok), s = T.schede?.get(m.sid), at = armaMira(m);
@@ -3929,12 +4191,14 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const ai = aiutoPer(a); if (ai) pro.push(`aiutato da ${ai.h.nome}`);
     if (schiva(b)) contro.push(`${nb} sta schivando`);
     const br = s && tatticaBranco(s) && alleatoVicino(a, b, sc); if (br) pro.push(`tattica del branco: ${br.nome || 'un alleato'} è accanto a ${nb}`);
+    const fi = modo === 'mischia' && !br && fiancheggia(a, b, sc); if (fi) pro.push(`fiancheggiamento con ${fi.nome || 'un alleato'}`);
     const sb = schedaDi(b);
     effetti(s, 'vant_att').forEach(p => pro.push(p.nome || 'un tratto')); effetti(s, 'svant_att').forEach(p => contro.push(p.nome || 'un tratto'));
     effetti(sb, 'vant_contro').forEach(p => pro.push(`${nb}: ${p.nome || 'un tratto'}`)); effetti(sb, 'svant_contro').forEach(p => contro.push(`${nb}: ${p.nome || 'un tratto'}`));
     if (m.adv === 1) pro.push('scelto dalla scheda'); if (m.adv === 2) contro.push('scelto dalla scheda');
+    if (merdaAttiva(s)) contro.push('💩 punto merda');
     const adv = pro.length && !contro.length ? 1 : contro.length && !pro.length ? 2 : 0;
-    return { ok: true, modo, d, adv, pro, contro, anim: modo === 'mischia' ? 'spada' : p.col ? 'magia' : p.lancio ? 'lancio' : 'freccia', col: p.col, ritorna: modo === 'distanza' && p.ritorna, aiuto: ai };
+    return { ok: true, modo, d, adv, pro, contro, vicino: alleatoVicino(a, b, sc), anim: modo === 'mischia' ? 'spada' : p.col ? 'magia' : p.lancio ? 'lancio' : 'freccia', col: p.col, ritorna: modo === 'distanza' && p.ritorna, aiuto: ai };
   }
   // il token con cui attacca chi apre la scheda: il suo personaggio, o il PNG da cui il DM ha aperto la scheda
   function attaccante(s) {
@@ -3984,7 +4248,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       d.addEventListener('close', () => res(d.returnValue === 'senza' ? lv : /^\d$/.test(d.returnValue) ? +d.returnValue : null));
     });
   }
-  async function lanciaInc(s, inc) {
+  async function lanciaInc(s, inc, tok) {
     const sp = s.dati.incantesimi?.[inc]; if (!sp) return;
     const liv = await sceltaLivello(s, sp); if (liv == null) return;
     const lv = liv || num(sp.livello) || 0, tot = num(s.dati['slot_' + lv]) || 0, usati = num(s.dati['usati_' + lv]) || 0;
@@ -3992,7 +4256,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     // si sceglie il bersaglio sulla mappa per tutti gli incantesimi che arrivano su qualcuno (non quelli su di sé)
     const at = attDaInc(s, sp), pa = portata(at), su = /^\s*(s[eé]|personale|incantatore)\b/i.test(sp.portata || '');
     const mira = !!(pa.area || !su && (String(sp.portata || '').trim() || sp.ts || sp.attacco || String(sp.danni || '').trim()));
-    const tk = mira ? attaccante(s) : null;
+    const tk = mira ? tok || attaccante(s) : null;
     if (tk) return iniziaMira(s, 0, tk, inc, lv);
     if (mira && scena() && [...T.tok.values()].filter(t => t.scena === scena().id && schedaDi(t)?.id === s.id).length > 1) toast('Per scegliere il bersaglio apri la scheda dal token che lancia.');
     // senza bersagli da scegliere: lo annuncio in chat, tiro gli eventuali dadi e consumo lo slot
@@ -4002,7 +4266,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (sp.attacco) await tiroD20(s, bonusInc(s), 'Attacco: ' + (sp.nome || 'incantesimo'));
     if (dn) tira(dn, null, T.sv?.seg, `${chi} · Danni: ${sp.nome || 'Incantesimo'}${lv > base ? ` (slot di ${lv}°)` : ''}`);
     usaSlot(s, inc, lv);
-    const t = tokScheda() || attaccante(s); if (t && suoTurno(t) && /azione bonus/i.test(sp.tempo || '')) segnaAzioni(t, { bon: true }); else if (t && suoTurno(t) && /^\s*1\s*azione/i.test(sp.tempo || '')) segnaAzioni(t, { az: true });
+    const t = tok || tokScheda() || attaccante(s); if (t && suoTurno(t) && /azione bonus/i.test(sp.tempo || '')) segnaAzioni(t, { bon: true }); else if (t && suoTurno(t) && /^\s*1\s*azione/i.test(sp.tempo || '')) segnaAzioni(t, { az: true });
   }
   /* ---------- manuale degli incantesimi: l'SRD 5.1 in italiano, caricato solo quando serve ---------- */
   let SRD = null;
@@ -4014,7 +4278,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       T.srd = { ...j, per: new Map(j.incantesimi.flatMap(x => [[chiaveInc(x.nome), x], ...en(x).map(n => [chiaveInc(n), x])])) };
       if (!document.getElementById('tv-srd-l')) {
         const dl = document.createElement('datalist'), liv = x => `${x.livello ? x.livello + '° livello' : 'Trucchetto'} · ${x.scuola}`; dl.id = 'tv-srd-l';
-        dl.innerHTML = j.incantesimi.map(x => `<option value="${esc(x.nome)}">${esc(liv(x))}${x.en ? ' · ' + esc(x.en) : ''}</option>` + en(x).map(n => `<option value="${esc(n)}">${esc(x.nome)} · ${esc(liv(x))}</option>`).join('')).join('');
+        // un'opzione sola per incantesimo, col nome italiano: l'inglese si legge accanto e scrivendolo si trova lo stesso
+        dl.innerHTML = j.incantesimi.map(x => `<option value="${esc(x.nome)}">${esc(liv(x))}${x.en ? ' · ' + esc(x.en) : ''}</option>`).join('');
         document.body.append(dl);
       }
       return T.srd;
@@ -4025,7 +4290,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   const dalManuale = sp => !String(sp?.testo || '').trim() && (T.srd?.per.get(chiaveInc(sp?.nome)) || T.srd?.per.get(chiaveInc(String(sp?.nome || '').split(/[,(]/)[0]))) || null;
   // l'incantesimo preso dal manuale: tiene id e «preparato», il resto viene dal libro
   // il nome resta quello scritto (anche in inglese); l'altro nome si vede sotto il titolo della card
-  const daManuale = (sp, x) => { const mio = String(sp.nome || '').trim(), it = !mio || chiaveInc(mio) === chiaveInc(x.nome); const { riassunto, ...v } = x;
+  // scritto col nome inglese (Eldritch Blast) prende quello italiano (Deflagrazione occulta): l'inglese resta sotto il titolo
+  const nomiEn = x => String(x?.en || '').split(' / ').filter(Boolean);
+  const daManuale = (sp, x) => { const mio = String(sp.nome || '').trim(), it = !mio || [x.nome, ...nomiEn(x)].some(n => chiaveInc(mio) === chiaveInc(n)); const { riassunto, ...v } = x;
     return { id: sp.id || nuovoId(), ...(sp.prep ? { prep: true } : {}), ...v, nome: it ? x.nome : mio, alt: it ? x.en || '' : x.nome, srd: !riassunto, ...(riassunto ? { riassunto: true } : {}) }; };
   const testoInc = (t, dis) => String(t || '').split(/\n+/).map(r => r.trim()).filter(Boolean).map(r => { const m = r.match(/^\*\*(.+?)\*\*\s*(.*)$/) || r.match(/^(Ai livelli superiori)[.:]\s*(.*)$/i); return `<p>${m ? `<b><i>${esc(m[1].replace(/[.:]\s*$/, ''))}.</i></b> ${dadiTesto(m[2], dis)}` : dadiTesto(r, dis)}</p>`; }).join('');
   function incForm(sp, i) {
@@ -4073,14 +4340,17 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const b = $('#tv-mbar'), m = T.mira; if (!b || !m) return;
     const p = portata(at), arr = p.dist ? `gittata ${metri(p.dist[0])}${p.dist[1] > p.dist[0] ? ' / ' + metri(p.dist[1]) : ''}${p.mischia ? ' · anche in mischia' : ''}` : p.area ? 'da chi lancia' : `mischia · ${metri(p.reach)}`;
     // i privilegi con dadi da aggiungere ai danni (attacco furtivo, punizione…) si accendono qui
-    const s = T.schede?.get(m.sid), ex = extraDi(s).filter(x => x.dadi).map(x => [x, x.id]);
+    const s = T.schede?.get(m.sid), ex = extraDi(s).filter(x => x.dadi).map(x => [x, x.id]), pun = haPunizione(s) ? [1, 2, 3, 4, 5].filter(lv => slotLiberi(s, lv)) : [];
     const forma = p.area && { cerchio: 'sfera', cubo: 'cubo', cono: 'cono', linea: 'linea' }[p.area.forma] + ' di ' + metri(p.area.m);
     b.innerHTML = `<div class="g"><b class="tit">🎯 ${esc(at.nome || 'Attacco')}${m.inc != null && m.slot ? ` · slot di ${m.slot}°` : ''}</b><span class="avv">di ${esc(tok.nome || '')} · ${arr}${forma ? ' · ' + forma : ''}. ${p.area ? (m.f ? (m.f.lontano ? '<b>Troppo lontano.</b>' : `Dentro: ${m.bers.length ? m.bers.map(id => esc(T.tok.get(id)?.nome || '?')).join(', ') : 'nessuno'}.`) : 'Clicca sulla mappa il punto dove lanciarlo.') : 'Clicca il bersaglio sulla mappa.'}</span></div>
+      ${!p.area && m.inc == null && p.mischia ? `<div class="g"><label class="sw" title="Se lo porti a 0 punti ferita resta svenuto invece che morto"><input type="checkbox" data-nl ${m.nl ? 'checked' : ''}><span class="tg" aria-hidden="true"></span>🤚 Non letale</label>${pun.length ? `<label class="sw" title="Se colpisci in mischia: 2d8 radiosi, +1d8 per ogni livello di slot sopra il 1° (max 5d8), +1d8 contro non morti e immondi. Lo slot si spende solo se colpisci."><input type="checkbox" data-pu ${m.pu ? 'checked' : ''}><span class="tg" aria-hidden="true"></span>✨ Punizione divina</label><select data-pul aria-label="Slot della punizione">${pun.map(lv => `<option value="${lv}"${lv === (m.pu || pun[0]) ? ' selected' : ''}>${lv}° · ${Math.min(5, lv + 1)}d8 (${slotLiberi(s, lv)} ${slotLiberi(s, lv) === 1 ? 'libero' : 'liberi'})</option>`).join('')}</select>` : ''}</div>` : ''}
       ${ex.length && !p.area && m.inc == null ? `<div class="g">${ex.map(([x, i]) => `<label class="sw" title="Aggiunge ${esc(x.dadi)} ai danni se colpisci"><input type="checkbox" data-x="${esc(i)}" ${m.extra.has(i) ? 'checked' : ''}><span class="tg" aria-hidden="true"></span>＋ ${esc(x.nome)} (${esc(x.dadi)})</label>`).join('')}</div>` : ''}
       <div class="g">${p.area ? `<button type="button" data-k="lancia" class="on"${m.f && !m.f.lontano ? '' : ' disabled'}>🔥 Lancia qui</button>` : ''}<button type="button" data-k="annulla">Annulla (Esc)</button></div>`;
     b.classList.remove('spenta'); b.hidden = false;
     b.querySelector('[data-k=annulla]').onclick = () => fineMira();
     b.querySelector('[data-k=lancia]')?.addEventListener('click', lanciaArea);
+    b.querySelector('[data-nl]')?.addEventListener('change', e => { m.nl = e.target.checked; });
+    const pul = b.querySelector('[data-pul]'); b.querySelector('[data-pu]')?.addEventListener('change', e => { m.pu = e.target.checked ? +pul.value : 0; }); pul?.addEventListener('change', () => { if (m.pu) m.pu = +pul.value; });
     b.querySelectorAll('[data-x]').forEach(x => x.onchange = () => { x.checked ? m.extra.add(x.dataset.x) : m.extra.delete(x.dataset.x); attivaExtra(s, x.dataset.x, x.checked); });
   }
   /* «Modificatore danno aggiuntivo» (come in Roll20): dadi che, se accesi, si sommano ai danni di ogni attacco.
@@ -4113,12 +4383,23 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const m = T.mira; if (!m) return;
     const sx = T.schede?.get(m.sid), at = armaMira(m), sp = m.inc != null ? sx?.dati.incantesimi?.[m.inc] : null;
     const v = suSe(m) && b.id === m.tok ? { ok: true, adv: 0, pro: [], contro: [], col: portata(at).col } : valuta(m, b); if (!v.ok) { if (v.motivo) toast(v.motivo, 'err'); return; }
+    // chi si è disimpegnato in questo turno non subisce attacchi di opportunità: lo blocco, salvo conferma (un'azione preparata resta possibile)
+    const att = T.tok.get(m.tok);
+    if (att && !suoTurno(att) && suoTurno(b) && (azioniDi(b).fatte || []).some(f => f.k === 'dis')
+      && !await ask(`${b.nome || 'Il bersaglio'} si è disimpegnato in questo turno: il suo movimento non provoca attacchi di opportunità. Attacchi lo stesso (per esempio con un'azione preparata)?`, { ok: 'Attacca lo stesso', title: 'Disimpegno' })) return fineMira(0);
+    if (sp && MARCHI.test(sp.nome || '')) { fineMira(600); return marchia(att, sx, sp.nome, b, { inc: m.inc, liv: m.slot, sposta: m.sposta }); }
     if (at && portata(at).ts) { fineMira(animazioni() ? 1800 : 700); return incantesimoTS(m, [b.id], null, v.col || '#ffb347', at); }
     // senza tiro per colpire: i danni arrivano e basta (Dardo incantato), altrimenti si annuncia su chi è lanciato
     if (sp && !sp.attacco) { fineMira(animazioni() ? 1800 : 700); return String(at.danni || '').trim() ? incantesimoTS(m, [b.id], null, v.col || '#ffb347', at) : incantesimoSu(m, sx, sp, b); }
+    const fu = m.inc == null && extraDi(sx).find(x => x.dadi && /furtiv/i.test(x.nome || ''));
+    if (fu) { const puo = v.adv !== 2 && (v.adv === 1 || !!v.vicino), on = m.extra.has(fu.id);
+      if (puo && !on) { m.extra.add(fu.id); toast(`Attacco furtivo aggiunto: ${v.adv === 1 ? 'hai vantaggio' : `${v.vicino.nome || 'un alleato'} è accanto a ${b.nome || 'il bersaglio'}`}.`); }
+      else if (!puo && on) { m.extra.delete(fu.id); toast(`Attacco furtivo tolto: ${v.adv === 2 ? 'con lo svantaggio non vale' : 'serve il vantaggio o un alleato accanto al bersaglio'}.`); } }
     fineMira(animazioni() ? 1800 : 700);
     const exP = extraDi(sx).filter(x => m.extra.has(x.id) && x.dadi), bd = m.inc == null ? bonusDadi(at) : '';
-    const extra = [bd, ...exP.map(x => x.dadi)].filter(Boolean).join('+'), exN = [bd ? bonusNome(at) : '', ...exP.map(x => x.nome || 'danni in più')].filter(Boolean).join(' + ');
+    const mk = marchioDi(att), mkx = mk && mk.a === b.id && (m.inc == null || mk.tutti) ? mk : null;
+    const pu = m.pu && m.inc == null && v.modo === 'mischia' && slotLiberi(sx, m.pu) ? { lv: m.pu, dadi: `${Math.min(5, m.pu + 1) + (/non\s*mort|immond|demon|diavol/i.test(schedaDi(b)?.dati?.taglia_tipo || '') ? 1 : 0)}d8` } : null;
+    const extra = [bd, ...exP.map(x => x.dadi), mkx?.dadi, pu?.dadi].filter(Boolean).join('+'), exN = [bd ? bonusNome(at) : '', ...exP.map(x => x.nome || 'danni in più'), mkx?.nome, pu && 'Punizione divina'].filter(Boolean).join(' + ');
     const r = await SB.rpc('tavolo_attacca', { p_token: m.tok, p_bersaglio: b.id, p_attacco: m.i, p_adv: v.adv, p_privato: m.seg, ...(extra ? { p_extra: extra, p_extra_nome: exN } : {}), ...(m.inc != null ? { p_inc: m.inc } : {}), p_liv: m.liv || null });
     if (r.error) return toast(/candidate function/i.test(r.error.message) ? 'In Supabase è rimasta una versione vecchia della funzione: esegui di nuovo tavolo/tappa-9.sql.' : /p_liv/i.test(r.error.message) ? 'Per lanciare con uno slot più alto esegui tavolo/tappa-9.sql in Supabase.' : sqlMancante(r.error) ? 'Per gli attacchi sulla mappa esegui tavolo/tappa-5.sql in Supabase.' : extra && /p_extra|function/i.test(r.error.message) ? 'Per aggiungere i dadi in più esegui tavolo/tappa-7.sql in Supabase.' : r.error.message, 'err');
     const x = Array.isArray(r.data) ? r.data[0] : r.data, a = T.tok.get(m.tok);
@@ -4126,16 +4407,30 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     manda('attacco', mossa); mostraAttacco(mossa);
     if (m.inc != null) usaSlot(sx, m.inc, m.slot);
     const tempo = m.inc != null ? sx?.dati.incantesimi?.[m.inc]?.tempo || '' : '';
-    if (a && suoTurno(a)) { if (/azione bonus/i.test(tempo)) { if (!azioniDi(a).bon) await segnaAzioni(a, { bon: true }); } else if (/reazione/i.test(tempo)) await segnaAzioni(a, { rea: true }); else if (!azioniDi(a).az) await segnaAzioni(a, { az: true }); }
+    if (a && suoTurno(a)) { if (/azione bonus/i.test(tempo)) { if (!azioniDi(a).bon) await segnaAzioni(a, { bon: true }); } else if (/reazione/i.test(tempo)) await segnaAzioni(a, { rea: true }); else if (!usata(a, 'az')) await segnaAzioni(a, { az: true }); }
     else if (a) await segnaReazione(a); // fuori dal suo turno si attacca solo con la reazione (attacco di opportunità)
     if (a && v.aiuto) usaAiuto(a, v.aiuto);
+    if (v.contro.includes('💩 punto merda')) consumaMerda(sx);
     if (x.critico && x.pf !== 0) barraCritico(x, a, b, mossa);
+    if (x.morto && m.nl) await nonLetale(m.tok, b);
+    // la punizione spende lo slot solo se il colpo va a segno
+    if (pu && x.colpito === true) { await salvaScheda(sx.id, { ['usati_' + pu.lv]: (num(sx.dati['usati_' + pu.lv]) || 0) + 1 }, true); const fx = { id: b.id, col: '#ffd76a', txt: '✨ Punizione', dopo: ATTESA_DADO + 600 }; manda('lampo', fx); mostraLampo(fx); }
+    if (mkx && x.colpito === true) { const fx = { id: b.id, col: '#7cc8e8', txt: '🎯 +1d6', dopo: ATTESA_DADO + 300 }; manda('lampo', fx); mostraLampo(fx); }
     if (x.salvezza) toast(`${b.nome || 'Il bersaglio'} deve fare un tiro salvezza su ${nomeCar(x.salvezza.car)} (CD ${x.salvezza.cd}) per i danni in più.`);
     if (mossa.esito === 'si' && m.inc == null) for (const p of effetti(sx, 'ts_colpo')) chiediTSTratto(a, b, p);
+    // «se colpisce, TS su Forza CD 16 o cade prono» scritto nelle note dell'attacco: il TS arriva al bersaglio colpito
+    if (mossa.esito === 'si' && m.inc == null && !x.salvezza && !x.morto) { const r2 = tsDaNote(at); if (r2) chiediTSTratto(a, b, { ...r2, nome: at.nome || 'attacco' }); }
     const perche = [v.adv === 1 ? 'vantaggio: ' + v.pro.join(', ') : v.adv === 2 ? 'svantaggio: ' + v.contro.join(', ') : ''].filter(Boolean).join('');
     toast(`${a?.nome || ''} → ${b.nome || ''}: ${mossa.esito === 'nd' ? `tiro ${x.totale}, senza CA nella scheda del bersaglio decide il DM` : mossa.esito === 'si' ? `${x.critico ? 'critico! ' : 'colpito, '}${x.danni} danni${x.danni_extra != null ? ` (di cui ${x.danni_extra} da ${exN})` : ''}` : x.fallito ? '1 naturale, mancato' : 'mancato'}${perche ? ' (' + perche + ')' : ''}${v.ritorna ? ' · il pugnale torna in mano' : ''}`);
   }
 
+  // attacco non letale: a 0 punti ferita il bersaglio resta svenuto invece che morto
+  async function nonLetale(da, b) {
+    const r = await SB.rpc('tavolo_non_letale', { p_token: da, p_bersaglio: b.id });
+    if (r.error) return toast(sqlMancante(r.error) || /tavolo_non_letale/.test(r.error.message) ? 'Per gli attacchi non letali esegui tavolo/tappa-15.sql in Supabase.' : r.error.message, 'err');
+    const t = T.tok.get(b.id); if (t && r.data?.condizioni) { t.condizioni = r.data.condizioni; disegnaToken(); }
+    await annuncia(`🤚 ${b.nome || 'Il bersaglio'} è messo fuori combattimento: resta svenuto, non muore.`);
+  }
   // un tratto «quando colpisce, TS…»: la richiesta arriva al bersaglio come per gli incantesimi
   async function chiediTSTratto(a, b, p) {
     const car = p.ts_car, cd = num(p.ts_cd); if (!a || !car || !cd) return;
@@ -4258,7 +4553,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     box.innerHTML = `<div class="h"><b>🛡 Tiro salvezza${l.length > 1 ? ` (${l.length})` : ''}</b>${isDM() && png.length > 1 ? '<button type="button" data-k="tutti">🎲 Tira tutti i PNG</button>' : ''}</div><div class="l">${l.map(riga).join('')}</div>`;
     box.querySelectorAll('.ts').forEach(el => el.querySelectorAll('button').forEach(b => b.onclick = () => {
       const id = el.dataset.id, k = b.dataset.k;
-      if (k === 'x') return SB.rpc('tavolo_salva_annulla', { p_id: id }).then(r => { if (r.error) toast(r.error.message, 'err'); else { T.salv.delete(id); disegnaSalvezze(); } });
+      if (k === 'x') return SB.rpc('tavolo_salva_annulla', { p_id: id }).then(r => { if (r.error) toast(r.error.message, 'err'); else { T.salv.delete(id); disegnaSalvezze(); manda('ts-via', { id }); } });
       tiraSalvezza(id, k === 'v' ? 1 : k === 's' ? 2 : 0);
     }));
     box.querySelector('[data-k=tutti]')?.addEventListener('click', async () => { for (const r of png) await tiraSalvezza(r.id, 0); });
@@ -4266,8 +4561,10 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   async function tiraSalvezza(id, adv) {
     const rq = T.salv.get(id), sh = rq && schedaDi(T.tok.get(rq.token)); if (!adv && sh && vantTS(sh, rq.car)) adv = 1;
     const el = $(`#tv-ts .ts[data-id="${id}"]`); if (el?.classList.contains('va')) return; el?.classList.add('va');
+    const me = merdaAttiva(sh); if (me) adv = adv === 1 ? 0 : 2;
     const r = await SB.rpc('tavolo_salva', { p_id: id, p_adv: adv });
     if (r.error) { el?.classList.remove('va'); return toast(sqlMancante(r.error) ? 'Per i tiri salvezza su richiesta esegui tavolo/tappa-7.sql in Supabase.' : r.error.message, 'err'); }
+    if (me) consumaMerda(sh);
     const x = r.data, m = { id: x.token, salvo: x.salvo, danni: x.danni, tiro: x.tiro };
     T.salv.delete(id); disegnaSalvezze();
     manda('ts', m); mostraTS(m);
@@ -4321,7 +4618,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function mostraAttaccoOra(m) {
     const sc = scena(), fx = $('#tv-fx'), a = T.tok.get(m.da), b = T.tok.get(m.a); if (!sc || !fx || !b) return;
     const vedeB = isDM() || !tokEl(b.id)?.hidden, vedeA = a && (isDM() || !tokEl(a.id)?.hidden);
-    if (!vedeB) return;
+    // nel buio non si svela dove sta il bersaglio, ma chi attacca (o chi muove l'attaccante) vede sempre il suo colpo
+    if (!vedeB && !(a && puoMuovere(a))) return;
     const u = sc.griglia, [bx, by, br] = centro(b, sc), esito = () => {
       if (m.esito === 'kill') { lampo(fx, bx, by, '#ff2d2d', br * 2.6); lampo(fx, bx, by, '#fff', br * 1.2); trema(b.id, u * 1.6); scritta(fx, bx, by - br - u * 0.25, '☠ Colpo mortale!', '#ff3b3b', u, true); }
       else if (m.esito === 'conf') scritta(fx, bx, by - br - u * 0.25, 'Conferma: ' + m.nat, '#f3e6c8', u);
@@ -4412,10 +4710,12 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (!isDM() || !T.turno?.length) return;
     for (const x of T.turno) {
       const t = x.token && T.tok.get(x.token); if (!t || togliendo.has(x.id)) continue;
-      const pf = pfDi(t), morto = condTok(t).includes('Morto') || (!t.giocatore && pf?.max > 0 && pf.pf === 0);
-      if (!morto) continue;
+      const morto = y => { const pf = pfDi(y), c = condTok(y); return c.includes('Morto') || (!y.giocatore && pf?.max > 0 && pf.pf === 0 && !c.includes('Svenuto')); };
+      if (!morto(t)) continue;
       togliendo.add(x.id);
       (async () => {
+        await new Promise(r => setTimeout(r, 1500));
+        const y = T.tok.get(t.id); if (!y || !morto(y)) { togliendo.delete(x.id); return; }
         if (T.stato?.turno === x.id && T.turno.length > 1) { const r = await SB.rpc('tavolo_turno_avanti'); if (r.error) toast(r.error.message, 'err'); }
         const r = await SB.from('tavolo_turno').delete().eq('id', x.id); togliendo.delete(x.id);
         if (r.error) return toast(r.error.message, 'err');
@@ -4584,6 +4884,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   const CAR = [['for', 'FOR', 'Forza'], ['des', 'DES', 'Destrezza'], ['cos', 'COS', 'Costituzione'], ['int', 'INT', 'Intelligenza'], ['sag', 'SAG', 'Saggezza'], ['car', 'CAR', 'Carisma']];
   const ABIL = [['acrobazia', 'Acrobazia', 'des'], ['addestrare', 'Addestrare animali', 'sag'], ['arcano', 'Arcano', 'int'], ['atletica', 'Atletica', 'for'], ['furtivita', 'Furtività', 'des'], ['indagare', 'Indagare', 'int'], ['inganno', 'Inganno', 'car'], ['intimidire', 'Intimidire', 'car'], ['intrattenere', 'Intrattenere', 'car'], ['intuizione', 'Intuizione', 'sag'], ['medicina', 'Medicina', 'sag'], ['natura', 'Natura', 'int'], ['percezione', 'Percezione', 'sag'], ['persuasione', 'Persuasione', 'car'], ['rapidita', 'Rapidità di mano', 'des'], ['religione', 'Religione', 'int'], ['sopravvivenza', 'Sopravvivenza', 'sag'], ['storia', 'Storia', 'int']];
   const CONDIZIONI = ['Accecato', 'Affascinato', 'Afferrato', 'Assordato', 'Avvelenato', 'Incapacitato', 'Invisibile', 'Paralizzato', 'Pietrificato', 'Prono', 'Spaventato', 'Stordito', 'Svenuto', 'Trattenuto', 'Concentrazione', 'Morto'];
+  // regola della casa di questa campagna: al level up i PF sono il massimo del dado + Costituzione (niente media né tiro)
+  const PF_MASSIMI = true;
   const BASE = { for: 10, des: 10, cos: 10, int: 10, sag: 10, car: 10 };
   const num = v => v === '' || v == null || isNaN(+v) ? null : +v;
   const segno = n => (n < 0 ? '−' : '+') + Math.abs(n);
@@ -4646,7 +4948,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     lista = [...new Set(lista)];
     if (tk) return condSuToken(tk, lista);
     if (s) await salvaScheda(s.id, { condizioni: lista }, true);
-    if (s?.giocatore) for (const t of [...T.tok.values()].filter(t => t.giocatore === s.giocatore && puoMuovere(t))) await condSuToken(t, lista);
+    if (s) for (const t of [...T.tok.values()].filter(t => schedaDi(t)?.id === s.id && (isDM() || puoMuovere(t)))) await condSuToken(t, lista);
   }
   // i punti ferita di un token: i suoi (ogni PNG ha i propri) o quelli della scheda del personaggio
   function pfDi(t) {
@@ -4660,7 +4962,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (p.tok || (isDM() && p.s.tipo === 'png')) {
       const pf = clamp(p.pf + delta, 0, p.max), ch = { pf, pf_max: p.max }, cc = condTok(t);
       // un nemico a 0 punti ferita è sconfitto: prende la condizione Morto, e la perde se lo si cura
-      if (!t.giocatore && 'condizioni' in t) { if (!pf && !cc.includes('Morto')) ch.condizioni = [...cc, 'Morto']; else if (pf && cc.includes('Morto')) ch.condizioni = cc.filter(c => c !== 'Morto'); }
+      if (!t.giocatore && 'condizioni' in t) { if (!pf && !cc.includes('Morto') && !cc.includes('Svenuto')) ch.condizioni = [...cc, 'Morto']; else if (pf && cc.includes('Morto')) ch.condizioni = cc.filter(c => c !== 'Morto'); }
       const r = await SB.from('tavolo_token').update(ch).eq('id', t.id).select().single();
       if (r.error) return toast(r.error.message, 'err');
       T.tok.set(t.id, completa(T.tok.get(t.id), r.data)); disegnaToken(); aggiornaFinestra(); effettoPF(t, pf - p.pf); return;
@@ -4836,6 +5138,10 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (vecchia && !isDM() && s.giocatore && s.giocatore === T.me?.giocatore && (num(s.dati?.liv_concesso) || 0) > (num(vecchia.dati?.liv_concesso) || 0) && num(s.dati.liv_concesso) > (num(s.dati.livello) || 1)) festaLivello(s);
     if (p) s.dati = { ...s.dati, ...p.dati }; // ciò che sto ancora scrivendo resta mio
     T.schede.set(row.id, s); dopoScheda(row.id);
+  }
+  async function riprendiScheda(id) {
+    const r = await SB.from('tavolo_schede').select('*').eq('id', id).maybeSingle();
+    if (!r.error && r.data) { arrivaScheda(r.data); togliMorti(); }
   }
   async function ricaricaSchede() {
     const r = await SB.from('tavolo_schede').select('*'); if (r.error) return;
@@ -5219,7 +5525,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       // come nelle schede dei personaggi: il testo del manuale e sotto i tasti per attaccare
       const pa = portata(a), dist = !!pa.dist && !pa.mischia, mi = media(a.danni), col = segno(num(a.colpire) || 0);
       const dove = pa.area ? 'incantesimo ad area' : pa.ts ? 'incantesimo con tiro salvezza' : `Attacco con arma ${pa.dist && pa.mischia ? 'da mischia o a distanza' : dist ? 'a distanza' : 'da mischia'}`;
-      return `<div class="sbat"><p><b><i>${esc(a.nome || 'Attacco')}.</i></b> <i>${dove}:</i> ${pa.area || pa.ts ? '' : `${col} al colpire. `}<i>Colpito:</i> ${mi != null ? `${mi} (${esc(a.danni)})` : esc(a.danni || '—')} danni${a.tipo ? ' ' + esc(a.tipo) : ''}${bonusDadi(a) ? ` più ${media(bonusDadi(a)) != null ? media(bonusDadi(a)) + ' ' : ''}(${esc(bonusDadi(a))}) ${esc(bonusNome(a))}` : ''}.</p>
+      return `<div class="sbat"><p><b><i>${esc(a.nome || 'Attacco')}.</i></b> <i>${dove}:</i> ${pa.area || pa.ts ? '' : `${col} al colpire. `}<i>Se colpisce:</i> ${mi != null ? `${mi} danni in media (${esc(a.danni)})` : `${esc(a.danni || '—')} danni`}${a.tipo ? ' ' + esc(a.tipo) : ''}${bonusDadi(a) ? ` più ${media(bonusDadi(a)) != null ? media(bonusDadi(a)) + ' ' : ''}(${esc(bonusDadi(a))}) ${esc(bonusNome(a))}` : ''}.</p>
         <div class="sbb"><button type="button" class="mini on" data-roll="att:${i}" title="${pa.area ? 'Scegli il punto sulla mappa' : 'Scegli il bersaglio sulla mappa (senza token: tiro per colpire)'}"${dis}>${pa.area ? '🔥 Lancia' : pa.ts ? '✨ Lancia' : '🎯 Attacca ' + col}</button><button type="button" class="mini" data-roll="dan:${i}" title="Tira i danni (con Maiusc: critico)"${dis}>💥 Danni ${esc(a.danni || '')}${bonusDadi(a) ? ' + ' + esc(bonusDadi(a)) : ''}</button><button type="button" class="mini" data-roll="cri:${i}" title="Critico: dadi dei danni raddoppiati"${dis}>✖2 Critico</button></div></div>`;
     }).join('');
     return `<div class="sb">
@@ -5230,6 +5536,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         ${pf && pf.max != null ? `<span class="ora ${pf.pf <= 0 ? 'ko' : ''}">ora ${n2(tk ? 'tok.pf' : 'pf', dis)} / ${pf.max}</span>` : ''}
         ${w && pf ? '<span class="q"><button type="button" data-k="pfm" title="Danni">−</button><input type="number" data-k="pfq" value="1" min="1" aria-label="Quanti punti"><button type="button" data-k="pfp" title="Cura">+</button></span>' : ''}</p>
       <p><b>Velocità</b> ${esc(d.velocita || '—')}</p>
+      <p class="naz"><b>Azioni per turno</b> ${w ? `<input type="number" data-f="n_azioni" min="1" max="9" step="1" placeholder="1" aria-label="Azioni per turno"${dis}>` : nAzioni(s)}</p>
       <hr>
       <div class="sbc">${CAR.map(([k, abb, nome]) => `<button type="button" data-roll="car:${k}" title="Prova di ${nome}"${dis}><b>${abb}</b><span>${num(d[k]) ?? 10} (${segno(modC(d[k]))})</span></button>`).join('')}</div>
       <hr>
@@ -5241,7 +5548,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       ${paragrafi(d.tratti, dis)}${(d.privilegi || []).map((p, i) => `<p class="trt"><b><i>${esc(p.nome || 'Tratto')}.</i></b> ${dadiTesto(String(p.testo || '').replace(/\n+/g, ' '), dis)} ${chipEff(p, i, w)}</p>`).join('')}
       <p class="iz"><button type="button" class="mini" data-roll="iniz"${dis}>🎲 Iniziativa ${segno(modC(d.des))}</button></p>
       <h4>Azioni</h4>
-      ${atts || (d.azioni ? '' : '<p class="vuoto">Nessuna azione: premi Modifica per aggiungerne.</p>')}${paragrafi(d.azioni, dis)}
+      ${atts || (d.azioni ? '' : '<p class="vuoto">Nessuna azione: premi Modifica per aggiungerne.</p>')}${paragrafi(leggDi(s).length ? senzaLegg(d.azioni) : d.azioni, dis)}${boxUsabili(s, w, dis)}
+      ${leggDi(s).length || num(d.leg_n) ? `<h4>Azioni leggendarie</h4>${boxLegg(s, w, dis)}` : ''}
       ${d.competenze ? `<h4>Altro</h4>${paragrafi(d.competenze, dis)}` : ''}
       <h4>Condizioni</h4><div class="cnd">${cond || '<span class="vuoto">Nessuna</span>'}${w ? `<select data-k="cond" class="selc" aria-label="Aggiungi una condizione"><option value="">+ Condizione</option>${CONDIZIONI.filter(c => !conds.includes(c)).map(c => `<option>${c}</option>`).join('')}</select>` : ''}</div>
     </div>`;
@@ -5256,7 +5564,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const out = []; let cur = null, gruppo = false; // gruppo: un titolo da solo (Metamagia) tiene sotto di sé le sue opzioni
     for (const r of String(txt || '').split(/\n/).map(x => x.trim())) {
       if (!r) { cur = null; gruppo = false; continue; }
-      const m = r.match(/^[-•*]?\s*([^.:]{2,50}?)\s*[.:]\s+(.+)$/), titolo = !m && r.length <= 45 && !/[.!?]$/.test(r);
+      const m = r.match(/^[-•*]?\s*([^.:]{2,70}?)\s*[.:]\s+(.+)$/), titolo = !m && r.length <= 45 && !/[.!?]$/.test(r);
       if (m && cur && gruppo && !RISORSA.test(m[1])) { cur.testo += (cur.testo ? '\n' : '') + r; continue; }
       if (m || titolo || !cur) { cur = { id: nuovoId(), nome: (m ? m[1] : titolo ? r : 'Nota').replace(/^[-•*]\s*/, ''), fonte: fonte || '', testo: m ? m[2] : titolo ? '' : r }; gruppo = titolo && !RISORSA.test(r); out.push(cur); }
       else { cur.testo += (cur.testo ? '\n' : '') + r; gruppo = false; }
@@ -5265,6 +5573,10 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       // «Punti stregoneria: 5» o «Ira 3/3»: diventano risorse da contare
       const n = p.testo.match(/^\s*(\d{1,3})(?:\s*\/\s*(\d{1,3}))?\b(?!\s*d\d)/) || p.nome.match(/(\d{1,3})\s*\/\s*(\d{1,3})\s*$/);
       if (n && RISORSA.test(p.nome + ' ' + p.testo)) { p.usi = +(n[2] || n[1]); p.usati = n[2] ? Math.max(0, +n[2] - +n[1]) : 0; p.riposo = /breve/i.test(p.testo) ? 'breve' : 'lungo'; }
+      // «Imposizione delle mani: … dalla riserva di 45»: la riserva di PF si conta come una risorsa e cura chi tocca
+      const ris = p.testo.match(/riserva di (\d{1,3})/i);
+      if (ris && !p.usi) { p.usi = +ris[1]; p.usati = 0; p.riposo = 'lungo'; }
+      if (/imposizione delle mani/i.test(p.nome)) p.cura = true;
       // «Attacco furtivo: 3d6…»: i dadi si tirano dalla voce e si possono aggiungere ai danni
       const dd = `${p.nome} ${p.testo}`.match(/\b(\d{1,2}d\d{1,3}(?:\s*[+-]\s*\d+)?)\b/i);
       if (dd && /furtiv|punizion|danni in più|danni extra|in più ai danni/i.test(p.nome + ' ' + p.testo)) { p.dadi = dd[1].replace(/\s+/g, ''); p.extra = true; }
@@ -5298,9 +5610,87 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       <textarea data-f="prv.${i}.testo" rows="5" placeholder="Descrizione completa: i dadi come 3d6 diventano tirabili" aria-label="Descrizione"></textarea>
       <div class="pvr"><label>Usi ${f('usi', '—', 'number', 'u')}</label><label>Tornano con <select data-f="prv.${i}.riposo">${Object.entries(RIPOSO).map(([k, l]) => `<option value="${k}">${l}</option>`).join('')}</select></label></div>
       <div class="pvr"><label>Dadi ${f('dadi', 'es. 3d6', 'text', 'd')}</label><label class="ck" title="Quando attacchi un bersaglio puoi aggiungerli ai danni (attacco furtivo, punizione…)"><input type="checkbox" data-f="prv.${i}.extra"> Si aggiungono ai danni di un attacco</label></div>
+      <div class="pvr"><label>Si usa con <select data-f="prv.${i}.tempo"><option value="">${(t => t ? TEMPI[t] + ' (letto dal testo)' : 'Niente: solo da leggere')(tempoAuto(p))}</option>${Object.entries(TEMPI).map(([k, l]) => `<option value="${k}">${l}</option>`).join('')}<option value="no">Niente: solo da leggere</option></select></label>
+        ${tempoDi(p) === 'leg' ? `<label>Costa ${f('costo_leg', '1', 'number', 'u')} punti</label>` : `<label class="ck" title="Usandolo si sceglie chi curare: con la riserva (usi) si decide quanti PF, altrimenti si tirano i dadi"><input type="checkbox" data-f="prv.${i}.cura"> Cura una creatura</label>`}</div>
       <div class="pvr"><label class="eff">Effetto in combattimento <select data-f="prv.${i}.eff">${EFFETTI_TR.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select></label></div>
       ${(e => e === 'ts_colpo' || e === 'vant_ts' ? `<div class="pvr"><label>${e === 'ts_colpo' ? 'Tiro salvezza su' : 'Su quali tiri salvezza'} <select data-f="prv.${i}.ts_car"><option value="">${e === 'ts_colpo' ? '—' : 'Tutti'}</option>${CAR.map(([k, , n]) => `<option value="${k}">${n}</option>`).join('')}</select></label>${e === 'ts_colpo' ? `<label>CD ${f('ts_cd', '13', 'number', 'u')}</label>` : ''}</div>` : '')(effettoDi(p))}
       <div class="pvr"><button type="button" class="mini" data-k="prv-mod" data-i="${i}">✓ Fatto</button><button type="button" class="mini via" data-k="prv-via" data-i="${i}">Elimina</button></div></div>`;
+  }
+  /* ---------- privilegi che si usano (Imposizione delle mani, Voto di inimicizia…) e azioni leggendarie ----------
+     p.tempo: 'az' azione, 'bon' azione bonus, 'rea' reazione, 'leg' azione leggendaria, 'no' solo testo, vuoto = letto dal testo */
+  const TEMPI = { az: 'Azione', bon: 'Azione bonus', rea: 'Reazione', leg: 'Azione leggendaria' };
+  const tempoAuto = p => {
+    const n = String(p.nome || ''), t = String(p.testo || '');
+    if (/azione leggendaria|\(\s*\d+\s*punt[oi]\s*\)/i.test(n)) return 'leg';
+    if (/imposizione delle mani/i.test(n)) return 'az';
+    // «Vendetta spietata (reazione)», «Voto di inimicizia (Incanalare divinità, azione bonus)»
+    const par = (n.match(/\(([^)]*)\)/) || [])[1] || '';
+    if (/\breazione\b/i.test(par)) return 'rea'; if (/\bazione bonus\b/i.test(par)) return 'bon';
+    const x = tempoPriv(n + '. ' + t) || tempoPriv(t);
+    if (x) return x;
+    return /^(?:con|usando|come) (?:un'|l')azione\b(?! bonus)/i.test(t.trim()) ? 'az' : '';
+  };
+  const tempoDi = p => p.tempo === 'no' ? '' : TEMPI[p.tempo] ? p.tempo : tempoAuto(p);
+  // le azioni leggendarie: le voci con «Azione leggendaria», se no quelle scritte nel testo delle azioni («Spallata (1 punto): …»)
+  function leggDi(s) {
+    const d = s.dati, P = (d.privilegi || []).map((p, i) => [p, i]).filter(([p]) => tempoDi(p) === 'leg')
+      .map(([p, i]) => ({ i, nome: String(p.nome || 'Azione leggendaria').replace(/\s*\((?:\s*\d+\s*punt[oi]|azione leggendaria)[^)]*\)\s*$/i, ''), testo: p.testo || '', costo: num(p.costo_leg) || +((`${p.nome}`.match(/(\d+)\s*punt[oi]/i) || [])[1] || 1) }));
+    if (P.length) return P;
+    const L = [];
+    for (const r of String(d.azioni || '').split(/\n/)) {
+      const m = rigaLegg(r);
+      if (m) L.push({ nome: m[1].trim(), costo: +(m[2] || 1), testo: m[3].trim() });
+    }
+    return L;
+  }
+  // nel blocco delle statistiche le azioni leggendarie scritte nel testo si leggono solo nel loro riquadro
+  const senzaLegg = t => String(t || '').split(/\n/).filter(r => !rigaLegg(r) && !/^\s*azioni leggendarie\b/i.test(r)).join('\n');
+  function rigaLegg(r) {
+    return r.match(/^\s*[-•*]?\s*([^():\n]{2,60}?)\s*\(\s*(\d+)\s*punt[oi]\s*\)\s*[.:]\s*(.+)$/i) || r.match(/^\s*[-•*]?\s*([^():\n]{2,60}?)\s*\(\s*azione leggendaria(?:[^)]*?(\d+)\s*punt[oi])?[^)]*\)\s*[.:]\s*(.+)$/i);
+  }
+  const legN = s => { const v = num(s.dati.leg_n); if (v != null) return v; const m = String(s.dati.azioni || '').match(/azioni leggendarie[^\n]*?(\d+)\s*(?:punti|azioni)/i); return m ? +m[1] : leggDi(s).length ? 3 : 0; };
+  const legRest = s => Math.max(0, legN(s) - (num(s.dati.leg_usate) || 0));
+  function boxLegg(s, w, dis) {
+    const L = leggDi(s), n = legN(s); if (!L.length && !num(s.dati.leg_n)) return '';
+    const r = legRest(s), dm = isDM();
+    return `<div class="sez legg"><p class="lgt">${n} punti per round, si recuperano all'inizio del suo turno. Una sola alla fine del turno di un'altra creatura.</p>
+      <div class="lgr"><span class="dots rd">${Array.from({ length: n }, (_, j) => `<b class="${j < r ? 'on' : ''}"></b>`).join('')}</span><span class="rv"><b>${r}</b>/${n}</span>
+        ${w ? `<label class="lgn">Punti <input type="number" data-f="leg_n" min="0" max="9" step="1" placeholder="${n}" aria-label="Punti per round"${dis}></label><button type="button" class="mini" data-k="leg-reset" title="Recupera i punti (inizio del suo turno)"${dis}>↺</button>` : ''}</div>
+      ${L.map((x, i) => `<div class="lg"><p><b><i>${esc(x.nome)}${x.costo > 1 ? ` (costa ${x.costo} punti)` : ''}.</i></b> ${dadiTesto(String(x.testo || '').replace(/\n+/g, ' '), dis)}</p>${w && dm ? `<button type="button" class="mini on" data-k="leg-usa" data-i="${i}" title="Usa: scala ${x.costo} punt${x.costo > 1 ? 'i' : 'o'} e lo scrive in chat"${r >= x.costo ? '' : ' disabled'}${dis}>👑 Usa</button>` : ''}</div>`).join('')}
+      <h6>Azioni leggendarie</h6></div>`;
+  }
+  async function usaLeg(s, t, x) {
+    if (!s || !x) return; const r = legRest(s);
+    if (r < x.costo) return toast(`Non bastano i punti: ne restano ${r}.`, 'err');
+    await salvaScheda(s.id, { leg_usate: (num(s.dati.leg_usate) || 0) + x.costo }, true); disegnaScheda();
+    await annuncia(`👑 ${t?.nome || s.nome || 'La creatura'} usa l'azione leggendaria ${x.nome}${x.costo > 1 ? ` (${x.costo} punti)` : ''}: ${corto(x.testo || '', 220)}`).catch(() => { });
+  }
+  // all'inizio del turno di una creatura le sue azioni leggendarie tornano tutte (lo fa il DM)
+  function legInizioTurno() {
+    if (!isDM()) return;
+    const x = T.turno?.find(y => y.id === T.stato?.turno), t = x?.token && T.tok.get(x.token), s = t && schedaDi(t);
+    if (s?.id && T.schede?.has(s.id) && num(s.dati.leg_usate)) salvaScheda(s.id, { leg_usate: 0 }, true).then(() => T.sv?.id === s.id && disegnaScheda());
+  }
+  // quante azioni ha a ogni turno (Azione impetuosa, mostri con più azioni…): 1 se non scritto
+  const nAzioni = s => Math.max(1, num(s?.dati?.n_azioni) || 1);
+  // le voci che si usano dalla scheda: azioni, azioni bonus e reazioni dei privilegi
+  const USABILE = p => ['az', 'bon', 'rea'].includes(tempoDi(p));
+  // quelle ancora scritte nel testo libero delle azioni o dei tratti (schede importate): usandole diventano voci vere
+  const usabiliTesto = s => { const d = s.dati, ci = new Set((d.privilegi || []).map(p => norm(p.nome))); return [...dividiTesto(d.azioni), ...dividiTesto(d.tratti)].filter(p => USABILE(p) && !ci.has(norm(p.nome)) && !/^multiattacco$/i.test(p.nome)); };
+  function boxUsabili(s, w, dis) {
+    const P = [...(s.dati.privilegi || []).map((p, i) => [p, i]).filter(([p]) => USABILE(p)), ...usabiliTesto(s).map((p, j) => [p, 'n' + j])];
+    if (!P.length) return '';
+    const t = tokScheda() || attaccante(s), sc = scena();
+    const vicini = t && sc ? [...T.tok.values()].filter(o => o.scena === sc.id && (!o.nascosto || isDM()) && !condTok(o).includes('Morto')).map(o => [o, o.id === t.id ? 0 : distanza(t, o, sc)]).sort((a, b) => a[1] - b[1]) : [];
+    const riga = ([p, i]) => {
+      const tp = tempoDi(p), max = num(p.usi) || 0, r = restanti(p), pool = p.cura && max > 8;
+      const bersaglio = p.cura && vicini.length ? `<select data-pu-a="${i}" aria-label="Chi curare"${dis}>${vicini.map(([o, d]) => `<option value="${o.id}">${o.id === t.id ? 'Su di sé' : esc(o.nome || 'Token') + ' · ' + metri(d)}</option>`).join('')}</select>` : '';
+      return `<div class="pu"><div class="pur"><b>${esc(p.nome || 'Privilegio')}</b><span class="tag ${tp}">${TEMPI[tp]}</span>${max ? `<span class="pu2" title="Rimasti">${r}/${max}</span>` : ''}</div>
+        <div class="pur">${bersaglio}${pool ? `<input type="number" data-pu-q="${i}" min="1" max="${r}" step="1" value="${Math.min(r, 5) || 1}" aria-label="Quanti punti ferita"${dis}>` : ''}
+        ${p.dadi && !p.cura && typeof i === 'number' ? `<button type="button" class="mini" data-k="prv-dadi" data-i="${i}" title="Tira ${esc(p.dadi)}"${dis}>🎲 ${esc(p.dadi)}</button>` : ''}
+        ${w ? `<button type="button" class="mini on" data-k="pu-usa" data-i="${i}" title="${esc(corto(p.testo || '', 160))}"${max && !r ? ' disabled' : ''}${dis}>${p.cura ? '✚ Cura' + (p.dadi && !pool ? ' ' + esc(p.dadi) : '') : tp === 'rea' ? '↺ Usa' : '✨ Usa'}</button>` : ''}</div></div>`;
+    };
+    return `<div class="sez usab">${P.map(riga).join('')}<p class="nota">Usandole si segna ${'l\'azione'} del turno e finiscono in chat. ⚙ su un privilegio per scegliere con cosa si usa.</p><h6>Privilegi da usare</h6></div>`;
   }
   function boxPrivilegi(s, w, dis) {
     const sv = T.sv, d = s.dati, L = d.privilegi || [], fl = norm(sv.filtro || '');
@@ -5334,7 +5724,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const prossimo = (io > u.i ? u.r : u.r + 1) * 1000 + io;
     return ora.r * 1000 + ora.i < prossimo;
   }
-  const usata = (t, k) => k === 'rea' ? reaUsata(t) : !!azioniDi(t)[k];
+  // quante azioni ha un personaggio per turno (Attacco extra non conta: è un'azione sola). Dalla scheda, campo n_azioni
+  const azioniTok = t => Math.min(4, nAzioni(schedaDi(t)));
+  const usata = (t, k) => { if (k === 'rea') return reaUsata(t); const a = azioniDi(t); return k === 'az' ? !!a.az && (a.azx || 0) >= azioniTok(t) - 1 : !!a[k]; };
   // fuori dal suo turno l'unica cosa che si spende è la reazione
   function segnaReazione(t) { if (!t || !inCombattimento() || !T.turno.some(x => x.token === t.id)) return; if (suoTurno(t)) return segnaAzioni(t, { rea: true }); return segnaAzioni(t, { reaf: chiaveTurno() }); }
   const velocitaDi = s => { const m = String(s?.dati.velocita || '').match(/\d+(?:[.,]\d+)?/); return m ? parseFloat(m[0].replace(',', '.')) : 9; };
@@ -5345,7 +5737,12 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   const origineTurno = t => { const a = azioniDi(t); if (a.ox != null) return { x: a.ox, y: a.oy }; const p = T.passo?.id === t.id ? T.passo : T.drag?.id === t.id ? T.drag : null; return p ? { x: p.x0, y: p.y0 } : { x: t.x, y: t.y }; };
   const suoTurno = t => { const att = T.turno?.find(x => x.id === T.stato?.turno); return !!t && !!att && att.token === t.id; };
   async function segnaAzioni(t, ch) {
-    if (!t) return; const a = { ...azioniDi(t), segni: t.azioni?.segni, reaf: t.azioni?.reaf, ...ch, chiave: chiaveTurno() }, prima = t.azioni;
+    if (!t) return;
+    // con più azioni per turno, usare l'azione quando la prima è già spesa consuma la successiva (e ridarla libera l'ultima)
+    { const v = azioniDi(t), n = azioniTok(t), x = v.azx || 0;
+      if (ch.az === true && v.az && n > 1) { ch = { ...ch }; delete ch.az; if (x < n - 1) ch.azx = x + 1; }
+      else if (ch.az === false && x > 0) { ch = { ...ch }; delete ch.az; ch.azx = x - 1; } }
+    const a = { ...azioniDi(t), segni: t.azioni?.segni, reaf: t.azioni?.reaf, ...ch, chiave: chiaveTurno() }, prima = t.azioni;
     t.azioni = a; disegnaToken(); if (T.sv) aggiornaFinestra(); rinfrescaTurnoPop(t);
     const r = await SB.from('tavolo_token').update({ azioni: a }).eq('id', t.id);
     if (r.error) { t.azioni = prima; disegnaToken(); toast(/azioni/i.test(r.error.message) ? 'Per segnare azioni e movimento esegui tavolo/tappa-6.sql in Supabase.' : r.error.message, 'err'); }
@@ -5397,13 +5794,19 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       R.razze.forEach(r => [r, ...(r.sotto || [])].forEach(x => (x.tratti || []).forEach(([n, t]) => put(n, t)))); (R.talenti || []).forEach(f => put(f.nome, f.testo));
       R.__ip = m;
     }
-    const out = new Map(), add = (n, t, f) => { n = String(n || '').trim(); const k = norm(n); if (!n || out.has(k)) return; t = t || R.__ip.get(k) || ''; const tempo = STD_BON[k] ? 'bon' : tempoPriv(t); if (tempo) out.set(k, { nome: n, testo: t, tempo, fonte: f, std: STD_BON[k] || null }); };
-    (d.privilegi || []).forEach(p => add(p.nome, p.testo, p.fonte));
+    const out = new Map(), add = (n, t, f, p, i) => {
+      n = String(n || '').trim(); const k = norm(n); if (!n || out.has(k)) return; t = t || R.__ip.get(k) || '';
+      if (p?.tempo === 'no') { out.set(k, null); return; }
+      const tempo = p && TEMPI[p.tempo] ? p.tempo : STD_BON[k] ? 'bon' : p ? tempoAuto({ ...p, testo: t }) : tempoPriv(t);
+      if (tempo) out.set(k, { nome: n, testo: t, tempo, fonte: f, std: STD_BON[k] || null, ...(p ? { i, usi: num(p.usi) || 0, dadi: p.dadi || '', cura: !!p.cura, costo: num(p.costo_leg) || 1 } : {}) });
+    };
+    (d.privilegi || []).forEach((p, i) => add(p.nome, p.testo, p.fonte, p, i));
     const L = classiDi(R, d).L;
     for (const c of L) { const k = R.classi[c.id], sb = sottoDi(R, c); for (let l = 1; l <= c.livello; l++) { (k.liv[l] || []).forEach(([n, t]) => add(n, t, `${k.nome} ${l}`)); (sb?.liv?.[l] || []).forEach(([n, t]) => add(n, t, `${nomeBreve(sb.nome)} ${l}`)); } }
     const mo = L.find(c => c.id === 'monaco'); if (mo) KI.forEach(([n, t], i) => (!i || mo.livello >= 2) && add(n, t, 'Monaco'));
     const rn = norm(d.razza), r = R.razze.find(x => x.id === d.razza_id) || (rn ? R.razze.find(x => rn.includes(norm(x.nome))) : null), sr = r?.sotto?.find(x => x.id === d.sottorazza || (rn && rn.includes(norm(x.nome))));
     for (const x of [r, sr]) (x?.tratti || []).forEach(([n, t]) => add(n, t, x.nome));
+    for (const [k, v] of out) if (!v) out.delete(k);
     return out;
   }
   // con l'azione bonus: Scatto, Disimpegno, Aiuto… quando un privilegio lo permette (Azione scaltra, Fuga agile, Maestro delle tattiche…)
@@ -5420,11 +5823,37 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     return null;
   }
   // un privilegio usato con l'azione bonus o con la reazione: si segna e si scrive in chat
-  async function usaPriv(t, x, da) {
-    const a = azioniDi(t); if (a[da]) { toast(da === 'rea' ? 'La reazione di questo turno è già usata.' : 'L\'azione bonus di questo turno è già usata.', 'err'); return; }
-    const fatte = [...(a.fatte || (a.scatto ? [{ k: 'scatto', da: 'az' }] : [])), { k: 'p:' + x.nome, da }];
-    await segnaAzioni(t, { [da]: true, fatte, scatto: fatte.some(y => y.k === 'scatto') });
-    await annuncia(`${da === 'rea' ? '↺' : '✨'} ${t.nome || 'Il token'} usa ${x.nome} (${da === 'rea' ? 'reazione' : 'azione bonus'})${x.testo ? ': ' + corto(x.testo, 220) : '.'}`);
+  // x arriva da privAzioni (o dalla scheda): se è una voce della scheda ne scala gli usi, e se cura chiede chi e quanto (opt.a, opt.q)
+  async function usaPriv(t, x, da, opt = {}) {
+    da = da || x.tempo || 'az';
+    const s = opt.s || (t && schedaDi(t)), P = s?.dati?.privilegi || [], pi = x.i != null ? x.i : P.findIndex(p => norm(p.nome) === norm(x.nome)), p = pi >= 0 ? P[pi] : null;
+    if (da === 'leg') return usaLeg(s, t, { nome: x.nome, testo: x.testo, costo: x.costo || num(p?.costo_leg) || 1 });
+    const a = t ? azioniDi(t) : {};
+    if (t && usata(t, da)) { toast(da === 'rea' ? 'La reazione di questo turno è già usata.' : da === 'bon' ? 'L\'azione bonus di questo turno è già usata.' : 'L\'azione di questo turno è già usata.', 'err'); return; }
+    // quanto costa: la riserva di Imposizione delle mani si spende a punti, il resto un uso alla volta
+    const max = num(p?.usi) || 0, pool = p?.cura && max > 8, q = pool ? Math.max(1, Math.trunc(num(opt.q) || 1)) : 1;
+    if (max && restanti(p) < q) { toast(restanti(p) ? `Ne restano solo ${restanti(p)}.` : `${p.nome} è finito: torna col ${p.riposo === 'breve' ? 'riposo breve' : 'riposo lungo'}.`, 'err'); return; }
+    let cura = 0, su = opt.a ? T.tok.get(opt.a) : null;
+    if (p?.cura) {
+      if (!su) su = t;
+      if (pool) cura = q;
+      else if (p.dadi) { const r = await tira(p.dadi, null, false, `${s?.nome || ''} · ${p.nome}`); cura = r?.totale || 0; }
+    }
+    if (max) await salvaScheda(s.id, { privilegi: P.map((y, j) => j === pi ? { ...y, usati: (num(y.usati) || 0) + q } : y) }, true);
+    if (cura > 0 && su) {
+      const r = await SB.rpc('tavolo_cura', { p_token: t ? t.id : su.id, p_bersaglio: su.id, p_pf: cura, p_motivo: p.nome || '' });
+      if (r.error) {
+        if (isDM() || puoMuovere(su)) await cambiaPF(su, cura);
+        else toast(sqlMancante(r.error) ? 'Per curare gli altri personaggi esegui tavolo/tappa-14.sql in Supabase.' : r.error.message, 'err');
+      } else if (r.data) { const row = r.data; if (row.token) { const o = T.tok.get(row.token); if (o && row.pf != null && o.pf_max != null) { o.pf = row.pf; disegnaToken(); } } effettoPF(su, cura); }
+    }
+    if (t) {
+      const fatte = [...(a.fatte || (a.scatto ? [{ k: 'scatto', da: 'az' }] : [])), { k: 'p:' + x.nome, da, ...(su && su.id !== t.id ? { a: su.id } : {}) }];
+      await segnaAzioni(t, { [da]: true, fatte, scatto: fatte.some(y => y.k === 'scatto') });
+    }
+    const chi = t?.nome || s?.nome || 'Qualcuno', con = da === 'rea' ? 'reazione' : da === 'bon' ? 'azione bonus' : 'azione';
+    await annuncia(`${da === 'rea' ? '↺' : p?.cura ? '✚' : '✨'} ${chi} usa ${x.nome} (${con})${cura ? ` su ${su && t && su.id === t.id ? 'di sé' : su?.nome || 'un alleato'}: +${cura} PF` : ''}${!cura && x.testo ? ': ' + corto(x.testo, 220) : '.'}`).catch(() => { });
+    if (s && T.sv?.id === s.id) disegnaScheda();
   }
   // con cosa può scattare ora: l'azione, se no l'azione bonus (Azione scaltra…)
   const puoScattare = t => { const a = azioniDi(t); if (!a.az) return 'az'; const b = bonusAz(t); return b && b.k.includes('scatto') && !a.bon ? 'bon' : null; };
@@ -5451,7 +5880,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
   async function faiAzione(t, k, da, x) {
     if (T.passo?.id === t.id && k !== 'dis') await confermaPasso(); // prima si conferma lo spostamento fatto
-    const a = azioniDi(t); if (a[da]) { toast(da === 'az' ? 'L\'azione di questo turno è già usata.' : 'L\'azione bonus di questo turno è già usata.', 'err'); return; }
+    const a = azioniDi(t); if (usata(t, da)) { toast(da === 'az' ? 'L\'azione di questo turno è già usata.' : 'L\'azione bonus di questo turno è già usata.', 'err'); return; }
     const fatte = [...(a.fatte || (a.scatto ? [{ k: 'scatto', da: 'az' }] : [])), { k, da, ...(x ? { a: x.id } : {}) }];
     await segnaAzioni(t, { [da]: true, fatte, scatto: fatte.some(y => y.k === 'scatto') });
     const quando = { round: T.stato?.round || 1, turno: T.stato?.turno || null };
@@ -5460,7 +5889,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     await annuncia(descriviAzione(t, k, da, x));
     if (k === 'nas') await tiraFurtivita(t);
     // il Disimpegno vale anche per lo spostamento ancora da confermare: si riscrive la richiesta senza l'avviso
-    if (k === 'dis' && T.passo?.id === t.id) { const p = T.passo; T.passo = null; chiediPasso(t, p.x, p.y, p.x0, p.y0, p.m, p.dif); }
+    if (k === 'dis' && T.passo?.id === t.id) chiediPasso(t, T.passo);
   }
   async function tiraFurtivita(t) {
     const s = schedaDi(t), mod = s ? abTot(s, 'furtivita') : 0, ai = aiutoPer(t);
@@ -5506,38 +5935,65 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
   // le azioni fatte in questo turno, da togliere con un tocco se segnate per sbaglio
   const fatteHtml = (t, cls, k) => (azioniDi(t).fatte || []).map((x, i) => { const [, ic, l] = voceAz(x.k), su = x.a && T.tok.get(x.a); return `<button type="button" class="${cls}" data-k="${k}" data-i="${i}" title="${l} (${x.da === 'bon' ? 'azione bonus' : x.da === 'rea' ? 'reazione' : 'azione'}): tocca per toglierla">${ic} ${l}${su ? ' → ' + esc(String(su.nome || '').split(/\s+/)[0]) : ''} ✕</button>`; }).join('');
-  function menuAzioni(t, anc) {
+  // cosa si fa con l'azione, l'azione bonus o la reazione: azioni comuni, armi, incantesimi e privilegi. Con «solo» si vede una sezione sola (il pallino toccato)
+  const tempoInc = sp => { const x = String(sp.tempo || ''); return /bonus/i.test(x) ? 'bon' : /reazione/i.test(x) ? 'rea' : !x.trim() || /^\s*1\s*azione/i.test(x) ? 'az' : null; };
+  function menuAzioni(t, anc, solo) {
     document.querySelectorAll('.tv-azm').forEach(x => x.remove());
-    const a = azioniDi(t), b = bonusAz(t), m = document.createElement('div'); m.className = 'tv-azm'; m.setAttribute('role', 'menu');
-    const voce = (k, da, off) => { const [, ic, l, d, lungo] = voceAz(k); return `<button type="button" role="menuitem" data-a="${k}" data-da="${da}" title="${lungo}"${off ? ' disabled' : ''}><span>${ic}</span><div><b>${l}</b><small>${d}</small></div></button>`; };
+    const b = bonusAz(t), m = document.createElement('div'); m.className = 'tv-azm'; m.setAttribute('role', 'menu');
+    const s = schedaDi(t), d = s?.dati || {}, mio = suoTurno(t), U = { az: usata(t, 'az'), bon: usata(t, 'bon'), rea: usata(t, 'rea') };
+    const voce = (k, da, off) => { const [, ic, l, dd, lungo] = voceAz(k); return `<button type="button" role="menuitem" data-a="${k}" data-da="${da}" title="${lungo}"${off ? ' disabled' : ''}><span>${ic}</span><div><b>${l}</b><small>${dd}</small></div></button>`; };
     // le azioni bonus e le reazioni dei privilegi arrivano con le regole: se non sono ancora caricate il menu si ridisegna appena ci sono
-    const R = window.__regole, P = R ? [...privAzioni(R, schedaDi(t)?.dati || {}).values()] : [], pb = P.filter(x => x.tempo === 'bon' && !x.std), pr = [OPP, ...P.filter(x => x.tempo === 'rea')];
-    const vp = (x, i, da, off) => `<button type="button" role="menuitem" data-p="${i}" data-da="${da}" title="${esc(x.testo)}"${off ? ' disabled' : ''}><span>${da === 'rea' ? '↺' : '✨'}</span><div><b>${esc(x.nome)}</b><small>${esc(corto(x.testo, 64))}</small></div></button>`;
-    m.innerHTML = `<h5>Con l'azione${a.az ? ' <small>già usata</small>' : ''}</h5><div class="gz">${AZIONI.map(([k]) => voce(k, 'az', a.az)).join('')}</div>
-      ${b || pb.length ? `<h5>Con l'azione bonus <small>${[b?.nome, a.bon ? 'già usata' : ''].filter(Boolean).join(' · ')}</small></h5><div class="gz">${b ? b.k.map(k => voce(k, 'bon', a.bon)).join('') : ''}${pb.map(x => vp(x, P.indexOf(x), 'bon', a.bon)).join('')}</div>` : ''}
-      <h5>Con la reazione${a.rea ? ' <small>già usata</small>' : ''}</h5><div class="gz">${pr.map(x => vp(x, x === OPP ? 'opp' : P.indexOf(x), 'rea', a.rea)).join('')}</div>
-      <p class="nota">Attaccare e lanciare incantesimi si fa dalla scheda. Le azioni scelte finiscono in chat.</p>`;
+    const R = window.__regole, P = R ? [...privAzioni(R, d).values()] : [], pa = P.filter(x => x.tempo === 'az' && !x.std), pb = P.filter(x => x.tempo === 'bon' && !x.std), pr = [OPP, ...P.filter(x => x.tempo === 'rea')];
+    const vp = (x, i, da, off) => `<button type="button" role="menuitem" data-p="${i}" data-da="${da}" title="${esc(x.testo || '')}"${off ? ' disabled' : ''}><span>${da === 'rea' ? '↺' : '✨'}</span><div><b>${esc(x.nome)}</b><small>${esc(corto(x.testo || '', 64))}</small></div></button>`;
+    // armi e incantesimi dalla scheda: si sceglie il bersaglio sulla mappa
+    const armi = s ? (d.attacchi || []).map((x, i) => [x, i]).filter(([x]) => x && (x.nome || x.danni)) : [];
+    const va = ([x, i], off) => `<button type="button" role="menuitem" data-w="${i}" title="Attacca con ${esc(x.nome || 'l\'arma')}: poi tocca il bersaglio"${off ? ' disabled' : ''}><span>🗡</span><div><b>${esc(x.nome || 'Attacco')}</b><small>${[x.colpire !== '' && x.colpire != null ? 'colpire ' + (piuMod(num(x.colpire)) || '+0') : '', x.danni || ''].filter(Boolean).map(esc).join(' · ')}</small></div></button>`;
+    // un incantesimo che è già tra gli attacchi (Deflagrazione occulta / Eldritch Blast) compare una volta sola
+    const nArmi = new Set(armi.map(([x]) => chiaveInc(x.nome)));
+    const inc = s ? (d.incantesimi || []).map((x, i) => [x, i]).filter(([x]) => x?.nome && (!num(x.livello) || x.prep !== false) && ![x.nome, x.alt, ...String(x.alt || '').split(' / ')].some(n => n && nArmi.has(chiaveInc(n)))) : [];
+    // con l'azione già usata le armi si spengono, salvo Attacco extra (più attacchi con la stessa azione)
+    const extraAtt = /attacco extra|attacchi multipli|multiattacco/i.test([(d.privilegi || []).map(p => p.nome).join('|'), d.azioni || '', d.tratti || ''].join('|'));
+    const vi = ([x, i], off) => { const lv = num(x.livello) || 0, sl = lv ? Math.max(0, (num(d['slot_' + lv]) || 0) - (num(d['usati_' + lv]) || 0)) : null; return `<button type="button" role="menuitem" data-i="${i}" title="${esc(x.nome)}${x.portata ? ' · ' + esc(x.portata) : ''}"${off ? ' disabled' : ''}><span>✨</span><div><b>${esc(x.nome)}</b><small>${lv ? `${lv}° · ${sl} slot liberi` : 'trucchetto'}${x.danni ? ' · ' + esc(x.danni) : ''}</small></div></button>`; };
+    const incDi = k => inc.filter(([x]) => tempoInc(x) === k);
+    const mk = marchioDi(t), mkInc = mk ? (d.incantesimi || []).findIndex(x => norm(x?.nome) === norm(mk.nome)) : -1;
+    const testa = (k, l, extra = '') => `<h5><span>${l}${U[k] ? ' <small>già usata</small>' : ''}${extra}</span>${mio || k === 'rea' ? `<button type="button" class="tg" data-t="${k}" title="Se è stata segnata per sbaglio (o va segnata a mano)">${U[k] ? 'Ridalla' : 'Segna usata'}</button>` : ''}</h5>`;
+    const gruppo = (l, html) => html ? `<h6>${l}</h6><div class="gz">${html}</div>` : '';
+    const sez = {
+      az: () => `${testa('az', azioniTok(t) > 1 ? `Con l'azione (${azioniTok(t)} per turno)` : 'Con l\'azione')}<div class="gz">${AZIONI.map(([k]) => voce(k, 'az', U.az)).join('')}</div>
+        ${gruppo('Attacchi', armi.map(x => va(x, U.az && !extraAtt)).join(''))}${gruppo('Incantesimi', incDi('az').map(x => vi(x, U.az)).join(''))}${gruppo('Privilegi', pa.map(x => vp(x, P.indexOf(x), 'az', U.az)).join(''))}`,
+      bon: () => b || pb.length || incDi('bon').length || mk ? `${testa('bon', 'Con l\'azione bonus', b ? ` <small>${esc(b.nome)}</small>` : '')}<div class="gz">${mk ? `<button type="button" role="menuitem" data-mm title="${esc(mk.nome)}: il bersaglio è a terra, puoi spostare il segno su un'altra creatura"${U.bon || !marchioLibero(t) || mkInc < 0 ? ' disabled' : ''}><span>🎯</span><div><b>Sposta ${esc(mk.nome)}</b><small>${marchioLibero(t) ? 'su un altro bersaglio, senza slot' : `ora su ${esc(T.tok.get(mk.a)?.nome || '?')}`}</small></div></button><button type="button" role="menuitem" data-mx title="La concentrazione è finita: togli il segno"><span>✕</span><div><b>Togli ${esc(mk.nome)}</b><small>fine della concentrazione</small></div></button>` : ''}${b ? b.k.map(k => voce(k, 'bon', U.bon)).join('') : ''}${pb.map(x => vp(x, P.indexOf(x), 'bon', U.bon)).join('')}${incDi('bon').map(x => vi(x, U.bon)).join('')}</div>`
+        : `${testa('bon', 'Con l\'azione bonus')}<p class="nota">Nessuna azione bonus nella scheda.</p>`,
+      leg: () => { const L = leggDi(s || { dati: {} }), r = s ? legRest(s) : 0; return `<h5><span>Azioni leggendarie <small>${r} di ${legN(s)} punti${mio ? ' · non nel suo turno' : ''}</small></span></h5><div class="gz">${L.map((x, j) => `<button type="button" role="menuitem" data-lg="${j}" title="${esc(x.testo || '')}"${mio || x.costo > r ? ' disabled' : ''}><span>♛</span><div><b>${esc(x.nome)}</b><small>${x.costo} punt${x.costo > 1 ? 'i' : 'o'} · ${esc(corto(x.testo || '', 50))}</small></div></button>`).join('')}</div>${L.length ? '' : '<p class="nota">Nessuna azione leggendaria nella scheda.</p>'}`; },
+      rea: () => `${testa('rea', 'Con la reazione')}<div class="gz">${pr.map(x => vp(x, x === OPP ? 'opp' : P.indexOf(x), 'rea', U.rea)).join('')}${incDi('rea').map(x => vi(x, U.rea)).join('')}</div>`
+    };
+    m.innerHTML = (solo ? [solo] : ['az', 'bon', 'rea', ...(s && legN(s) ? ['leg'] : [])]).map(k => sez[k]()).join('') + (solo ? '<button type="button" class="tutte">Mostra tutte le azioni</button>' : '') + `<p class="nota">Le azioni scelte finiscono in chat.</p>`;
     document.body.append(m);
-    const r = anc.getBoundingClientRect(), h = m.offsetHeight, w = m.offsetWidth;
-    m.style.left = clamp(r.left + r.width / 2 - w / 2, 6, innerWidth - w - 6) + 'px';
-    m.style.top = (r.top - h - 8 >= 6 ? r.top - h - 8 : clamp(r.bottom + 8, 6, innerHeight - h - 6)) + 'px';
+    const r = anc.getBoundingClientRect(), metti = () => { const h = m.offsetHeight, w = m.offsetWidth; m.style.left = clamp(r.left + r.width / 2 - w / 2, 6, innerWidth - w - 6) + 'px'; m.style.top = (r.bottom + 8 + h <= innerHeight - 6 ? r.bottom + 8 : r.top - h - 8 >= 6 ? r.top - h - 8 : clamp(r.bottom + 8, 6, innerHeight - h - 6)) + 'px'; };
+    metti();
     const chiudi = () => { m.remove(); removeEventListener('pointerdown', fuori, true); removeEventListener('keydown', tasto); };
     const fuori = e => { if (!m.contains(e.target) && !anc.contains(e.target)) chiudi(); };
     const tasto = e => { if (e.key === 'Escape') chiudi(); };
     addEventListener('pointerdown', fuori, true); addEventListener('keydown', tasto); onCleanup(chiudi);
     const chi = da => {
       const sc = scena(), L = sc ? [...T.tok.values()].filter(o => o.scena === sc.id && o.id !== t.id && !o.nascosto && parte(o) === parte(t) && !condTok(o).includes('Morto')).map(o => [o, distanza(t, o, sc)]).sort((p, q) => p[1] - q[1]) : [];
-      m.innerHTML = `<h5>Chi aiuti?</h5><div class="gz">${L.map(([o, d]) => `<button type="button" data-o="${o.id}"><i style="--c:${esc(o.colore || '#7d2530')};${o.immagine ? `background-image:url('${o.immagine.replace(/'/g, '%27')}')` : ''}"></i><div><b>${esc(o.nome || 'Token')}</b><small>a ${metri(d)}</small></div></button>`).join('')}</div>${L.length ? '' : '<p class="nota">Nessun alleato sulla mappa.</p>'}<p class="nota">Avrà vantaggio alla prossima prova o al prossimo tiro per colpire.</p><button type="button" class="ind">← Indietro</button>`;
+      m.innerHTML = `<h5>Chi aiuti?</h5><div class="gz">${L.map(([o, dd]) => `<button type="button" data-o="${o.id}"><i style="--c:${esc(o.colore || '#7d2530')};${o.immagine ? `background-image:url('${o.immagine.replace(/'/g, '%27')}')` : ''}"></i><div><b>${esc(o.nome || 'Token')}</b><small>a ${metri(dd)}</small></div></button>`).join('')}</div>${L.length ? '' : '<p class="nota">Nessun alleato sulla mappa.</p>'}<p class="nota">Avrà vantaggio alla prossima prova o al prossimo tiro per colpire.</p><button type="button" class="ind">← Indietro</button>`;
       m.querySelectorAll('[data-o]').forEach(y => y.onclick = () => { chiudi(); faiAzione(t, 'aiu', da, T.tok.get(y.dataset.o)); });
-      m.querySelector('.ind').onclick = () => { chiudi(); menuAzioni(t, anc); };
-      const h2 = m.offsetHeight; m.style.top = (r.top - h2 - 8 >= 6 ? r.top - h2 - 8 : clamp(r.bottom + 8, 6, innerHeight - h2 - 6)) + 'px';
-      m.querySelector('[data-o]')?.focus();
+      m.querySelector('.ind').onclick = () => { chiudi(); menuAzioni(t, anc, solo); };
+      metti(); m.querySelector('[data-o]')?.focus();
     };
     m.querySelectorAll('[data-a]').forEach(x => x.onclick = () => { if (x.dataset.a === 'aiu') return chi(x.dataset.da); chiudi(); faiAzione(t, x.dataset.a, x.dataset.da); });
     m.querySelectorAll('[data-p]').forEach(x => x.onclick = () => { chiudi(); usaPriv(t, x.dataset.p === 'opp' ? OPP : P[+x.dataset.p], x.dataset.da); });
-    m.querySelector('[data-a]:not([disabled])')?.focus();
-    if (!R) regole().then(() => { if (m.isConnected) menuAzioni(t, anc); }, () => { });
+    m.querySelectorAll('[data-w]').forEach(x => x.onclick = () => { chiudi(); if (s) iniziaMira(s, +x.dataset.w, t); });
+    m.querySelectorAll('[data-i]').forEach(x => x.onclick = () => { chiudi(); if (s) lanciaInc(s, +x.dataset.i, t); });
+    m.querySelectorAll('[data-t]').forEach(x => x.onclick = async () => { await cambiaAz(t, x.dataset.t); menuAzioni(t, anc, solo); });
+    m.querySelector('.tutte')?.addEventListener('click', () => menuAzioni(t, anc));
+    m.querySelectorAll('[data-lg]').forEach(x => x.onclick = async () => { chiudi(); await usaLeg(s, t, leggDi(s)[+x.dataset.lg]); disegnaToken(); });
+    m.querySelector('[data-mm]')?.addEventListener('click', () => { chiudi(); if (s && mkInc >= 0) { iniziaMira(s, 0, t, mkInc, null); if (T.mira) T.mira.sposta = true; } });
+    m.querySelector('[data-mx]')?.addEventListener('click', async () => { await segna(t, { marchio: null }); menuAzioni(t, anc, solo); });
+    m.querySelector('[data-a]:not([disabled]),[data-p]:not([disabled]),[data-w]')?.focus();
+    if (!R) regole().then(() => { if (m.isConnected) menuAzioni(t, anc, solo); }, () => { });
   }
+
 
   // pozioni di cura: con l'azione bonus si tirano i dadi, con l'azione curano il massimo
   const POZIONI = [['pot_guarigione', 'Guarigione', '2d4+2'], ['pot_superiore', 'Guarigione superiore', '4d4+4'], ['pot_eccellente', 'Guarigione eccellente', '8d4+8'], ['pot_suprema', 'Guarigione suprema', '10d4+20']];
@@ -5659,7 +6115,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
           <div class="dueA"><div class="carcol">${car}</div>
             <div class="altA">
               ${pg ? `<div class="pill isp"><input type="number" class="pv" data-f="ispirazione" min="0" step="1" placeholder="0" aria-label="Punti ispirazione"${dis}><span>Ispirazione</span></div>` : ''}
+              ${pg || num(d.merda) || d.merda_attiva ? pillMerda(s) : ''}
               <div class="pill"><b class="pv" data-c="comp"></b><span>Bonus di competenza</span></div>
+              <div class="pill isp" title="Quante azioni ha a ogni turno: 1 di solito, di più per alcuni mostri o privilegi"><input type="number" class="pv" data-f="n_azioni" min="1" max="9" step="1" placeholder="1" aria-label="Azioni per turno"${dis}><span>Azioni per turno</span></div>
               ${box(ts, 'Tiri salvezza', 'lista')}${box(ab, 'Abilità', 'lista')}
             </div></div>
           <div class="pill largo"><b class="pv" data-c="pp"></b><span>Saggezza passiva (Percezione)</span></div>
@@ -5679,7 +6137,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
           ${pg ? boxRisorse(s, w, dis) : ''}
           <div class="sez atts"><div class="th"><span>Nome</span><span>Bonus</span><span>Danni</span></div><div data-ord="attacchi">${at || '<p class="vuoto">Nessun attacco.</p>'}</div>
             ${w ? '<button type="button" class="mini agg" data-k="addatt">+ Aggiungi un attacco</button>' : ''}${pg ? '' : area('azioni', 'Multiattacco, reazioni, azioni speciali…', 3)}<h6>Attacchi e incantesimi</h6></div>
-          ${boxExtra(s, w, dis)}
+          ${boxUsabili(s, w, dis)}${boxExtra(s, w, dis)}${boxLegg(s, w, dis)}
           ${pg ? `<div class="sez eq"><div class="mon"><label title="Monete d'oro"><span>MO</span>${n('mo', '0')}</label></div>${area('equip', 'Armi, armatura, oggetti…', 7)}<h6>Equipaggiamento</h6></div>${boxPozioni(s, w, dis)}` : ''}
         </div>
         <div class="colC">
@@ -5690,6 +6148,11 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         </div></div>`;
     } else if (sv.tab === 'inc') {
       if (!T.srd) manuale().then(m => { if (m && T.sv?.tab === 'inc') disegnaScheda(); });
+      else if (w) {
+        // incantesimi presi dal manuale quando restava il nome inglese: passano al nome italiano
+        const I = d.incantesimi || [], it = I.map(sp => { const x = T.srd.per.get(chiaveInc(sp.nome)); return x && chiaveInc(sp.nome) !== chiaveInc(x.nome) && nomiEn(x).some(n => chiaveInc(n) === chiaveInc(sp.nome)) ? { ...sp, nome: x.nome, alt: x.en || sp.nome } : sp; });
+        if (it.some((sp, j) => sp !== I[j])) { salvaScheda(s.id, { incantesimi: it }, true).then(() => disegnaScheda()); toast('Incantesimi col nome inglese passati al nome italiano.'); }
+      }
       const daCompl = (d.incantesimi || []).filter(dalManuale).length;
       const IL = (d.incantesimi || []).map((sp, j) => [sp, j]), vecchi = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].some(i => String(d['inc_' + i] || '').trim());
       const liv = i => { const voci = IL.filter(([sp]) => (num(sp.livello) || 0) === i); return `<div class="sez lv"><div class="lt"><b>${i || '0'}</b>${i ? `<span>Slot</span>${n('slot_' + i, '0', 'sn')}<span class="dots" data-dots="usati_${i}"></span>` : '<span>Trucchetti</span>'}</div>
@@ -5741,7 +6204,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       Object.assign(t, ch); disegnaToken(); clearTimeout(sv.tt);
       sv.tt = setTimeout(async () => { const r = await SB.from('tavolo_token').update(ch).eq('id', t.id); if (r.error) toast(r.error.message, 'err'); }, 500); return;
     }
-    if (f.startsWith('prv.')) { const [, i, k] = f.split('.'), a = (s.dati.privilegi || []).map(x => ({ ...x })); if (!a[i]) return; a[i][k] = v; const p2 = salvaScheda(s.id, { privilegi: a }, ['eff', 'ts_car'].includes(k)); if (['eff', 'ts_car'].includes(k)) p2.then(() => disegnaScheda()); return; }
+    if (f.startsWith('prv.')) { const [, i, k] = f.split('.'), a = (s.dati.privilegi || []).map(x => ({ ...x })); if (!a[i]) return; a[i][k] = v; const p2 = salvaScheda(s.id, { privilegi: a }, ['eff', 'ts_car', 'tempo', 'cura'].includes(k)); if (['eff', 'ts_car', 'tempo', 'cura'].includes(k)) p2.then(() => disegnaScheda()); return; }
     if (f.startsWith('inc.')) {
       const [, i, k] = f.split('.'), a = (s.dati.incantesimi || []).map(x => ({ ...x })); if (!a[i]) return;
       a[i][k] = k === 'livello' ? +v || 0 : v;
@@ -5763,10 +6226,12 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (['ca_auto', 'armatura', 'scudo_ca'].includes(f) || (f === 'equip' && sv.mca && !el.matches(':focus'))) disegnaScheda();
   }
   function tiroD20(s, mod, cosa, aiutabile) {
-    const sv = T.sv, tk = aiutabile && sv.adv !== 2 ? tokScheda() || attaccante(s) : null, ai = tk ? aiutoPer(tk) : null, adv = ai ? 1 : sv.adv;
+    const sv = T.sv, tk = aiutabile && sv.adv !== 2 ? tokScheda() || attaccante(s) : null, ai = tk ? aiutoPer(tk) : null, me = merdaAttiva(s);
+    let adv = ai ? 1 : sv.adv;
     if (ai) usaAiuto(tk, ai);
+    if (me) { adv = adv === 1 ? 0 : 2; consumaMerda(s); }
     const f = (adv === 1 ? '2d20kh1' : adv === 2 ? '2d20kl1' : '1d20') + piu(mod);
-    return tira(f, adv === 1 ? 'vantaggio' + (ai ? ` (aiutato da ${ai.h.nome})` : '') : adv === 2 ? 'svantaggio' : null, sv.seg, s.nome + ' · ' + cosa);
+    return tira(f, adv === 1 ? 'vantaggio' + (ai ? ` (aiutato da ${ai.h.nome})` : '') : adv === 2 ? 'svantaggio' + (me ? ' (punto merda)' : '') : me ? 'punto merda: annulla il vantaggio' : null, sv.seg, s.nome + ' · ' + cosa);
   }
   // l'iniziativa dalla scheda entra nell'ordine del turno per ogni suo token sulla mappa
   async function inizScheda(s) {
@@ -5915,7 +6380,31 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       const q = Math.max(1, Math.trunc(+sv.d.querySelector('[data-k=pfq]').value || 1)) * (k === 'pfm' ? -1 : 1), t = tokScheda();
       return t ? cambiaPF(t, q) : pfScheda(s, q);
     }
+    if (k === 'pu-usa') {
+      const key = b.dataset.i, a = sv.d.querySelector(`[data-pu-a="${key}"]`)?.value, q = sv.d.querySelector(`[data-pu-q="${key}"]`)?.value;
+      let i = +key;
+      if (key[0] === 'n') {
+        // dal testo libero: diventa una voce dei privilegi (così si contano gli usi) e la riga esce dal testo
+        const x = usabiliTesto(s)[+key.slice(1)]; if (!x) return;
+        const via = r => norm(r).startsWith(norm(x.nome)), togli = t => String(t || '').split(/\n/).filter(r => !via(r.replace(/^[-•*]\s*/, ''))).join('\n');
+        // il tempo si segna sulla voce e non resta nel nome: «Voto di inimicizia (Incanalare divinità, azione bonus)» → «Voto di inimicizia (Incanalare divinità)»
+        const tp = tempoDi(x), nome = x.nome.replace(/\b(?:azione bonus|reazione)\b/i, '').replace(/\(\s*,\s*/, '(').replace(/\s*,\s*\)/, ')').replace(/\s*\(\s*\)/, '').replace(/\s{2,}/g, ' ').trim();
+        const L = [...(d.privilegi || []), { ...x, nome, tempo: tp, fonte: x.fonte || '' }]; i = L.length - 1;
+        await salvaScheda(s.id, { privilegi: L, azioni: togli(d.azioni), tratti: togli(d.tratti) }, true);
+      }
+      const p = (T.schede.get(s.id)?.dati.privilegi || [])[i]; if (!p) return;
+      return usaPriv(tokScheda() || attaccante(s), { nome: p.nome, testo: p.testo, tempo: tempoDi(p), i }, tempoDi(p), { s: T.schede.get(s.id), a, q });
+    }
+    if (k === 'leg-usa') { const x = leggDi(s)[+b.dataset.i]; return usaLeg(s, tokScheda() || attaccante(s), x); }
+    if (k === 'leg-reset') { await salvaScheda(s.id, { leg_usate: 0 }, true); return disegnaScheda(); }
     if (!isDM()) return;
+    if (k === 'merda+' || k === 'merda-') { await salvaScheda(s.id, { merda: Math.max(0, (num(d.merda) || 0) + (k === 'merda+' ? 1 : -1)) }, true); return disegnaScheda(); }
+    if (k === 'merda-no') { await salvaScheda(s.id, { merda: (num(d.merda) || 0) + 1, merda_attiva: false }, true); return disegnaScheda(); }
+    if (k === 'merda-usa') {
+      if (!num(d.merda)) return;
+      await salvaScheda(s.id, { merda: num(d.merda) - 1, merda_attiva: true }, true); disegnaScheda();
+      return annuncia(`💩 Il DM usa un punto merda su ${s.nome || 'un personaggio'}: svantaggio al prossimo tiro con il d20.`).catch(() => { });
+    }
     if (k === 'tirapf') {
       const dv = String(d.dadi_vita || '').trim(); if (!dv) return toast('Scrivi prima i dadi vita, per esempio 2d8+2', 'err');
       const t = await tira(dv, null, true, s.nome + ' · Punti ferita'); if (!t?.totale) return;
@@ -6228,7 +6717,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const pl0 = num(d.pf_liv) || 0; let pl = pl0;
     if (f?.pfLiv) pl += f.pfLiv; if (ctx.subNuova && sb?.pfPiu) pl += sb.pfPiu;
     d.pf_liv = pl || null;
-    const dado = crea ? k.dv : G.pf.modo === 'media' ? k.dv / 2 + 1 : clamp(num(G.pf.v) || 1, 1, k.dv);
+    const dado = crea || PF_MASSIMI ? k.dv : G.pf.modo === 'media' ? k.dv / 2 + 1 : clamp(num(G.pf.v) || 1, 1, k.dv);
     const guad = Math.max(1, dado + modV(st.cos)) + pl + (crea ? 0 : (modV(st.cos) - modV(st0.cos) + pl - pl0) * (lt - 1));
     const pm0 = num(d.pf_max) || 0; d.pf_max = pm0 + guad; d.pf = crea ? d.pf_max : Math.min(d.pf_max, (num(d.pf) ?? pm0) + guad);
     righe.unshift(['Punti ferita', crea ? String(d.pf_max) : `${pm0} → ${d.pf_max} (+${guad})`]);
@@ -6335,7 +6824,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (G.dedotte) { const tot = G.classi.reduce((a, c) => a + (+c.livello || 0), 0), lv = clamp(num(G.d0.livello) || 1, 1, 20); if (G.classi.length && tot !== lv) return `Le classi attuali devono sommare il livello ${lv} (ora fanno ${tot})`; }
       if (!G.classi.length) return 'Indica la classe di adesso (per una scheda nuova usa la creazione guidata)';
       if (!G.cl) return 'Scegli in quale classe sali';
-      if (G.pf.modo !== 'media' && !num(G.pf.v)) return G.pf.modo === 'tiro' ? 'Tira il dado dei punti ferita' : 'Scrivi i punti ferita guadagnati';
+      if (!PF_MASSIMI && G.pf.modo !== 'media' && !num(G.pf.v)) return G.pf.modo === 'tiro' ? 'Tira il dado dei punti ferita' : 'Scrivi i punti ferita guadagnati';
       return '';
     }
     if (p === 'sotto') return ctx?.servS && !G.sotto ? 'Scegli la sottoclasse' : '';
@@ -6604,7 +7093,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (G.classi.length) h += `<details class="box"${nuova ? ' open' : ''}><summary><b>Oppure una nuova classe (multiclasse)</b></summary><p class="hint">Serve il punteggio minimo sia nella classe nuova sia in quelle che hai già.</p><div class="gcards">${altre.map(([k, x]) => card('cl', k, G.cl === k, x.nome, `Richiede ${reqT(k)}`, `d${x.dv}`, !okMulti(k) || !mieOk ? 'Punteggi insufficienti' : '')).join('')}</div></details>`;
       if (G.cl) {
         const k = R.classi[G.cl], med = k.dv / 2 + 1, cm = modV(G.d0.cos);
-        h += `<h4>Punti ferita</h4><div class="seg"><button type="button" data-g="pf" data-v="media" class="${G.pf.modo === 'media' ? 'on' : ''}">Media: ${med}</button>${T.pag ? '' : `<button type="button" data-g="pf" data-v="tiro" class="${G.pf.modo === 'tiro' ? 'on' : ''}">Tira 1d${k.dv}</button>`}<button type="button" data-g="pf" data-v="man" class="${G.pf.modo === 'man' ? 'on' : ''}">Lo scrivo io</button></div>
+        if (PF_MASSIMI) h += `<h4>Punti ferita</h4><p class="riga"><span class="dado">+${Math.max(1, k.dv + cm) + (num(G.d0.pf_liv) || 0)}</span><span class="hint">In questa campagna si prende il massimo del dado: ${k.dv} (d${k.dv}) ${cm < 0 ? '−' : '+'} ${Math.abs(cm)} di Costituzione${num(G.d0.pf_liv) ? ` + ${num(G.d0.pf_liv)} per i bonus di razza o talento` : ''}.</span></p>`;
+        else h += `<h4>Punti ferita</h4><div class="seg"><button type="button" data-g="pf" data-v="media" class="${G.pf.modo === 'media' ? 'on' : ''}">Media: ${med}</button>${T.pag ? '' : `<button type="button" data-g="pf" data-v="tiro" class="${G.pf.modo === 'tiro' ? 'on' : ''}">Tira 1d${k.dv}</button>`}<button type="button" data-g="pf" data-v="man" class="${G.pf.modo === 'man' ? 'on' : ''}">Lo scrivo io</button></div>
           ${G.pf.modo === 'tiro' ? `<div class="riga">${G.pf.tirato ? `<span class="dado">${G.pf.v}</span><span class="hint">Tirato al Tavolo: lo vedono tutti in chat.</span>` : `<button type="button" class="gbtn" data-g="pftira">🎲 Tira 1d${k.dv}</button><span class="hint">Il tiro esce in chat e vale quello.</span>`}</div>` : ''}
           ${G.pf.modo === 'man' ? `<div class="riga"><label>Dado: <input type="number" min="1" max="${k.dv}" value="${G.pf.v ?? ''}" data-gi="pfv" style="width:70px"></label><span class="hint">Per esempio se hai tirato i dadi veri.</span></div>` : ''}
           <p class="hint">${T.pag ? 'Fuori dal Tavolo non si tirano dadi: scegli la media o scrivi il risultato. ' : ''}Si aggiunge il modificatore di Costituzione (${segnoP(cm) || '+0'})${num(G.d0.pf_liv) ? ` e ${num(G.d0.pf_liv)} per i bonus di razza o talento` : ''}.</p>`;
@@ -6824,6 +7314,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     vivoPag = SB.channel('schede-pagina-' + Math.random().toString(36).slice(2, 8)).on('postgres_changes', { event: '*', schema: 'public', table: 'tavolo_schede' }, p => {
       if (!T.schede) return;
       if (p.eventType === 'DELETE') { T.schede.delete(p.old.id); dopoScheda(p.old.id); return; }
+      if (!p.new.dati) return riprendiScheda(p.new.id);
       arrivaScheda(p.new);
     }).subscribe();
   }
