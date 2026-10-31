@@ -2188,7 +2188,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
           hud.querySelectorAll('[data-z]').forEach(b => b.onclick = e => { e.stopPropagation(); menuAzioni(t, e.currentTarget, b.dataset.z); });
         }
       }
-      box.append(el); // l'ordine nel riquadro decide chi sta sopra
+      // chi sta sopra lo decide lo z-index: un token già sulla mappa non si sposta nel riquadro, altrimenti le animazioni delle condizioni ripartono a ogni movimento
+      if (el.parentNode !== box) box.append(el);
     });
     // fin dove arriva chi gioca (le diagonali contano 1, come sul regolamento): lo vede chi lo muove
     let mvr = box.querySelector('.tv-mvr');
