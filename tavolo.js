@@ -197,7 +197,7 @@ dialog.dlg.tv-side.tv-sw.tv-incol{position:relative;inset:auto;margin:0;width:10
 .tv-card.nuova{border:2px dashed #e7cf9a55;background:transparent;align-items:center;justify-content:center;min-height:120px;color:#e7cf9a;font-family:var(--display);gap:6px}
 .tv-card.nuova span{font-size:1.8rem;line-height:1}
 @media (hover:none){.tv-card .acts{opacity:1}}
-.tv-pop{position:absolute;z-index:8;background:var(--paper);color:var(--ink);border:1px solid var(--gold);border-radius:8px;box-shadow:0 10px 30px #000a;padding:8px;display:flex;flex-direction:column;gap:5px;min-width:190px}
+.tv-pop{position:absolute;z-index:8;overflow-y:auto;overscroll-behavior:contain;background:var(--paper);color:var(--ink);border:1px solid var(--gold);border-radius:8px;box-shadow:0 10px 30px #000a;padding:8px;display:flex;flex-direction:column;gap:5px;min-width:190px}
 .tv-pop b{font-family:var(--display);color:var(--wine);padding:2px 4px 4px}
 :root[data-theme=dark] .tv-pop b{color:var(--gold2)}
 .tv-pop .btn{justify-content:flex-start}
@@ -650,6 +650,13 @@ dialog.tv-pag .tv-sch .at .riga.az .tp{flex:1 1 0}
 .tv-sch .spl:hover .mchat,.tv-sch .spl .mchat:focus-visible{opacity:.85}
 .tv-sch .spl .mchat:disabled{display:none}
 .tv-livd{width:min(440px,94vw)}
+.tv-oppd{width:min(460px,94vw)}
+.tv-oppd .opp-chi{display:flex;gap:12px;align-items:center;margin:10px 0 4px}.tv-oppd .opp-chi p{margin:0;line-height:1.4}
+.tv-oppd .opp-chi .av{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--c);color:#fff;font-weight:700;box-shadow:0 0 0 2px #fff,0 0 0 4px #c0392b}
+.tv-oppd .opp-l{display:grid;gap:8px;margin:14px 0}
+.tv-oppd .opp-l .btn{display:flex;align-items:center;gap:12px;height:auto;padding:10px 14px;text-align:left;justify-content:flex-start;text-transform:none;letter-spacing:0}
+.tv-oppd .opp-l .ic{font-size:1.4rem;width:28px;text-align:center}.tv-oppd .opp-l .tx{display:flex;flex-direction:column;gap:2px}
+.tv-oppd .opp-l b{font-size:1rem}.tv-oppd .opp-l small{font-size:.78rem;opacity:.8;font-weight:400}.tv-oppd .opp-l .btn.primary small{color:inherit;opacity:.85}
 .tv-liv{background:none;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;margin:12px 0}
 .tv-liv .btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;height:auto}
 .tv-liv .btn b{font-size:1.15rem}.tv-liv .btn small{font-size:.7rem;opacity:.85;white-space:nowrap}
@@ -1789,6 +1796,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     // il DM ha tolto una richiesta di tiro salvezza: sparisce anche dallo schermo del giocatore
     ch.on('broadcast', { event: 'ts-via' }, ({ payload: m }) => { if (T.salv?.delete(m.id)) disegnaSalvezze(); });
     ch.on('broadcast', { event: 'foto' }, ({ payload: f }) => { if (!isDM()) apriFoto(f, true); });
+    ch.on('broadcast', { event: 'bozza' }, ({ payload: m }) => { T.bozze ??= new Map(); if (m.legs) T.bozze.set(m.id, m); else T.bozze.delete(m.id); disegnaRighelli(); });
     ch.on('broadcast', { event: 'righello' }, ({ payload: m }) => {
       // un righello remoto sparisce da solo se non arrivano aggiornamenti (un messaggio tardivo non lo lascia appeso)
       T.rlT ??= new Map(); clearTimeout(T.rlT.get(m.uid));
@@ -2216,7 +2224,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function interazioni(st) {
     if (st.__tv) return; st.__tv = true;
     const punti = new Map(); let pan = null, pinch = null, rul = null, mas = null, ultimo = 0;
-    st.addEventListener('wheel', e => { e.preventDefault(); const r = st.getBoundingClientRect(); const dy = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY; zoom(Math.exp(-(e.ctrlKey ? dy * 0.01 : clamp(dy, -100, 100) * 0.0005)), e.clientX - r.left, e.clientY - r.top); }, { passive: false });
+    st.addEventListener('wheel', e => { const pp = e.target.closest?.('.tv-pop'); if (pp && pp.scrollHeight > pp.clientHeight) return; e.preventDefault(); const r = st.getBoundingClientRect(); const dy = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY; zoom(Math.exp(-(e.ctrlKey ? dy * 0.01 : clamp(dy, -100, 100) * 0.0005)), e.clientX - r.left, e.clientY - r.top); }, { passive: false });
     st.addEventListener('pointerdown', e => {
       if (e.button > 0 || !scena() || e.target.closest('.tv-zoom,.tv-pop,.tv-porta,.tv-incolla')) return;
       chiudiPop();
@@ -2238,11 +2246,11 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (T.tool === 'griglia' && isDM()) { const sc = scena(); T.gd = { sx: e.clientX, sy: e.clientY, x: sc.griglia_x, y: sc.griglia_y }; return; }
       if (T.tool === 'allinea' && isDM()) { T.al = { a: p, b: p }; disegnaRighelli(); return; }
       if (T.tool === 'righello') { const sc = scena(); const a = { x: centroCasella(p.x, sc.griglia_x), y: centroCasella(p.y, sc.griglia_y) }; rul = { pts: [a, a] }; mostraRighello(rul.pts); return; }
-      // riprendere il token mentre aspetta la conferma: si continua da dove è, misurando sempre dalla partenza
+      // riprendere il token mentre aspetta la conferma: si aggiunge un tratto al percorso, che resta da confermare
       let da = null;
-      if (t && T.tool !== 'mano' && puoMuovere(t) && T.passo) { if (T.passo.id === t.id) { da = T.passo; T.passo = null; barraMaschera(); } else annullaPasso(); }
+      if (t && T.tool !== 'mano' && puoMuovere(t) && T.passo) { if (T.passo.id === t.id) da = T.passo; else annullaPasso(); }
       // finito il movimento il token si prende lo stesso: se lo si sposta, si chiede conferma (per rimediare a un errore)
-      if (t && T.tool !== 'mano' && puoMuovere(t)) { T.drag = { id: t.id, dx: p.x - t.x, dy: p.y - t.y, x0: da ? da.x0 : t.x, y0: da ? da.y0 : t.y, sx: e.clientX, sy: e.clientY, mosso: false }; el.classList.add('drag'); return; }
+      if (t && T.tool !== 'mano' && puoMuovere(t)) { T.drag = { id: t.id, dx: p.x - t.x, dy: p.y - t.y, x0: t.x, y0: t.y, prev: da, sx: e.clientX, sy: e.clientY, mosso: false }; el.classList.add('drag'); return; }
       if (t && T.tool !== 'mano') T.clic = { id: t.id, sx: e.clientX, sy: e.clientY };
       pan = { sx: e.clientX, sy: e.clientY, x: T.view.x, y: T.view.y }; st.classList.add('pan');
       // tenendo premuto senza muoversi compare il segnale, anche sugli schermi degli altri (il DM con Maiusc li porta tutti lì)
@@ -2301,7 +2309,6 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         if (el) el.classList.remove('drag');
         if (!t) return;
         if (!d.mosso) {
-          if (t.x !== d.x0 || t.y !== d.y0) { const cm = costoMov(t, d.x0, d.y0, t.x, t.y); if (cm.m) return chiediPasso(t, t.x, t.y, d.x0, d.y0, cm.m, cm.dif); }
           if (e.type === 'pointerup') menuToken(t.id, e); return;
         }
         const sc = scena(); let x = aggancia(d.x, sc.griglia_x, t.misura), y = aggancia(d.y, sc.griglia_y, t.misura);
@@ -2314,14 +2321,13 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         // nel suo turno il movimento (in caselle, come col righello) si conferma e poi si scala dalla scheda
         const cm = suoTurno(t) ? costoMov(t, d.x0, d.y0, x, y) : { m: 0, dif: 0 }, m = cm.m;
         if (m) {
-          const mv = movimentoDi(t);
-          // movimento a zigzag: ogni tratto si conta sulla griglia e si salva subito, senza conferme; il token resta dove lo lasci.
-          // si chiede solo se il tratto va oltre il movimento rimasto (si può spostare lo stesso) o provoca attacchi di opportunità
-          t.x = x; t.y = y; disegnaToken(); manda('trascina', { id: t.id, x, y });
-          const oltre = !(isDM() && e.altKey) && m > mv.resta + 0.01, opp = suoTurno(t) ? opportunita(t, d.x0, d.y0, x, y) : [];
-          if (oltre || opp.length) return chiediPasso(t, x, y, d.x0, d.y0, m, cm.dif);
-          T.passo = { id: t.id, x, y, x0: d.x0, y0: d.y0, m, dif: cm.dif }; return confermaPasso();
+          // movimento a tratti: ogni tratto si conta sulla griglia e si aggiunge al percorso; si può provare, tornare indietro
+          // di un tratto o ricominciare, e solo alla conferma il movimento si scala e il percorso resta disegnato
+          t.x = x; t.y = y; disegnaToken(); manda('trascina', { id: t.id, x, y }); via();
+          const pr = d.prev?.id === t.id ? d.prev : null;
+          return chiediPasso(t, { id: t.id, x, y, x0: pr ? pr.x0 : d.x0, y0: pr ? pr.y0 : d.y0, m: (pr?.m || 0) + m, dif: (pr?.dif || 0) + cm.dif, legs: [...(pr?.legs || []), [x, y, m, cm.dif]] });
         }
+        if (d.prev?.id === t.id) { t.x = d.prev.x; t.y = d.prev.y; disegnaToken(); manda('trascina', { id: t.id, x: t.x, y: t.y }); via(); return; } // rimesso dov'era: il percorso resta
         mostraRighello(null); manda('righello', { uid: T.me.uid, pts: null });
         t.x = x; t.y = y; disegnaToken(); manda('trascina', { id: t.id, x, y });
         salvaPosto(t, x, y, d.x0, d.y0);
@@ -2646,7 +2652,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const [ic, l] = SEGNI[x.tipo] || SEGNI.punto, r = st.getBoundingClientRect(), pop = document.createElement('div'); pop.className = 'tv-pop';
     pop.innerHTML = `<b>${ic} ${esc(x.nome || l)}</b><button class="btn sm" data-k="nasc">${x.nascosto ? '👁 Rivela ai giocatori' : '🙈 Nascondi ai giocatori'}</button><button class="btn sm" data-k="mod">✏️ Modifica</button><button class="btn sm danger" data-k="via">Togli il segnalino</button>`;
     st.append(pop);
-    pop.style.left = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6) + 'px'; pop.style.top = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6) + 'px';
+    pop.style.left = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6) + 'px'; pop.style.top = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6) + 'px'; adattaPop(pop);
     pop.querySelector('[data-k=nasc]').onclick = () => { chiudiPop(); cambiaSegnalino(x, { nascosto: !x.nascosto }); };
     pop.querySelector('[data-k=mod]').onclick = () => { chiudiPop(); T.sgSel = x.id; if (T.tool !== 'segni') strumento('segni'); else { disegnaSegnalini(); barraMaschera(); } };
     pop.querySelector('[data-k=via]').onclick = () => { chiudiPop(); togliSegnalini([x.id]); };
@@ -2693,16 +2699,25 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     return true;
   }
   // «Muovere Livion di 6 m?»: con la conferma il movimento si scala, altrimenti il token torna dov'era
-  function chiediPasso(t, x, y, x0, y0, m, dif) {
+  // i punti del percorso in attesa: la partenza e la fine di ogni tratto
+  const puntiPasso = p => [[p.x0, p.y0], ...p.legs.map(l => [l[0], l[1]])];
+  // chi attacca di opportunità lungo tutto il percorso, con il punto da cui il bersaglio esce dalla portata
+  function oppPercorso(t, p) {
+    if (!suoTurno(t)) return []; const P = puntiPasso(p), out = new Map();
+    for (let i = 1; i < P.length; i++) for (const o of opportunita(t, P[i - 1][0], P[i - 1][1], P[i][0], P[i][1])) if (!out.has(o.id)) out.set(o.id, { o, x0: P[i - 1][0], y0: P[i - 1][1] });
+    return [...out.values()];
+  }
+  function chiediPasso(t, p) {
     const b = $('#tv-mbar'); if (!b) return;
-    const mv = movimentoDi(t), dopo = mv.resta - m, opp = suoTurno(t) ? opportunita(t, x0, y0, x, y) : [], pd = opp.length && puoDisimpegnarsi(t);
-    T.passo = { id: t.id, x, y, x0, y0, m, dif };
+    T.passo = p; const { m, dif } = p; manda('bozza', { id: t.id, x0: p.x0, y0: p.y0, legs: p.legs });
+    const mv = movimentoDi(t), dopo = mv.resta, opp = oppPercorso(t, p).map(x => x.o), pd = opp.length && puoDisimpegnarsi(t), n = p.legs.length;
     const nomi = opp.map(o => o.nome || 'un nemico').join(', '), oppHtml = opp.length ? `<span class="avv opp">⚔️ <b>Attacco di opportunità:</b> ${esc(t.nome || 'il token')} esce dalla portata di ${esc(nomi)} senza Disimpegno. ${opp.length > 1 ? 'Possono' : 'Può'} attaccarlo con la reazione.</span>` : '';
-    b.innerHTML = `<div class="g"><b class="tit">🏃 ${esc(t.nome || 'Token')}: ${metri(m)}${dif ? ' 🪨' : ''}</b>${dif ? `<span class="avv">${dif} ${dif === 1 ? 'casella' : 'caselle'} di terreno difficile (contano doppio).</span>` : ''}<span class="avv">${dopo >= 0 ? `Dopo restano ${metri(dopo)} di ${metri(mv.tot)}.` : `<b>Oltre il movimento di ${metri(-dopo)}.</b>`} Confermi lo spostamento?</span>${oppHtml}</div><div class="g">${pd ? `<button type="button" data-k="dis" class="on" title="Usa ${pd === 'bon' ? 'l\'azione bonus' : 'l\'azione'} per il Disimpegno: niente attacchi di opportunità">🛡 Disimpegno e conferma</button>` : ''}${dopo < 0 && suoTurno(t) && puoScattare(t) ? `<button type="button" data-k="scatta" class="on" title="Usa ${puoScattare(t) === 'bon' ? 'l\'azione bonus' : 'l\'azione'} per lo Scatto: altri ${metri(velocitaDi(schedaDi(t)))}">🏃 Scatta e conferma</button>` : ''}<button type="button" data-k="ok" class="${dopo < 0 && suoTurno(t) && puoScattare(t) ? '' : 'on'}" title="${dopo < 0 ? 'Sposta il token anche oltre il movimento (per esempio per rimediare a un errore)' : ''}">✓ ${dopo < 0 ? 'Sposta comunque' : 'Conferma'}</button><button type="button" data-k="no">Annulla</button></div>`;
+    b.innerHTML = `<div class="g"><b class="tit">🏃 ${esc(t.nome || 'Token')}: ${metri(m)}${n > 1 ? ` in ${n} tratti` : ''}${dif ? ' 🪨' : ''}</b>${dif ? `<span class="avv">${dif} ${dif === 1 ? 'casella' : 'caselle'} di terreno difficile (contano doppio).</span>` : ''}<span class="avv">${dopo >= 0 ? `Dopo restano ${metri(dopo)} di ${metri(mv.tot)}.` : `<b>Oltre il movimento di ${metri(-dopo)}.</b>`} Puoi trascinarlo ancora per provare un'altra strada, poi conferma.</span>${oppHtml}</div><div class="g">${pd ? `<button type="button" data-k="dis" class="on" title="Usa ${pd === 'bon' ? 'l\'azione bonus' : 'l\'azione'} per il Disimpegno: niente attacchi di opportunità">🛡 Disimpegno e conferma</button>` : ''}${dopo < 0 && suoTurno(t) && puoScattare(t) ? `<button type="button" data-k="scatta" class="on" title="Usa ${puoScattare(t) === 'bon' ? 'l\'azione bonus' : 'l\'azione'} per lo Scatto: altri ${metri(velocitaDi(schedaDi(t)))}">🏃 Scatta e conferma</button>` : ''}<button type="button" data-k="ok" class="${dopo < 0 && suoTurno(t) && puoScattare(t) ? '' : 'on'}" title="${dopo < 0 ? 'Sposta il token anche oltre il movimento (per esempio per rimediare a un errore)' : ''}">✓ ${dopo < 0 ? 'Sposta comunque' : 'Conferma'}</button>${n > 1 ? '<button type="button" data-k="giu" title="Toglie l\'ultimo tratto e riporta il token alla fine di quello prima">↶ Togli l\'ultimo tratto</button>' : ''}<button type="button" data-k="no" title="Il token torna da dove era partito">${n > 1 ? 'Ricomincia' : 'Annulla'}</button></div>`;
     b.classList.remove('spenta'); b.hidden = false;
     const ok = b.querySelector('[data-k=ok]'); if (ok) ok.onclick = confermaPasso;
     const sc = b.querySelector('[data-k=scatta]'); if (sc) sc.onclick = () => faiAzione(t, 'scatto', puoScattare(t)); // conferma il passo e poi scatta
     const di = b.querySelector('[data-k=dis]'); if (di) di.onclick = async () => { await faiAzione(t, 'dis', puoDisimpegnarsi(t)); confermaPasso(); };
+    const gi = b.querySelector('[data-k=giu]'); if (gi) gi.onclick = () => { const l = p.legs.slice(0, -1), u = l[l.length - 1], q = p.legs[p.legs.length - 1]; tornaIndietro(t, u[0], u[1]); chiediPasso(t, { ...p, x: u[0], y: u[1], m: p.m - q[2], dif: p.dif - (q[3] || 0), legs: l }); };
     disegnaToken(); // il pannello e l'area contano già questo passo
     b.querySelector('[data-k=no]').onclick = annullaPasso;
   }
@@ -2710,16 +2725,16 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const p = T.passo; if (!p) return; T.passo = null; barraMaschera();
     mostraRighello(null); manda('righello', { uid: T.me.uid, pts: null });
     const t = T.tok.get(p.id); if (!t) return;
-    const opp = suoTurno(t) ? opportunita(t, p.x0, p.y0, p.x, p.y) : [];
+    manda('bozza', { id: p.id, legs: null }); const opp = oppPercorso(t, p);
     if (!await salvaPosto(t, p.x, p.y, p.x0, p.y0)) return;
     if (opp.length) {
-      annuncia(`⚔️ Attacco di opportunità: ${t.nome || 'Il token'} esce dalla portata di ${opp.map(o => o.nome || 'un nemico').join(', ')} senza Disimpegno.`);
+      annuncia(`⚔️ Attacco di opportunità: ${t.nome || 'Il token'} esce dalla portata di ${opp.map(x => x.o.nome || 'un nemico').join(', ')} senza Disimpegno.`);
       // chi ha la reazione attacca subito: lo decide chi muove quel token (il giocatore, o il DM per i PNG)
-      for (const o of opp) { const m = { da: o.id, a: t.id, x0: p.x0, y0: p.y0 }; manda('opp', m); reazioneOpp(m); }
+      for (const x of opp) { const m = { da: x.o.id, a: t.id, x0: x.x0, y0: x.y0 }; manda('opp', m); reazioneOpp(m); }
     }
     const a = azioniDi(t);
     // il percorso del turno resta disegnato: si vede che strada ha fatto e quanto è costata
-    const pp = [...(a.pp?.length ? a.pp : [[p.x0, p.y0, 0]]), [p.x, p.y, p.m]].slice(-40);
+    const pp = [...(a.pp?.length ? a.pp : [[p.x0, p.y0, 0]]), ...p.legs.map(l => [l[0], l[1], l[2]])].slice(-40);
     await segnaAzioni(t, { mov: (a.mov || 0) + p.m, pp, ...(a.ox == null ? { ox: p.x0, oy: p.y0 } : {}) });
   }
   // l'attacco di opportunità parte da solo se c'è un modo solo di farlo; con più armi o più reazioni si sceglie
@@ -2735,20 +2750,23 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const colpisci = i => { T.mira = { sid: s.id, i, inc: null, liv: null, slot: null, tok: o.id, adv: 0, seg: false, extra: new Set(extraDi(s).filter(x => x.attivo && x.dadi && !/furtiv/i.test(x.nome || '')).map(x => x.id)), opp: true }; return scegliBersaglio(prima); };
     if (armi.length === 1 && !P.length && !inc.length) { toast(`↺ ${o.nome}: attacco di opportunità su ${b.nome || 'il bersaglio'}.`); return colpisci(armi[0][1]); }
     if (!armi.length && !P.length && !inc.length) return toast(`${o.nome || 'Il token'} non ha armi da mischia per l'attacco di opportunità.`);
-    const d = openDlg(`<h3>↺ Attacco di opportunità</h3><p>${esc(b.nome || 'Il bersaglio')} esce dalla portata di <b>${esc(o.nome || '')}</b> senza Disimpegno. Usi la reazione?</p>
-      <menu class="tv-pozm">${armi.map(([x, i]) => `<button class="btn" data-w="${i}"><b>🗡 ${esc(x.nome || 'Attacco')}</b><small>${[x.colpire !== '' && x.colpire != null ? 'colpire ' + (piuMod(num(x.colpire)) || '+0') : '', x.danni || ''].filter(Boolean).map(esc).join(' · ')}</small></button>`).join('')}
-      ${P.map((x, j) => `<button class="btn" data-p="${j}"><b>↺ ${esc(x.nome)}</b><small>${esc(corto(x.testo || '', 60))}</small></button>`).join('')}
-      ${inc.map(([x, i]) => `<button class="btn" data-i="${i}"><b>✨ ${esc(x.nome)}</b><small>incantesimo di reazione</small></button>`).join('')}
-      <button class="btn ghost" data-no>Lascia stare</button></menu>`, 'tv-poz');
+    // come la scelta dello slot: una scheda per ogni modo di reagire, il nemico in alto
+    const opz = (k, v, ic, nome, sotto, cls = '') => `<button type="button" class="btn ${cls}" data-${k}="${v}"><span class="ic">${ic}</span><span class="tx"><b>${esc(nome)}</b><small>${esc(sotto)}</small></span></button>`;
+    const d = openDlg(`<form method="dialog"><h3>↺ Attacco di opportunità</h3>
+      <div class="opp-chi"><span class="av" style="--c:${esc(b.colore || '#7a2a2a')}">${esc(iniziali(b.nome))}</span><p><b>${esc(b.nome || 'Il bersaglio')}</b> esce dalla portata di <b>${esc(o.nome || '')}</b> senza Disimpegno.<br><span class="hint">Usi la reazione? Ne hai una per round.</span></p></div>
+      <div class="opp-l">${armi.map(([x, i], n) => opz('w', i, '🗡', x.nome || 'Attacco', [x.colpire !== '' && x.colpire != null ? 'colpire ' + (piuMod(num(x.colpire)) || '+0') : '', x.danni || ''].filter(Boolean).join(' · '), n ? '' : 'primary')).join('')}
+      ${P.map((x, j) => opz('p', j, '↺', x.nome, corto(x.testo || '', 70))).join('')}
+      ${inc.map(([x, i]) => opz('i', i, '✨', x.nome, 'incantesimo di reazione')).join('')}</div>
+      <menu><button type="button" class="btn ghost" data-no>Lascia stare</button></menu></form>`, 'tv-oppd');
     const sc = await new Promise(res => { d.querySelectorAll('button').forEach(x => x.onclick = () => { res(x.dataset); d.close(); }); d.addEventListener('close', () => res({ no: '' }), { once: true }); });
     if (sc.w != null) return colpisci(+sc.w);
     if (sc.p != null) return usaPriv(o, P[+sc.p], 'rea');
     if (sc.i != null) return lanciaInc(s, +sc.i, o);
   }
   function annullaPasso() {
-    const p = T.passo; if (!p) return; T.passo = null; barraMaschera();
+    const p = T.passo; if (!p) return; T.passo = null; barraMaschera(); manda('bozza', { id: p.id, legs: null });
     mostraRighello(null); manda('righello', { uid: T.me.uid, pts: null });
-    const t = T.tok.get(p.id); if (t) tornaIndietro(t, p.x0, p.y0);
+    const t = T.tok.get(p.id); if (t) tornaIndietro(t, p.x0, p.y0); disegnaRighelli();
   }
   function barraRighello(b) {
     b.innerHTML = `<div class="g"><label class="sw" title="In combattimento, mentre trascini un token compare il righello con il movimento che resta"><input type="checkbox" data-k="rigt" ${righelloAuto() ? 'checked' : ''}><span class="tg" aria-hidden="true"></span>Righello mentre trascini i token (in combattimento)</label></div>`;
@@ -2759,14 +2777,20 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function percorsoTurno(sc, S) {
     const att = T.turno?.find(x => x.id === T.stato?.turno), t = att?.token && T.tok.get(att.token);
     if (!t || t.scena !== sc.id || (t.nascosto && !isDM())) return '';
-    const pp = azioniDi(t).pp; if (!pp?.length || pp.length < 2) return '';
-    const l = t.misura * sc.griglia / 2, P = pp.map(([x, y]) => S({ x: x + l, y: y + l })), tot = pp.reduce((q, x) => q + (x[2] || 0), 0);
-    const f = m => (+m).toLocaleString('it-IT', { maximumFractionDigits: 1 }) + ' m', d = P.map(([x, y], i) => (i ? 'L' : 'M') + x + ' ' + y).join('');
-    const [ex, ey] = P[P.length - 1];
-    return `<g class="perc"><path d="${d}" fill="none" stroke="#000a" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="#ffd84a" stroke-width="3" stroke-dasharray="10 6" stroke-linecap="round" stroke-linejoin="round"/>
-      ${P.map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i ? 4 : 5}" fill="#ffd84a" stroke="#000" stroke-width="1.5"/>`).join('')}
-      ${P.slice(1).map(([x, y], i) => { const [px, py] = P[i]; return pp[i + 1][2] ? `<text x="${(x + px) / 2 + 6}" y="${(y + py) / 2 - 6}" class="pt">${f(pp[i + 1][2])}</text>` : ''; }).join('')}
-      <text x="${ex + 12}" y="${ey + 22}">${esc(t.nome || '')} · percorso ${f(tot)}</text></g>`;
+    // il percorso confermato in giallo; i tratti ancora da confermare (anche quelli che sta provando un altro) in bianco
+    const bz = T.passo?.id === t.id ? T.passo : T.bozze?.get(t.id), fatti = azioniDi(t).pp || [];
+    const pp = fatti.length ? fatti : bz ? [[bz.x0, bz.y0, 0]] : [], prov = bz?.legs || [];
+    if (pp.length + prov.length < 2) return '';
+    const l = t.misura * sc.griglia / 2, pt = ([x, y]) => S({ x: x + l, y: y + l }), f = m => (+m).toLocaleString('it-IT', { maximumFractionDigits: 1 }) + ' m';
+    const P = pp.map(pt), Q = [P[P.length - 1], ...prov.map(pt)], tot = pp.reduce((q, x) => q + (x[2] || 0), 0), totP = prov.reduce((q, x) => q + (x[2] || 0), 0);
+    const path = A => A.map(([x, y], i) => (i ? 'L' : 'M') + x + ' ' + y).join('');
+    const linea = (A, col) => A.length < 2 ? '' : `<path d="${path(A)}" fill="none" stroke="#000a" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="${path(A)}" fill="none" stroke="${col}" stroke-width="3" stroke-dasharray="10 6" stroke-linecap="round" stroke-linejoin="round"/>`;
+    const metriT = (A, L) => A.slice(1).map(([x, y], i) => { const [px, py] = A[i]; return L[i]?.[2] ? `<text x="${(x + px) / 2 + 6}" y="${(y + py) / 2 - 6}" class="pt">${f(L[i][2])}</text>` : ''; }).join('');
+    const [ex, ey] = Q[Q.length - 1];
+    return `<g class="perc">${linea(P, '#ffd84a')}${linea(Q, '#ffffff')}
+      ${P.map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i ? 4 : 5}" fill="#ffd84a" stroke="#000" stroke-width="1.5"/>`).join('')}${Q.slice(1).map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4" fill="#fff" stroke="#000" stroke-width="1.5"/>`).join('')}
+      ${metriT(P, pp.slice(1))}${metriT(Q, prov)}
+      <text x="${ex + 12}" y="${ey + 22}">${esc(t.nome || '')} · ${tot ? 'percorso ' + f(tot) : ''}${tot && totP ? ' + ' : ''}${totP ? f(totP) + ' da confermare' : ''}</text></g>`;
   }
   function mostraRighello(pts) { if (pts) T.rulers.set('io', { nome: '', pts }); else T.rulers.delete('io'); disegnaRighelli(); }
   function disegnaRighelli() {
@@ -2785,6 +2809,12 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
 
   /* ---------- menu del token (DM) ---------- */
   function chiudiPop() { document.querySelectorAll('.tv-pop').forEach(p => p.remove()); }
+  // i menu sulla mappa restano dentro lo schermo: se si allungano (grandezza, chi lo muove…) risalgono, e se non c'è posto scorrono
+  function adattaPop(pop) {
+    const st = pop.parentElement; if (!st) return;
+    const fit = () => { const H = st.clientHeight; pop.style.maxHeight = (H - 12) + 'px'; const top = parseFloat(pop.style.top) || 0; if (top + pop.offsetHeight > H - 6) pop.style.top = Math.max(6, H - pop.offsetHeight - 6) + 'px'; };
+    fit(); if ('ResizeObserver' in window) { const ro = new ResizeObserver(() => { if (!pop.isConnected) return ro.disconnect(); fit(); }); ro.observe(pop); }
+  }
   function menuToken(id, e) {
     const t = T.tok.get(id), st = $('#tv-stage'); if (!t || !st) return;
     chiudiPop();
@@ -2836,7 +2866,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       const gr = tsch + (ft ? tile('foto', '🖼', 'Foto', 'Solo sul tuo schermo') : '');
       pop.innerHTML = `${testa}${mio ? bfine + tzp + rpf : ''}${gr ? `<div class="gr">${gr}</div>` : ''}${mio ? rcond + ini : ''}`;
       st.append(pop); extra();
-      pop.style.left = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6) + 'px'; pop.style.top = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6) + 'px';
+      pop.style.left = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6) + 'px'; pop.style.top = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6) + 'px'; adattaPop(pop);
       if (ft) pop.querySelector('[data-k=foto]').onclick = () => { chiudiPop(); apriFoto(fotoDi(t)); };
       if (mio && !giaIn) pop.querySelector('[data-k=ini]').onclick = () => { chiudiPop(); iniziativa(t, pop.querySelector('[data-k=imod]').value); };
       return;
@@ -2854,7 +2884,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       ${vista ? `<div class="row" title="Con la nebbia automatica: fin dove vede questo personaggio (18 m è la scurovisione)"><span>Vede fino a</span><select data-k="vista"><option value="">senza limite</option>${[0, 1.5, 3, 6, 9, 12, 18, 24, 36].map(n => `<option value="${n}" ${t.vista != null && +t.vista === n ? 'selected' : ''}>${n ? n.toLocaleString('it-IT') + ' m' + (n === 18 ? ' (scurovisione)' : '') : 'non vede'}</option>`).join('')}</select></div>` : ''}</details>`;
     st.append(pop); extra();
     const x = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6), y = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6);
-    pop.style.left = x + 'px'; pop.style.top = y + 'px';
+    pop.style.left = x + 'px'; pop.style.top = y + 'px'; adattaPop(pop);
     const salva = async ch => {
       const r2 = await SB.from('tavolo_token').update(ch).eq('id', id).select().single();
       if (r2.error) { toast(r2.error.message, 'err'); return; }
@@ -3901,7 +3931,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const r = st.getBoundingClientRect(), pop = document.createElement('div'); pop.className = 'tv-pop';
     pop.innerHTML = `<b>🚪 Porta</b><button class="btn sm" data-k="ap">${m.aperta ? 'Chiudi' : 'Apri'}</button><button class="btn sm" data-k="bl">${m.bloccata ? '🔓 Togli la chiave' : '🔒 Chiudi a chiave'}</button><button class="btn sm danger" data-k="via">Elimina la porta</button>`;
     st.append(pop);
-    pop.style.left = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6) + 'px'; pop.style.top = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6) + 'px';
+    pop.style.left = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6) + 'px'; pop.style.top = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6) + 'px'; adattaPop(pop);
     pop.querySelector('[data-k=ap]').onclick = () => { chiudiPop(); apriPorta(id); };
     pop.querySelector('[data-k=bl]').onclick = async () => {
       chiudiPop(); const ch = m.bloccata ? { bloccata: false } : { bloccata: true, aperta: false };
@@ -5859,7 +5889,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     await annuncia(descriviAzione(t, k, da, x));
     if (k === 'nas') await tiraFurtivita(t);
     // il Disimpegno vale anche per lo spostamento ancora da confermare: si riscrive la richiesta senza l'avviso
-    if (k === 'dis' && T.passo?.id === t.id) { const p = T.passo; T.passo = null; chiediPasso(t, p.x, p.y, p.x0, p.y0, p.m, p.dif); }
+    if (k === 'dis' && T.passo?.id === t.id) chiediPasso(t, T.passo);
   }
   async function tiraFurtivita(t) {
     const s = schedaDi(t), mod = s ? abTot(s, 'furtivita') : 0, ai = aiutoPer(t);
