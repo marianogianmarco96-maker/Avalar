@@ -1439,6 +1439,11 @@ function fixNames(j, P) {
   JSON.stringify(j, (k, v) => { if (typeof v === 'string' && k !== 'id' && k !== 'formato') for (const m of v.matchAll(/(?<![\p{L}\p{N}_])\p{Lu}[\p{L}']{3,}(?![\p{L}\p{N}_])/gu)) refs.push(m[0]); return v; });
   for (const r of new Set(refs)) { const k = norm(r); if (!k || S.byName.has(k) || S.ents.has(r) || planned.has(k)) continue; const id = nearName(r); if (id) add(r, id); }
   if (!fixes.size) return;
+  // anche i nomi giusti, che restano uguali: se una variante è l'inizio del nome giusto («Fulgrus» di «Fulgrus Cornellus»),
+  // il nome intero vince e non diventa «Fulgrus Cornellus Cornellus»
+  const right = new Map([...new Set(fixes.values())].map(n => [n, n]));
+  for (const id of new Set([...fixes.values()].flatMap(n => S.byName.get(norm(n)) || []))) for (const a of S.ents.get(id)?.alias || []) right.set(a, a);
+  for (const [k, v] of right) if (!fixes.has(k)) fixes.set(k, v);
   const keys = [...fixes.keys()].sort((a, b) => b.length - a.length).map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+'));
   const rx = new RegExp(`(?<![\\p{L}\\p{N}_])(?:${keys.join('|')})(?![\\p{L}\\p{N}_])`, 'giu');
   const byNorm = new Map([...fixes].map(([v, n]) => [norm(v), n]));
@@ -1450,7 +1455,7 @@ function fixNames(j, P) {
     return o;
   };
   walk(j);
-  P.warns.push('Nomi corretti come sono salvati sul sito: ' + [...fixes].map(([v, n]) => `«${v}» → «${n}»`).join(', ') + '.');
+  P.warns.push('Nomi corretti come sono salvati sul sito: ' + [...fixes].filter(([v, n]) => v !== n && !right.has(v)).map(([v, n]) => `«${v}» → «${n}»`).join(', ') + '.');
 }
 async function planImport(raw) {
   const P = { errors: [], warns: [], ents: [], sess: [], events: 0, evSessions: [], pins: [], misc: [], writes: [], general: null, label: '' };
