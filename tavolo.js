@@ -206,6 +206,13 @@ dialog.dlg.tv-side.tv-sw.tv-incol{position:relative;inset:auto;margin:0;width:10
 .tv-pop b{font-family:var(--display);color:var(--wine);padding:2px 4px 4px}
 :root[data-theme=dark] .tv-pop b{color:var(--gold2)}
 .tv-pop .btn{justify-content:flex-start}
+.tv-ctx{min-width:200px;padding:6px;gap:2px}
+.tv-ctx .tt{padding:4px 8px 6px;font-family:var(--display);font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px}
+.tv-ctx .btn{border:0;background:transparent;box-shadow:none;width:100%;text-align:left;color:inherit;text-transform:none;letter-spacing:0;font:500 .93rem var(--body);padding:7px 10px;min-height:0}
+.tv-ctx .btn:hover,.tv-ctx .btn:focus-visible{background:color-mix(in srgb,currentColor 11%,transparent)}
+.tv-ctx .btn.danger{color:#b3263a;background:transparent}
+.tv-ctx .btn.danger:hover{background:#b3263a1f}
+.tv-ctx hr{border:0;border-top:1px solid color-mix(in srgb,currentColor 15%,transparent);margin:3px 0}
 .tv-pnome{font:600 1rem var(--display);color:var(--wine);background:transparent;border:0;border-bottom:1px dashed var(--line2);padding:2px 4px 4px;margin-bottom:2px}
 .tv-pnome:focus{outline:none;border-bottom:1px solid var(--wine);background:var(--paper2)}
 :root[data-theme=dark] .tv-pnome{color:var(--gold2)}
@@ -360,6 +367,8 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
 .tv-tok.c-prono{transform:rotate(-80deg) scale(.92)}
 .tv-tok.c-prono b,.tv-tok.c-prono .cnd,.tv-tok.c-prono .pf{rotate:80deg}
 .tv-tok.c-invisibile{opacity:.4}
+.tv-tok.c-nascosto{opacity:.6;filter:saturate(.45) brightness(.8)}
+.f-nascosto{box-shadow:0 0 0 2px #1d1613cc,0 0 18px 7px #0009;animation:tvfx-pulsa 4s ease-in-out infinite}
 .f-invisibile{box-shadow:0 0 0 2px #9fd8ffaa,0 0 24px 8px #9fd8ff66;animation:tvfx-pulsa 3s ease-in-out infinite}
 .f-accecato{inset:34% -6% auto -6%;height:24%;border-radius:4px;background:#111;box-shadow:0 2px 4px #000a}
 .f-assordato{box-shadow:0 0 0 3px #95a5a6}
@@ -1812,6 +1821,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       else T.rulers.delete(m.uid);
       disegnaRighelli();
     });
+    ch.on('broadcast', { event: 'nasconde' }, ({ payload: m }) => { const t = isDM() && T.tok.get(m.id); if (t && Number.isFinite(+m.tot)) esitoNascondersi(t, +m.tot); });
     ch.on('broadcast', { event: 'nascosto' }, ({ payload: m }) => {
       if (isDM()) return; const t = T.tok.get(m.id); if (t && t.giocatore !== T.me.giocatore) { T.tok.delete(m.id); disegnaToken(); }
     });
@@ -2419,7 +2429,17 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     st.addEventListener('pointerover', e => { if (!T.mira || T.mira.area) return; const id = e.target.closest?.('.tv-tok')?.dataset.id || null; if (id !== T.copv) { T.copv = id; disegnaRighelli(); } });
     st.addEventListener('pointermove', e => { if (!T.mira?.area || e.pointerType !== 'mouse' || punti.size || !scena()) return; T.mira.p = mondo(st, e); cancelAnimationFrame(T.araf); T.araf = requestAnimationFrame(disegnaArea); });
     st.addEventListener('pointermove', e => { if (!isDM() || T.tool !== 'muri' || T.mdown || T.mgom || e.pointerType !== 'mouse' || !scena()) return; const p = mondo(st, e); T.mhov = T.mtool === 'gomma' ? p : punta(p, e); disegnaRighelli(); });
-    st.addEventListener('contextmenu', e => { const sg = isDM() && e.target.closest('.tv-sg'); if (sg) { e.preventDefault(); menuSegnalino(sg.dataset.id, e); return; } if (T.tool === 'muri') { e.preventDefault(); T.mu = null; disegnaRighelli(); } });
+    st.addEventListener('pointerdown', e => { T.ptipo = e.pointerType; }, true);
+    st.addEventListener('contextmenu', e => {
+      const sg = isDM() && e.target.closest('.tv-sg'); if (sg) { e.preventDefault(); menuSegnalino(sg.dataset.id, e); return; }
+      if (T.tool === 'muri') { e.preventDefault(); T.mu = null; disegnaRighelli(); return; }
+      // il tasto destro del mouse apre le opzioni rapide al posto del menu del browser (col dito resta la pressione lunga per il segnale)
+      if (T.ptipo && T.ptipo !== 'mouse') { e.preventDefault(); return; }
+      if (e.target.closest('input,textarea,select,[contenteditable],.tv-pop,.tv-zoom') || !scena()) return;
+      e.preventDefault(); if (T.mira || T.drag) return;
+      const el = e.target.closest('.tv-tok'), t = el && T.tok.get(el.dataset.id);
+      if (t) menuRapido(t, e); else menuMappa(e);
+    });
     function annullaDrag() { const d = T.drag; if (!d) return; T.drag = null; const t = T.tok.get(d.id); if (t) { disegnaToken(); manda('trascina', { id: t.id, x: t.x, y: t.y }); } }
     function fineRighello(r, subito) {
       if (!r) return null;
@@ -2888,6 +2908,44 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const st = pop.parentElement; if (!st) return;
     const fit = () => { const H = st.clientHeight; pop.style.maxHeight = (H - 12) + 'px'; const top = parseFloat(pop.style.top) || 0; if (top + pop.offsetHeight > H - 6) pop.style.top = Math.max(6, H - pop.offsetHeight - 6) + 'px'; };
     fit(); if ('ResizeObserver' in window) { const ro = new ResizeObserver(() => { if (!pop.isConnected) return ro.disconnect(); fit(); }); ro.observe(pop); }
+  }
+  // le opzioni rapide del tasto destro
+  function popRapido(e, testa, voci) {
+    const st = $('#tv-stage'); if (!st || !voci.length) return;
+    chiudiPop();
+    const r = st.getBoundingClientRect(), pop = document.createElement('div'); pop.className = 'tv-pop tv-ctx';
+    pop.innerHTML = (testa ? `<b class="tt">${testa}</b>` : '') + voci.map((v, i) => v === '-' ? '<hr>' : `<button type="button" class="btn sm${v[2] ? ' danger' : ''}" data-i="${i}">${v[0]}</button>`).join('');
+    st.append(pop);
+    pop.style.left = clamp(e.clientX - r.left + 2, 6, r.width - pop.offsetWidth - 6) + 'px'; pop.style.top = clamp(e.clientY - r.top + 2, 6, r.height - pop.offsetHeight - 6) + 'px'; adattaPop(pop);
+    pop.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { chiudiPop(); Promise.resolve(voci[+b.dataset.i][1]()).catch(err => toast(err.message, 'err')); });
+  }
+  function menuRapido(t, e) {
+    const mio = puoMuovere(t), s = schedaDi(t), cn = condTok(t), n = esc(t.nome || 'Token'), V = [];
+    if (!mio && !isDM()) return menuToken(t.id, e);
+    if (cn.includes('Nascosto')) V.push(['👁 Esci dal nascondiglio', () => mettiNascosto(t, false)]);
+    else if (!(isDM() && t.nascosto && !t.giocatore)) V.push(['🥷 Nascondersi (Furtività)', () => nascondersi(t)]);
+    if (isDM() && !t.giocatore) V.push(t.nascosto ? ['👁 Mostra ai giocatori', () => mettiSoloDM(t, false)] : ['👑 Solo per me', () => mettiSoloDM(t, true)]);
+    if (s) V.push(['📜 Scheda', () => apriScheda(s.id, t.id)]);
+    if (!T.turno.some(x => x.token === t.id)) { const m = s ? modC(s.dati?.des) : 0; V.push([`🎲 Iniziativa (d20${m ? ' ' + segno(m) : ''})`, () => iniziativa(t, m)]); }
+    if (isDM()) V.push(['📋 Copia', () => copiaToken(t)], ['🗑 Elimina', async () => {
+      if (!await ask(`Eliminare il token **${t.nome || 'senza nome'}**?`, { ok: 'Elimina', danger: true, title: 'Elimina token' })) return;
+      const r = await SB.from('tavolo_token').delete().eq('id', t.id); if (r.error) return toast(r.error.message, 'err');
+      T.tok.delete(t.id); disegnaToken();
+    }, true]);
+    V.push('-', ['⋯ Tutte le opzioni', () => menuToken(t.id, e)]);
+    popRapido(e, n, V);
+  }
+  // nascondersi: nel proprio turno costa l'azione bonus se un privilegio lo permette, sennò l'azione; fuori dal turno è solo il tiro
+  function nascondersi(t) {
+    if (!suoTurno(t)) return tiraFurtivita(t);
+    const b = bonusAz(t), da = b?.k.includes('nas') && !usata(t, 'bon') ? 'bon' : !usata(t, 'az') ? 'az' : null;
+    if (!da) return toast('In questo turno azione e azione bonus sono già usate.', 'err');
+    return faiAzione(t, 'nas', da);
+  }
+  function menuMappa(e) {
+    const st = $('#tv-stage'), p = mondo(st, e), V = [['📍 Segnale qui', () => faiPing(p)], ['📏 Righello', () => strumento('righello')]];
+    if (isDM()) V.push(['➕ Aggiungi un token', () => dlgToken()], ['🗺 Mappe', () => pannelloMappe(true)]);
+    popRapido(e, '', V);
   }
   function menuToken(id, e) {
     const t = T.tok.get(id), st = $('#tv-stage'); if (!t || !st) return;
@@ -4322,9 +4380,11 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (['Accecato', 'Avvelenato', 'Spaventato', 'Trattenuto'].some(c => ca.includes(c))) contro.push(`${a.nome} è ${ca.find(c => ['Accecato', 'Avvelenato', 'Spaventato', 'Trattenuto'].includes(c)).toLowerCase()}`);
     if (ca.includes('Prono')) contro.push(`${a.nome} è prono`);
     if (ca.includes('Invisibile')) pro.push(`${a.nome} è invisibile`);
+    if (ca.includes('Nascosto')) pro.push(`${a.nome} è nascosto`);
     const vb = ['Accecato', 'Paralizzato', 'Pietrificato', 'Stordito', 'Svenuto', 'Trattenuto'].find(c => cb.includes(c)); if (vb) pro.push(`${nb} è ${vb.toLowerCase()}`);
     if (cb.includes('Prono')) (d <= 1.51 ? pro : contro).push(`${nb} è prono`);
     if (cb.includes('Invisibile')) contro.push(`${nb} è invisibile`);
+    if (cb.includes('Nascosto')) contro.push(`${nb} è nascosto`);
     const ai = aiutoPer(a); if (ai) pro.push(`aiutato da ${ai.h.nome}`);
     if (schiva(b)) contro.push(`${nb} sta schivando`);
     const br = s && tatticaBranco(s) && alleatoVicino(a, b, sc); if (br) pro.push(`tattica del branco: ${br.nome || 'un alleato'} è accanto a ${nb}`);
@@ -4546,6 +4606,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const x = Array.isArray(r.data) ? r.data[0] : r.data, a = T.tok.get(m.tok);
     const mossa = { da: m.tok, a: b.id, anim: v.anim, col: v.col, ritorna: !!v.ritorna, esito: x.colpito === true ? 'si' : x.colpito === false ? 'no' : 'nd', crit: !!x.critico, fallito: !!x.fallito, danni: x.danni || 0 };
     manda('attacco', mossa); mostraAttacco(mossa);
+    if (a && condTok(a).includes('Nascosto')) mettiNascosto(a, false); // attaccare svela chi era nascosto
     if (m.inc != null) usaSlot(sx, m.inc, m.slot);
     const tempo = m.inc != null ? sx?.dati.incantesimi?.[m.inc]?.tempo || '' : '';
     if (a && suoTurno(a)) { if (/azione bonus/i.test(tempo)) { if (!azioniDi(a).bon) await segnaAzioni(a, { bon: true }); } else if (/reazione/i.test(tempo)) await segnaAzioni(a, { rea: true }); else if (!usata(a, 'az')) await segnaAzioni(a, { az: true }); }
@@ -5024,7 +5085,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   // una scheda di 5e per personaggio e per PNG; il giocatore compila la sua, il DM tutte. Si aggiornano dal vivo.
   const CAR = [['for', 'FOR', 'Forza'], ['des', 'DES', 'Destrezza'], ['cos', 'COS', 'Costituzione'], ['int', 'INT', 'Intelligenza'], ['sag', 'SAG', 'Saggezza'], ['car', 'CAR', 'Carisma']];
   const ABIL = [['acrobazia', 'Acrobazia', 'des'], ['addestrare', 'Addestrare animali', 'sag'], ['arcano', 'Arcano', 'int'], ['atletica', 'Atletica', 'for'], ['furtivita', 'Furtività', 'des'], ['indagare', 'Indagare', 'int'], ['inganno', 'Inganno', 'car'], ['intimidire', 'Intimidire', 'car'], ['intrattenere', 'Intrattenere', 'car'], ['intuizione', 'Intuizione', 'sag'], ['medicina', 'Medicina', 'sag'], ['natura', 'Natura', 'int'], ['percezione', 'Percezione', 'sag'], ['persuasione', 'Persuasione', 'car'], ['rapidita', 'Rapidità di mano', 'des'], ['religione', 'Religione', 'int'], ['sopravvivenza', 'Sopravvivenza', 'sag'], ['storia', 'Storia', 'int']];
-  const CONDIZIONI = ['Accecato', 'Affascinato', 'Afferrato', 'Assordato', 'Avvelenato', 'Incapacitato', 'Invisibile', 'Paralizzato', 'Pietrificato', 'Prono', 'Spaventato', 'Stordito', 'Svenuto', 'Trattenuto', 'Concentrazione', 'Morto'];
+  const CONDIZIONI = ['Accecato', 'Affascinato', 'Afferrato', 'Assordato', 'Avvelenato', 'Incapacitato', 'Invisibile', 'Nascosto', 'Paralizzato', 'Pietrificato', 'Prono', 'Spaventato', 'Stordito', 'Svenuto', 'Trattenuto', 'Concentrazione', 'Morto'];
   // regola della casa di questa campagna: al level up i PF sono il massimo del dado + Costituzione (niente media né tiro)
   const PF_MASSIMI = true;
   const BASE = { for: 10, des: 10, cos: 10, int: 10, sag: 10, car: 10 };
@@ -5077,7 +5138,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   const fotoScheda = s => s.immagine || S.ents?.get(s.entita)?.portrait?.thumb || null;
   const completaS = (prima, nuovo) => { const o = completa(prima, nuovo); if (prima?.dati && !nuovo.dati) o.dati = prima.dati; return o; };
   // condizioni sui token, con un effetto che vedono tutti
-  const COND_FX = { Accecato: ['🙈', 'accecato'], Affascinato: ['💗', 'affascinato'], Afferrato: ['✊', 'afferrato'], Assordato: ['🔇', 'assordato'], Avvelenato: ['🤢', 'avvelenato'], Incapacitato: ['⛔', 'incapacitato'], Invisibile: ['👻', 'invisibile'], Paralizzato: ['⚡', 'paralizzato'], Pietrificato: ['🗿', 'pietrificato'], Prono: ['🛌', 'prono'], Spaventato: ['😱', 'spaventato'], Stordito: ['💫', 'stordito'], Svenuto: ['💤', 'svenuto'], Trattenuto: ['⛓️', 'trattenuto'], Concentrazione: ['🔮', 'concentrazione'], Morto: ['💀', 'morto'] };
+  const COND_FX = { Accecato: ['🙈', 'accecato'], Affascinato: ['💗', 'affascinato'], Afferrato: ['✊', 'afferrato'], Assordato: ['🔇', 'assordato'], Avvelenato: ['🤢', 'avvelenato'], Incapacitato: ['⛔', 'incapacitato'], Invisibile: ['👻', 'invisibile'], Nascosto: ['🥷', 'nascosto'], Paralizzato: ['⚡', 'paralizzato'], Pietrificato: ['🗿', 'pietrificato'], Prono: ['🛌', 'prono'], Spaventato: ['😱', 'spaventato'], Stordito: ['💫', 'stordito'], Svenuto: ['💤', 'svenuto'], Trattenuto: ['⛓️', 'trattenuto'], Concentrazione: ['🔮', 'concentrazione'], Morto: ['💀', 'morto'] };
   const condTok = t => Array.isArray(t?.condizioni) ? t.condizioni : [];
   async function condSuToken(t, lista) {
     const r = await SB.from('tavolo_token').update({ condizioni: lista }).eq('id', t.id).select().single();
@@ -6035,7 +6096,38 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   async function tiraFurtivita(t) {
     const s = schedaDi(t), mod = s ? abTot(s, 'furtivita') : 0, ai = aiutoPer(t);
     if (ai) usaAiuto(t, ai);
-    await tira((ai ? '2d20kh1' : '1d20') + piuMod(mod), ai ? `vantaggio (aiutato da ${ai.h.nome})` : null, isDM() && !t.giocatore, `${t.nome || 'Token'} · Furtività (Nascondersi)`);
+    const r = await tira((ai ? '2d20kh1' : '1d20') + piuMod(mod), ai ? `vantaggio (aiutato da ${ai.h.nome})` : null, isDM() && !t.giocatore, `${t.nome || 'Token'} · Furtività (Nascondersi)`);
+    if (!r?.totale && r?.totale !== 0) return;
+    // il confronto con la Percezione passiva lo fa il DM, che ha tutte le schede: dal giocatore parte la richiesta
+    if (isDM()) esitoNascondersi(t, r.totale); else { manda('nasconde', { id: t.id, tot: r.totale }); toast(`Furtività ${r.totale}: se nessun nemico ti nota, sul segnalino compare «Nascosto».`); }
+  }
+  // la Percezione passiva: 10 + Saggezza (Percezione) della scheda; senza scheda 10
+  const percPassiva = o => { const s = schedaDi(o); return s ? 10 + abTot(s, 'percezione') : 10; };
+  // chi si nasconde supera la Percezione passiva più alta degli avversari svegli sulla mappa
+  async function esitoNascondersi(t, tot) {
+    t = T.tok.get(t.id) || t;
+    const opp = [...T.tok.values()].filter(o => o.scena === t.scena && o.id !== t.id && parte(o) !== parte(t) && !condTok(o).some(c => FERMO.includes(c)) && (pfDi(o)?.pf ?? 1) > 0)
+      .map(o => ({ o, pp: percPassiva(o) })).sort((a, b) => b.pp - a.pp);
+    const top = opp[0], ok = !top || tot >= top.pp, n = t.nome || 'Il token';
+    const dett = top ? `Furtività ${tot} contro Percezione passiva ${top.pp} di ${top.o.nome || 'un avversario'}` : `Furtività ${tot}, nessun avversario sulla mappa`;
+    if (!t.giocatore) { // un PNG del DM: se riesce passa a «Solo per me», i giocatori non lo vedono più
+      if (!ok) return toast(`${n} non riesce a nascondersi: ${dett}.`, 'err');
+      if (!t.nascosto) await mettiSoloDM(t, true);
+      return toast(`🥷 ${n} è nascosto (${dett}): ora lo vedi solo tu. Per farlo riapparire: tasto destro › Mostra ai giocatori.`);
+    }
+    if (!ok) return annuncia(`👁 ${n} prova a nascondersi, ma ${top.o.nome || 'qualcuno'} lo nota.`);
+    await mettiNascosto(t, true); annuncia(`🥷 ${n} si nasconde.`); toast(`🥷 ${n}: nascosto. ${dett}.`);
+  }
+  // la condizione «Nascosto» su un personaggio va anche sulla sua scheda, come le altre condizioni
+  async function mettiNascosto(t, on) {
+    t = T.tok.get(t.id) || t; const c = condTok(t); if (on === c.includes('Nascosto')) return;
+    const lista = on ? [...c, 'Nascosto'] : c.filter(x => x !== 'Nascosto'), s = t.giocatore ? schedaDi(t) : null;
+    if (s && puoScrivere(s)) { await cambiaCond(s, null, lista); if (!condTok(T.tok.get(t.id)).includes('Nascosto') === on) await condSuToken(t, lista); }
+    else await condSuToken(t, lista);
+  }
+  async function mettiSoloDM(t, on) {
+    const r = await SB.from('tavolo_token').update({ nascosto: on }).eq('id', t.id).select().single(); if (r.error) return toast(r.error.message, 'err');
+    T.tok.set(t.id, completa(T.tok.get(t.id), r.data)); disegnaToken(); if (on) manda('nascosto', { id: t.id });
   }
   // segni che durano oltre il turno (Schivata, Aiuto): stanno sul token di chi li fa e valgono fino all'inizio del suo prossimo turno
   function segnoVivo(g) {
