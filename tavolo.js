@@ -194,6 +194,11 @@ dialog.dlg.tv-side.tv-sw.tv-incol{position:relative;inset:auto;margin:0;width:10
 .tv-card:hover .acts,.tv-card:focus-within .acts{opacity:1}
 .tv-card .acts button{all:unset;cursor:pointer;width:28px;height:28px;border-radius:6px;background:#000b;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.9rem}
 .tv-card .acts button:hover{background:#7d2530}
+.tv-card .acts .sposta{cursor:grab;touch-action:none}
+.tv-card .acts .sposta:hover{background:#000b}
+.tv-pgrid.riordina{user-select:none;-webkit-user-select:none}
+.tv-pgrid.riordina .tv-card{cursor:grabbing}
+.tv-card.trasc{opacity:.55;border-color:#e7cf9a;border-style:dashed;transform:scale(.97)}
 .tv-card.nuova{border:2px dashed #e7cf9a55;background:transparent;align-items:center;justify-content:center;min-height:120px;color:#e7cf9a;font-family:var(--display);gap:6px}
 .tv-card.nuova span{font-size:1.8rem;line-height:1}
 @media (hover:none){.tv-card .acts{opacity:1}}
@@ -1139,7 +1144,6 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
 .tv-pop.nuovo .ini{display:flex;align-items:center;gap:6px;padding:10px 12px;border-top:1px solid #ffffff14;font:600 .85rem var(--body)}
 .tv-pop.nuovo .ini span{flex:1}
 .tv-pop.nuovo .ini .gia{min-width:40px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#c9a24a;color:#1d1613;font:700 1rem var(--display)}
-.tv-pop.nuovo .ini input{width:56px;height:32px;box-sizing:border-box;border-radius:8px;border:1px solid #ffffff2a;background:#0006;color:#fff;text-align:center;font:inherit}
 .tv-pop.nuovo details{border-top:1px solid #ffffff14;padding:8px 12px;font-size:.84rem;color:var(--pan-mute)}
 .tv-pop.nuovo details summary{cursor:pointer;padding:2px 0}
 .tv-pop.nuovo details .row{display:flex;align-items:center;gap:6px;margin-top:8px;color:var(--pan-ink)}
@@ -1266,7 +1270,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
   .tv-pop.nuovo .gr button{padding:6px 2px 5px;gap:2px}
   .tv-pop.nuovo .tv-pcond{padding:0 10px 7px}
   .tv-pop.nuovo .ini{padding:6px 10px}
-  .tv-pop.nuovo .ini input,.tv-pop.nuovo .ini .tv-b{height:30px}
+  .tv-pop.nuovo .ini .tv-b{height:30px}
   .tv-pop.nuovo details{padding:6px 10px}
   .tv-pop.nuovo .fine{padding:7px 10px 0}
   body:has(.tv) .toast{font-size:.85rem;line-height:1.3;max-width:min(92vw,460px);padding:7px 12px}
@@ -2015,18 +2019,72 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     T.mini.set(s.mappa, p); p.catch(() => T.mini.delete(s.mappa));
     return p;
   }
+  // le mappe nell'ordine scelto dal DM (tappa-17.sql); senza la colonna, in ordine di creazione
+  const ordScena = s => s.ordine ?? Date.parse(s.creata) / 1000;
+  const sceneInOrdine = () => [...T.scene.values()].sort((a, b) => ordScena(a) - ordScena(b));
+  // trascinare le schede delle mappe per riordinarle: col mouse da tutta la scheda, col dito dalla maniglia ⠿
+  function riordinoMappe(p) {
+    const g = p.querySelector('.tv-pgrid'); if (!g) return;
+    let d = null;
+    const fine = async ok => {
+      if (!d) return; const { c, mosso, x0 } = d; d = null; T.trascMappe = false;
+      c.classList.remove('trasc'); g.classList.remove('riordina');
+      if (!mosso) return;
+      const zitto = e => { e.stopPropagation(); e.preventDefault(); };
+      c.addEventListener('click', zitto, { capture: true, once: true }); setTimeout(() => c.removeEventListener('click', zitto, { capture: true }), 0);
+      const ids = [...g.querySelectorAll('.tv-card[data-id]')].map(x => x.dataset.id), i = ids.indexOf(c.dataset.id);
+      if (!ok || ids.join() === x0) return pannelloMappe(true);
+      const pr = T.scene.get(ids[i - 1]), nx = T.scene.get(ids[i + 1]);
+      const v = pr && nx ? (ordScena(pr) + ordScena(nx)) / 2 : pr ? ordScena(pr) + 1 : nx ? ordScena(nx) - 1 : 0;
+      const s = T.scene.get(c.dataset.id), prima = s.ordine; s.ordine = v;
+      const r = await SB.from('tavolo_scene').update({ ordine: v }).eq('id', s.id).select().single();
+      if (r.error) { s.ordine = prima; toast(/ordine|column/i.test(r.error.message) ? 'Per riordinare le mappe esegui tavolo/tappa-17.sql in Supabase.' : r.error.message, 'err'); return pannelloMappe(true); }
+      T.scene.set(s.id, r.data);
+    };
+    g.querySelectorAll('.tv-card[data-id]').forEach(c => {
+      c.addEventListener('pointerdown', e => {
+        const man = e.target.closest('[data-k=sposta]');
+        if (e.button || (!man && (e.pointerType !== 'mouse' || e.target.closest('.acts')))) return;
+        if (p.querySelector('input[type=search]')?.value.trim()) return toast('Svuota la ricerca per riordinare le mappe.');
+        d = { c, id: e.pointerId, sx: e.clientX, sy: e.clientY, mosso: false, x0: [...g.querySelectorAll('.tv-card[data-id]')].map(x => x.dataset.id).join() };
+        if (man) { e.preventDefault(); try { man.setPointerCapture(e.pointerId); } catch { } }
+      });
+    });
+    const muovi = e => {
+      if (!d || e.pointerId !== d.id) return;
+      if (!d.mosso) {
+        if (Math.hypot(e.clientX - d.sx, e.clientY - d.sy) < 6) return;
+        d.mosso = true; T.trascMappe = true; d.c.classList.add('trasc'); g.classList.add('riordina');
+      }
+      e.preventDefault();
+      const r = g.getBoundingClientRect();
+      if (e.clientY < r.top + 30) g.scrollTop -= 12; else if (e.clientY > r.bottom - 30) g.scrollTop += 12;
+      const su = document.elementFromPoint(e.clientX, e.clientY)?.closest('.tv-card[data-id]');
+      if (!su || su === d.c || su.parentNode !== g) return;
+      const b = su.getBoundingClientRect(), dopo = e.clientX > b.left + b.width / 2;
+      if (dopo) su.after(d.c); else su.before(d.c);
+    };
+    // un solo gruppo di ascoltatori sul pannello, che resta lo stesso: puntano sempre all'ultimo disegno
+    p._rm = muovi; p._rf = fine; p._rattivo = () => !!d;
+    if (p._rok) return; p._rok = true;
+    p.addEventListener('pointermove', e => p._rm(e));
+    p.addEventListener('pointerup', () => p._rf(true));
+    p.addEventListener('pointercancel', () => p._rf(false));
+    p.addEventListener('keydown', e => { if (e.key === 'Escape' && p._rattivo()) { e.stopPropagation(); p._rf(false); } });
+  }
   function pannelloMappe(apri) {
     const p = $('#tv-pages'); if (!p) return;
-    if (!apri) { p.hidden = true; return; }
+    if (!apri) { T.trascMappe = false; p.hidden = true; return; }
+    if (T.trascMappe) return;
     chiudiPop();
     const sc = scena(), att = T.stato.scena, q = p.querySelector('input[type=search]')?.value || '';
     const card = s => `<div class="tv-card ${s.id === T.vista ? 'cur' : ''}" role="button" tabindex="0" data-id="${s.id}"><span class="im" data-mini="${s.id}"></span>${s.id === att ? '<span class="seg" title="I giocatori sono qui"></span>' : ''}
-      <span class="nm">${esc(s.nome)}</span><span class="acts">${s.id === att ? '' : '<button type="button" data-k="porta" title="Porta qui i giocatori" aria-label="Porta qui i giocatori">🔖</button>'}<button type="button" data-k="nome" title="Rinomina" aria-label="Rinomina">✎</button><button type="button" data-k="via" title="Elimina" aria-label="Elimina">✕</button></span></div>`;
+      <span class="nm">${esc(s.nome)}</span><span class="acts">${s.id === att ? '' : '<button type="button" data-k="porta" title="Porta qui i giocatori" aria-label="Porta qui i giocatori">🔖</button>'}<button type="button" data-k="nome" title="Rinomina" aria-label="Rinomina">✎</button><button type="button" data-k="sposta" class="sposta" title="Trascina per spostare la mappa" aria-label="Sposta la mappa">⠿</button><button type="button" data-k="via" title="Elimina" aria-label="Elimina">✕</button></span></div>`;
     p.innerHTML = `<div class="tv-ph"><div class="cur">${sc ? `<span class="ph" data-mini="${sc.id}"></span><b>${esc(sc.nome)}</b><button type="button" class="lnk" data-k="imp">⚙ Impostazioni della pagina</button>` : '<b>Mappe</b>'}</div>
       <input type="search" placeholder="Cerca…" aria-label="Cerca una mappa" value="${esc(q)}">
       <label title="Se è spuntato, quando apri una mappa ci vanno anche i giocatori"><input type="checkbox" data-k="segui" ${segue() ? 'checked' : ''}> I giocatori mi seguono</label>
       <button type="button" class="btn primary" data-k="nuova">+ Crea pagina</button><button type="button" class="x" data-k="chiudi" aria-label="Chiudi">✕</button></div>
-      <div class="tv-pgrid">${[...T.scene.values()].map(card).join('')}<button type="button" class="tv-card nuova" data-k="nuova"><span>+</span>Nuova mappa</button></div>`;
+      <div class="tv-pgrid">${sceneInOrdine().map(card).join('')}<button type="button" class="tv-card nuova" data-k="nuova"><span>+</span>Nuova mappa</button></div>`;
     p.hidden = false;
     p.querySelectorAll('[data-mini]').forEach(el => { const s = T.scene.get(el.dataset.mini); if (s) miniUrl(s).then(u => { if (u) el.style.backgroundImage = `url("${u}")`; el.style.backgroundSize = 'cover'; el.style.backgroundPosition = 'center'; }).catch(() => { }); });
     const cerca = p.querySelector('input[type=search]');
@@ -2036,6 +2094,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     p.querySelectorAll('[data-k=nuova]').forEach(b => b.onclick = () => dlgNuovaScena());
     p.querySelector('[data-k=chiudi]').onclick = () => pannelloMappe(false);
     const imp = p.querySelector('[data-k=imp]'); if (imp) imp.onclick = () => { pannelloMappe(false); dlgGriglia(); };
+    riordinoMappe(p);
     p.querySelectorAll('.tv-card[data-id]').forEach(c => {
       const s = T.scene.get(c.dataset.id);
       const apriMappa = async () => {
@@ -2056,7 +2115,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         if (s.mappa) SB.storage.from(BUCKET).remove([s.mappa, miniPath(s.mappa)]).catch(() => { });
         T.scene.delete(s.id); for (const t of [...T.tok.values()]) if (t.scena === s.id) T.tok.delete(t.id);
         if (T.stato.scena === s.id) T.stato.scena = null;
-        if (T.vista === s.id) { T.vista = T.stato.scena || [...T.scene.keys()][0] || null; mostraScena(true); }
+        if (T.vista === s.id) { T.vista = T.stato.scena || sceneInOrdine()[0]?.id || null; mostraScena(true); }
         pannelloMappe(true); disegnaBarra();
       };
     });
@@ -2835,8 +2894,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     chiudiPop();
     const r = st.getBoundingClientRect(), pop = document.createElement('div'); pop.className = 'tv-pop nuovo';
     const giaIn = T.turno.find(x => x.token === t.id);
-    const ini = giaIn ? `<div class="ini"><span>🎲 Iniziativa</span><b class="gia" title="Già nell'ordine del turno${isDM() ? ': la cambi con la matita della tabella del turno' : ''}">${giaIn.valore}</b></div>` : `<div class="ini"><span>🎲 Iniziativa</span><input type="number" data-k="imod" placeholder="mod" aria-label="Modificatore d'iniziativa"><button type="button" class="tv-b sec" data-k="ini" title="Tira 1d20 + modificatore e aggiungi all'ordine del turno">Tira</button></div>`;
-    const ft = haFoto(t), sch = schedaDi(t), pf = (isDM() || puoMuovere(t)) && pfDi(t);
+    const ft = haFoto(t), sch = schedaDi(t), imod = sch ? modC(sch.dati?.des) : 0, pf = (isDM() || puoMuovere(t)) && pfDi(t);
+    const ini = giaIn ? `<div class="ini"><span>🎲 Iniziativa</span><b class="gia" title="Già nell'ordine del turno${isDM() ? ': la cambi con la matita della tabella del turno' : ''}">${giaIn.valore}</b></div>` : `<div class="ini"><span>🎲 Iniziativa</span><button type="button" class="tv-b sec" data-k="ini" title="${sch ? `Tira 1d20 ${segno(imod)} (Destrezza dalla scheda di ${esc(sch.nome)})` : 'Tira 1d20: il token non ha una scheda, quindi senza bonus'} e aggiungi all'ordine del turno">Tira d20${imod ? ' ' + segno(imod) : ''}</button></div>`;
     const quota = pf ? clamp(pf.pf / Math.max(1, pf.max), 0, 1) : 0;
     const rpf = pf ? `<div class="pfr"><div class="rr"><span>PF <b>${pf.pf}</b> / ${pf.max}</span><button type="button" class="tv-b ko ico" data-k="pfm" title="Danni">−</button><input type="number" data-k="pfq" value="1" min="1" aria-label="Quanti punti"><button type="button" class="tv-b ok ico" data-k="pfp" title="Cura">+</button></div><div class="bar"><s style="width:${Math.round(quota * 100)}%;--b:${quota > 0.5 ? '#3f9a4a' : quota > 0.25 ? '#c9a24a' : '#b8322c'}"></s></div></div>` : '';
     const cnow = condTok(t), pcond = isDM() || puoMuovere(t), mio = puoMuovere(t);
@@ -2873,7 +2932,6 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       pop.querySelector('[data-k=fine]')?.addEventListener('click', () => { chiudiPop(); finisciTurno(); });
       pop.querySelector('[data-k=pfm]')?.addEventListener('click', () => { cambiaPF(t, -q()); chiudiPop(); });
       pop.querySelector('[data-k=pfp]')?.addEventListener('click', () => { cambiaPF(t, q()); chiudiPop(); });
-      const im = pop.querySelector('[data-k=imod]'); if (im && sch) im.value = modC(sch.dati.des);
     };
     if (!isDM()) {
       // il giocatore apre la foto (solo per sé) e, sul proprio token, tira l'iniziativa
@@ -2883,7 +2941,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       st.append(pop); extra();
       pop.style.left = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6) + 'px'; pop.style.top = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6) + 'px'; adattaPop(pop);
       if (ft) pop.querySelector('[data-k=foto]').onclick = () => { chiudiPop(); apriFoto(fotoDi(t)); };
-      if (mio && !giaIn) pop.querySelector('[data-k=ini]').onclick = () => { chiudiPop(); iniziativa(t, pop.querySelector('[data-k=imod]').value); };
+      if (mio && !giaIn) pop.querySelector('[data-k=ini]').onclick = () => { chiudiPop(); iniziativa(t, imod); };
       return;
     }
     const gioc = (T.info.giocatori || []).map(g => `<option value="${esc(g.id)}" ${t.giocatore === g.id ? 'selected' : ''}>${esc(g.name)}</option>`).join('');
@@ -2920,7 +2978,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     pop.querySelector('[data-k=piu]').onclick = () => salva({ misura: t.misura < 1 ? 1 : Math.min(10, t.misura + 1) });
     pop.querySelector('[data-k=gioc]').onchange = ev => salva({ giocatore: ev.target.value || null });
     pop.querySelector('[data-k=vista]')?.addEventListener('change', ev => salva({ vista: ev.target.value === '' ? null : +ev.target.value }));
-    pop.querySelector('[data-k=ini]')?.addEventListener('click', () => { chiudiPop(); iniziativa(t, pop.querySelector('[data-k=imod]').value); });
+    pop.querySelector('[data-k=ini]')?.addEventListener('click', () => { chiudiPop(); iniziativa(t, imod); });
     const rin = pop.querySelector('[data-k=rin]');
     const rinomina = () => { const n = rin.value.trim().slice(0, 60); if (n !== (t.nome || '')) salva({ nome: n }); };
     rin.onkeydown = ev => { if (ev.key === 'Enter') { ev.preventDefault(); rinomina(); } else if (ev.key === 'Escape') chiudiPop(); };
