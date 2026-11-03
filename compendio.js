@@ -41,7 +41,7 @@
 .cp-row .r{flex:none;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:240px}
 .cp-num{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-size:1.02rem;color:var(--wine);border:2px solid var(--tc,var(--gold));background:var(--paper2);line-height:1}
 :root[data-theme=dark] .cp-num{color:var(--gold2)}
-.cp-ktl{display:inline-block;margin-right:9px;font-family:var(--display);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--tc,var(--gold));font-weight:700;vertical-align:1px}
+.cp-ktl{display:inline-block;margin-right:9px;font-family:var(--display);font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-weight:600;vertical-align:1px}
 .cp-star{flex:none;width:36px;height:36px;display:grid;place-items:center;border-radius:50%;border:0;background:none;color:var(--line2);cursor:pointer}
 .cp-star svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}
 .cp-star:hover{color:var(--gold)}
@@ -50,7 +50,22 @@
 .btn.cp-fav.on{color:var(--gold);border-color:var(--gold)}.btn.cp-fav.on svg{fill:currentColor}
 .cp-sc0{--tc:#2a5ea8}.cp-sc1{--tc:#a8286e}.cp-sc2{--tc:#167a85}.cp-sc3{--tc:#806b00}.cp-sc4{--tc:#7a3ea6}.cp-sc5{--tc:#a8283a}.cp-sc6{--tc:#44503f}.cp-sc7{--tc:#2e7a3c}
 :root[data-theme=dark] .cp-sc0{--tc:#7aaaf0}:root[data-theme=dark] .cp-sc1{--tc:#e07ab0}:root[data-theme=dark] .cp-sc2{--tc:#5ec6cf}:root[data-theme=dark] .cp-sc3{--tc:#e8cb45}:root[data-theme=dark] .cp-sc4{--tc:#bd96e8}:root[data-theme=dark] .cp-sc5{--tc:#e8788a}:root[data-theme=dark] .cp-sc6{--tc:#a9b8a0}:root[data-theme=dark] .cp-sc7{--tc:#72c47e}
-.badge.cp-b{background:var(--tc)}
+.badge.cp-b{background:var(--ink2)}
+.cp-kr{display:inline-block;font-family:var(--display);font-size:.6rem;font-weight:600;letter-spacing:.06em;color:var(--mute);border:1px solid var(--line2);border-radius:3px;padding:2px 4px 1px;margin-left:3px;line-height:1.1;vertical-align:1px}
+.cp-sp{font-size:1rem}
+.cp-sp tbody tr[data-cp-open]{cursor:pointer}
+.cp-sp tbody tr[data-cp-open]:hover td,.cp-sp tbody tr[data-cp-open]:focus-visible td{background:var(--paper2)}
+.cp-sp td{color:var(--ink2);white-space:nowrap;vertical-align:middle;padding:7px 10px}
+.cp-sp td.n{color:var(--ink);white-space:normal;min-width:150px}
+.cp-sp td.n small{font-weight:400;color:var(--mute);font-size:.8rem;margin-left:6px}
+.cp-sp td.k{width:1%;text-align:right}
+.cp-sp td.st{width:1%;padding:0 4px}
+.cp-sp .cp-star{width:32px;height:32px}
+.cp-sp tr.sep td{background:var(--paper2);font-family:var(--display);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);padding:7px 10px}
+.cp-sp tr.sep small{font-family:var(--body);letter-spacing:0;text-transform:none;color:var(--mute);margin-left:6px}
+.cp-spw{background:var(--paper);border:1px solid var(--line2);border-radius:5px;box-shadow:var(--shadow);margin:0 0 18px}
+.prose .cp-tbl{margin:6px 0 12px;font-size:.95rem}
+.prose .cp-tbl caption{text-align:left;font-family:var(--display);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);padding:0 0 6px}
 .pill.cp-k{color:var(--warn);border-color:var(--warn)}
 .pill.cp-r{color:#2a5ea8;border-color:#2a5ea888}
 :root[data-theme=dark] .pill.cp-r{color:#7aaaf0}
@@ -59,7 +74,7 @@
 .cp-statline em{font-style:normal;font-family:var(--display);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
 .cp-statline b{font-weight:600;color:var(--ink)}
 .cp-foot{font-size:.85rem;color:var(--mute);margin:14px 0 0}
-.cp-dmg{display:inline-flex;align-items:baseline;gap:2px;color:var(--dc);font-weight:600;white-space:nowrap}
+.cp-dmg{font-weight:600;white-space:nowrap}
 .cp-dmg svg{width:.95em;height:.95em;align-self:center;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .cp-x{background:none;border:0;padding:0;font:inherit;color:inherit;border-bottom:1px dotted var(--wine2);cursor:help}
 .cp-x:hover{color:var(--wine2)}
@@ -108,6 +123,8 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
   .cp-filters input[type=search]{max-width:none}
   .cp-row{padding:8px 12px;gap:10px}
   .cp-row .r{display:none}
+  .cp-sp .w{display:none}
+  .cp-sp td,.cp-sp th{padding-left:8px;padding-right:8px}
   .cp-car{grid-template-columns:repeat(3,1fr)}
   .cp-car div:nth-child(3){border-right:0}.cp-car div:nth-child(-n+3){border-bottom:1px solid var(--line)}
   .cp-stat div{flex:1 1 40%}
@@ -144,10 +161,11 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
   };
   const svg = (k, cls = '') => `<svg viewBox="0 0 24 24" class="${cls}" aria-hidden="true">${I[k] || ''}</svg>`;
   const DMG = ['fuoco', 'freddo', 'fulmine', 'tuono', 'acido', 'veleno', 'necrotici', 'radiosi', 'psichici', 'forza', 'taglienti', 'perforanti', 'contundenti'];
+  /* i colori dei danni non si usano più: il testo resta sobrio */
   const DCOL = { fuoco: '#c2410c', freddo: '#2b7bb9', fulmine: '#a07c00', tuono: '#5b5fa8', acido: '#5f8a12', veleno: '#3f7d3a', necrotici: '#6b5a7e', radiosi: '#b8860b', psichici: '#a0399a', forza: '#8a3fbf', fisici: '#7a6450' };
   const DCOLD = { fuoco: '#f08a4b', freddo: '#7ec0ee', fulmine: '#f0d050', tuono: '#a7abf0', acido: '#a8d65a', veleno: '#86c27e', necrotici: '#b9aec6', radiosi: '#f4cf62', psichici: '#e08ad8', forza: '#c79af0', fisici: '#cbb69c' };
   const dcol = k => { const c = ['taglienti', 'perforanti', 'contundenti'].includes(k) ? 'fisici' : k; return (document.documentElement.dataset.theme === 'dark' ? DCOLD : DCOL)[c]; };
-  const dmgTag = k => `<span class="cp-dmg" style="--dc:${dcol(k)}" title="Danni ${['fuoco', 'freddo', 'fulmine', 'tuono', 'acido', 'veleno', 'forza'].includes(k) ? 'da ' : ''}${k}">${svg(k)}${k}</span>`;
+  const dmgTag = k => `<span class="cp-dmg">${k}</span>`;
   // nel testo libero (attacchi del Tavolo, «perforanti, gittata 24/96 m»): la prima parola che è un tipo di danno prende l'icona
   const conIcone = t => esc(t).replace(new RegExp(`\\b(${DMG.join('|')})\\b`), k => dmgTag(k));
 
@@ -171,13 +189,14 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
     fetch('compendio.json').then(r => r.ok ? r.json() : Promise.reject(new Error('compendio.json ' + r.status))),
     fetch('incantesimi.json').then(r => r.ok ? r.json() : Promise.reject(new Error('incantesimi.json ' + r.status))),
     regole(),
-  ]).then(([c, inc, R]) => {
+    dm() ? fetch('bestiario.json').then(r => r.ok ? r.json() : { mostri: [] }, () => ({ mostri: [] })) : { mostri: [] },
+  ]).then(([c, inc, R, B]) => {
     const cl = {};
     if (R?.liste) for (const [k, liv] of Object.entries(R.liste)) liv.forEach(l => (l || []).forEach(n => { (cl[norm(n)] = cl[norm(n)] || new Set()).add(k); }));
     const map = x => ({ n: x.nome, l: +x.livello || 0, s: x.scuola, r: !!x.rituale, t: x.tempo || '', p: x.portata || '', c: x.componenti || '', d: x.durata || '', k: !!x.conc, x: x.testo || '', fonte: x.fonte || '', riass: !!x.riassunto, cl: [...(cl[norm(x.nome)] || [])] });
     const nomi = new Set(inc.incantesimi.map(x => norm(x.nome)));
     const sp = [...inc.incantesimi.map(map), ...(R?.extraInc || []).filter(x => !nomi.has(norm(x.nome))).map(map)].sort((a, b) => a.l - b.l || a.n.localeCompare(b.n, 'it'));
-    D = { ...c, sp, attr: inc.attribuzione || '' };
+    D = { ...c, mostri: B.mostri || [], sp, attr: inc.attribuzione || '' };
     D.creg = new RegExp('(^|[^\\p{L}])(' + D.condizioni.map(x => x.n.toLowerCase()).concat(['avvelenat[aoie]', 'spaventat[aoie]', 'paralizzat[aoie]', 'pron[aoie]', 'accecat[aoie]', 'affascinat[aoie]', 'afferrat[aoie]', 'trattenut[aoie]', 'stordit[aoie]', 'incapacitat[aoie]', 'assordat[aoie]', 'pietrificat[aoie]', 'invisibil[ei]', 'nascost[aoie]']).join('|') + ')(?![\\p{L}])', 'giu');
     return D;
   }).catch(e => { P = null; throw e; }));
@@ -189,6 +208,19 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
     return h.split(/\n\n+/).map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
   }
   const inline = (t, skip) => rich(t, skip).replace(/^<p>|<\/p>$/g, '');
+  // testo degli oggetti: un paragrafo per riga, e le tabelle scritte come «|t|titolo», «|h|a|b», «|a|b»
+  function testoLungo(t) {
+    const out = []; let tb = null;
+    const chiudi = () => { if (tb) { out.push(`<div class="cp-tblw"><table class="cp-tbl">${tb.t ? `<caption>${esc(tb.t)}</caption>` : ''}${tb.h ? `<thead><tr>${tb.h.map(c => `<th>${esc(c)}</th>`).join('')}</tr></thead>` : ''}<tbody>${tb.r.map(r => `<tr>${r.map((c, i) => `<td${i ? '' : ' class="n"'}>${inline(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`); tb = null; } };
+    for (const riga of String(t || '').split('\n')) {
+      if (riga.startsWith('|t|')) { chiudi(); tb = { t: riga.slice(3), h: null, r: [] }; continue; }
+      if (riga.startsWith('|h|')) { if (!tb || tb.h || tb.r.length) { chiudi(); tb = { t: '', h: null, r: [] }; } tb.h = riga.slice(3).split('|'); continue; }
+      if (riga.startsWith('|')) { if (!tb) tb = { t: '', h: null, r: [] }; tb.r.push(riga.slice(1).split('|')); continue; }
+      chiudi(); out.push(`<p>${inline(riga)}</p>`);
+    }
+    chiudi(); return out.join('');
+  }
+  const FONTE_SRD = 'Contiene materiale del System Reference Document 5.1 in italiano di Wizards of the Coast, con licenza CC-BY-4.0.';
 
   /* ---------- chi sei e i tuoi preferiti (in questo dispositivo) ---------- */
   const dm = () => !window.__RO;
@@ -242,9 +274,9 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
     const i = key.indexOf(':'), k = key.slice(0, i), id = key.slice(i + 1);
     if (k === 'spell') { const s = D.sp.find(x => x.n === id); if (s) sheet(spellMeta(s), s.n, spellBody(s), star('spell', s.n), '#/compendio/incantesimi/' + encodeURIComponent(s.n)); }
     if (k === 'mostro' && dm()) { const m = D.mostri.find(x => x.id === id); if (m) { const d = sheet(monMeta(m), m.nome, statblock(m), star('mostro', m.id), '#/compendio/bestiario/' + m.id); d.querySelector('menu').insertAdjacentHTML('afterbegin', `<button type="button" class="btn" data-cp-put="${m.id}">${svg('tavolo', 'cp-ic')} Metti al Tavolo</button>`); d.querySelector('[data-cp-put]').onclick = () => { d.close(); alTavolo(m); }; } }
-    if (k === 'ogg') { const o = D.oggetti.find(x => x.n === id); if (o) sheet(oggMeta(o), o.n, `<div class="prose">${rich(o.x)}</div>`, star('ogg', o.n), '#/compendio/oggetti/' + encodeURIComponent(o.n)); }
+    if (k === 'ogg') { const o = D.oggetti.find(x => x.n === id); if (o) sheet(oggMeta(o), o.n, `<div class="prose">${testoLungo(o.x)}</div>`, star('ogg', o.n), '#/compendio/oggetti/' + encodeURIComponent(o.n)); }
     if (k === 'cond') mostraCond(id);
-    if (k === 'att') { const g = D.att.find(x => x.n === id); if (g) sheet(`<span class="badge" style="background:var(--gold)">${esc(g.cat)}</span>`, g.n, `<div class="cp-statline">${slot('Costo', esc(g.c))}${slot('Peso', esc(g.w))}</div>${g.x ? `<div class="prose">${rich(g.x)}</div>` : ''}`, star('att', g.n)); }
+    if (k === 'att') { const g = D.att.find(x => x.n === id); if (g) sheet(`<span class="badge" style="background:var(--gold)">${esc(g.cat)}</span>${g.sub ? `<span class="pill">${esc(g.sub)}</span>` : ''}`, g.n, `<div class="cp-statline">${slot('Costo', esc(g.c))}${g.w ? slot('Peso', esc(g.w)) : ''}${g.vel ? slot('Velocità', esc(g.vel)) : ''}${g.car ? slot('Carico', esc(g.car)) : ''}</div>${g.x ? `<div class="prose">${testoLungo(g.x)}</div>` : ''}`, star('att', g.n)); }
     if (k === 'arma') { const w = D.armi.find(x => x.n === id); if (w) sheet('<span class="badge" style="background:#7a6450">Arma</span>', w.n, `<div class="cp-statline">${slot('Danni', `${esc(w.d)} ${w.t ? dmgTag(w.t) : ''}`)}${slot('Costo', esc(w.c))}${slot('Peso', esc(w.w))}</div><p>${propLinks(w.p) || 'Nessuna proprietà.'}</p>`, star('arma', w.n)); }
   }
 
@@ -283,8 +315,8 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
     const f = favs();
     const grp = (t, items) => items.length ? `<div class="cp-grp">${t} <small>${items.length}</small></div>${items.join('')}` : '';
     const fs = [
-      grp('Incantesimi', (f.spell || []).map(n => D.sp.find(x => x.n === n)).filter(Boolean).map(s => row('spell:' + s.n, s.l || 'T', s.s, 'cp-sc' + scI(s.s), s.n, `${esc(s.t.split(',')[0])} · ${esc(s.p)}`, '', 'spell', s.n))),
-      dm() ? grp('Bestiario', (f.mostro || []).map(id => D.mostri.find(x => x.id === id)).filter(Boolean).map(m => row('mostro:' + m.id, esc(m.gs), m.tipo, '', m.nome, `CA ${m.ca} · ${m.pf} PF`, '', 'mostro', m.id))) : '',
+      grp('Incantesimi', (f.spell || []).map(n => D.sp.find(x => x.n === n)).filter(Boolean).map(s => row('spell:' + s.n, null, spKtl(s), '', s.n, `${esc(s.t.split(',')[0])} · ${esc(s.p)}`, '', 'spell', s.n))),
+      dm() ? grp('Bestiario', (f.mostro || []).map(id => D.mostri.find(x => x.id === id)).filter(Boolean).map(m => row('mostro:' + m.id, null, `Sfida ${m.gs} · ${m.tipo}`, '', m.nome, `CA ${m.ca} · ${m.pf} PF`, '', 'mostro', m.id))) : '',
       grp('Condizioni', (f.cond || []).map(n => row('cond:' + n, null, '', '', n, '', '', 'cond', n))),
       grp('Oggetti magici', (f.ogg || []).map(n => D.oggetti.find(x => x.n === n)).filter(Boolean).map(o => row('ogg:' + o.n, null, o.r, '', o.n, esc(o.t), '', 'ogg', o.n))),
       grp('Equipaggiamento', [...(f.arma || []).map(n => D.armi.find(x => x.n === n)).filter(Boolean).map(w => row('arma:' + w.n, null, 'Arma', '', w.n, `${esc(w.d)} ${w.t ? dmgTag(w.t) : ''}`, '', 'arma', w.n)), ...(f.att || []).map(n => D.att.find(x => x.n === n)).filter(Boolean).map(g => row('att:' + g.n, null, g.cat, '', g.n, esc(g.c), '', 'att', g.n))]),
@@ -295,10 +327,10 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
       if (q.length >= 2) {
         const hit = s => norm(s).includes(q);
         const r = [
-          ...D.sp.filter(s => hit(s.n)).slice(0, 12).map(s => row('spell:' + s.n, s.l || 'T', 'Incantesimo', 'cp-sc' + scI(s.s), s.n, `${esc(s.s)} · ${esc(s.t.split(',')[0])}`, '', 'spell', s.n)),
+          ...D.sp.filter(s => hit(s.n)).slice(0, 12).map(s => row('spell:' + s.n, null, 'Incantesimo · ' + spKtl(s), '', s.n, `${esc(s.t.split(',')[0])} · ${esc(s.p)}`, '', 'spell', s.n)),
           ...D.condizioni.filter(c => hit(c.n)).map(c => row('cond:' + c.n, null, 'Condizione', '', c.n, esc(c.r[0]), '', 'cond', c.n)),
-          ...(dm() ? D.mostri.filter(m => hit(m.nome)).map(m => row('mostro:' + m.id, esc(m.gs), 'Bestiario', '', m.nome, `CA ${m.ca} · ${m.pf} PF`, '', 'mostro', m.id)) : []),
-          ...D.oggetti.filter(o => hit(o.n)).map(o => row('ogg:' + o.n, null, 'Oggetto magico', '', o.n, `${esc(o.t)} · ${esc(o.r)}`, '', 'ogg', o.n)),
+          ...(dm() ? D.mostri.filter(m => hit(m.nome)).slice(0, 20).map(m => row('mostro:' + m.id, null, `Bestiario · Sfida ${m.gs}`, '', m.nome, `CA ${m.ca} · ${m.pf} PF`, '', 'mostro', m.id)) : []),
+          ...D.oggetti.filter(o => hit(o.n)).slice(0, 20).map(o => row('ogg:' + o.n, null, 'Oggetto magico', '', o.n, `${esc(o.t)} · ${esc(o.r)}`, '', 'ogg', o.n)),
           ...D.armi.filter(w => hit(w.n)).map(w => row('arma:' + w.n, null, 'Arma', '', w.n, `${esc(w.d)} ${w.t ? dmgTag(w.t) : ''} · ${esc(w.c)}`, '', 'arma', w.n)),
           ...D.att.filter(g => hit(g.n)).map(g => row('att:' + g.n, null, g.cat, '', g.n, esc(g.c), '', 'att', g.n)),
         ];
@@ -312,14 +344,14 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
         <h2 style="margin:22px 0 10px">Da consultare</h2>
         <div class="cp-tiles">
           ${tile('incantesimi', 'spells', '#7a3ea6', 'Incantesimi', `${D.sp.length} incantesimi, da cercare per classe, livello e scuola.`)}
-          ${dm() ? tile('bestiario', 'beast', '#2e7a3c', 'Bestiario', 'Le creature da mettere contro il party, pronte per il Tavolo.', true) : ''}
+          ${dm() ? tile('bestiario', 'beast', '#2e7a3c', 'Bestiario', `${D.mostri.length} creature da mettere contro il party, pronte per il Tavolo.`, true) : ''}
           ${tile('condizioni', 'cond', '#7d2530', 'Condizioni', 'Cosa succede a chi è prono, afferrato, spaventato…')}
-          ${tile('oggetti', 'ring', '#2a5ea8', 'Oggetti magici', 'Pozioni, anelli, armi e bacchette con le loro regole.')}
-          ${tile('equipaggiamento', 'sword', '#7a6450', 'Equipaggiamento', 'Armi, armature e attrezzatura, con costo e peso.')}
+          ${tile('oggetti', 'ring', '#2a5ea8', 'Oggetti magici', `${D.oggetti.length} oggetti: pozioni, anelli, armi e bacchette con le loro regole.`)}
+          ${tile('equipaggiamento', 'sword', '#7a6450', 'Equipaggiamento', 'Armi, armature, scudi, attrezzatura, strumenti e cavalcature, con costo e peso.')}
         </div>
         <h2 style="margin:0 0 10px">Manuali da sfogliare</h2>
         ${MAN ? MAN.html() : ''}
-        <p class="cp-foot">Incantesimi, condizioni ed equipaggiamento vengono dall'SRD 5.1 (regole del 2014); gli incantesimi delle espansioni sono riassunti scritti per il sito. Per il testo completo fa fede il manuale.</p>`, solo);
+        <p class="cp-foot">Incantesimi, creature, oggetti ed equipaggiamento vengono dall'SRD 5.1 (regole del 2014); gli incantesimi delle espansioni sono riassunti scritti per il sito. Per il testo completo fa fede il manuale. ${FONTE_SRD}</p>`, solo);
       const q2 = $('#cp-q'); if (q2 && !solo) q2.oninput = () => { ST_HOME.q = q2.value; draw(true); };
       if (!solo && MAN) MAN.lega($('#view'));
     };
@@ -328,7 +360,9 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
 
   /* ---------- incantesimi ---------- */
   const ST_SP = { q: '', cl: '', sc: '', lv: '', k: false, r: false, aperti: false };
-  const spellMeta = s => `<span class="badge cp-b cp-sc${scI(s.s)}">${esc(s.s)}</span><span class="pill">${s.l ? LIV(s.l) : 'Trucchetto'}</span>${s.k ? '<span class="pill cp-k">Concentrazione</span>' : ''}${s.r ? '<span class="pill cp-r">Rituale</span>' : ''}`;
+  const spKtl = s => `${s.l ? s.l + '°' : 'Trucchetto'} · ${s.s}`;
+  const kr = s => `${s.k ? '<span class="cp-kr" title="Concentrazione">C</span>' : ''}${s.r ? '<span class="cp-kr" title="Rituale">R</span>' : ''}`;
+  const spellMeta = s => `<span class="badge cp-b">${esc(s.s)}</span><span class="pill">${s.l ? LIV(s.l) : 'Trucchetto'}</span>${s.k ? '<span class="pill cp-k">Concentrazione</span>' : ''}${s.r ? '<span class="pill cp-r">Rituale</span>' : ''}`;
   function spellBody(s, full) {
     const parti = s.x.split(/\n\n(?=\*\*Ai livelli superiori\.\*\*)/), mat = s.c.match(/^(.*?)\s*\((.+)\)$/), lungo = s.t.length > 24;
     return `<div class="cp-statline">${slot('Lancio', esc(lungo ? s.t.split(',')[0] : s.t) + (s.r ? ' o rituale' : ''))}${slot('Gittata', esc(s.p))}${slot('Componenti', esc(mat ? mat[1] : s.c))}${slot('Durata', esc(s.d))}</div>
@@ -346,9 +380,10 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
       const l = D.sp.filter(s => (!q || norm(s.n).includes(q)) && (!f.cl || s.cl.includes(f.cl)) && (f.lv === '' || s.l === +f.lv) && (!f.sc || s.s === f.sc) && (!f.k || s.k) && (!f.r || s.r));
       let rows = '', last = null;
       for (const s of l) {
-        if (s.l !== last) { rows += `<div class="cp-grp">${LIV(s.l)} <small>${l.filter(x => x.l === s.l).length}</small></div>`; last = s.l; }
-        rows += row('spell:' + s.n, s.l || 'T', s.s, 'cp-sc' + scI(s.s), s.n, `${esc(s.t.split(',')[0])} · ${esc(s.p)} · ${esc(s.d)}`, `${s.k ? '<span class="pill cp-k">Concentrazione</span>' : ''}${s.r ? '<span class="pill cp-r">Rituale</span>' : ''}${s.riass ? `<span class="pill" title="${esc(FONTI[s.fonte] || s.fonte)}">${esc(s.fonte || 'Espansione')}</span>` : ''}`, 'spell', s.n);
+        if (s.l !== last) { rows += `<tr class="sep"><td colspan="7">${LIV(s.l)}<small>${l.filter(x => x.l === s.l).length}</small></td></tr>`; last = s.l; }
+        rows += `<tr data-cp-open="${esc('spell:' + s.n)}" tabindex="0" role="button"><td class="n"><b>${esc(s.n)}</b>${s.riass ? `<small title="${esc(FONTI[s.fonte] || s.fonte)}">${esc(s.fonte || 'Espansione')}</small>` : ''}</td><td class="w">${esc(s.s)}</td><td>${esc(s.t.split(',')[0])}</td><td class="w">${esc(s.p)}</td><td class="w">${esc(maiusc(s.d.replace(/^Concentrazione, /, '')))}</td><td class="k">${kr(s)}</td><td class="st">${star('spell', s.n)}</td></tr>`;
       }
+      if (rows) rows = `<div class="cp-spw cp-tblw" id="cp-list"><table class="cp-tbl cp-sp"><thead><tr><th>Nome</th><th class="w">Scuola</th><th>Tempo</th><th class="w">Gittata</th><th class="w">Durata</th><th aria-label="Concentrazione e rituale"></th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
       const n = [f.cl, f.sc, f.lv !== '', f.k, f.r].filter(Boolean).length;
       ridisegna(`${crumbs(['Incantesimi'])}<div class="pagehead"><h1>Incantesimi</h1></div><div class="orn"></div>
         ${filtri(`<input id="cp-q" type="search" placeholder="Cerca un incantesimo…" value="${esc(f.q)}" aria-label="Cerca un incantesimo">`, `
@@ -357,7 +392,8 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
           <div class="seg cp-seg" role="group" aria-label="Livello"><button type="button" data-cp-f="lv" data-v="" class="${f.lv === '' ? 'on' : ''}">Tutti</button><button type="button" data-cp-f="lv" data-v="0" class="${f.lv === '0' ? 'on' : ''}">Trucchetti</button>${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => `<button type="button" data-cp-f="lv" data-v="${i}" class="${f.lv === String(i) ? 'on' : ''}">${i}°</button>`).join('')}</div>
           <button type="button" class="chip${f.k ? ' on' : ''}" data-cp-f="k">Concentrazione</button><button type="button" class="chip${f.r ? ' on' : ''}" data-cp-f="r">Rituale</button>${n ? '<button type="button" class="btn sm ghost" data-cp-reset>Togli i filtri</button>' : ''}`)}
         <div class="cp-filters"><span class="cp-count">${l.length} su ${D.sp.length}</span></div>
-        <div class="cp-list" id="cp-list">${rows || '<p class="empty">Nessun incantesimo con questi filtri.</p>'}</div>`, solo);
+        ${rows || '<div class="cp-list" id="cp-list"><p class="empty">Nessun incantesimo con questi filtri.</p></div>'}
+        <p class="cp-foot">C = concentrazione, R = rituale.</p>`, solo);
       if (!solo) { attivaFiltri(ST_SP, draw); const r = $('[data-cp-reset]'); if (r) r.onclick = () => { Object.assign(ST_SP, { cl: '', sc: '', lv: '', k: false, r: false }); draw(); }; if ($('[data-cp-ftog]') && n) $('[data-cp-ftog]').textContent = `Filtri (${n})`; }
     };
     draw();
@@ -373,15 +409,17 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
   /* ---------- bestiario (solo DM) ---------- */
   const GSV = g => String(g).includes('/') ? 1 / +String(g).split('/')[1] : +g;
   const modS = v => { const m = Math.floor((v - 10) / 2); return (m >= 0 ? '+' : '−') + Math.abs(m); };
-  const monMeta = m => `<span class="badge" style="background:#2e7a3c">${esc(m.tipo)}</span><span class="pill">Sfida ${esc(m.gs)} · ${m.pe} PE</span><span class="pill dm">Solo DM</span>`;
+  const monMeta = m => `<span class="badge" style="background:var(--ink2)">${esc(m.tipo)}</span><span class="pill">Sfida ${esc(m.gs)} · ${m.pe.toLocaleString('it-IT')} PE</span><span class="pill dm">Solo DM</span>`;
   function statblock(m) {
     const prop = (k, v) => v ? `<p><b>${k}</b> ${inline(v)}</p>` : '';
     const acts = (t, arr, open = true) => arr && arr.length ? `<details class="sec"${open ? ' open' : ''}><summary>${t} <span class="cnt">${arr.length}</span></summary>${arr.map(([n, x]) => `<p class="cp-act"><b>${esc(n)}.</b> ${inline(x)}</p>`).join('')}</details>` : '';
-    return `<p style="margin:0 0 10px;font-style:italic;color:var(--ink2)">${esc(m.tipo)} di taglia ${esc(m.taglia.toLowerCase())}, ${esc(m.al)}</p>
-      <div class="cp-stat"><div><span>Classe armatura</span><b>${m.ca}</b><small>${esc(m.can || '')}</small></div><div><span>Punti ferita</span><b>${m.pf}</b><small>${esc(m.dv)}</small></div><div><span>Velocità</span><b style="font-size:1.1rem;padding:5px 0">${esc(m.vel)}</b></div><div><span>Sfida</span><b>${esc(m.gs)}</b><small>${m.pe} PE</small></div></div>
+    const leg = m.leg?.length ? `<details class="sec" open><summary>Azioni leggendarie <span class="cnt">${m.leg.length}</span></summary>${m.legi ? `<p class="hint" style="margin:0 0 8px">${inline(m.legi)}</p>` : ''}${m.leg.map(([n, x]) => `<p class="cp-act"><b>${esc(n)}.</b> ${inline(x)}</p>`).join('')}</details>` : '';
+    return `<p style="margin:0 0 10px;font-style:italic;color:var(--ink2)">${esc(m.tipo)}${m.sotto ? ' ' + esc(m.sotto) : ''} di taglia ${esc(m.tg || m.taglia.toLowerCase())}, ${esc(m.al)}</p>
+      <div class="cp-stat"><div><span>Classe armatura</span><b>${m.ca}</b><small>${esc(m.can || '')}</small></div><div><span>Punti ferita</span><b>${m.pf}</b><small>${esc(m.dv)}</small></div><div><span>Velocità</span><b style="font-size:1.1rem;padding:5px 0">${esc(m.vel)}</b></div><div><span>Sfida</span><b>${esc(m.gs)}</b><small>${m.pe.toLocaleString('it-IT')} PE</small></div></div>
       <div class="cp-car">${['FOR', 'DES', 'COS', 'INT', 'SAG', 'CAR'].map((k, i) => `<div><span>${k}</span><b>${m.car[i]}</b><small>${modS(m.car[i])}</small></div>`).join('')}</div>
-      <div class="cp-props">${prop('Tiri salvezza', m.ts)}${prop('Abilità', m.abil)}${prop('Resistenze', m.res)}${prop('Immunità', m.imm)}${prop('Sensi', m.sensi)}${prop('Linguaggi', m.ling)}</div>
-      ${acts('Tratti', m.tratti)}${acts('Azioni', m.azioni)}${acts('Reazioni', m.reaz)}`;
+      <div class="cp-props">${prop('Tiri salvezza', m.ts)}${prop('Abilità', m.abil)}${prop('Vulnerabilità', m.vuln)}${prop('Resistenze', m.res)}${prop('Immunità ai danni', m.imm)}${prop('Immunità alle condizioni', m.cimm)}${prop('Sensi', m.sensi)}${prop('Linguaggi', m.ling)}</div>
+      ${acts('Tratti', m.tratti)}${acts('Azioni', m.azioni)}${acts('Reazioni', m.reaz)}${leg}
+      <p class="cp-foot">${FONTE_SRD}</p>`;
   }
   // «Metti al Tavolo»: il Tavolo crea la scheda della creatura (nascosta ai giocatori) e la apre
   function alTavolo(m) {
@@ -389,20 +427,22 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
     location.hash = '#/tavolo';
   }
   const ST_MO = { q: '', tipo: '', gs: '', aperti: false };
+  const GSF = { b: [0, 0.5], m: [1, 4], a: [5, 10], e: [11, 16], l: [17, 30] };
   route(/^\/compendio\/bestiario$/, async () => {
     await caricaPagina();
     if (!dm()) { location.replace('#/compendio'); setTimeout(nega, 300); return; }
     const tipi = [...new Set(D.mostri.map(m => m.tipo))].sort();
     const draw = solo => {
       const f = ST_MO, q = norm(f.q);
-      const l = D.mostri.filter(m => (!q || norm(m.nome).includes(q)) && (!f.tipo || m.tipo === f.tipo) && (!f.gs || (f.gs === 'b' ? GSV(m.gs) < 1 : f.gs === 'm' ? GSV(m.gs) >= 1 && GSV(m.gs) <= 3 : GSV(m.gs) > 3))).sort((a, b) => GSV(a.gs) - GSV(b.gs) || a.nome.localeCompare(b.nome, 'it'));
+      const l = D.mostri.filter(m => (!q || norm(m.nome).includes(q)) && (!f.tipo || m.tipo === f.tipo) && (!f.gs || ((a, b) => GSV(m.gs) >= a && GSV(m.gs) <= b)(...GSF[f.gs]))).sort((a, b) => GSV(a.gs) - GSV(b.gs) || a.nome.localeCompare(b.nome, 'it'));
       ridisegna(`${crumbs(['Bestiario'])}<div class="pagehead"><h1>Bestiario <span class="pill dm" style="vertical-align:middle">Solo DM</span></h1></div><div class="orn"></div>
         ${filtri(`<input id="cp-q" type="search" placeholder="Cerca una creatura…" value="${esc(f.q)}" aria-label="Cerca una creatura">`, `
           <select data-cp-f="tipo" aria-label="Tipo"><option value="">Ogni tipo</option>${tipi.map(t => `<option${f.tipo === t ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select>
-          <div class="seg cp-seg" role="group" aria-label="Sfida"><button type="button" data-cp-f="gs" data-v="" class="${!f.gs ? 'on' : ''}">Ogni sfida</button><button type="button" data-cp-f="gs" data-v="b" class="${f.gs === 'b' ? 'on' : ''}">Sotto 1</button><button type="button" data-cp-f="gs" data-v="m" class="${f.gs === 'm' ? 'on' : ''}">Da 1 a 3</button><button type="button" data-cp-f="gs" data-v="a" class="${f.gs === 'a' ? 'on' : ''}">Oltre 3</button></div>`)}
+          <div class="seg cp-seg" role="group" aria-label="Sfida"><button type="button" data-cp-f="gs" data-v="" class="${!f.gs ? 'on' : ''}">Ogni sfida</button>${[['b', '0–½'], ['m', '1–4'], ['a', '5–10'], ['e', '11–16'], ['l', '17+']].map(([k, t]) => `<button type="button" data-cp-f="gs" data-v="${k}" class="${f.gs === k ? 'on' : ''}">${t}</button>`).join('')}</div>`)}
         <div class="cp-filters"><span class="cp-count">${l.length} creature</span></div>
-        <div class="cp-list" id="cp-list">${l.map(m => row('mostro:' + m.id, esc(m.gs), m.tipo, '', m.nome, `CA ${m.ca} · ${m.pf} PF · ${esc(m.vel)}`, `<span class="pill">${m.pe} PE</span>`, 'mostro', m.id)).join('') || '<p class="empty">Nessuna creatura con questi filtri.</p>'}</div>
-        <p class="cp-foot">Dall'SRD 5.1 (regole del 2014), in breve. «Metti al Tavolo» crea la scheda della creatura, nascosta ai giocatori finché non la mostri.</p>`, solo);
+        <div class="cp-list" id="cp-list">${l.map(m => row('mostro:' + m.id, null, `Sfida ${m.gs} · ${m.tipo}`, '', m.nome, `CA ${m.ca} · ${m.pf} PF · ${esc(m.vel)}`, `<span class="pill">${m.pe.toLocaleString('it-IT')} PE</span>`, 'mostro', m.id)).join('') || '<p class="empty">Nessuna creatura con questi filtri.</p>'}</div>
+        <div class="card" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><p style="margin:0;flex:1;min-width:220px">Non trovi una creatura? Qui ci sono quelle dell'SRD, la parte libera delle regole. Le altre sono nel Manuale dei Mostri.</p><a class="btn" href="#/manuali/mostri">Apri il Manuale dei Mostri</a></div>
+        <p class="cp-foot">«Metti al Tavolo» crea la scheda della creatura, nascosta ai giocatori finché non la mostri. ${FONTE_SRD}</p>`, solo);
       if (!solo) attivaFiltri(ST_MO, draw);
     };
     draw();
@@ -435,18 +475,21 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
   });
 
   /* ---------- oggetti magici ---------- */
-  const RAR = r => ({ 'Comune': '#8a7560', 'Non comune': '#2e7a3c', 'Raro': '#2a5ea8', 'Rara': '#2a5ea8', 'Molto raro': '#7a3ea6', 'Molto rara': '#7a3ea6', 'Leggendario': '#a8641c', 'Leggendaria': '#a8641c' }[r] || '#a98334');
-  const oggMeta = o => `<span class="badge" style="background:${RAR(o.r)}">${esc(o.r)}</span><span class="pill">${esc(o.t)}</span>${o.s ? '<span class="pill cp-k">Richiede sintonia</span>' : ''}`;
-  const ST_OG = { q: '', rar: '', sint: false, aperti: false };
+  const RAR = r => ({ 'comune': '#8a7560', 'non comune': '#2e7a3c', 'raro': '#2a5ea8', 'rara': '#2a5ea8', 'molto raro': '#7a3ea6', 'molto rara': '#7a3ea6', 'leggendario': '#a8641c', 'leggendaria': '#a8641c', 'manufatto': '#7d2530' }[r] || ({ 'Comune': '#8a7560', 'Non comune': '#2e7a3c', 'Raro': '#2a5ea8', 'Rara': '#2a5ea8', 'Molto raro': '#7a3ea6', 'Molto rara': '#7a3ea6', 'Leggendario': '#a8641c', 'Leggendaria': '#a8641c' }[r]) || '#a98334');
+  const maiusc = t => t ? t[0].toUpperCase() + t.slice(1) : t;
+  const oggMeta = o => `<span class="badge" style="background:${RAR(o.r)}">${esc(maiusc(o.r))}</span><span class="pill">${esc(o.t)}</span>${o.s ? `<span class="pill cp-k">Richiede sintonia${o.sd ? ' ' + esc(o.sd) : ''}</span>` : ''}`;
+  const tipoOgg = o => o.t.split(' (')[0];
+  const ST_OG = { q: '', rar: '', tipo: '', sint: false, aperti: false };
   route(/^\/compendio\/oggetti$/, async () => {
     await caricaPagina();
     const draw = solo => {
-      const f = ST_OG, q = norm(f.q), l = D.oggetti.filter(o => (!q || norm(o.n).includes(q)) && (!f.rar || norm(o.r).startsWith(norm(f.rar))) && (!f.sint || o.s));
+      const f = ST_OG, q = norm(f.q), l = D.oggetti.filter(o => (!q || norm(o.n).includes(q)) && (!f.rar || norm(o.r).startsWith(norm(f.rar))) && (!f.tipo || tipoOgg(o) === f.tipo) && (!f.sint || o.s));
+      const tipi = [...new Set(D.oggetti.map(tipoOgg))].sort((a, b) => a.localeCompare(b, 'it'));
       ridisegna(`${crumbs(['Oggetti magici'])}<div class="pagehead"><h1>Oggetti magici</h1></div><div class="orn"></div>
-        ${filtri(`<input id="cp-q" type="search" placeholder="Cerca un oggetto…" value="${esc(f.q)}" aria-label="Cerca un oggetto">`, `<select data-cp-f="rar" aria-label="Rarità"><option value="">Ogni rarità</option>${[['Comune', 'Comune'], ['Non comune', 'Non comune'], ['Rar', 'Raro'], ['Molto rar', 'Molto raro'], ['Leggendari', 'Leggendario']].map(([v, t]) => `<option value="${v}"${f.rar === v ? ' selected' : ''}>${t}</option>`).join('')}</select><button type="button" class="chip${f.sint ? ' on' : ''}" data-cp-f="sint">Richiede sintonia</button>`)}
+        ${filtri(`<input id="cp-q" type="search" placeholder="Cerca un oggetto…" value="${esc(f.q)}" aria-label="Cerca un oggetto">`, `<select data-cp-f="tipo" aria-label="Tipo"><option value="">Ogni tipo</option>${tipi.map(t => `<option${f.tipo === t ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select><select data-cp-f="rar" aria-label="Rarità"><option value="">Ogni rarità</option>${[['Comune', 'Comune'], ['Non comune', 'Non comune'], ['Rar', 'Raro'], ['Molto rar', 'Molto raro'], ['Leggendari', 'Leggendario']].map(([v, t]) => `<option value="${v}"${f.rar === v ? ' selected' : ''}>${t}</option>`).join('')}</select><button type="button" class="chip${f.sint ? ' on' : ''}" data-cp-f="sint">Richiede sintonia</button>`)}
         <div class="cp-filters"><span class="cp-count">${l.length} oggetti</span></div>
         <div class="cp-list" id="cp-list">${l.map(o => row('ogg:' + o.n, null, o.r, '', o.n, esc(o.t), o.s ? '<span class="pill cp-k">Sintonia</span>' : '', 'ogg', o.n).replace('class="cp-ktl ', `style="--tc:${RAR(o.r)}" class="cp-ktl `)).join('') || '<p class="empty">Nessun oggetto con questi filtri.</p>'}</div>
-        <p class="cp-foot">Dall'SRD 5.1, in breve. Per ora una scelta dei più comuni.</p>`, solo);
+        <p class="cp-foot">Tutti gli oggetti magici dell'SRD 5.1. ${FONTE_SRD}</p>`, solo);
       if (!solo) attivaFiltri(ST_OG, draw);
     };
     draw();
@@ -456,7 +499,7 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
     const o = D.oggetti.find(x => x.n === nome);
     if (!o) { setView(`<div class="empty"><h2>Oggetto non trovato</h2><p><a href="#/compendio/oggetti">Torna agli oggetti</a></p></div>`); return; }
     setView(`${crumbs(['Oggetti magici', '#/compendio/oggetti'])}<div class="pagehead"><div style="flex:1;min-width:220px"><div class="cp-meta" style="margin-bottom:6px">${oggMeta(o)}</div><h1>${esc(o.n)}</h1></div><div class="acts">${favBtn('ogg', o.n)}</div></div>
-      <div class="orn"></div><div class="card"><div class="prose">${rich(o.x)}</div></div>`);
+      <div class="orn"></div><div class="card"><div class="prose">${testoLungo(o.x)}</div><p class="cp-foot">${FONTE_SRD}</p></div>`);
   });
 
   /* ---------- equipaggiamento ---------- */
@@ -478,11 +521,12 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
         const cats = [...new Set(D.att.map(g => g.cat))];
         const l = D.att.filter(g => (!q || norm(g.n).includes(q) || norm(g.x).includes(q)) && (!f.cat || g.cat === f.cat));
         body = `<div class="cp-filters"><div class="seg cp-seg" role="group" aria-label="Categoria"><button type="button" data-cp-f="cat" data-v="" class="${!f.cat ? 'on' : ''}">Tutto</button>${cats.map(c => `<button type="button" data-cp-f="cat" data-v="${c}" class="${f.cat === c ? 'on' : ''}">${c}</button>`).join('')}</div></div>
-          <div class="cp-list" id="cp-list">${l.map(g => row('att:' + g.n, null, g.cat, '', g.n, g.x ? inline(g.x) : '&nbsp;', `<span class="pill">${esc(g.c)}</span>`, 'att', g.n)).join('') || '<p class="empty">Niente con questo nome.</p>'}</div>`;
+          <div class="cp-list" id="cp-list">${l.map(g => row('att:' + g.n, null, g.sub || g.cat, '', g.n, [g.c, g.w, g.vel && 'velocità ' + g.vel, g.car && 'carico ' + g.car].filter(Boolean).map(esc).join(' · ') || '&nbsp;', '', 'att', g.n)).join('') || '<p class="empty">Niente con questo nome.</p>'}</div>
+          <p class="cp-foot">${FONTE_SRD}</p>`;
       }
       ridisegna(`${crumbs(['Equipaggiamento'])}<div class="pagehead"><h1>Equipaggiamento</h1></div><div class="orn"></div>
         <p class="hint" style="margin:-6px 0 14px">I costi sono in monete d'oro (mo), d'argento (ma) e di rame (mr).</p>
-        <div class="cp-filters"><div class="seg" role="tablist">${[['armi', 'Armi'], ['armature', 'Armature'], ['att', 'Attrezzatura']].map(([k, t]) => `<button type="button" role="tab" aria-selected="${f.t === k}" data-cp-tab="${k}" class="${f.t === k ? 'on' : ''}">${t}</button>`).join('')}</div><input id="cp-q" type="search" placeholder="Cerca…" value="${esc(f.q)}" aria-label="Cerca nell'equipaggiamento"></div>${body}`, solo);
+        <div class="cp-filters"><div class="seg" role="tablist">${[['armi', 'Armi'], ['armature', 'Armature e scudi'], ['att', 'Attrezzatura e altro']].map(([k, t]) => `<button type="button" role="tab" aria-selected="${f.t === k}" data-cp-tab="${k}" class="${f.t === k ? 'on' : ''}">${t}</button>`).join('')}</div><input id="cp-q" type="search" placeholder="Cerca…" value="${esc(f.q)}" aria-label="Cerca nell'equipaggiamento"></div>${body}`, solo);
       if (!solo) { attivaFiltri(ST_EQ, draw); $$('[data-cp-tab]').forEach(b => b.onclick = () => { ST_EQ.t = b.dataset.cpTab; ST_EQ.q = ''; ST_EQ.cat = ''; draw(); }); }
     };
     draw();
