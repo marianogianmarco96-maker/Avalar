@@ -63,22 +63,19 @@ html.man-open #tools{display:none}
     img.src = list[0];
   });
 
-  route(/^\/manuali$/, async () => {
-    await claude.use('db'); css();
-    const vis = visibili(), pg = vis.filter(m => !m.dm), dm = vis.filter(m => m.dm);
-    setView(`<div class="pagehead"><h1>Manuali</h1></div><div class="orn"></div>
-      <div class="man-grid">${[...pg, ...dm].map(tile).join('')}</div>`);
-    loadCovers();
-    $$('.man-tile').forEach(a => { const m = MANUALI.find(x => a.getAttribute('href') === '#/manuali/' + x.id); if (m && vietato(m)) a.onclick = e => { e.preventDefault(); nega(); }; });
-  });
+  // l'elenco dei manuali ora sta nel Compendio (compendio.js), che porta qui per sfogliarli
+  window.__manuali = {
+    html: () => { css(); return `<div class="man-grid">${visibili().map(tile).join('')}</div>`; },
+    lega: root => { loadCovers(); root.querySelectorAll('.man-tile').forEach(a => { const m = MANUALI.find(x => a.getAttribute('href') === '#/manuali/' + x.id); if (m && vietato(m)) a.onclick = e => { e.preventDefault(); nega(); }; }); },
+  };
 
   // il libro occupa esattamente lo spazio tra l'intestazione e la barra delle sezioni: niente scorrimento della pagina,
   // così il dito dentro il libro usa solo i comandi di AnyFlip
   route(/^\/manuali\/([\w-]+)$/, async ([id]) => {
     await claude.use('db'); css();
     const m = visibili().find(x => x.id === id);
-    if (!m) { setView(`<div class="empty"><h2>Manuale non trovato</h2><p><a href="#/manuali">Torna ai manuali</a></p></div>`); return; }
-    if (vietato(m)) { location.replace('#/manuali'); setTimeout(nega, 300); return; }
+    if (!m) { setView(`<div class="empty"><h2>Manuale non trovato</h2><p><a href="#/compendio">Torna al Compendio</a></p></div>`); return; }
+    if (vietato(m)) { location.replace('#/compendio'); setTimeout(nega, 300); return; }
     setView(`<h1 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">${esc(m.title)}</h1>
       <div class="man-full"><div class="man-bar"><b>${esc(m.title)}</b>${anyflip(m)}</div>
       <iframe src="${esc(m.url)}" title="${esc(m.title)}" allowfullscreen allow="fullscreen" referrerpolicy="no-referrer-when-downgrade"></iframe></div>`);
