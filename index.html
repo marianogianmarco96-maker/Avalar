@@ -244,8 +244,10 @@ dialog.dlg::backdrop{background:#150b0acc}
 dialog.dlg form{padding:20px 24px;margin:0}
 dialog.dlg h3{margin-bottom:12px}
 dialog.dlg menu{display:flex;justify-content:flex-end;gap:8px;padding:0;margin:14px 0 0}
-#toasts{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
-.toast{background:var(--wine-d);color:#fbeccb;padding:9px 18px;border-radius:4px;border:1px solid var(--gold2);box-shadow:0 6px 20px #0008;transition:opacity .4s}
+/* notifiche piccole nell'angolo in basso a sinistra (accanto alla barra del Tavolo): non coprono i comandi e lasciano passare i clic */
+#toasts{position:fixed;left:max(12px,env(safe-area-inset-left,0px));bottom:14px;z-index:100;display:flex;flex-direction:column;gap:5px;align-items:flex-start;pointer-events:none;max-width:min(300px,calc(100vw - 24px))}
+body:has(.tv) #toasts{left:62px}
+.toast{background:var(--wine-d);color:#fbeccb;padding:5px 11px;border-radius:4px;border:1px solid var(--gold2);box-shadow:0 3px 10px #0006;font-size:.8rem;line-height:1.3;opacity:.94;transition:opacity .3s}
 .toast.out{opacity:0}.toast.err{background:var(--bad)}
 
 /* ---------- maps ---------- */
@@ -956,7 +958,7 @@ const prose = t => `<div class="prose">${md(t)}</div>`;
 /* ---------- UI: toast, dialoghi ---------- */
 function toast(msg, kind = '') {
   const d = document.createElement('div'); d.className = 'toast ' + kind; d.textContent = msg;
-  $('#toasts').append(d); setTimeout(() => d.classList.add('out'), kind === 'err' ? 6000 : 3200); setTimeout(() => d.remove(), kind === 'err' ? 6500 : 3700);
+  $('#toasts').append(d); setTimeout(() => d.classList.add('out'), kind === 'err' ? 5000 : 2200); setTimeout(() => d.remove(), kind === 'err' ? 5300 : 2500);
 }
 function openDlg(html, cls = '') {
   const d = document.createElement('dialog'); d.className = 'dlg ' + cls; d.innerHTML = html;
