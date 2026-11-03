@@ -252,7 +252,7 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
 .tv-walls{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:99998}
 .tv-walls line{stroke-linecap:round;vector-effect:non-scaling-stroke}
 .tv-walls .mu{stroke:#ff5ad1;stroke-width:3;filter:drop-shadow(0 0 1.5px #000)}
-.tv-walls .mu.meta{stroke:#45d4ff;stroke-dasharray:7 4}.tv-walls .mu.tre{stroke:#ffa31a;stroke-dasharray:12 4}
+.tv-walls .mu.pieno{stroke:#b07cff;stroke-dasharray:16 3}.tv-walls .mu.meta{stroke:#45d4ff;stroke-dasharray:7 4}.tv-walls .mu.tre{stroke:#ffa31a;stroke-dasharray:12 4}
 .tv-tok .cop{position:absolute;left:50%;top:-12px;transform:translateX(-50%);z-index:6;padding:1px 7px;border-radius:9px;font:700 12px/1.4 system-ui;white-space:nowrap;background:#123;color:#9fe6ff;box-shadow:0 0 0 1.5px #45d4ff;pointer-events:none}.tv-tok .cop.tre{color:#ffd28a;box-shadow:0 0 0 1.5px #ffa31a;background:#2a1a05}
 .tv-ov .cpl{stroke-width:2;stroke-dasharray:4 4}.tv-ov .cpl.ok{stroke:#5fe08a}.tv-ov .cpl.ko{stroke:#ff5a4e}
 .tv-walls .po{stroke:#c98a3c;stroke-width:5;filter:drop-shadow(0 0 1.5px #000)}
@@ -1681,6 +1681,15 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
   function stato(cls, txt) { const o = $('#tv-on'); if (!o) return; o.className = 'tv-on ' + cls; o.title = txt; }
 
+  // Supabase consegna al massimo 1000 righe per richiesta: i muri di tutte le mappe si leggono a blocchi, sempre nello stesso ordine
+  async function tuttiIMuri() {
+    const N = 1000, tutti = [];
+    for (let da = 0; ; da += N) {
+      const r = await SB.from('tavolo_muri').select('*').order('id').range(da, da + N - 1);
+      if (r.error) return r;
+      tutti.push(...r.data); if (r.data.length < N) return { data: tutti, error: null };
+    }
+  }
   async function carica() {
     const [st, sc, tk, tr, mb, ms, tu, ct, sh, mu, pg, sv, sg] = await Promise.all([
       SB.from('tavolo_stato').select('*').eq('id', 1).maybeSingle(),
@@ -1692,7 +1701,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       SB.from('tavolo_turno').select('*'),
       SB.from('tavolo_chat').select('*').order('id', { ascending: false }).limit(80),
       SB.from('tavolo_schede').select('*'),
-      SB.from('tavolo_muri').select('*'),
+      tuttiIMuri(),
       SB.from('tavolo_pf_gruppo').select('*'),
       SB.from('tavolo_salvezze').select('*').is('esito', null).order('creato'),
       SB.from('tavolo_segnalini').select('*').order('creato')
@@ -3945,12 +3954,15 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const t = ((cx - ax) * s2 - (cy - ay) * s1) / den, u = ((cx - ax) * r2 - (cy - ay) * r1) / den;
     return t > 1e-6 && t < 1 - 1e-6 && u >= 0 && u <= 1;
   }
-  const attraversa = (sc, ax, ay, bx, by) => muriScena(sc).some(m => chiuso(m) && !m.tipo && taglia(ax, ay, bx, by, m.punti));
+  // due tipi di muro pieno: quello di stanza (tipo vuoto) fa la nebbia e tiene buie le stanze chiuse;
+  // quello di copertura ('pieno': colonne, rocce, edifici visti da fuori) ferma passo e attacchi ma non fa nebbia né ombra
+  const fermaPasso = m => !m.tipo || m.tipo === 'pieno';
+  const attraversa = (sc, ax, ay, bx, by) => muriScena(sc).some(m => chiuso(m) && fermaPasso(m) && taglia(ax, ay, bx, by, m.punti));
   /* ---------- coperture (prova): muretti e tavoli ½, feritoie e banconi ¾, muri veri totale ----------
      Regola della DMG con la griglia: da un angolo della casella di chi attacca si tirano le linee ai quattro angoli
      della casella del bersaglio; 1-2 linee bloccate = ½, 3-4 = ¾, tutte fermate da un muro = totale.
      Chi attacca sceglie l'angolo migliore. Anche una creatura in mezzo dà ½. */
-  const NOMI_COP = { meta: 'copertura ½', tre: 'copertura ¾' };
+  const NOMI_COP = { meta: 'copertura ½', tre: 'copertura ¾', pieno: 'muro di copertura' };
   const COP = [{ n: 0, ca: 0, t: 'nessuna' }, { n: 1, ca: 2, t: '½', k: 'meta' }, { n: 2, ca: 5, t: '¾', k: 'tre' }, { n: 3, ca: 0, t: 'totale' }];
   function copertura(a, b, sc) {
     if (!sc || !a || !b) return null;
@@ -4145,8 +4157,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
   async function salvaMuro(a, b) {
     const sc = scena(); if (!sc || Math.hypot(b.x - a.x, b.y - a.y) < 3) return;
-    const r = await SB.from('tavolo_muri').insert({ scena: sc.id, punti: [a.x, a.y, b.x, b.y], porta: T.mtool === 'porta', ...(T.mtool === 'meta' || T.mtool === 'tre' ? { tipo: T.mtool } : {}) }).select().single();
-    if (r.error) return toast(/tipo|column/i.test(r.error.message) ? 'Per muretti e feritoie esegui tavolo/tappa-16.sql in Supabase.' : sqlMancante(r.error) ? 'Per i muri esegui tavolo/tappa-4.sql in Supabase.' : r.error.message, 'err');
+    const r = await SB.from('tavolo_muri').insert({ scena: sc.id, punti: [a.x, a.y, b.x, b.y], porta: T.mtool === 'porta', ...(T.mtool === 'meta' || T.mtool === 'tre' || T.mtool === 'pieno' ? { tipo: T.mtool } : {}) }).select().single();
+    if (r.error) return toast(T.mtool === 'pieno' && /tipo|check|constraint/i.test(r.error.message) ? 'Per i muri di copertura esegui tavolo/tappa-18.sql in Supabase.' : /tipo|column/i.test(r.error.message) ? 'Per muretti e feritoie esegui tavolo/tappa-16.sql in Supabase.' : sqlMancante(r.error) ? 'Per i muri esegui tavolo/tappa-4.sql in Supabase.' : r.error.message, 'err');
     if (!T.muri.some(m => m.id === r.data.id)) T.muri.push(r.data);
     T.mfatti.push(r.data.id);
     if (r.data.porta && a.m && a.m === b.m && T.muri.includes(a.m)) await apriVarco(a.m, a, b, r.data.id);
@@ -4156,17 +4168,18 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   async function apriVarco(m, a, b, porta) {
     const [x1, y1, x2, y2] = m.punti, [p, q] = a.t <= b.t ? [a, b] : [b, a];
     const pezzi = [[x1, y1, p.x, p.y], [q.x, q.y, x2, y2]].filter(([ax, ay, bx, by]) => Math.hypot(bx - ax, by - ay) >= 3);
-    const ins = pezzi.length ? await SB.from('tavolo_muri').insert(pezzi.map(punti => ({ scena: m.scena, punti, porta: false }))).select() : { data: [] };
+    const resto = { ...(m.tipo ? { tipo: m.tipo } : {}), ...(m.nome ? { nome: m.nome } : {}), ...(m.auto ? { auto: true } : {}) };
+    const ins = pezzi.length ? await SB.from('tavolo_muri').insert(pezzi.map(punti => ({ scena: m.scena, punti, porta: false, ...resto }))).select() : { data: [] };
     if (ins.error) return toast(ins.error.message, 'err');
     const del = await SB.from('tavolo_muri').delete().eq('id', m.id); if (del.error) return toast(del.error.message, 'err');
     T.muri = T.muri.filter(x => x.id !== m.id); for (const n of ins.data) if (!T.muri.some(x => x.id === n.id)) T.muri.push(n);
-    T.mvarchi.set(porta, { punti: m.punti, scena: m.scena, pezzi: ins.data.map(n => n.id) });
+    T.mvarchi.set(porta, { punti: m.punti, scena: m.scena, resto, pezzi: ins.data.map(n => n.id) });
   }
   // annullando la porta il muro torna intero
   async function chiudiVarco(porta) {
     const v = T.mvarchi.get(porta); if (!v) return; T.mvarchi.delete(porta);
     for (const id of v.pezzi) { const m = T.muri.find(x => x.id === id); if (m) await cancellaMuro(m); }
-    const r = await SB.from('tavolo_muri').insert({ scena: v.scena, punti: v.punti, porta: false }).select().single(); if (r.error) return toast(r.error.message, 'err');
+    const r = await SB.from('tavolo_muri').insert({ scena: v.scena, punti: v.punti, porta: false, ...v.resto }).select().single(); if (r.error) return toast(r.error.message, 'err');
     if (!T.muri.some(m => m.id === r.data.id)) T.muri.push(r.data); T.wver++; programmaMaschera();
   }
   async function cancellaMuro(m) {
@@ -4202,7 +4215,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       const [ax, ay] = S({ x: m.punti[0], y: m.punti[1] }), [bx, by] = S({ x: m.punti[2], y: m.punti[3] });
       return `<line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="#ff4d4d" stroke-width="7" stroke-linecap="round" opacity=".8"/>`;
     }
-    const a = T.mdown?.a || T.mu?.a, [bx, by] = S(b), col = T.mtool === 'porta' ? '#f0a548' : T.mtool === 'meta' ? '#45d4ff' : T.mtool === 'tre' ? '#ffa31a' : '#ff5ad1';
+    const a = T.mdown?.a || T.mu?.a, [bx, by] = S(b), col = T.mtool === 'porta' ? '#f0a548' : T.mtool === 'meta' ? '#45d4ff' : T.mtool === 'tre' ? '#ffa31a' : T.mtool === 'pieno' ? '#b07cff' : '#ff5ad1';
     let h = '';
     if (a) { const [ax, ay] = S(a); h += `<line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="#000a" stroke-width="6" stroke-linecap="round"/><line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="${col}" stroke-width="3" stroke-dasharray="8 5" stroke-linecap="round"/><circle cx="${ax}" cy="${ay}" r="4" fill="${col}"/>`; }
     return h + `<circle cx="${bx}" cy="${by}" r="5" fill="none" stroke="${col}" stroke-width="2"/>`;
@@ -4239,7 +4252,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const bt = (k, ic, l, sel, tip, dis) => `<button type="button" data-w="${k}" class="${sel ? 'on' : ''}" title="${esc(tip || l)}" aria-label="${esc(tip || l)}" ${dis ? 'disabled' : ''}>${ic ? svg(ic) : ''}${l ? `<span>${l}</span>` : ''}</button>`;
     const n = muriScena(sc).length;
     b.innerHTML = `<div class="g">${sw('visuale', sc.visuale, 'Nebbia automatica', 'I giocatori vedono solo ciò che vedono i loro token: i muri fermano la vista')}</div>
-      <div class="g seg">${bt('muro', 'muro', 'Muro', T.mtool === 'muro', 'Disegna i muri: trascina, oppure clicca punto per punto (doppio clic o Esc per finire)')}${bt('porta', 'porta', 'Porta', T.mtool === 'porta', 'Disegna una porta sopra un muro: si aggancia al muro e da aperta lascia passare')}${bt('meta', 'muro', 'Muretto ½', T.mtool === 'meta', 'Copertura a metà (+2 CA): muretti, tavoli, botti, ringhiere. Non ferma la vista né il passo')}${bt('tre', 'muro', 'Feritoia ¾', T.mtool === 'tre', 'Copertura a tre quarti (+5 CA): feritoie, banconi alti, tronchi spessi. Non ferma la vista né il passo')}${bt('gomma', 'gomma', 'Gomma', T.mtool === 'gomma', 'Clicca o passa sui muri per cancellarli')}</div>
+      <div class="g seg">${bt('muro', 'muro', 'Muro di stanza', T.mtool === 'muro', 'Pareti delle stanze: fermano vista e passo, e con la nebbia automatica la stanza chiusa resta buia finché qualcuno non ci guarda dentro. Trascina, oppure clicca punto per punto (doppio clic o Esc per finire)')}${bt('porta', 'porta', 'Porta', T.mtool === 'porta', 'Disegna una porta sopra un muro: si aggancia al muro e da aperta lascia passare')}${bt('gomma', 'gomma', 'Gomma', T.mtool === 'gomma', 'Clicca o passa sui muri per cancellarli')}</div>
+      <div class="g seg" title="Coperture: contano negli attacchi, non fanno nebbia">${bt('pieno', 'muro', 'Muro di copertura', T.mtool === 'pieno', 'Copertura totale: colonne, rocce, edifici visti da fuori. Ferma il passo e gli attacchi, ma non fa nebbia né ombra')}${bt('meta', 'muro', 'Muretto ½', T.mtool === 'meta', 'Copertura a metà (+2 CA): muretti, tavoli, botti, ringhiere. Non ferma la vista né il passo')}${bt('tre', 'muro', 'Feritoia ¾', T.mtool === 'tre', 'Copertura a tre quarti (+5 CA): feritoie, banconi alti, tronchi spessi. Non ferma la vista né il passo')}</div>
       <div class="g">${bt('griglia', 'gri', '', aggancioGriglia(), 'Aggancia i punti agli angoli delle caselle (tieni Alt per staccarli)')}${bt('annulla', 'undo', '', false, 'Annulla l\'ultimo muro', !T.mfatti.some(id => T.muri.some(m => m.id === id)))}</div>
       <div class="g sl" title="Solo per te: i giocatori la vedono sempre nera">${svg('luna')}<input type="range" class="tv-rg" data-w="tono" min="0.1" max="0.95" step="0.05" value="${tono()}" aria-label="Opacità della nebbia (solo per te)"><output data-w="tv">${Math.round(tono() * 100)}%</output></div>
       <div class="g">${sw('cono', sc.cono !== false, 'Cono d\'ombra', 'Acceso: i muri proiettano l\'ombra e non si vede cosa c\'è dietro. Spento: restano buie solo le stanze chiuse in cui il token non è')}${sw('esplora', sc.esplora !== false, 'Zone viste', 'I posti già visti restano in penombra')}${sw('vista_condivisa', !!sc.vista_condivisa, 'Vista di gruppo', 'Ogni giocatore vede anche ciò che vedono i compagni')}</div>
@@ -4257,7 +4271,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     });
     b.querySelectorAll('button[data-w]').forEach(x => x.onclick = async () => {
       const k = x.dataset.w;
-      if (k === 'muro' || k === 'porta' || k === 'gomma' || k === 'meta' || k === 'tre') { T.mtool = k; T.mu = null; }
+      if (k === 'muro' || k === 'porta' || k === 'gomma' || k === 'meta' || k === 'tre' || k === 'pieno') { T.mtool = k; T.mu = null; }
       else if (k === 'griglia') { try { localStorage.setItem(SNAP, aggancioGriglia() ? '0' : '1'); } catch { } }
       else if (k === 'annulla') { const id = [...T.mfatti].reverse().find(i => T.muri.some(m => m.id === i)), m = T.muri.find(x => x.id === id); if (m) { T.mfatti = T.mfatti.filter(i => i !== id); await cancellaMuro(m); await chiudiVarco(id); } }
       else if (k === 'claude') return chiediCoperture(sc);
