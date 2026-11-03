@@ -248,7 +248,7 @@ dialog.dlg.tv-side.tv-sw.tv-incol{position:relative;inset:auto;margin:0;width:10
 dialog.dlg.tv-gd{margin:auto 12px 12px auto;width:min(420px,94vw)}
 dialog.dlg.tv-gd::backdrop{background:transparent}
 .tv-tabs{display:flex;gap:4px;margin:4px 0 10px;flex-wrap:wrap}
-.tv-fog{position:absolute;left:0;top:0;pointer-events:none}
+.tv-fog,.tv-fogfx{position:absolute;left:0;top:0;pointer-events:none}
 .tv-walls{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:99998}
 .tv-walls line{stroke-linecap:round;vector-effect:non-scaling-stroke}
 .tv-walls .mu{stroke:#ff5ad1;stroke-width:3;filter:drop-shadow(0 0 1.5px #000)}
@@ -2157,7 +2157,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       return;
     }
     st.innerHTML = `<div class="tv-world" id="tv-world"><img class="tv-map" id="tv-map" alt="" draggable="false" width="${sc.larghezza}" height="${sc.altezza}" style="width:${sc.larghezza}px;height:${sc.altezza}px">
-      <svg class="tv-grid" id="tv-grid" width="${sc.larghezza}" height="${sc.altezza}"></svg><svg class="tv-dif" id="tv-dif" width="${sc.larghezza}" height="${sc.altezza}"></svg><svg class="tv-efx" id="tv-efx" width="${sc.larghezza}" height="${sc.altezza}"></svg><div class="tv-segn" id="tv-segn"></div><div id="tv-toks"></div><canvas class="tv-fog" id="tv-fog" style="width:${sc.larghezza}px;height:${sc.altezza}px"></canvas>
+      <svg class="tv-grid" id="tv-grid" width="${sc.larghezza}" height="${sc.altezza}"></svg><svg class="tv-dif" id="tv-dif" width="${sc.larghezza}" height="${sc.altezza}"></svg><svg class="tv-efx" id="tv-efx" width="${sc.larghezza}" height="${sc.altezza}"></svg><div class="tv-segn" id="tv-segn"></div><div id="tv-toks"></div><canvas class="tv-fog" id="tv-fog" style="width:${sc.larghezza}px;height:${sc.altezza}px"></canvas><canvas class="tv-fogfx" id="tv-fogfx" hidden style="width:${sc.larghezza}px;height:${sc.altezza}px"></canvas>
       <svg class="tv-walls" id="tv-walls" width="${sc.larghezza}" height="${sc.altezza}"></svg><div class="tv-porte" id="tv-porte"></div><svg class="tv-fx" id="tv-fx" width="${sc.larghezza}" height="${sc.altezza}"></svg></div>
       <svg class="tv-ov" id="tv-ov"></svg><div class="tv-zoom" role="group" aria-label="Zoom"><button type="button" data-z="1.25" data-tip="Ingrandisci" aria-label="Ingrandisci">${svg('piu')}</button>
         <div class="tv-zs" id="tv-zs" role="slider" tabindex="0" aria-label="Zoom" aria-valuemin="5" aria-valuemax="600" data-tip="Trascina per lo zoom"><span class="tr"><i></i></span>${[0.25, 0.5, 1, 2, 4].map(z => `<span class="tk ${z === 1 ? 'uno' : ''}" style="--q:${(Math.log(z) - Z_MIN) / (Z_MAX - Z_MIN)}"></span>`).join('')}<span class="kn"></span></div>
@@ -3255,19 +3255,21 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         <label>Metri per casella</label><input type="number" name="m" min="0.1" max="1000" step="any" value="${sc.metri}">
         <label>Mostra la griglia</label><label style="justify-content:flex-start"><input type="checkbox" name="vis" ${sc.griglia_visibile ? 'checked' : ''}> sì</label>
         <label>Colore</label><input type="color" name="gc" value="${esc(sc.griglia_colore || '#000000')}">
-        <label>Opacità</label><span style="display:flex;gap:8px;align-items:center"><input type="range" class="tv-rg" name="go" min="0" max="100" step="1" value="${sc.griglia_opacita ?? 38}" style="flex:1"><output name="gov" style="width:42px;text-align:right">${sc.griglia_opacita ?? 38}%</output></span></div>
+        <label>Opacità</label><span style="display:flex;gap:8px;align-items:center"><input type="range" class="tv-rg" name="go" min="0" max="100" step="1" value="${sc.griglia_opacita ?? 38}" style="flex:1"><output name="gov" style="width:42px;text-align:right">${sc.griglia_opacita ?? 38}%</output></span>
+        <label title="Come appare la nebbia automatica in questa mappa">Nebbia</label><select name="neb">${Object.entries(NEBBIE).map(([k, n]) => `<option value="${k}"${stileNebbia(sc) === k ? ' selected' : ''}>${n.nome}</option>`).join('')}</select></div>
       <menu><button value="cancel" class="btn ghost" formnovalidate>Annulla</button><button value="ok" class="btn primary">Salva</button></menu></form>`, 'tv-gd');
     const v = n => d.querySelector(`[name=${n}]`); d.querySelectorAll('.tv-rg').forEach(pRange);
     const prova = () => {
       sc.griglia = clamp(+v('gn').value || sc.griglia, 8, 600); sc.griglia_x = +v('gxn').value || 0; sc.griglia_y = +v('gyn').value || 0; sc.metri = +v('m').value || 1.5; sc.griglia_visibile = v('vis').checked;
       sc.griglia_colore = v('gc').value; sc.griglia_opacita = +v('go').value; v('gov').value = sc.griglia_opacita + '%';
+      if (stileNebbia(sc) !== v('neb').value) { sc.nebbia = v('neb').value; programmaMaschera(); }
       v('gx').max = v('gy').max = sc.griglia; disegnaGriglia(); disegnaToken(); d.querySelectorAll('.tv-rg').forEach(pRange);
     };
     v('g').oninput = () => { v('gn').value = v('g').value; prova(); };
     v('gn').oninput = () => { v('g').value = v('gn').value; prova(); };
     v('gx').oninput = () => { v('gxn').value = v('gx').value; prova(); }; v('gxn').oninput = () => { v('gx').value = v('gxn').value; prova(); };
     v('gy').oninput = () => { v('gyn').value = v('gy').value; prova(); }; v('gyn').oninput = () => { v('gy').value = v('gyn').value; prova(); };
-    ['m', 'vis', 'gc', 'go'].forEach(n => v(n).oninput = prova);
+    ['m', 'vis', 'gc', 'go', 'neb'].forEach(n => v(n).oninput = prova);
     // frecce nei riquadri: un pixel alla volta, un decimo con Maiusc (il browser col passo «any» andrebbe di 1 senza decimi)
     ['gn', 'gxn', 'gyn'].forEach(n => v(n).addEventListener('keydown', e => {
       if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return; e.preventDefault();
@@ -3277,13 +3279,15 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     d.querySelector('[data-k=allinea]').onclick = () => { d.close('cancel'); setTimeout(() => { strumento('allinea'); toast('Disegna un riquadro su alcune caselle della mappa.'); }, 80); };
     d.addEventListener('close', async () => {
       if (d.returnValue === 'mano') return; // la griglia resta com'è: si rifinisce trascinandola
-      if (d.returnValue !== 'ok') { Object.assign(sc, prima); disegnaGriglia(); disegnaToken(); return; }
+      if (d.returnValue !== 'ok') { Object.assign(sc, prima); if (!('nebbia' in prima)) delete sc.nebbia; disegnaGriglia(); disegnaToken(); programmaMaschera(); return; }
       const ch = { nome: v('nome').value.trim().slice(0, 80) || prima.nome, griglia: sc.griglia, griglia_x: sc.griglia_x, griglia_y: sc.griglia_y, metri: sc.metri, griglia_visibile: sc.griglia_visibile };
       // colore e opacità solo se cambiati: servono le colonne di tappa-2b.sql
       if (sc.griglia_colore !== (prima.griglia_colore || '#000000')) ch.griglia_colore = sc.griglia_colore;
       if (sc.griglia_opacita !== (prima.griglia_opacita ?? 38)) ch.griglia_opacita = sc.griglia_opacita;
+      // lo stile della nebbia solo se cambiato: serve la colonna di tappa-19.sql
+      if (stileNebbia(sc) !== stileNebbia(prima)) ch.nebbia = sc.nebbia;
       const r = await SB.from('tavolo_scene').update(ch).eq('id', sc.id).select().single();
-      if (r.error) { Object.assign(sc, prima); disegnaGriglia(); disegnaToken(); return toast(sqlMancante(r.error) ? 'Per colore e opacità della griglia esegui tavolo/tappa-2b.sql in Supabase.' : r.error.message, 'err'); }
+      if (r.error) { Object.assign(sc, prima); if (!('nebbia' in prima)) delete sc.nebbia; disegnaGriglia(); disegnaToken(); programmaMaschera(); return toast(ch.nebbia && /nebbia/i.test(r.error.message) ? 'Per scegliere lo stile della nebbia esegui tavolo/tappa-19.sql in Supabase.' : sqlMancante(r.error) ? 'Per colore e opacità della griglia esegui tavolo/tappa-2b.sql in Supabase.' : r.error.message, 'err'); }
       T.scene.set(sc.id, r.data);
       riaggancia(sc); disegnaToken(); disegnaTop(); toast('Impostazioni salvate.');
     });
@@ -3743,10 +3747,67 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (p.length === 2) g.lineTo(p[0] + 0.01, p[1]);
     g.stroke();
   }
+  /* ---------- lo stile della nebbia automatica: bruma grigia o nebbia notturna, scelto nelle impostazioni della mappa ---------- */
+  const NEBBIE = {
+    notte: { nome: 'Nebbia notturna', lo: [14, 18, 28], hi: [74, 88, 108], sb: [128, 146, 170] },
+    bruma: { nome: 'Bruma grigia', lo: [120, 132, 145], hi: [222, 228, 234], sb: [255, 255, 255] }
+  };
+  const stileNebbia = sc => NEBBIE[sc?.nebbia] ? sc.nebbia : 'notte';
+  // rumore «a nuvole» che si ripete senza cuciture: n×n valori fra 0 e 1
+  function nuvole(n, seme, ottave = 5, base = 4) {
+    let x = seme >>> 0; const R = () => (x = (x * 1664525 + 1013904223) >>> 0) / 4294967296;
+    const out = new Float32Array(n * n); let amp = 1, tot = 0;
+    for (let o = 0, g = base; o < ottave; o++, g *= 2, amp *= 0.5) {
+      const v = Float32Array.from({ length: g * g }, R), q = n / g;
+      for (let y = 0; y < n; y++) {
+        const fy = y / q, iy = fy | 0, ty = fy - iy, sy = ty * ty * (3 - 2 * ty), y0 = (iy % g) * g, y1 = ((iy + 1) % g) * g;
+        for (let xx = 0; xx < n; xx++) {
+          const fx = xx / q, ix = fx | 0, tx = fx - ix, sx = tx * tx * (3 - 2 * tx), x0 = ix % g, x1 = (ix + 1) % g;
+          const a = v[y0 + x0], b = v[y0 + x1], c = v[y1 + x0], d = v[y1 + x1];
+          out[y * n + xx] += amp * (a + (b - a) * sx + (c - a) * sy + (a - b - c + d) * sx * sy);
+        }
+      }
+      tot += amp;
+    }
+    for (let i = 0; i < out.length; i++) out[i] /= tot;
+    return out;
+  }
+  // la trama della nebbia (coprente) e quella degli sbuffi che scorrono sopra (trasparente), fatte una volta per stile
+  function trameNebbia(st) {
+    T.trame = T.trame || {}; if (T.trame[st]) return T.trame[st];
+    const S = NEBBIE[st], N = 256, fa = (n, fn) => { const c = document.createElement('canvas'); c.width = c.height = N; const g = c.getContext('2d'), im = g.createImageData(N, N); for (let i = 0; i < N * N; i++) fn(im.data, i * 4, n[i]); g.putImageData(im, 0, 0); return c; };
+    const n1 = nuvole(N, 7, 6, 3), n2 = nuvole(N, 99, 4, 6);
+    const fondo = fa(n1, (d, p, v) => { const t = clamp((v - 0.5) * 1.6 + 0.5, 0, 1) * 0.8 + n2[p / 4] * 0.2; for (let k = 0; k < 3; k++) d[p + k] = S.lo[k] + (S.hi[k] - S.lo[k]) * t; d[p + 3] = 255; });
+    const sbuffi = fa(n2, (d, p, v) => { for (let k = 0; k < 3; k++) d[p + k] = S.sb[k]; d[p + 3] = 255 * clamp((v - 0.52) * 3.2, 0, 1); });
+    return T.trame[st] = { fondo, sbuffi };
+  }
+  // gli sbuffi si muovono piano, solo dove c'è nebbia (15 volte al secondo, a metà risoluzione)
+  function animaNebbia() {
+    if (T.fxraf) return;
+    let ultimo = 0;
+    const giro = ora => {
+      const fx = $('#tv-fogfx'), c = $('#tv-fog'), sc = scena();
+      if (!fx || !c || !sc || c.hidden || !T.fxOn) { if (fx) fx.hidden = true; T.fxraf = null; return; }
+      T.fxraf = requestAnimationFrame(giro);
+      if (ora - ultimo < 66) return; ultimo = ora;
+      const W = Math.max(1, Math.round(c.width / 2)), H = Math.max(1, Math.round(c.height / 2));
+      if (fx.width !== W || fx.height !== H) { fx.width = W; fx.height = H; }
+      const g = fx.getContext('2d'), tr = trameNebbia(stileNebbia(sc)), sz = Math.max(W, H) / 1.1, t = ora / 1000;
+      g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, W, H);
+      const pat = g.createPattern(tr.sbuffi, 'repeat'), sc2 = sz / 256;
+      for (const [vx, vy, a] of [[9, 4, 0.9], [-6, 7, 0.6]]) {
+        const ox = (t * vx) % sz, oy = (t * vy) % sz;
+        g.setTransform(sc2, 0, 0, sc2, ox, oy); g.globalAlpha = a; g.fillStyle = pat; g.fillRect(-ox / sc2 - 256, -oy / sc2 - 256, W / sc2 + 512, H / sc2 + 512);
+      }
+      g.globalAlpha = 1; g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'destination-in'; g.drawImage(c, 0, 0, W, H);
+      fx.style.opacity = (+c.style.opacity || 1) * 0.4; fx.hidden = false;
+    };
+    T.fxraf = requestAnimationFrame(giro);
+  }
   function disegnaMaschera() {
     const c = $('#tv-fog'), sc = scena(); if (!c || !sc) return;
     const nebbia = nebbiaQui(sc); T.fogKey = chiaveVista(sc);
-    if (!sc.maschera && !nebbia) { c.hidden = true; disegnaMuri(); return; }
+    if (!sc.maschera && !nebbia) { c.hidden = true; T.fxOn = false; const fx = $('#tv-fogfx'); if (fx) fx.hidden = true; disegnaMuri(); return; }
     // la tela è più piccola della mappa (al massimo 2048 px di lato): basta per i bordi e pesa poco
     const k = Math.min(1, FOG_MAX / Math.max(sc.larghezza, sc.altezza)), W = Math.max(1, Math.round(sc.larghezza * k)), H = Math.max(1, Math.round(sc.altezza * k));
     if (c.width !== W || c.height !== H) { c.width = W; c.height = H; }
@@ -3763,7 +3824,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         const e = esplorato(sc); segnaEsplorato(e, viste);
         g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 0.45; g.drawImage(e.c, 0, 0, W, H); g.globalAlpha = 1; g.setTransform(k, 0, 0, k, 0, 0);
       }
-      viste.forEach(o => buca(g, o));
+      g.filter = `blur(${Math.max(1, 4 * k)}px)`; viste.forEach(o => buca(g, o)); g.filter = 'none';
       if (!isDM() && !viste.length && T.avvisato !== sc.id) { T.avvisato = sc.id; toast('Non hai un token su questa mappa: vedi solo i posti già esplorati.'); }
       // senza i token dei giocatori la nebbia coprirebbe tutto anche al DM: lui la mappa la vede chiara, e glielo dico una volta
       if (isDM() && !viste.length) {
@@ -3778,8 +3839,12 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       for (const o of T.mask.filter(x => x.scena === sc.id).sort((a, b) => a.id - b.id)) applica(h, o);
       g.globalCompositeOperation = 'source-over'; g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(m, 0, 0); g.setTransform(k, 0, 0, k, 0, 0);
     }
-    g.globalCompositeOperation = 'source-over';
+    // la nebbia vera: al posto del nero la trama dello stile scelto, con gli sbuffi che scorrono sopra
+    T.fxOn = nebbia;
+    if (nebbia) { g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-in'; g.drawImage(trameNebbia(stileNebbia(sc)).fondo, 0, 0, W, H); }
+    g.globalCompositeOperation = 'source-over'; g.setTransform(k, 0, 0, k, 0, 0);
     c.hidden = false; c.style.opacity = isDM() ? tono() : 1; T.fogK = k;
+    if (nebbia) animaNebbia(); else { const fx = $('#tv-fogfx'); if (fx) fx.hidden = true; }
     disegnaMuri();
   }
   const coperto = (x, y) => alfa(x, y) > 128;
@@ -4056,7 +4121,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     } else g.fillStyle = '#000';
     g.fill(); g.restore();
   }
-  const chiaveVista = sc => [sc.id, sc.visuale, sc.cono, sc.esplora, sc.vista_condivisa, sc.griglia, sc.metri, sc.larghezza, sc.altezza, T.wver, isDM(), T.esp?.v, nebbiaQui(sc) ? occhi(sc).map(o => `${o.id}:${Math.round(o.x)}:${Math.round(o.y)}:${Math.round(o.r)}`).join() : ''].join('|');
+  const chiaveVista = sc => [sc.id, sc.visuale, sc.nebbia, sc.cono, sc.esplora, sc.vista_condivisa, sc.griglia, sc.metri, sc.larghezza, sc.altezza, T.wver, isDM(), T.esp?.v, nebbiaQui(sc) ? occhi(sc).map(o => `${o.id}:${Math.round(o.x)}:${Math.round(o.y)}:${Math.round(o.r)}`).join() : ''].join('|');
   // le zone già viste restano in penombra: le ricorda il browser di ogni giocatore
   function esplorato(sc) {
     if (T.esp?.id === sc.id) return T.esp;
