@@ -9,8 +9,8 @@ messa nei segreti dell'ambiente di Claude. La chiave pubblica di Supabase è que
   python3 strumenti/coperture.py salva <id> [nota]     # manda i tratti di coperture/<id>/muri.py al tavolo
 
 muri.py usa le funzioni qui sotto (linea, tondo, rett, ruot), in pixel della mappa:
-  linea([(x1, y1), (x2, y2), ...], None, 'muro')        # muro di stanza: ferma vista e passo, fa la nebbia
-  rett(x0, y0, x1, y1, 'pieno', 'colonna')               # muro di copertura: ferma passo e attacchi, niente nebbia
+  linea([(x1, y1), (x2, y2), ...], 'pieno', 'parete')   # muro di copertura: ferma passo e attacchi, niente nebbia
+  (mai None: la nebbia la fanno solo le stanze disegnate dal DM; salva() trasforma None in 'pieno')
   tondo(cx, cy, r, 'meta', 'tavolo')                    # tavolo tondo, copertura ½
   rett(x0, y0, x1, y1, 'meta', 'tavolo')                # tavolo rettangolare, copertura ½
   ruot(cx, cy, larghezza, altezza, gradi, 'meta', 'tavolo')
@@ -84,7 +84,8 @@ def prova(id_):
 
 
 def salva(id_, nota=None):
-    n = rpc('tavolo_bot_muri', p_richiesta=id_, p_muri=carica(id_), p_nota=nota)
+    muri = [{**m, 'tipo': m['tipo'] or 'pieno'} for m in carica(id_)]  # Claude non fa mai nebbia
+    n = rpc('tavolo_bot_muri', p_richiesta=id_, p_muri=muri, p_nota=nota)
     print(f'Salvati {n} tratti: il DM li vede comparire nella mappa.')
 
 

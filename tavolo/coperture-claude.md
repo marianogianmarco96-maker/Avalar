@@ -11,9 +11,10 @@ Serve `AVALAR_BOT_KEY` nei segreti dell'ambiente (`select chiave from public.tav
    Se non c'è niente in attesa, fine.
 2. Guarda `mappa.png` e `griglia.png` (a quadranti, ingranditi dove serve) e scrivi `coperture/<id>/muri.py` con
    `linea`, `tondo`, `rett`, `ruot` in pixel della mappa:
-   - **muro di stanza** (`None`): pareti delle stanze, porte chiuse. Ferma vista e passo e fa la nebbia (la stanza chiusa resta buia).
-   - **`'pieno'` (muro di copertura)**: colonne grandi, rocce, camini, edifici visti da fuori nelle mappe all'aperto.
+   - **`'pieno'` (muro di copertura)**: pareti, colonne grandi, rocce, camini, edifici, porte chiuse.
      Ferma passo e attacchi ma non fa nebbia né ombra. Serve `tavolo/tappa-18.sql`.
+   - **Mai muri di stanza** (`None`): la nebbia la fanno solo le stanze chiuse che disegna il DM.
+     Se in `muri.py` resta un `None`, `salva` lo trasforma comunque in `'pieno'`.
    - **`'meta'` (½, CA +2)**: tavoli, botti, casse, ringhiere, muretti, carri, mobili bassi.
    - **`'tre'` (¾, CA +5)**: feritoie, banconi alti, tronchi spessi, merli.
    - Non tracciare tappeti, sedie, oggetti piccoli, scale (a meno che abbiano una ringhiera). Non ritracciare i muri già fatti dal DM.
