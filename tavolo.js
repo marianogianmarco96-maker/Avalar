@@ -343,6 +343,9 @@ dialog.dlg.tv-side .tv-pick button{font-size:.78rem}
 .tv-f input[type=color]{padding:0 2px;height:30px;width:52px}
 .tv-pcond{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
 .tv-pcond button{all:unset;cursor:pointer;background:#7d2530;color:#fff;border-radius:10px;padding:1px 8px;font-size:.78rem;font-weight:600}
+.tv-pcond .tv-cc{display:inline-flex}.tv-pcond .tv-cc button[data-cp-cond]{text-decoration:underline dotted;text-underline-offset:2px}
+.tv-pcond .tv-cc button:first-child:not(:last-child){border-top-right-radius:0!important;border-bottom-right-radius:0!important;padding-right:5px!important}
+.tv-pcond .tv-cc button+button{border-top-left-radius:0!important;border-bottom-left-radius:0!important;padding-left:5px!important;margin-left:-1px;opacity:.85}
 .tv-pcond select{flex:1;min-width:120px}
 .tv-tok .cnd{position:absolute;right:-14%;top:-8%;display:flex;flex-direction:column;gap:2px;pointer-events:none;font-size:calc(var(--fs,13px)*1.05);z-index:2}
 .tv-tok .cnd i{font-style:normal;width:1.55em;height:1.55em;border-radius:50%;background:#140e0bdd;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 1px #ffffff66,0 1px 3px #000a;line-height:1}
@@ -645,7 +648,10 @@ dialog.tv-pag .tv-sch .at .riga.az .tp{flex:1 1 0}
 .tv-sch .mon input{border:0;font-size:.82rem;padding:2px}
 .tv-sch .tratti{gap:6px}
 .tv-sch .cnd{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;min-height:20px}
-.tv-sch .cnd .ch{all:unset;cursor:pointer;background:#7d2530;color:#fff;border-radius:10px;padding:1px 8px;font-size:.72rem;font-weight:600}
+.tv-sch .cnd .ch{display:inline-flex;align-items:center;background:#7d2530;color:#fff;border-radius:10px;font-size:.72rem;font-weight:600;overflow:hidden}
+.tv-sch .cnd .ch button{all:unset;cursor:pointer;padding:1px 8px}
+.tv-sch .cnd .ch .chx{padding:1px 6px 1px 2px;opacity:.85}
+.tv-sch .cnd .ch .chn[data-cp-cond]{text-decoration:underline dotted;text-underline-offset:2px}
 .tv-sch .sez select,.tv-sch .selc{margin-top:4px;font-size:.8rem;border:1px solid var(--ul);border-radius:4px}
 .tv-sch .incT{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;border:2px solid var(--lin);border-radius:8px;padding:8px 10px;background:var(--box);margin-bottom:8px}
 .tv-sch .li.grande b,.tv-sch .li.grande .rb{font:700 1.3rem var(--display);text-align:center;padding:2px 0}
@@ -1716,6 +1722,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     // senza tavolo/tappa-3.sql il tavolo funziona lo stesso, solo senza schede
     T.schede = sh.error ? null : new Map(sh.data.map(x => [x.id, x]));
     setTimeout(festaInSospeso, 1500);
+    setTimeout(daBestiario, 700);
     setTimeout(() => regole().catch(() => { }), 4000); // servono anche alle azioni bonus e alle reazioni dei privilegi
     // senza tavolo/tappa-4.sql niente muri né nebbia automatica
     T.muri = mu.error ? null : mu.data; T.wver++;
@@ -2970,7 +2977,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const tsch = sch ? tile('sch', '📜', sch.giocatore && sch.giocatore === T.me.giocatore ? 'La mia scheda' : 'Scheda') : isDM() && T.schede ? tile('sch', '📜', 'Crea la scheda') : '';
     const tzp = inCombattimento() && T.turno.some(x => x.token === t.id) && pcond ? turnoPop(t) : '';
     const bfine = suoTurno(t) && pcond ? '<div class="fine"><button type="button" class="tv-b pri" data-k="fine" title="Passa al prossimo nell\'ordine del turno">⏭ Finisci il turno</button></div>' : '';
-    const rcond = pcond ? `<div class="tv-pcond">${cnow.map(c => `<button type="button" data-tc="${esc(c)}" title="Togli">${COND_FX[c]?.[0] || ''} ${esc(c)} ✕</button>`).join('')}<select data-k="tcond" aria-label="Aggiungi una condizione"><option value="">+ Condizione</option>${CONDIZIONI.filter(c => !cnow.includes(c)).map(c => `<option>${c}</option>`).join('')}</select></div>` : '';
+    const rcond = pcond || cnow.length ? `<div class="tv-pcond">${cnow.map(c => `<span class="tv-cc"><button type="button"${regolaDi(c)}>${COND_FX[c]?.[0] || ''} ${esc(c)}</button>${pcond ? `<button type="button" data-tc="${esc(c)}" title="Togli ${esc(c)}" aria-label="Togli ${esc(c)}">✕</button>` : ''}</span>`).join('')}${pcond ? `<select data-k="tcond" aria-label="Aggiungi una condizione"><option value="">+ Condizione</option>${CONDIZIONI.filter(c => !cnow.includes(c)).map(c => `<option>${c}</option>`).join('')}</select>` : ''}</div>` : '';
     const chi = t.giocatore ? (T.info.giocatori || []).find(g => g.id === t.giocatore) : null;
     const sotto = mio && !isDM() ? 'Il tuo personaggio' : chi ? 'Lo muove ' + chi.name : 'Lo muove solo il DM';
     const testa = `<div class="hd"><i style="--c:${esc(t.colore || '#7d2530')};${t.immagine ? `background-image:url('${t.immagine.replace(/'/g, '%27')}')` : ''}">${t.immagine ? '' : esc(iniziali(t.nome))}</i><div class="nm">${isDM() ? `<input class="tv-pnome" data-k="rin" value="${esc(t.nome || '')}" maxlength="60" placeholder="Nome del token" aria-label="Nome del token" title="Scrivi per rinominare il token, Invio per salvare">` : `<b>${esc(t.nome || 'Token')}</b>`}<small>${esc(sotto)}${isDM() && t.nascosto ? ' · solo tu lo vedi' : ''}</small></div><button type="button" class="x" data-k="chiudi" aria-label="Chiudi">✕</button></div>`;
@@ -3002,9 +3009,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     };
     if (!isDM()) {
       // il giocatore apre la foto (solo per sé) e, sul proprio token, tira l'iniziativa
-      if (!ft && !mio && !sch) return;
+      if (!ft && !mio && !sch && !cnow.length) return;
       const gr = tsch + (ft ? tile('foto', '🖼', 'Foto', 'Solo sul tuo schermo') : '');
-      pop.innerHTML = `${testa}${mio ? bfine + tzp + rpf : ''}${gr ? `<div class="gr">${gr}</div>` : ''}${mio ? rcond + ini : ''}`;
+      pop.innerHTML = `${testa}${mio ? bfine + tzp + rpf : ''}${gr ? `<div class="gr">${gr}</div>` : ''}${mio ? rcond + ini : rcond}`;
       st.append(pop); extra();
       pop.style.left = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6) + 'px'; pop.style.top = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6) + 'px'; adattaPop(pop);
       if (ft) pop.querySelector('[data-k=foto]').onclick = () => { chiudiPop(); apriFoto(fotoDi(t)); };
@@ -5099,6 +5106,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   // una scheda di 5e per personaggio e per PNG; il giocatore compila la sua, il DM tutte. Si aggiornano dal vivo.
   const CAR = [['for', 'FOR', 'Forza'], ['des', 'DES', 'Destrezza'], ['cos', 'COS', 'Costituzione'], ['int', 'INT', 'Intelligenza'], ['sag', 'SAG', 'Saggezza'], ['car', 'CAR', 'Carisma']];
   const ABIL = [['acrobazia', 'Acrobazia', 'des'], ['addestrare', 'Addestrare animali', 'sag'], ['arcano', 'Arcano', 'int'], ['atletica', 'Atletica', 'for'], ['furtivita', 'Furtività', 'des'], ['indagare', 'Indagare', 'int'], ['inganno', 'Inganno', 'car'], ['intimidire', 'Intimidire', 'car'], ['intrattenere', 'Intrattenere', 'car'], ['intuizione', 'Intuizione', 'sag'], ['medicina', 'Medicina', 'sag'], ['natura', 'Natura', 'int'], ['percezione', 'Percezione', 'sag'], ['persuasione', 'Persuasione', 'car'], ['rapidita', 'Rapidità di mano', 'des'], ['religione', 'Religione', 'int'], ['sopravvivenza', 'Sopravvivenza', 'sag'], ['storia', 'Storia', 'int']];
+  const regolaDi = c => window.__compendio && c !== 'Morto' ? ` data-cp-cond="${esc(c)}" title="Cosa comporta ${esc(c).toLowerCase()}"` : '';
   const CONDIZIONI = ['Accecato', 'Affascinato', 'Afferrato', 'Assordato', 'Avvelenato', 'Incapacitato', 'Invisibile', 'Nascosto', 'Paralizzato', 'Pietrificato', 'Prono', 'Spaventato', 'Stordito', 'Svenuto', 'Trattenuto', 'Concentrazione', 'Morto'];
   // regola della casa di questa campagna: al level up i PF sono il massimo del dado + Costituzione (niente media né tiro)
   const PF_MASSIMI = true;
@@ -5578,6 +5586,19 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       d.addEventListener('paste', e => { const f = [...(e.clipboardData?.files || [])][0]; if (f) usa(f); });
       d.addEventListener('close', () => res(scelta));
     });
+  }
+  // «Metti al Tavolo» dal Bestiario del Compendio: crea la scheda della creatura (nascosta ai giocatori) e la apre.
+  // Se il Tavolo ha già il suo modello con quel nome usa quello, altrimenti le statistiche del Compendio
+  async function daBestiario() {
+    let r = null; try { r = JSON.parse(sessionStorage.getItem('cr-tv-bestiario') || 'null'); sessionStorage.removeItem('cr-tv-bestiario'); } catch { }
+    if (!r?.dati || !isDM() || !T.schede) return;
+    const m = MODELLI.find(x => norm(x.nome) === norm(r.nome)) || r;
+    const n = [...T.schede.values()].filter(s => s.nome === m.nome || s.nome.startsWith(m.nome + ' ')).length;
+    const s = await creaPng({ nome: n ? m.nome + ' ' + (n + 1) : m.nome, dati: JSON.parse(JSON.stringify(m.dati)) }); if (!s) return;
+    apriSchede(true); apriScheda(s.id);
+    // il token va nel livello Master: lo vedi solo tu finché non lo rendi visibile
+    const t = scena() ? await piazza({ nome: s.nome, img: fotoScheda(s), scheda: 'tv:' + s.id, colore: '#7d2530', sch: s }, num(s.dati.misura) || 1, true) : null;
+    toast(t ? `${s.nome} è sulla mappa, per ora solo per te: quando vuoi mostrarlo tocca il token e «Rendi visibile».` : `Scheda creata: ${s.nome}. Apri una mappa e usa «Metti sulla mappa» dalla scheda.`);
   }
   function dlgNuovoPng() {
     if (!T.schede) return;
@@ -6327,7 +6348,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       : cella(inp('taglia_tipo', 'Taglia e tipo'), 'Taglia e tipo') + cella(inp('gs', 'GS'), 'Grado di sfida') + cella(inp('allineamento', 'Allineamento'), 'Allineamento')
         + cella(inp('sensi', 'Scurovisione 18 m'), 'Sensi') + cella(inp('linguaggi', 'Comune'), 'Linguaggi') + cella(inp('difese', '—'), 'Resistenze e immunità');
     const conds = s.tipo !== 'pg' && tk ? condTok(tk) : d.condizioni || [];
-    const cond = conds.map(c => `<button type="button" class="ch" data-cond="${esc(c)}" title="${w ? 'Togli' : ''}"${dis}>${esc(c)}${w ? ' ✕' : ''}</button>`).join('');
+    const cond = conds.map(c => `<span class="ch"><button type="button" class="chn"${regolaDi(c)}>${esc(c)}</button>${w ? `<button type="button" class="chx" data-cond="${esc(c)}" title="Togli ${esc(c)}" aria-label="Togli ${esc(c)}"${dis}>✕</button>` : ''}</span>`).join('');
     let corpo = '';
     const tkT = tk || attaccante(s);
     if (sv.tab === 'pri' && !pg && !sv.edit) corpo = bloccoPng(s, tk, w, dis, cond, conds);
