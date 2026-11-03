@@ -9,7 +9,8 @@ messa nei segreti dell'ambiente di Claude. La chiave pubblica di Supabase è que
   python3 strumenti/coperture.py salva <id> [nota]     # manda i tratti di coperture/<id>/muri.py al tavolo
 
 muri.py usa le funzioni qui sotto (linea, tondo, rett, ruot), in pixel della mappa:
-  linea([(x1, y1), (x2, y2), ...], None, 'muro')        # muro vero: ferma vista, passo e attacchi
+  linea([(x1, y1), (x2, y2), ...], None, 'muro')        # muro di stanza: ferma vista e passo, fa la nebbia
+  rett(x0, y0, x1, y1, 'pieno', 'colonna')               # muro di copertura: ferma passo e attacchi, niente nebbia
   tondo(cx, cy, r, 'meta', 'tavolo')                    # tavolo tondo, copertura ½
   rett(x0, y0, x1, y1, 'meta', 'tavolo')                # tavolo rettangolare, copertura ½
   ruot(cx, cy, larghezza, altezza, gradi, 'meta', 'tavolo')
@@ -78,7 +79,7 @@ def prova(id_):
     from PIL import Image, ImageDraw
     d = os.path.join(DIR, id_); im = Image.open(os.path.join(d, 'mappa.png')).convert('RGB'); dr = ImageDraw.Draw(im)
     for m in json.load(open(os.path.join(d, 'info.json'))).get('muri_del_dm', []): dr.line(m['punti'], fill=(255, 255, 255), width=3)
-    for m in carica(id_): dr.line(m['punti'], fill={None: (255, 40, 40), 'tre': (255, 160, 0), 'meta': (60, 220, 255)}[m['tipo']], width=4)
+    for m in carica(id_): dr.line(m['punti'], fill={None: (255, 40, 40), 'pieno': (176, 124, 255), 'tre': (255, 160, 0), 'meta': (60, 220, 255)}[m['tipo']], width=4)
     im.save(os.path.join(d, 'controllo.png')); print(len(S), 'tratti →', os.path.join(d, 'controllo.png'))
 
 
