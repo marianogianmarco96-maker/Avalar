@@ -1005,6 +1005,15 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
 .tv-azm h5 small{letter-spacing:0;text-transform:none;font:italic 400 .76rem var(--body);color:#bda983;margin-left:4px}
 .tv-azm .gz{display:grid;grid-template-columns:1fr 1fr;gap:2px}
 .tv-azm h5{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tv-voto{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px}
+.tv-voto button,.tv-voto .vv{all:unset;cursor:pointer;border:1px solid #c9a86a66;border-radius:999px;padding:3px 10px;font-size:.8rem;font-weight:600}
+.tv-voto .vv{cursor:default}.tv-voto .vv b{margin-left:2px}
+.tv-voto button.on,.tv-voto .vv.on{background:#7d2530;border-color:#7d2530;color:#fff}
+.tv-voto button:focus-visible{outline:2px solid #d8a93a;outline-offset:2px}
+.tv-voto small{flex-basis:100%;opacity:.75;font-size:.72rem}
+.tv-vmsg{border-left:3px solid #d8a93a}
+.tv-azm .pron{border-bottom:1px solid #ffffff1f;padding-bottom:4px;margin-bottom:2px}.tv-azm .pron h5 span{color:#e6c46d}
+.tv-sch .tv-star{min-width:0;padding:1px 6px;color:#a9812c;font-size:.95rem;line-height:1}.tv-sch .tv-star.on{color:#d8a93a}.tv-sch .tv-star[disabled]{opacity:1}
 .tv-azm h6{margin:8px 8px 2px;font:600 .62rem/1.3 var(--display);letter-spacing:.1em;text-transform:uppercase;color:#bda983}
 .tv-azm button.tg{width:auto;flex:none;display:inline-block;padding:3px 9px;border:1px solid #e7cf9a66;border-radius:99px;font:600 .7rem/1.2 var(--body);letter-spacing:0;text-transform:none;color:#f1e4c8}
 .tv-azm button.tutte{display:block;text-align:center;margin-top:6px;color:#e7cf9a;font-size:.78rem}
@@ -3376,7 +3385,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       <div class="op"><span class="sg" title="Vale per il d20">${[['', 'Normale'], ['kh1', 'Vantaggio'], ['kl1', 'Svantaggio']].map(([v, l]) => `<button type="button" data-cadv="${v}" class="${(T.cadv || '') === v ? 'on' : ''}">${l}</button>`).join('')}</span><input class="md" type="number" data-k="cmod" placeholder="+0" aria-label="Modificatore" value="${esc(T.cmod || '')}"><button type="button" class="sgr ${T.tdpriv ? 'on' : ''}" data-k="cpriv">${T.tdpriv ? '🙈 Nascosto' : '👁 Tutti'}</button></div>
       <div class="in"><input type="text" id="tv-f" placeholder="Scrivi… (/w nome per sussurrare)" autocomplete="off" aria-label="Scrivi un messaggio"><button type="button" data-act="tv-tira" title="Invia" aria-label="Invia">➤</button></div></div>`;
     $('#tv-f').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); scrivi(); } };
-    $('#tv-log').onclick = e => { const b = e.target.closest('[data-del]'); if (b) cancella(b.dataset.del).catch(err => toast(err.message, 'err')); };
+    $('#tv-log').onclick = e => { const vb = e.target.closest('[data-voto]'); if (vb) { const [id, v] = vb.dataset.voto.split(':'); return vota(id, v); } const b = e.target.closest('[data-del]'); if (b) cancella(b.dataset.del).catch(err => toast(err.message, 'err')); };
     const dk = box.querySelector('.tv-dk'), cm = dk.querySelector('[data-k=cmod]');
     cm.oninput = () => { T.cmod = cm.value; };
     dk.querySelectorAll('[data-cadv]').forEach(b => b.onclick = () => { T.cadv = b.dataset.cadv; dk.querySelectorAll('[data-cadv]').forEach(x => x.classList.toggle('on', x === b)); });
@@ -3590,7 +3599,32 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   const rigaTiro = t => { const tt = tipoTiro(t.motivo); return `<div class="tv-roll ${esito(t)} ${t.privato ? 'priv' : ''} ${t.autore === T.me.uid ? 'me' : ''}${tt ? ' k-' + tt.k : ''}">${tagTiro(t)}<div class="h"><span class="who">${chiHtml(t, tt)}</span><span class="dx"><small>${ora(t.creato)}</small>${via('t', t)}</span></div>
     ${tt ? `<div class="kt"><b>${esc(tt.l)}</b>${tt.es ? `<span class="es ${tt.es[0]}">${tt.es[1]}</span>` : ''}</div><div class="m">${esc(tt.d)}</div>` : t.motivo ? `<div class="m">${esc(t.motivo)}</div>` : ''}<div class="fo">tira ${esc(t.formula)}</div><div class="r"><span class="chips">${chips(t.dettaglio)}</span><span class="t">${t.totale}</span></div></div>`; };
   const nomeGioc = id => id === 'dm' ? 'DM' : T.membri.find(x => x.giocatore === id)?.nome || id;
-  const rigaMsg = m => `<div class="tv-roll tv-msg ${m.per ? 'w' : ''} ${m.autore === T.me.uid ? 'me' : ''}">${tagMsg(m)}<div class="h"><span class="who">${avatar(m.autore, m.nome)}${esc(m.nome)}</span><span class="dx"><small>${ora(m.creato)}</small>${via('c', m)}</span></div><div class="tx">${esc(m.testo)}</div></div>`;
+  // voto a fine scontro: il DM apre il voto con un messaggio pubblico, ogni giocatore risponde con un sussurro al DM
+  // (i sussurri del voto non compaiono in chat: il conteggio si vede sotto il messaggio, solo al DM)
+  const VOTI = [['facile', '😌 Facile'], ['giusto', '⚖️ Giusto'], ['difficile', '💀 Difficile']];
+  const votoApre = m => (String(m.testo).match(/⟦voto:(\w+)⟧/) || [])[1];
+  const votoDi = m => { const x = m.per === 'dm' && String(m.testo).match(/^🗳 voto:(\w+):(\w+)$/); return x ? { id: x[1], v: x[2] } : null; };
+  function voti(id) {
+    const ult = new Map(); for (const m of [...(T.chat || [])].sort((a, b) => a.id - b.id)) { const x = votoDi(m); if (x?.id === id && VOTI.some(v => v[0] === x.v)) ult.set(m.autore, { v: x.v, nome: m.nome }); }
+    return ult;
+  }
+  function boxVoto(m, id) {
+    const V = voti(id);
+    if (isDM()) {
+      const n = V.size, gioc = T.membri.filter(x => x.giocatore).length;
+      return `<div class="tv-voto">${VOTI.map(([k, l]) => { const chi = [...V.values()].filter(x => x.v === k).map(x => x.nome); return `<span class="vv${chi.length ? ' on' : ''}" title="${esc(chi.join(', '))}">${l} <b>${chi.length}</b></span>`; }).join('')}<small>${n ? `${n === 1 ? 'Ha votato 1 giocatore' : `Hanno votato ${n} giocatori`}${gioc ? ` su ${gioc}` : ''}` : 'Nessun voto ancora'}</small></div>`;
+    }
+    const mio = V.get(T.me.uid)?.v;
+    return `<div class="tv-voto">${VOTI.map(([k, l]) => `<button type="button" data-voto="${id}:${k}" aria-pressed="${mio === k}" class="${mio === k ? 'on' : ''}">${l}</button>`).join('')}<small>${mio ? 'Grazie! Puoi cambiare idea finché vuoi: il voto lo vede solo il DM.' : 'Il voto lo vede solo il DM.'}</small></div>`;
+  }
+  async function vota(id, v) {
+    const r = await SB.rpc('tavolo_scrivi', { p_testo: `🗳 voto:${id}:${v}`, p_per: 'dm' });
+    if (r.error) return toast(r.error.message, 'err');
+    const row = Array.isArray(r.data) ? r.data[0] : r.data;
+    if (row && !T.chat.some(x => x.id === row.id)) T.chat.push(row);
+    disegnaLog();
+  }
+  const rigaMsg = m => votoDi(m) ? '' : votoApre(m) ? `<div class="tv-roll tv-msg tv-vmsg">${'<div class="h"><span class="who">⚔ Fine dello scontro</span><span class="dx"><small>' + ora(m.creato) + '</small>' + via('c', m) + '</span></div>'}<div class="tx">${esc(m.testo.replace(/\s*⟦voto:\w+⟧/, ''))}</div>${boxVoto(m, votoApre(m))}</div>` : `<div class="tv-roll tv-msg ${m.per ? 'w' : ''} ${m.autore === T.me.uid ? 'me' : ''}">${tagMsg(m)}<div class="h"><span class="who">${avatar(m.autore, m.nome)}${esc(m.nome)}</span><span class="dx"><small>${ora(m.creato)}</small>${via('c', m)}</span></div><div class="tx">${esc(m.testo)}</div></div>`;
   async function cancella(k) {
     const [tipo, id] = k.split(':'), tab = tipo === 't' ? 'tavolo_tiri' : 'tavolo_chat';
     const r = await SB.from(tab).delete().eq('id', +id).select('id');
@@ -3624,7 +3658,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
   function nuovoMsg(m) {
     disegnaLog();
-    if ($('#tv-dice')?.hidden && m.autore !== T.me.uid) { $('#tv-ctab')?.classList.add('nuovo'); toast(`${m.nome}${m.per ? ' (sussurro)' : ''}: ${m.testo.slice(0, 120)}`); }
+    const vt = votoDi(m); if (vt) { if (isDM() && m.autore !== T.me.uid) toast(`${m.nome} ha votato lo scontro: ${(VOTI.find(x => x[0] === vt.v) || ['', vt.v])[1]}`); return; }
+    if ($('#tv-dice')?.hidden && m.autore !== T.me.uid) { $('#tv-ctab')?.classList.add('nuovo'); toast(`${m.nome}${m.per ? ' (sussurro)' : ''}: ${m.testo.slice(0, 120).replace(/\s*⟦voto:\w+⟧/, '')}`); }
   }
   function nuovoTiro(t) {
     disegnaLog(); lancia(t);
@@ -4527,6 +4562,10 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       <div class="pvr"><label>Danni ${f('danni', 'es. 8d6', 'd')}</label><label>Tipo ${f('tipo_danni', 'fuoco', 'd')}</label>${ck('attacco', 'Tiro per colpire', 'Si tira per colpire contro la CA del bersaglio')}<label>TS <select data-f="inc.${i}.ts"><option value="">nessuno</option>${CAR.map(([k, , n]) => `<option value="${k}">${n}</option>`).join('')}</select></label>${ck('dimezza', 'Metà danni se riesce')}</div>
       <div class="pvr"><button type="button" class="mini" data-k="inc-mod" data-i="${i}">✓ Fatto</button><button type="button" class="mini via" data-k="inc-via" data-i="${i}">Elimina</button></div></div>`;
   }
+  // azioni pronte: le armi e gli incantesimi con la stella compaiono per primi nel menu delle azioni del token
+  const chiavePr = (t, nome) => t + ':' + norm(nome || '');
+  const pronta = (d, t, nome) => !!nome && (d.pronte || []).includes(chiavePr(t, nome));
+  const stella = (d, t, nome, w) => { if (!nome || (!w && !pronta(d, t, nome))) return ''; const on = pronta(d, t, nome); return `<button type="button" class="mini tv-star${on ? ' on' : ''}" data-k="pronta" data-p="${esc(chiavePr(t, nome))}" aria-pressed="${on}" title="${on ? 'Tra le azioni pronte: tocca per toglierla' : 'Tieni pronta: la trovi per prima nel menu delle azioni del token'}" aria-label="${on ? 'Togli dalle azioni pronte' : 'Aggiungi alle azioni pronte'}"${w ? '' : ' disabled'}>${on ? '★' : '☆'}</button>`; };
   function voceInc(s, sp, i, w, dis) {
     const sv = T.sv, key = sp.id || 'n' + i, aperta = sv.aperti?.has(key), mod = sv.minc === key && w, lv = num(sp.livello) || 0;
     const riga = (l, v) => `<p><b>${l}:</b> ${esc(v || '')}</p>`;
@@ -4538,7 +4577,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const tag = [sp.conc ? '<i title="Concentrazione">C</i>' : '', sp.rituale ? '<i title="Rituale">R</i>' : '', sp.componenti ? `<small>${esc(String(sp.componenti).split('(')[0].trim())}</small>` : ''].join('');
     return `<div class="pv spl${aperta ? ' ap' : ''}" data-ordi="${i}">
       <div class="ph">${w ? '<span class="mano" title="Trascina per spostare" aria-hidden="true">⠿</span>' : ''}${lv ? `<button type="button" class="prp${sp.prep ? ' on' : ''}" data-k="inc-prep" data-i="${i}" title="${sp.prep ? 'Preparato' : 'Non preparato'}" aria-pressed="${!!sp.prep}"${w ? '' : ' disabled'}></button>` : ''}<button type="button" class="pt" data-k="inc-apri" data-i="${i}" aria-expanded="${!!aperta}">${esc(sp.nome || 'Senza nome')}</button>
-        <span class="az2"><span class="tg2">${tag}</span><button type="button" class="mchat" data-k="inc-chat" data-i="${i}" title="Mostra la descrizione in chat" aria-label="Mostra in chat"${dis}>💬</button><button type="button" class="lancia" data-k="inc-lancia" data-i="${i}" title="Lancia ${esc(sp.nome || 'l\'incantesimo')}"${dis}>✨ Lancia</button>
+        <span class="az2"><span class="tg2">${tag}</span>${stella(s.dati, 'i', sp.nome, w)}<button type="button" class="mchat" data-k="inc-chat" data-i="${i}" title="Mostra la descrizione in chat" aria-label="Mostra in chat"${dis}>💬</button><button type="button" class="lancia" data-k="inc-lancia" data-i="${i}" title="Lancia ${esc(sp.nome || 'l\'incantesimo')}"${dis}>✨ Lancia</button>
         ${w ? `<button type="button" class="ing" data-k="inc-mod" data-i="${i}" title="Modifica" aria-label="Modifica">⚙</button>` : ''}</span></div>
       ${mod ? incForm(sp, i) : aperta ? dett : ''}</div>`;
   }
@@ -5061,7 +5100,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   // svuota l'ordine del turno: la striscia in alto sparisce per tutti
   async function fineCombattimento(dom = 'Il combattimento è finito? L\'ordine del turno si svuota e la barra in alto sparisce per tutti.', ok = 'Fine combattimento', title = 'Fine del combattimento') {
     if (!T.turno.length || !await ask(dom, { ok, title })) return;
-    await svuotaTurno();
+    if (await svuotaTurno() && ok === 'Fine combattimento') annuncia(`Lo scontro è finito! Com'è stato per voi? ⟦voto:${Date.now().toString(36)}⟧`);
   }
   async function svuotaTurno() {
     const r = await SB.from('tavolo_turno').delete().in('id', T.turno.map(y => y.id)); if (r.error) { toast(r.error.message, 'err'); return false; }
@@ -6223,6 +6262,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const extraAtt = /attacco extra|attacchi multipli|multiattacco/i.test([(d.privilegi || []).map(p => p.nome).join('|'), d.azioni || '', d.tratti || ''].join('|'));
     const vi = ([x, i], off) => { const lv = num(x.livello) || 0, sl = lv ? Math.max(0, (num(d['slot_' + lv]) || 0) - (num(d['usati_' + lv]) || 0)) : null; return `<button type="button" role="menuitem" data-i="${i}" title="${esc(x.nome)}${x.portata ? ' · ' + esc(x.portata) : ''}"${off ? ' disabled' : ''}><span>✨</span><div><b>${esc(x.nome)}</b><small>${lv ? `${lv}° · ${sl} slot liberi` : 'trucchetto'}${x.danni ? ' · ' + esc(x.danni) : ''}</small></div></button>`; };
     const incDi = k => inc.filter(([x]) => tempoInc(x) === k);
+    const prW = armi.filter(([x]) => pronta(d, 'w', x.nome)), prI = inc.filter(([x]) => pronta(d, 'i', x.nome));
+    const pronte = prW.length || prI.length ? `<div class="pron"><h5><span>★ Pronte</span></h5><div class="gz">${prW.map(x => va(x, U.az && !extraAtt)).join('')}${prI.map(x => vi(x, !!U[tempoInc(x[0])])).join('')}</div></div>` : '';
     const mk = marchioDi(t), mkInc = mk ? (d.incantesimi || []).findIndex(x => norm(x?.nome) === norm(mk.nome)) : -1;
     const testa = (k, l, extra = '') => `<h5><span>${l}${U[k] ? ' <small>già usata</small>' : ''}${extra}</span>${mio || k === 'rea' ? `<button type="button" class="tg" data-t="${k}" title="Se è stata segnata per sbaglio (o va segnata a mano)">${U[k] ? 'Ridalla' : 'Segna usata'}</button>` : ''}</h5>`;
     const gruppo = (l, html) => html ? `<h6>${l}</h6><div class="gz">${html}</div>` : '';
@@ -6234,7 +6275,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       leg: () => { const L = leggDi(s || { dati: {} }), r = s ? legRest(s) : 0; return `<h5><span>Azioni leggendarie <small>${r} di ${legN(s)} punti${mio ? ' · non nel suo turno' : ''}</small></span></h5><div class="gz">${L.map((x, j) => `<button type="button" role="menuitem" data-lg="${j}" title="${esc(x.testo || '')}"${mio || x.costo > r ? ' disabled' : ''}><span>♛</span><div><b>${esc(x.nome)}</b><small>${x.costo} punt${x.costo > 1 ? 'i' : 'o'} · ${esc(corto(x.testo || '', 50))}</small></div></button>`).join('')}</div>${L.length ? '' : '<p class="nota">Nessuna azione leggendaria nella scheda.</p>'}`; },
       rea: () => `${testa('rea', 'Con la reazione')}<div class="gz">${pr.map(x => vp(x, x === OPP ? 'opp' : P.indexOf(x), 'rea', U.rea)).join('')}${incDi('rea').map(x => vi(x, U.rea)).join('')}</div>`
     };
-    m.innerHTML = (solo ? [solo] : ['az', 'bon', 'rea', ...(s && legN(s) ? ['leg'] : [])]).map(k => sez[k]()).join('') + (solo ? '<button type="button" class="tutte">Mostra tutte le azioni</button>' : '') + `<p class="nota">Le azioni scelte finiscono in chat.</p>`;
+    m.innerHTML = pronte + (solo ? [solo] : ['az', 'bon', 'rea', ...(s && legN(s) ? ['leg'] : [])]).map(k => sez[k]()).join('') + (solo ? '<button type="button" class="tutte">Mostra tutte le azioni</button>' : '') + `<p class="nota">Le azioni scelte finiscono in chat.</p>`;
     document.body.append(m);
     const r = anc.getBoundingClientRect(), metti = () => { const h = m.offsetHeight, w = m.offsetWidth; m.style.left = clamp(r.left + r.width / 2 - w / 2, 6, innerWidth - w - 6) + 'px'; m.style.top = (r.bottom + 8 + h <= innerHeight - 6 ? r.bottom + 8 : r.top - h - 8 >= 6 ? r.top - h - 8 : clamp(r.bottom + 8, 6, innerHeight - h - 6)) + 'px'; };
     metti();
@@ -6367,7 +6408,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       };
       const opzArmi = R ? `<optgroup label="Armi semplici">${R.armi.filter(w => w[3] === 'semplice').map(w => `<option>${esc(w[0])}</option>`).join('')}</optgroup><optgroup label="Armi da guerra">${R.armi.filter(w => w[3] === 'guerra').map(w => `<option>${esc(w[0])}</option>`).join('')}</optgroup>` : '';
       const at = (d.attacchi || []).map((x, i) => `<div class="at" data-ordi="${i}"><div class="riga">${w ? '<span class="mano" title="Trascina per spostare" aria-hidden="true">⠿</span>' : ''}${testo(`att.${i}.nome`, 'Arma', 'an')}${inp(`att.${i}.colpire`, '+0', 'ac', 'number')}${inp(`att.${i}.danni`, '1d6+1', 'ad')}</div>
-          <div class="riga az">${testo(`att.${i}.tipo`, 'Tipo e note', 'tp')}${bonusDadi(x) ? `<span class="bon" title="Danni bonus: si tirano insieme ai danni">+ ${esc(bonusDadi(x))} ${esc(bonusNome(x).replace(/^danni /, ''))}</span>` : ''}<button type="button" class="mini" data-roll="att:${i}"${dis} title="Tiro per colpire">🎯 Colpisci</button><button type="button" class="mini" data-roll="dan:${i}"${dis} title="Danni">💥 Danni</button><button type="button" class="mini" data-roll="cri:${i}"${dis} title="Critico: dadi dei danni raddoppiati">✖2 Critico</button>${w ? `<button type="button" class="mini cfg${sv.matt === i ? ' on' : ''}" data-k="attcfg" data-i="${i}" title="Modifica: caratteristica (Forza, Destrezza…), competenza, dado e bonus magico" aria-label="Modifica l'attacco" aria-expanded="${sv.matt === i}">⚙</button><button type="button" class="mini via" data-k="delatt" data-i="${i}" title="Togli l'attacco" aria-label="Togli l'attacco">🗑</button>` : ''}</div>
+          <div class="riga az">${stella(d, 'w', x.nome, w)}${testo(`att.${i}.tipo`, 'Tipo e note', 'tp')}${bonusDadi(x) ? `<span class="bon" title="Danni bonus: si tirano insieme ai danni">+ ${esc(bonusDadi(x))} ${esc(bonusNome(x).replace(/^danni /, ''))}</span>` : ''}<button type="button" class="mini" data-roll="att:${i}"${dis} title="Tiro per colpire">🎯 Colpisci</button><button type="button" class="mini" data-roll="dan:${i}"${dis} title="Danni">💥 Danni</button><button type="button" class="mini" data-roll="cri:${i}"${dis} title="Critico: dadi dei danni raddoppiati">✖2 Critico</button>${w ? `<button type="button" class="mini cfg${sv.matt === i ? ' on' : ''}" data-k="attcfg" data-i="${i}" title="Modifica: caratteristica (Forza, Destrezza…), competenza, dado e bonus magico" aria-label="Modifica l'attacco" aria-expanded="${sv.matt === i}">⚙</button><button type="button" class="mini via" data-k="delatt" data-i="${i}" title="Togli l'attacco" aria-label="Togli l'attacco">🗑</button>` : ''}</div>
           ${infoArma(x)}${String(x.desc || '').trim() && !(w && sv.matt === i) ? `<p class="atdesc">${esc(x.desc)}</p>` : ''}
           ${w && sv.matt === i ? (wa => `<div class="atcfg"><label class="lg"><span>Descrizione dell'oggetto (armi particolari, proprietà magiche…)</span><textarea data-f="att.${i}.desc" class="auto" rows="2" placeholder="Es. lama di ghiaccio forgiata dai nani: brilla al buio e…"></textarea></label>${R ? `<label class="lg"><span>Arma del manuale</span><select data-f="att.${i}.arma"><option value="">${wa && !x.arma ? 'Riconosciuta dal nome: ' + esc(wa[0]) : 'Dal nome (nessuna arma riconosciuta)'}</option>${opzArmi}</select></label>` : ''}
             <label><span>Caratteristica</span><select data-f="att.${i}.car">${CAR_ATT.map(([v, l]) => `<option value="${v}">${v === '' ? (wa ? `Automatica: ${nomeCar(carArma(s, wa))}` : 'Automatica: nessuna arma, scrivi tu') : l}</option>`).join('')}</select></label>
@@ -6595,6 +6636,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (k === 'cond' && !b.value) return;
       await cambiaCond(s, tk, b.dataset.cond ? ora.filter(c => c !== b.dataset.cond) : [...ora, b.value]); return disegnaScheda();
     }
+    if (k === 'pronta') { const p = b.dataset.p, L = (d.pronte || []).filter(x => x !== p); if (L.length === (d.pronte || []).length) L.push(p); await salvaScheda(s.id, { pronte: L }, true); return disegnaScheda(); }
     const salvaP = (L, subito = true) => salvaScheda(s.id, { privilegi: L }, subito).then(() => disegnaScheda());
     const salvaI = L => salvaScheda(s.id, { incantesimi: L }, true).then(() => disegnaScheda());
     if (k === 'inc-mod' && sp) { sv.minc = sv.minc === ckey ? null : ckey; if (!sp.id) { const L = I.map(x => ({ ...x })); L[pi].id = nuovoId(); if (sv.minc) sv.minc = L[pi].id; return salvaI(L); } return disegnaScheda(); }
