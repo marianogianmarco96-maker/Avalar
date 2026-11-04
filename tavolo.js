@@ -974,6 +974,55 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
 .tv-strip.vert .pie{display:flex;justify-content:stretch;padding:8px 10px 10px;border-top:1px solid #ffffff1a}
 .tv-strip.vert .pie .tv-b{flex:1;justify-content:center;height:38px}
 .tv-strip.vert .pie:has(.tv-b[hidden]){display:none}
+.tv.gio .tv-rail button em.nl{position:absolute;top:2px;right:4px;min-width:16px;height:16px;padding:0 4px;box-sizing:border-box;border-radius:8px;background:#c0392b;color:#fff;font:700 .62rem/16px var(--body);font-style:normal;text-align:center;box-shadow:0 0 0 2px var(--rail)}
+.tv-ctab[data-n]::after{content:attr(data-n);top:-7px;left:-7px;width:auto;height:18px;min-width:18px;padding:0 5px;box-sizing:border-box;border-radius:9px;font:700 .66rem/18px var(--body);color:#fff;text-align:center;background:#c0392b}
+@media (min-width:821px){
+  .tv.gio .tv-rail{width:54px}
+  .tv.gio .tv-rail button{width:42px;height:42px}
+  .tv.gio .tv-rail button .rl{display:none}
+  .tv.gio .tv-rail button svg{width:22px;height:22px}
+  .tv.gio .tv-chat{position:absolute;right:0;top:0;bottom:0;z-index:14;box-shadow:-10px 0 28px #000a}
+  .tv.gio .tv-ctab{width:36px;height:76px;font-size:1.15rem}
+  .tv.gio .tv-ctab:not(.chiusa){display:none}
+}
+.tv-back{display:none}
+@media (max-width:820px){
+  html.in-tavolo #nav{display:none!important}
+  html.in-tavolo #toasts{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+  .tv-back{all:unset;display:flex;align-items:center;justify-content:center;width:28px;height:28px;margin:-2px 2px -2px -4px;border-radius:8px;cursor:pointer;color:var(--gold2);font:700 1.4rem/1 var(--body)}
+  .tv-back:hover{background:#ffffff14}
+  .tv.gio .tv-top,.tv.gio .tv-wrap.con-turno .tv-top{top:8px;justify-content:flex-start}
+  .tv.gio .tv-strip{top:52px;right:auto;max-width:calc(100% - 16px)}
+  .tv.gio .tv-wrap.con-turno .tv-zoom{top:8px}
+  .tv.gio .tv-rail{justify-content:space-around}
+  .tv.gio .tv-rail button{flex:1 1 0;max-width:76px}
+  .tv.gio .tv-rail .tv-on{display:none}
+}
+.tv-strip .rz{position:absolute;right:2px;bottom:2px;width:14px;height:14px;cursor:nwse-resize;touch-action:none;opacity:.55;background:linear-gradient(135deg,transparent 45%,var(--gold2) 45%,var(--gold2) 52%,transparent 52%,transparent 66%,var(--gold2) 66%,var(--gold2) 73%,transparent 73%);border-bottom-right-radius:12px}
+.tv-strip .rz:hover,.tv-strip.tira .rz{opacity:1}
+.tv-strip .fin2{position:absolute;left:10px;top:100%;margin-top:6px;height:30px;padding:0 12px;font-size:.8rem;box-shadow:0 6px 16px #000a}
+.tv-strip .fin2[hidden]{display:none}
+.tv-strip.col .fin2{left:0;white-space:nowrap}
+.tv-strip.tz{gap:calc(10px*var(--tz));padding-top:calc(6px*var(--tz));padding-bottom:calc(6px*var(--tz))}
+.tv-strip.tz .rd{font-size:calc(1.05rem*var(--tz))}
+.tv-strip.tz .ls{gap:calc(8px*var(--tz));padding-top:calc(6px*var(--tz))}
+.tv-strip.tz .p{width:calc(52px*var(--tz))}
+.tv-strip.tz .p i{width:calc(40px*var(--tz));height:calc(40px*var(--tz));font-size:calc(.8rem*var(--tz))}
+.tv-strip.tz .p b{font-size:calc(.66rem*var(--tz));max-width:100%}
+.tv-strip.tz .p em{transform:scale(calc(.55 + .45*var(--tz)));transform-origin:top right}
+.tv-strip.tz .p.on{width:calc(64px*var(--tz))}
+.tv-strip.tz .p.on i{width:calc(52px*var(--tz));height:calc(52px*var(--tz))}
+.tv-strip.tz .p.on b{font-size:calc(.72rem*var(--tz))}
+.tv-strip.tz .ac .tv-b{transform:scale(calc(.7 + .3*var(--tz)));transform-origin:center}
+.tv-strip.tz.foto .p b,.tv-strip.tz.foto .rd small,.tv-strip.tz.foto .p em{display:none}
+.tv-strip.tz.foto .rd::before{content:'R';font-size:.8em}
+.tv-strip.tz.foto .rd{flex-direction:row;align-items:baseline}
+.tv-strip.tz.foto .p.on i{box-shadow:0 0 0 2px #e7cf9a44,0 0 10px #e7cf9a88}
+.tv-strip.tz.vert:not(.ed){width:calc(262px*var(--tz))}
+.tv-strip.tz.vert .tv-tr{font-size:calc(1em*var(--tz));padding-top:calc(5px*var(--tz));padding-bottom:calc(5px*var(--tz))}
+.tv-strip.tz.vert .tv-tr i{width:calc(28px*var(--tz));height:calc(28px*var(--tz))}
+.tv-strip.tz.col{width:calc(80px*var(--tz))}
+.tv-tmenu .gz{grid-template-columns:1fr!important}
 .tv-wrap.con-turno .tv-tdp,.tv-wrap.con-turno .tv-sp{top:96px;max-height:calc(100% - 106px)}
 
 /* il pannello del turno, in basso al centro */
@@ -1162,6 +1211,27 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
 .tv-pop.nuovo .tzp .c:focus-visible,.tv-pop.nuovo .tzp .az:focus-visible{outline:2px solid var(--gold2)}
 .tv-pop.nuovo .gr button:hover,.tv-pop.nuovo .gr button:focus-visible{background:#7d253088;border-color:#e7cf9a55;outline:none}
 .tv-pop.nuovo .gr button.via{color:#ff9d93}
+.tv-pop.tv-anello{width:0;height:0;min-width:0;padding:0;border:0;background:none;box-shadow:none;overflow:visible;pointer-events:none;z-index:12;display:block}
+.tv-anello>*{pointer-events:auto}
+.tv-anello .rb{all:unset;pointer-events:auto;box-sizing:border-box;color:#f4e7cc;font-weight:700;position:absolute;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#1b1512ee;border:1px solid #e7cf9a66;box-shadow:0 6px 16px #000b;animation:tvRb .16s ease-out both}
+.tv-anello .rb span{font-size:1.25rem;line-height:1}
+.tv-anello .rb small{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:2px;font:700 .72rem var(--body);color:#f4e7cc;text-shadow:0 1px 3px #000,0 0 6px #000;white-space:nowrap;pointer-events:none}
+.tv-anello .rb:hover,.tv-anello .rb:focus-visible{background:#3a2a20f2;border-color:var(--gold2);outline:none}
+.tv-anello .rb[disabled]{opacity:.4;cursor:default}
+@keyframes tvRb{from{opacity:0;transform:scale(.6)}}
+.tv-anello .sotto{position:absolute;left:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px}
+.tv-anello .sotto[data-su]{transform:translate(-50%,-100%);flex-direction:column-reverse}
+.tv-anello .chip{display:flex;align-items:center;gap:9px;padding:5px 11px;border-radius:12px;background:#1b1512e6;border:1px solid #e7cf9a44;box-shadow:0 4px 12px #000a;font:600 .82rem var(--body);color:#f4e7cc;white-space:nowrap}
+.tv-anello .chip .pf b{color:var(--b);font-weight:800}
+.tv-anello .chip .dd{display:flex;gap:5px}
+.tv-anello .chip .dt{all:unset;pointer-events:auto;cursor:pointer;width:12px;height:12px;border-radius:50%;background:#4caf6a;box-shadow:0 0 0 2px #4caf6a44}
+.tv-anello .chip .dt.u{background:#5a5550;box-shadow:none}
+.tv-anello .chip .dt[disabled]{cursor:default;opacity:.55}
+.tv-anello .chip .mv.ko{color:#ff8a7d}
+.tv-anello .fin{all:unset;pointer-events:auto;cursor:pointer;padding:8px 14px;border-radius:12px;background:var(--wine,#8c2c38);border:1px solid var(--gold2);color:#fff;font:700 .85rem var(--body);box-shadow:0 6px 16px #000b;white-space:nowrap}
+.tv-anello .fin:hover{filter:brightness(1.15)}
+.tv-pop.tv-asub{width:250px}
+.tv-pop.tv-asub .tv-pcond{padding:10px 12px}
 .tv-pop.nuovo .tv-pcond{padding:0 12px 10px;gap:5px}
 .tv-pop.nuovo .tv-pcond button{background:#6b3fa055;border:1px solid #b98cff66;border-radius:12px;padding:4px 9px;font:600 .74rem var(--body);color:var(--pan-ink)}
 .tv-pop.nuovo select{font:600 .8rem var(--body);padding:6px 8px;border-radius:8px;border:1px solid #ffffff2a;background:#0006;color:var(--pan-ink);min-width:0}
@@ -1665,6 +1735,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       f.style.top = (top ? top.getBoundingClientRect().bottom : 0) + 'px';
       f.style.bottom = (nav && getComputedStyle(nav).position === 'fixed' ? nav.offsetHeight : 0) + 'px';
     };
+    // sul telefono il tavolo prende tutto lo schermo: la barra del sito sparisce (si esce con ‹ accanto al nome della mappa)
+    document.documentElement.classList.add('in-tavolo'); onCleanup(() => document.documentElement.classList.remove('in-tavolo'));
     fit(); scrollTo(0, 0); addEventListener('resize', fit); addEventListener('resize', alzaAvvisi);
     let vivo = true;
     onCleanup(() => { vivo = false; removeEventListener('resize', fit); removeEventListener('resize', alzaAvvisi); esci(); document.querySelectorAll('.tv-tip').forEach(x => x.remove()); });
@@ -1941,6 +2013,16 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const r = $('#tv-rail'); if (!r) return;
     const RL = { 'tv-sel': 'Seleziona', 'tv-mano': 'Sposta', 'tv-righello': 'Righello', 'tv-tiradadi': 'Dadi', 'tv-turno': 'Turno', 'tv-schede': 'Schede', 'tv-dadi': 'Chat', 'tv-scaletta': 'Scaletta', 'tv-maschera': 'Maschera', 'tv-muri': 'Muri', 'tv-difficile': 'Terreno', 'tv-effetti': 'Effetti', 'tv-segni': 'Segnalini', 'tv-token': 'Token', 'tv-griglia': 'Griglia', 'tv-liv-seg': 'Tutti', 'tv-liv-mas': 'Solo io' };
     const b = (act, tip, k, on) => `<button type="button" data-act="${act}" data-tip="${esc(tip)}" aria-label="${esc(tip)}" class="${on ? 'on' : ''}">${svg(k)}<span class="rl" aria-hidden="true">${RL[act] || ''}</span></button>`;
+    const gio = !isDM(); $('.tv')?.classList.toggle('gio', gio);
+    // i giocatori: quattro strumenti (e la chat, sul telefono). Il resto sta nel menu del token e nel ⋯ della tabella del turno
+    if (gio) {
+      const nl = T.nonLetti || 0, aperta = !$('#tv-dice')?.hidden;
+      r.innerHTML = b('tv-sel', 'Seleziona e muovi il tuo token (S)', 'sel', T.tool === 'muovi').replace('Seleziona</span>', 'Muovi</span>') + b('tv-righello', 'Righello (R)', 'rig', T.tool === 'righello') + b('tv-tiradadi', 'Tiradadi', 'dado', !$('#tv-tdp')?.hidden)
+        + b('tv-mia', 'La tua scheda', 'sch', aperta && !!T.stab).replace('</span>', 'Scheda</span>')
+        + b('tv-dadi', 'Chat', 'chat', aperta && !T.stab).replace('class="', 'class="tel ').replace('</button>', nl ? `<em class="nl">${nl > 9 ? '9+' : nl}</em></button>` : '</button>')
+        + `<span class="sp"></span><span class="tv-on ${T.live ? 'ok' : ''}" id="tv-on" title="${T.live ? esc('Al tavolo ora: ' + T.online.join(', ')) : 'Connessione…'}"></span>`;
+      return;
+    }
     let h = b('tv-sel', 'Seleziona e sposta i token (S)', 'sel', T.tool === 'muovi') + b('tv-mano', 'Sposta la mappa (M)', 'mano', T.tool === 'mano')
       + b('tv-righello', 'Righello (R)', 'rig', T.tool === 'righello') + b('tv-tiradadi', 'Tiradadi', 'dado', !$('#tv-tdp')?.hidden)
       + b('tv-turno', isDM() ? 'Modifica l\'ordine del turno' : 'Ordine del turno: barra o tabella classica', 'tur', isDM() ? !!T.turnoEd : turnoVert()) + b('tv-schede', 'Schede dei personaggi e dei PNG', 'sch', !$('#tv-sp')?.hidden)
@@ -1957,7 +2039,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const t = $('#tv-top'); if (!t) return;
     const sc = scena(), att = T.stato?.scena;
     let h = '';
-    if (sc) h += `<div class="tv-chip"><b>${esc(sc.nome)}</b>${isDM() ? (sc.id === att ? '<span class="qui" title="I giocatori sono su questa mappa">I giocatori sono qui</span>' : '<button type="button" class="btn sm primary" data-act="tv-porta">Porta qui i giocatori</button>') : ''}</div>`;
+    if (sc) h += `<div class="tv-chip"><button type="button" class="tv-back" data-act="tv-esci" aria-label="Esci dal tavolo" title="Esci dal tavolo">‹</button><b>${esc(sc.nome)}</b>${isDM() ? (sc.id === att ? '<span class="qui" title="I giocatori sono su questa mappa">I giocatori sono qui</span>' : '<button type="button" class="btn sm primary" data-act="tv-porta">Porta qui i giocatori</button>') : ''}</div>`;
     if (isDM() && sc && T.livello === 'master') h = '<div class="tv-liv" title="I token che aggiungi e sposti ora li vedi solo tu">👑 Livello Master</div>' + h;
     if (isDM()) h += `<button type="button" class="tv-pgbtn" data-act="tv-pagine" data-tip="Mappe" aria-label="Mappe">${svg('pag')}<span>Mappe</span></button>`;
     t.innerHTML = h;
@@ -1966,8 +2048,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     return {
       'tv-sel': () => strumento('muovi'), 'tv-mano': () => strumento('mano'), 'tv-righello': () => strumento(T.tool === 'righello' ? 'muovi' : 'righello'),
       'tv-dadi': () => { if (T.scal && !$('#tv-dice').hidden && matchMedia('(max-width:820px)').matches) return apriScaletta(false); apriChat($('#tv-dice').hidden, true); },
+      'tv-mia': () => { if (!$('#tv-dice').hidden && T.stab) return apriChat(false); apriSchedaTab(true); disegnaRail(); },
       'tv-scaletta': () => apriScaletta(!(T.scal && !$('#tv-dice').hidden)), 'tv-chatab': () => { apriScaletta(false); apriSchedaTab(false); }, 'tv-schtab': () => apriSchedaTab(true),
-      'tv-porta': () => porta(T.vista),
+      'tv-porta': () => porta(T.vista), 'tv-esci': () => { location.hash = '#/'; },
       'tv-pagine': () => pannelloMappe($('#tv-pages').hidden), 'tv-nuova': () => dlgNuovaScena(),
       'tv-token': () => dlgToken(), 'tv-griglia': () => dlgGriglia(),
       'tv-turno': () => apriTurno(!T.turnoEd), 'tv-schede': () => apriSchede($('#tv-sp').hidden),
@@ -2325,7 +2408,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function interazioni(st) {
     if (st.__tv) return; st.__tv = true;
     const punti = new Map(); let pan = null, pinch = null, rul = null, mas = null, ultimo = 0;
-    st.addEventListener('wheel', e => { const pp = e.target.closest?.('.tv-pop'); if (pp && pp.scrollHeight > pp.clientHeight) return; e.preventDefault(); const r = st.getBoundingClientRect(); const dy = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY; zoom(Math.exp(-(e.ctrlKey ? dy * 0.01 : clamp(dy, -100, 100) * 0.0005)), e.clientX - r.left, e.clientY - r.top); }, { passive: false });
+    st.addEventListener('wheel', e => { const pp = e.target.closest?.('.tv-pop'); if (pp && pp.scrollHeight > pp.clientHeight) return; e.preventDefault(); if (st.querySelector('.tv-anello')) chiudiPop(); const r = st.getBoundingClientRect(); const dy = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY; zoom(Math.exp(-(e.ctrlKey ? dy * 0.01 : clamp(dy, -100, 100) * 0.0005)), e.clientX - r.left, e.clientY - r.top); }, { passive: false });
     st.addEventListener('pointerdown', e => {
       if (e.button > 0 || !scena() || e.target.closest('.tv-zoom,.tv-pop,.tv-porta,.tv-incolla')) return;
       chiudiPop();
@@ -2946,7 +3029,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
   function menuRapido(t, e) {
     const mio = puoMuovere(t), s = schedaDi(t), cn = condTok(t), n = esc(t.nome || 'Token'), V = [];
-    if (!mio && !isDM()) return menuToken(t.id, e);
+    if (!isDM()) return menuToken(t.id, e);
     if (cn.includes('Nascosto')) V.push(['👁 Esci dal nascondiglio', () => mettiNascosto(t, false)]);
     else if (!(isDM() && t.nascosto && !t.giocatore)) V.push(['🥷 Nascondersi (Furtività)', () => nascondersi(t)]);
     if (isDM() && !t.giocatore) V.push(t.nascosto ? ['👁 Mostra ai giocatori', () => mettiSoloDM(t, false)] : ['👑 Solo per me', () => mettiSoloDM(t, true)]);
@@ -3018,7 +3101,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     };
     if (!isDM()) {
       // il giocatore apre la foto (solo per sé) e, sul proprio token, tira l'iniziativa
-      if (!ft && !mio && !sch && !cnow.length) return;
+      if (mio) return anello(t, e);
+      if (!ft && !sch && !cnow.length) return;
       const gr = tsch + (ft ? tile('foto', '🖼', 'Foto', 'Solo sul tuo schermo') : '');
       pop.innerHTML = `${testa}${mio ? bfine + tzp + rpf : ''}${gr ? `<div class="gr">${gr}</div>` : ''}${mio ? rcond + ini : rcond}`;
       st.append(pop); extra();
@@ -3070,6 +3154,66 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       chiudiPop(); if (!await ask(`Eliminare il token **${t.nome || 'senza nome'}**?`, { ok: 'Elimina', danger: true, title: 'Elimina token' })) return;
       const r2 = await SB.from('tavolo_token').delete().eq('id', id); if (r2.error) return toast(r2.error.message, 'err');
       T.tok.delete(id); disegnaToken();
+    };
+  }
+
+  /* ---------- il menu ad anello del giocatore: cinque tasti sopra il proprio token, sotto PF, azioni e movimento ---------- */
+  function chipAnello(t) {
+    const pf = pfDi(t), comb = inCombattimento() && T.turno.some(x => x.token === t.id), mio = suoTurno(t);
+    const pz = [];
+    if (pf) { const q = pf.pf / Math.max(1, pf.max); pz.push(`<span class="pf" style="--b:${q > 0.5 ? '#5bb36a' : q > 0.25 ? '#d8b04e' : '#e0564c'}" title="Punti ferita">❤ <b>${pf.pf}</b>/${pf.max}</span>`); }
+    if (comb) pz.push(`<span class="dd">${AZ.map(([k, , l]) => { const u = usata(t, k), off = !mio && k !== 'rea'; return `<button type="button" class="dt${u ? ' u' : ''}" data-z="${k}" title="${l}: ${off ? 'solo nel tuo turno' : u ? 'usata (tocca per ridarla)' : 'disponibile (tocca per segnarla usata)'}" aria-label="${l}${u ? ' usata' : ''}"${off ? ' disabled' : ''}></button>`; }).join('')}</span>`);
+    if (comb && mio) { const mv = movimentoDi(t); pz.push(`<span class="mv${mv.resta < 0 ? ' ko' : ''}" title="Movimento che ti resta, di ${metri(mv.tot)}">🏃 ${metri(Math.max(0, mv.resta))}</span>`); }
+    return pz.length ? `<div class="chip" data-id="${t.id}">${pz.join('')}</div>` : '';
+  }
+  function legaChip(box, t) { box.querySelectorAll('.chip [data-z]').forEach(b => b.onclick = ev => { ev.stopPropagation(); cambiaAz(t, b.dataset.z); }); }
+  function anello(t, e) {
+    const st = $('#tv-stage'), el = tokEl(t.id); if (!st) return;
+    chiudiPop();
+    const r = st.getBoundingClientRect(), tr = el ? el.getBoundingClientRect() : { left: e.clientX - 20, top: e.clientY - 20, width: 40, height: 40 };
+    const tk = Math.max(16, tr.width / 2), cx = tr.left - r.left + tr.width / 2, cy = tr.top - r.top + tr.height / 2;
+    const R = Math.max(86, tk + 50), giu = cy - R - 34 < 0; // troppo in alto: l'arco va sotto
+    const s = schedaDi(t), d = s?.dati || {}, haInc = (d.incantesimi || []).some(x => x?.nome);
+    const V = [['att', '⚔️', 'Attacca', 'Attacchi e azioni: poi tocca il bersaglio'], ['mag', '✨', 'Magie', haInc ? 'Gli incantesimi della scheda' : 'Nessun incantesimo nella scheda'], ['pf', '❤️', 'PF', 'Danni e cure'], ['sch', '📜', 'Scheda', 'La tua scheda'], ['alt', '⋯', 'Altro', 'Condizioni, foto, iniziativa, nascondersi']];
+    const ax = clamp(cx, R + 28, r.width - R - 28);
+    const pop = document.createElement('div'); pop.className = 'tv-pop tv-anello'; pop.dataset.id = t.id;
+    pop.style.left = cx + 'px'; pop.style.top = cy + 'px';
+    pop.innerHTML = V.map(([k, ic, l, tit], i) => {
+      const a = (giu ? 162 - i * 36 : -162 + i * 36) * Math.PI / 180, x = ax - cx + R * Math.cos(a), y = R * Math.sin(a);
+      const off = k === 'mag' && !haInc || k === 'sch' && !s || k === 'pf' && !pfDi(t);
+      return `<button type="button" class="rb" data-k="${k}" style="left:${x}px;top:${y}px" title="${tit}"${off ? ' disabled' : ''}><span>${ic}</span><small>${l}</small></button>`;
+    }).join('') + `<div class="sotto" style="top:${giu ? -(tk + 10) : tk + 8}px"${giu ? ' data-su' : ''}>${chipAnello(t)}${suoTurno(t) ? '<button type="button" class="fin" data-k="fine" title="Passa al prossimo nell\'ordine del turno">Finisci il turno ▶</button>' : ''}</div>`;
+    st.append(pop); legaChip(pop, t);
+    const sub = html => {
+      st.querySelector('.tv-asub')?.remove();
+      const p = document.createElement('div'); p.className = 'tv-pop nuovo tv-asub'; p.innerHTML = html; st.append(p);
+      const w = p.offsetWidth, dx = cx + R + 30 + w < r.width ? cx + R + 30 : cx - R - 30 - w;
+      p.style.left = clamp(dx, 6, r.width - w - 6) + 'px'; p.style.top = clamp(cy - p.offsetHeight / 2, 6, r.height - p.offsetHeight - 6) + 'px'; adattaPop(p);
+      return p;
+    };
+    const k = x => pop.querySelector(`[data-k=${x}]`);
+    k('att').onclick = ev => menuAzioni(t, ev.currentTarget, 'att');
+    k('mag').onclick = ev => menuAzioni(t, ev.currentTarget, 'inc');
+    k('fine')?.addEventListener('click', () => { chiudiPop(); finisciTurno(); });
+    k('sch').onclick = () => { chiudiPop(); const s2 = schedaDi(t); if (!s2) return; if (s2 === miaScheda() && $('#tv-schc')) return apriSchedaTab(true); apriScheda(s2.id, t.id); };
+    k('pf').onclick = () => {
+      const pf = pfDi(t); if (!pf) return; const q = clamp(pf.pf / Math.max(1, pf.max), 0, 1);
+      const p = sub(`<div class="pfr"><div class="rr"><span>PF <b>${pf.pf}</b> / ${pf.max}</span><button type="button" class="tv-b ko ico" data-k="pfm" title="Danni">−</button><input type="number" data-k="pfq" value="1" min="1" aria-label="Quanti punti"><button type="button" class="tv-b ok ico" data-k="pfp" title="Cura">+</button></div><div class="bar"><s style="width:${Math.round(q * 100)}%;--b:${q > 0.5 ? '#3f9a4a' : q > 0.25 ? '#c9a24a' : '#b8322c'}"></s></div></div>`);
+      const n = () => Math.max(1, Math.trunc(+p.querySelector('[data-k=pfq]').value || 1));
+      p.querySelector('[data-k=pfm]').onclick = () => { cambiaPF(t, -n()); chiudiPop(); };
+      p.querySelector('[data-k=pfp]').onclick = () => { cambiaPF(t, n()); chiudiPop(); };
+      p.querySelector('[data-k=pfq]').select();
+    };
+    k('alt').onclick = () => {
+      const cnow = condTok(t), giaIn = T.turno.find(x => x.token === t.id), imod = s ? modC(d.des) : 0, ft = haFoto(t), nasc = cnow.includes('Nascosto');
+      const p = sub(`<div class="tv-pcond">${cnow.map(c => `<span class="tv-cc"><button type="button"${regolaDi(c)}>${COND_FX[c]?.[0] || ''} ${esc(c)}</button><button type="button" data-tc="${esc(c)}" title="Togli ${esc(c)}" aria-label="Togli ${esc(c)}">✕</button></span>`).join('')}<select data-k="tcond" aria-label="Aggiungi una condizione"><option value="">+ Condizione</option>${CONDIZIONI.filter(c => !cnow.includes(c)).map(c => `<option>${c}</option>`).join('')}</select></div>
+        <div class="gr">${ft ? '<button type="button" data-k="foto" title="Solo sul tuo schermo"><span>🖼</span>Foto</button>' : ''}<button type="button" data-k="nas"><span>${nasc ? '👁' : '🥷'}</span>${nasc ? 'Esci dal nascondiglio' : 'Nasconditi'}</button>${giaIn ? '' : `<button type="button" data-k="ini" title="Tira 1d20${imod ? ' ' + segno(imod) : ''} e entra nell'ordine del turno"><span>🎲</span>Iniziativa</button>`}</div>${giaIn ? `<div class="ini"><span>🎲 Iniziativa</span><b class="gia">${giaIn.valore}</b></div>` : ''}`);
+      const metti = async lista => { chiudiPop(); const s2 = t.giocatore ? schedaDi(t) : null; if (s2 && puoScrivere(s2)) { await cambiaCond(s2, null, lista); if (!condTok(T.tok.get(t.id)).includes(lista.at(-1) ?? '')) await condSuToken(t, lista); } else await condSuToken(t, lista); };
+      p.querySelectorAll('[data-tc]').forEach(b => b.onclick = () => metti(cnow.filter(c => c !== b.dataset.tc)));
+      const sc = p.querySelector('[data-k=tcond]'); sc.onchange = () => { if (sc.value) metti([...cnow, sc.value]); };
+      p.querySelector('[data-k=foto]')?.addEventListener('click', () => { chiudiPop(); apriFoto(fotoDi(t)); });
+      p.querySelector('[data-k=nas]').onclick = () => { chiudiPop(); Promise.resolve(nasc ? mettiNascosto(t, false) : nascondersi(t)).catch(err => toast(err.message, 'err')); };
+      p.querySelector('[data-k=ini]')?.addEventListener('click', () => { chiudiPop(); iniziativa(t, imod); });
     };
   }
 
@@ -3370,18 +3514,25 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
 
   // la chat resta aperta; la linguetta sul bordo la chiude e la riapre (si ricorda la scelta)
-  const CHAT = 'tavolo-chat';
+  // i giocatori la trovano chiusa (una linguetta col numero dei messaggi nuovi) e, aperta, sta sopra la mappa
+  const CHAT = 'tavolo-chat', chatChiave = () => isDM() ? CHAT : CHAT + '-g';
+  function nonLetti(piu) {
+    T.nonLetti = piu ? (T.nonLetti || 0) + 1 : 0;
+    const tab = $('#tv-ctab'), n = T.nonLetti; if (tab) { if (n) tab.dataset.n = n > 9 ? '9+' : n; else delete tab.dataset.n; }
+    disegnaRail();
+  }
   function apriChat(apri, salva) {
     const box = $('#tv-dice'), tab = $('#tv-ctab'); if (!box) return;
     box.hidden = !apri;
-    if (salva) try { localStorage.setItem(CHAT, apri ? '1' : '0'); } catch { }
-    if (tab) { const tel = matchMedia('(max-width:820px)').matches; tab.textContent = tel ? (apri ? '⌄' : '💬') : apri ? '›' : '‹'; tab.classList.toggle('chiusa', !apri); tab.dataset.tip = apri ? 'Chiudi la chat' : 'Apri la chat'; tab.setAttribute('aria-label', tab.dataset.tip); if (apri) tab.classList.remove('nuovo'); }
+    if (salva) try { localStorage.setItem(chatChiave(), apri ? '1' : '0'); } catch { }
+    if (apri && T.nonLetti) T.nonLetti = 0, tab && delete tab.dataset.n;
+    if (tab) { const tel = matchMedia('(max-width:820px)').matches; tab.textContent = tel ? (apri ? '⌄' : '💬') : !isDM() ? '💬' : apri ? '›' : '‹'; tab.classList.toggle('chiusa', !apri); tab.dataset.tip = apri ? 'Chiudi la chat' : 'Apri la chat'; tab.setAttribute('aria-label', tab.dataset.tip); if (apri) tab.classList.remove('nuovo'); }
     if (apri) { const l = $('#tv-log'); if (l) l.scrollTop = 1e9; }
     disegnaRail();
   }
   function disegnaDadi() {
     const box = $('#tv-dice'); if (!box) return;
-    if (!T.diceInit) { let v = null; try { v = localStorage.getItem(CHAT); } catch { } apriChat(v ? v === '1' : matchMedia('(min-width:821px)').matches); }
+    if (!T.diceInit) { let v = null; try { v = localStorage.getItem(chatChiave()); } catch { } apriChat(v ? v === '1' : isDM() && matchMedia('(min-width:821px)').matches); }
     T.diceInit = true;
     const tabSc = isDM() && window.__scaletta, tabSh = !isDM() && !!T.schede;
     box.innerHTML = `<i class="tv-crz" data-k="crz" title="Trascina per allargare o stringere la chat" aria-hidden="true"></i><div class="tv-dh">${tabSc ? '<span class="tv-dtab" role="tablist"><button type="button" role="tab" data-act="tv-chatab">Chat</button><button type="button" role="tab" data-act="tv-scaletta">Scaletta</button></span>' : tabSh ? '<span class="tv-dtab" role="tablist"><button type="button" role="tab" data-act="tv-chatab">Chat</button><button type="button" role="tab" data-act="tv-schtab">Scheda</button></span>' : '<span>Chat</span>'}<span class="dx"><button type="button" class="tv-cx tv-anim ${animazioni() ? 'on' : ''}" data-act="tv-anim" title="Animazioni degli attacchi: ${animazioni() ? 'accese' : 'spente'}" aria-label="Animazioni degli attacchi" aria-pressed="${animazioni()}">✨</button>${isDM() ? '<button type="button" class="tv-cx tv-svuota" data-act="tv-svuota" title="Svuota la chat: cancella tutti i messaggi e i tiri, per tutti" aria-label="Svuota la chat">🗑</button>' : '<button type="button" class="tv-cx" data-act="tv-dadi" title="Chiudi la chat" aria-label="Chiudi la chat">✕</button>'}</span></div><div class="tv-log" id="tv-log"></div>${tabSc ? '<div class="tv-scal" id="tv-scal"></div>' : ''}${tabSh ? '<div class="tv-schc" id="tv-schc"></div>' : ''}
@@ -3424,7 +3575,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function apriSchedaTab(on) {
     T.stab = !!on && !isDM(); try { localStorage.setItem(STAB, T.stab ? '1' : '0'); } catch { }
     if (T.stab && $('#tv-dice')?.hidden) apriChat(true);
-    disegnaSchedaTab();
+    disegnaSchedaTab(); disegnaRail();
   }
   function disegnaSchedaTab() {
     const box = $('#tv-dice'), host = $('#tv-schc'); if (!box || isDM()) return;
@@ -3663,11 +3814,11 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function nuovoMsg(m) {
     disegnaLog();
     const vt = votoDi(m); if (vt) { if (isDM() && m.autore !== T.me.uid) toast(`${m.nome} ha votato lo scontro: ${(VOTI.find(x => x[0] === vt.v) || ['', vt.v])[1]}`); return; }
-    if ($('#tv-dice')?.hidden && m.autore !== T.me.uid) { $('#tv-ctab')?.classList.add('nuovo'); toast(`${m.nome}${m.per ? ' (sussurro)' : ''}: ${m.testo.slice(0, 120).replace(/\s*⟦voto:\w+⟧/, '')}`); }
+    if ($('#tv-dice')?.hidden && m.autore !== T.me.uid) { $('#tv-ctab')?.classList.add('nuovo'); nonLetti(true); toast(`${m.nome}${m.per ? ' (sussurro)' : ''}: ${m.testo.slice(0, 120).replace(/\s*⟦voto:\w+⟧/, '')}`); }
   }
   function nuovoTiro(t) {
     disegnaLog(); lancia(t);
-    if (!$('#tv-dice') || $('#tv-dice').hidden) { $('#tv-ctab')?.classList.add('nuovo'); toast(`${t.nome}${t.motivo ? ' (' + t.motivo + ')' : ''}: ${t.formula} = ${t.totale}`); }
+    if (!$('#tv-dice') || $('#tv-dice').hidden) { $('#tv-ctab')?.classList.add('nuovo'); if (t.autore !== T.me?.uid) nonLetti(true); toast(`${t.nome}${t.motivo ? ' (' + t.motivo + ')' : ''}: ${t.formula} = ${t.totale}`); }
   }
   /* ---------- dadi che rotolano sulla mappa ---------- */
   const FORME = {
@@ -5021,8 +5172,11 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   // la matita (solo DM) la apre in modifica: iniziative, nascondi, togli, aggiungi.
   var TVERT = 'tavolo-turno-vert', TPOS = 'tavolo-turno-pos';
   function turnoVert() { try { return localStorage.getItem('tavolo-turno-vert') === '1'; } catch { return false; } }
-  function turnoStretta() { try { return localStorage.getItem('tavolo-turno-stretta') === '1'; } catch { return false; } }
   function turnoPos() { try { return JSON.parse(localStorage.getItem('tavolo-turno-pos') || 'null'); } catch { return null; } }
+  // la grandezza della tabella, per ogni dispositivo: si cambia tirando l'angolo in basso a destra. Sotto 0,8 restano solo le foto
+  const TZ = 'tavolo-turno-zoom', tzTel = () => matchMedia('(max-width:820px)').matches;
+  function turnoZoom() { let v = null; try { v = parseFloat(localStorage.getItem(TZ)); } catch { } return v >= 0.55 && v <= 1.4 ? v : tzTel() ? 0.75 : 1; }
+  const soloFoto = k => k < 0.8;
   function giraTurno() { try { localStorage.setItem(TVERT, turnoVert() ? '0' : '1'); } catch { } disegnaStriscia(); disegnaRail(); }
   function apriTurno(apri) {
     if (!isDM()) return giraTurno();
@@ -5060,34 +5214,37 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function disegnaStriscia() {
     const s = $('#tv-strip'), w = $('.tv-wrap'); if (!s) return;
     const L = ordinati(), att = T.stato?.turno, ia = L.findIndex(x => x.id === att);
-    const ed = isDM() && !!T.turnoEd, col = !ed && turnoVert() && turnoStretta(), vert = !col && (ed || turnoVert()), pos = turnoPos();
+    const kz = turnoZoom(), ed = isDM() && !!T.turnoEd, col = !ed && turnoVert() && soloFoto(kz), vert = !col && (ed || turnoVert()), pos = turnoPos();
     // la tabella si vede solo sulla mappa del combattimento (il DM può guardarne un'altra)
     const qui = !L.length || !T.vista || scenaCombattimento() === T.vista;
     s.hidden = (!L.length || !qui) && !ed; s.classList.toggle('vert', vert); s.classList.toggle('col', col); s.classList.toggle('ed', ed);
+    s.classList.add('tz'); s.classList.toggle('foto', soloFoto(kz) && !ed); s.style.setProperty('--tz', ed ? 1 : kz);
     w?.classList.toggle('con-turno', !s.hidden && !vert && !col && !pos);
     if (s.hidden) { s.innerHTML = ''; disegnaHud(); return; }
-    const avanti = L.length && (isDM() || L.some(x => x.id === att && x.giocatore === T.me.giocatore));
+    const avanti = L.length && (isDM() || L.some(x => x.id === att && x.giocatore === T.me.giocatore)), dm = isDM();
     const faccia = x => `<i style="--c:${esc(x.colore || '#7d2530')};${x.immagine ? `background-image:url('${x.immagine}')` : ''}">${x.immagine ? '' : esc(iniziali(x.nome))}</i>`;
     const grip = '<span class="mv" title="Trascina per spostare (doppio click: torna al suo posto)" aria-hidden="true">⠿</span>';
-    const bottoni = `<button type="button" class="tv-b sec ico" data-k="gira" title="${vert ? 'Barra orizzontale' : 'Tabella classica (verticale)'}" aria-label="${vert ? 'Barra orizzontale' : 'Tabella classica'}"${ed ? ' hidden' : ''}>${vert ? '⇄' : '⇅'}</button>${isDM() ? `<button type="button" class="tv-b sec ico${ed ? ' on' : ''}" data-k="ed" title="${ed ? 'Fine modifica' : 'Modifica l\'ordine del turno'}" aria-label="Modifica l'ordine del turno">✎</button><button type="button" class="tv-b sec ico" data-k="x" title="Fine combattimento: svuota l'ordine del turno e chiude la tabella" aria-label="Fine combattimento">✕</button>` : ''}`;
+    const bottoni = `<button type="button" class="tv-b sec ico" data-k="piu" title="Barra o tabella, solo foto, rimetti a posto" aria-label="Altre opzioni della tabella" aria-haspopup="menu"${ed ? ' hidden' : ''}>⋯</button>${isDM() ? `<button type="button" class="tv-b sec ico${ed ? ' on' : ''}" data-k="ed" title="${ed ? 'Fine modifica' : 'Modifica l\'ordine del turno'}" aria-label="Modifica l'ordine del turno">✎</button><button type="button" class="tv-b sec ico" data-k="x" title="Fine combattimento: svuota l'ordine del turno e chiude la tabella" aria-label="Fine combattimento">✕</button>` : ''}`;
     const bav = `<button type="button" class="tv-b pri" data-k="av" title="Passa al prossimo (chi è a 0 PF viene saltato)"${avanti ? '' : ' hidden'}>${col ? 'Fine ▶' : 'Finisci il turno ▶'}</button>`;
-    // in verticale si può stringere: le facce una sotto l'altra, come la barra
-    const bstr = ed ? '' : `<button type="button" class="tv-b sec ico" data-k="str" title="${col ? 'Allarga: tabella con i nomi' : 'Stringi: solo le facce'}" aria-label="${col ? 'Allarga la tabella' : 'Stringi la tabella'}">${col ? '⇥' : '⇤'}</button>`;
+    // il giocatore lo vede solo nel suo turno, piccolo sotto la barra (e nel menu del suo token)
+    const fin2 = dm ? '' : `<button type="button" class="tv-b pri fin2" data-k="av" title="Passa al prossimo nell'ordine del turno"${avanti ? '' : ' hidden'}>Finisci il turno ▶</button>`;
+    const rz = ed ? '' : '<span class="rz" title="Tira per ingrandire o rimpicciolire (doppio click: grandezza normale)" aria-hidden="true"></span>';
+    const bstr = '';
     if (!vert) {
       s.innerHTML = `${grip}<div class="rd"><small>Round</small>${T.stato?.round || 1}</div><div class="ls">${L.map((x, i) => `<span class="p${i === ia ? ' on' : ''}${ia >= 0 && i < ia ? ' gia' : ''}${x.giocatore ? '' : ' nem'}${x.nascosto ? ' hid' : ''}" title="${esc(x.nome)} · iniziativa ${x.valore}${x.nascosto ? ' (nascosto ai giocatori)' : ''}">${faccia(x)}<b>${esc(String(x.nome || '').split(/\s+/)[0])}</b><em>${x.valore}</em></span>`).join('')}</div>
-      <div class="ac">${bav}${col ? bstr : ''}${bottoni}</div>`;
+      <div class="ac">${dm ? bav : ''}${bottoni}</div>${fin2}${rz}`;
     } else {
       s.innerHTML = `<div class="tt">${grip}<b><small>Round</small> ${T.stato?.round || 1}</b><span class="ac">${bstr}${bottoni}</span></div>
       <div class="tv-tl">${L.map((x, i) => `<div class="tv-tr${x.id === att ? ' att' : ''}${ia >= 0 && i < ia ? ' gia' : ''}${x.nascosto ? ' hid' : ''}" data-id="${x.id}">${faccia(x)}<span title="${esc(x.nome)}">${esc(x.nome)}${x.id === att ? '<small class="ora">sta giocando</small>' : ''}</span>
         ${ed ? `<input type="number" step="1" value="${x.valore}" aria-label="Iniziativa di ${esc(x.nome)}"><button type="button" data-k="nasc" title="${x.nascosto ? 'Mostra ai giocatori' : 'Nascondi ai giocatori'}">${x.nascosto ? '🙈' : '👁'}</button><button type="button" data-k="via" title="Togli dall'ordine">✕</button>` : `<em>${x.valore}</em>`}</div>`).join('')
         || '<div class="tv-tvuoto">Nessuno ancora. Clicca un token e premi «Tira» accanto a Iniziativa, o aggiungilo qui sotto.</div>'}</div>
-      ${ed ? '<div class="tv-tf"><input type="text" data-k="nn" placeholder="Nome" style="flex:1;width:auto"><input type="number" data-k="nv" placeholder="0"><button type="button" data-k="add">+ Aggiungi</button><button type="button" data-k="svuota">Svuota</button></div>' : `<div class="pie">${bav}</div>`}`;
+      ${ed ? '<div class="tv-tf"><input type="text" data-k="nn" placeholder="Nome" style="flex:1;width:auto"><input type="number" data-k="nv" placeholder="0"><button type="button" data-k="add">+ Aggiungi</button><button type="button" data-k="svuota">Svuota</button></div>' : `<div class="pie">${bav}</div>`}${rz}`;
     }
-    s.querySelector('[data-k=av]')?.addEventListener('click', finisciTurno);
+    s.querySelectorAll('[data-k=av]').forEach(b => b.onclick = finisciTurno);
+    s.querySelector('[data-k=piu]')?.addEventListener('click', e => menuTurno(e.currentTarget, vert || col, kz));
+    ridimensionaTurno(s, s.querySelector('.rz'));
     s.querySelector('[data-k=x]')?.addEventListener('click', () => fineCombattimento());
     s.querySelector('[data-k=ed]')?.addEventListener('click', () => apriTurno(!T.turnoEd));
-    s.querySelector('[data-k=gira]').onclick = giraTurno;
-    s.querySelector('[data-k=str]')?.addEventListener('click', () => { try { localStorage.setItem('tavolo-turno-stretta', col ? '0' : '1'); } catch { } disegnaStriscia(); });
     if (ed) legaModificaTurno(s);
     trascinaTurno(s, s.querySelector('.mv'));
     piazzaTurno(s, pos);
@@ -5095,6 +5252,45 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (on && col) ls.scrollTop = on.offsetTop - ls.clientHeight / 2 + on.offsetHeight / 2;
     else if (on) ls.scrollLeft = on.offsetLeft - ls.clientWidth / 2 + on.offsetWidth / 2;
     disegnaHud();
+  }
+  // ⋯ della tabella: barra o tabella, solo foto, rimetti com'era
+  function menuTurno(anc, vert, kz) {
+    document.querySelectorAll('.tv-azm').forEach(x => x.remove());
+    const m = document.createElement('div'); m.className = 'tv-azm tv-tmenu'; m.setAttribute('role', 'menu');
+    const v = (k, ic, l, d) => `<button type="button" role="menuitem" data-m="${k}"><span>${ic}</span><div><b>${l}</b><small>${d}</small></div></button>`;
+    m.innerHTML = `<div class="gz">${v('gira', vert ? '⇄' : '⇅', vert ? 'Barra orizzontale' : 'Tabella verticale', vert ? 'Le facce in fila in alto' : 'Una riga per ognuno, con i nomi')}${v('foto', soloFoto(kz) ? '🔠' : '🖼', soloFoto(kz) ? 'Con i nomi' : 'Solo le foto', soloFoto(kz) ? 'Grandezza normale' : 'Più piccola, senza nomi')}${v('rip', '↺', 'Rimetti com\'era', 'Al suo posto e grandezza normale')}</div><p class="nota">Tira l'angolo in basso a destra per cambiarne la grandezza.</p>`;
+    document.body.append(m);
+    const r = anc.getBoundingClientRect(); m.style.width = '260px';
+    m.style.left = clamp(r.right - 260, 6, innerWidth - 266) + 'px'; m.style.top = Math.min(r.bottom + 8, innerHeight - m.offsetHeight - 6) + 'px';
+    const chiudi = () => { m.remove(); removeEventListener('pointerdown', fuori, true); };
+    const fuori = e => { if (!m.contains(e.target) && !anc.contains(e.target)) chiudi(); };
+    addEventListener('pointerdown', fuori, true); onCleanup(chiudi);
+    const metti = k => { try { k == null ? localStorage.removeItem(TZ) : localStorage.setItem(TZ, String(k)); } catch { } };
+    m.querySelectorAll('[data-m]').forEach(b => b.onclick = () => {
+      chiudi(); const k = b.dataset.m;
+      if (k === 'gira') return giraTurno();
+      if (k === 'foto') metti(soloFoto(kz) ? 1 : 0.7);
+      if (k === 'rip') { metti(null); try { localStorage.removeItem(TPOS); } catch { } }
+      disegnaStriscia();
+    });
+  }
+  // l'angolo in basso a destra: tirando, facce e scritte crescono o rimpiccioliscono (fino alle sole foto)
+  function ridimensionaTurno(s, h) {
+    if (!h) return;
+    h.onpointerdown = e => {
+      if (e.button) return; e.preventDefault(); e.stopPropagation();
+      const k0 = turnoZoom(), r = s.getBoundingClientRect(), x0 = e.clientX, y0 = e.clientY; let k = k0;
+      h.setPointerCapture(e.pointerId); s.classList.add('tira');
+      h.onpointermove = m => {
+        const rx = (r.width + m.clientX - x0) / r.width, ry = (r.height + m.clientY - y0) / r.height, q = Math.abs(rx - 1) > Math.abs(ry - 1) ? rx : ry;
+        k = Math.round(clamp(k0 * q, 0.55, 1.4) * 100) / 100; s.style.setProperty('--tz', k); s.classList.toggle('foto', soloFoto(k));
+      };
+      h.onpointerup = h.onpointercancel = () => {
+        h.onpointermove = h.onpointerup = h.onpointercancel = null; s.classList.remove('tira');
+        if (k !== k0) { try { localStorage.setItem(TZ, String(k)); } catch { } disegnaStriscia(); }
+      };
+    };
+    h.ondblclick = () => { try { localStorage.removeItem(TZ); } catch { } disegnaStriscia(); };
   }
   // dove l'ha lasciata chi guarda, senza farla uscire dal tavolo
   function piazzaTurno(s, pos) {
@@ -5153,7 +5349,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const vedo = false && !!t && t.scena === T.vista && puoMuovere(t);
     h.hidden = !vedo; w?.classList.toggle('con-hud', vedo);
     // la striscia mostra «Finisci il turno» solo quando non c'è il pannello
-    const sa = $('#tv-strip [data-k=av]'); if (sa) sa.hidden = vedo || !(isDM() || att?.giocatore === T.me.giocatore);
+    document.querySelectorAll('#tv-strip [data-k=av]').forEach(sa => { sa.hidden = vedo || !(isDM() || att?.giocatore === T.me.giocatore); });
     if (!vedo) { h.innerHTML = ''; return; }
     requestAnimationFrame(alzaAvvisi);
     const a = azioniDi(t), mv = movimentoDi(t), q = mv.tot > 0 ? clamp(mv.resta / mv.tot, 0, 1) : 0;
@@ -6113,6 +6309,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     box.querySelector('[data-k=tzazm]')?.addEventListener('click', e => menuAzioni(t, e.currentTarget));
   }
   function rinfrescaTurnoPop(t) {
+    const ch = document.querySelector(`.tv-anello .chip[data-id="${t.id}"]`); if (ch) { ch.outerHTML = chipAnello(t); legaChip(document.querySelector('.tv-anello'), t); }
     const el = document.querySelector(`.tv-pop .tzp[data-id="${t.id}"]`); if (!el) return;
     el.outerHTML = turnoPop(t); legaTurnoPop(document.querySelector('.tv-pop'), t);
   }
@@ -6342,6 +6539,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         ${gruppo('Attacchi', armi.map(x => va(x, U.az && !extraAtt)).join(''))}${gruppo('Incantesimi', incDi('az').map(x => vi(x, U.az)).join(''))}${gruppo('Privilegi', pa.map(x => vp(x, P.indexOf(x), 'az', U.az)).join(''))}`,
       bon: () => b || pb.length || incDi('bon').length || mk ? `${testa('bon', 'Con l\'azione bonus', b ? ` <small>${esc(b.nome)}</small>` : '')}<div class="gz">${mk ? `<button type="button" role="menuitem" data-mm title="${esc(mk.nome)}: il bersaglio è a terra, puoi spostare il segno su un'altra creatura"${U.bon || !marchioLibero(t) || mkInc < 0 ? ' disabled' : ''}><span>🎯</span><div><b>Sposta ${esc(mk.nome)}</b><small>${marchioLibero(t) ? 'su un altro bersaglio, senza slot' : `ora su ${esc(T.tok.get(mk.a)?.nome || '?')}`}</small></div></button><button type="button" role="menuitem" data-mx title="La concentrazione è finita: togli il segno"><span>✕</span><div><b>Togli ${esc(mk.nome)}</b><small>fine della concentrazione</small></div></button>` : ''}${b ? b.k.map(k => voce(k, 'bon', U.bon)).join('') : ''}${pb.map(x => vp(x, P.indexOf(x), 'bon', U.bon)).join('')}${incDi('bon').map(x => vi(x, U.bon)).join('')}</div>`
         : `${testa('bon', 'Con l\'azione bonus')}<p class="nota">Nessuna azione bonus nella scheda.</p>`,
+      att: () => `${testa('az', azioniTok(t) > 1 ? `Con l'azione (${azioniTok(t)} per turno)` : 'Con l\'azione')}${gruppo('Attacchi', armi.map(x => va(x, U.az && !extraAtt)).join('')) || '<p class="nota">Nessun attacco nella scheda.</p>'}${gruppo('Altre azioni', AZIONI.map(([k]) => voce(k, 'az', U.az)).join(''))}${gruppo('Privilegi', pa.map(x => vp(x, P.indexOf(x), 'az', U.az)).join(''))}`,
+      inc: () => `<h5><span>Incantesimi</span></h5>${inc.length ? ['az', 'bon', 'rea', null].map(k => gruppo(k === 'az' ? 'Con l\'azione' : k === 'bon' ? 'Con l\'azione bonus' : k === 'rea' ? 'Con la reazione' : 'Altri', inc.filter(([x]) => tempoInc(x) === k).map(x => vi(x, !!(k && U[k]))).join(''))).join('') : '<p class="nota">Nessun incantesimo preparato nella scheda.</p>'}`,
       leg: () => { const L = leggDi(s || { dati: {} }), r = s ? legRest(s) : 0; return `<h5><span>Azioni leggendarie <small>${r} di ${legN(s)} punti${mio ? ' · non nel suo turno' : ''}</small></span></h5><div class="gz">${L.map((x, j) => `<button type="button" role="menuitem" data-lg="${j}" title="${esc(x.testo || '')}"${mio || x.costo > r ? ' disabled' : ''}><span>♛</span><div><b>${esc(x.nome)}</b><small>${x.costo} punt${x.costo > 1 ? 'i' : 'o'} · ${esc(corto(x.testo || '', 50))}</small></div></button>`).join('')}</div>${L.length ? '' : '<p class="nota">Nessuna azione leggendaria nella scheda.</p>'}`; },
       rea: () => `${testa('rea', 'Con la reazione')}<div class="gz">${pr.map(x => vp(x, x === OPP ? 'opp' : P.indexOf(x), 'rea', U.rea)).join('')}${incDi('rea').map(x => vi(x, U.rea)).join('')}</div>`
     };
