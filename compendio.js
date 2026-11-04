@@ -131,6 +131,86 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
   dialog.dlg.cp-sheet{margin:auto 0 0;width:100vw;max-width:100vw;max-height:88vh;border-radius:14px 14px 0 0;border-bottom:0}
   dialog.dlg.cp-sheet form{padding:14px 16px calc(18px + env(safe-area-inset-bottom,0px))}
   dialog.dlg.cp-sheet::before{content:"";display:block;width:44px;height:4px;border-radius:2px;background:var(--line2);margin:8px auto 0}
+}
+/* --- Compendio più vivo (novembre 2026) --- */
+:root[data-theme=dark] .cp-list,:root[data-theme=dark] .cp-spw{background:linear-gradient(180deg,#2c2119 0,#231a14 100%);border-color:#4a3828;box-shadow:inset 0 1px 0 #f5dca812,0 1px 0 #0006,0 10px 28px #0007}
+.cp-sec{display:flex;align-items:center;gap:14px;margin:26px 0 12px}
+.cp-sec::before{content:"◆";font-size:.6em;color:var(--gold)}
+.cp-sec::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--gold),transparent)}
+.cp-h h2{display:flex;align-items:center;gap:12px}.cp-h h2::before{content:"◆";font-size:.6em;color:var(--gold)}
+.cp-tiles{grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+:root .card.cp-tile{position:relative;overflow:hidden;min-height:150px;flex-direction:column;gap:10px;padding:18px 20px;border-radius:12px;--tc2:var(--tc);
+  background:radial-gradient(circle at 100% 0%,color-mix(in srgb,var(--tc) 30%,transparent) 0,transparent 62%),linear-gradient(180deg,var(--paper),var(--paper2));
+  border:1px solid color-mix(in srgb,var(--tc) 35%,var(--line2));transition:transform .15s,box-shadow .15s,border-color .15s}
+:root[data-theme=dark] .cp-tile{--tc2:color-mix(in srgb,var(--tc) 50%,#fff)}
+:root .card.cp-tile:hover{transform:translateY(-2px);border-color:var(--tc);box-shadow:0 0 0 1px var(--tc),0 12px 30px color-mix(in srgb,var(--tc) 30%,#0000)}
+.cp-tile .wm{position:absolute;right:-18px;bottom:-22px;width:130px;height:130px;color:var(--tc2);opacity:.15;pointer-events:none}
+.cp-tile .wm svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
+.cp-tile .ic{width:50px;height:50px;box-shadow:0 0 0 4px color-mix(in srgb,var(--tc) 22%,transparent),0 4px 14px color-mix(in srgb,var(--tc) 45%,transparent);background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--tc) 60%,#fff) 0,var(--tc) 60%)}
+.cp-tile h3{font-size:1.15rem;letter-spacing:.06em}
+.cp-tile p{max-width:85%;position:relative}
+.cp-tile .n{position:absolute;top:16px;right:20px;font-family:var(--display);font-size:1.7rem;line-height:1;color:var(--tc2);text-align:right}
+.cp-tile .n small{display:block;font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-top:3px}
+:root[data-theme=dark] .cp-search input[type=search]{background:#1a1310;border-color:#5a4431}
+.cp-search input[type=search]{box-shadow:inset 0 2px 6px #0002;transition:box-shadow .2s}
+.cp-search input[type=search]:focus{box-shadow:0 0 0 3px #c9a24b33,0 0 22px #c9a24b22}
+.cp-sp tbody tr[data-cp-open] td:first-child{box-shadow:inset 3px 0 0 var(--tc)}
+.cp-sp .sch{display:inline-flex;align-items:center;gap:7px;color:var(--tc);font-weight:600}
+.cp-sp .sch::before{content:"";width:9px;height:9px;transform:rotate(45deg);background:var(--tc);box-shadow:0 0 8px var(--tc)}
+.cp-sp tbody tr[data-cp-open]:hover td,.cp-sp tbody tr[data-cp-open]:focus-visible td{background:color-mix(in srgb,var(--tc) 10%,var(--paper2))}
+.cp-sp tr.sep td{background:linear-gradient(90deg,color-mix(in srgb,var(--gold) 18%,var(--paper2)),var(--paper2) 60%);padding:10px 12px;color:var(--wine);font-size:.78rem;border-top:1px solid color-mix(in srgb,var(--gold) 45%,transparent)}
+:root[data-theme=dark] .cp-sp tr.sep td{color:var(--gold2)}
+.cp-sp tr.sep .lv{display:inline-grid;place-items:center;width:30px;height:30px;margin-right:10px;border-radius:50%;border:1.5px solid var(--gold);font-size:.95rem;letter-spacing:0;color:var(--wine);background:#fff8;vertical-align:middle;box-shadow:0 0 12px #c9a24b33}
+:root[data-theme=dark] .cp-sp tr.sep .lv{color:var(--gold2);background:#0002}
+.cp-sp td.k{padding-right:14px;white-space:nowrap}
+.cp-sp td.w{white-space:normal;min-width:90px}.cp-sp .sch{white-space:nowrap}
+.cp-kr{border-radius:50%;width:20px;height:20px;padding:0;display:inline-grid;place-items:center;font-size:.62rem;vertical-align:middle;margin-left:4px}
+.cp-kr.c{color:var(--warn);border-color:var(--warn);background:color-mix(in srgb,var(--warn) 14%,transparent)}
+.cp-kr.r{color:#2a5ea8;border-color:#2a5ea8;background:#2a5ea81a}
+:root[data-theme=dark] .cp-kr.r{color:#7aaaf0;border-color:#7aaaf0;background:#7aaaf022}
+.cp-row{position:relative;transition:background .12s}
+.cp-row.tc::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:0 3px 3px 0;background:var(--tc)}
+.cp-row.tc .cp-ktl{color:var(--tc)}
+:root[data-theme=dark] .cp-row.tc .cp-ktl{color:color-mix(in srgb,var(--tc) 55%,#fff)}
+.cp-row.cr .cp-ktl{color:var(--mute)}
+.cp-row.leg{background:linear-gradient(90deg,color-mix(in srgb,var(--tc) 12%,transparent),transparent 45%)}
+.cp-gem{flex:none;width:40px;height:40px;display:grid;place-items:center}
+.cp-gem i{width:22px;height:22px;transform:rotate(45deg);border-radius:4px;background:linear-gradient(135deg,color-mix(in srgb,var(--tc) 40%,#fff) 0,var(--tc) 55%,color-mix(in srgb,var(--tc) 60%,#000) 100%);box-shadow:0 0 12px color-mix(in srgb,var(--tc) 60%,transparent),inset 0 0 0 1px #fff4}
+.cp-cr{flex:none;width:46px;height:50px;display:grid;place-items:center;font-family:var(--display);font-weight:600;font-size:1rem;color:#fff;clip-path:polygon(50% 0,100% 18%,100% 62%,50% 100%,0 62%,0 18%);background:linear-gradient(180deg,color-mix(in srgb,var(--tc) 70%,#fff) 0,var(--tc) 45%,color-mix(in srgb,var(--tc) 65%,#000));text-shadow:0 1px 2px #0008}
+.cr0{--tc:#6f8f5a}.cr1{--tc:#3f8a6e}.cr2{--tc:#2a6ea8}.cr3{--tc:#8a3fbf}.cr4{--tc:#b23a3a}.cr5{--tc:#c08a1e}
+.pagehead.cp-hero{position:relative;overflow:hidden;border-radius:14px;padding:20px 22px 18px;margin:0 0 16px;background:radial-gradient(circle at 92% 20%,color-mix(in srgb,var(--tc) 38%,transparent) 0,transparent 55%),linear-gradient(180deg,var(--paper2),var(--paper));border:1px solid color-mix(in srgb,var(--tc) 45%,var(--line2));box-shadow:0 10px 30px #0003}
+.cp-hero .wm{position:absolute;left:62%;top:50%;transform:translateY(-50%);width:150px;height:150px;color:var(--tc);opacity:.16;pointer-events:none}
+.cp-hero .wm svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.1;stroke-linecap:round;stroke-linejoin:round}
+.cp-hero>div{position:relative;z-index:1}
+.cp-hero h1{font-size:2.1rem}
+.cp-hero .badge{background:var(--tc)!important;color:#fff}
+:root[data-theme=dark] .cp-hero .badge{color:#16100c}
+.cp-statline{gap:10px;justify-content:stretch;border:0;padding:0 0 14px}
+.cp-statline span{flex:1 1 120px;padding:10px 8px;border-radius:8px;background:var(--paper2);border:1px solid var(--line);box-shadow:inset 0 1px 0 #ffffff0d}
+.cp-statline em{color:var(--gold)}
+:root .card.cp-sb{border-top:4px solid var(--wine2);border-bottom:4px solid var(--wine2)}
+.cp-stat div{border-radius:10px;border-color:color-mix(in srgb,var(--wine2) 35%,var(--line));background:linear-gradient(180deg,color-mix(in srgb,var(--wine2) 10%,var(--paper2)),var(--paper2))}
+.cp-stat b{font-size:1.8rem}
+.cp-car{border:0;gap:8px;overflow:visible}
+.cp-car div{border:1px solid var(--line);border-radius:50% 50% 12px 12px;padding:10px 2px 8px;background:var(--paper2)}
+.cp-car div:last-child{border-right:1px solid var(--line)}
+.cp-car b{display:block;font-size:1.35rem;color:var(--ink)}
+.cp-car small{display:inline-block;margin:2px 0 0;padding:0 8px;border-radius:10px;background:color-mix(in srgb,var(--gold) 22%,transparent);color:var(--wine);font-weight:600}
+:root[data-theme=dark] .cp-car small{color:var(--gold2)}
+.cp-props{padding:10px 0;margin:6px 0 4px;border-top:2px solid color-mix(in srgb,var(--wine2) 55%,transparent);border-bottom:2px solid color-mix(in srgb,var(--wine2) 55%,transparent)}
+.cp-props b{color:var(--wine2)}
+.cp-act>b{font-family:var(--display);font-style:normal;font-size:.92em;letter-spacing:.03em}
+:root .cp-conds .card{border-top:3px solid var(--tc,var(--wine2));padding-top:12px}
+.cp-conds .card h3{display:flex;align-items:center;gap:10px}
+.cp-conds .ci{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--tc) 22%,transparent);color:var(--tc);font-size:1rem;font-family:var(--body)}
+@media (max-width:620px){
+  .cp-hero .wm{left:auto;right:-20px;top:30px;transform:none;width:110px;height:110px}
+  .cp-hero h1{font-size:1.6rem}
+  .cp-tile{min-height:0}.cp-tile .wm{width:100px;height:100px}
+  .cp-car{gap:5px}.cp-car div,.cp-car div:nth-child(3),.cp-car div:nth-child(-n+3){border:1px solid var(--line)}
+  .cp-statline span{flex:1 1 40%}
+  .cp-row .cp-gem,.cp-row .cp-cr{margin-left:-2px}
+  .cp-sp td{white-space:normal}.cp-sp td.n{min-width:120px}.cp-sp td.k{padding-right:4px}
 }`;
   let cssDone = false;
   const css = () => { if (cssDone) return; cssDone = true; const s = document.createElement('style'); s.textContent = CSS; document.head.append(s); };
@@ -282,7 +362,10 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
 
   /* ---------- pezzi comuni ---------- */
   const crumbs = (...p) => `<div class="cp-crumbs"><a href="#/compendio">Compendio</a>${p.map(([l, h]) => ` › ${h ? `<a href="${h}">${l}</a>` : l}`).join('')}</div>`;
-  const row = (key, num, ktl, sc, name, sub, right, favK, favId) => `<div class="cp-row" data-cp-open="${esc(key)}" tabindex="0" role="button">${num != null ? `<span class="cp-num ${sc}">${num}</span>` : ''}<div class="main"><div class="t">${ktl ? `<span class="cp-ktl ${sc}">${esc(ktl)}</span>` : ''}${esc(name)}</div><div class="b">${sub}</div></div><div class="r">${right || ''}</div>${star(favK, favId)}</div>`;
+  const row = (key, num, ktl, sc, name, sub, right, favK, favId, x = {}) => `<div class="cp-row${x.cls ? ' ' + x.cls : ''}"${x.tc ? ` style="--tc:${x.tc}"` : ''} data-cp-open="${esc(key)}" tabindex="0" role="button">${x.lead || ''}${num != null ? `<span class="cp-num ${sc}">${num}</span>` : ''}<div class="main"><div class="t">${ktl ? `<span class="cp-ktl ${sc}">${esc(ktl)}</span>` : ''}${esc(name)}</div><div class="b">${sub}</div></div><div class="r">${right || ''}</div>${star(favK, favId)}</div>`;
+  // gemma della rarità per gli oggetti, scudo del grado di sfida per le creature
+  const xOgg = o => ({ tc: RAR(o.r), cls: 'tc' + (/^(leggendari|manufatto)/i.test(o.r) ? ' leg' : ''), lead: '<span class="cp-gem" aria-hidden="true"><i></i></span>' });
+  const xMon = m => { const v = GSV(m.gs), t = v < 1 ? 0 : v < 5 ? 1 : v < 11 ? 2 : v < 17 ? 3 : v < 21 ? 4 : 5; return { cls: 'cr', lead: `<span class="cp-cr cr${t}" title="Grado di sfida ${esc(m.gs)}">${String(m.gs).replace('1/2', '½').replace('1/4', '¼').replace('1/8', '⅛')}</span>` }; };
   const filtri = (search, more) => `<div class="cp-filters">${search}${more ? '<button type="button" class="btn sm cp-ftog" data-cp-ftog aria-expanded="false">Filtri</button>' : ''}</div>${more ? `<div class="cp-filters cp-more">${more}</div>` : ''}`;
   function attivaFiltri(stato, draw) {
     const q = $('#cp-q'); if (q) q.oninput = () => { stato.q = q.value; draw(true); };
@@ -310,15 +393,15 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
   const ST_HOME = { q: '' };
   route(/^\/compendio$/, async () => {
     await caricaPagina();
-    const tile = (h, ic, col, t, p, solo) => `<a class="card cp-tile" href="#/compendio/${h}" style="--tc:${col}"><span class="ic">${svg(ic)}</span><span><h3>${t}${solo ? ' <span class="pill dm">Solo DM</span>' : ''}</h3><p>${p}</p></span></a>`;
+    const tile = (h, ic, col, t, p, solo, n, nl) => `<a class="card cp-tile" href="#/compendio/${h}" style="--tc:${col}"><span class="wm">${svg(ic)}</span>${n ? `<b class="n">${n}<small>${nl}</small></b>` : ''}<span class="ic">${svg(ic)}</span><span><h3>${t}${solo ? ' <span class="pill dm">Solo DM</span>' : ''}</h3><p>${p}</p></span></a>`;
     const MAN = window.__manuali;
     const f = favs();
     const grp = (t, items) => items.length ? `<div class="cp-grp">${t} <small>${items.length}</small></div>${items.join('')}` : '';
     const fs = [
       grp('Incantesimi', (f.spell || []).map(n => D.sp.find(x => x.n === n)).filter(Boolean).map(s => row('spell:' + s.n, null, spKtl(s), '', s.n, `${esc(s.t.split(',')[0])} · ${esc(s.p)}`, '', 'spell', s.n))),
-      dm() ? grp('Bestiario', (f.mostro || []).map(id => D.mostri.find(x => x.id === id)).filter(Boolean).map(m => row('mostro:' + m.id, null, `Sfida ${m.gs} · ${m.tipo}`, '', m.nome, `CA ${m.ca} · ${m.pf} PF`, '', 'mostro', m.id))) : '',
+      dm() ? grp('Bestiario', (f.mostro || []).map(id => D.mostri.find(x => x.id === id)).filter(Boolean).map(m => row('mostro:' + m.id, null, m.tipo, '', m.nome, `CA ${m.ca} · ${m.pf} PF`, '', 'mostro', m.id, xMon(m)))) : '',
       grp('Condizioni', (f.cond || []).map(n => row('cond:' + n, null, '', '', n, '', '', 'cond', n))),
-      grp('Oggetti magici', (f.ogg || []).map(n => D.oggetti.find(x => x.n === n)).filter(Boolean).map(o => row('ogg:' + o.n, null, o.r, '', o.n, esc(o.t), '', 'ogg', o.n))),
+      grp('Oggetti magici', (f.ogg || []).map(n => D.oggetti.find(x => x.n === n)).filter(Boolean).map(o => row('ogg:' + o.n, null, o.r, '', o.n, esc(o.t), '', 'ogg', o.n, xOgg(o)))),
       grp('Equipaggiamento', [...(f.arma || []).map(n => D.armi.find(x => x.n === n)).filter(Boolean).map(w => row('arma:' + w.n, null, 'Arma', '', w.n, `${esc(w.d)} ${w.t ? dmgTag(w.t) : ''}`, '', 'arma', w.n)), ...(f.att || []).map(n => D.att.find(x => x.n === n)).filter(Boolean).map(g => row('att:' + g.n, null, g.cat, '', g.n, esc(g.c), '', 'att', g.n))]),
     ].join('');
     const draw = solo => {
@@ -341,15 +424,15 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
         ${res}
         <div class="cp-h"><h2>${dm() ? 'I preferiti del DM' : 'I tuoi preferiti'}</h2><span class="hint">Tocca la stella accanto a qualsiasi voce per ritrovarla qui.</span></div>
         ${fs ? `<div class="cp-list">${fs}</div>` : '<div class="card"><p class="hint" style="margin:0">Ancora niente. Salva l\'incantesimo che usi sempre o la condizione che non ti ricordi mai.</p></div>'}
-        <h2 style="margin:22px 0 10px">Da consultare</h2>
+        <h2 class="cp-sec">Da consultare</h2>
         <div class="cp-tiles">
-          ${tile('incantesimi', 'spells', '#7a3ea6', 'Incantesimi', `${D.sp.length} incantesimi, da cercare per classe, livello e scuola.`)}
-          ${dm() ? tile('bestiario', 'beast', '#2e7a3c', 'Bestiario', `${D.mostri.length} creature da mettere contro il party, pronte per il Tavolo.`, true) : ''}
+          ${tile('incantesimi', 'spells', '#7a3ea6', 'Incantesimi', `${D.sp.length} incantesimi, da cercare per classe, livello e scuola.`, false, D.sp.length, 'incantesimi')}
+          ${dm() ? tile('bestiario', 'beast', '#2e7a3c', 'Bestiario', `${D.mostri.length} creature da mettere contro il party, pronte per il Tavolo.`, true, D.mostri.length, 'creature') : ''}
           ${tile('condizioni', 'cond', '#7d2530', 'Condizioni', 'Cosa succede a chi è prono, afferrato, spaventato…')}
-          ${tile('oggetti', 'ring', '#2a5ea8', 'Oggetti magici', `${D.oggetti.length} oggetti: pozioni, anelli, armi e bacchette con le loro regole.`)}
+          ${tile('oggetti', 'ring', '#2a5ea8', 'Oggetti magici', `${D.oggetti.length} oggetti: pozioni, anelli, armi e bacchette con le loro regole.`, false, D.oggetti.length, 'oggetti')}
           ${tile('equipaggiamento', 'sword', '#7a6450', 'Equipaggiamento', 'Armi, armature, scudi, attrezzatura, strumenti e cavalcature, con costo e peso.')}
         </div>
-        <h2 style="margin:0 0 10px">Manuali da sfogliare</h2>
+        <h2 class="cp-sec">Manuali da sfogliare</h2>
         ${MAN ? MAN.html() : ''}
         <p class="cp-foot">Incantesimi, creature, oggetti ed equipaggiamento vengono dall'SRD 5.1 (regole del 2014); gli incantesimi delle espansioni sono riassunti scritti per il sito. Per il testo completo fa fede il manuale. ${FONTE_SRD}</p>`, solo);
       const q2 = $('#cp-q'); if (q2 && !solo) q2.oninput = () => { ST_HOME.q = q2.value; draw(true); };
@@ -361,7 +444,7 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
   /* ---------- incantesimi ---------- */
   const ST_SP = { q: '', cl: '', sc: '', lv: '', k: false, r: false, aperti: false };
   const spKtl = s => `${s.l ? s.l + '°' : 'Trucchetto'} · ${s.s}`;
-  const kr = s => `${s.k ? '<span class="cp-kr" title="Concentrazione">C</span>' : ''}${s.r ? '<span class="cp-kr" title="Rituale">R</span>' : ''}`;
+  const kr = s => `${s.k ? '<span class="cp-kr c" title="Concentrazione">C</span>' : ''}${s.r ? '<span class="cp-kr r" title="Rituale">R</span>' : ''}`;
   const spellMeta = s => `<span class="badge cp-b">${esc(s.s)}</span><span class="pill">${s.l ? LIV(s.l) : 'Trucchetto'}</span>${s.k ? '<span class="pill cp-k">Concentrazione</span>' : ''}${s.r ? '<span class="pill cp-r">Rituale</span>' : ''}`;
   function spellBody(s, full) {
     const parti = s.x.split(/\n\n(?=\*\*Ai livelli superiori\.\*\*)/), mat = s.c.match(/^(.*?)\s*\((.+)\)$/), lungo = s.t.length > 24;
@@ -380,8 +463,8 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
       const l = D.sp.filter(s => (!q || norm(s.n).includes(q)) && (!f.cl || s.cl.includes(f.cl)) && (f.lv === '' || s.l === +f.lv) && (!f.sc || s.s === f.sc) && (!f.k || s.k) && (!f.r || s.r));
       let rows = '', last = null;
       for (const s of l) {
-        if (s.l !== last) { rows += `<tr class="sep"><td colspan="7">${LIV(s.l)}<small>${l.filter(x => x.l === s.l).length}</small></td></tr>`; last = s.l; }
-        rows += `<tr data-cp-open="${esc('spell:' + s.n)}" tabindex="0" role="button"><td class="n"><b>${esc(s.n)}</b>${s.riass ? `<small title="${esc(FONTI[s.fonte] || s.fonte)}">${esc(s.fonte || 'Espansione')}</small>` : ''}</td><td class="w">${esc(s.s)}</td><td>${esc(s.t.split(',')[0])}</td><td class="w">${esc(s.p)}</td><td class="w">${esc(maiusc(s.d.replace(/^Concentrazione, /, '')))}</td><td class="k">${kr(s)}</td><td class="st">${star('spell', s.n)}</td></tr>`;
+        if (s.l !== last) { rows += `<tr class="sep"><td colspan="7"><span class="lv">${s.l}</span>${LIV(s.l)}<small>${l.filter(x => x.l === s.l).length}</small></td></tr>`; last = s.l; }
+        rows += `<tr class="cp-sc${scI(s.s)}" data-cp-open="${esc('spell:' + s.n)}" tabindex="0" role="button"><td class="n"><b>${esc(s.n)}</b>${s.riass ? `<small title="${esc(FONTI[s.fonte] || s.fonte)}">${esc(s.fonte || 'Espansione')}</small>` : ''}</td><td class="w"><span class="sch">${esc(s.s)}</span></td><td>${esc(s.t.split(',')[0])}</td><td class="w">${esc(s.p)}</td><td class="w">${esc(maiusc(s.d.replace(/^Concentrazione, /, '')))}</td><td class="k">${kr(s)}</td><td class="st">${star('spell', s.n)}</td></tr>`;
       }
       if (rows) rows = `<div class="cp-spw cp-tblw" id="cp-list"><table class="cp-tbl cp-sp"><thead><tr><th>Nome</th><th class="w">Scuola</th><th>Tempo</th><th class="w">Gittata</th><th class="w">Durata</th><th aria-label="Concentrazione e rituale"></th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
       const n = [f.cl, f.sc, f.lv !== '', f.k, f.r].filter(Boolean).length;
@@ -402,8 +485,8 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
     await caricaPagina();
     const s = D.sp.find(x => x.n === nome);
     if (!s) { setView(`<div class="empty"><h2>Incantesimo non trovato</h2><p><a href="#/compendio/incantesimi">Torna agli incantesimi</a></p></div>`); return; }
-    setView(`${crumbs(['Incantesimi', '#/compendio/incantesimi'])}<div class="pagehead"><div style="flex:1;min-width:220px"><div class="cp-meta" style="margin-bottom:6px">${spellMeta(s)}</div><h1>${esc(s.n)}</h1><div class="brief" style="font-style:italic;color:var(--ink2)">${s.l ? `${esc(s.s)} di ${s.l}° livello` : `Trucchetto di ${esc(s.s.toLowerCase())}`}</div></div><div class="acts">${favBtn('spell', s.n)}</div></div>
-      <div class="orn"></div><div class="card">${spellBody(s, true)}</div>`);
+    setView(`${crumbs(['Incantesimi', '#/compendio/incantesimi'])}<div class="pagehead cp-hero cp-sc${scI(s.s)}"><span class="wm" aria-hidden="true">${svg('spells')}</span><div style="flex:1;min-width:220px"><div class="cp-meta" style="margin-bottom:6px">${spellMeta(s)}</div><h1>${esc(s.n)}</h1><div class="brief" style="font-style:italic;color:var(--ink2)">${s.l ? `${esc(s.s)} di ${s.l}° livello` : `Trucchetto di ${esc(s.s.toLowerCase())}`}</div></div><div class="acts">${favBtn('spell', s.n)}</div></div>
+      <div class="card">${spellBody(s, true)}</div>`);
   });
 
   /* ---------- bestiario (solo DM) ---------- */
@@ -440,7 +523,7 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
           <select data-cp-f="tipo" aria-label="Tipo"><option value="">Ogni tipo</option>${tipi.map(t => `<option${f.tipo === t ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select>
           <div class="seg cp-seg" role="group" aria-label="Sfida"><button type="button" data-cp-f="gs" data-v="" class="${!f.gs ? 'on' : ''}">Ogni sfida</button>${[['b', '0–½'], ['m', '1–4'], ['a', '5–10'], ['e', '11–16'], ['l', '17+']].map(([k, t]) => `<button type="button" data-cp-f="gs" data-v="${k}" class="${f.gs === k ? 'on' : ''}">${t}</button>`).join('')}</div>`)}
         <div class="cp-filters"><span class="cp-count">${l.length} creature</span></div>
-        <div class="cp-list" id="cp-list">${l.map(m => row('mostro:' + m.id, null, `Sfida ${m.gs} · ${m.tipo}`, '', m.nome, `CA ${m.ca} · ${m.pf} PF · ${esc(m.vel)}`, `<span class="pill">${m.pe.toLocaleString('it-IT')} PE</span>`, 'mostro', m.id)).join('') || '<p class="empty">Nessuna creatura con questi filtri.</p>'}</div>
+        <div class="cp-list" id="cp-list">${l.map(m => row('mostro:' + m.id, null, m.tipo, '', m.nome, `CA ${m.ca} · ${m.pf} PF · ${esc(m.vel)}`, `<span class="pill">${m.pe.toLocaleString('it-IT')} PE</span>`, 'mostro', m.id, xMon(m))).join('') || '<p class="empty">Nessuna creatura con questi filtri.</p>'}</div>
         <div class="card" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><p style="margin:0;flex:1;min-width:220px">Non trovi una creatura? Qui ci sono quelle dell'SRD, la parte libera delle regole. Le altre sono nel Manuale dei Mostri.</p><a class="btn" href="#/manuali/mostri">Apri il Manuale dei Mostri</a></div>
         <p class="cp-foot">«Metti al Tavolo» crea la scheda della creatura, nascosta ai giocatori finché non la mostri. ${FONTE_SRD}</p>`, solo);
       if (!solo) attivaFiltri(ST_MO, draw);
@@ -452,14 +535,18 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
     if (!dm()) { location.replace('#/compendio'); setTimeout(nega, 300); return; }
     const m = D.mostri.find(x => x.id === id);
     if (!m) { setView(`<div class="empty"><h2>Creatura non trovata</h2><p><a href="#/compendio/bestiario">Torna al Bestiario</a></p></div>`); return; }
-    setView(`${crumbs(['Bestiario', '#/compendio/bestiario'])}<div class="pagehead"><div style="flex:1;min-width:220px"><div class="cp-meta" style="margin-bottom:6px">${monMeta(m)}</div><h1>${esc(m.nome)}</h1></div>
+    setView(`${crumbs(['Bestiario', '#/compendio/bestiario'])}<div class="pagehead cp-hero" style="--tc:var(--wine2)"><span class="wm" aria-hidden="true">${svg('beast')}</span><div style="flex:1;min-width:220px"><div class="cp-meta" style="margin-bottom:6px">${monMeta(m)}</div><h1>${esc(m.nome)}</h1></div>
       <div class="acts"><button type="button" class="btn primary" id="cp-put">${svg('tavolo', 'cp-ic')} Metti al Tavolo</button>${favBtn('mostro', m.id)}</div></div>
-      <div class="orn"></div><div class="card">${statblock(m)}</div>`);
+      <div class="card cp-sb">${statblock(m)}</div>`);
     $('#cp-put').onclick = () => alTavolo(m);
   });
 
   /* ---------- condizioni ---------- */
   const ST_CO = { q: '' };
+  const CSIM = { Accecato: '◉', Affascinato: '♥', Afferrato: '✊', Assordato: '◎', Avvelenato: '☠', Incapacitato: '✕', Indebolimento: '▼', Invisibile: '◌', Paralizzato: 'ϟ', Pietrificato: '◆', 'Privo di sensi': '☾', Prono: '↓', Spaventato: '!', Stordito: '✶', Trattenuto: '⛓', Nascosto: '◐', Concentrazione: '✦' };
+  const CCOL = ['#2a5ea8', '#a8286e', '#806b00', '#75614d', '#2e7a3c', '#a8283a', '#7a3ea6', '#167a85', '#a07c00', '#6b5a7e', '#44503f', '#b54c0c', '#7d2530', '#5b5fa8', '#7a6450', '#3f6b46', '#a8641c'];
+  const CCOLD = ['#7aaaf0', '#e07ab0', '#e8cb45', '#b39c7d', '#86c27e', '#e8788a', '#bd96e8', '#5ec6cf', '#f0d050', '#b9aec6', '#a9b8a0', '#f29a55', '#c4494f', '#a7abf0', '#cbb69c', '#7bb383', '#e0a05a'];
+  const condCol = n => { const i = Math.max(0, D.condizioni.findIndex(c => c.n === n)) % CCOL.length; return (document.documentElement.dataset.theme === 'dark' ? CCOLD : CCOL)[i]; };
   route(/^\/compendio\/condizioni$/, async () => {
     await caricaPagina();
     const draw = solo => {
@@ -467,7 +554,7 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
       ridisegna(`${crumbs(['Condizioni'])}<div class="pagehead"><h1>Condizioni</h1></div><div class="orn"></div>
         <p class="hint" style="margin:-6px 0 14px">Al Tavolo basta toccare una condizione su un token o su una scheda per leggere questo stesso testo.</p>
         ${filtri(`<input id="cp-q" type="search" placeholder="Cerca, anche dentro il testo…" value="${esc(ST_CO.q)}" aria-label="Cerca una condizione">`)}
-        <div class="cp-conds" id="cp-list">${l.map(c => `<div class="card"><div class="spread" style="margin:0 0 4px"><h3>${esc(c.n)}</h3>${star('cond', c.n)}</div><div class="prose"><ul>${c.r.map(r => `<li>${inline(r, c.n)}</li>`).join('')}</ul></div></div>`).join('') || '<p class="empty">Nessuna condizione trovata.</p>'}</div>
+        <div class="cp-conds" id="cp-list">${l.map(c => `<div class="card" style="--tc:${condCol(c.n)}"><div class="spread" style="margin:0 0 4px"><h3><span class="ci" aria-hidden="true">${CSIM[c.n] || '◆'}</span>${esc(c.n)}</h3>${star('cond', c.n)}</div><div class="prose"><ul>${c.r.map(r => `<li>${inline(r, c.n)}</li>`).join('')}</ul></div></div>`).join('') || '<p class="empty">Nessuna condizione trovata.</p>'}</div>
         <p class="cp-foot">Regole del 2014, in breve. In caso di dubbio vale il Manuale del Giocatore.</p>`, solo);
       if (!solo) attivaFiltri(ST_CO, draw);
     };
@@ -488,7 +575,7 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
       ridisegna(`${crumbs(['Oggetti magici'])}<div class="pagehead"><h1>Oggetti magici</h1></div><div class="orn"></div>
         ${filtri(`<input id="cp-q" type="search" placeholder="Cerca un oggetto…" value="${esc(f.q)}" aria-label="Cerca un oggetto">`, `<select data-cp-f="tipo" aria-label="Tipo"><option value="">Ogni tipo</option>${tipi.map(t => `<option${f.tipo === t ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select><select data-cp-f="rar" aria-label="Rarità"><option value="">Ogni rarità</option>${[['Comune', 'Comune'], ['Non comune', 'Non comune'], ['Rar', 'Raro'], ['Molto rar', 'Molto raro'], ['Leggendari', 'Leggendario']].map(([v, t]) => `<option value="${v}"${f.rar === v ? ' selected' : ''}>${t}</option>`).join('')}</select><button type="button" class="chip${f.sint ? ' on' : ''}" data-cp-f="sint">Richiede sintonia</button>`)}
         <div class="cp-filters"><span class="cp-count">${l.length} oggetti</span></div>
-        <div class="cp-list" id="cp-list">${l.map(o => row('ogg:' + o.n, null, o.r, '', o.n, esc(o.t), o.s ? '<span class="pill cp-k">Sintonia</span>' : '', 'ogg', o.n).replace('class="cp-ktl ', `style="--tc:${RAR(o.r)}" class="cp-ktl `)).join('') || '<p class="empty">Nessun oggetto con questi filtri.</p>'}</div>
+        <div class="cp-list" id="cp-list">${l.map(o => row('ogg:' + o.n, null, o.r, '', o.n, esc(o.t), o.s ? '<span class="pill cp-k">Sintonia</span>' : '', 'ogg', o.n, xOgg(o))).join('') || '<p class="empty">Nessun oggetto con questi filtri.</p>'}</div>
         <p class="cp-foot">Tutti gli oggetti magici dell'SRD 5.1. ${FONTE_SRD}</p>`, solo);
       if (!solo) attivaFiltri(ST_OG, draw);
     };
@@ -498,8 +585,8 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
     await caricaPagina();
     const o = D.oggetti.find(x => x.n === nome);
     if (!o) { setView(`<div class="empty"><h2>Oggetto non trovato</h2><p><a href="#/compendio/oggetti">Torna agli oggetti</a></p></div>`); return; }
-    setView(`${crumbs(['Oggetti magici', '#/compendio/oggetti'])}<div class="pagehead"><div style="flex:1;min-width:220px"><div class="cp-meta" style="margin-bottom:6px">${oggMeta(o)}</div><h1>${esc(o.n)}</h1></div><div class="acts">${favBtn('ogg', o.n)}</div></div>
-      <div class="orn"></div><div class="card"><div class="prose">${testoLungo(o.x)}</div><p class="cp-foot">${FONTE_SRD}</p></div>`);
+    setView(`${crumbs(['Oggetti magici', '#/compendio/oggetti'])}<div class="pagehead cp-hero" style="--tc:${RAR(o.r)}"><span class="wm" aria-hidden="true">${svg('ring')}</span><div style="flex:1;min-width:220px"><div class="cp-meta" style="margin-bottom:6px">${oggMeta(o)}</div><h1>${esc(o.n)}</h1></div><div class="acts">${favBtn('ogg', o.n)}</div></div>
+      <div class="card"><div class="prose">${testoLungo(o.x)}</div><p class="cp-foot">${FONTE_SRD}</p></div>`);
   });
 
   /* ---------- equipaggiamento ---------- */
