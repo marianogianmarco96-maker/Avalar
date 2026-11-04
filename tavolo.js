@@ -4059,12 +4059,16 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const r1 = bx - ax, r2 = by - ay, s1 = dx - cx, s2 = dy - cy, den = r1 * s2 - r2 * s1;
     if (Math.abs(den) < 1e-9) return false;
     const t = ((cx - ax) * s2 - (cy - ay) * s1) / den, u = ((cx - ax) * r2 - (cy - ay) * r1) / den;
-    return t > 1e-6 && t < 1 - 1e-6 && u >= 0 && u <= 1;
+    return t > 1e-6 && t < 1 - 1e-6 && u >= 0 && u <= 1 ? [ax + r1 * t, ay + r2 * t] : false;
   }
+  // una porta aperta lascia passare anche se sotto c'è ancora un altro muro sulla stessa linea
+  // (per esempio il muro di copertura tracciato da Claude sul bordo dell'edificio, sotto la porta della stanza del DM)
+  const portaAperta = (sc, p) => muriScena(sc).some(m => m.porta && m.aperta && distSeg(p[0], p[1], m.punti) < 4);
+  function tagliaMuro(sc, ax, ay, bx, by, m) { const p = taglia(ax, ay, bx, by, m.punti); return !!p && !portaAperta(sc, p); }
   // due tipi di muro pieno: quello di stanza (tipo vuoto) fa la nebbia e tiene buie le stanze chiuse;
   // quello di copertura ('pieno': colonne, rocce, edifici visti da fuori) ferma passo e attacchi ma non fa nebbia né ombra
   const fermaPasso = m => !m.tipo || m.tipo === 'pieno';
-  const attraversa = (sc, ax, ay, bx, by) => muriScena(sc).some(m => chiuso(m) && fermaPasso(m) && taglia(ax, ay, bx, by, m.punti));
+  const attraversa = (sc, ax, ay, bx, by) => muriScena(sc).some(m => chiuso(m) && fermaPasso(m) && tagliaMuro(sc, ax, ay, bx, by, m));
   /* ---------- coperture (prova): muretti e tavoli ½, feritoie e banconi ¾, muri veri totale ----------
      Regola della DMG con la griglia: da un angolo della casella di chi attacca si tirano le linee ai quattro angoli
      della casella del bersaglio; 1-2 linee bloccate = ½, 3-4 = ¾, tutte fermate da un muro = totale.
@@ -4088,7 +4092,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (best?.n === 0) break;
       const linee = cas.map(d => {
         let liv = 0, chi = null;
-        for (const m of muri) if (taglia(c[0], c[1], d[0], d[1], m.punti)) { const v = m.tipo === 'meta' ? 1 : m.tipo === 'tre' ? 2 : 3; if (v > liv) { liv = v; chi = m.tipo ? (m.nome || NOMI_COP[m.tipo]) : 'muro'; } }
+        for (const m of muri) if (tagliaMuro(sc, c[0], c[1], d[0], d[1], m)) { const v = m.tipo === 'meta' ? 1 : m.tipo === 'tre' ? 2 : 3; if (v > liv) { liv = v; chi = m.tipo ? (m.nome || NOMI_COP[m.tipo]) : 'muro'; } }
         if (liv < 1) for (const x of crea) if (x.seg.some(sg => taglia(c[0], c[1], d[0], d[1], sg))) { liv = 1; chi = x.t.nome || 'una creatura'; break; }
         return { d, liv, chi };
       });
@@ -4492,7 +4496,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (cb.includes('Morto')) return { ok: false, motivo: `${nb} è già sconfitto.` };
     const fermo = ca.find(c => FERMO.includes(c)); if (fermo) return { ok: false, motivo: `${a.nome} non può attaccare: è ${fermo.toLowerCase()}.` };
     const l = g => g.misura * sc.griglia / 2;
-    if (sc.visuale && T.muri && attraversa(sc, a.x + l(a), a.y + l(a), b.x + l(b), b.y + l(b))) return { ok: false, motivo: `C'è un muro tra ${a.nome} e ${nb}.` };
+    // non si può bersagliare solo chi ha copertura totale: basta un angolo libero (per esempio dalla porta aperta)
+    if (T.muri && copertura(a, b, sc)?.n === 3) return { ok: false, motivo: `C'è un muro tra ${a.nome} e ${nb}.` };
     const p = portata(at), d = distanza(a, b, sc), pro = [], contro = [];
     let modo;
     if (p.mischia && d <= p.reach + 0.01) modo = 'mischia';
