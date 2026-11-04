@@ -985,6 +985,19 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   .tv.gio .tv-ctab{width:36px;height:76px;font-size:1.15rem}
   .tv.gio .tv-ctab:not(.chiusa){display:none}
 }
+.tv-back{display:none}
+@media (max-width:820px){
+  html.in-tavolo #nav{display:none!important}
+  html.in-tavolo #toasts{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+  .tv-back{all:unset;display:flex;align-items:center;justify-content:center;width:28px;height:28px;margin:-2px 2px -2px -4px;border-radius:8px;cursor:pointer;color:var(--gold2);font:700 1.4rem/1 var(--body)}
+  .tv-back:hover{background:#ffffff14}
+  .tv.gio .tv-top,.tv.gio .tv-wrap.con-turno .tv-top{top:8px;justify-content:flex-start}
+  .tv.gio .tv-strip{top:52px;right:auto;max-width:calc(100% - 16px)}
+  .tv.gio .tv-wrap.con-turno .tv-zoom{top:8px}
+  .tv.gio .tv-rail{justify-content:space-around}
+  .tv.gio .tv-rail button{flex:1 1 0;max-width:76px}
+  .tv.gio .tv-rail .tv-on{display:none}
+}
 .tv-strip .rz{position:absolute;right:2px;bottom:2px;width:14px;height:14px;cursor:nwse-resize;touch-action:none;opacity:.55;background:linear-gradient(135deg,transparent 45%,var(--gold2) 45%,var(--gold2) 52%,transparent 52%,transparent 66%,var(--gold2) 66%,var(--gold2) 73%,transparent 73%);border-bottom-right-radius:12px}
 .tv-strip .rz:hover,.tv-strip.tira .rz{opacity:1}
 .tv-strip .fin2{position:absolute;left:10px;top:100%;margin-top:6px;height:30px;padding:0 12px;font-size:.8rem;box-shadow:0 6px 16px #000a}
@@ -1722,6 +1735,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       f.style.top = (top ? top.getBoundingClientRect().bottom : 0) + 'px';
       f.style.bottom = (nav && getComputedStyle(nav).position === 'fixed' ? nav.offsetHeight : 0) + 'px';
     };
+    // sul telefono il tavolo prende tutto lo schermo: la barra del sito sparisce (si esce con ‹ accanto al nome della mappa)
+    document.documentElement.classList.add('in-tavolo'); onCleanup(() => document.documentElement.classList.remove('in-tavolo'));
     fit(); scrollTo(0, 0); addEventListener('resize', fit); addEventListener('resize', alzaAvvisi);
     let vivo = true;
     onCleanup(() => { vivo = false; removeEventListener('resize', fit); removeEventListener('resize', alzaAvvisi); esci(); document.querySelectorAll('.tv-tip').forEach(x => x.remove()); });
@@ -2024,7 +2039,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const t = $('#tv-top'); if (!t) return;
     const sc = scena(), att = T.stato?.scena;
     let h = '';
-    if (sc) h += `<div class="tv-chip"><b>${esc(sc.nome)}</b>${isDM() ? (sc.id === att ? '<span class="qui" title="I giocatori sono su questa mappa">I giocatori sono qui</span>' : '<button type="button" class="btn sm primary" data-act="tv-porta">Porta qui i giocatori</button>') : ''}</div>`;
+    if (sc) h += `<div class="tv-chip"><button type="button" class="tv-back" data-act="tv-esci" aria-label="Esci dal tavolo" title="Esci dal tavolo">‹</button><b>${esc(sc.nome)}</b>${isDM() ? (sc.id === att ? '<span class="qui" title="I giocatori sono su questa mappa">I giocatori sono qui</span>' : '<button type="button" class="btn sm primary" data-act="tv-porta">Porta qui i giocatori</button>') : ''}</div>`;
     if (isDM() && sc && T.livello === 'master') h = '<div class="tv-liv" title="I token che aggiungi e sposti ora li vedi solo tu">👑 Livello Master</div>' + h;
     if (isDM()) h += `<button type="button" class="tv-pgbtn" data-act="tv-pagine" data-tip="Mappe" aria-label="Mappe">${svg('pag')}<span>Mappe</span></button>`;
     t.innerHTML = h;
@@ -2035,7 +2050,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       'tv-dadi': () => { if (T.scal && !$('#tv-dice').hidden && matchMedia('(max-width:820px)').matches) return apriScaletta(false); apriChat($('#tv-dice').hidden, true); },
       'tv-mia': () => { if (!$('#tv-dice').hidden && T.stab) return apriChat(false); apriSchedaTab(true); disegnaRail(); },
       'tv-scaletta': () => apriScaletta(!(T.scal && !$('#tv-dice').hidden)), 'tv-chatab': () => { apriScaletta(false); apriSchedaTab(false); }, 'tv-schtab': () => apriSchedaTab(true),
-      'tv-porta': () => porta(T.vista),
+      'tv-porta': () => porta(T.vista), 'tv-esci': () => { location.hash = '#/'; },
       'tv-pagine': () => pannelloMappe($('#tv-pages').hidden), 'tv-nuova': () => dlgNuovaScena(),
       'tv-token': () => dlgToken(), 'tv-griglia': () => dlgGriglia(),
       'tv-turno': () => apriTurno(!T.turnoEd), 'tv-schede': () => apriSchede($('#tv-sp').hidden),
