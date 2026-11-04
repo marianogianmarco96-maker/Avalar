@@ -1162,6 +1162,27 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
 .tv-pop.nuovo .tzp .c:focus-visible,.tv-pop.nuovo .tzp .az:focus-visible{outline:2px solid var(--gold2)}
 .tv-pop.nuovo .gr button:hover,.tv-pop.nuovo .gr button:focus-visible{background:#7d253088;border-color:#e7cf9a55;outline:none}
 .tv-pop.nuovo .gr button.via{color:#ff9d93}
+.tv-pop.tv-anello{width:0;height:0;min-width:0;padding:0;border:0;background:none;box-shadow:none;overflow:visible;pointer-events:none;z-index:12;display:block}
+.tv-anello>*{pointer-events:auto}
+.tv-anello .rb{all:unset;pointer-events:auto;box-sizing:border-box;color:#f4e7cc;font-weight:700;position:absolute;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#1b1512ee;border:1px solid #e7cf9a66;box-shadow:0 6px 16px #000b;animation:tvRb .16s ease-out both}
+.tv-anello .rb span{font-size:1.25rem;line-height:1}
+.tv-anello .rb small{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:2px;font:700 .72rem var(--body);color:#f4e7cc;text-shadow:0 1px 3px #000,0 0 6px #000;white-space:nowrap;pointer-events:none}
+.tv-anello .rb:hover,.tv-anello .rb:focus-visible{background:#3a2a20f2;border-color:var(--gold2);outline:none}
+.tv-anello .rb[disabled]{opacity:.4;cursor:default}
+@keyframes tvRb{from{opacity:0;transform:scale(.6)}}
+.tv-anello .sotto{position:absolute;left:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px}
+.tv-anello .sotto[data-su]{transform:translate(-50%,-100%);flex-direction:column-reverse}
+.tv-anello .chip{display:flex;align-items:center;gap:9px;padding:5px 11px;border-radius:12px;background:#1b1512e6;border:1px solid #e7cf9a44;box-shadow:0 4px 12px #000a;font:600 .82rem var(--body);color:#f4e7cc;white-space:nowrap}
+.tv-anello .chip .pf b{color:var(--b);font-weight:800}
+.tv-anello .chip .dd{display:flex;gap:5px}
+.tv-anello .chip .dt{all:unset;pointer-events:auto;cursor:pointer;width:12px;height:12px;border-radius:50%;background:#4caf6a;box-shadow:0 0 0 2px #4caf6a44}
+.tv-anello .chip .dt.u{background:#5a5550;box-shadow:none}
+.tv-anello .chip .dt[disabled]{cursor:default;opacity:.55}
+.tv-anello .chip .mv.ko{color:#ff8a7d}
+.tv-anello .fin{all:unset;pointer-events:auto;cursor:pointer;padding:8px 14px;border-radius:12px;background:var(--wine,#8c2c38);border:1px solid var(--gold2);color:#fff;font:700 .85rem var(--body);box-shadow:0 6px 16px #000b;white-space:nowrap}
+.tv-anello .fin:hover{filter:brightness(1.15)}
+.tv-pop.tv-asub{width:250px}
+.tv-pop.tv-asub .tv-pcond{padding:10px 12px}
 .tv-pop.nuovo .tv-pcond{padding:0 12px 10px;gap:5px}
 .tv-pop.nuovo .tv-pcond button{background:#6b3fa055;border:1px solid #b98cff66;border-radius:12px;padding:4px 9px;font:600 .74rem var(--body);color:var(--pan-ink)}
 .tv-pop.nuovo select{font:600 .8rem var(--body);padding:6px 8px;border-radius:8px;border:1px solid #ffffff2a;background:#0006;color:var(--pan-ink);min-width:0}
@@ -2325,7 +2346,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function interazioni(st) {
     if (st.__tv) return; st.__tv = true;
     const punti = new Map(); let pan = null, pinch = null, rul = null, mas = null, ultimo = 0;
-    st.addEventListener('wheel', e => { const pp = e.target.closest?.('.tv-pop'); if (pp && pp.scrollHeight > pp.clientHeight) return; e.preventDefault(); const r = st.getBoundingClientRect(); const dy = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY; zoom(Math.exp(-(e.ctrlKey ? dy * 0.01 : clamp(dy, -100, 100) * 0.0005)), e.clientX - r.left, e.clientY - r.top); }, { passive: false });
+    st.addEventListener('wheel', e => { const pp = e.target.closest?.('.tv-pop'); if (pp && pp.scrollHeight > pp.clientHeight) return; e.preventDefault(); if (st.querySelector('.tv-anello')) chiudiPop(); const r = st.getBoundingClientRect(); const dy = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY; zoom(Math.exp(-(e.ctrlKey ? dy * 0.01 : clamp(dy, -100, 100) * 0.0005)), e.clientX - r.left, e.clientY - r.top); }, { passive: false });
     st.addEventListener('pointerdown', e => {
       if (e.button > 0 || !scena() || e.target.closest('.tv-zoom,.tv-pop,.tv-porta,.tv-incolla')) return;
       chiudiPop();
@@ -2946,7 +2967,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
   function menuRapido(t, e) {
     const mio = puoMuovere(t), s = schedaDi(t), cn = condTok(t), n = esc(t.nome || 'Token'), V = [];
-    if (!mio && !isDM()) return menuToken(t.id, e);
+    if (!isDM()) return menuToken(t.id, e);
     if (cn.includes('Nascosto')) V.push(['👁 Esci dal nascondiglio', () => mettiNascosto(t, false)]);
     else if (!(isDM() && t.nascosto && !t.giocatore)) V.push(['🥷 Nascondersi (Furtività)', () => nascondersi(t)]);
     if (isDM() && !t.giocatore) V.push(t.nascosto ? ['👁 Mostra ai giocatori', () => mettiSoloDM(t, false)] : ['👑 Solo per me', () => mettiSoloDM(t, true)]);
@@ -3018,7 +3039,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     };
     if (!isDM()) {
       // il giocatore apre la foto (solo per sé) e, sul proprio token, tira l'iniziativa
-      if (!ft && !mio && !sch && !cnow.length) return;
+      if (mio) return anello(t, e);
+      if (!ft && !sch && !cnow.length) return;
       const gr = tsch + (ft ? tile('foto', '🖼', 'Foto', 'Solo sul tuo schermo') : '');
       pop.innerHTML = `${testa}${mio ? bfine + tzp + rpf : ''}${gr ? `<div class="gr">${gr}</div>` : ''}${mio ? rcond + ini : rcond}`;
       st.append(pop); extra();
@@ -3070,6 +3092,66 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       chiudiPop(); if (!await ask(`Eliminare il token **${t.nome || 'senza nome'}**?`, { ok: 'Elimina', danger: true, title: 'Elimina token' })) return;
       const r2 = await SB.from('tavolo_token').delete().eq('id', id); if (r2.error) return toast(r2.error.message, 'err');
       T.tok.delete(id); disegnaToken();
+    };
+  }
+
+  /* ---------- il menu ad anello del giocatore: cinque tasti sopra il proprio token, sotto PF, azioni e movimento ---------- */
+  function chipAnello(t) {
+    const pf = pfDi(t), comb = inCombattimento() && T.turno.some(x => x.token === t.id), mio = suoTurno(t);
+    const pz = [];
+    if (pf) { const q = pf.pf / Math.max(1, pf.max); pz.push(`<span class="pf" style="--b:${q > 0.5 ? '#5bb36a' : q > 0.25 ? '#d8b04e' : '#e0564c'}" title="Punti ferita">❤ <b>${pf.pf}</b>/${pf.max}</span>`); }
+    if (comb) pz.push(`<span class="dd">${AZ.map(([k, , l]) => { const u = usata(t, k), off = !mio && k !== 'rea'; return `<button type="button" class="dt${u ? ' u' : ''}" data-z="${k}" title="${l}: ${off ? 'solo nel tuo turno' : u ? 'usata (tocca per ridarla)' : 'disponibile (tocca per segnarla usata)'}" aria-label="${l}${u ? ' usata' : ''}"${off ? ' disabled' : ''}></button>`; }).join('')}</span>`);
+    if (comb && mio) { const mv = movimentoDi(t); pz.push(`<span class="mv${mv.resta < 0 ? ' ko' : ''}" title="Movimento che ti resta, di ${metri(mv.tot)}">🏃 ${metri(Math.max(0, mv.resta))}</span>`); }
+    return pz.length ? `<div class="chip" data-id="${t.id}">${pz.join('')}</div>` : '';
+  }
+  function legaChip(box, t) { box.querySelectorAll('.chip [data-z]').forEach(b => b.onclick = ev => { ev.stopPropagation(); cambiaAz(t, b.dataset.z); }); }
+  function anello(t, e) {
+    const st = $('#tv-stage'), el = tokEl(t.id); if (!st) return;
+    chiudiPop();
+    const r = st.getBoundingClientRect(), tr = el ? el.getBoundingClientRect() : { left: e.clientX - 20, top: e.clientY - 20, width: 40, height: 40 };
+    const tk = Math.max(16, tr.width / 2), cx = tr.left - r.left + tr.width / 2, cy = tr.top - r.top + tr.height / 2;
+    const R = Math.max(86, tk + 50), giu = cy - R - 34 < 0; // troppo in alto: l'arco va sotto
+    const s = schedaDi(t), d = s?.dati || {}, haInc = (d.incantesimi || []).some(x => x?.nome);
+    const V = [['att', '⚔️', 'Attacca', 'Attacchi e azioni: poi tocca il bersaglio'], ['mag', '✨', 'Magie', haInc ? 'Gli incantesimi della scheda' : 'Nessun incantesimo nella scheda'], ['pf', '❤️', 'PF', 'Danni e cure'], ['sch', '📜', 'Scheda', 'La tua scheda'], ['alt', '⋯', 'Altro', 'Condizioni, foto, iniziativa, nascondersi']];
+    const ax = clamp(cx, R + 28, r.width - R - 28);
+    const pop = document.createElement('div'); pop.className = 'tv-pop tv-anello'; pop.dataset.id = t.id;
+    pop.style.left = cx + 'px'; pop.style.top = cy + 'px';
+    pop.innerHTML = V.map(([k, ic, l, tit], i) => {
+      const a = (giu ? 162 - i * 36 : -162 + i * 36) * Math.PI / 180, x = ax - cx + R * Math.cos(a), y = R * Math.sin(a);
+      const off = k === 'mag' && !haInc || k === 'sch' && !s || k === 'pf' && !pfDi(t);
+      return `<button type="button" class="rb" data-k="${k}" style="left:${x}px;top:${y}px" title="${tit}"${off ? ' disabled' : ''}><span>${ic}</span><small>${l}</small></button>`;
+    }).join('') + `<div class="sotto" style="top:${giu ? -(tk + 10) : tk + 8}px"${giu ? ' data-su' : ''}>${chipAnello(t)}${suoTurno(t) ? '<button type="button" class="fin" data-k="fine" title="Passa al prossimo nell\'ordine del turno">Finisci il turno ▶</button>' : ''}</div>`;
+    st.append(pop); legaChip(pop, t);
+    const sub = html => {
+      st.querySelector('.tv-asub')?.remove();
+      const p = document.createElement('div'); p.className = 'tv-pop nuovo tv-asub'; p.innerHTML = html; st.append(p);
+      const w = p.offsetWidth, dx = cx + R + 30 + w < r.width ? cx + R + 30 : cx - R - 30 - w;
+      p.style.left = clamp(dx, 6, r.width - w - 6) + 'px'; p.style.top = clamp(cy - p.offsetHeight / 2, 6, r.height - p.offsetHeight - 6) + 'px'; adattaPop(p);
+      return p;
+    };
+    const k = x => pop.querySelector(`[data-k=${x}]`);
+    k('att').onclick = ev => menuAzioni(t, ev.currentTarget, 'att');
+    k('mag').onclick = ev => menuAzioni(t, ev.currentTarget, 'inc');
+    k('fine')?.addEventListener('click', () => { chiudiPop(); finisciTurno(); });
+    k('sch').onclick = () => { chiudiPop(); const s2 = schedaDi(t); if (!s2) return; if (s2 === miaScheda() && $('#tv-schc')) return apriSchedaTab(true); apriScheda(s2.id, t.id); };
+    k('pf').onclick = () => {
+      const pf = pfDi(t); if (!pf) return; const q = clamp(pf.pf / Math.max(1, pf.max), 0, 1);
+      const p = sub(`<div class="pfr"><div class="rr"><span>PF <b>${pf.pf}</b> / ${pf.max}</span><button type="button" class="tv-b ko ico" data-k="pfm" title="Danni">−</button><input type="number" data-k="pfq" value="1" min="1" aria-label="Quanti punti"><button type="button" class="tv-b ok ico" data-k="pfp" title="Cura">+</button></div><div class="bar"><s style="width:${Math.round(q * 100)}%;--b:${q > 0.5 ? '#3f9a4a' : q > 0.25 ? '#c9a24a' : '#b8322c'}"></s></div></div>`);
+      const n = () => Math.max(1, Math.trunc(+p.querySelector('[data-k=pfq]').value || 1));
+      p.querySelector('[data-k=pfm]').onclick = () => { cambiaPF(t, -n()); chiudiPop(); };
+      p.querySelector('[data-k=pfp]').onclick = () => { cambiaPF(t, n()); chiudiPop(); };
+      p.querySelector('[data-k=pfq]').select();
+    };
+    k('alt').onclick = () => {
+      const cnow = condTok(t), giaIn = T.turno.find(x => x.token === t.id), imod = s ? modC(d.des) : 0, ft = haFoto(t), nasc = cnow.includes('Nascosto');
+      const p = sub(`<div class="tv-pcond">${cnow.map(c => `<span class="tv-cc"><button type="button"${regolaDi(c)}>${COND_FX[c]?.[0] || ''} ${esc(c)}</button><button type="button" data-tc="${esc(c)}" title="Togli ${esc(c)}" aria-label="Togli ${esc(c)}">✕</button></span>`).join('')}<select data-k="tcond" aria-label="Aggiungi una condizione"><option value="">+ Condizione</option>${CONDIZIONI.filter(c => !cnow.includes(c)).map(c => `<option>${c}</option>`).join('')}</select></div>
+        <div class="gr">${ft ? '<button type="button" data-k="foto" title="Solo sul tuo schermo"><span>🖼</span>Foto</button>' : ''}<button type="button" data-k="nas"><span>${nasc ? '👁' : '🥷'}</span>${nasc ? 'Esci dal nascondiglio' : 'Nasconditi'}</button>${giaIn ? '' : `<button type="button" data-k="ini" title="Tira 1d20${imod ? ' ' + segno(imod) : ''} e entra nell'ordine del turno"><span>🎲</span>Iniziativa</button>`}</div>${giaIn ? `<div class="ini"><span>🎲 Iniziativa</span><b class="gia">${giaIn.valore}</b></div>` : ''}`);
+      const metti = async lista => { chiudiPop(); const s2 = t.giocatore ? schedaDi(t) : null; if (s2 && puoScrivere(s2)) { await cambiaCond(s2, null, lista); if (!condTok(T.tok.get(t.id)).includes(lista.at(-1) ?? '')) await condSuToken(t, lista); } else await condSuToken(t, lista); };
+      p.querySelectorAll('[data-tc]').forEach(b => b.onclick = () => metti(cnow.filter(c => c !== b.dataset.tc)));
+      const sc = p.querySelector('[data-k=tcond]'); sc.onchange = () => { if (sc.value) metti([...cnow, sc.value]); };
+      p.querySelector('[data-k=foto]')?.addEventListener('click', () => { chiudiPop(); apriFoto(fotoDi(t)); });
+      p.querySelector('[data-k=nas]').onclick = () => { chiudiPop(); Promise.resolve(nasc ? mettiNascosto(t, false) : nascondersi(t)).catch(err => toast(err.message, 'err')); };
+      p.querySelector('[data-k=ini]')?.addEventListener('click', () => { chiudiPop(); iniziativa(t, imod); });
     };
   }
 
@@ -6113,6 +6195,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     box.querySelector('[data-k=tzazm]')?.addEventListener('click', e => menuAzioni(t, e.currentTarget));
   }
   function rinfrescaTurnoPop(t) {
+    const ch = document.querySelector(`.tv-anello .chip[data-id="${t.id}"]`); if (ch) { ch.outerHTML = chipAnello(t); legaChip(document.querySelector('.tv-anello'), t); }
     const el = document.querySelector(`.tv-pop .tzp[data-id="${t.id}"]`); if (!el) return;
     el.outerHTML = turnoPop(t); legaTurnoPop(document.querySelector('.tv-pop'), t);
   }
@@ -6342,6 +6425,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         ${gruppo('Attacchi', armi.map(x => va(x, U.az && !extraAtt)).join(''))}${gruppo('Incantesimi', incDi('az').map(x => vi(x, U.az)).join(''))}${gruppo('Privilegi', pa.map(x => vp(x, P.indexOf(x), 'az', U.az)).join(''))}`,
       bon: () => b || pb.length || incDi('bon').length || mk ? `${testa('bon', 'Con l\'azione bonus', b ? ` <small>${esc(b.nome)}</small>` : '')}<div class="gz">${mk ? `<button type="button" role="menuitem" data-mm title="${esc(mk.nome)}: il bersaglio è a terra, puoi spostare il segno su un'altra creatura"${U.bon || !marchioLibero(t) || mkInc < 0 ? ' disabled' : ''}><span>🎯</span><div><b>Sposta ${esc(mk.nome)}</b><small>${marchioLibero(t) ? 'su un altro bersaglio, senza slot' : `ora su ${esc(T.tok.get(mk.a)?.nome || '?')}`}</small></div></button><button type="button" role="menuitem" data-mx title="La concentrazione è finita: togli il segno"><span>✕</span><div><b>Togli ${esc(mk.nome)}</b><small>fine della concentrazione</small></div></button>` : ''}${b ? b.k.map(k => voce(k, 'bon', U.bon)).join('') : ''}${pb.map(x => vp(x, P.indexOf(x), 'bon', U.bon)).join('')}${incDi('bon').map(x => vi(x, U.bon)).join('')}</div>`
         : `${testa('bon', 'Con l\'azione bonus')}<p class="nota">Nessuna azione bonus nella scheda.</p>`,
+      att: () => `${testa('az', azioniTok(t) > 1 ? `Con l'azione (${azioniTok(t)} per turno)` : 'Con l\'azione')}${gruppo('Attacchi', armi.map(x => va(x, U.az && !extraAtt)).join('')) || '<p class="nota">Nessun attacco nella scheda.</p>'}${gruppo('Altre azioni', AZIONI.map(([k]) => voce(k, 'az', U.az)).join(''))}${gruppo('Privilegi', pa.map(x => vp(x, P.indexOf(x), 'az', U.az)).join(''))}`,
+      inc: () => `<h5><span>Incantesimi</span></h5>${inc.length ? ['az', 'bon', 'rea', null].map(k => gruppo(k === 'az' ? 'Con l\'azione' : k === 'bon' ? 'Con l\'azione bonus' : k === 'rea' ? 'Con la reazione' : 'Altri', inc.filter(([x]) => tempoInc(x) === k).map(x => vi(x, !!(k && U[k]))).join(''))).join('') : '<p class="nota">Nessun incantesimo preparato nella scheda.</p>'}`,
       leg: () => { const L = leggDi(s || { dati: {} }), r = s ? legRest(s) : 0; return `<h5><span>Azioni leggendarie <small>${r} di ${legN(s)} punti${mio ? ' · non nel suo turno' : ''}</small></span></h5><div class="gz">${L.map((x, j) => `<button type="button" role="menuitem" data-lg="${j}" title="${esc(x.testo || '')}"${mio || x.costo > r ? ' disabled' : ''}><span>♛</span><div><b>${esc(x.nome)}</b><small>${x.costo} punt${x.costo > 1 ? 'i' : 'o'} · ${esc(corto(x.testo || '', 50))}</small></div></button>`).join('')}</div>${L.length ? '' : '<p class="nota">Nessuna azione leggendaria nella scheda.</p>'}`; },
       rea: () => `${testa('rea', 'Con la reazione')}<div class="gz">${pr.map(x => vp(x, x === OPP ? 'opp' : P.indexOf(x), 'rea', U.rea)).join('')}${incDi('rea').map(x => vi(x, U.rea)).join('')}</div>`
     };
