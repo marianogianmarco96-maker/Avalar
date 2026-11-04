@@ -974,6 +974,17 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
 .tv-strip.vert .pie{display:flex;justify-content:stretch;padding:8px 10px 10px;border-top:1px solid #ffffff1a}
 .tv-strip.vert .pie .tv-b{flex:1;justify-content:center;height:38px}
 .tv-strip.vert .pie:has(.tv-b[hidden]){display:none}
+.tv.gio .tv-rail button em.nl{position:absolute;top:2px;right:4px;min-width:16px;height:16px;padding:0 4px;box-sizing:border-box;border-radius:8px;background:#c0392b;color:#fff;font:700 .62rem/16px var(--body);font-style:normal;text-align:center;box-shadow:0 0 0 2px var(--rail)}
+.tv-ctab[data-n]::after{content:attr(data-n);top:-7px;left:-7px;width:auto;height:18px;min-width:18px;padding:0 5px;box-sizing:border-box;border-radius:9px;font:700 .66rem/18px var(--body);color:#fff;text-align:center;background:#c0392b}
+@media (min-width:821px){
+  .tv.gio .tv-rail{width:54px}
+  .tv.gio .tv-rail button{width:42px;height:42px}
+  .tv.gio .tv-rail button .rl{display:none}
+  .tv.gio .tv-rail button svg{width:22px;height:22px}
+  .tv.gio .tv-chat{position:absolute;right:0;top:0;bottom:0;z-index:14;box-shadow:-10px 0 28px #000a}
+  .tv.gio .tv-ctab{width:36px;height:76px;font-size:1.15rem}
+  .tv.gio .tv-ctab:not(.chiusa){display:none}
+}
 .tv-strip .rz{position:absolute;right:2px;bottom:2px;width:14px;height:14px;cursor:nwse-resize;touch-action:none;opacity:.55;background:linear-gradient(135deg,transparent 45%,var(--gold2) 45%,var(--gold2) 52%,transparent 52%,transparent 66%,var(--gold2) 66%,var(--gold2) 73%,transparent 73%);border-bottom-right-radius:12px}
 .tv-strip .rz:hover,.tv-strip.tira .rz{opacity:1}
 .tv-strip .fin2{position:absolute;left:10px;top:100%;margin-top:6px;height:30px;padding:0 12px;font-size:.8rem;box-shadow:0 6px 16px #000a}
@@ -1987,6 +1998,16 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const r = $('#tv-rail'); if (!r) return;
     const RL = { 'tv-sel': 'Seleziona', 'tv-mano': 'Sposta', 'tv-righello': 'Righello', 'tv-tiradadi': 'Dadi', 'tv-turno': 'Turno', 'tv-schede': 'Schede', 'tv-dadi': 'Chat', 'tv-scaletta': 'Scaletta', 'tv-maschera': 'Maschera', 'tv-muri': 'Muri', 'tv-difficile': 'Terreno', 'tv-effetti': 'Effetti', 'tv-segni': 'Segnalini', 'tv-token': 'Token', 'tv-griglia': 'Griglia', 'tv-liv-seg': 'Tutti', 'tv-liv-mas': 'Solo io' };
     const b = (act, tip, k, on) => `<button type="button" data-act="${act}" data-tip="${esc(tip)}" aria-label="${esc(tip)}" class="${on ? 'on' : ''}">${svg(k)}<span class="rl" aria-hidden="true">${RL[act] || ''}</span></button>`;
+    const gio = !isDM(); $('.tv')?.classList.toggle('gio', gio);
+    // i giocatori: quattro strumenti (e la chat, sul telefono). Il resto sta nel menu del token e nel ⋯ della tabella del turno
+    if (gio) {
+      const nl = T.nonLetti || 0, aperta = !$('#tv-dice')?.hidden;
+      r.innerHTML = b('tv-sel', 'Seleziona e muovi il tuo token (S)', 'sel', T.tool === 'muovi').replace('Seleziona</span>', 'Muovi</span>') + b('tv-righello', 'Righello (R)', 'rig', T.tool === 'righello') + b('tv-tiradadi', 'Tiradadi', 'dado', !$('#tv-tdp')?.hidden)
+        + b('tv-mia', 'La tua scheda', 'sch', aperta && !!T.stab).replace('</span>', 'Scheda</span>')
+        + b('tv-dadi', 'Chat', 'chat', aperta && !T.stab).replace('class="', 'class="tel ').replace('</button>', nl ? `<em class="nl">${nl > 9 ? '9+' : nl}</em></button>` : '</button>')
+        + `<span class="sp"></span><span class="tv-on ${T.live ? 'ok' : ''}" id="tv-on" title="${T.live ? esc('Al tavolo ora: ' + T.online.join(', ')) : 'Connessione…'}"></span>`;
+      return;
+    }
     let h = b('tv-sel', 'Seleziona e sposta i token (S)', 'sel', T.tool === 'muovi') + b('tv-mano', 'Sposta la mappa (M)', 'mano', T.tool === 'mano')
       + b('tv-righello', 'Righello (R)', 'rig', T.tool === 'righello') + b('tv-tiradadi', 'Tiradadi', 'dado', !$('#tv-tdp')?.hidden)
       + b('tv-turno', isDM() ? 'Modifica l\'ordine del turno' : 'Ordine del turno: barra o tabella classica', 'tur', isDM() ? !!T.turnoEd : turnoVert()) + b('tv-schede', 'Schede dei personaggi e dei PNG', 'sch', !$('#tv-sp')?.hidden)
@@ -2012,6 +2033,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     return {
       'tv-sel': () => strumento('muovi'), 'tv-mano': () => strumento('mano'), 'tv-righello': () => strumento(T.tool === 'righello' ? 'muovi' : 'righello'),
       'tv-dadi': () => { if (T.scal && !$('#tv-dice').hidden && matchMedia('(max-width:820px)').matches) return apriScaletta(false); apriChat($('#tv-dice').hidden, true); },
+      'tv-mia': () => { if (!$('#tv-dice').hidden && T.stab) return apriChat(false); apriSchedaTab(true); disegnaRail(); },
       'tv-scaletta': () => apriScaletta(!(T.scal && !$('#tv-dice').hidden)), 'tv-chatab': () => { apriScaletta(false); apriSchedaTab(false); }, 'tv-schtab': () => apriSchedaTab(true),
       'tv-porta': () => porta(T.vista),
       'tv-pagine': () => pannelloMappe($('#tv-pages').hidden), 'tv-nuova': () => dlgNuovaScena(),
@@ -3477,18 +3499,25 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
 
   // la chat resta aperta; la linguetta sul bordo la chiude e la riapre (si ricorda la scelta)
-  const CHAT = 'tavolo-chat';
+  // i giocatori la trovano chiusa (una linguetta col numero dei messaggi nuovi) e, aperta, sta sopra la mappa
+  const CHAT = 'tavolo-chat', chatChiave = () => isDM() ? CHAT : CHAT + '-g';
+  function nonLetti(piu) {
+    T.nonLetti = piu ? (T.nonLetti || 0) + 1 : 0;
+    const tab = $('#tv-ctab'), n = T.nonLetti; if (tab) { if (n) tab.dataset.n = n > 9 ? '9+' : n; else delete tab.dataset.n; }
+    disegnaRail();
+  }
   function apriChat(apri, salva) {
     const box = $('#tv-dice'), tab = $('#tv-ctab'); if (!box) return;
     box.hidden = !apri;
-    if (salva) try { localStorage.setItem(CHAT, apri ? '1' : '0'); } catch { }
-    if (tab) { const tel = matchMedia('(max-width:820px)').matches; tab.textContent = tel ? (apri ? '⌄' : '💬') : apri ? '›' : '‹'; tab.classList.toggle('chiusa', !apri); tab.dataset.tip = apri ? 'Chiudi la chat' : 'Apri la chat'; tab.setAttribute('aria-label', tab.dataset.tip); if (apri) tab.classList.remove('nuovo'); }
+    if (salva) try { localStorage.setItem(chatChiave(), apri ? '1' : '0'); } catch { }
+    if (apri && T.nonLetti) T.nonLetti = 0, tab && delete tab.dataset.n;
+    if (tab) { const tel = matchMedia('(max-width:820px)').matches; tab.textContent = tel ? (apri ? '⌄' : '💬') : !isDM() ? '💬' : apri ? '›' : '‹'; tab.classList.toggle('chiusa', !apri); tab.dataset.tip = apri ? 'Chiudi la chat' : 'Apri la chat'; tab.setAttribute('aria-label', tab.dataset.tip); if (apri) tab.classList.remove('nuovo'); }
     if (apri) { const l = $('#tv-log'); if (l) l.scrollTop = 1e9; }
     disegnaRail();
   }
   function disegnaDadi() {
     const box = $('#tv-dice'); if (!box) return;
-    if (!T.diceInit) { let v = null; try { v = localStorage.getItem(CHAT); } catch { } apriChat(v ? v === '1' : matchMedia('(min-width:821px)').matches); }
+    if (!T.diceInit) { let v = null; try { v = localStorage.getItem(chatChiave()); } catch { } apriChat(v ? v === '1' : isDM() && matchMedia('(min-width:821px)').matches); }
     T.diceInit = true;
     const tabSc = isDM() && window.__scaletta, tabSh = !isDM() && !!T.schede;
     box.innerHTML = `<i class="tv-crz" data-k="crz" title="Trascina per allargare o stringere la chat" aria-hidden="true"></i><div class="tv-dh">${tabSc ? '<span class="tv-dtab" role="tablist"><button type="button" role="tab" data-act="tv-chatab">Chat</button><button type="button" role="tab" data-act="tv-scaletta">Scaletta</button></span>' : tabSh ? '<span class="tv-dtab" role="tablist"><button type="button" role="tab" data-act="tv-chatab">Chat</button><button type="button" role="tab" data-act="tv-schtab">Scheda</button></span>' : '<span>Chat</span>'}<span class="dx"><button type="button" class="tv-cx tv-anim ${animazioni() ? 'on' : ''}" data-act="tv-anim" title="Animazioni degli attacchi: ${animazioni() ? 'accese' : 'spente'}" aria-label="Animazioni degli attacchi" aria-pressed="${animazioni()}">✨</button>${isDM() ? '<button type="button" class="tv-cx tv-svuota" data-act="tv-svuota" title="Svuota la chat: cancella tutti i messaggi e i tiri, per tutti" aria-label="Svuota la chat">🗑</button>' : '<button type="button" class="tv-cx" data-act="tv-dadi" title="Chiudi la chat" aria-label="Chiudi la chat">✕</button>'}</span></div><div class="tv-log" id="tv-log"></div>${tabSc ? '<div class="tv-scal" id="tv-scal"></div>' : ''}${tabSh ? '<div class="tv-schc" id="tv-schc"></div>' : ''}
@@ -3531,7 +3560,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function apriSchedaTab(on) {
     T.stab = !!on && !isDM(); try { localStorage.setItem(STAB, T.stab ? '1' : '0'); } catch { }
     if (T.stab && $('#tv-dice')?.hidden) apriChat(true);
-    disegnaSchedaTab();
+    disegnaSchedaTab(); disegnaRail();
   }
   function disegnaSchedaTab() {
     const box = $('#tv-dice'), host = $('#tv-schc'); if (!box || isDM()) return;
@@ -3770,11 +3799,11 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function nuovoMsg(m) {
     disegnaLog();
     const vt = votoDi(m); if (vt) { if (isDM() && m.autore !== T.me.uid) toast(`${m.nome} ha votato lo scontro: ${(VOTI.find(x => x[0] === vt.v) || ['', vt.v])[1]}`); return; }
-    if ($('#tv-dice')?.hidden && m.autore !== T.me.uid) { $('#tv-ctab')?.classList.add('nuovo'); toast(`${m.nome}${m.per ? ' (sussurro)' : ''}: ${m.testo.slice(0, 120).replace(/\s*⟦voto:\w+⟧/, '')}`); }
+    if ($('#tv-dice')?.hidden && m.autore !== T.me.uid) { $('#tv-ctab')?.classList.add('nuovo'); nonLetti(true); toast(`${m.nome}${m.per ? ' (sussurro)' : ''}: ${m.testo.slice(0, 120).replace(/\s*⟦voto:\w+⟧/, '')}`); }
   }
   function nuovoTiro(t) {
     disegnaLog(); lancia(t);
-    if (!$('#tv-dice') || $('#tv-dice').hidden) { $('#tv-ctab')?.classList.add('nuovo'); toast(`${t.nome}${t.motivo ? ' (' + t.motivo + ')' : ''}: ${t.formula} = ${t.totale}`); }
+    if (!$('#tv-dice') || $('#tv-dice').hidden) { $('#tv-ctab')?.classList.add('nuovo'); if (t.autore !== T.me?.uid) nonLetti(true); toast(`${t.nome}${t.motivo ? ' (' + t.motivo + ')' : ''}: ${t.formula} = ${t.totale}`); }
   }
   /* ---------- dadi che rotolano sulla mappa ---------- */
   const FORME = {
