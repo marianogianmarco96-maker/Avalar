@@ -974,6 +974,31 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
 .tv-strip.vert .pie{display:flex;justify-content:stretch;padding:8px 10px 10px;border-top:1px solid #ffffff1a}
 .tv-strip.vert .pie .tv-b{flex:1;justify-content:center;height:38px}
 .tv-strip.vert .pie:has(.tv-b[hidden]){display:none}
+.tv-strip .rz{position:absolute;right:2px;bottom:2px;width:14px;height:14px;cursor:nwse-resize;touch-action:none;opacity:.55;background:linear-gradient(135deg,transparent 45%,var(--gold2) 45%,var(--gold2) 52%,transparent 52%,transparent 66%,var(--gold2) 66%,var(--gold2) 73%,transparent 73%);border-bottom-right-radius:12px}
+.tv-strip .rz:hover,.tv-strip.tira .rz{opacity:1}
+.tv-strip .fin2{position:absolute;left:10px;top:100%;margin-top:6px;height:30px;padding:0 12px;font-size:.8rem;box-shadow:0 6px 16px #000a}
+.tv-strip .fin2[hidden]{display:none}
+.tv-strip.col .fin2{left:0;white-space:nowrap}
+.tv-strip.tz{gap:calc(10px*var(--tz));padding-top:calc(6px*var(--tz));padding-bottom:calc(6px*var(--tz))}
+.tv-strip.tz .rd{font-size:calc(1.05rem*var(--tz))}
+.tv-strip.tz .ls{gap:calc(8px*var(--tz));padding-top:calc(6px*var(--tz))}
+.tv-strip.tz .p{width:calc(52px*var(--tz))}
+.tv-strip.tz .p i{width:calc(40px*var(--tz));height:calc(40px*var(--tz));font-size:calc(.8rem*var(--tz))}
+.tv-strip.tz .p b{font-size:calc(.66rem*var(--tz));max-width:100%}
+.tv-strip.tz .p em{transform:scale(calc(.55 + .45*var(--tz)));transform-origin:top right}
+.tv-strip.tz .p.on{width:calc(64px*var(--tz))}
+.tv-strip.tz .p.on i{width:calc(52px*var(--tz));height:calc(52px*var(--tz))}
+.tv-strip.tz .p.on b{font-size:calc(.72rem*var(--tz))}
+.tv-strip.tz .ac .tv-b{transform:scale(calc(.7 + .3*var(--tz)));transform-origin:center}
+.tv-strip.tz.foto .p b,.tv-strip.tz.foto .rd small,.tv-strip.tz.foto .p em{display:none}
+.tv-strip.tz.foto .rd::before{content:'R';font-size:.8em}
+.tv-strip.tz.foto .rd{flex-direction:row;align-items:baseline}
+.tv-strip.tz.foto .p.on i{box-shadow:0 0 0 2px #e7cf9a44,0 0 10px #e7cf9a88}
+.tv-strip.tz.vert:not(.ed){width:calc(262px*var(--tz))}
+.tv-strip.tz.vert .tv-tr{font-size:calc(1em*var(--tz));padding-top:calc(5px*var(--tz));padding-bottom:calc(5px*var(--tz))}
+.tv-strip.tz.vert .tv-tr i{width:calc(28px*var(--tz));height:calc(28px*var(--tz))}
+.tv-strip.tz.col{width:calc(80px*var(--tz))}
+.tv-tmenu .gz{grid-template-columns:1fr!important}
 .tv-wrap.con-turno .tv-tdp,.tv-wrap.con-turno .tv-sp{top:96px;max-height:calc(100% - 106px)}
 
 /* il pannello del turno, in basso al centro */
@@ -5103,8 +5128,11 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   // la matita (solo DM) la apre in modifica: iniziative, nascondi, togli, aggiungi.
   var TVERT = 'tavolo-turno-vert', TPOS = 'tavolo-turno-pos';
   function turnoVert() { try { return localStorage.getItem('tavolo-turno-vert') === '1'; } catch { return false; } }
-  function turnoStretta() { try { return localStorage.getItem('tavolo-turno-stretta') === '1'; } catch { return false; } }
   function turnoPos() { try { return JSON.parse(localStorage.getItem('tavolo-turno-pos') || 'null'); } catch { return null; } }
+  // la grandezza della tabella, per ogni dispositivo: si cambia tirando l'angolo in basso a destra. Sotto 0,8 restano solo le foto
+  const TZ = 'tavolo-turno-zoom', tzTel = () => matchMedia('(max-width:820px)').matches;
+  function turnoZoom() { let v = null; try { v = parseFloat(localStorage.getItem(TZ)); } catch { } return v >= 0.55 && v <= 1.4 ? v : tzTel() ? 0.75 : 1; }
+  const soloFoto = k => k < 0.8;
   function giraTurno() { try { localStorage.setItem(TVERT, turnoVert() ? '0' : '1'); } catch { } disegnaStriscia(); disegnaRail(); }
   function apriTurno(apri) {
     if (!isDM()) return giraTurno();
@@ -5142,34 +5170,37 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function disegnaStriscia() {
     const s = $('#tv-strip'), w = $('.tv-wrap'); if (!s) return;
     const L = ordinati(), att = T.stato?.turno, ia = L.findIndex(x => x.id === att);
-    const ed = isDM() && !!T.turnoEd, col = !ed && turnoVert() && turnoStretta(), vert = !col && (ed || turnoVert()), pos = turnoPos();
+    const kz = turnoZoom(), ed = isDM() && !!T.turnoEd, col = !ed && turnoVert() && soloFoto(kz), vert = !col && (ed || turnoVert()), pos = turnoPos();
     // la tabella si vede solo sulla mappa del combattimento (il DM può guardarne un'altra)
     const qui = !L.length || !T.vista || scenaCombattimento() === T.vista;
     s.hidden = (!L.length || !qui) && !ed; s.classList.toggle('vert', vert); s.classList.toggle('col', col); s.classList.toggle('ed', ed);
+    s.classList.add('tz'); s.classList.toggle('foto', soloFoto(kz) && !ed); s.style.setProperty('--tz', ed ? 1 : kz);
     w?.classList.toggle('con-turno', !s.hidden && !vert && !col && !pos);
     if (s.hidden) { s.innerHTML = ''; disegnaHud(); return; }
-    const avanti = L.length && (isDM() || L.some(x => x.id === att && x.giocatore === T.me.giocatore));
+    const avanti = L.length && (isDM() || L.some(x => x.id === att && x.giocatore === T.me.giocatore)), dm = isDM();
     const faccia = x => `<i style="--c:${esc(x.colore || '#7d2530')};${x.immagine ? `background-image:url('${x.immagine}')` : ''}">${x.immagine ? '' : esc(iniziali(x.nome))}</i>`;
     const grip = '<span class="mv" title="Trascina per spostare (doppio click: torna al suo posto)" aria-hidden="true">⠿</span>';
-    const bottoni = `<button type="button" class="tv-b sec ico" data-k="gira" title="${vert ? 'Barra orizzontale' : 'Tabella classica (verticale)'}" aria-label="${vert ? 'Barra orizzontale' : 'Tabella classica'}"${ed ? ' hidden' : ''}>${vert ? '⇄' : '⇅'}</button>${isDM() ? `<button type="button" class="tv-b sec ico${ed ? ' on' : ''}" data-k="ed" title="${ed ? 'Fine modifica' : 'Modifica l\'ordine del turno'}" aria-label="Modifica l'ordine del turno">✎</button><button type="button" class="tv-b sec ico" data-k="x" title="Fine combattimento: svuota l'ordine del turno e chiude la tabella" aria-label="Fine combattimento">✕</button>` : ''}`;
+    const bottoni = `<button type="button" class="tv-b sec ico" data-k="piu" title="Barra o tabella, solo foto, rimetti a posto" aria-label="Altre opzioni della tabella" aria-haspopup="menu"${ed ? ' hidden' : ''}>⋯</button>${isDM() ? `<button type="button" class="tv-b sec ico${ed ? ' on' : ''}" data-k="ed" title="${ed ? 'Fine modifica' : 'Modifica l\'ordine del turno'}" aria-label="Modifica l'ordine del turno">✎</button><button type="button" class="tv-b sec ico" data-k="x" title="Fine combattimento: svuota l'ordine del turno e chiude la tabella" aria-label="Fine combattimento">✕</button>` : ''}`;
     const bav = `<button type="button" class="tv-b pri" data-k="av" title="Passa al prossimo (chi è a 0 PF viene saltato)"${avanti ? '' : ' hidden'}>${col ? 'Fine ▶' : 'Finisci il turno ▶'}</button>`;
-    // in verticale si può stringere: le facce una sotto l'altra, come la barra
-    const bstr = ed ? '' : `<button type="button" class="tv-b sec ico" data-k="str" title="${col ? 'Allarga: tabella con i nomi' : 'Stringi: solo le facce'}" aria-label="${col ? 'Allarga la tabella' : 'Stringi la tabella'}">${col ? '⇥' : '⇤'}</button>`;
+    // il giocatore lo vede solo nel suo turno, piccolo sotto la barra (e nel menu del suo token)
+    const fin2 = dm ? '' : `<button type="button" class="tv-b pri fin2" data-k="av" title="Passa al prossimo nell'ordine del turno"${avanti ? '' : ' hidden'}>Finisci il turno ▶</button>`;
+    const rz = ed ? '' : '<span class="rz" title="Tira per ingrandire o rimpicciolire (doppio click: grandezza normale)" aria-hidden="true"></span>';
+    const bstr = '';
     if (!vert) {
       s.innerHTML = `${grip}<div class="rd"><small>Round</small>${T.stato?.round || 1}</div><div class="ls">${L.map((x, i) => `<span class="p${i === ia ? ' on' : ''}${ia >= 0 && i < ia ? ' gia' : ''}${x.giocatore ? '' : ' nem'}${x.nascosto ? ' hid' : ''}" title="${esc(x.nome)} · iniziativa ${x.valore}${x.nascosto ? ' (nascosto ai giocatori)' : ''}">${faccia(x)}<b>${esc(String(x.nome || '').split(/\s+/)[0])}</b><em>${x.valore}</em></span>`).join('')}</div>
-      <div class="ac">${bav}${col ? bstr : ''}${bottoni}</div>`;
+      <div class="ac">${dm ? bav : ''}${bottoni}</div>${fin2}${rz}`;
     } else {
       s.innerHTML = `<div class="tt">${grip}<b><small>Round</small> ${T.stato?.round || 1}</b><span class="ac">${bstr}${bottoni}</span></div>
       <div class="tv-tl">${L.map((x, i) => `<div class="tv-tr${x.id === att ? ' att' : ''}${ia >= 0 && i < ia ? ' gia' : ''}${x.nascosto ? ' hid' : ''}" data-id="${x.id}">${faccia(x)}<span title="${esc(x.nome)}">${esc(x.nome)}${x.id === att ? '<small class="ora">sta giocando</small>' : ''}</span>
         ${ed ? `<input type="number" step="1" value="${x.valore}" aria-label="Iniziativa di ${esc(x.nome)}"><button type="button" data-k="nasc" title="${x.nascosto ? 'Mostra ai giocatori' : 'Nascondi ai giocatori'}">${x.nascosto ? '🙈' : '👁'}</button><button type="button" data-k="via" title="Togli dall'ordine">✕</button>` : `<em>${x.valore}</em>`}</div>`).join('')
         || '<div class="tv-tvuoto">Nessuno ancora. Clicca un token e premi «Tira» accanto a Iniziativa, o aggiungilo qui sotto.</div>'}</div>
-      ${ed ? '<div class="tv-tf"><input type="text" data-k="nn" placeholder="Nome" style="flex:1;width:auto"><input type="number" data-k="nv" placeholder="0"><button type="button" data-k="add">+ Aggiungi</button><button type="button" data-k="svuota">Svuota</button></div>' : `<div class="pie">${bav}</div>`}`;
+      ${ed ? '<div class="tv-tf"><input type="text" data-k="nn" placeholder="Nome" style="flex:1;width:auto"><input type="number" data-k="nv" placeholder="0"><button type="button" data-k="add">+ Aggiungi</button><button type="button" data-k="svuota">Svuota</button></div>' : `<div class="pie">${bav}</div>`}${rz}`;
     }
-    s.querySelector('[data-k=av]')?.addEventListener('click', finisciTurno);
+    s.querySelectorAll('[data-k=av]').forEach(b => b.onclick = finisciTurno);
+    s.querySelector('[data-k=piu]')?.addEventListener('click', e => menuTurno(e.currentTarget, vert || col, kz));
+    ridimensionaTurno(s, s.querySelector('.rz'));
     s.querySelector('[data-k=x]')?.addEventListener('click', () => fineCombattimento());
     s.querySelector('[data-k=ed]')?.addEventListener('click', () => apriTurno(!T.turnoEd));
-    s.querySelector('[data-k=gira]').onclick = giraTurno;
-    s.querySelector('[data-k=str]')?.addEventListener('click', () => { try { localStorage.setItem('tavolo-turno-stretta', col ? '0' : '1'); } catch { } disegnaStriscia(); });
     if (ed) legaModificaTurno(s);
     trascinaTurno(s, s.querySelector('.mv'));
     piazzaTurno(s, pos);
@@ -5177,6 +5208,45 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (on && col) ls.scrollTop = on.offsetTop - ls.clientHeight / 2 + on.offsetHeight / 2;
     else if (on) ls.scrollLeft = on.offsetLeft - ls.clientWidth / 2 + on.offsetWidth / 2;
     disegnaHud();
+  }
+  // ⋯ della tabella: barra o tabella, solo foto, rimetti com'era
+  function menuTurno(anc, vert, kz) {
+    document.querySelectorAll('.tv-azm').forEach(x => x.remove());
+    const m = document.createElement('div'); m.className = 'tv-azm tv-tmenu'; m.setAttribute('role', 'menu');
+    const v = (k, ic, l, d) => `<button type="button" role="menuitem" data-m="${k}"><span>${ic}</span><div><b>${l}</b><small>${d}</small></div></button>`;
+    m.innerHTML = `<div class="gz">${v('gira', vert ? '⇄' : '⇅', vert ? 'Barra orizzontale' : 'Tabella verticale', vert ? 'Le facce in fila in alto' : 'Una riga per ognuno, con i nomi')}${v('foto', soloFoto(kz) ? '🔠' : '🖼', soloFoto(kz) ? 'Con i nomi' : 'Solo le foto', soloFoto(kz) ? 'Grandezza normale' : 'Più piccola, senza nomi')}${v('rip', '↺', 'Rimetti com\'era', 'Al suo posto e grandezza normale')}</div><p class="nota">Tira l'angolo in basso a destra per cambiarne la grandezza.</p>`;
+    document.body.append(m);
+    const r = anc.getBoundingClientRect(); m.style.width = '260px';
+    m.style.left = clamp(r.right - 260, 6, innerWidth - 266) + 'px'; m.style.top = Math.min(r.bottom + 8, innerHeight - m.offsetHeight - 6) + 'px';
+    const chiudi = () => { m.remove(); removeEventListener('pointerdown', fuori, true); };
+    const fuori = e => { if (!m.contains(e.target) && !anc.contains(e.target)) chiudi(); };
+    addEventListener('pointerdown', fuori, true); onCleanup(chiudi);
+    const metti = k => { try { k == null ? localStorage.removeItem(TZ) : localStorage.setItem(TZ, String(k)); } catch { } };
+    m.querySelectorAll('[data-m]').forEach(b => b.onclick = () => {
+      chiudi(); const k = b.dataset.m;
+      if (k === 'gira') return giraTurno();
+      if (k === 'foto') metti(soloFoto(kz) ? 1 : 0.7);
+      if (k === 'rip') { metti(null); try { localStorage.removeItem(TPOS); } catch { } }
+      disegnaStriscia();
+    });
+  }
+  // l'angolo in basso a destra: tirando, facce e scritte crescono o rimpiccioliscono (fino alle sole foto)
+  function ridimensionaTurno(s, h) {
+    if (!h) return;
+    h.onpointerdown = e => {
+      if (e.button) return; e.preventDefault(); e.stopPropagation();
+      const k0 = turnoZoom(), r = s.getBoundingClientRect(), x0 = e.clientX, y0 = e.clientY; let k = k0;
+      h.setPointerCapture(e.pointerId); s.classList.add('tira');
+      h.onpointermove = m => {
+        const rx = (r.width + m.clientX - x0) / r.width, ry = (r.height + m.clientY - y0) / r.height, q = Math.abs(rx - 1) > Math.abs(ry - 1) ? rx : ry;
+        k = Math.round(clamp(k0 * q, 0.55, 1.4) * 100) / 100; s.style.setProperty('--tz', k); s.classList.toggle('foto', soloFoto(k));
+      };
+      h.onpointerup = h.onpointercancel = () => {
+        h.onpointermove = h.onpointerup = h.onpointercancel = null; s.classList.remove('tira');
+        if (k !== k0) { try { localStorage.setItem(TZ, String(k)); } catch { } disegnaStriscia(); }
+      };
+    };
+    h.ondblclick = () => { try { localStorage.removeItem(TZ); } catch { } disegnaStriscia(); };
   }
   // dove l'ha lasciata chi guarda, senza farla uscire dal tavolo
   function piazzaTurno(s, pos) {
@@ -5235,7 +5305,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const vedo = false && !!t && t.scena === T.vista && puoMuovere(t);
     h.hidden = !vedo; w?.classList.toggle('con-hud', vedo);
     // la striscia mostra «Finisci il turno» solo quando non c'è il pannello
-    const sa = $('#tv-strip [data-k=av]'); if (sa) sa.hidden = vedo || !(isDM() || att?.giocatore === T.me.giocatore);
+    document.querySelectorAll('#tv-strip [data-k=av]').forEach(sa => { sa.hidden = vedo || !(isDM() || att?.giocatore === T.me.giocatore); });
     if (!vedo) { h.innerHTML = ''; return; }
     requestAnimationFrame(alzaAvvisi);
     const a = azioniDi(t), mv = movimentoDi(t), q = mv.tot > 0 ? clamp(mv.resta / mv.tot, 0, 1) : 0;
