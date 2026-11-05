@@ -3040,7 +3040,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       const r = await SB.from('tavolo_token').delete().eq('id', t.id); if (r.error) return toast(r.error.message, 'err');
       T.tok.delete(t.id); disegnaToken();
     }, true]);
-    V.push('-', ['⋯ Tutte le opzioni', () => menuToken(t.id, e)]);
+    V.push('-', ['⋯ Tutte le opzioni', () => menuToken(t.id, e, true)]);
     popRapido(e, n, V);
   }
   // nascondersi: nel proprio turno costa l'azione bonus se un privilegio lo permette, sennò l'azione; fuori dal turno è solo il tiro
@@ -3055,8 +3055,10 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (isDM()) V.push(['➕ Aggiungi un token', () => dlgToken()], ['🗺 Mappe', () => pannelloMappe(true)]);
     popRapido(e, '', V);
   }
-  function menuToken(id, e) {
+  function menuToken(id, e, pieno) {
     const t = T.tok.get(id), st = $('#tv-stage'); if (!t || !st) return;
+    // anche il DM ha l'anello: il pannello completo (nome, misura, copia, elimina…) si apre da «Altro»
+    if (isDM() && !pieno) return anello(t, e);
     chiudiPop();
     const r = st.getBoundingClientRect(), pop = document.createElement('div'); pop.className = 'tv-pop nuovo';
     const giaIn = T.turno.find(x => x.token === t.id);
@@ -3174,13 +3176,13 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const tk = Math.max(16, tr.width / 2), cx = tr.left - r.left + tr.width / 2, cy = tr.top - r.top + tr.height / 2;
     const R = Math.max(86, tk + 50), giu = cy - R - 34 < 0; // troppo in alto: l'arco va sotto
     const s = schedaDi(t), d = s?.dati || {}, haInc = (d.incantesimi || []).some(x => x?.nome);
-    const V = [['att', '⚔️', 'Attacca', 'Attacchi e azioni: poi tocca il bersaglio'], ['mag', '✨', 'Magie', haInc ? 'Gli incantesimi della scheda' : 'Nessun incantesimo nella scheda'], ['pf', '❤️', 'PF', 'Danni e cure'], ['sch', '📜', 'Scheda', 'La tua scheda'], ['alt', '⋯', 'Altro', 'Condizioni, foto, iniziativa, nascondersi']];
+    const V = [['att', '⚔️', 'Attacca', 'Attacchi e azioni: poi tocca il bersaglio'], ['mag', '✨', 'Magie', haInc ? 'Gli incantesimi della scheda' : 'Nessun incantesimo nella scheda'], ['pf', '❤️', 'PF', 'Danni e cure'], ['sch', '📜', 'Scheda', isDM() ? (s ? 'La sua scheda' : 'Crea la scheda') : 'La tua scheda'], ['alt', '⋯', 'Altro', isDM() ? 'Nome, misura, chi lo muove, condizioni, foto, copia, elimina…' : 'Condizioni, foto, iniziativa, nascondersi']];
     const ax = clamp(cx, R + 28, r.width - R - 28);
     const pop = document.createElement('div'); pop.className = 'tv-pop tv-anello'; pop.dataset.id = t.id;
     pop.style.left = cx + 'px'; pop.style.top = cy + 'px';
     pop.innerHTML = V.map(([k, ic, l, tit], i) => {
       const a = (giu ? 162 - i * 36 : -162 + i * 36) * Math.PI / 180, x = ax - cx + R * Math.cos(a), y = R * Math.sin(a);
-      const off = k === 'mag' && !haInc || k === 'sch' && !s || k === 'pf' && !pfDi(t);
+      const off = k === 'mag' && !haInc || k === 'sch' && !s && !isDM() || k === 'pf' && !pfDi(t);
       return `<button type="button" class="rb" data-k="${k}" style="left:${x}px;top:${y}px" title="${tit}"${off ? ' disabled' : ''}><span>${ic}</span><small>${l}</small></button>`;
     }).join('') + `<div class="sotto" style="top:${giu ? -(tk + 10) : tk + 8}px"${giu ? ' data-su' : ''}>${chipAnello(t)}${suoTurno(t) ? '<button type="button" class="fin" data-k="fine" title="Passa al prossimo nell\'ordine del turno">Finisci il turno ▶</button>' : ''}</div>`;
     st.append(pop); legaChip(pop, t);
@@ -3195,7 +3197,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     k('att').onclick = ev => menuAzioni(t, ev.currentTarget, 'att');
     k('mag').onclick = ev => menuAzioni(t, ev.currentTarget, 'inc');
     k('fine')?.addEventListener('click', () => { chiudiPop(); finisciTurno(); });
-    k('sch').onclick = () => { chiudiPop(); const s2 = schedaDi(t); if (!s2) return; if (s2 === miaScheda() && $('#tv-schc')) return apriSchedaTab(true); apriScheda(s2.id, t.id); };
+    k('sch').onclick = () => { const s2 = schedaDi(t); if (!s2) return isDM() ? menuToken(t.id, e, true) : undefined; chiudiPop(); if (s2 === miaScheda() && $('#tv-schc')) return apriSchedaTab(true); apriScheda(s2.id, t.id); };
     k('pf').onclick = () => {
       const pf = pfDi(t); if (!pf) return; const q = clamp(pf.pf / Math.max(1, pf.max), 0, 1);
       const p = sub(`<div class="pfr"><div class="rr"><span>PF <b>${pf.pf}</b> / ${pf.max}</span><button type="button" class="tv-b ko ico" data-k="pfm" title="Danni">−</button><input type="number" data-k="pfq" value="1" min="1" aria-label="Quanti punti"><button type="button" class="tv-b ok ico" data-k="pfp" title="Cura">+</button></div><div class="bar"><s style="width:${Math.round(q * 100)}%;--b:${q > 0.5 ? '#3f9a4a' : q > 0.25 ? '#c9a24a' : '#b8322c'}"></s></div></div>`);
@@ -3205,6 +3207,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       p.querySelector('[data-k=pfq]').select();
     };
     k('alt').onclick = () => {
+      if (isDM()) return menuToken(t.id, e, true);
       const cnow = condTok(t), giaIn = T.turno.find(x => x.token === t.id), imod = s ? modC(d.des) : 0, ft = haFoto(t), nasc = cnow.includes('Nascosto');
       const p = sub(`<div class="tv-pcond">${cnow.map(c => `<span class="tv-cc"><button type="button"${regolaDi(c)}>${COND_FX[c]?.[0] || ''} ${esc(c)}</button><button type="button" data-tc="${esc(c)}" title="Togli ${esc(c)}" aria-label="Togli ${esc(c)}">✕</button></span>`).join('')}<select data-k="tcond" aria-label="Aggiungi una condizione"><option value="">+ Condizione</option>${CONDIZIONI.filter(c => !cnow.includes(c)).map(c => `<option>${c}</option>`).join('')}</select></div>
         <div class="gr">${ft ? '<button type="button" data-k="foto" title="Solo sul tuo schermo"><span>🖼</span>Foto</button>' : ''}<button type="button" data-k="nas"><span>${nasc ? '👁' : '🥷'}</span>${nasc ? 'Esci dal nascondiglio' : 'Nasconditi'}</button>${giaIn ? '' : `<button type="button" data-k="ini" title="Tira 1d20${imod ? ' ' + segno(imod) : ''} e entra nell'ordine del turno"><span>🎲</span>Iniziativa</button>`}</div>${giaIn ? `<div class="ini"><span>🎲 Iniziativa</span><b class="gia">${giaIn.valore}</b></div>` : ''}`);
