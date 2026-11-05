@@ -316,7 +316,7 @@ Se ti chiedo modifiche, rispondi con l'oggetto aggiornato nello stesso formato.`
     const io = loadItems(), pgs = [...S.ents.values()].filter(e => e.type === 'pg').sort((a, b) => a.name.localeCompare(b.name));
     io.pgs = io.pgs.filter(id => S.ents.has(id));
     const sel = (k, opts, v) => `<select id="i-${k}">${opts.map(([a, b]) => `<option value="${esc(a)}" ${String(a) === String(v) ? 'selected' : ''}>${esc(b)}</option>`).join('')}</select>`;
-    setView(`<div class="pagehead"><h1>Idee per le sessioni</h1><div class="acts"><button class="btn" data-act="ipaste">Salva una risposta di Claude</button><button class="btn" data-act="iset">${api ? 'Claude collegato ✓' : 'Collega Claude'}</button></div></div><div class="orn"></div>
+    setView(`<div class="pagehead"><h1>Idee per le sessioni</h1><div class="acts"><a class="btn" href="#/bottino" title="Oggetti e dispense pronti da consegnare al Tavolo">🎁 Bottino pronto${window.__bottino?.tutte().filter(v => !v.consegne?.length).length ? ' · ' + window.__bottino.tutte().filter(v => !v.consegne?.length).length : ''}</a><button class="btn" data-act="ipaste">Salva una risposta di Claude</button><button class="btn" data-act="iset">${api ? 'Claude collegato ✓' : 'Collega Claude'}</button></div></div><div class="orn"></div>
       <div class="card"><p class="lead" style="margin-top:0">Chiedi a Claude di ideare oneshot, sessioni o missioni partendo da tutto quello che è successo nella campagna: riassunti, schede, PNG, luoghi e segreti. Lo vedi solo tu come DM.</p>
         <div class="idee-grid">
           <label class="f"><span>Cosa ti serve</span>${sel('kind', Object.entries(KINDS).filter(([k]) => k !== 'items').map(([k, v]) => [k, v[0]]), o.kind)}</label>
@@ -372,7 +372,7 @@ Se ti chiedo modifiche, rispondi con l'oggetto aggiornato nello stesso formato.`
       const failed = CONV.turns[CONV.turns.length - 1].err;
       conv.innerHTML = `<div class="card idee-out"><div class="spread"><h2 style="margin:0">${CONV.o.kind === 'items' ? 'Gli oggetti di Claude' : esc(KINDS[CONV.o.kind][0]) + ': le proposte di Claude'}</h2><button class="btn sm ghost" data-act="iclear">Chiudi</button></div>
         ${CONV.turns.map((t, i) => `<div class="idee-turn">${i ? `<div class="idee-q">${esc(t.q)}</div>` : ''}${t.err ? `<p style="color:var(--bad,#a3262f)">${esc(t.err)}</p><button class="btn sm" data-act="iretry">Riprova</button>` : `<div class="${t.live ? 'idee-live' : ''}" id="i-a${i}">${prose(t.a || '…')}</div>`}
-          ${!t.live && t.a ? `<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="isave" data-i="${i}">${t.saved ? 'Salvata ✓' : 'Salva tra le idee'}</button><button class="btn sm" data-act="icp" data-i="${i}">Copia</button>${t.stop === 'max_tokens' ? '<span class="hint">La risposta è stata interrotta perché troppo lunga: chiedi di continuare.</span>' : t.stop === 'aborted' ? '<span class="hint">Interrotta da te: se vuoi, chiedi di continuare.</span>' : ''}</div>` : ''}</div>`).join('')}
+          ${!t.live && t.a ? `<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="isave" data-i="${i}">${t.saved ? 'Salvata ✓' : 'Salva tra le idee'}</button><button class="btn sm" data-act="icp" data-i="${i}">Copia</button>${window.__bottino?.daMarkdown(t.a).length ? `<button class="btn sm" data-act="ibot" data-i="${i}" title="Mette gli oggetti nel Bottino pronto, da consegnare al Tavolo">🎁 Prepara per la partita</button>` : ''}${t.stop === 'max_tokens' ? '<span class="hint">La risposta è stata interrotta perché troppo lunga: chiedi di continuare.</span>' : t.stop === 'aborted' ? '<span class="hint">Interrotta da te: se vuoi, chiedi di continuare.</span>' : ''}</div>` : ''}</div>`).join('')}
         ${failed ? '' : BUSY ? `<div class="row" style="margin-top:12px"><button class="btn sm" data-act="istop">Interrompi</button><span class="hint">Claude sta scrivendo…</span></div>` : `<div class="idee-turn"><label class="f"><span>Continua con Claude</span><textarea id="i-follow" rows="2" placeholder="es. Sviluppa la seconda proposta con i dialoghi di Edward · rendila più cupa · aggiungi un incontro con i Predoni"></textarea></label><button class="btn" data-act="ifollow">Invia</button></div>`}</div>`;
     };
     const live = i => { const el = $('#i-a' + i); if (el) el.innerHTML = prose(CONV.turns[i].a || '…'); };
@@ -414,6 +414,7 @@ Se ti chiedo modifiche, rispondi con l'oggetto aggiornato nello stesso formato.`
       iretry: async () => { const t = CONV.turns[CONV.turns.length - 1]; t.err = null; t.a = ''; await run(); },
       iclear: () => { if (BUSY) BUSY.abort(); CONV = null; paintConv(); },
       icp: a => copyText(CONV.turns[+a.dataset.i].a, 'Copiato'),
+      ibot: async a => { if (await window.__bottino.daIdee(CONV.turns[+a.dataset.i].a, KINDS[CONV.o.kind]?.[0])) location.hash = '#/bottino'; },
       isave: async a => {
         const t = CONV.turns[+a.dataset.i]; if (t.saved) return;
         const id = 'idea-' + Date.now().toString(36);
@@ -436,11 +437,12 @@ Se ti chiedo modifiche, rispondi con l'oggetto aggiornato nello stesso formato.`
     const i = await ideaGet(id);
     if (!i) return setView(`<div class="empty"><h2>Idea non trovata</h2><a href="#/idee">Torna alle idee</a></div>`);
     setView(`<div class="pagehead"><div style="flex:1"><a href="#/idee">← Tutte le idee</a><h1>${esc(i.title)}</h1><div class="hint">${esc(i.kindLabel || '')} · salvata il ${esc(new Date(i.ts).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }))}</div></div>
-      <div class="acts"><button class="btn" data-act="icp">Copia</button><button class="btn" data-act="idl">Scarica</button><button class="btn" data-act="iren">Rinomina</button><button class="btn" data-act="idev">Sviluppa con Claude</button><button class="btn danger" data-act="idel">Elimina</button></div></div><div class="orn"></div>
+      <div class="acts">${window.__bottino?.daMarkdown(i.text).length ? '<button class="btn primary" data-act="ibot" title="Mette gli oggetti nel Bottino pronto, da consegnare al Tavolo">🎁 Prepara per la partita</button>' : ''}<button class="btn" data-act="icp">Copia</button><button class="btn" data-act="idl">Scarica</button><button class="btn" data-act="iren">Rinomina</button><button class="btn" data-act="idev">Sviluppa con Claude</button><button class="btn danger" data-act="idel">Elimina</button></div></div><div class="orn"></div>
       <div class="card idee-out">${prose(i.text)}</div>
       ${i.request ? `<details class="card"><summary class="hint" style="cursor:pointer">Cosa avevi chiesto</summary><div class="idee-q" style="margin-top:8px">${esc(i.request)}</div></details>` : ''}`);
     setActs({
       icp: () => copyText(i.text, 'Idea copiata'),
+      ibot: async () => { if (await window.__bottino.daIdee(i.text, i.title)) location.hash = '#/bottino'; },
       idl: async () => { const dl = await claude.use('downloads'); await dl.save({ filename: i.title.replace(/[\\/:*?"<>|]+/g, '').slice(0, 60) + '.md', data: new Blob(['# ' + i.title + '\n\n' + i.text], { type: 'text/markdown' }) }); },
       iren: async () => { const r = await formDlg({ title: 'Rinomina l\'idea', fields: [{ k: 't', label: 'Titolo', value: i.title, req: true }] }); if (!r || !r.t.trim()) return; i.title = r.t.trim(); await ideaPut(i); rerender(); },
       idev: async () => {

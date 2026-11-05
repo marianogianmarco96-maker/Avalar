@@ -170,7 +170,7 @@ def copia(d, chi=None):
         'maps': mappe,
         'pins': pins,
         'regions': {k: r for k, r in S['regions'].items() if r['mapId'] in mappe and r.get('entityId') not in nascoste},
-        'meta': {k: (g if k == 'general' else v) for k, v in S['meta'].items() if k not in ('generalHist', 'giocatori', 'segnalazioni', 'bozza') and not k.startswith('scaletta:')},  # scaletta e bozza di Claude: solo DM
+        'meta': {k: (g if k == 'general' else v) for k, v in S['meta'].items() if k not in ('generalHist', 'giocatori', 'segnalazioni', 'bozza') and not k.startswith(('scaletta:', 'bottino:'))},  # scaletta, bottino e bozza di Claude: solo DM
         'blobs': blobs,
     }
     out = {'dataVersion': d['dataVersion'], 'stores': {k: stores[k] for k in ORDINE}, 'blobmap': {b['aid']: d['blobmap'][b['aid']] for b in blobs.values()}}

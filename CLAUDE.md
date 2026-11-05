@@ -6,3 +6,5 @@
   online con «Salva». `bozza.py mostra dm.json` elenca le modifiche e gli avvisi sulle note da DM rimaste visibili.
 - Le parti per il solo DM vanno in `[DM]…[/DM]` (o `dm: true` / «Mostra a:»), mai lasciate come «Nota per DM» nel testo.
 - Se modifichi copie.js o il filtro copia() in strumenti/pubblica.py, verifica con `python3 strumenti/prova_copie.py dm.json`.
+- Oggetti e dispense da consegnare al Tavolo stanno nel «Bottino pronto» (bottino.js, meta `bottino:<id>`, solo DM).
+  La consegna passa da Supabase (tavolo/tappa-20.sql, tabella tavolo_consegne) e non porta mai «La verità».

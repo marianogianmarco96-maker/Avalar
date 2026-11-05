@@ -979,7 +979,7 @@ html.review #view :is(p,li,h1,h2,h3,h4,h5,dd,dt,td,th,figcaption,blockquote):hov
     if (c === 'sessions' || c === 'sbodies') { const s = MEM.sessions && [...MEM.sessions.values()].find(x => x.n === v.n); return 'Sessione ' + v.n + (s && s.title ? ' · ' + s.title : ''); }
     if (c === 'events') return 'Evento · ' + (v.title || ''); if (c === 'maps') return 'Mappa · ' + (v.name || '');
     if (c === 'pins') return 'Segnalino · ' + (v.label || v.name || ''); if (c === 'regions') return 'Regione · ' + (v.name || v.label || '');
-    if (c === 'links') return 'Collegamento'; if (c === 'blobs') return 'Immagine'; if (c === 'meta') return ({ general: 'Riassunto generale', arcs: 'Archi narrativi', bozza: 'Bozza di Claude' })[v.k] || 'Impostazioni';
+    if (c === 'links') return 'Collegamento'; if (c === 'blobs') return 'Immagine'; if (c === 'meta') return ({ general: 'Riassunto generale', arcs: 'Archi narrativi', bozza: 'Bozza di Claude' })[v.k] || (String(v.k).startsWith('bottino:') ? 'Bottino pronto · ' + (v.v?.nome || '') : String(v.k).startsWith('scaletta:') ? 'Scaletta' : 'Impostazioni');
     return c;
   }
   function pathLabel(v, path) {
