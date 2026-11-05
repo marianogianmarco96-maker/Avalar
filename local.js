@@ -74,7 +74,7 @@
       if (r.ok) { pronto = true; const [s] = await r.json(); sb = s ? { versione: +s.versione, cartella: s.cartella } : null; ls.set('cdnd_sito', JSON.stringify(sb)); }
     } catch { try { sb = JSON.parse(ls.get('cdnd_sito')); } catch { } } // senza rete: l'ultima cartella vista (i file restano nel service worker)
     const ghv = await gh, sbv = sb ? sb.versione : 0;
-    FONTE = sb && sb.cartella && sbv > ghv ? { base: SB_FILES + sb.cartella + '/', sbv, pronto, cartella: sb.cartella } : { base: '', sbv, pronto };
+    FONTE = sb && sb.cartella && sbv > ghv ? { base: SB_FILES + sb.cartella + '/', sbv, ghv, pronto, cartella: sb.cartella } : { base: '', sbv, ghv, pronto };
     return FONTE;
   }
   // un file dei dati dalla copia più recente (su Supabase, o su GitHub se Supabase non risponde)
@@ -449,6 +449,50 @@
     } catch { notice('Non riesco a contattare il sito: controlla la connessione e riprova.'); }
     btn.disabled = false; btn.classList.remove('spin');
   }
+
+  /* ---------- avviso di nuova versione (tutti) ----------
+     Ogni tanto, e quando si torna sulla pagina, guarda se sul server c'è un sito nuovo (VERSION di sw.js) o, per i
+     giocatori, se il DM ha salvato o pubblicato dati nuovi: allora mostra un avviso con «Ricarica pagina».
+     Il confronto è con quello che c'era quando la pagina si è aperta (i file del sito si scaricano sempre freschi). */
+  const swVer = () => fetch('sw.js?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => (t.match(/VERSION\s*=\s*'([^']+)'/) || [])[1] || '', () => '');
+  const datiDi = (ghv, sb) => sb && sb.cartella && +sb.versione > ghv ? 'sb:' + sb.cartella : 'gh:' + ghv;
+  async function datiOra() {
+    const ghv = await fetch('versione.json?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => j ? +j.pub || 0 : null, () => null);
+    if (ghv == null) return '';
+    try {
+      const r = await fetch(SB_URL + '/rest/v1/sito_stato?select=versione,cartella&id=eq.1', { headers: { apikey: SB_KEY }, cache: 'no-store' });
+      if (!r.ok) return datiDi(ghv, null);
+      const [sb] = await r.json(); return datiDi(ghv, sb);
+    } catch { return ''; }
+  }
+  const V0 = swVer();
+  let D0 = null, AVVISO = '', inCorso = false;
+  function mostraAvviso(t) {
+    if (AVVISO) return; AVVISO = t;
+    const n = document.createElement('div'); n.id = 'newver'; n.setAttribute('role', 'alert');
+    n.style.cssText = 'position:fixed;left:50%;top:calc(66px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:10000;display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;width:max-content;max-width:min(560px,94vw);background:#561820;color:#f5e6c4;padding:10px 12px 10px 16px;border-radius:10px;border:1px solid #c9a24b;font:15px/1.35 Georgia,serif;box-shadow:0 8px 28px #0008';
+    n.innerHTML = `<span style="flex:1 1 220px">${t}</span><button type="button" data-r style="font:600 13px/1 Cinzel,Georgia,serif;letter-spacing:.06em;text-transform:uppercase;background:#e0c071;color:#2c0f14;border:0;border-radius:6px;padding:9px 14px;cursor:pointer">Ricarica pagina</button><button type="button" data-x aria-label="Più tardi" title="Più tardi" style="background:none;border:0;color:#f5e6c4;font-size:20px;line-height:1;padding:4px 6px;cursor:pointer;opacity:.75">×</button>`;
+    n.querySelector('[data-r]').onclick = () => { ls.set('cdnd_updated', '1'); location.reload(); };
+    n.querySelector('[data-x]').onclick = () => { n.remove(); setTimeout(() => { if (AVVISO === t) { AVVISO = ''; mostraAvviso(t); } }, 20 * 60000); };
+    document.body.append(n);
+  }
+  async function controllaNovita() {
+    if (inCorso || AVVISO || !ROLE || document.hidden || navigator.onLine === false) return;
+    inCorso = true;
+    try {
+      const [v0, v] = [await V0, await swVer()];
+      if (v0 && v && v !== v0) return mostraAvviso('È uscita una nuova versione del sito: ricarica la pagina per usarla.');
+      // i dati salvati dal DM: lui li ha già, li vedono nuovi solo i giocatori
+      if (ROLE === 'admin' || !FONTE) return;
+      if (D0 == null) { D0 = FONTE.base || FONTE.ghv ? datiDi(FONTE.ghv || 0, FONTE.base ? { cartella: FONTE.cartella, versione: FONTE.sbv } : null) : await datiOra(); if (!D0) D0 = null; return; }
+      const d = await datiOra();
+      if (d && d !== D0) mostraAvviso('Il DM ha aggiornato i contenuti del sito: ricarica la pagina per vederli.');
+    } finally { inCorso = false; }
+  }
+  setInterval(controllaNovita, 3 * 60000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) controllaNovita(); });
+  addEventListener('online', controllaNovita);
+  window.__controllaNovita = controllaNovita;
   if (ls.get('cdnd_updated')) { ls.del('cdnd_updated'); domReady().then(() => setTimeout(() => notice('Sito aggiornato all\'ultima versione.'), 600)); }
 
   /* ---------- modifiche fatte sul sito (amministratore) ----------
