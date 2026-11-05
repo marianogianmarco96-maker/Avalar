@@ -8,6 +8,9 @@ Uso:
   python3 strumenti/pubblica.py salva   CODICE  dm.json     # riscrive data.enc e giocatori/*.enc da dm.json
   python3 strumenti/pubblica.py account CODICE  dm.json     # crea gli account mancanti dei giocatori e ne stampa le password
 
+Per riassunti di sessione e altre modifiche ai contenuti, prima di «salva» usare strumenti/bozza.py prepara: le modifiche
+finiscono in una bozza che vede solo il DM, che le controlla dal sito («Controlla») e le manda online con «Salva».
+
 Gli account stanno nei dati del DM (meta «giocatori»: id, nome, scheda del PG, password, sale), quindi solo il DM li legge.
 «Mostra a:» (vis: [id dei giocatori], [] = nessuno) su schede, sezioni, voci, eventi e collegamenti, e le frasi [PER Sam, Violet]…[/PER],
 limitano una parte ai giocatori scelti: senza vis la vede chiunque. La copia pubblica tiene solo ciò che vedono tutti i giocatori.
@@ -167,7 +170,7 @@ def copia(d, chi=None):
         'maps': mappe,
         'pins': pins,
         'regions': {k: r for k, r in S['regions'].items() if r['mapId'] in mappe and r.get('entityId') not in nascoste},
-        'meta': {k: (g if k == 'general' else v) for k, v in S['meta'].items() if k not in ('generalHist', 'giocatori', 'segnalazioni') and not k.startswith('scaletta:')},  # scaletta: solo DM
+        'meta': {k: (g if k == 'general' else v) for k, v in S['meta'].items() if k not in ('generalHist', 'giocatori', 'segnalazioni', 'bozza') and not k.startswith(('scaletta:', 'bottino:'))},  # scaletta, bottino e bozza di Claude: solo DM
         'blobs': blobs,
     }
     out = {'dataVersion': d['dataVersion'], 'stores': {k: stores[k] for k in ORDINE}, 'blobmap': {b['aid']: d['blobmap'][b['aid']] for b in blobs.values()}}

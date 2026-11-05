@@ -1778,7 +1778,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     }
   }
   async function carica() {
-    const [st, sc, tk, tr, mb, ms, tu, ct, sh, mu, pg, sv, sg] = await Promise.all([
+    const [st, sc, tk, tr, mb, ms, tu, ct, sh, mu, pg, sv, sg, co] = await Promise.all([
       SB.from('tavolo_stato').select('*').eq('id', 1).maybeSingle(),
       SB.from('tavolo_scene').select('*').order('creata'),
       SB.from('tavolo_token').select('*'),
@@ -1791,7 +1791,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       tuttiIMuri(),
       SB.from('tavolo_pf_gruppo').select('*'),
       SB.from('tavolo_salvezze').select('*').is('esito', null).order('creato'),
-      SB.from('tavolo_segnalini').select('*').order('creato')
+      SB.from('tavolo_segnalini').select('*').order('creato'),
+      SB.from('tavolo_consegne').select('*').order('creata')
     ]);
     for (const r of [ms, tu, ct]) if (r.error && sqlMancante(r.error)) throw errore('sql2');
     T.stato = chk(st) || { scena: null, canale: 'avalar' };
@@ -1812,6 +1813,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     // senza tavolo/tappa-7.sql i tiri salvezza si fanno ancora tutti in automatico
     // senza tavolo/tappa-11.sql niente segnalini sulla mappa
     T.segn = sg.error ? null : sg.data;
+    // senza tavolo/tappa-20.sql niente consegne di oggetti e dispense
+    T.cons = co.error ? null : new Map(co.data.map(x => [x.id, x]));
     T.salvOk = !sv.error; T.salv = new Map(sv.error ? [] : sv.data.map(x => [x.id, x])); disegnaSalvezze();
     if (!isDM() || !T.scene.has(T.vista)) T.vista = T.stato.scena;
   }
@@ -1835,6 +1838,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (!p.new.dati) { riprendiScheda(p.new.id); return; }
       arrivaScheda(p.new); togliMorti();
     });
+    if (T.cons) pg('tavolo_consegne', p => arrivaConsegna(p).catch(() => { }));
     // schede di PNG che il DM ha appena mostrato o nascosto: i giocatori ricaricano l'elenco
     ch.on('broadcast', { event: 'schede' }, () => { if (!isDM() && T.schede) ricaricaSchede(); });
     pg('tavolo_scene', p => {
@@ -1965,6 +1969,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   /* ---------- strumenti (a sinistra) e mappe (in alto a destra), come su Roll20 ---------- */
   const ICO = {
     sel: '<path d="M5 3l14 7.5-6.2 1.7L10.5 19z"/>',
+    bott: '<path d="M4 10h16v10H4z"/><path d="M3 7h18v3H3zM12 7v13M12 7c-1.5-3-5-3.5-5.5-1.5S9.5 7 12 7c2.5 0 5-.5 4.5-1.5S13.5 4 12 7"/>',
     mano: '<path d="M8 13V6a1.5 1.5 0 0 1 3 0v5.5M11 11V4.5a1.5 1.5 0 0 1 3 0V11M14 11V6a1.5 1.5 0 0 1 3 0v6M17 10a1.5 1.5 0 0 1 3 0v5a6 6 0 0 1-6 6h-1.6a6 6 0 0 1-4.7-2.3l-3.2-4a1.5 1.5 0 0 1 2.3-1.9L8 14.5"/>',
     rig: '<path d="M3 16.5L16.5 3 21 7.5 7.5 21z"/><path d="M7 12.5l2 2M10 9.5l2.5 2.5M13 6.5l2 2"/>',
     dado: '<path d="M12 2.5l8.2 4.75v9.5L12 21.5l-8.2-4.75v-9.5z"/><path d="M12 7.5l4.3 7.5H7.7z"/>',
@@ -2011,7 +2016,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function disegnaBarra() { disegnaRail(); disegnaTop(); setActs(azioni()); }
   function disegnaRail() {
     const r = $('#tv-rail'); if (!r) return;
-    const RL = { 'tv-sel': 'Seleziona', 'tv-mano': 'Sposta', 'tv-righello': 'Righello', 'tv-tiradadi': 'Dadi', 'tv-turno': 'Turno', 'tv-schede': 'Schede', 'tv-dadi': 'Chat', 'tv-scaletta': 'Scaletta', 'tv-maschera': 'Maschera', 'tv-muri': 'Muri', 'tv-difficile': 'Terreno', 'tv-effetti': 'Effetti', 'tv-segni': 'Segnalini', 'tv-token': 'Token', 'tv-griglia': 'Griglia', 'tv-liv-seg': 'Tutti', 'tv-liv-mas': 'Solo io' };
+    const RL = { 'tv-sel': 'Seleziona', 'tv-mano': 'Sposta', 'tv-righello': 'Righello', 'tv-tiradadi': 'Dadi', 'tv-turno': 'Turno', 'tv-schede': 'Schede', 'tv-dadi': 'Chat', 'tv-scaletta': 'Scaletta', 'tv-bottino': 'Bottino', 'tv-ricevuti': 'Ricevuti', 'tv-maschera': 'Maschera', 'tv-muri': 'Muri', 'tv-difficile': 'Terreno', 'tv-effetti': 'Effetti', 'tv-segni': 'Segnalini', 'tv-token': 'Token', 'tv-griglia': 'Griglia', 'tv-liv-seg': 'Tutti', 'tv-liv-mas': 'Solo io' };
     const b = (act, tip, k, on) => `<button type="button" data-act="${act}" data-tip="${esc(tip)}" aria-label="${esc(tip)}" class="${on ? 'on' : ''}">${svg(k)}<span class="rl" aria-hidden="true">${RL[act] || ''}</span></button>`;
     const gio = !isDM(); $('.tv')?.classList.toggle('gio', gio);
     // i giocatori: quattro strumenti (e la chat, sul telefono). Il resto sta nel menu del token e nel ⋯ della tabella del turno
@@ -2019,6 +2024,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       const nl = T.nonLetti || 0, aperta = !$('#tv-dice')?.hidden;
       r.innerHTML = b('tv-sel', 'Seleziona e muovi il tuo token (S)', 'sel', T.tool === 'muovi').replace('Seleziona</span>', 'Muovi</span>') + b('tv-righello', 'Righello (R)', 'rig', T.tool === 'righello') + b('tv-tiradadi', 'Tiradadi', 'dado', !$('#tv-tdp')?.hidden)
         + b('tv-mia', 'La tua scheda', 'sch', aperta && !!T.stab).replace('</span>', 'Scheda</span>')
+        + (T.cons?.size ? b('tv-ricevuti', 'Oggetti e dispense ricevuti', 'bott', false).replace('</button>', T.nuoveC ? `<em class="nl">${T.nuoveC > 9 ? '9+' : T.nuoveC}</em></button>` : '</button>') : '')
         + b('tv-dadi', 'Chat', 'chat', aperta && !T.stab).replace('class="', 'class="tel ').replace('</button>', nl ? `<em class="nl">${nl > 9 ? '9+' : nl}</em></button>` : '</button>')
         + `<span class="sp"></span><span class="tv-on ${T.live ? 'ok' : ''}" id="tv-on" title="${T.live ? esc('Al tavolo ora: ' + T.online.join(', ')) : 'Connessione…'}"></span>`;
       return;
@@ -2027,7 +2033,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       + b('tv-righello', 'Righello (R)', 'rig', T.tool === 'righello') + b('tv-tiradadi', 'Tiradadi', 'dado', !$('#tv-tdp')?.hidden)
       + b('tv-turno', isDM() ? 'Modifica l\'ordine del turno' : 'Ordine del turno: barra o tabella classica', 'tur', isDM() ? !!T.turnoEd : turnoVert()) + b('tv-schede', 'Schede dei personaggi e dei PNG', 'sch', !$('#tv-sp')?.hidden)
       + b('tv-dadi', 'Chat e dadi', 'chat', !$('#tv-dice')?.hidden).replace('class="', 'class="tel '); // solo sul telefono, al posto della linguetta
-    const bSc = isDM() && window.__scaletta ? b('tv-scaletta', 'Scaletta della sessione: la vedi solo tu', 'scal', !!T.scal && !$('#tv-dice')?.hidden) : '';
+    const bSc = (isDM() && window.__scaletta ? b('tv-scaletta', 'Scaletta della sessione: la vedi solo tu', 'scal', !!T.scal && !$('#tv-dice')?.hidden) : '')
+      + (isDM() && window.__bottino ? b('tv-bottino', 'Bottino pronto: consegna oggetti e dispense', 'bott', false) : '');
     if (isDM() && !scena() && bSc) h += '<hr><span class="lbl">DM</span>' + bSc;
     if (isDM() && scena()) h += '<hr><span class="lbl">DM</span>' + bSc + b('tv-maschera', 'Maschera: nascondi e svela la mappa', 'mas', T.tool === 'maschera') + b('tv-muri', 'Muri, porte e nebbia automatica', 'muro', T.tool === 'muri') + b('tv-difficile', 'Terreno difficile: il movimento costa il doppio', 'dif', T.tool === 'difficile') + b('tv-effetti', 'Effetti sulla mappa: fuoco, gas, veleno…', 'efx', T.tool === 'effetti') + b('tv-segni', 'Segnalini: bauli, porte, trappole, punti d\'interesse', 'pin', T.tool === 'segni') + b('tv-token', 'Aggiungi un token', 'tok') + b('tv-griglia', 'Impostazioni della pagina', 'gri');
     h += '<span class="sp"></span>';
@@ -2050,6 +2057,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       'tv-dadi': () => { if (T.scal && !$('#tv-dice').hidden && matchMedia('(max-width:820px)').matches) return apriScaletta(false); apriChat($('#tv-dice').hidden, true); },
       'tv-mia': () => { if (!$('#tv-dice').hidden && T.stab) return apriChat(false); apriSchedaTab(true); disegnaRail(); },
       'tv-scaletta': () => apriScaletta(!(T.scal && !$('#tv-dice').hidden)), 'tv-chatab': () => { apriScaletta(false); apriSchedaTab(false); }, 'tv-schtab': () => apriSchedaTab(true),
+      'tv-bottino': () => dlgConsegna(), 'tv-ricevuti': () => dlgRicevuti(),
       'tv-porta': () => porta(T.vista), 'tv-esci': () => { location.hash = '#/'; },
       'tv-pagine': () => pannelloMappe($('#tv-pages').hidden), 'tv-nuova': () => dlgNuovaScena(),
       'tv-token': () => dlgToken(), 'tv-griglia': () => dlgGriglia(),
@@ -3237,6 +3245,116 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     o.onclick = chiudi; addEventListener('keydown', esc_); onCleanup(chiudi);
     // il ritratto a piena risoluzione, se la scheda è nel sito
     if (e?.portrait) dbGet('blobs', e.portrait.id).then(rec => { if (!rec?.blob || !o.isConnected) return; url = URL.createObjectURL(rec.blob); o.querySelector('img').src = url; }).catch(() => { });
+  }
+
+  /* ---------- bottino pronto: oggetti e dispense consegnati durante la partita (bottino.js, tavolo/tappa-20.sql) ---------- */
+  const B = () => window.__bottino;
+  const nomeDi = id => T.membri?.find(m => m.giocatore === id)?.nome || (T.info?.giocatori || []).find(g => g.id === id)?.name || id;
+  const nomiDi = a => (a || []).map(nomeDi).join(', ').replace(/, ([^,]*)$/, ' e $1');
+  const ICOT = { oggetto: '🗡', lettera: '✉', documento: '📜', mappa: '🗺' };
+  // la carta di una consegna, con le cariche rimaste se l'oggetto è nella mia scheda
+  function cartaConsegna(r) {
+    const c = { ...(r.contenuto || {}), tipo: r.tipo, nome: r.nome };
+    for (const s of T.schede?.values() || []) { const o = (s.dati.oggetti || []).find(x => x.id === r.id); if (o && (isDM() || s.giocatore === T.me.giocatore)) { c.usate = o.usate; break; } }
+    return c;
+  }
+  function apriConsegna(r, titolo) {
+    if (!B()) return;
+    const mia = !isDM() && (r.a || []).includes(T.me.giocatore);
+    const az = [['Tienila', null, true]];
+    if (mia && !r.pubblica) az.push(['📣 Mostrala al gruppo', async () => {
+      const q = await SB.rpc('tavolo_consegna_mostra', { p_id: r.id }); if (q.error) throw q.error;
+      toast('Ora la vedono tutti al tavolo.');
+    }]);
+    if (r.tipo === 'oggetto' && mia) az.push(['La tua scheda', () => { apriSchedaTab(true); disegnaRail(); }]);
+    B().mostra(cartaConsegna(r), { titolo: titolo || '', azioni: az });
+  }
+  async function arrivaConsegna(p) {
+    if (p.eventType === 'DELETE') { T.cons.delete(p.old.id); disegnaRail(); return; }
+    let r = p.new; const prima = T.cons.get(r.id);
+    // il tempo reale taglia i valori lunghi (un'immagine): la riprendo intera
+    if (!r.contenuto || !Array.isArray(r.a)) { const q = await SB.from('tavolo_consegne').select('*').eq('id', r.id).maybeSingle(); if (q.error || !q.data) return; r = q.data; }
+    T.cons.set(r.id, r);
+    if (isDM()) { if (r.mostrata_da && !prima?.mostrata_da) toast(`${nomeDi(r.mostrata_da)} mostra al gruppo: ${r.nome}`); return; }
+    const mia = (r.a || []).includes(T.me.giocatore);
+    let titolo = null;
+    if (!prima) titolo = mia ? (r.pubblica ? `🎁 Il DM ti consegna, davanti a tutti…` : r.tipo === 'oggetto' ? '🎁 Hai trovato qualcosa…' : '✉ Ti è arrivato qualcosa… lo vedi solo tu') : `🎁 ${nomiDi(r.a)} riceve qualcosa`;
+    else if (r.pubblica && !prima.pubblica && !mia) titolo = `📣 ${nomeDi(r.mostrata_da) || 'Un compagno'} vi mostra cosa ha trovato`;
+    if (!titolo) return;
+    T.nuoveC = (T.nuoveC || 0) + 1; disegnaRail();
+    apriConsegna(r, titolo);
+  }
+  function dlgRicevuti() {
+    B()?.css(); T.nuoveC = 0; disegnaRail();
+    const L = [...(T.cons?.values() || [])].sort((a, b) => b.creata.localeCompare(a.creata));
+    const d = openDlg(`<h3>Ricevuti</h3><p class="hint" style="margin-top:0">Gli oggetti e le dispense che il DM ti ha consegnato, e quelli che i compagni hanno mostrato al gruppo.</p>
+      <div class="tv-ric">${L.map(r => `<button type="button" data-id="${r.id}"><span aria-hidden="true">${ICOT[r.tipo] || '🎁'}</span><b>${esc(r.nome)}</b><small>${(r.a || []).includes(T.me.giocatore) ? (r.pubblica ? 'tua · la vedono tutti' : 'solo tua') : 'di ' + esc(nomiDi(r.a))} · ${esc(new Date(r.creata).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' }))}</small></button>`).join('') || '<p class="vuoto">Ancora niente.</p>'}</div>
+      <menu><button class="btn primary" data-x>Chiudi</button></menu>`, 'tv-ricd');
+    d.addEventListener('click', e => { if (e.target.closest('[data-x]')) return d.close(); const b = e.target.closest('[data-id]'); const r = b && T.cons.get(b.dataset.id); if (r) { d.close(); apriConsegna(r); } });
+  }
+  // il DM: quale voce, a chi, come
+  function dlgConsegna() {
+    if (!B()) return; B().css();
+    if (!T.cons) return showInfo('Consegne non ancora attive', '<p>Per consegnare oggetti e dispense al tavolo serve un ultimo passo nel database: apri Supabase › <b>SQL Editor</b> › New query, incolla il file <code>tavolo/tappa-20.sql</code> e premi <b>Run</b>. Poi ricarica la pagina.</p>');
+    const G = (T.info?.giocatori || []).map(g => { const e = S.ents.get(g.pg); return { id: g.id, nome: g.name, pg: e?.name || g.name, img: e?.portrait?.thumb || '' }; });
+    const st = { sel: B().tutte().find(v => !v.consegne?.length)?.id || B().tutte()[0]?.id || null, a: new Set(), modo: 'nascosto' };
+    const v0 = st.sel && B().una(st.sel); if (v0?.per) { const g = (T.info?.giocatori || []).find(x => x.pg === v0.per); if (g) st.a.add(g.id); }
+    const d = openDlg(`<div class="tvc-h"><h3>🎁 Consegna</h3><button type="button" class="btn sm ghost" data-x aria-label="Chiudi">✕</button></div><div class="tvc"><div class="sx" data-sx></div><div class="dx" data-dx></div></div>`, 'tv-cons');
+    const disegna = () => {
+      const L = B().tutte(), v = st.sel && B().una(st.sel), tutti = st.a.size === G.length && G.length > 0;
+      const voce = x => { const [c, t] = B().stato(x); return `<button type="button" class="vc${x.id === st.sel ? ' on' : ''}${c ? ' fatto' : ''}" data-v="${esc(x.id)}"><span aria-hidden="true">${ICOT[x.tipo] || '🎁'}</span><span class="n"><b>${esc(x.nome)}</b><small>${esc(t)}</small></span></button>`; };
+      $('[data-sx]', d).innerHTML = `<h6>Quale</h6><div class="lst">${L.map(voce).join('') || '<p class="vuoto">Il bottino è vuoto: preparalo prima, anche dalle idee di Claude.</p>'}</div><button type="button" class="btn sm ghost" data-nuova>+ Prepara al volo…</button>
+        <h6>A chi</h6><div class="chi">${G.map(g => `<button type="button" class="${st.a.has(g.id) ? 'on' : ''}" data-g="${esc(g.id)}" aria-pressed="${st.a.has(g.id)}">${g.img ? `<img alt="" src="${esc(g.img)}">` : `<i>${esc(g.pg[0] || '?')}</i>`}<span>${esc(g.nome)}</span></button>`).join('')}<button type="button" class="${tutti ? 'on' : ''}" data-tutti aria-pressed="${tutti}"><i>✦</i><span>Tutti</span></button></div>
+        <h6>Come</h6><div class="modo"><button type="button" class="${st.modo === 'nascosto' ? 'on' : ''}" data-m="nascosto"><b>Di nascosto</b><small>Si apre solo sul suo schermo: deciderà lui se mostrarlo</small></button><button type="button" class="${st.modo === 'tutti' ? 'on' : ''}" data-m="tutti"><b>Davanti a tutti</b><small>La carta si apre a tutto il tavolo</small></button></div>
+        <button type="button" class="btn primary" data-ok${v && st.a.size ? '' : ' disabled'}>${v && st.a.size ? `Consegna a ${esc(tutti ? 'tutti' : nomiDi([...st.a]))}` : 'Scegli cosa e a chi'}</button>`;
+      $('[data-dx]', d).innerHTML = v ? `${B().carta(B().perGiocatore(v))}${v.verita ? `<details class="ver"><summary>La verità · solo tu</summary><div class="prose">${md(v.verita)}</div></details>` : ''}<div class="pie"><button type="button" class="btn sm ghost" data-mod>Modifica</button>${v.tipo === 'oggetto' ? '<small>Va nella scheda di chi lo riceve, con le cariche. La sua scheda nel sito diventa visibile a lui dopo «Salva».</small>' : '<small>Resta nei «Ricevuti» di chi la riceve.</small>'}</div>` : '';
+    };
+    d.addEventListener('click', async e => {
+      const t = e.target.closest('button'); if (!t) return;
+      if (t.dataset.x !== undefined) return d.close();
+      if (t.dataset.v) { st.sel = t.dataset.v; const v = B().una(st.sel); if (v?.per && !st.a.size) { const g = (T.info?.giocatori || []).find(x => x.pg === v.per); if (g) st.a.add(g.id); } return disegna(); }
+      if (t.dataset.g) { st.a.has(t.dataset.g) ? st.a.delete(t.dataset.g) : st.a.add(t.dataset.g); return disegna(); }
+      if (t.dataset.tutti !== undefined) { if (st.a.size === G.length) st.a.clear(); else G.forEach(g => st.a.add(g.id)); return disegna(); }
+      if (t.dataset.m) { st.modo = t.dataset.m; return disegna(); }
+      if (t.dataset.nuova !== undefined) { const v = await B().editor(null); if (v) st.sel = v.id; return disegna(); }
+      if (t.dataset.mod !== undefined) { const v = B().una(st.sel); if (v) { const r = await B().editor(v); if (r === 'via') st.sel = null; } return disegna(); }
+      if (t.dataset.ok !== undefined) {
+        const v = B().una(st.sel); if (!v || !st.a.size) return;
+        t.disabled = true; t.textContent = 'Consegno…';
+        try { await consegna(v, [...st.a], st.a.size === G.length, st.modo === 'tutti'); d.close(); }
+        catch (err) { toast(err.message || String(err), 'err'); disegna(); }
+      }
+    });
+    disegna();
+  }
+  async function consegna(v, a, tutti, pubblica) {
+    const r = await SB.from('tavolo_consegne').insert({ bottino: v.id, tipo: v.tipo, nome: v.nome.slice(0, 120), contenuto: B().perGiocatore(v), a, pubblica }).select().single();
+    if (r.error) throw r.error;
+    T.cons.set(r.data.id, r.data);
+    const senza = [];
+    if (v.tipo === 'oggetto') for (const g of a) {
+      const s = [...(T.schede?.values() || [])].find(x => x.tipo === 'pg' && x.giocatore === g);
+      if (!s) { senza.push(nomeDi(g)); continue; }
+      await salvaScheda(s.id, { oggetti: [...(s.dati.oggetti || []), { id: r.data.id, nome: v.nome, sotto: v.sotto || '', cariche: +v.cariche || 0, usate: 0, ricarica: v.ricarica || '' }] }, true);
+    }
+    if (pubblica) await SB.rpc('tavolo_scrivi', { p_testo: `🎁 ${tutti ? 'Il gruppo' : nomiDi(a)} riceve: ${v.nome}` });
+    await B().consegnato(v.id, tutti ? null : a, pubblica);
+    toast(`Consegnato a ${tutti ? 'tutti' : nomiDi(a)}.${senza.length ? ` ${senza.join(', ')} non ha ancora la scheda al tavolo: l'oggetto resta nei Ricevuti.` : ''}${v.tipo === 'oggetto' ? ' La scheda dell\'oggetto va online con «Salva».' : ''}`);
+  }
+  // gli oggetti ricevuti nella scheda del PG, con le cariche
+  function boxOggetti(s, w, dis) {
+    const L = s.dati.oggetti || []; if (!L.length) return '';
+    return `<div class="sez ris ogg"><div class="rl">${L.map((o, i) => {
+      const max = num(o.cariche) || 0, r = Math.max(0, max - (num(o.usate) || 0));
+      return `<div class="rs"><button type="button" class="rn" data-k="ogg-apri" data-i="${i}" title="${esc(o.sotto || 'Apri la carta')}">🎁 ${esc(o.nome)}</button>${max ? `<span class="rv" title="${esc(o.ricarica || '')}"><b>${r}</b>/${max}</span>${w ? `<button type="button" class="mini" data-k="ogg-usa" data-i="${i}" title="Usa una carica"${r ? '' : ' disabled'}>−</button><button type="button" class="mini" data-k="ogg-rec" data-i="${i}" title="Recupera una carica${o.ricarica ? ' (' + esc(o.ricarica) + ')' : ''}"${r < max ? '' : ' disabled'}>+</button>` : ''}` : ''}${w ? `<button type="button" class="mini" data-k="ogg-via" data-i="${i}" title="Togli dalla scheda"${dis}>✕</button>` : ''}</div>`;
+    }).join('')}</div><h6>Oggetti ricevuti</h6></div>`;
+  }
+  async function oggettoScheda(s, k, i) {
+    const L = [...(s.dati.oggetti || [])], o = L[i]; if (!o) return;
+    if (k === 'ogg-apri') { const r = T.cons?.get(o.id); return r ? apriConsegna(r) : B()?.mostra({ tipo: 'oggetto', nome: o.nome, sotto: o.sotto, cariche: o.cariche, usate: o.usate, ricarica: o.ricarica }); }
+    if (k === 'ogg-via') { if (!await ask(`Togliere **${o.nome}** dalla scheda di ${s.nome}?`, { danger: true, ok: 'Togli' })) return; L.splice(i, 1); }
+    else { const max = num(o.cariche) || 0, u = num(o.usate) || 0; L[i] = { ...o, usate: clamp(u + (k === 'ogg-usa' ? 1 : -1), 0, max) }; }
+    await salvaScheda(s.id, { oggetti: L }, true); disegnaScheda();
   }
 
   /* ---------- aggiungi token (DM) ---------- */
@@ -6719,7 +6837,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
           <div class="sez atts"><div class="th"><span>Nome</span><span>Bonus</span><span>Danni</span></div><div data-ord="attacchi">${at || '<p class="vuoto">Nessun attacco.</p>'}</div>
             ${w ? '<button type="button" class="mini agg" data-k="addatt">+ Aggiungi un attacco</button>' : ''}${pg ? '' : area('azioni', 'Multiattacco, reazioni, azioni speciali…', 3)}<h6>Attacchi e incantesimi</h6></div>
           ${boxUsabili(s, w, dis)}${boxExtra(s, w, dis)}${boxLegg(s, w, dis)}
-          ${pg ? `<div class="sez eq"><div class="mon"><label title="Monete d'oro"><span>MO</span>${n('mo', '0')}</label></div>${area('equip', 'Armi, armatura, oggetti…', 7)}<h6>Equipaggiamento</h6></div>${boxPozioni(s, w, dis)}` : ''}
+          ${pg ? `<div class="sez eq"><div class="mon"><label title="Monete d'oro"><span>MO</span>${n('mo', '0')}</label></div>${area('equip', 'Armi, armatura, oggetti…', 7)}<h6>Equipaggiamento</h6></div>${boxOggetti(s, w, dis)}${boxPozioni(s, w, dis)}` : ''}
         </div>
         <div class="colC">
           ${boxPrivilegi(s, w, dis)}
@@ -6946,6 +7064,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       await salvaScheda(s.id, png ? { privilegi: L, tratti: '' } : { privilegi: L, tratti: '', azioni: '', attacchi: (d.attacchi || []).filter(a => !NON_ATTACCO.test(a.nome || '')) }, true); toast(`Fatto: ${L.length - P.length} voci. Aprile per leggerle, ⚙ per cambiarle, ⠿ per spostarle.`); return disegnaScheda();
     }
     if (k === 'bevi') return bevi(s, b.dataset.p);
+    if (String(k || '').startsWith('ogg-')) return oggettoScheda(s, k, +b.dataset.i);
     const tkz = tokScheda() || attaccante(s);
     if (k === 'tz' && tkz) { const z = b.dataset.z; return segnaAzioni(tkz, { [z]: !azioniDi(tkz)[z] }); }
     if (k === 'tz-azm' && tkz) return menuAzioni(tkz, b);
