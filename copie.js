@@ -75,7 +75,7 @@
       maps: mappe,
       pins,
       regions: filtra(S.regions, r => has(mappe, r.mapId) && !has(nascoste, r.entityId ?? null)),
-      meta: mappa(filtra(S.meta, (v, k) => !['generalHist', 'giocatori', 'segnalazioni'].includes(k) && !k.startsWith('scaletta:')), (v, k) => k === 'general' ? g : v),
+      meta: mappa(filtra(S.meta, (v, k) => !['generalHist', 'giocatori', 'segnalazioni', 'bozza'].includes(k) && !k.startsWith('scaletta:')), (v, k) => k === 'general' ? g : v),
       blobs
     };
     const out = { dataVersion: d.dataVersion, stores: Object.fromEntries(ORDINE.map(k => [k, stores[k]])), blobmap: Object.fromEntries(Object.values(blobs).map(b => [b.aid, d.blobmap[b.aid]])) };

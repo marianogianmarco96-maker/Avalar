@@ -676,7 +676,7 @@
   let OB = null, PREP = null, PREPV = 0, JUST = false;
   function outbox() {
     if (ROLE !== 'admin' || !document.body) return;
-    if (!anyPending()) { if (OB) OB.remove(); OB = null; return; }
+    if (!anyPending() && !bozza()) { if (OB) OB.remove(); OB = null; return; }
     if (!OB) { const st = document.createElement('style'); st.textContent = OB_CSS; document.head.append(st); OB = document.createElement('div'); OB.id = 'outbox'; OB.setAttribute('role', 'status'); document.body.append(OB); }
     PREP = null; const v = ++PREPV; drawOutbox();
     if (salvaQui()) return; // le modifiche si salvano su Supabase: la richiesta per Claude serve solo per note ed errori
@@ -689,11 +689,19 @@
     const msg = document.createElement('div'); msg.className = 'om'; OB.append(msg);
     const mk = (t, f, p) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = t; if (p) b.className = 'p'; b.onclick = () => f(b); OB.append(b); return b; };
     if (SAVING) { msg.innerHTML = '<b>Salvataggio in corso:</b> ' + esc(SAVING); return; }
+    const bz = bozza();
+    if (bz) {
+      const n = bz.ops.length;
+      msg.innerHTML = '<b>Claude ha preparato:</b> ' + esc(bz.titoli.join(' + ')) + ' (' + n + (n === 1 ? ' modifica' : ' modifiche') + '). I giocatori non vedono niente finché non le controlli e premi «Salva».'
+        + (PEND.size ? ' Hai anche altre modifiche da salvare.' : '');
+      mk('Controlla', b => applicaBozza(b), true);
+      mk('Scarta la bozza', b => { if (confirm('Scartare tutte le modifiche preparate da Claude? Non andranno online.')) scartaBozza(b); }); return;
+    }
     if (salvaQui()) {
       const altro = NOTES.length + BUGS.length ? ' Dopo potrai inviare a Claude anche le note e gli errori.' : '';
       msg.innerHTML = '<b>Da salvare:</b> ' + summary(true) + '. Finché non premi «Salva» le vedi solo tu.' + altro;
       mk('Salva', () => salvaSito(), true);
-      mk('Rivedi elenco', () => reviewList());
+      mk('Controlla', () => reviewList());
       mk('Scarta', b => { if (confirm('Scartare le modifiche non salvate? Il sito torna ai dati pubblicati.')) resetToServer(b); }); return;
     }
     if (SENT) {
@@ -741,9 +749,13 @@ html.review #view :is(p,li,h1,h2,h3,h4,h5,dd,dt,td,th,figcaption,blockquote):hov
 .revbox .rb{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .revbox .rc{display:block;width:100%;text-align:left;margin-top:6px}
 .rvl{margin-top:10px;overflow:auto;max-height:62vh}.rvl .it{border-top:1px solid #dccaa0;padding:10px 0}.rvl .it:first-child{border-top:0}
-.rvl .ih{display:flex;gap:8px;align-items:baseline}.rvl .ih b{flex:1;color:#561820}
+.rvl .ih{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline}.rvl .ih b{flex:1 1 220px;color:#561820}
 .rvl .df{white-space:pre-wrap;font-size:.95rem;margin:4px 0 0;color:#3b2a1e}.rvl .df i{color:#8a7560;font-style:normal;font-size:.85rem;display:block}
-.rvl del{background:#f4c7c3;color:#7d1f1a}.rvl ins{background:#cfe8c9;color:#1f5a26;text-decoration:none}`;
+.rvl del{background:#f4c7c3;color:#7d1f1a}.rvl ins{background:#cfe8c9;color:#1f5a26;text-decoration:none}
+.rvl .ih .btn{text-decoration:none}.rvl .it.warn{background:#fbe3dc;margin:0 -10px;padding:10px;border-radius:6px}
+.rvl .vis{display:inline-block;margin-left:6px;padding:0 7px;border-radius:9px;font-size:.78rem;background:#efe2c2;color:#5a4636}.rvl .vis.dm{background:#e4dcef;color:#4a3570}.rvl .vis.all{background:#dcebd6;color:#2c5a23}
+.rvl .dmt{background:#e4dcef;color:#4a3570;border-radius:3px;padding:0 2px}.rvl .dmt:before{content:'🔒 '}
+.avv{display:block;color:#a3262f;font-size:.88rem;margin:2px 0}.rvsum .avv{display:inline}`;
   const segCss = () => { if (!document.getElementById('segcss')) { const st = document.createElement('style'); st.id = 'segcss'; st.textContent = SEG_CSS; document.head.append(st); } };
   function dlg(id, html) {
     segCss(); let d = document.getElementById(id); if (d) d.remove();
@@ -967,7 +979,7 @@ html.review #view :is(p,li,h1,h2,h3,h4,h5,dd,dt,td,th,figcaption,blockquote):hov
     if (c === 'sessions' || c === 'sbodies') { const s = MEM.sessions && [...MEM.sessions.values()].find(x => x.n === v.n); return 'Sessione ' + v.n + (s && s.title ? ' · ' + s.title : ''); }
     if (c === 'events') return 'Evento · ' + (v.title || ''); if (c === 'maps') return 'Mappa · ' + (v.name || '');
     if (c === 'pins') return 'Segnalino · ' + (v.label || v.name || ''); if (c === 'regions') return 'Regione · ' + (v.name || v.label || '');
-    if (c === 'links') return 'Collegamento'; if (c === 'blobs') return 'Immagine'; if (c === 'meta') return 'Impostazioni';
+    if (c === 'links') return 'Collegamento'; if (c === 'blobs') return 'Immagine'; if (c === 'meta') return ({ general: 'Riassunto generale', arcs: 'Archi narrativi', bozza: 'Bozza di Claude' })[v.k] || 'Impostazioni';
     return c;
   }
   function pathLabel(v, path) {
@@ -1057,43 +1069,134 @@ html.review #view :is(p,li,h1,h2,h3,h4,h5,dd,dt,td,th,figcaption,blockquote):hov
     flushCh(); flushEq(); return h + ctx(A.slice(A.length - s), false);
   }
   const KEYF = { meta: 'k', entities: 'id', bodies: 'id', sessions: 'n', sbodies: 'n', events: 'id', maps: 'id', blobs: 'id', pins: 'id', links: 'k', regions: 'id' };
+  /* ---------- bozza di Claude e controllo prima di salvare (amministratore) ----------
+     Claude non pubblica più i riassunti direttamente: li mette in una bozza (meta «bozza», strumenti/bozza.py) che le
+     copie dei giocatori non contengono. «Controlla» la porta in questo browser come modifiche da salvare e apre l'elenco:
+     per ogni testo nuovo o cambiato dice chi lo vedrà e avvisa se una nota per il DM finirebbe sotto gli occhi dei
+     giocatori. Online va solo con «Salva». */
+  const bozza = () => { const b = MEM.meta && MEM.meta.get('bozza'); return b && b.v && b.v.ops && b.v.ops.length ? b.v : null; };
+  async function applicaBozza(btn) {
+    const bz = bozza(); if (!bz) return reviewList();
+    if (btn) btn.disabled = true;
+    try {
+      const st = [...new Set(['meta', ...bz.ops.map(o => o.c)])];
+      await window.__cronache.runBatch(st, 'Bozza di Claude', async b => {
+        for (const o of bz.ops) { if (o.del) await b.del(o.c, o.c === 'sessions' || o.c === 'sbodies' ? +o.id : o.id); else await b.put(o.c, o.v); }
+        await b.del('meta', 'bozza');
+      });
+      await window.__cronache.rerender();
+    } catch (x) { if (btn) btn.disabled = false; notice('Non sono riuscito ad aprire la bozza: ' + (x && x.message || 'riprova.')); return; }
+    reviewList();
+  }
+  async function scartaBozza(btn) {
+    if (btn) btn.disabled = true;
+    try { await window.__cronache.runBatch(['meta'], 'Scarta bozza', b => b.del('meta', 'bozza')); await window.__cronache.rerender(); notice('Bozza scartata: premi «Salva» per toglierla anche dai dati online.'); }
+    catch (x) { if (btn) btn.disabled = false; notice('Non sono riuscito a scartarla: riprova.'); }
+  }
+  // le stesse parole che fanno scattare l'avviso in strumenti/bozza.py
+  const NOTA_PER_DM = /\bnot[ae]\s+(?:per\s+(?:il\s+)?)?(?:dm|master)\b|\bsolo\s+(?:per\s+)?(?:il\s+)?dm\b|\bper\s+il\s+dm\b|\(\s*dm\s*\)|\bi\s+giocatori\s+non\s+(?:lo\s+|la\s+|li\s+|le\s+)?(?:sanno|conoscono)\b|\bsegret[oi]\s+(?:del|per\s+il)\s+dm\b/i;
+  const senzaDM = t => String(t).replace(/\[DM\][\s\S]*?(?:\[\/DM\]|$)/g, ' ');
+  // «Rendi solo DM»: ogni riga con la nota diventa [DM]…[/DM] dal punto in cui la nota comincia (il resto della riga resta com'è)
+  const soloDM = t => t.split('\n').map(l => { if (/\[\/?DM\]/.test(l)) return l; const m = NOTA_PER_DM.exec(l); if (!m) return l; const i = l.slice(0, m.index).search(/[(*_]*$/); return l.slice(0, i) + '[DM]' + l.slice(i) + '[/DM]'; }).join('\n');
+  // chi vedrà un testo: si rifanno le copie dei giocatori (copie.js) e si cerca il testo in ognuna
+  function copieGiocatori() {
+    if (!window.__copie) return null;
+    const d = { dataVersion: 0, blobmap: BLOBMAP, stores: {} };
+    for (const c of window.__copie.ORDINE) d.stores[c] = Object.fromEntries(MEM[c] || new Map());
+    if (!d.stores.meta.general) d.stores.meta.general = { k: 'general', v: { text: '' } };
+    try { return window.__copie.giocatori(d).map(g => ({ name: g.name, s: window.__copie.copia(d, g.id).stores })); } catch { return null; }
+  }
+  // i pezzi riconoscibili di un testo, senza le parti [DM] e i collegamenti (che nelle copie possono cambiare forma)
+  const pezzi = t => String(t).replace(/\[DM\][\s\S]*?(?:\[\/DM\]|$)/g, '\n').split(/\[\/?PER[^\]]*\]|\[\[[^\]]*\]\]|\n/).map(x => x.replace(/[*_#>`]/g, '').trim()).filter(x => x.length >= 12).map(x => x.slice(0, 50));
+  function chiVede(P, c, id, t) {
+    const pz = pezzi(t); if (!P || !pz.length) return null;
+    const out = [];
+    for (const p of P) {
+      const doc = p.s[c] && p.s[c][id]; if (!doc) continue;
+      const j = JSON.stringify(doc), n = pz.filter(x => j.includes(JSON.stringify(x).slice(1, -1))).length;
+      if (n) out.push({ name: p.name, parte: n < pz.length });
+    }
+    return { out, tutti: out.length === P.length && !out.some(x => x.parte) };
+  }
+  // nei testi nuovi le parti [DM]…[/DM] si vedono, ma segnate come nascoste ai giocatori
+  const conDM = t => esc(t).replace(/\[DM\]([\s\S]*?)(?:\[\/DM\]|$)/g, '<span class="dmt" title="Solo DM">$1</span>');
+  const visHtml = v => !v ? '' : !v.out.length ? '<span class="vis dm">🔒 Solo tu</span>' : v.tutti ? '<span class="vis all">👁 Tutti i giocatori</span>'
+    : '<span class="vis some">👁 ' + esc(v.out.map(x => x.name + (x.parte ? ' (in parte)' : '')).join(', ')) + '</span>';
+  const apriHref = (c, v) => c === 'entities' || c === 'bodies' ? '#/scheda/' + encodeURIComponent(v.id) : c === 'sessions' || c === 'sbodies' ? '#/sessioni/' + v.n : c === 'events' ? '#/sessioni/' + v.n : '';
   async function reviewList() {
-    const d = dlg('revlist', `<h3 style="${H3}">${salvaQui() ? 'Da salvare' : 'Da inviare a Claude'}</h3><div class="rvl">Carico…</div><div style="display:flex;margin-top:12px"><button type="button" class="btn ghost" style="margin-left:auto" data-a="close">Chiudi</button></div>`);
-    const body = d.querySelector('.rvl'); let base = {};
-    if (PEND.size) { try { base = (await serverData()).stores; } catch { body.textContent = 'Non riesco a leggere i dati pubblicati per il confronto: controlla la connessione e riprova.'; return; } }
+    const d = dlg('revlist', `<h3 style="${H3}">Da controllare</h3><p class="sd rvsum" style="margin:0">Carico…</p><div class="rvl"></div><div style="display:flex;gap:8px;margin-top:12px">${salvaQui() ? '<button type="button" class="btn primary" data-a="save">Salva: va online</button>' : ''}<button type="button" class="btn ghost" style="margin-left:auto" data-a="close">Chiudi</button></div>`);
+    const body = d.querySelector('.rvl'), sum = d.querySelector('.rvsum'); let base = {};
+    const sv = d.querySelector('[data-a=save]'); if (sv) sv.onclick = () => { d.close(); salvaSito(); };
+    if (PEND.size) { try { base = (await serverData()).stores; } catch { sum.textContent = 'Non riesco a leggere i dati pubblicati per il confronto: controlla la connessione e riprova.'; return; } }
     const draw = () => {
       body.innerHTML = '';
-      const item = (title, html, undo) => {
-        const w = document.createElement('div'); w.className = 'it';
-        w.innerHTML = `<div class="ih"><b>${esc(title)}</b></div>${html}`;
-        if (undo) { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn sm'; b.textContent = undo[0]; b.onclick = async () => { b.disabled = true; try { await undo[1](); } catch { b.disabled = false; notice('Non sono riuscito ad annullare: riprova.'); return; } draw(); }; w.querySelector('.ih').append(b); }
-        body.append(w);
+      const P = copieGiocatori(); let nAvvisi = 0, nVoci = 0;
+      const item = (title, html, acts, warn, href) => {
+        const w = document.createElement('div'); w.className = 'it' + (warn ? ' warn' : '');
+        w.innerHTML = `<div class="ih"><b>${esc(title)}</b>${href ? `<a class="btn sm" href="${href}">Apri</a>` : ''}</div>${html}`;
+        for (const [label, fn] of acts || []) { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn sm'; b.textContent = label; b.onclick = async () => { b.disabled = true; try { await fn(); } catch { b.disabled = false; notice('Non ci sono riuscito: riprova.'); return; } draw(); }; w.querySelector('.ih').append(b); }
+        if (href) w.querySelector('.ih a').onclick = () => d.close();
+        warn ? body.prepend(w) : body.append(w);
       };
+      // scheda e testo della scheda (o sessione e riassunto) in un'unica voce
+      const gruppi = new Map();
       for (const k of PEND) {
         const j = k.indexOf('/'), c = k.slice(0, j), id = k.slice(j + 1), cur = MEM[c] && MEM[c].get(id), old = base[c] && base[c][id];
-        let html = '';
-        if (cur === undefined && old === undefined) continue;
-        if (cur === undefined) html = '<div class="df"><i>Eliminato</i></div>';
-        else if (old === undefined) html = '<div class="df"><i>Nuovo</i></div>';
-        else {
-          const so = new Map(), sn = new Map(); strings(old, [], (p, s) => so.set(JSON.stringify(p), s)); strings(cur, [], (p, s) => sn.set(JSON.stringify(p), s));
-          for (const [p, s] of sn) { const o = so.get(p) || ''; if (o !== s) html += `<div class="df"><i>${esc(pathLabel(cur, JSON.parse(p)) || 'testo')}</i>${wdiff(o, s)}</div>`; }
-          for (const [p, s] of so) if (!sn.has(p)) html += `<div class="df"><i>${esc(pathLabel(old, JSON.parse(p)) || 'testo')}</i><del>${esc(s)}</del></div>`;
-          const strip = v => { const x = clone(v); strings(x, [], p => { const o = getAt(x, p.slice(0, -1)); if (o) o[p[p.length - 1]] = ''; }); return JSON.stringify(x); };
-          if (strip(cur) !== strip(old)) html += '<div class="df"><i>Altre modifiche (immagini, collegamenti o impostazioni)</i></div>';
-          if (!html) html = '<div class="df"><i>Nessuna differenza visibile</i></div>';
+        if ((cur === undefined && old === undefined) || k === 'meta/bozza') continue;
+        const g = c === 'entities' || c === 'bodies' ? 'e:' + id : c === 'sessions' || c === 'sbodies' ? 's:' + id : k;
+        if (!gruppi.has(g)) gruppi.set(g, []);
+        gruppi.get(g).push({ k, c, id, cur, old });
+        gruppi.get(g).sort((x, y) => ['entities', 'sessions'].includes(y.c) - ['entities', 'sessions'].includes(x.c));
+      }
+      for (const parti of gruppi.values()) {
+        let html = '', warn = false; const fix = new Map();
+        for (const { c, id, cur, old } of parti) {
+          // un testo nuovo o cambiato: chi lo vedrà, e l'avviso se sembra una nota per il DM ma la vede qualcuno
+          const riga = (p, label, inner, s) => {
+            const v = chiVede(P, c, id, s), sosp = NOTA_PER_DM.test(senzaDM(s)) && v && v.out.length;
+            if (sosp) { warn = true; nAvvisi++; if (!fix.has(c)) fix.set(c, []); fix.get(c).push(p); }
+            return `<div class="df"><i>${esc(label || 'testo')} ${visHtml(v)}</i>${sosp ? '<span class="avv">Sembra una nota per il DM, ma la vedrebbero i giocatori.</span>' : ''}${inner}</div>`;
+          };
+          if (cur === undefined) html += '<div class="df"><i>Eliminato</i></div>';
+          else if (old === undefined) {
+            if (!html) html = '<div class="df"><i>Nuovo</i></div>';
+            strings(cur, [], (p, s) => { html += riga(p, pathLabel(cur, p), conDM(s.length > 600 ? s.slice(0, 600) + '…' : s), s); });
+          } else {
+            const so = new Map(), sn = new Map(); strings(old, [], (p, s) => so.set(JSON.stringify(p), s)); strings(cur, [], (p, s) => sn.set(JSON.stringify(p), s));
+            for (const [p, s] of sn) { const o = so.get(p) || ''; if (o !== s) html += riga(JSON.parse(p), pathLabel(cur, JSON.parse(p)), wdiff(o, s), s); }
+            for (const [p, s] of so) if (!sn.has(p)) html += `<div class="df"><i>${esc(pathLabel(old, JSON.parse(p)) || 'testo')}</i><del>${esc(s)}</del></div>`;
+            const strip = v => { const x = clone(v); strings(x, [], p => { const o = getAt(x, p.slice(0, -1)); if (o) o[p[p.length - 1]] = ''; }); return JSON.stringify(x); };
+            if (strip(cur) !== strip(old)) html += '<div class="df"><i>Altre modifiche (immagini, collegamenti, visibilità o impostazioni)</i></div>';
+          }
         }
-        item(recLabel(c, cur || old), html, c === 'blobs' ? null : ['Annulla', async () => {
-          await window.__cronache.runBatch([c], 'Annulla', b => old === undefined ? b.del(c, cur[KEYF[c]]) : b.put(c, clone(old)));
-          PEND.delete(k); saveState(); await window.__cronache.rerender();
+        if (!html) html = '<div class="df"><i>Nessuna differenza visibile</i></div>';
+        nVoci++;
+        const acts = [];
+        if (fix.size) acts.push(['🔒 Rendi solo DM', async () => {
+          await window.__cronache.runBatch([...fix.keys()], 'Solo DM', async b => {
+            for (const [c, ps] of fix) {
+              const x = parti.find(q => q.c === c), rec = clone(x.cur);
+              for (const p of ps) { const o = getAt(rec, p.slice(0, -1)), f = p[p.length - 1]; if (o && typeof o[f] === 'string') o[f] = soloDM(o[f]); }
+              await b.put(c, rec);
+            }
+          });
+          await window.__cronache.rerender();
         }]);
+        if (!parti.some(q => q.c === 'blobs')) acts.push(['Annulla', async () => {
+          await window.__cronache.runBatch([...new Set(parti.map(q => q.c))], 'Annulla', async b => { for (const { c, cur, old } of parti) await (old === undefined ? b.del(c, cur[KEYF[c]]) : b.put(c, clone(old))); });
+          for (const q of parti) PEND.delete(q.k); saveState(); await window.__cronache.rerender();
+        }]);
+        const x = parti[0];
+        item(recLabel(x.c, x.cur || x.old), html, acts, warn, x.cur ? apriHref(x.c, x.cur) : '');
       }
       if (PFILES.size) item(PFILES.size + (PFILES.size === 1 ? ' immagine nuova' : ' immagini nuove'), '');
-      NOTES.forEach((n, i) => item('Nota · ' + n.where, `<div class="df"><i>Sul testo: «${esc(n.quote.slice(0, 160))}${n.quote.length > 160 ? '…' : ''}»</i>${esc(n.note)}</div>`, ['Togli', async () => { NOTES.splice(i, 1); saveState(); }]));
-      BUGS.forEach((g, i) => item('Errore · ' + (g.page || g.hash), `<div class="df">${esc(g.text)}${g.photos.length ? '<i>' + g.photos.length + (g.photos.length === 1 ? ' foto' : ' foto') + '</i>' : ''}</div>`, ['Togli', async () => {
+      NOTES.forEach((n, i) => item('Nota · ' + n.where, `<div class="df"><i>Sul testo: «${esc(n.quote.slice(0, 160))}${n.quote.length > 160 ? '…' : ''}»</i>${esc(n.note)}</div>`, [['Togli', async () => { NOTES.splice(i, 1); saveState(); }]]));
+      BUGS.forEach((g, i) => item('Errore · ' + (g.page || g.hash), `<div class="df">${esc(g.text)}${g.photos.length ? '<i>' + g.photos.length + (g.photos.length === 1 ? ' foto' : ' foto') + '</i>' : ''}</div>`, [['Togli', async () => {
         const t = DB.transaction('files', 'readwrite'); for (const aid of g.photos) t.objectStore('files').delete(aid); await done(t); BUGS.splice(i, 1); saveState();
-      }]));
-      if (!body.children.length) body.innerHTML = '<p class="sd">Non c\'è più nulla da inviare.</p>';
+      }]]));
+      sum.innerHTML = !body.children.length ? 'Non c\'è più nulla da controllare.'
+        : (nVoci ? nVoci + (nVoci === 1 ? ' modifica' : ' modifiche') + ', visibili solo a te finché non premi «Salva». Accanto a ogni testo vedi chi lo vedrà dopo il salvataggio.' : '')
+        + (nAvvisi ? ` <b class="avv">${nAvvisi === 1 ? '1 testo sembra' : nAvvisi + ' testi sembrano'} per il solo DM ma lo vedrebbero i giocatori: sono in cima.</b>` : '');
     };
     draw();
   }
