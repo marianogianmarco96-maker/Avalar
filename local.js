@@ -60,12 +60,21 @@
   const SB_KEY = 'sb_publishable_cAGuilUZdnxhtDeJ-qwuEQ_ihjCyFj0'; // la stessa chiave pubblica del tavolo
   const SB_FILES = SB_URL + '/storage/v1/object/public/sito/';
   // le immagini caricate dal sito stanno su Supabase (blobs/sb-….jpg, priv/sb-….bin), le altre su GitHub
-  const fileUrl = p => /^(blobs|priv)\/sb-/.test(p) ? SB_FILES + p : p;
+  // con «solo» in versione.json (emergenza, strumenti/ripristina_backup.py) anche le immagini caricate dal sito arrivano da GitHub
+  const fileUrl = p => /^(blobs|priv)\/sb-/.test(p) && !(FONTE && FONTE.solo) ? SB_FILES + p : p;
+  // un'immagine caricata dal sito che Supabase non dà più: prova la copia rimessa su GitHub da strumenti/ripristina_backup.py
+  const prendi = async p => {
+    const u = fileUrl(p); if (u === p) return fetch(p);
+    try { const r = await fetch(u); if (r.ok) return r; } catch { }
+    return fetch(p);
+  };
   // FONTE: { base: '' per GitHub o indirizzo della cartella su Supabase, sbv: versione su Supabase, pronto: tavolo/sito-1.sql eseguito }
   let FONTE = null;
   async function fonte(fresca) {
     if (FONTE && !fresca) return FONTE;
-    const gh = fetch('versione.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : {}).then(j => +j.pub || 0, () => 0);
+    const gj = fetch('versione.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : {}).catch(() => ({})), gh = gj.then(j => +j.pub || 0);
+    // «solo»: Supabase non è affidabile (per esempio dopo un attacco) e il sito usa solo la copia su GitHub
+    if ((await gj).solo) { FONTE = { base: '', sbv: 0, ghv: await gh, pronto: false, solo: true }; return FONTE; }
     let sb = null, pronto = false;
     try {
       const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 6000);
@@ -291,14 +300,14 @@
     const p = BLOBMAP[aid];
     if (p && p.startsWith('priv/') && BLOBKEYS[aid]) { try { const b = await playerBlob(aid, p); return { ok: true, blob: async () => b }; } catch { return { ok: false, status: 404 }; } }
     if (!p || p.startsWith('priv/')) return { ok: false, status: 404 };
-    return fetch(fileUrl(p));
+    return prendi(p);
   };
   window.__blobHref = aid => { const p = BLOBMAP[aid]; return p && !p.startsWith('priv/') ? fileUrl(p) : ''; };
   // giocatore: le immagini riservate che può vedere arrivano cifrate con una chiave propria, che c'è solo nella sua copia
   const PLAIN = new Map();
   async function playerBlob(aid, p) {
     if (!PLAIN.has(aid)) PLAIN.set(aid, (async () => {
-      const r = await fetch(fileUrl(p)); if (!r.ok) throw new Error(r.status);
+      const r = await prendi(p); if (!r.ok) throw new Error(r.status);
       const buf = new Uint8Array(await r.arrayBuffer()), t = [...(MEM.blobs?.values() || [])].find(b => b.aid === aid)?.type;
       return new Blob([await crypto.subtle.decrypt({ name: 'AES-GCM', iv: buf.slice(0, 12) }, await aesKey(b64d(BLOBKEYS[aid])), buf.slice(12))], { type: t || 'image/jpeg' });
     })().catch(x => { PLAIN.delete(aid); throw x; }));
@@ -457,8 +466,10 @@
   const swVer = () => fetch('sw.js?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => (t.match(/VERSION\s*=\s*'([^']+)'/) || [])[1] || '', () => '');
   const datiDi = (ghv, sb) => sb && sb.cartella && +sb.versione > ghv ? 'sb:' + sb.cartella : 'gh:' + ghv;
   async function datiOra() {
-    const ghv = await fetch('versione.json?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => j ? +j.pub || 0 : null, () => null);
-    if (ghv == null) return '';
+    const gj = await fetch('versione.json?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null);
+    if (!gj) return '';
+    const ghv = +gj.pub || 0;
+    if (gj.solo) return datiDi(ghv, null);
     try {
       const r = await fetch(SB_URL + '/rest/v1/sito_stato?select=versione,cartella&id=eq.1', { headers: { apikey: SB_KEY }, cache: 'no-store' });
       if (!r.ok) return datiDi(ghv, null);
@@ -575,7 +586,7 @@
   // un'immagine in chiaro: dal browser se c'è (le riservate sono già decifrate qui), altrimenti dal suo indirizzo
   async function immagine(aid, p) {
     const f = await rq(store('files').get(aid)); if (f) return new Uint8Array(await f.blob.arrayBuffer());
-    const r = await fetch(fileUrl(p)); if (!r.ok) throw new Error('Non trovo l\'immagine ' + p);
+    const r = await prendi(p); if (!r.ok) throw new Error('Non trovo l\'immagine ' + p);
     const b = new Uint8Array(await r.arrayBuffer());
     return p.startsWith('priv/') ? new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b.slice(0, 12) }, await aesKey(RAW), b.slice(12))) : b;
   }
@@ -639,12 +650,16 @@
       const kg = await deriveRaw(g.code, b64d(g.salt), env.it), c = await cifra(kg, await gzip(new TextEncoder().encode(JSON.stringify(copia(d, g.id)))));
       file.push([cartella + '/giocatori/' + g.id + '.enc', JSON.stringify({ v: 1, z: 1, it: env.it, salt: g.salt, iv: b64e(c.iv), ct: b64e(c.ct) }), 'application/json']);
     }
+    // l'elenco dei file di questo salvataggio, per il backup notturno su GitHub (strumenti/backup_notturno.py):
+    // solo percorsi, nessun contenuto (le immagini sono già nel bucket pubblico, in chiaro solo quelle che vedono tutti)
+    const imm = [...new Set(Object.values(d.blobmap))].filter(x => /^(blobs|priv)\/sb-/.test(x)).sort();
+    file.unshift([cartella + '/file.json', JSON.stringify({ v: 1, giocatori: giocatori(d).filter(g => g.code).map(g => g.id), immagini: imm }), 'application/json']);
     return { d, env, file, cartella, iv: b64e(e.iv), daCapo };
   }
   const giaCaricato = e => e && (String(e.statusCode) === '409' || /exists|duplicate/i.test(e.message || ''));
   async function togliCartella(sb, cart) {
     const g = await sb.storage.from('sito').list(cart + '/giocatori');
-    await sb.storage.from('sito').remove([cart + '/data.enc', ...(g.data || []).map(x => cart + '/giocatori/' + x.name)]);
+    await sb.storage.from('sito').remove([cart + '/data.enc', cart + '/file.json', ...(g.data || []).map(x => cart + '/giocatori/' + x.name)]);
   }
   let SAVING = null;
   async function salvaSito() {
@@ -653,6 +668,7 @@
     passo('Mi collego a Supabase…');
     try {
       if (!window.__sbDM || !window.__copie) throw new Error('Ricarica la pagina e riprova.');
+      if ((await fetch('versione.json', { cache: 'no-cache' }).then(r => r.json()).catch(() => ({}))).solo) throw new Error('il sito sta usando il backup su GitHub (emergenza). Prima Supabase va rimesso in sicurezza: chiedi a Claude di riattivarlo.');
       const sb = await window.__sbDM();
       for (let prova = 0; ; prova++) {
         const p = await preparaSalvataggio(passo), nota = summary(true);

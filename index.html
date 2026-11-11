@@ -2928,6 +2928,9 @@ route(/^\/backup$/, async () => {
       <div class="row"><button class="btn primary" data-act="bkFull">Backup completo (con mappe)</button><button class="btn" data-act="bkData">Solo dati (leggero)</button></div>
       <p class="hint">Ultimo backup: ${lastBk ? fmtDate(lastBk) : 'mai'}. Il «solo dati» non include le immagini delle mappe, che di solito cambiano di rado.</p></div>
     <div class="card"><h2>Ripristina da un backup</h2><p>Sostituisce <b>tutto</b> il contenuto attuale con quello del file.</p><label class="btn" style="cursor:pointer">Scegli il file di backup…<input type="file" id="rfile" accept=".json,application/json" hidden></label></div>
+    ${window.__tavoloBackup && document.documentElement.classList.contains('adm') ? `<div class="card"><h2>Backup del Tavolo</h2><p>Il Tavolo (scene, mappe, segnalini, tiri, chat, schede) vive solo su Supabase. Scarica una copia ogni tanto, per esempio dopo ogni sessione: se qualcosa andasse perso o venisse manomesso, la puoi rimettere da qui.</p>
+      <div class="row"><button class="btn primary" data-act="tvBk">Scarica il backup del Tavolo</button><label class="btn" style="cursor:pointer">Ripristina il Tavolo…<input type="file" id="tvfile" accept=".json,application/json" hidden></label></div>
+      <p class="hint" id="tvmsg">Il ripristino rimette scene, segnalini, tiri e chat com'erano nel file; gli account dei giocatori restano come sono. La chiave di Claude non finisce mai nel file.</p></div>` : ''}
     <div class="card"><h2>Dove sono i dati</h2><p class="hint">I dati e le immagini sono salvati in questo browser, su questo dispositivo${usage ? ': <b>' + fmtSize(usage.bytes) + '</b> su ' + fmtSize(usage.maxBytes) + ' (' + usage.files + ' file)' : ''}. Le modifiche fatte qui restano su questo dispositivo: fai un backup ogni tanto. Gli aggiornamenti della campagna arrivano come nuova versione dei dati (il sito te lo propone).</p></div>
     <div class="card"><h2>Zona pericolosa</h2><p>Cancella tutto (schede, sessioni, mappe, cronologia). Fai prima un backup.</p><button class="btn danger" data-act="wipe">Svuota tutto</button></div>`);
   $('#rfile').onchange = async e => {
@@ -2936,7 +2939,20 @@ route(/^\/backup$/, async () => {
     try { const r = await restoreBackup(await f.text()); toast('Backup ripristinato' + (r.images ? '' : ' (le immagini delle mappe esistenti sono rimaste)')); location.hash = '#/'; }
     catch (err) { toast(err.message, 'err'); }
   };
+  const tvMsg = t => { const m = $('#tvmsg'); if (m) m.textContent = t; };
+  const tvf = $('#tvfile');
+  if (tvf) tvf.onchange = async e => {
+    const f = e.target.files[0]; if (!f) return;
+    if (!await ask(`Ripristinare il Tavolo dal file **${f.name}**? Scene, segnalini, tiri e chat attuali verranno **sostituiti**.`, { danger: true, ok: 'Ripristina' })) { e.target.value = ''; return; }
+    try { await window.__tavoloBackup.ripristina(await f.text(), tvMsg); tvMsg('Tavolo ripristinato.'); toast('Tavolo ripristinato'); }
+    catch (err) { tvMsg('Ripristino non riuscito: il Tavolo è rimasto com\'era.'); toast(err.message, 'err'); }
+    e.target.value = '';
+  };
   setActs({
+    tvBk: async () => {
+      try { const b = await window.__tavoloBackup.scarica(tvMsg); await download(b, `tavolo-backup-${stamp()}.json`); tvMsg('Backup del Tavolo scaricato (' + fmtSize(b.size) + ').'); }
+      catch (err) { tvMsg('Backup non riuscito.'); toast(err.message, 'err'); }
+    },
     bkFull: () => doBackup(true).then(rerender), bkData: () => doBackup(false).then(rerender),
     wipe: async () => {
       const r = await formDlg({ title: 'Svuota tutto', ok: 'Cancella definitivamente', fields: [{ k: 't', label: 'Scrivi CANCELLA per confermare', req: true }] });

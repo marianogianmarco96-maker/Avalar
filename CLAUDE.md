@@ -8,3 +8,6 @@
 - Se modifichi copie.js o il filtro copia() in strumenti/pubblica.py, verifica con `python3 strumenti/prova_copie.py dm.json`.
 - Oggetti e dispense da consegnare al Tavolo stanno nel «Bottino pronto» (bottino.js, meta `bottino:<id>`, solo DM).
   La consegna passa da Supabase (tavolo/tappa-20.sql, tabella tavolo_consegne) e non porta mai «La verità».
+- Backup: ogni notte .github/workflows/backup-notturno.yml copia l'ultimo salvataggio dal sito (Supabase) sul ramo
+  `backup`. Per rimetterlo: `python3 strumenti/ripristina_backup.py elenco` / `usa [COMMIT] [--solo]` / `riattiva`
+  («solo» in versione.json = il sito ignora Supabase). Il Tavolo si salva dalla pagina Backup (tavolo/tappa-21.sql).
