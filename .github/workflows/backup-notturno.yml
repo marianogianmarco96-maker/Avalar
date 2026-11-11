@@ -1,0 +1,56 @@
+# Ogni notte copia sul ramo «backup» l'ultimo salvataggio fatto dal DM sul sito (vedi strumenti/backup_notturno.py).
+# Si può anche lanciare a mano: GitHub › Actions › Backup notturno › Run workflow.
+# Se qualcosa va storto GitHub manda un'email al proprietario del repository.
+name: Backup notturno
+
+on:
+  schedule:
+    - cron: '23 2 * * *'   # 3:23 in Italia (ora solare), 4:23 con l'ora legale
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: backup-notturno
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepara il ramo backup
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git fetch --depth=1 origin backup; then
+            git worktree add -B backup ../bk FETCH_HEAD
+          else
+            git worktree add --detach ../bk
+            cd ../bk && git checkout --orphan backup && git rm -rfq . && git clean -fdxq
+          fi
+
+      - name: Copia l'ultimo salvataggio
+        id: copia
+        run: |
+          set +e
+          python3 strumenti/backup_notturno.py ../bk
+          echo "esito=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Salva sul ramo backup
+        # 0 = tutto copiato, 3 = mancano solo delle immagini; con altri errori non salvo una copia a metà
+        if: steps.copia.outputs.esito == '0' || steps.copia.outputs.esito == '3'
+        working-directory: ../bk
+        run: |
+          git add -A
+          if git diff --cached --quiet; then echo 'Niente di nuovo.'; exit 0; fi
+          git commit -qm "Backup del $(date -u +'%Y-%m-%d %H:%M') UTC"
+          git push origin backup
+
+      - name: Esito
+        if: steps.copia.outputs.esito != '0'
+        run: |
+          echo "::error::Il backup non è riuscito del tutto: guarda i messaggi del passo «Copia l'ultimo salvataggio»."
+          exit 1

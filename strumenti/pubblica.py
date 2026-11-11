@@ -70,9 +70,13 @@ def scarica(url, **headers):
 def su_supabase():
     """Versione e cartella dei dati salvati dal DM sul sito, se sono più recenti di quelli su GitHub (altrimenti None)."""
     try:
-        pub = json.load(open('versione.json')).get('pub', 0)
+        vj = json.load(open('versione.json'))
     except FileNotFoundError:
-        pub = 0
+        vj = {}
+    pub = vj.get('pub', 0)
+    if vj.get('solo'):  # emergenza (strumenti/ripristina_backup.py): Supabase non si usa
+        print('  (versione.json dice «solo»: uso solo i dati di GitHub)', file=sys.stderr)
+        return None
     try:
         st = json.loads(scarica(SB_URL + '/rest/v1/sito_stato?select=versione,cartella&id=eq.1', apikey=SB_KEY))
     except Exception as e:  # noqa: BLE001
@@ -294,7 +298,12 @@ def salva(codice, src):
         if f not in fatti:
             os.remove(f)
     # quando sono stati pubblicati: il sito confronta questa data con l'ultimo salvataggio del DM su Supabase
-    json.dump({'pub': int(time.time() * 1000)}, open('versione.json', 'w'))
+    # «solo» (emergenza, strumenti/ripristina_backup.py) resta finché Supabase non viene riattivato
+    try:
+        solo = json.load(open('versione.json')).get('solo')
+    except FileNotFoundError:
+        solo = None
+    json.dump({'pub': int(time.time() * 1000), **({'solo': True} if solo else {})}, open('versione.json', 'w'))
 
 
 if __name__ == '__main__':

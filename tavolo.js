@@ -1687,6 +1687,60 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     return SB;
   };
 
+  /* Backup del Tavolo (pagina Backup, solo DM): le tabelle del tavolo e le mappe del bucket in un file da tenere.
+     Non contiene mai la chiave di Claude (tavolo_bot). Gli account (tavolo_membri) ci sono solo come promemoria:
+     il ripristino li lascia come sono. Il ripristino ricarica le mappe, poi rimette le tabelle con tavolo_ripristina
+     (tavolo/tappa-21.sql), tutto o niente. */
+  const BK_TABELLE = { tavolo_scene: 'id', tavolo_stato: 'id', tavolo_token: 'id', tavolo_tiri: 'id', tavolo_chat: 'id', tavolo_maschera: 'id', tavolo_muri: 'id', tavolo_segnalini: 'id', tavolo_turno: 'id', tavolo_schede: 'id', tavolo_pf_gruppo: 'giocatore', tavolo_critici: 'tiro', tavolo_salvezze: 'id', tavolo_coperture_richieste: 'id', tavolo_consegne: 'id', tavolo_membri: 'user_id' };
+  const BK_FORMATO = 'avalar-tavolo/1';
+  const inB64 = async blob => { const u = new Uint8Array(await blob.arrayBuffer()); let t = ''; for (let i = 0; i < u.length; i += 0x8000) t += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(t); };
+  const daB64 = (b, type) => { const t = atob(b), u = new Uint8Array(t.length); for (let i = 0; i < t.length; i++) u[i] = t.charCodeAt(i); return new Blob([u], { type }); };
+  async function fileDelBucket(sb, dir = '') {
+    const out = [];
+    for (let da = 0; ; da += 1000) {
+      const r = await sb.storage.from(BUCKET).list(dir, { limit: 1000, offset: da, sortBy: { column: 'name', order: 'asc' } });
+      if (r.error) throw new Error(r.error.message);
+      for (const f of r.data) { const p = (dir ? dir + '/' : '') + f.name; if (f.id == null) out.push(...await fileDelBucket(sb, p)); else out.push({ p, type: f.metadata?.mimetype || 'application/octet-stream' }); }
+      if (r.data.length < 1000) return out;
+    }
+  }
+  window.__tavoloBackup = {
+    async scarica(passo = () => { }) {
+      const sb = await window.__sbDM(), tabelle = {}, file = {};
+      for (const [t, k] of Object.entries(BK_TABELLE)) {
+        passo('Leggo ' + t.slice(7).replace(/_/g, ' ') + '…');
+        const righe = [];
+        for (let da = 0; ; da += 1000) {
+          const r = await sb.from(t).select('*').order(k).range(da, da + 999);
+          if (r.error) { if (sqlMancante(r.error)) break; throw new Error(r.error.message); } // tabella di una tappa non eseguita
+          righe.push(...r.data); if (r.data.length < 1000) { tabelle[t] = righe; break; }
+        }
+      }
+      const elenco = await fileDelBucket(sb);
+      for (const [i, f] of elenco.entries()) {
+        passo('Scarico le mappe… (' + (i + 1) + ' di ' + elenco.length + ')');
+        const r = await sb.storage.from(BUCKET).download(f.p); if (r.error) throw new Error('Non riesco a scaricare ' + f.p + ': ' + r.error.message);
+        file[f.p] = { type: r.data.type || f.type, b64: await inB64(r.data) };
+      }
+      return new Blob([JSON.stringify({ formato: BK_FORMATO, creato: new Date().toISOString(), tabelle, file })], { type: 'application/json' });
+    },
+    async ripristina(testo, passo = () => { }) {
+      let j; try { j = JSON.parse(testo); } catch { throw new Error('Il file non è un backup del Tavolo.'); }
+      if (j.formato !== BK_FORMATO || !j.tabelle) throw new Error('Il file non è un backup del Tavolo.');
+      const sb = await window.__sbDM(), file = Object.entries(j.file || {});
+      for (const [i, [p, f]] of file.entries()) {
+        passo('Ricarico le mappe… (' + (i + 1) + ' di ' + file.length + ')');
+        const r = await sb.storage.from(BUCKET).upload(p, daB64(f.b64, f.type), { contentType: f.type, upsert: true });
+        if (r.error) throw new Error('Non riesco a ricaricare ' + p + ': ' + r.error.message);
+      }
+      passo('Rimetto il tavolo com\'era…');
+      const dati = { ...j.tabelle }; delete dati.tavolo_membri; delete dati.tavolo_bot;
+      const r = await sb.rpc('tavolo_ripristina', { p_dati: dati });
+      if (r.error) throw new Error(r.error.code === 'PGRST202' || /tavolo_ripristina/.test(r.error.message) && /find|exist/i.test(r.error.message) ? 'Manca l\'aggiornamento del database: esegui tavolo/tappa-21.sql nell\'SQL Editor di Supabase.' : r.error.message);
+      return r.data;
+    }
+  };
+
   // il DM crea (o ritrova) l'account di ogni giocatore e lo collega al suo nome
   async function preparaGiocatori(info) {
     if (!info.it) return;
