@@ -42,6 +42,7 @@
 .sc-dado{all:unset;display:inline-block;padding:0 7px;border-radius:10px;background:#7d253014;border:1px solid #7d253055;color:var(--wine2);font-weight:700;font-size:.92em;white-space:nowrap;line-height:1.35}
 button.sc-dado{cursor:pointer}button.sc-dado:hover{background:var(--wine);color:#fff}
 .sc-list .card{display:flex;gap:16px;align-items:center;flex-wrap:wrap;border:2px dashed #7a3d8a88;background:#7a3d8a0a}
+.sc-dl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 4px}.sc-dl .btn{display:flex;flex-direction:column;gap:2px;padding:14px 10px;height:auto;text-transform:none;letter-spacing:0}.sc-dl .btn b{font:600 1.1rem/1.2 var(--display);letter-spacing:.06em}.sc-dl .btn small{font:400 .85rem/1.2 var(--body);opacity:.8}
 .sc-list .n{font:700 2rem/1 var(--display);color:#7a3d8a}
 .sc-list .k{font:600 .7rem/1.4 var(--display);letter-spacing:.12em;color:#7a3d8a;text-transform:uppercase}
 .sc-list .t{font:600 1.25rem/1.3 var(--display);color:var(--wine);margin:2px 0;text-decoration:none;display:block}
@@ -316,7 +317,7 @@ dialog .sc-txt{width:100%;min-height:200px;font:13px/1.45 ui-monospace,SFMono-Re
     const corpo = a.sezioni.map((x, k) => x.scene ? a.scene.map((y, i) => cartaScena(y, i, st[i], { chiusa: st[i] === 'ok' })).join('') : `<section class="sc-box" id="sc-b${k}">${x.t ? `<h3>${esc(x.t)}</h3>` : ''}${testo(x.md)}</section>`).join('');
     setView(`<div class="pagehead"><div style="flex:1;min-width:220px"><div class="sc-kick">${etichetta(v)}${v.inCorso ? ' · più serate' : ''} · scaletta</div><h1><span class="num">${n}.</span> ${esc(v.title || a.titolo || 'Sessione ' + n)} <span class="pill dm">🔒 solo DM</span></h1>
       <div class="hint">${a.scene.length ? `${a.scene.length} scene · ${nf} giocate` : 'Nessuna scena riconosciuta'}${v.file ? ' · dal file ' + esc(v.file) : ''}${s ? ` · <a href="#/sessioni/${n}">Racconto della sessione →</a>` : ''}</div></div>
-      <div class="acts"><a class="btn primary" href="#/tavolo" data-act="sctavolo">⚔️ Al Tavolo</a><button class="btn" data-act="scmod">Modifica</button>${moreActs((v.inCorso ? '<button class="btn" data-act="scfine">✓ Segna come conclusa</button>' : '<button class="btn" data-act="scfine">Segna «in corso»</button>') + '<button class="btn" data-act="scfile">Sostituisci con un file</button><button class="btn danger" data-act="scdel">Elimina</button>')}</div></div><div class="orn"></div>
+      <div class="acts"><a class="btn primary" href="#/tavolo" data-act="sctavolo">⚔️ Al Tavolo</a><button class="btn" data-act="scmod">Modifica</button><button class="btn" data-act="scdl" title="Tutta la scaletta in Word o PDF">⬇ Scarica</button>${moreActs((v.inCorso ? '<button class="btn" data-act="scfine">✓ Segna come conclusa</button>' : '<button class="btn" data-act="scfine">Segna «in corso»</button>') + '<button class="btn" data-act="scfile">Sostituisci con un file</button><button class="btn danger" data-act="scdel">Elimina</button>')}</div></div><div class="orn"></div>
       <nav class="sc-chips" aria-label="Parti della scaletta">${chips.join('')}</nav>
       <div class="sc-wrap"><nav class="sc-toc" aria-label="Parti della scaletta"><small>Sessione ${n} · scaletta</small>${a.scene.length ? `<div class="sc-prog"><i style="width:${Math.round(nf / a.scene.length * 100)}%"></i></div>` : ''}${toc.join('').replace(/^<hr>/, '').replace(/<hr>$/, '')}</nav><div>${corpo || '<p class="empty">La scaletta è vuota: usa «Modifica».</p>'}</div></div>`);
     setActs({
@@ -324,6 +325,7 @@ dialog .sc-txt{width:100%;min-height:200px;font:13px/1.45 ui-monospace,SFMono-Re
       scfatta: a2 => { const i = +a2.dataset.i; segna(n, i, !fatte(n).has(i)); rerender(); },
       sctavolo: () => { ls.set('scaletta-tavolo', n); ls.set('scaletta-apri', true); location.hash = '#/tavolo'; },
       scmod: () => dlgScaletta(v),
+      scdl: () => scarica(v),
       scfine: async () => { const w = { ...v }; if (w.inCorso) delete w.inCorso; else w.inCorso = true; await setMeta(KEY(n), w); toast(w.inCorso ? 'Segnata come in corso' : 'Sessione conclusa: la scaletta resta tra le sessioni giocate'); rerender(); },
       scfile: () => dlgScaletta(v, { file: true }),
       scdel: async () => { if (!await ask(`Eliminare la **scaletta della sessione ${n}**? Il racconto della sessione resta.`, { danger: true, ok: 'Elimina' })) return; await runBatch(['meta'], '', async t => t.del('meta', KEY(n))); location.hash = '#/sessioni'; }
@@ -381,14 +383,150 @@ dialog .sc-txt{width:100%;min-height:200px;font:13px/1.45 ui-monospace,SFMono-Re
     });
   }
 
+  /* ---------- scaricare la scaletta completa (Word o PDF) ---------- */
+  // dal testo della scaletta (Markdown) a blocchi semplici: titoli, paragrafi, elenchi, citazioni, righe
+  const nomeScheda = id => S.ents.get(id)?.name || id.replace(/^[a-z]+-/, '').replace(/-/g, ' ');
+  function inl(s) {
+    s = String(s).replace(/\[\[([^\]|]+?)(?:\|([^\]]+?))?\]\]/g, (m, id, al) => al || nomeScheda(id)).replace(/\[([^\]]+)\]\((?:[^)]+)\)/g, '$1').replace(/`([^`]+)`/g, '$1');
+    const out = [];
+    for (const p of s.split(/(\*\*\*[^*]+?\*\*\*|\*\*[^*]+?\*\*|(?<![\w*])\*[^*\s][^*]*?\*(?![\w*])|(?<![\w_])_[^_\s][^_]*?_(?![\w_]))/)) {
+      if (!p) continue;
+      if (/^\*\*\*.+\*\*\*$/.test(p)) out.push({ x: p.slice(3, -3), b: 1, i: 1 });
+      else if (/^\*\*.+\*\*$/.test(p)) out.push({ x: p.slice(2, -2), b: 1 });
+      else if (/^([*_]).+\1$/.test(p)) out.push({ x: p.slice(1, -1), i: 1 });
+      else out.push({ x: p });
+    }
+    return out;
+  }
+  function blocchi(t) {
+    const out = []; let par = [];
+    const flush = () => { if (par.length) { out.push({ t: 'p', r: inl(par.join(' ')) }); par = []; } };
+    for (const raw of String(t || '').replace(/\r/g, '').split('\n')) {
+      const r = raw.replace(/\t/g, '    '); let m;
+      if (!r.trim()) { flush(); continue; }
+      if ((m = r.match(/^\s*(#{1,6})\s+(.*)$/))) { flush(); out.push({ t: 'h', liv: Math.min(m[1].length, 4), r: inl(m[2]) }); continue; }
+      if (/^\s*([-*_])(\s*\1){2,}\s*$/.test(r)) { flush(); out.push({ t: 'hr' }); continue; }
+      if ((m = r.match(/^(\s*)(?:[-*•+]|(\d+)[.)])\s+(.*)$/))) { flush(); out.push({ t: 'li', liv: Math.min(3, Math.floor(m[1].length / 2)), num: m[2] ? +m[2] : null, r: inl(m[3]) }); continue; }
+      if ((m = r.match(/^\s*>\s?(.*)$/))) { flush(); out.push({ t: 'q', r: inl(m[1]) }); continue; }
+      if (/^\s*\|/.test(r)) { flush(); if (!/^\s*\|?[\s:|-]+$/.test(r)) out.push({ t: 'li', liv: 0, num: null, r: inl(r.trim().replace(/^\||\|$/g, '').split('|').map(x => x.trim()).filter(Boolean).join(' · ')) }); continue; }
+      // riga rientrata sotto un punto dell'elenco: è il seguito di quel punto
+      const ult = out[out.length - 1];
+      if (!par.length && ult?.t === 'li' && /^\s{2,}/.test(raw)) { ult.r.push({ x: ' ' }, ...inl(r.trim())); continue; }
+      par.push(r.trim());
+    }
+    flush(); return out;
+  }
+  const nomeFile = v => (`Sessione ${v.n} - ${v.title || 'scaletta'}`).replace(/[\\/:*?"<>|]+/g, '').replace(/\s+/g, ' ').trim().slice(0, 80);
+  const intestazione = v => ({ titolo: `Sessione ${v.n} · ${v.title || analizza(v.text).titolo || 'Scaletta'}`, sotto: `Scaletta del DM · ${etichetta(v)}${v.inCorso ? ' (più serate)' : ''} · scaricata il ${new Date().toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' })}` });
+  // il titolo «# …» in cima al testo è già nell'intestazione
+  const senzaTitolo = v => { const a = analizza(v.text); return a.titolo ? String(v.text).replace(/^\s*#{1,4}\s+.+\n?/, '') : v.text; };
+
+  // Word: un .docx vero, costruito qui (zip senza compressione)
+  const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  const crc32 = b => { let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = CRC[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+  function zip(files) {
+    const enc = new TextEncoder(), parti = [], centrale = []; let off = 0;
+    for (const [nome, testo] of files) {
+      const n = enc.encode(nome), d = enc.encode(testo), c = crc32(d);
+      const h = new DataView(new ArrayBuffer(30)); h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true); h.setUint16(12, 0x21, true); h.setUint32(14, c, true); h.setUint32(18, d.length, true); h.setUint32(22, d.length, true); h.setUint16(26, n.length, true);
+      const z = new DataView(new ArrayBuffer(46)); z.setUint32(0, 0x02014b50, true); z.setUint16(4, 20, true); z.setUint16(6, 20, true); z.setUint16(8, 0x0800, true); z.setUint16(14, 0x21, true); z.setUint32(16, c, true); z.setUint32(20, d.length, true); z.setUint32(24, d.length, true); z.setUint16(28, n.length, true); z.setUint32(42, off, true);
+      parti.push(h.buffer, n, d); centrale.push(z.buffer, n); off += 30 + n.length + d.length;
+    }
+    const lc = centrale.reduce((s, x) => s + x.byteLength, 0), e = new DataView(new ArrayBuffer(22));
+    e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, lc, true); e.setUint32(16, off, true);
+    return new Blob([...parti, ...centrale, e.buffer], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+  }
+  function docx(v) {
+    const x = s => String(s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const runs = r => r.map(o => `<w:r>${o.b || o.i ? `<w:rPr>${o.b ? '<w:b/>' : ''}${o.i ? '<w:i/>' : ''}</w:rPr>` : ''}<w:t xml:space="preserve">${x(o.x)}</w:t></w:r>`).join('');
+    const p = (st, r, extra = '') => `<w:p><w:pPr>${st ? `<w:pStyle w:val="${st}"/>` : ''}${extra}</w:pPr>${runs(r)}</w:p>`;
+    const { titolo, sotto } = intestazione(v), num = [0, 0, 0, 0];
+    let corpo = p('Title', [{ x: titolo }]) + p('Subtitle', [{ x: sotto }]);
+    for (const b of blocchi(senzaTitolo(v))) {
+      if (b.t !== 'li') num.fill(0);
+      if (b.t === 'h') corpo += p('Heading' + b.liv, b.r);
+      else if (b.t === 'hr') corpo += '<w:p><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="6" w:space="1" w:color="B0802A"/></w:pBdr></w:pPr></w:p>';
+      else if (b.t === 'q') corpo += p('Quote', b.r);
+      else if (b.t === 'li') {
+        num.fill(0, b.liv + 1); const seg = b.num != null ? (num[b.liv] = b.num) + '.' : ['•', '–', '•', '–'][b.liv];
+        corpo += p('ListParagraph', [{ x: seg + '\t' }, ...b.r], `<w:tabs><w:tab w:val="left" w:pos="${360 * (b.liv + 1) + 360}"/></w:tabs><w:ind w:left="${360 * (b.liv + 1) + 360}" w:hanging="360"/>`);
+      } else corpo += p('', b.r);
+    }
+    const W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"';
+    const stile = (id, nome, ppr, rpr, base = 'Normal') => `<w:style w:type="paragraph" w:styleId="${id}"><w:name w:val="${nome}"/><w:basedOn w:val="${base}"/><w:next w:val="Normal"/><w:qFormat/><w:pPr>${ppr}</w:pPr><w:rPr>${rpr}</w:rPr></w:style>`;
+    const vino = '<w:color w:val="7D2530"/>';
+    const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles ${W}><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Georgia" w:hAnsi="Georgia" w:cs="Georgia" w:eastAsia="Georgia"/><w:sz w:val="22"/><w:lang w:val="it-IT"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="120" w:line="276" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>
+<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style>
+${stile('Title', 'Title', '<w:spacing w:after="60"/>', '<w:b/><w:sz w:val="40"/>' + vino)}${stile('Subtitle', 'Subtitle', '<w:spacing w:after="360"/>', '<w:i/><w:color w:val="6B5434"/><w:sz w:val="20"/>')}
+${stile('Heading1', 'heading 1', '<w:keepNext/><w:spacing w:before="360" w:after="120"/><w:outlineLvl w:val="0"/>', '<w:b/><w:sz w:val="32"/>' + vino)}${stile('Heading2', 'heading 2', '<w:keepNext/><w:spacing w:before="300" w:after="100"/><w:outlineLvl w:val="1"/>', '<w:b/><w:sz w:val="28"/>' + vino)}
+${stile('Heading3', 'heading 3', '<w:keepNext/><w:spacing w:before="240" w:after="80"/><w:outlineLvl w:val="2"/>', '<w:b/><w:sz w:val="24"/>' + vino)}${stile('Heading4', 'heading 4', '<w:keepNext/><w:spacing w:before="200" w:after="60"/><w:outlineLvl w:val="3"/>', '<w:b/><w:i/><w:sz w:val="22"/><w:color w:val="6B4D12"/>')}
+${stile('ListParagraph', 'List Paragraph', '<w:spacing w:after="60"/>', '')}${stile('Quote', 'Quote', '<w:ind w:left="567"/><w:pBdr><w:left w:val="single" w:sz="12" w:space="8" w:color="B0802A"/></w:pBdr>', '<w:i/><w:color w:val="4A3A2A"/>')}</w:styles>`;
+    const doc = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document ${W}><w:body>${corpo}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1247" w:right="1134" w:bottom="1247" w:left="1134" w:header="567" w:footer="567" w:gutter="0"/></w:sectPr></w:body></w:document>`;
+    return zip([
+      ['[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>'],
+      ['_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>'],
+      ['docProps/core.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>${x(titolo)}</dc:title><dc:creator>Avalar</dc:creator><dc:language>it-IT</dc:language></cp:coreProperties>`],
+      ['word/_rels/document.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'],
+      ['word/document.xml', doc],
+      ['word/styles.xml', styles]
+    ]);
+  }
+
+  // PDF: pdfmake (da cdnjs), con i caratteri Roboto che ha dentro
+  const PDFMAKE = 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/';
+  async function pdf(v) {
+    const carica = src => new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('Per creare il PDF serve internet.')); document.head.append(s); });
+    if (!window.pdfMake?.vfs) { if (!window.pdfMake) await carica(PDFMAKE + 'pdfmake.min.js'); await carica(PDFMAKE + 'vfs_fonts.min.js'); }
+    // le emoji non sono nei caratteri del PDF: si tolgono
+    const pulisci = s => String(s).replace(/[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}️‍]/gu, '').replace(/^\s+(?=\S)/, m => m);
+    const testo = r => r.map(o => ({ text: pulisci(o.x), bold: !!o.b, italics: !!o.i })).filter(o => o.text);
+    const { titolo, sotto } = intestazione(v), num = [0, 0, 0, 0], content = [{ text: pulisci(titolo), style: 'titolo' }, { text: sotto, style: 'sotto' }];
+    for (const b of blocchi(senzaTitolo(v))) {
+      if (b.t !== 'li') num.fill(0);
+      if (b.t === 'h') content.push({ text: testo(b.r), style: 'h' + b.liv, headlineLevel: 1 });
+      else if (b.t === 'hr') content.push({ canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: .7, lineColor: '#B0802A' }], margin: [0, 6, 0, 10] });
+      else if (b.t === 'q') content.push({ table: { widths: ['*'], body: [[{ text: testo(b.r), italics: true, color: '#4A3A2A', border: [true, false, false, false] }]] }, layout: { vLineColor: () => '#B0802A', vLineWidth: () => 2, paddingLeft: () => 10 }, margin: [14, 2, 0, 8] });
+      else if (b.t === 'li') {
+        num.fill(0, b.liv + 1); const seg = b.num != null ? (num[b.liv] = b.num) + '.' : ['•', '–', '•', '–'][b.liv];
+        content.push({ columns: [{ width: 18, text: seg, alignment: 'right' }, { width: '*', text: testo(b.r) }], columnGap: 6, margin: [b.liv * 18 + 4, 0, 0, 4] });
+      } else content.push({ text: testo(b.r), margin: [0, 0, 0, 8] });
+    }
+    const def = {
+      pageSize: 'A4', pageMargins: [56, 56, 56, 56], info: { title: titolo, creator: 'Avalar' }, content,
+      defaultStyle: { font: 'Roboto', fontSize: 10.5, lineHeight: 1.25, color: '#2B1D14' },
+      styles: {
+        titolo: { fontSize: 20, bold: true, color: '#7D2530', margin: [0, 0, 0, 2] }, sotto: { fontSize: 9, italics: true, color: '#6B5434', margin: [0, 0, 0, 18] },
+        h1: { fontSize: 16, bold: true, color: '#7D2530', margin: [0, 14, 0, 6] }, h2: { fontSize: 14, bold: true, color: '#7D2530', margin: [0, 12, 0, 5] },
+        h3: { fontSize: 12, bold: true, color: '#7D2530', margin: [0, 10, 0, 4] }, h4: { fontSize: 11, bold: true, italics: true, color: '#6B4D12', margin: [0, 8, 0, 3] }
+      },
+      footer: (pg, tot) => ({ text: `${pulisci(titolo)} · ${pg}/${tot}`, alignment: 'center', fontSize: 8, color: '#8F7F66', margin: [0, 20, 0, 0] }),
+      // un titolo non resta da solo in fondo alla pagina
+      pageBreakBefore: (n, seguenti) => n.headlineLevel === 1 && seguenti.length === 0
+    };
+    return new Promise((res, rej) => { try { window.pdfMake.createPdf(def).getBlob(res); } catch (e) { rej(e); } });
+  }
+  async function scarica(v) {
+    css();
+    const d = openDlg(`<form method="dialog"><h3>Scarica la scaletta</h3><p class="hint" style="margin-top:0">Sessione ${v.n}${v.title ? ' · ' + esc(v.title) : ''}: tutto il testo, con scene, PNG e segreti. È un file solo per te.</p>
+      <div class="sc-dl"><button value="docx" class="btn"><b>Word</b><small>.docx · da modificare</small></button><button value="pdf" class="btn"><b>PDF</b><small>da leggere o stampare</small></button></div>
+      <menu><button value="cancel" class="btn ghost">Annulla</button></menu></form>`);
+    const tipo = await new Promise(res => d.addEventListener('close', () => res(d.returnValue)));
+    if (tipo !== 'docx' && tipo !== 'pdf') return;
+    try {
+      if (tipo === 'pdf') toast('Preparo il PDF…');
+      const blob = tipo === 'docx' ? docx(v) : await pdf(v);
+      await download(blob, nomeFile(v) + '.' + tipo);
+    } catch (e) { toast(e.message || String(e), 'err'); }
+  }
+
   /* ---------- in Sessioni ---------- */
   function riquadro() {
     if (window.__RO) return '';
     css();
     const l = tutte().filter(daGiocare).sort((a, b) => a.n - b.n);
-    return l.length ? `<div class="sc-list">${l.map(v => { const a = analizza(v.text), f = fatte(v.n).size; return `<div class="card"><div class="n">${v.n}</div><div style="flex:1;min-width:200px"><div class="k">${v.inCorso || sessOf(v.n)?.ongoing ? 'In corso' + (v.inCorso ? ' · più serate' : '') : 'Prossima sessione · da giocare'} <span class="pill dm">🔒 solo DM</span></div><a class="t" href="#/scaletta/${v.n}">${esc(v.title || a.titolo || 'Sessione ' + v.n)}</a><div class="h">${a.scene.length} scene${f ? ` · ${f} giocate` : ''} · i giocatori non la vedono</div></div><a class="btn primary" href="#/scaletta/${v.n}">Apri la scaletta</a><a class="btn" href="#/tavolo" data-act="sctav" data-n="${v.n}">⚔️ Al Tavolo</a></div>`; }).join('')}</div>` : '';
+    return l.length ? `<div class="sc-list">${l.map(v => { const a = analizza(v.text), f = fatte(v.n).size; return `<div class="card"><div class="n">${v.n}</div><div style="flex:1;min-width:200px"><div class="k">${v.inCorso || sessOf(v.n)?.ongoing ? 'In corso' + (v.inCorso ? ' · più serate' : '') : 'Prossima sessione · da giocare'} <span class="pill dm">🔒 solo DM</span></div><a class="t" href="#/scaletta/${v.n}">${esc(v.title || a.titolo || 'Sessione ' + v.n)}</a><div class="h">${a.scene.length} scene${f ? ` · ${f} giocate` : ''} · i giocatori non la vedono</div></div><a class="btn primary" href="#/scaletta/${v.n}">Apri la scaletta</a><a class="btn" href="#/tavolo" data-act="sctav" data-n="${v.n}">⚔️ Al Tavolo</a><button class="btn" data-act="scdln" data-n="${v.n}" title="Tutta la scaletta in Word o PDF">⬇ Scarica</button></div>`; }).join('')}</div>` : '';
   }
-  const acts = () => window.__RO ? {} : { scnuova: () => dlgScaletta(null), sctav: a => { ls.set('scaletta-tavolo', +a.dataset.n); ls.set('scaletta-apri', true); location.hash = '#/tavolo'; } };
+  const acts = () => window.__RO ? {} : { scdln: b => { const v = una(+b.dataset.n); if (v) scarica(v); }, scnuova: () => dlgScaletta(null), sctav: a => { ls.set('scaletta-tavolo', +a.dataset.n); ls.set('scaletta-apri', true); location.hash = '#/tavolo'; } };
 
   /* ---------- al Tavolo ---------- */
   const POP = { el: null };
@@ -434,5 +572,5 @@ dialog .sc-txt{width:100%;min-height:200px;font:13px/1.45 ui-monospace,SFMono-Re
   // il Tavolo apre il pannello da solo quando si arriva da «Al Tavolo»
   const daAprire = () => { const v = ls.get('scaletta-apri', false); if (v) ls.set('scaletta-apri', false); return !!v; };
 
-  window.__scaletta = { riquadro, acts, nuova: () => dlgScaletta(null), dellaSessione: n => window.__RO ? 0 : una(n) ? n : (tutte().find(v => v.inCorso && v.n <= n)?.n || 0), pannello, daAprire, analizza, docxMd };
+  window.__scaletta = { scarica: n => una(n) && scarica(una(n)), blocchi, riquadro, acts, nuova: () => dlgScaletta(null), dellaSessione: n => window.__RO ? 0 : una(n) ? n : (tutte().find(v => v.inCorso && v.n <= n)?.n || 0), pannello, daAprire, analizza, docxMd };
 })();
