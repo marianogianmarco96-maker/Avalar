@@ -572,5 +572,13 @@ ${stile('ListParagraph', 'List Paragraph', '<w:spacing w:after="60"/>', '')}${st
   // il Tavolo apre il pannello da solo quando si arriva da «Al Tavolo»
   const daAprire = () => { const v = ls.get('scaletta-apri', false); if (v) ls.set('scaletta-apri', false); return !!v; };
 
-  window.__scaletta = { scarica: n => una(n) && scarica(una(n)), blocchi, riquadro, acts, nuova: () => dlgScaletta(null), dellaSessione: n => window.__RO ? 0 : una(n) ? n : (tutte().find(v => v.inCorso && v.n <= n)?.n || 0), pannello, daAprire, analizza, docxMd };
+  // la scaletta aperta al Tavolo (o la prossima da giocare), per l'assistente e la revisione di fine sessione
+  function corrente(n) {
+    const l = tutte(); if (!l.length) return null;
+    if (!una(n)) n = ls.get('scaletta-tavolo', null);
+    if (!una(n)) n = (l.filter(daGiocare).sort((a, b) => a.n - b.n)[0] || l[0]).n;
+    const v = una(n), a = analizza(v.text), f = fatte(n);
+    return { n, title: v.title || a.titolo || '', text: v.text, scene: a.scene.map((x, i) => ({ t: x.t, fatta: f.has(i) })), ora: PAN.scena[n] ?? statoScene(n, a.scene).indexOf('ora') };
+  }
+  window.__scaletta = { scarica: n => una(n) && scarica(una(n)), blocchi, riquadro, acts, nuova: () => dlgScaletta(null), dellaSessione: n => window.__RO ? 0 : una(n) ? n : (tutte().find(v => v.inCorso && v.n <= n)?.n || 0), pannello, daAprire, analizza, docxMd, corrente };
 })();
