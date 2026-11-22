@@ -11,3 +11,5 @@
 - Backup: ogni notte .github/workflows/backup-notturno.yml copia l'ultimo salvataggio dal sito (Supabase) sul ramo
   `backup`. Per rimetterlo: `python3 strumenti/ripristina_backup.py elenco` / `usa [COMMIT] [--solo]` / `riattiva`
   («solo» in versione.json = il sito ignora Supabase). Il Tavolo si salva dalla pagina Backup (tavolo/tappa-21.sql).
+- Supabase (piano gratuito) va in pausa dopo 7 giorni senza attività: .github/workflows/supabase-sveglio.yml lo legge
+  ogni 5 giorni con la chiave pubblica. Se fallisce, Supabase è in pausa o non risponde: va riattivato dal suo pannello.
