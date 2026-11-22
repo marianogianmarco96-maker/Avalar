@@ -13,3 +13,8 @@
   («solo» in versione.json = il sito ignora Supabase). Il Tavolo si salva dalla pagina Backup (tavolo/tappa-21.sql).
 - Supabase (piano gratuito) va in pausa dopo 7 giorni senza attività: .github/workflows/supabase-sveglio.yml lo legge
   ogni 5 giorni con la chiave pubblica. Se fallisce, Supabase è in pausa o non risponde: va riattivato dal suo pannello.
+- Diario dei giocatori (diario.js) e creature sconosciute al Tavolo: tabella tavolo_diario e colonna tavolo_token.ignoto
+  (tavolo/tappa-22.sql). Le pagine «solo io» non le legge nemmeno il DM, quindi non finiscono nel backup del Tavolo.
+- Immagini di razze, classi e mostri del Compendio: meta «immagini» ({ 'razza:elfo' | 'classe:mago' | 'mostro:<id>':
+  { src, autore, licenza, fonte, titolo } }), solo con licenza libera e fonte citata; mai per i PG del party.
+  Razza, classe e livello del party: meta «party», aggiornata dalla Home del DM leggendo le schede del Tavolo.

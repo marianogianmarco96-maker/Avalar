@@ -64,6 +64,23 @@
 .tv-tok.drag{transition:none;z-index:5;box-shadow:0 8px 18px #000c;cursor:grabbing}
 .tv-tok.live{transition:left .06s linear,top .06s linear}
 .tv-tok.hid{opacity:.45;border-style:dashed}
+.tv-tok.ign{background:radial-gradient(circle at 50% 40%,#6b4128,#2a170e 72%);border-color:#b8322c}
+.tv-tok.ign .ini{color:#f1d48a;font-size:calc(var(--fs,13px)*2.2)}
+.tv-tok.ignd>.ini::after{content:"?";position:absolute;right:-4px;top:-4px;width:18px;height:18px;border-radius:50%;background:#b8322c;color:#fff;font:700 12px/18px var(--body);text-align:center;box-shadow:0 1px 3px #000a}
+.tv-ign{width:min(360px,calc(100% - 12px))}
+.tv-ign .ihd{display:flex;gap:12px;align-items:center;padding:12px 14px 8px}
+.tv-ign .ihd i{flex:none;width:52px;height:52px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#6b4128,#2a170e 72%) center/cover;border:3px solid #b8322c;display:grid;place-items:center;font:700 26px var(--display);color:#f1d48a;font-style:normal}
+.tv-ign .ihd .x{all:unset;cursor:pointer;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--pan-mute);flex:none;align-self:flex-start}
+.tv-ign .ihd .x:hover{background:#ffffff1a;color:#fff}
+.tv-ign .ihd b{display:block;font:600 1.05rem var(--display);letter-spacing:.04em;color:#f1d48a}
+.tv-ign .ihd small{display:block;font-style:italic;color:#e8dcc4;line-height:1.35;margin-top:2px}
+.tv-ign .isal{display:flex;align-items:center;gap:8px;padding:4px 14px 8px;font-weight:600}
+.tv-ign .isal .bar{flex:1;height:7px;border-radius:4px;background:#ffffff22;overflow:hidden}
+.tv-ign .isal .bar s{display:block;height:100%;background:var(--b)}
+.tv-ign .isap{margin:4px 12px 12px;padding:8px 12px;border:1px solid #d4b06a55;border-radius:8px;background:#ffffff0d}
+.tv-ign .isap h5{margin:0 0 4px;font:600 .72rem var(--display);letter-spacing:.12em;color:#d4b06a;text-transform:uppercase}
+.tv-ign .isap ul{margin:0;padding-left:18px}.tv-ign .isap li{margin:2px 0}
+.tv-ign .isap .no{color:#cbb995;font-style:italic;list-style:none;margin-left:-18px}
 .tv-tok.altro{opacity:.35;pointer-events:none;filter:grayscale(.5)}
 .tv-tok.hid.qui{opacity:1}
 .tv-liv{display:flex;align-items:center;gap:6px;background:#3b1f4ae6;color:#f1e4c8;border:1px solid #b98cff88;border-radius:8px;padding:6px 10px;font:600 .85rem/1.2 var(--body);box-shadow:0 2px 10px #0006;white-space:nowrap}
@@ -1687,12 +1704,29 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     try { await entraUnaVolta(info); } catch (e) { throw e.tv && ERR[e.tv] ? new Error(ERR[e.tv][0] + '. ' + ERR[e.tv][1].replace(/<[^>]+>/g, '')) : e; }
     return SB;
   };
+  // lo stesso accesso per DM e giocatori, fuori dal tavolo (il Diario): { sb, ruolo, giocatore }
+  window.__sbIo = async () => {
+    const info = await window.__tavolo?.();
+    if (!info) throw new Error('Entra con il tuo accesso per usare il diario.');
+    try { await entraUnaVolta(info); } catch (e) { throw e.tv && ERR[e.tv] ? new Error(ERR[e.tv][0] + '. ' + ERR[e.tv][1].replace(/<[^>]+>/g, '')) : e; }
+    return { sb: SB, ruolo: info.ruolo, giocatore: info.ruolo === 'dm' ? null : info.id, nome: info.ruolo === 'dm' ? 'DM' : info.nome, pg: info.pg || null };
+  };
+
+  // razza, classe e livello dei personaggi del party, dalle schede del Tavolo (solo il DM le legge tutte): per la Home e le carte delle razze
+  let partyP = null;
+  window.__party = () => partyP = partyP || (async () => {
+    const info = await window.__tavolo?.(); if (info?.ruolo !== 'dm') return [];
+    const sb = await window.__sbDM(), r = await sb.from('tavolo_schede').select('giocatore,nome,entita,dati').eq('tipo', 'pg');
+    if (r.error) throw r.error;
+    const G = info.giocatori || [];
+    return r.data.map(x => ({ giocatore: x.giocatore, nome: x.nome, entita: x.entita || G.find(g => g.id === x.giocatore)?.pg || null, razza: String(x.dati?.razza || '').trim(), razza_id: x.dati?.razza_id || null, classe: String(x.dati?.classe || '').trim(), livello: +x.dati?.livello || null }));
+  })().catch(e => { partyP = null; throw e; });
 
   /* Backup del Tavolo (pagina Backup, solo DM): le tabelle del tavolo e le mappe del bucket in un file da tenere.
      Non contiene mai la chiave di Claude (tavolo_bot). Gli account (tavolo_membri) ci sono solo come promemoria:
      il ripristino li lascia come sono. Il ripristino ricarica le mappe, poi rimette le tabelle con tavolo_ripristina
      (tavolo/tappa-21.sql), tutto o niente. */
-  const BK_TABELLE = { tavolo_scene: 'id', tavolo_stato: 'id', tavolo_token: 'id', tavolo_tiri: 'id', tavolo_chat: 'id', tavolo_maschera: 'id', tavolo_muri: 'id', tavolo_segnalini: 'id', tavolo_turno: 'id', tavolo_schede: 'id', tavolo_pf_gruppo: 'giocatore', tavolo_critici: 'tiro', tavolo_salvezze: 'id', tavolo_coperture_richieste: 'id', tavolo_consegne: 'id', tavolo_membri: 'user_id' };
+  const BK_TABELLE = { tavolo_scene: 'id', tavolo_stato: 'id', tavolo_token: 'id', tavolo_tiri: 'id', tavolo_chat: 'id', tavolo_maschera: 'id', tavolo_muri: 'id', tavolo_segnalini: 'id', tavolo_turno: 'id', tavolo_schede: 'id', tavolo_pf_gruppo: 'giocatore', tavolo_critici: 'tiro', tavolo_salvezze: 'id', tavolo_coperture_richieste: 'id', tavolo_consegne: 'id', tavolo_diario: 'id', tavolo_membri: 'user_id' };
   const BK_FORMATO = 'avalar-tavolo/1';
   const inB64 = async blob => { const u = new Uint8Array(await blob.arrayBuffer()); let t = ''; for (let i = 0; i < u.length; i += 0x8000) t += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(t); };
   const daB64 = (b, type) => { const t = atob(b), u = new Uint8Array(t.length); for (let i = 0; i < t.length; i++) u[i] = t.charCodeAt(i); return new Blob([u], { type }); };
@@ -2018,7 +2052,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       const s = schedaDi(t); if (s) riprendiScheda(s.id);
     }, 1500));
   }
-  const completa = (prima, nuovo) => { const o = { ...(prima || {}), ...nuovo }; if (prima?.immagine && !nuovo.immagine) o.immagine = prima.immagine; return o; };
+  const completa = (prima, nuovo) => { const o = { ...(prima || {}), ...nuovo }; if (prima?.immagine && !nuovo.immagine && !ignotoNasc(nuovo) && nuovo.nome !== '???') o.immagine = prima.immagine; return o; };
   const manda = (event, payload) => { if (T.ch) T.ch.send({ type: 'broadcast', event, payload }).catch(() => { }); };
 
   /* ---------- strumenti (a sinistra) e mappe (in alto a destra), come su Roll20 ---------- */
@@ -2392,7 +2426,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       let el = tokEl(t.id);
       if (!el) { el = document.createElement('div'); el.className = 'tv-tok'; el.dataset.id = t.id; el.innerHTML = '<span class="fxs"></span><span class="ini"></span><b></b><i class="pf"><s></s></i><span class="cnd"></span><span class="az" hidden></span>'; }
       const lato = t.misura * sc.griglia, pos = T.drag?.id === t.id && T.drag.mosso ? T.drag : t;
-      el.style.cssText = `left:${pos.x}px;top:${pos.y}px;width:${lato}px;height:${lato}px;--c:${t.colore};--fs:${Math.max(11, sc.griglia * 0.22)}px;z-index:${att?.token === t.id ? lista.length + 1 : i + 1}${t.immagine ? `;background-image:url("${t.immagine.replace(/"/g, '%22')}")` : ''}`;
+      const ign = ignotoNasc(t), imgV = ign && isDM() ? t.ignoto.img : t.immagine;
+      el.style.cssText = `left:${pos.x}px;top:${pos.y}px;width:${lato}px;height:${lato}px;--c:${t.colore};--fs:${Math.max(11, sc.griglia * 0.22)}px;z-index:${att?.token === t.id ? lista.length + 1 : i + 1}${imgV ? `;background-image:url("${imgV.replace(/"/g, '%22')}")` : ''}`;
+      el.classList.toggle('ign', ign && !imgV);
       if (T.drag?.id !== t.id) el.classList.remove('live');
       el.classList.toggle('turno', !!att && att.token === t.id);
       // mirando, i bersagli raggiungibili si accendono e gli altri si spengono
@@ -2404,10 +2440,11 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       el.classList.toggle('hid', !!t.nascosto);
       if (isDM()) { const qui = !!t.nascosto === (T.livello === 'master'); el.classList.toggle('altro', !qui); el.classList.toggle('qui', qui); }
       el.classList.toggle('mine', !!t.giocatore && t.giocatore === T.me.giocatore); el.classList.toggle('dm', isDM());
-      el.querySelector('.ini').textContent = t.immagine ? '' : iniziali(t.nome);
-      el.querySelector('b').textContent = t.nome + (t.nascosto ? ' (nascosto)' : '');
+      el.querySelector('.ini').textContent = imgV ? '' : ign ? '?' : iniziali(t.nome);
+      el.querySelector('b').textContent = (ign && isDM() ? (t.ignoto.vero || '?') + ' ❓' : t.nome) + (t.nascosto ? ' (nascosto)' : '');
+      el.classList.toggle('ignd', ign && isDM());
       el.querySelector('b').hidden = !t.nome;
-      el.title = t.nome || '';
+      el.title = ign && isDM() ? `${t.ignoto.vero || ''}: i giocatori vedono una creatura sconosciuta` : t.nome || '';
       const ai = aiutoPer(t), sg = [schiva(t) && ['🌀', 'Schivata'], suoTurno(t) && (azioniDi(t).fatte || []).some(f => f.k === 'dis') && ['🛡', 'Disimpegnato: niente attacchi di opportunità'], ai && ['🤝', 'Aiutato da ' + ai.h.nome], ...marchiatoDa(t).map(h => ['🎯', `${marchioDi(h).nome} di ${h.nome || '?'}`])].filter(Boolean);
       const cl = condTok(t).filter(c => COND_FX[c]), ck = cl.join('|') + '#' + sg.map(x => x[1]).join('|');
       if (el.dataset.cnd !== ck) { // ridisegno gli effetti solo se cambiano, così le animazioni non ripartono
@@ -3100,6 +3137,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (cn.includes('Nascosto')) V.push(['👁 Esci dal nascondiglio', () => mettiNascosto(t, false)]);
     else if (!(isDM() && t.nascosto && !t.giocatore)) V.push(['🥷 Nascondersi (Furtività)', () => nascondersi(t)]);
     if (isDM() && !t.giocatore) V.push(t.nascosto ? ['👁 Mostra ai giocatori', () => mettiSoloDM(t, false)] : ['👑 Solo per me', () => mettiSoloDM(t, true)]);
+    if (isDM() && !t.giocatore) V.push([t.ignoto ? '❓ Sconosciuta: cosa svelare' : '❓ Rendi sconosciuta', () => dlgIgnoto(t)]);
     if (s) V.push(['📜 Scheda', () => apriScheda(s.id, t.id)]);
     if (!T.turno.some(x => x.token === t.id)) { const m = s ? modC(s.dati?.des) : 0; V.push([`🎲 Iniziativa (d20${m ? ' ' + segno(m) : ''})`, () => iniziativa(t, m)]); }
     if (isDM()) V.push(['📋 Copia', () => copiaToken(t)], ['🗑 Elimina', async () => {
@@ -3171,6 +3209,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (!isDM()) {
       // il giocatore apre la foto (solo per sé) e, sul proprio token, tira l'iniziativa
       if (mio) return anello(t, e);
+      if (t.ignoto) return popIgnoto(t, e);
       if (!ft && !sch && !cnow.length) return;
       const gr = tsch + (ft ? tile('foto', '🖼', 'Foto', 'Solo sul tuo schermo') : '');
       pop.innerHTML = `${testa}${mio ? bfine + tzp + rpf : ''}${gr ? `<div class="gr">${gr}</div>` : ''}${mio ? rcond + ini : rcond}`;
@@ -3185,6 +3224,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const gr = tsch + (ft ? tile('foto', '🖼', 'Foto', 'Solo sul tuo schermo') + tile('mostra', '📣', 'Mostra a tutti', 'Si apre a schermo intero a tutti i giocatori') : '')
       + (t.nascosto ? tile('nasc', '⬆', 'Rendi visibile', 'Sposta nei Segnalini: lo vedono tutti') : tile('nasc', '👑', 'Solo per me', 'Sposta nel livello Master: lo vedi solo tu'))
       + (!t.giocatore && pf ? (t.barra ? tile('barra', '🙈', 'Nascondi salute', 'I giocatori vedono la barra della salute di questo token') : tile('barra', '❤', 'Mostra salute', 'Per ora la barra della salute la vedi solo tu')) : '')
+      + (!t.giocatore ? tile('ign', '❓', t.ignoto ? 'Sconosciuta: cosa svelare' : 'Rendi sconosciuta', 'I giocatori vedono «???» e solo quello che decidi di svelare') : '')
       + tile('copia', '📋', 'Copia', 'Poi «Incolla» (o Ctrl+V sulla mappa) per metterne altri uguali') + tile('via', '🗑', 'Elimina', '', 'via');
     pop.innerHTML = `${testa}${bfine}${tzp}${rpf}<div class="gr">${gr}</div>${rcond}${ini}
       <details><summary>Altro: misura, chi lo muove${vista ? ', vista' : ''}</summary>
@@ -3208,6 +3248,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (r2.error) return toast(/barra/i.test(r2.error.message) || sqlMancante(r2.error) ? 'Per la barra della salute esegui tavolo/tappa-6.sql in Supabase.' : r2.error.message, 'err');
       T.tok.set(id, r2.data); disegnaToken(); chiudiPop();
     });
+    pop.querySelector('[data-k=ign]')?.addEventListener('click', () => { chiudiPop(); dlgIgnoto(t); });
     pop.querySelector('[data-k=copia]').onclick = () => { chiudiPop(); copiaToken(t); };
     pop.querySelector('[data-k=nasc]').onclick = async () => { await salva({ nascosto: !t.nascosto }); if (!t.nascosto) manda('nascosto', { id }); };
     pop.querySelector('[data-k=meno]').onclick = () => salva({ misura: t.misura > 1 ? t.misura - 1 : 0.5 });
@@ -3224,6 +3265,71 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       const r2 = await SB.from('tavolo_token').delete().eq('id', id); if (r2.error) return toast(r2.error.message, 'err');
       T.tok.delete(id); disegnaToken();
     };
+  }
+
+  /* ---------- creatura sconosciuta ----------
+     t.ignoto = { vero, img, descr, nome, salute, ca, caN, note: [], prova, cd } (tavolo/tappa-22.sql).
+     Finché il nome non è svelato, nel database il token si chiama «???» e non ha immagine: così anche i messaggi della chat
+     (attacchi, tiri, ordine del turno) non lo tradiscono. Nome e immagine veri restano in ignoto, per il DM. */
+  function ignotoNasc(t) { return !!t?.ignoto && !t.ignoto.nome; }
+  function saluteParole(t) {
+    const m = +t.pf_max, p = +t.pf; if (!m || t.pf == null) return null;
+    const q = clamp(p / m, 0, 1);
+    return [q >= 1 ? 'Sembra illesa' : q > 0.5 ? 'Ferita' : q > 0.25 ? 'Gravemente ferita' : q > 0 ? 'In fin di vita' : 'A terra', q];
+  }
+  function popIgnoto(t, e) {
+    const st = $('#tv-stage'); if (!st) return; chiudiPop();
+    const ig = t.ignoto, r = st.getBoundingClientRect(), sal = ig.salute ? saluteParole(t) : null;
+    const pop = document.createElement('div'); pop.className = 'tv-pop nuovo tv-ign';
+    const note = ig.note || [], ignote = [!ig.ca && 'CA', 'resistenze', 'attacchi'].filter(Boolean);
+    pop.innerHTML = `<div class="ihd"><i style="${!ignotoNasc(t) && t.immagine ? `background-image:url('${t.immagine.replace(/'/g, '%27')}')` : ''}">${!ignotoNasc(t) && t.immagine ? '' : '?'}</i><div style="flex:1;min-width:0"><b>${ig.nome ? esc(t.nome) : 'Creatura sconosciuta'}</b>${ig.descr ? `<small>«${esc(ig.descr)}»</small>` : ''}</div><button type="button" class="x" data-k="chiudi" aria-label="Chiudi">✕</button></div>
+      ${sal ? `<div class="isal"><span>${sal[1] < 0.5 ? '❤️‍🩹' : '❤️'} ${sal[0]}</span><span class="bar"><s style="width:${Math.round(sal[1] * 100)}%;--b:${sal[1] > 0.5 ? '#5bb36a' : sal[1] > 0.25 ? '#d8b04e' : '#e0564c'}"></s></span></div>` : ''}
+      ${ig.ca && ig.caN != null ? `<div class="isal"><span>🛡 CA ${esc(ig.caN)}</span></div>` : ''}
+      <div class="isap"><h5>Cosa sapete</h5><ul>${note.map(n => `<li>${esc(n)}</li>`).join('')}<li class="no">${note.length ? 'Il resto (' + ignote.join(', ') + ') è ancora un mistero.' : 'Niente, per ora. Una prova di conoscenza potrebbe aiutare.'}</li></ul></div>`;
+    st.append(pop);
+    pop.querySelector('[data-k=chiudi]').onclick = chiudiPop;
+    pop.style.left = clamp(e.clientX - r.left + 8, 6, r.width - pop.offsetWidth - 6) + 'px'; pop.style.top = clamp(e.clientY - r.top + 8, 6, r.height - pop.offsetHeight - 6) + 'px'; adattaPop(pop);
+  }
+  async function dlgIgnoto(t) {
+    const ig = t.ignoto || {}, vero0 = ig.vero || t.nome || '';
+    const simili = [...T.tok.values()].filter(x => x.id !== t.id && x.scena === t.scena && !x.giocatore && (x.ignoto?.vero || x.nome) === vero0).length;
+    const r = await formDlg({
+      title: 'Creatura sconosciuta', intro: 'I giocatori vedono «???» al posto di nome e immagine, e solo quello che scegli qui sotto. Lo stesso nelle righe della chat e nell\'ordine del turno.', fields: [
+        { k: 'on', label: 'Creatura sconosciuta ai giocatori', type: 'check', value: true },
+        { k: 'vero', label: 'Nome vero (lo vedi solo tu)', value: vero0 },
+        { k: 'descr', label: 'Cosa vedono i giocatori', type: 'textarea', rows: 2, value: ig.descr || '', hint: 'Per esempio: «Una cassa con le cinghie di ferro… che respira.»' },
+        { k: 'salute', label: 'Svela la salute a parole (illesa, ferita, gravemente ferita…)', type: 'check', value: ig.salute ?? true },
+        { k: 'ca', label: 'Svela la CA', type: 'check', value: !!ig.ca },
+        { k: 'note', label: 'Cosa sanno (una riga per ogni cosa scoperta)', type: 'textarea', rows: 3, value: (ig.note || []).join('\n'), hint: 'Per esempio: «Livion (Arcano 14): è un mimo.»' },
+        { k: 'nome', label: 'Svela il nome e l\'immagine', type: 'check', value: !!ig.nome },
+        { k: 'prova', label: 'Prova di conoscenza', type: 'select', value: ig.prova || '', options: [['', 'Nessuna'], ['Arcano', 'Arcano'], ['Natura', 'Natura'], ['Religione', 'Religione'], ['Storia', 'Storia'], ['Indagare', 'Indagare'], ['Sopravvivenza', 'Sopravvivenza']] },
+        { k: 'cd', label: 'CD della prova', type: 'number', value: ig.cd ?? 12 },
+        { k: 'chiedi', label: 'Chiedi la prova ora, in chat', type: 'check', value: false },
+        ...(simili ? [{ k: 'tutti', label: `Vale anche per gli altri ${simili} token «${vero0}» di questa mappa`, type: 'check', value: true }] : [])]
+    });
+    if (!r) return;
+    const lista = r.tutti ? [...T.tok.values()].filter(x => x.scena === t.scena && !x.giocatore && (x.ignoto?.vero || x.nome) === vero0) : [t];
+    const note = String(r.note || '').split('\n').map(x => x.trim()).filter(Boolean).slice(0, 12);
+    for (const x of lista) {
+      const vx = x.id === t.id || r.tutti ? (String(r.vero || '').trim().slice(0, 60) || vero0) : (x.ignoto?.vero || x.nome);
+      const img = x.ignoto ? (x.ignoto.img ?? x.immagine) : x.immagine;
+      const ch = !r.on ? { ignoto: null, nome: vx, immagine: img }
+        : { ignoto: { vero: vx, img, descr: String(r.descr || '').trim().slice(0, 300), salute: !!r.salute, ca: !!r.ca, caN: r.ca ? (schedaDi(x)?.dati?.ca ?? null) : null, nome: !!r.nome, note, prova: r.prova || null, cd: r.cd ?? null }, nome: r.nome ? vx : '???', immagine: r.nome ? img : null };
+      const u = await SB.from('tavolo_token').update(ch).eq('id', x.id).select().single();
+      if (u.error) return toast(sqlMancante(u.error) || /ignoto/.test(u.error.message) ? 'Per le creature sconosciute esegui tavolo/tappa-22.sql in Supabase.' : u.error.message, 'err');
+      T.tok.set(x.id, u.data);
+      // l'ordine del turno tiene una copia di nome e immagine
+      if (T.turno.some(y => y.token === x.id)) {
+        const v = await SB.from('tavolo_turno').update({ nome: ch.nome, immagine: ch.immagine }).eq('token', x.id);
+        if (!v.error) T.turno.forEach(y => { if (y.token === x.id) { y.nome = ch.nome; y.immagine = ch.immagine; } });
+      }
+    }
+    disegnaToken(); disegnaTurno();
+    if (r.on && r.chiedi && r.prova) {
+      const q = await SB.rpc('tavolo_scrivi', { p_testo: `🔎 Prova di ${r.prova}${r.cd ? ' CD ' + r.cd : ''} per riconoscere la creatura sconosciuta${r.descr ? ` («${String(r.descr).trim().slice(0, 80)}»)` : ''}: chi vuole provarci tira e lo dice al DM.` });
+      if (q.error) toast(q.error.message, 'err');
+    }
+    toast(!r.on ? 'Ora i giocatori vedono ' + (String(r.vero || '').trim() || vero0) : r.nome ? 'Nome svelato ai giocatori' : 'I giocatori vedono una creatura sconosciuta');
   }
 
   /* ---------- il menu ad anello del giocatore: cinque tasti sopra il proprio token, sotto PF, azioni e movimento ---------- */
@@ -3288,7 +3394,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
 
   /* ---------- foto del token a schermo intero ---------- */
-  const ritratto = t => { const e = t.scheda && S.ents?.get(t.scheda); return e?.portrait || null; };
+  const ritratto = t => { if (ignotoNasc(t) && !isDM()) return null; const e = t.scheda && S.ents?.get(t.scheda); return e?.portrait || null; };
   const haFoto = t => !!(t.immagine || ritratto(t));
   const fotoDi = t => ({ nome: t.nome || '', scheda: t.scheda || null, immagine: t.immagine || null });
   function apriFoto(f, dalDM) {
@@ -5417,7 +5523,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   // la tabella del turno: le facce in ordine di iniziativa, chi gioca in grande
   function disegnaStriscia() {
     const s = $('#tv-strip'), w = $('.tv-wrap'); if (!s) return;
-    const L = ordinati(), att = T.stato?.turno, ia = L.findIndex(x => x.id === att);
+    const L = ordinati().map(x => { const tk = isDM() && x.token && T.tok.get(x.token); return tk && ignotoNasc(tk) ? { ...x, nome: (tk.ignoto.vero || '?') + ' ❓', immagine: tk.ignoto.img || x.immagine } : x; }), att = T.stato?.turno, ia = L.findIndex(x => x.id === att);
     const kz = turnoZoom(), ed = isDM() && !!T.turnoEd, col = !ed && turnoVert() && soloFoto(kz), vert = !col && (ed || turnoVert()), pos = turnoPos();
     // la tabella si vede solo sulla mappa del combattimento (il DM può guardarne un'altra)
     const qui = !L.length || !T.vista || scenaCombattimento() === T.vista;
