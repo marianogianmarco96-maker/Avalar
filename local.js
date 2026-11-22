@@ -168,7 +168,7 @@
   /* ---------- schermata di accesso ---------- */
   const LOGIN_CSS = `#login{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at 50% 20%,#7d2530cc 0%,#561820e6 55%,#2d0d12 100%),url(login-mappa.jpg) center/cover #2d0d12;color:#f5e6c4;font-family:'Crimson Pro',Georgia,serif}
 #login .grp{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 18px}
-#login .grp button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;font-family:'Cinzel',Georgia,serif;font-size:.9rem;font-weight:700;letter-spacing:.04em;color:#561820}
+#login .grp button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;font-family:'Alegreya SC',Georgia,serif;font-size:.9rem;font-weight:700;letter-spacing:.04em;color:#561820}
 #login .grp span{display:block;width:100%;aspect-ratio:3/4;border-radius:6px;border:2px solid #a98334;background:url(login-gruppo.jpg) 0 0/400% 100% no-repeat #2b1d14;box-shadow:0 2px 8px #0004;transition:transform .15s,box-shadow .15s}
 #login .grp button:nth-child(2) span{background-position:33.333% 0}#login .grp button:nth-child(3) span{background-position:66.666% 0}#login .grp button:nth-child(4) span{background-position:100% 0}
 #login .grp button:hover span,#login .grp button:focus-visible span{transform:translateY(-2px);box-shadow:0 4px 12px #0006}
@@ -177,10 +177,10 @@
 #login .pick{text-align:center;margin:0 0 8px;color:#3b2a1e;font-size:1.05rem}
 @media (prefers-color-scheme:dark){#login .box{background:#241b16;color:#ecdfc6;border-color:#55402f}#login h1{color:#e0c071}#login .sub,#login small,#login .or{color:#94806a}#login label{color:#c5b193}#login .btn{background:#2b211b;color:#e0c071;border-color:#55402f}#login .btn.p{background:#8c2c38;color:#fbeccb;border-color:#c4494f}#login .or:before,#login .or:after{border-color:#3a2d24}}
 #login .box{width:min(420px,100%);background:#fbf5e3;color:#2b1d14;border:1px solid #d4b06a;border-radius:12px;padding:28px 26px;box-shadow:0 12px 40px #0008}
-#login h1{margin:0 0 2px;font-family:'Cinzel',Georgia,serif;font-size:1.35rem;letter-spacing:.06em;color:#561820;text-align:center}
+#login h1{margin:0 0 2px;font-family:'Grenze Gotisch',Georgia,serif;font-size:1.35rem;letter-spacing:.06em;color:#561820;text-align:center}
 #login .sub{text-align:center;color:#8a7560;margin:0 0 20px}
 #login button,#login input[type=password]{font:inherit;width:100%;box-sizing:border-box;border-radius:8px;padding:11px 14px}
-#login .btn{cursor:pointer;border:1px solid #a98334;background:#f3e8cc;color:#561820;font-family:'Cinzel',Georgia,serif;letter-spacing:.05em;font-size:.9rem}
+#login .btn{cursor:pointer;border:1px solid #a98334;background:#f3e8cc;color:#561820;font-family:'Alegreya SC',Georgia,serif;letter-spacing:.05em;font-size:.9rem}
 #login .btn.p{background:#7d2530;color:#fbf5e3;border-color:#561820}
 #login .btn:disabled{opacity:.6;cursor:wait}
 #login input[type=password]{border:1px solid #a98334;background:#fffdf4;color:#2b1d14;margin-bottom:8px}
@@ -406,7 +406,7 @@
   function askClaude() {
     let d = document.getElementById('askdlg'); if (d) d.remove();
     d = document.createElement('dialog'); d.id = 'askdlg'; d.style.cssText = 'border:1px solid #a98334;border-radius:12px;background:#fbf5e3;color:#2b1d14;padding:20px;width:min(560px,92vw);font:16px/1.4 Georgia,serif';
-    d.innerHTML = `<h3 style="margin:0 0 6px;font-family:Cinzel,Georgia,serif;color:#561820">Chiedi una modifica a Claude</h3>
+    d.innerHTML = `<h3 style="margin:0 0 6px;font-family:'Alegreya SC',Georgia,serif;color:#561820">Chiedi una modifica a Claude</h3>
       <p style="margin:0 0 10px;color:#5a4636">Scrivi cosa vuoi cambiare e premi «Invia a Claude»: si apre GitHub con la richiesta già compilata, tu confermi con «Create». Claude la studia e prepara la modifica, che resta in attesa finché non la approvi tu.</p>
       <textarea id="ask-t" rows="6" style="width:100%;box-sizing:border-box;border:1px solid #c4ae80;border-radius:8px;padding:10px;font:inherit;background:#fffdf4" placeholder="Es.: nella scheda di Robin aggiungi che…"></textarea>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button id="ask-s" class="btn primary">Invia a Claude</button><button id="ask-c" class="btn">Copia richiesta</button><button id="ask-x" class="btn">Copia richiesta + contesto</button><button id="ask-k" class="btn ghost" style="margin-left:auto">Chiudi</button></div><p id="ask-m" style="min-height:1.2em;color:#3f6b46;margin:8px 0 0"></p>`;
@@ -482,7 +482,7 @@
     if (AVVISO) return; AVVISO = t;
     const n = document.createElement('div'); n.id = 'newver'; n.setAttribute('role', 'alert');
     n.style.cssText = 'position:fixed;left:50%;top:calc(66px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:10000;display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;width:max-content;max-width:min(560px,94vw);background:#561820;color:#f5e6c4;padding:10px 12px 10px 16px;border-radius:10px;border:1px solid #c9a24b;font:15px/1.35 Georgia,serif;box-shadow:0 8px 28px #0008';
-    n.innerHTML = `<span style="flex:1 1 220px">${t}</span><button type="button" data-r style="font:600 13px/1 Cinzel,Georgia,serif;letter-spacing:.06em;text-transform:uppercase;background:#e0c071;color:#2c0f14;border:0;border-radius:6px;padding:9px 14px;cursor:pointer">Ricarica pagina</button><button type="button" data-x aria-label="Più tardi" title="Più tardi" style="background:none;border:0;color:#f5e6c4;font-size:20px;line-height:1;padding:4px 6px;cursor:pointer;opacity:.75">×</button>`;
+    n.innerHTML = `<span style="flex:1 1 220px">${t}</span><button type="button" data-r style="font:600 13px/1 'Alegreya SC',Georgia,serif;letter-spacing:.06em;text-transform:uppercase;background:#e0c071;color:#2c0f14;border:0;border-radius:6px;padding:9px 14px;cursor:pointer">Ricarica pagina</button><button type="button" data-x aria-label="Più tardi" title="Più tardi" style="background:none;border:0;color:#f5e6c4;font-size:20px;line-height:1;padding:4px 6px;cursor:pointer;opacity:.75">×</button>`;
     n.querySelector('[data-r]').onclick = () => { ls.set('cdnd_updated', '1'); location.reload(); };
     n.querySelector('[data-x]').onclick = () => { n.remove(); setTimeout(() => { if (AVVISO === t) { AVVISO = ''; mostraAvviso(t); } }, 20 * 60000); };
     document.body.append(n);
@@ -786,7 +786,7 @@
      «Modifica il contenuto» accende la modalità revisione: si tocca un testo qualsiasi, lo si corregge sul posto
      (o si lascia una nota) e tutto si accumula nel riquadro in basso, da inviare a Claude con un tasto. */
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-  const H3 = 'margin:0 0 6px;font-family:Cinzel,Georgia,serif;color:#561820';
+  const H3 = 'margin:0 0 6px;font-family:Alegreya SC,Georgia,serif;color:#561820';
   const SEG_CSS = `.segdlg{border:1px solid #a98334;border-radius:12px;background:#fbf5e3;color:#2b1d14;padding:20px;width:min(560px,92vw);max-height:88vh;font:16px/1.4 Georgia,serif}
 .segdlg .sd{color:#5a4636}
 .segc{display:flex;gap:14px;align-items:flex-start;width:100%;text-align:left;padding:14px;border-radius:10px;border:1px solid #c4ae80;background:#fffdf4;margin-top:10px;font:inherit;color:inherit;cursor:pointer}

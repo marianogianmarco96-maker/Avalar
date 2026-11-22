@@ -6,11 +6,11 @@
 <style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#eadcbc;color:#2b1d14}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 <meta name="theme-color" content="#561820"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><script src="copie.js"></script><script src="local.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Alegreya+SC:wght@500;700&display=swap">
 <style>
 :root{
-  --display:'Cinzel','Trajan Pro','Palatino Linotype','Book Antiqua',Palatino,Georgia,serif;
-  --body:'Crimson Pro','Iowan Old Style','Palatino Linotype','Book Antiqua',Georgia,serif;
+  --display:'Alegreya SC','Trajan Pro','Palatino Linotype','Book Antiqua',Palatino,Georgia,serif;
+  --body:'EB Garamond','Iowan Old Style','Palatino Linotype','Book Antiqua',Georgia,serif;
   --bg:#eadcbc; --bg2:#f3e8cc; --paper:#fbf5e3; --paper2:#f6ecd2; --ink:#2b1d14; --ink2:#5a4636; --mute:#8a7560;
   --wine:#7d2530; --wine2:#a7343b; --wine-d:#561820; --gold:#a98334; --gold2:#d4b06a;
   --line:#dccaa0; --line2:#c4ae80; --ok:#3f6b46; --warn:#a8641c; --bad:#a3262f;
@@ -873,6 +873,106 @@ details.older[open]>summary{display:none}
 .hm-ax{display:flex;justify-content:space-between;font-size:.82rem;color:var(--mute);margin-top:5px}
 @media (max-width:980px){.hm-top{grid-template-columns:1fr}.hm-row3{grid-template-columns:1fr 1fr}.hm-row3 .party{grid-column:1/-1}.hm-ns{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:620px){.hm-dove{height:300px}.hm-row3{grid-template-columns:1fr}.hm-top .hero .ht{font-size:1.4rem}.hm-top .hero .in{padding:18px 16px 16px}.hm-c.party .pgs{grid-template-columns:repeat(4,1fr)}.hm-n b{font-size:1.5rem}.hm-arcs span{font-size:.62rem;padding:10px 4px;letter-spacing:.03em}.hm-via{display:none}}
+</style>
+<style id="grimorio">
+/* ===== Restyling «Grimorio» (novembre 2026): caratteri, barra laterale, carte ===== */
+:root{--display:'Alegreya SC',serif;--title:'Grenze Gotisch',serif;--body:'EB Garamond',Georgia,serif}body{font-size:19px}
+h1,h2,h3,.hm-top .hero .ht{font-family:'Grenze Gotisch',serif!important;letter-spacing:.01em!important}
+/* ===== A · GRIMORIO MINIATO ===== */
+:root{--bg:#e9dcc0;--bg2:#f2e7cf;--paper:#fbf4e2;--paper2:#f4e9cf;--ink:#2a1a12;--ink2:#56402f;--mute:#86705a;--wine:#7a1f2c;--wine2:#9d2b37;--gold:#a9802f;--gold2:#cfa95c;--line:#e0cfa7;--line2:#c6ab73;--side:#2a1215;--sideink:#f2dfb4}
+:root[data-theme=dark]{--bg:#110c0a;--bg2:#17110e;--paper:#1c1410;--paper2:#241a14;--ink:#efe2c8;--ink2:#cdb894;--mute:#9b8569;--wine:#a12f3d;--wine2:#cf5560;--gold:#d2a95a;--gold2:#e8c57d;--line:#352820;--line2:#56412d;--side:#0b0706;--sideink:#e8d3a8}
+body{font-size:18px;background:var(--bg)}
+:root body::before{background:radial-gradient(ellipse at 70% -10%,#c9a24b22 0,transparent 55%),var(--tex)}
+:root[data-theme=dark] body::before{background:radial-gradient(ellipse at 70% -10%,#c9a24b14 0,transparent 55%),radial-gradient(ellipse at 100% 100%,#7d253022 0,transparent 50%)}
+h1,h2,h3{font-family:var(--display);letter-spacing:.03em}
+.pagehead h1,.page>h1{font-family:var(--title);font-weight:700;font-size:2.7rem;letter-spacing:.01em;line-height:1.05}
+:root[data-theme=dark] h1{background:none;-webkit-background-clip:initial;background-clip:initial;color:var(--gold2);filter:none}
+.pagehead h1::first-letter{color:var(--wine2);font-size:1.18em}
+:root[data-theme=dark] .pagehead h1::first-letter{color:var(--wine2)}
+h2{font-size:1.25rem}
+@media (min-width:900px){
+  header.top{position:fixed!important;left:0;top:0;bottom:0;width:236px;height:auto!important;flex-direction:column!important;align-items:stretch!important;gap:6px!important;padding:22px 16px 16px!important;background:linear-gradient(180deg,#3a161b,var(--side) 60%)!important;border:0!important;border-right:1px solid #c9a24b55!important;box-shadow:6px 0 30px #0004!important;overflow:auto}
+  :root[data-theme=dark] header.top{background:linear-gradient(180deg,#1a0c0d,var(--side) 60%)!important}
+  header.top::after{display:none!important}
+  header.top #backBtn,header.top #fwdBtn{display:none!important}
+  header.top .brand{order:-2;display:block;text-align:center;padding:6px 0 18px;margin:0 0 8px;border-bottom:1px solid #c9a24b44}
+  header.top .brand::before{content:"";display:block;width:64px;height:64px;margin:0 auto 10px;background:url(icon-192.png) center/cover;border-radius:14px;box-shadow:0 0 0 2px #c9a24b,0 6px 18px #0008}
+  header.top .brand b{font-family:var(--display)!important;font-size:1.8rem!important;letter-spacing:.18em!important;color:var(--sideink)!important;display:block}
+  header.top .brand small{display:block!important;font-family:var(--title);font-style:italic;font-size:.95rem;letter-spacing:.04em;text-transform:none;color:#c9a24b;margin:2px 0 0}
+  #nav{flex-direction:column!important;flex:0 0 auto!important;gap:2px!important;overflow:visible!important}
+  #nav a{display:flex!important;align-items:center;gap:12px;text-align:left!important;flex:none!important;padding:10px 12px!important;border-radius:8px!important;font-family:var(--display)!important;font-size:1.08rem!important;letter-spacing:.08em!important;text-transform:none!important;color:var(--sideink)!important;border:1px solid transparent}
+  #nav a .nic{display:block!important;width:20px;height:20px;flex:none;fill:none;stroke:#c9a24b;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+  #nav a:hover{background:#ffffff0d}
+  #nav a.on,#nav a[aria-current]{background:linear-gradient(90deg,#c9a24b33,#c9a24b08)!important;border-color:#c9a24b66;color:#fff!important;box-shadow:inset 3px 0 0 #e0c071}
+  #nav a.on::after,#nav a[aria-current]::after{display:none!important}
+  header.top .srch{order:-1;position:static!important;display:block!important;width:auto!important;margin:0 0 10px}
+  header.top .srch input[type=search]{border-radius:8px!important;background:#00000040!important}
+  header.top #srchBtn{display:none!important}
+  header.top #themeBtn{position:absolute;right:14px;top:14px}
+  header.top #tools{margin-top:auto!important;position:static!important}
+  #view{margin-left:236px!important;max-width:none!important;padding:34px 48px 60px!important}
+  #view>.page{max-width:1120px;margin:0 auto}
+  .spacer-top{display:none!important}
+}
+/* riquadri: cornice doppia da manoscritto con angoli dorati */
+.card,.cp-list,.cp-spw,.vl.flow{border-radius:4px!important;border:1px solid var(--line2)!important;background:
+  linear-gradient(var(--gold),var(--gold)) top left/14px 2px no-repeat,linear-gradient(var(--gold),var(--gold)) top left/2px 14px no-repeat,
+  linear-gradient(var(--gold),var(--gold)) top right/14px 2px no-repeat,linear-gradient(var(--gold),var(--gold)) top right/2px 14px no-repeat,
+  linear-gradient(var(--gold),var(--gold)) bottom left/14px 2px no-repeat,linear-gradient(var(--gold),var(--gold)) bottom left/2px 14px no-repeat,
+  linear-gradient(var(--gold),var(--gold)) bottom right/14px 2px no-repeat,linear-gradient(var(--gold),var(--gold)) bottom right/2px 14px no-repeat,
+  var(--paper)!important;box-shadow:inset 0 0 0 5px var(--paper),inset 0 0 0 6px var(--line),0 2px 14px #3a20101a!important}
+:root[data-theme=dark] .card,:root[data-theme=dark] .vl.flow{box-shadow:inset 0 0 0 5px var(--paper),inset 0 0 0 6px var(--line),0 10px 30px #0008!important}
+.card h2{display:flex;align-items:center;gap:10px}
+.card h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--gold),transparent)}
+.hm-top .hero{border-radius:4px!important;background:radial-gradient(circle at 85% 10%,#c9a24b30,transparent 50%),linear-gradient(135deg,#5a1620,#2a0b10)!important;box-shadow:inset 0 0 0 5px #2a0b10,inset 0 0 0 6px #c9a24b88,0 12px 34px #0005!important}
+.hm-top .hero .ht{font-family:var(--title)!important;font-size:2.4rem!important;font-weight:700}
+.btn{font-family:var(--display);font-size:1rem;letter-spacing:.06em;border-radius:4px}
+.btn.primary{background:linear-gradient(180deg,var(--wine2),var(--wine));border-color:#c9a24b88;box-shadow:inset 0 1px 0 #ffffff30,0 2px 8px #0003}
+.chip{border-radius:4px;font-family:var(--display);font-size:1rem;letter-spacing:.04em}
+.chip.on{background:var(--wine);border-color:var(--gold);box-shadow:inset 0 0 0 1px #c9a24b88}
+.erow{border-bottom:1px dashed var(--line2)!important}
+.erow .t,.erow b{font-family:var(--title);font-size:1.18rem}
+.orn{display:block!important;height:18px;margin:4px 0 22px;background:linear-gradient(90deg,transparent,var(--gold) 15%,var(--gold) 44%,transparent 44%,transparent 56%,var(--gold) 56%,var(--gold) 85%,transparent) center/100% 1px no-repeat}
+.orn::after{content:"◆";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:var(--gold);font-size:12px;line-height:1}
+.banner{border-radius:4px}
+@media (max-width:899px){
+  header.top{background:linear-gradient(180deg,#3a161b,#24090d)!important}
+  header.top .brand b{font-family:var(--display)!important;font-size:1.5rem!important;letter-spacing:.16em!important}
+  #nav{left:10px!important;right:10px!important;bottom:calc(10px + env(safe-area-inset-bottom,0px))!important;border-radius:18px!important;border:1px solid #c9a24b66!important;background:#24090df2!important;box-shadow:0 10px 30px #0009!important;overflow:hidden}
+  #nav a{font-family:var(--display)!important;font-size:.72rem!important;letter-spacing:.02em!important;text-transform:none!important}
+  #nav a.on,#nav a[aria-current]{background:radial-gradient(circle at 50% 30%,#c9a24b38,transparent 70%)!important;color:#fff!important}
+  .pagehead h1{font-size:2.1rem}
+  #view{padding-bottom:110px!important}
+}
+
+header.top .brand>span{display:block!important}
+.hm-c.party .pgs{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+@media (max-width:899px){header.top .brand b{letter-spacing:.1em!important}}
+@media (max-width:899px){header.top .brand,header.top .brand b{overflow:visible!important;text-overflow:clip!important;max-width:none!important}header.top .brand b{letter-spacing:.12em!important;font-size:1.35rem!important}}
+/* B3 · CARTE DA GIOCO: elenchi in griglia di carte, ritratti grandi, sigilli */
+html body :is(#slist,#elist).vl.flow{background:none!important;border:0!important;box-shadow:none!important;overflow:visible!important}
+html body :is(#slist,#elist).vl.flow .vl-in{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;height:auto!important}
+html body :is(#slist,#elist).vl.flow .vl-row{position:static!important;height:auto!important;transform:none!important}
+html body :is(#slist,#elist).vl.flow .erow{height:100%!important;flex-direction:column;align-items:stretch!important;gap:8px!important;padding:16px!important;border:0!important;border-radius:14px;min-height:200px;
+ background:linear-gradient(180deg,#ffffff0a,transparent 40%),var(--paper)!important;box-shadow:inset 0 0 0 1px var(--tc,#c9a24b),inset 0 0 0 5px var(--paper),inset 0 0 0 6px color-mix(in srgb,var(--tc,#c9a24b) 50%,transparent),0 10px 24px #0006!important;position:relative;transition:transform .15s}
+html body :is(#slist,#elist).vl.flow .erow:hover{transform:translateY(-3px) rotate(-.4deg)}
+html body :is(#slist,#elist).vl.flow .erow .r,html body :is(#slist,#elist).vl.flow .erow .icb{display:none!important}
+html body :is(#slist,#elist).vl.flow .erow .main{min-width:0}
+html body :is(#slist,#elist).vl.flow .erow .b{white-space:normal!important;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+html body :is(#slist,#elist).vl.flow .erow .num{align-self:center;width:58px;height:58px;border-radius:50%;display:grid;place-items:center;font:700 1.6rem var(--title);color:#f6d58e;background:radial-gradient(circle at 35% 30%,#c0393f,#7a1018 70%);box-shadow:0 0 0 4px #8e1a2299,0 4px 10px #0008,inset 0 -3px 6px #0006;margin:-2px 0 4px}
+html body :is(#slist,#elist).vl.flow .erow .t{text-align:center;font-size:1.25rem}
+html body :is(#slist,#elist).vl.flow .erow .d{text-align:center;color:var(--gold)}
+html body :is(#slist,#elist).vl.flow .erow.ent{padding:0 0 14px!important;overflow:hidden}
+html body :is(#slist,#elist).vl.flow .erow.ent .av{width:100%!important;height:170px!important;border-radius:14px 14px 0 0!important;object-fit:cover;flex:none;border:0!important;box-shadow:none!important;font-size:3rem!important;display:grid;place-items:center}
+html body :is(#slist,#elist).vl.flow .erow.ent .main{padding:0 14px}
+html body :is(#slist,#elist).vl.flow .erow.ent .ktl{display:block;margin:0 0 2px;text-align:center}
+html body .erow.t-luogo{--tc:#4caf6a}html body .erow.t-pg{--tc:#e8788a}html body .erow.t-png{--tc:#7aaaf0}html body .erow.t-oggetto{--tc:#e8cb45}html body .erow.t-fazione{--tc:#bd96e8}html body .erow.t-missione{--tc:#f29a55}html body .erow.t-lore{--tc:#5ec6cf}
+html body .card{border-radius:14px!important;box-shadow:inset 0 0 0 1px #c9a24b,inset 0 0 0 5px var(--paper),inset 0 0 0 6px #c9a24b66,0 10px 24px #0006!important;background:var(--paper)!important;border:0!important}
+html body .hm-top .hero{border-radius:14px!important}
+html body .hm-c .pgs a img{border-radius:10px!important;box-shadow:0 0 0 2px #c9a24b,0 6px 14px #0008!important}
+
+/* Tavolo con la barra laterale: occupa solo lo spazio a destra della barra */
+@media (min-width:900px){html.in-tavolo .tv{left:236px!important;top:0!important;bottom:0!important}}
 </style>
 </head><body>
 <header class="top">
