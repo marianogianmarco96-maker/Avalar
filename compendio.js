@@ -212,8 +212,51 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
   .cp-row .cp-gem,.cp-row .cp-cr{margin-left:-2px}
   .cp-sp td{white-space:normal}.cp-sp td.n{min-width:120px}.cp-sp td.k{padding-right:4px}
 }`;
+  const CSS_RC = `
+.page.rc-p{max-width:1400px}
+.rc-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
+.rc-tabs a{border:1px solid var(--line2);border-radius:22px;padding:8px 18px;font:600 .8rem var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);background:var(--paper);text-decoration:none!important}
+.rc-tabs a.on{background:var(--wine);border-color:var(--wine);color:#fbeccb}
+.rc{display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);gap:22px;align-items:start}
+.rc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.rc-card{position:relative;display:flex;flex-direction:column;justify-content:flex-end;aspect-ratio:3/4;border-radius:10px;overflow:hidden;border:2px solid #b8924a;box-shadow:0 4px 14px #2b1d1433;background:radial-gradient(circle at 50% 38%,var(--rg,#5b3a2e),#1c120e 78%);color:#f6e7c4;cursor:pointer;text-align:left;padding:0;font:inherit;transition:transform .15s,box-shadow .15s}
+.rc-card:hover,.rc-card:focus-visible{transform:translateY(-2px);box-shadow:0 8px 20px #2b1d1455}
+.rc-card.on{outline:3px solid var(--gold2);outline-offset:2px}
+.rc-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top}
+.rc-card .em{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);font-size:3.6rem;filter:drop-shadow(0 3px 6px #0008)}
+.rc-card .tx{position:relative;padding:44px 12px 12px;background:linear-gradient(180deg,transparent,#120b08e6 45%)}
+.rc-card h3{font:600 1.15rem var(--display);letter-spacing:.06em;color:#fff;margin:0 0 3px;text-transform:uppercase}
+.rc-card p{margin:0 0 7px;font-size:.84rem;line-height:1.3;color:#eadcbf;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.rc-ch{display:flex;flex-wrap:wrap;gap:4px}
+.rc-ch span{border:1px solid #d4b06a88;border-radius:10px;padding:0 7px;font-size:.72rem;color:#f6e7c4;white-space:nowrap}
+.rc-bd{position:absolute;top:9px;right:9px;background:#d4b06a;color:#2c0f14;border-radius:12px;padding:2px 9px;font:600 .66rem var(--display);letter-spacing:.1em;text-transform:uppercase;max-width:calc(100% - 18px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rc-bd.da{left:9px;right:auto;background:#120b08cc;color:#eadcbf;font:.7rem var(--body);letter-spacing:0;text-transform:none}
+.rc-det{position:sticky;top:78px;padding:0;overflow:hidden;margin:0;border:2px solid #b8924a;max-height:calc(100vh - 96px);overflow-y:auto}
+.rc-det .im{position:relative;aspect-ratio:4/3;background:radial-gradient(circle at 50% 40%,var(--rg,#5b3a2e),#1c120e 80%);display:grid;place-items:center;font-size:5rem}
+.rc-det .im img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top}
+.rc-det .im::after{content:"";position:absolute;inset:auto 0 0;height:45%;background:linear-gradient(180deg,transparent,var(--paper))}
+.rc-det .in{padding:0 20px 20px;margin-top:-34px;position:relative}
+.rc-det h2{font:600 1.9rem var(--display);color:var(--wine);margin:0;letter-spacing:.04em}
+:root[data-theme=dark] .rc-det h2{color:var(--gold2)}
+.rc-det .tag{font-style:italic;color:var(--ink2);margin:2px 0 12px}
+.rc-st{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 12px}
+.rc-st div{border:1px solid var(--line2);border-radius:8px;padding:8px 4px;text-align:center;background:var(--paper2)}
+.rc-st b{display:block;font:600 1.05rem var(--display);color:var(--wine)}
+:root[data-theme=dark] .rc-st b{color:var(--gold2)}
+.rc-st small{color:var(--mute);font-size:.76rem}
+.rc-det ul{margin:0 0 12px;padding-left:18px}.rc-det li{margin:0 0 5px;line-height:1.4}
+.rc-det h4{font:600 .74rem var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin:14px 0 6px}
+.rc-pl{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 6px}
+.rc-pl span,.rc-pl a{border:1px solid var(--line2);border-radius:12px;padding:2px 10px;font-size:.85rem;background:var(--paper2);color:var(--ink2);text-decoration:none!important}
+.rc-cr{font-size:.76rem;color:var(--mute);margin:10px 0 0;line-height:1.35}
+.rc-cr a{color:inherit;text-decoration:underline}
+.rc-cls{font-size:.9rem}
+@media (max-width:900px){.rc{grid-template-columns:1fr}.rc-det{position:static;max-height:none}.rc-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.rc-card h3{font-size:1rem}.rc-card p{-webkit-line-clamp:2}}
+.cp-hero .ill{position:relative;flex:none;width:150px;height:150px;border-radius:10px;overflow:hidden;border:2px solid var(--gold)}
+.cp-hero .ill img{width:100%;height:100%;object-fit:cover}
+`;
   let cssDone = false;
-  const css = () => { if (cssDone) return; cssDone = true; const s = document.createElement('style'); s.textContent = CSS; document.head.append(s); };
+  const css = () => { if (cssDone) return; cssDone = true; const s = document.createElement('style'); s.textContent = CSS + CSS_RC; document.head.append(s); };
 
   /* ---------- icone disegnate per il sito ---------- */
   const I = {
@@ -237,6 +280,7 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
     cond: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5M12 16h.01"/>',
     ring: '<circle cx="12" cy="14" r="6"/><path d="M9 8 12 4l3 4M10 8h4"/>',
     sword: '<path d="M14.5 4H20v5.5L9.5 20 4 14.5z"/><path d="M7 12l5 5M5 19l2-2"/>',
+    razze: '<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.4 2.8-5.3 5.5-5.3s4.9 1.9 5.5 5.3"/><path d="M15 5.2a3 3 0 0 1 0 5.6M17 13.9c1.9.6 3.2 2.4 3.5 5.1"/>',
     tavolo: '<path d="M5 4l9.5 9.5M19 4L9.5 13.5M12.5 15.5l-2 2M11.5 15.5l2 2M4 20l3-3M20 20l-3-3"/>',
   };
   const svg = (k, cls = '') => `<svg viewBox="0 0 24 24" class="${cls}" aria-hidden="true">${I[k] || ''}</svg>`;
@@ -276,7 +320,7 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
     const map = x => ({ n: x.nome, l: +x.livello || 0, s: x.scuola, r: !!x.rituale, t: x.tempo || '', p: x.portata || '', c: x.componenti || '', d: x.durata || '', k: !!x.conc, x: x.testo || '', fonte: x.fonte || '', riass: !!x.riassunto, cl: [...(cl[norm(x.nome)] || [])] });
     const nomi = new Set(inc.incantesimi.map(x => norm(x.nome)));
     const sp = [...inc.incantesimi.map(map), ...(R?.extraInc || []).filter(x => !nomi.has(norm(x.nome))).map(map)].sort((a, b) => a.l - b.l || a.n.localeCompare(b.n, 'it'));
-    D = { ...c, mostri: B.mostri || [], sp, attr: inc.attribuzione || '' };
+    D = { ...c, mostri: B.mostri || [], sp, attr: inc.attribuzione || '', R: R?.razze ? R : null };
     D.creg = new RegExp('(^|[^\\p{L}])(' + D.condizioni.map(x => x.n.toLowerCase()).concat(['avvelenat[aoie]', 'spaventat[aoie]', 'paralizzat[aoie]', 'pron[aoie]', 'accecat[aoie]', 'affascinat[aoie]', 'afferrat[aoie]', 'trattenut[aoie]', 'stordit[aoie]', 'incapacitat[aoie]', 'assordat[aoie]', 'pietrificat[aoie]', 'invisibil[ei]', 'nascost[aoie]']).join('|') + ')(?![\\p{L}])', 'giu');
     return D;
   }).catch(e => { P = null; throw e; }));
@@ -428,6 +472,7 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
         <div class="cp-tiles">
           ${tile('incantesimi', 'spells', '#7a3ea6', 'Incantesimi', `${D.sp.length} incantesimi, da cercare per classe, livello e scuola.`, false, D.sp.length, 'incantesimi')}
           ${dm() ? tile('bestiario', 'beast', '#2e7a3c', 'Bestiario', `${D.mostri.length} creature da mettere contro il party, pronte per il Tavolo.`, true, D.mostri.length, 'creature') : ''}
+          ${D.R ? tile('razze', 'razze', '#8a5a1c', 'Razze e classi', `${D.R.razze.length} razze e ${Object.keys(D.R.classi).length} classi, in carte da sfogliare.`) : ''}
           ${tile('condizioni', 'cond', '#7d2530', 'Condizioni', 'Cosa succede a chi è prono, afferrato, spaventato…')}
           ${tile('oggetti', 'ring', '#2a5ea8', 'Oggetti magici', `${D.oggetti.length} oggetti: pozioni, anelli, armi e bacchette con le loro regole.`, false, D.oggetti.length, 'oggetti')}
           ${tile('equipaggiamento', 'sword', '#7a6450', 'Equipaggiamento', 'Armi, armature, scudi, attrezzatura, strumenti e cavalcature, con costo e peso.')}
@@ -535,11 +580,132 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
     if (!dm()) { location.replace('#/compendio'); setTimeout(nega, 300); return; }
     const m = D.mostri.find(x => x.id === id);
     if (!m) { setView(`<div class="empty"><h2>Creatura non trovata</h2><p><a href="#/compendio/bestiario">Torna al Bestiario</a></p></div>`); return; }
-    setView(`${crumbs(['Bestiario', '#/compendio/bestiario'])}<div class="pagehead cp-hero" style="--tc:var(--wine2)"><span class="wm" aria-hidden="true">${svg('beast')}</span><div style="flex:1;min-width:220px"><div class="cp-meta" style="margin-bottom:6px">${monMeta(m)}</div><h1>${esc(m.nome)}</h1></div>
+    const im = immagini()['mostro:' + m.id], src = sicura(im?.src);
+    setView(`${crumbs(['Bestiario', '#/compendio/bestiario'])}<div class="pagehead cp-hero" style="--tc:var(--wine2)"><span class="wm" aria-hidden="true">${svg('beast')}</span>${src ? `<span class="ill"><img src="${esc(src)}" alt=""></span>` : ''}<div style="flex:1;min-width:220px"><div class="cp-meta" style="margin-bottom:6px">${monMeta(m)}</div><h1>${esc(m.nome)}</h1></div>
       <div class="acts"><button type="button" class="btn primary" id="cp-put">${svg('tavolo', 'cp-ic')} Metti al Tavolo</button>${favBtn('mostro', m.id)}</div></div>
-      <div class="card cp-sb">${statblock(m)}</div>`);
+      <div class="card cp-sb">${statblock(m)}${src ? credito(im) : ''}</div>`);
     $('#cp-put').onclick = () => alTavolo(m);
   });
+
+  /* ---------- razze e classi ----------
+     Carte illustrate: l'immagine viene da meta «immagini» ({ 'razza:elfo': { src, autore, licenza, fonte } }), scelta dal DM
+     con licenza libera e la fonte citata sotto. Senza immagine: la foto del personaggio del party di quella razza (o classe),
+     se c'è, altrimenti un simbolo. Razza, classe e livello del party: meta «party», che il DM aggiorna dalla Home. */
+  const RZ = {
+    dragonide: ['🐉', '#7a3a1c', 'Fieri discendenti dei draghi, con un soffio elementale e l\'orgoglio di una stirpe antica.'],
+    nano: ['⚒️', '#5b4a3a', 'Robusti come la roccia delle loro montagne, tenaci, leali e duri da avvelenare.'],
+    elfo: ['🌙', '#3a5a5e', 'Agili e longevi, vedono al buio e invece di dormire meditano.'],
+    gnomo: ['⚙️', '#4e5a2e', 'Piccoli, curiosi e testardi, con una mente difficile da ingannare.'],
+    mezzelfo: ['🍃', '#4a5a3a', 'A metà tra due mondi: il fascino degli elfi e l\'ingegno degli umani.'],
+    mezzorco: ['🪓', '#4a4a2e', 'Forza feroce e la tenacia di chi non cade facilmente.'],
+    halfling: ['🍀', '#2e5a34', 'Piccoli e fortunati: un 1 sul dado si può ritirare.'],
+    umano: ['🛡️', '#5a4a3a', 'Il popolo più diffuso: adattabile, ambizioso, pronto a tutto.'],
+    tiefling: ['🔥', '#6b1c24', 'Un\'eredità infernale scritta nelle corna e negli occhi.'],
+    aasimar: ['✨', '#6b5a2e', 'Toccati da un\'anima celeste: luce, guarigione e una missione da compiere.'],
+    goliath: ['⛰️', '#4a5560', 'Giganti di montagna che vivono per la sfida e per la gara.'],
+    firbolg: ['🌳', '#2e5a44', 'Custodi gentili dei boschi, capaci di parlare con piante e animali.'],
+    tabaxi: ['🐾', '#6b4a1c', 'Felini curiosi e velocissimi, sempre a caccia di storie.'],
+    tritone: ['🌊', '#1c4a6b', 'Guardiani degli abissi, a loro agio tanto in acqua quanto sulla terra.'],
+    kenku: ['🪶', '#2e2e3a', 'Corvi senza ali che imitano ogni voce e ogni suono.'],
+    lucertoloide: ['🦎', '#3a5a2e', 'Rettili pratici e spietati, con morso e scaglie robuste.'],
+    goblin: ['🗡️', '#4a5a2e', 'Piccoli, svelti e furbi: colpiscono e spariscono.'],
+    orco: ['💪', '#4a3a2e', 'Forti e resistenti, avanzano anche quando dovrebbero fermarsi.'],
+    changeling: ['🎭', '#4a3a5a', 'Mutaforma che cambiano volto come altri cambiano abito.'],
+    forgiato: ['🔩', '#4a4a4a', 'Costrutti viventi, creati per la guerra e in cerca di uno scopo.'],
+    centauro: ['🏹', '#5a3a1c', 'Metà umani e metà cavalli, nati per correre e per la caccia.'],
+    minotauro: ['🐂', '#5a2e1c', 'Corna e forza bruta: nessun labirinto li ferma.'],
+    aarakocra: ['🦅', '#3a4a6b', 'Gente dei cieli, con ali vere e artigli.'],
+    leonin: ['🦁', '#6b4a1c', 'Fieri leoni delle pianure, dal ruggito che fa tremare.'],
+    harengon: ['🐇', '#5a4a3a', 'Lepri dalle zampe agili e dai riflessi fortunati.'],
+    owlin: ['🦉', '#3a3a4a', 'Gufi silenziosi che volano e vedono nella notte.'],
+    satiro: ['🎶', '#4a5a2e', 'Spiriti fatati della festa, della musica e degli scherzi.'],
+    fatato: ['🧚', '#5a3a6b', 'Piccole creature della Selva Fatata, con ali e magia.'],
+    'yuan-ti': ['🐍', '#2e4a2e', 'Sangue di serpente, mente fredda e resistenza alla magia.'],
+    tartarughe: ['🐢', '#3a5a4a', 'Viaggiatori con la casa sulla schiena, calmi e corazzati.'],
+  };
+  const RZG = { genasi: ['🌀', '#3a4a5a', 'Toccati dagli elementi: aria, terra, fuoco o acqua scorrono nelle loro vene.'], githyanki: ['⚔️', '#4a4a2e', 'Guerrieri del Piano Astrale, con lame d\'argento e menti affilate.'], githzerai: ['🧘', '#3a4a4a', 'Asceti dalla mente disciplinata, maestri del controllo di sé.'], cangiante: ['🐺', '#4a3a2e', 'Con una bestia dentro, che esce quando serve.'], bugbear: ['👹', '#4a3a2e', 'Grossi, silenziosi e dalle braccia lunghe: colpiscono di sorpresa.'], hobgoblin: ['🎖️', '#5a2e24', 'Disciplinati e marziali: insieme sono più forti.'], coboldo: ['🥚', '#5a3a2e', 'Piccoli devoti dei draghi, astuti e pieni di trappole.'], drago: ['🐲', '#5a2e4a', 'Dragonidi delle gemme, dei metalli e dei colori, come in Fizban.'], stirpe: ['🧬', '#4a4a5a', 'Un\'origine tutta tua, da costruire insieme al DM.'] };
+  const KL = {
+    artefice: ['🔧', '#4a4a5a', 'Inventori che infondono magia negli oggetti.'], barbaro: ['🪓', '#6b2e1c', 'La furia come arma: colpisce più forte e incassa di più.'],
+    bardo: ['🎻', '#5a2e5a', 'Parole, musica e magia: ispira gli amici e confonde i nemici.'], chierico: ['☀️', '#6b5a2e', 'Il potere di un dio: cura, protegge e punisce.'],
+    druido: ['🌿', '#2e5a34', 'La voce della natura: si trasforma in animale e piega gli elementi.'], guerriero: ['⚔️', '#5a3a2e', 'Maestro di ogni arma e armatura, il più solido in battaglia.'],
+    ladro: ['🗝️', '#2e2e3a', 'Furtivo e preciso: un colpo nel punto giusto vale più di dieci.'], mago: ['📜', '#2a4a7a', 'Lo studio paziente della magia, il libro più potente del gruppo.'],
+    monaco: ['🥋', '#6b4a1c', 'Corpo e mente come un\'arma: colpi rapidi e movimenti impossibili.'], paladino: ['🛡️', '#6b5a2e', 'Un giuramento sacro, la spada e la luce divina.'],
+    ranger: ['🏹', '#2e5a3a', 'Cacciatore delle terre selvagge, legato alla sua preda e al suo territorio.'], stregone: ['🔮', '#5a2e6b', 'La magia nel sangue: istintiva, potente, difficile da domare.'],
+    warlock: ['👁️', '#3a1c3a', 'Un patto con un\'entità misteriosa, in cambio di poteri proibiti.'],
+  };
+  const CAR = { for: 'For', des: 'Des', cos: 'Cos', int: 'Int', sag: 'Sag', car: 'Car' };
+  const asiTesto = r => r.asi === 'libero' ? '+2 e +1 a scelta' : r.asi ? Object.entries(r.asi).map(([k, v]) => `+${v} ${CAR[k] || k}`).join(', ') : r.asiScelta ? `+${r.asiScelta[0]} a scelta` : '—';
+  const rzInfo = r => RZ[r.id] || RZG[Object.keys(RZG).find(k => r.id.startsWith(k))] || ['🧝', '#4a3a2e', r.tratti?.[0] ? `${r.tratti[0][0]}: ${r.tratti[0][1]}` : ''];
+  const immagini = () => getMeta('immagini', null) || {};
+  const credito = im => im ? `<p class="rc-cr">Immagine${im.titolo ? ` «${esc(im.titolo)}»` : ''}${im.autore ? ' di ' + esc(im.autore) : ''}${im.licenza ? ', ' + esc(im.licenza) : ''}${im.fonte ? ` · <a href="${esc(im.fonte)}" target="_blank" rel="noopener">fonte</a>` : ''}</p>` : '';
+  const sicura = u => /^(https:|data:image\/|blob:)/.test(String(u || '')) ? String(u) : '';
+  // chi del party è di quella razza o classe (meta «party» = { 'pg-sam': { razza, razza_id, classe, livello } })
+  function delParty(tipo, x) {
+    const P = getMeta('party', null) || {}, out = [];
+    for (const [id, v] of Object.entries(P)) {
+      const e = S.ents.get(id); if (!e) continue;
+      const ok = tipo === 'razza' ? (v.razza_id === x.id || (v.razza && (norm(v.razza).includes(norm(x.nome)) || (x.sotto || []).some(s => norm(v.razza).includes(norm(s.nome))))))
+        : norm(v.classe || '').includes(norm(x.nome));
+      if (ok) out.push(e);
+    }
+    return out;
+  }
+  const ST_RC = { k: 'razze', sel: { razze: null, classi: null } };
+  function voceRC(k, x, id) {
+    const im = immagini()[(k === 'razze' ? 'razza:' : 'classe:') + id], P = delParty(k === 'razze' ? 'razza' : 'classe', x);
+    const [em, col, tag] = k === 'razze' ? rzInfo(x) : (KL[id] || ['⚔️', '#4a3a2e', '']);
+    const foto = sicura(im?.src) || P.find(e => e.portrait)?.portrait?.thumb || '';
+    return { im: sicura(im?.src) ? im : null, P, em, col, tag, foto };
+  }
+  function cartaRC(k, x, id) {
+    const v = voceRC(k, x, id), chips = k === 'razze' ? [asiTesto(x), x.scuro ? 'Scurovisione' : '', ...(x.tratti || []).filter(t => t[0] !== 'Scurovisione' && t[0] !== 'Velocità').slice(0, 1).map(t => t[0])].filter(Boolean) : [`d${x.dv}`, x.prim, x.inc ? 'Incantesimi' : ''].filter(Boolean);
+    return `<button type="button" class="rc-card${ST_RC.sel[k] === id ? ' on' : ''}" data-rc="${esc(id)}" style="--rg:${v.col}" aria-label="${esc(x.nome)}">${v.foto ? `<img src="${esc(v.foto)}" alt="" loading="lazy">` : `<span class="em" aria-hidden="true">${v.em}</span>`}
+      ${v.P.length ? `<span class="rc-bd">${esc(v.P.map(e => e.name).join(' · '))}</span>` : !v.foto && dm() ? '<span class="rc-bd da">immagine da scegliere</span>' : ''}
+      <span class="tx"><h3>${esc(x.nome)}</h3>${v.tag ? `<p>${esc(v.tag)}</p>` : ''}<span class="rc-ch">${chips.map(c => `<span>${esc(c)}</span>`).join('')}</span></span></button>`;
+  }
+  function dettRC(k, x, id) {
+    const v = voceRC(k, x, id), R = D.R;
+    const testa = `<div class="im" style="--rg:${v.col}">${v.foto ? `<img src="${esc(v.foto)}" alt="">` : `<span aria-hidden="true">${v.em}</span>`}</div><div class="in"><h2>${esc(x.nome)}</h2>${v.tag ? `<p class="tag">${esc(v.tag)}</p>` : ''}`;
+    const party = v.P.length ? `<div class="rc-pl">${v.P.map(e => `<a href="#/scheda/${encodeURIComponent(e.id)}">Nel party: ${esc(e.name)}</a>`).join('')}</div>` : '';
+    const fonte = `<p class="rc-cr">${esc(FONTI[x.fonte] || x.fonte || '')}${x.fonte ? '. ' : ''}Riassunto scritto per il sito: per il testo completo fa fede il manuale.</p>`;
+    if (k === 'razze') {
+      const sotto = x.sotto || [];
+      return `${testa}<div class="rc-st"><div><b>${String(x.vel).replace('.', ',')} m</b><small>velocità</small></div><div><b>${esc(x.taglia)}</b><small>taglia</small></div><div><b style="font-size:.9rem">${esc(asiTesto(x))}</b><small>caratteristiche</small></div></div>
+        ${party}<ul>${(x.tratti || []).map(([n, t]) => `<li><b>${esc(n)}</b>: ${esc(t)}</li>`).join('')}${x.lingue ? `<li><b>Lingue</b>: ${esc(x.lingue)}</li>` : ''}</ul>
+        ${sotto.length ? `<h4>Sottorazze</h4><ul class="rc-cls">${sotto.map(s => `<li><b>${esc(s.nome)}</b>${s.asi ? ` (${esc(asiTesto(s))})` : ''}${s.tratti?.length ? ': ' + esc(s.tratti.map(t => t[0]).join(', ')) : ''}</li>`).join('')}</ul>` : ''}
+        ${credito(v.im)}${fonte}</div>`;
+    }
+    const sotto = R.sotto?.[id] || [], tsN = (x.ts || []).map(c => CAR[c] || c).join(', ');
+    return `${testa}<div class="rc-st"><div><b>d${x.dv}</b><small>dado vita</small></div><div><b style="font-size:.9rem">${esc(x.prim || '—')}</b><small>caratteristica</small></div><div><b style="font-size:.9rem">${esc(tsN || '—')}</b><small>tiri salvezza</small></div></div>
+      ${party}<ul>${x.comp ? `<li><b>Competenze</b>: ${esc(x.comp)}</li>` : ''}${x.abil ? `<li><b>Abilità</b>: ${x.abil[0]} a scelta</li>` : ''}${x.inc ? `<li><b>Incantesimi</b>: ${x.inc.tipo === 'preparati' ? 'prepara' : 'conosce'} incantesimi${x.inc.car ? ` con ${esc(CAR[x.inc.car] || x.inc.car)}` : ''}</li>` : ''}${x.sotto ? `<li><b>${esc(x.sotto.nome)}</b>: si sceglie al ${x.sotto.liv}° livello</li>` : ''}</ul>
+      ${sotto.length ? `<h4>${esc(x.sotto?.nome || 'Sottoclassi')} · ${sotto.length}</h4><div class="rc-pl">${sotto.map(s => `<span title="${esc(FONTI[s.fonte] || s.fonte || '')}">${esc(s.nome)}</span>`).join('')}</div>` : ''}
+      ${k === 'classi' && x.inc ? `<p style="margin:10px 0 0"><a href="#/compendio/incantesimi?cl=${esc(id)}">Gli incantesimi della classe →</a></p>` : ''}
+      ${credito(v.im)}${fonte}</div>`;
+  }
+  async function paginaRC(k) {
+    await caricaPagina();
+    if (!D.R) { setView(`${crumbs(['Razze e classi'])}<p class="empty">Le regole non si sono caricate: ricarica la pagina.</p>`); return; }
+    ST_RC.k = k;
+    const L = k === 'razze' ? D.R.razze.map(x => [x.id, x]) : Object.entries(D.R.classi);
+    // prima quelle del party, poi le altre del Manuale del Giocatore, poi le espansioni
+    const peso = ([id, x]) => (delParty(k === 'razze' ? 'razza' : 'classe', x).length ? 0 : 2) + (x.fonte === 'PHB' ? 0 : 1);
+    L.sort((a, b) => peso(a) - peso(b) || a[1].nome.localeCompare(b[1].nome, 'it'));
+    if (!ST_RC.sel[k] || !L.some(([id]) => id === ST_RC.sel[k])) ST_RC.sel[k] = L[0][0];
+    const draw = () => {
+      const x = L.find(([id]) => id === ST_RC.sel[k]);
+      setView(`${crumbs(['Razze e classi'])}<div class="pagehead"><h1>Razze e classi</h1></div><div class="orn"></div>
+        <div class="rc-tabs"><a href="#/compendio/razze" class="${k === 'razze' ? 'on' : ''}">Razze · ${D.R.razze.length}</a><a href="#/compendio/classi" class="${k === 'classi' ? 'on' : ''}">Classi · ${Object.keys(D.R.classi).length}</a></div>
+        <div class="rc"><aside class="card rc-det" id="rc-det">${dettRC(k, x[1], x[0])}</aside><div class="rc-grid">${L.map(([id, y]) => cartaRC(k, y, id)).join('')}</div></div>
+        <p class="cp-foot">Le immagini hanno una licenza libera e la fonte indicata sotto ciascuna. Quelle che mancano le sceglie il DM; finché non c'è, la carta usa la foto del personaggio del party o un simbolo.</p>`, 'rc-p');
+      $$('[data-rc]').forEach(b => b.onclick = () => {
+        ST_RC.sel[k] = b.dataset.rc; draw();
+        if (matchMedia('(max-width:900px)').matches) $('#rc-det')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    };
+    draw();
+  }
+  route(/^\/compendio\/razze$/, () => paginaRC('razze'));
+  route(/^\/compendio\/classi$/, () => paginaRC('classi'));
 
   /* ---------- condizioni ---------- */
   const ST_CO = { q: '' };

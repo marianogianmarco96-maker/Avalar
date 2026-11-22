@@ -816,6 +816,63 @@ details.older[open]>summary{display:none}
 .stabs button.on::before{content:"";position:absolute;left:10px;right:10px;top:-1px;height:3px;border-radius:0 0 3px 3px;background:linear-gradient(90deg,var(--gold),var(--gold2),var(--gold))}
 .stabs button.on::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:3px;background:var(--paper)}
 .stabs+.card,.stabs~[data-tab]{border-top-left-radius:0}
+/* home: l'ultima sessione con la mappa, il party, le missioni, le scoperte, i numeri */
+.page.home{max-width:1240px}
+.hm-top{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:18px;margin:0 0 18px;align-items:stretch}
+.hm-top.uno{grid-template-columns:1fr}
+.hm-top .hero{margin:0;background:linear-gradient(160deg,var(--wine-d),#2a0d12)}
+.hm-top .hero .in{height:100%;background:none;padding:26px 26px 24px}
+.hm-top .hero .ht{font-size:1.85rem}
+.hcs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
+.hc{border:1px solid #d4b06a88;border-radius:16px;padding:3px 11px;font-size:.9rem;color:#f6e7c4;background:#ffffff0d}
+.hm-dove{position:relative;display:block;padding:0;margin:0;overflow:hidden;border:1.5px solid var(--gold);background:#1c1411;text-decoration:none!important;color:#f6e7c4;height:380px}
+.hm-map{position:absolute;left:0;right:0;top:0;display:block}
+.hm-map img{display:block;width:100%;height:auto}
+.hm-map svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.hm-map polyline{fill:none;stroke:#f0c040;stroke-width:.7;stroke-dasharray:1.6 1.2;vector-effect:non-scaling-stroke;stroke-width:3}
+.hm-pin{position:absolute;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;pointer-events:none}
+.hm-pin i{width:14px;height:14px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#7d2530;border:2px solid #fff;box-shadow:0 2px 5px #0008;margin-bottom:4px}
+.hm-pin.qui i{width:20px;height:20px;background:#e0a52a;animation:hmpin 1.6s ease-in-out infinite}
+.hm-pin b{order:-1;font:600 .72rem var(--display);letter-spacing:.06em;background:#1c1411e0;color:#f6e7c4;border:1px solid #d4b06a66;border-radius:4px;padding:2px 6px;margin-bottom:3px;white-space:nowrap}
+.hm-pin:not(.qui) b{display:none}
+@keyframes hmpin{50%{transform:rotate(-45deg) scale(1.15)}}
+@media (prefers-reduced-motion:reduce){.hm-pin.qui i{animation:none}}
+.hm-dl{position:absolute;left:14px;top:14px;font:600 .74rem var(--display);letter-spacing:.14em;text-transform:uppercase;background:#1c1411d9;border-radius:14px;padding:5px 12px}
+.hm-dc{position:absolute;left:14px;bottom:14px;background:#fbf3e0;color:var(--ink);border:1px solid var(--gold);border-radius:6px;padding:7px 12px;box-shadow:0 4px 12px #0006}
+.hm-dc b{display:block;font-family:var(--display);color:var(--wine);letter-spacing:.04em}
+.hm-dc small{color:var(--ink2);font-size:.82rem}
+.hm-via{position:absolute;right:12px;bottom:14px;max-width:55%;background:#1c1411d9;border-radius:14px;padding:4px 12px;font-size:.82rem;text-align:right}
+.hm-row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin:0 0 18px;align-items:start}
+.hm-row3 .card{margin:0}
+.hm-c h2{margin-bottom:12px}
+.hm-c.party h2{text-align:left}
+.hm-c.party .pgs{grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:10px;justify-content:stretch}
+.hm-c.party small{display:block;font-size:.76rem;color:var(--mute);line-height:1.25;margin-top:2px}
+.hm-row{display:flex;gap:11px;align-items:flex-start;padding:9px 0;border-bottom:1px dashed var(--line2);color:var(--ink);text-decoration:none!important}
+.hm-row:last-of-type{border-bottom:0}
+.hm-row b{display:block;line-height:1.25}
+.hm-row small{display:block;color:var(--mute);font-size:.86rem;line-height:1.3}
+.hm-row:hover b{color:var(--wine2)}
+.hm-row .dot{flex:none;width:10px;height:10px;border-radius:50%;background:#c46a1c;margin-top:6px}
+.hm-row .dot.urg{background:#b8322c;box-shadow:0 0 0 3px #b8322c33}
+.hm-row .av{flex:none;width:38px;height:38px;border-radius:50%;object-fit:cover;object-position:top;display:grid;place-items:center;color:#fff;font:600 1rem var(--display);background:var(--t-lore)}
+.hm-row .av.t-png{background:var(--t-png)}.hm-row .av.t-luogo{background:var(--t-luogo)}.hm-row .av.t-oggetto{background:var(--t-oggetto)}.hm-row .av.t-fazione{background:var(--t-fazione)}
+.hm-all{display:inline-block;margin-top:10px;font-size:.95rem}
+.hm-new{background:var(--gold2);color:#2c0f14;border-color:var(--gold2);font-family:var(--display);letter-spacing:.08em;text-transform:uppercase;font-size:.66rem}
+.hm-num h2{margin-bottom:14px}
+.hm-ns{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.hm-n{display:flex;flex-direction:column;align-items:center;padding:14px 6px 12px;border:1px solid var(--line2);border-radius:8px;background:var(--paper2);text-decoration:none!important;transition:border-color .15s,transform .15s}
+.hm-n:hover{border-color:var(--gold);transform:translateY(-1px)}
+.hm-n b{font:600 2rem/1.1 var(--display);color:var(--wine)}
+:root[data-theme=dark] .hm-n b{color:var(--gold2)}
+.hm-n span{font:600 .7rem var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin-top:4px}
+.hm-ah{margin:20px 0 8px;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:400}
+.hm-arcs{display:flex;border-radius:6px;overflow:hidden;border:1px solid var(--line2)}
+.hm-arcs span{background:var(--ac);color:#fbeccb;font:600 .74rem var(--display);letter-spacing:.08em;text-transform:uppercase;padding:12px 8px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.hm-arcs span+span{border-left:2px solid #fff6}
+.hm-ax{display:flex;justify-content:space-between;font-size:.82rem;color:var(--mute);margin-top:5px}
+@media (max-width:980px){.hm-top{grid-template-columns:1fr}.hm-row3{grid-template-columns:1fr 1fr}.hm-row3 .party{grid-column:1/-1}.hm-ns{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:620px){.hm-dove{height:300px}.hm-row3{grid-template-columns:1fr}.hm-top .hero .ht{font-size:1.4rem}.hm-top .hero .in{padding:18px 16px 16px}.hm-c.party .pgs{grid-template-columns:repeat(4,1fr)}.hm-n b{font-size:1.5rem}.hm-arcs span{font-size:.62rem;padding:10px 4px;letter-spacing:.03em}.hm-via{display:none}}
 </style>
 </head><body>
 <header class="top">
@@ -1897,11 +1954,43 @@ route(/^\/$/, async () => {
   } else {
     const last = S.sess[S.sess.length - 1], party = [...S.ents.values()].filter(e => e.type === 'pg').sort((a, c) => (a.sessions?.[0] ?? 99) - (c.sessions?.[0] ?? 99) || a.name.localeCompare(c.name));
     const bgMap = S.maps.find(m => !m.parent && m.thumb) || S.maps.find(m => m.thumb);
-    if (last) h += `<a class="hero" href="#/sessioni/${last.n}">${bgMap ? `<span class="bg" style="background-image:url('${bgMap.thumb}')"></span>` : ''}<span class="in"><small>Ultima sessione · <span class="num">${last.n}</span></small><b class="ht">${esc(last.title || 'Sessione ' + last.n)}${ongoingPill(last)}</b>${last.short || last.brief ? `<span class="hb">${esc(last.short || last.brief)}</span>` : ''}<span class="go">${last.ongoing ? 'Riprendi da qui' : 'Continua a leggere'} →</span></span></a>`;
-    if (party.length) h += `<div class="card party"><h2>Il Party</h2><div class="pgs">${party.map(e => `<a href="#/scheda/${encodeURIComponent(e.id)}">${e.portrait ? `<img src="${e.portrait.thumb}" data-pid="${esc(e.portrait.id)}" alt="">` : `<span class="noimg">${esc(e.name[0])}</span>`}<b>${esc(e.name)}</b></a>`).join('')}</div></div>`;
-    // sul telefono la riga dei numeri diventa una griglia di riquadri «Esplora» (sessioni, tipi di scheda, eventi)
-    h += `<div class="card explore"><h2 class="exh">Esplora</h2><p class="statline num"><span><b>${S.sess.length}</b> sessioni</span> · <span><b>${S.ents.size}</b> schede</span> · <span><b>${evCount}</b> eventi</span> · <span><b>${S.maps.length}</b> mappe</span></p>
-      <div class="chips"><a class="chip exm" href="#/sessioni">Sessioni <em>${S.sess.length}</em></a>${TYPE_ORDER.filter(t => cnt[t]).map(t => `<a class="chip" href="#/schede?tipo=${t}">${TYPE_PL[t]} <em>${cnt[t]}</em></a>`).join('')}<a class="chip exm" href="#/cronologia">Eventi <em>${evCount}</em></a></div></div>`;
+    const pinfo = getMeta('party', null) || {}, E = [...S.ents.values()];
+    // prima riga: l'ultima sessione e, accanto, dove si trova il gruppo
+    const nuove = last ? E.filter(e => e.type !== 'pg' && e.sessions?.[0] === last.n) : [];
+    const contaT = t => nuove.filter(e => e.type === t).length;
+    const livelli = [...new Set(party.map(e => pinfo[e.id]?.livello).filter(Boolean))];
+    const hchips = last ? [
+      [contaT('png'), '👤', n => n === 1 ? 'personaggio nuovo' : 'personaggi nuovi'], [contaT('luogo'), '🗺', n => n === 1 ? 'luogo' : 'luoghi'],
+      [contaT('oggetto'), '🎁', n => n === 1 ? 'oggetto' : 'oggetti'], [contaT('missione') + contaT('fazione'), '🗝', n => n === 1 ? 'scoperta' : 'scoperte']
+    ].filter(c => c[0]).map(([n, ic, t]) => `<span class="hc">${ic} ${n} ${t(n)}</span>`).concat(livelli.length === 1 ? [`<span class="hc">⬆ livello ${livelli[0]}</span>`] : []) : [];
+    const hero = last ? `<a class="hero" href="#/sessioni/${last.n}"><span class="in"><small>Ultima sessione · <span class="num">${last.n}</span>${last.gameDate ? ' · ' + esc(last.gameDate) : ''}</small><b class="ht">${esc(last.title || 'Sessione ' + last.n)}${ongoingPill(last)}</b>${last.short || last.brief ? `<span class="hb">${esc(last.short || last.brief)}</span>` : ''}${hchips.length ? `<span class="hcs">${hchips.join('')}</span>` : ''}<span class="go">${last.ongoing ? 'Riprendi da qui' : 'Continua a leggere'} →</span></span></a>` : '';
+    let dove = '';
+    if (bgMap) {
+      const pins = (await dbAll('pins')).filter(p => p.mapId === bgMap.id && p.entityId && S.ents.get(p.entityId)?.type === 'luogo' && p.discovered !== false);
+      const ultima = e => Math.max(...(e.sessions || [0]));
+      const tappe = pins.map(p => ({ p, e: S.ents.get(p.entityId) })).filter(x => x.e.sessions?.length).sort((a, c) => ultima(c.e) - ultima(a.e) || (c.e.sessions[0] - a.e.sessions[0])).slice(0, 3).reverse();
+      const qui = tappe.at(-1), ss = qui ? qui.e.sessions.filter(n => n <= (last?.n ?? 1e9)) : [], da = [];
+      for (let k = ss.length - 1; k >= 0 && (!da.length || ss[k] === da[0] - 1); k--) da.unshift(ss[k]);
+      const pl = x => `left:${x.p.x}%;top:${x.p.y}%`;
+      dove = `<a class="card hm-dove" data-fy="${qui ? qui.p.y : 50}" href="#/mappe/${encodeURIComponent(bgMap.id)}"><span class="hm-map"><img src="${bgMap.thumb}" alt="${esc(bgMap.name)}">${tappe.length > 1 ? `<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline points="${tappe.map(x => x.p.x + ',' + x.p.y).join(' ')}"/></svg>` : ''}${tappe.map((x, i) => `<span class="hm-pin${x === qui ? ' qui' : ''}" style="${pl(x)}"><i></i><b>${esc(x.e.name)}</b></span>`).join('')}</span>
+        <span class="hm-dl">Dove siamo</span>${qui ? `<span class="hm-dc"><b>${esc(qui.e.name)}</b>${da.length ? `<small>${da.length > 1 ? 'sessioni ' + da[0] + '–' + da.at(-1) : 'sessione ' + da[0]}</small>` : ''}</span>${tappe.length > 1 ? `<span class="hm-via">Il viaggio: ${tappe.map(x => esc(x.e.name)).join(' → ')}</span>` : ''}` : `<span class="hm-dc"><b>${esc(bgMap.name)}</b><small>Apri la mappa</small></span>`}</a>`;
+    }
+    if (hero || dove) h += `<div class="hm-top${dove && hero ? '' : ' uno'}">${hero}${dove}</div>`;
+    // seconda riga: il party, le missioni aperte, le ultime scoperte
+    const pgLine = e => { const x = pinfo[e.id]; return x ? [x.razza, x.classe, x.livello ? 'liv. ' + x.livello : ''].filter(Boolean).join(' · ') : ''; };
+    const cpar = party.length ? `<div class="card party hm-c"><h2>Il Party</h2><div class="pgs">${party.map(e => `<a href="#/scheda/${encodeURIComponent(e.id)}">${e.portrait ? `<img src="${e.portrait.thumb}" data-pid="${esc(e.portrait.id)}" alt="">` : `<span class="noimg">${esc(e.name[0])}</span>`}<b>${esc(e.name)}</b>${pgLine(e) ? `<small>${esc(pgLine(e))}</small>` : ''}</a>`).join('')}</div></div>` : '';
+    const CHIUSA = /complet|fallit|abbandon|conclus|chius|risolt/i;
+    const mis = E.filter(e => e.type === 'missione'), aperte = mis.filter(e => !CHIUSA.test(e.status || '')).sort((a, c) => (/urgent/i.test(c.status || '') - /urgent/i.test(a.status || '')) || Math.max(...(c.sessions || [0])) - Math.max(...(a.sessions || [0])));
+    const cmis = mis.length ? `<div class="card hm-c hm-mis"><h2>Missioni in corso</h2>${aperte.length ? aperte.slice(0, 4).map(e => `<a class="hm-row" href="#/scheda/${encodeURIComponent(e.id)}"><i class="dot${/urgent/i.test(e.status || '') ? ' urg' : ''}"></i><span><b>${esc(e.name)}</b><small>${esc([e.status, e.sessions?.length ? 'da sessione ' + e.sessions[0] : ''].filter(Boolean).join(' · '))}</small></span></a>`).join('') : '<p class="hint">Nessuna missione aperta, per ora.</p>'}<a class="hm-all" href="#/schede?tipo=missione">Tutte le missioni (${mis.length}) →</a></div>` : '';
+    const recenti = E.filter(e => ['png', 'luogo', 'oggetto', 'fazione', 'lore'].includes(e.type) && e.sessions?.length).sort((a, c) => c.sessions[0] - a.sessions[0] || (c.upd || 0) - (a.upd || 0)).slice(0, 4);
+    const csco = recenti.length ? `<div class="card hm-c hm-sco"><div class="spread"><h2>Ultime scoperte</h2>${last && recenti.some(e => e.sessions[0] === last.n) ? '<span class="pill hm-new">Novità</span>' : ''}</div>${recenti.map(e => `<a class="hm-row" href="#/scheda/${encodeURIComponent(e.id)}">${e.portrait ? `<img class="av" src="${e.portrait.thumb}" alt="">` : `<span class="av t-${esc(e.type)}">${esc(e.name.replace(/^(il|lo|la|i|gli|le|l')\s*/i, '')[0] || '?')}</span>`}<span><b>${esc(e.name)}</b><small>${esc(TYPES[e.type] === 'Personaggio' ? 'PNG' : TYPES[e.type])} · sessione ${e.sessions[0]}</small></span></a>`).join('')}</div>` : '';
+    if (cpar || cmis || csco) h += `<div class="hm-row3">${cpar}${cmis}${csco}</div>`;
+    // la campagna in numeri e gli archi narrativi in fila
+    const tile = (n, t, href) => `<a class="hm-n" href="${href}"><b class="num">${n}</b><span>${t}</span></a>`;
+    const arcBar = arcs.filter(a => a.from != null).sort((a, c) => a.from - c.from), fine = lastSessionN() ?? 1;
+    const ARC_COL = ['#5b3a7e', '#8a5a1c', '#2e6b5c', '#7d2530', '#2a5ea8', '#6b5a2e'];
+    h += `<div class="card hm-num"><h2>La campagna in numeri</h2><div class="hm-ns">${tile(S.sess.length, 'Sessioni', '#/sessioni')}${tile(cnt.png || 0, 'Personaggi', '#/schede?tipo=png')}${tile(cnt.luogo || 0, 'Luoghi', '#/schede?tipo=luogo')}${tile(cnt.oggetto || 0, 'Oggetti', '#/schede?tipo=oggetto')}${tile(cnt.fazione || 0, 'Fazioni', '#/schede?tipo=fazione')}${tile(evCount, 'Momenti', '#/cronologia')}</div>
+      ${arcBar.length ? `<h3 class="hm-ah">Gli archi narrativi</h3><div class="hm-arcs">${arcBar.map((a, i) => { const to = Math.min(a.to ?? fine, fine), w = Math.max(1, to - a.from + 1); return `<span style="flex:${w};--ac:${ARC_COL[i % ARC_COL.length]}" title="${esc(a.title)} · sessioni ${a.from}–${a.to ?? '…'}">${esc(a.title)}</span>`; }).join('')}</div><div class="hm-ax"><span>Sessione ${arcBar[0].from}</span><span>oggi · ${fine}</span></div>` : ''}</div>`;
     const pro = await dbGet('bodies', 'lore-introduzione-al-mondo');
     if (pro?.sections?.length) h += `<div class="card"><div class="spread"><h2>Prologo</h2><a href="#/scheda/lore-introduzione-al-mondo">Apri la scheda →</a></div><details class="arc prologo"><summary>Leggi il prologo<small>il mondo di gioco</small></summary>${pro.sections.map(sc => `${sc.title ? `<h3>${esc(sc.title)}</h3>` : ''}${sc.entries.map(en => prose(en.text)).join('')}`).join('')}</details></div>`;
     h += `<div class="card"><div class="spread"><h2>Riassunto di quanto fatto finora</h2><div class="row"><button class="btn sm" data-act="editgen">Modifica</button>${(getMeta('generalHist', []).length) ? '<button class="btn sm ghost" data-act="histgen">Versioni precedenti</button>' : ''}</div></div>
@@ -1910,7 +1999,12 @@ route(/^\/$/, async () => {
     if (S.sess.length) h += `<p class="homelinks"><a href="#/sessioni">Tutte le sessioni →</a><a href="#/cronologia">Cronologia completa →</a></p>`;
     if (arcs.length || !window.__RO) h += `<div class="card"><div class="spread"><h2>Archi narrativi</h2><button class="btn sm" data-act="addArc">+ Nuovo arco</button></div>${arcs.length ? arcs.map((a, i) => `<details class="arc"><summary>${esc(a.title)}<small>${a.from != null ? 'sessioni ' + a.from + '–' + (a.to ?? '…') : ''}</small></summary>${prose(a.summary)}<button type="button" class="btn sm" data-act="editArc" data-i="${i}">Modifica arco</button></details>`).join('') : '<p class="hint">Nessun arco narrativo, per ora.</p>'}</div>`;
   }
-  setView(h);
+  setView(h, 'home');
+  // il DM tiene aggiornati razza, classe e livello del party (dalle schede del Tavolo): arrivano ai giocatori con il prossimo «Salva»
+  if (!window.__RO && window.__party && party0().length) window.__party().then(async L => { const nuovo = {}; for (const x of L) if (x.entita) nuovo[x.entita] = { razza: x.razza, razza_id: x.razza_id, classe: x.classe, livello: x.livello }; if (Object.keys(nuovo).length && JSON.stringify(nuovo) !== JSON.stringify(getMeta('party', null))) { await setMeta('party', nuovo); if (location.hash === '' || location.hash === '#/') rerender(); } }).catch(() => { });
+  // la mappa di «Dove siamo» si centra sul luogo in cui si trova il gruppo
+  const dv = $('.hm-dove'), dimg = dv?.querySelector('.hm-map img');
+  if (dimg) { const metti = () => { const H = dv.clientHeight, h = dimg.clientHeight; if (!h) return; dv.querySelector('.hm-map').style.top = clamp(H / 2 - (+dv.dataset.fy / 100) * h, H - h, 0) + 'px'; }; if (dimg.complete) metti(); else dimg.onload = metti; addEventListener('resize', metti); onCleanup(() => removeEventListener('resize', metti)); }
   // ritratti del gruppo a piena risoluzione
   document.querySelectorAll('.party img[data-pid]').forEach(im => dbGet('blobs', im.dataset.pid).then(rec => { if (!rec?.blob) return; const u = URL.createObjectURL(rec.blob); im.src = u; onCleanup(() => URL.revokeObjectURL(u)); }).catch(() => { }));
   setActs({
@@ -1928,6 +2022,7 @@ route(/^\/$/, async () => {
   });
 });
 // archi narrativi (meta «arcs»): il DM li crea, modifica ed elimina dalla Home; le sessioni dell'intervallo prendono l'arco
+const party0 = () => [...S.ents.values()].filter(e => e.type === 'pg');
 async function editArcDlg(i) {
   const arcs = clone(getMeta('arcs', [])), a = i == null ? null : arcs[i];
   if (i != null && !a) return;
@@ -3018,6 +3113,7 @@ async function checkAccess(PERM) {
 <script src="idee.js"></script>
 <script src="scaletta.js"></script>
 <script src="assistente.js"></script>
+<script src="diario.js"></script>
 <script src="bottino.js"></script>
 <script src="manuali.js"></script>
 <script src="compendio.js"></script>
