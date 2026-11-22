@@ -224,11 +224,11 @@ Se ti chiedo modifiche, rispondi con l'oggetto aggiornato nello stesso formato.`
   const fitMsg = s => s ? 'Richiesta copiata e accorciata per stare in un messaggio. Per mandare tutta la storia usa «Scarica per Claude» e allega il file' : 'Richiesta copiata: incollala in una chat con Claude';
 
   /* ---------- chiamata diretta a Claude (con la chiave API del DM) ---------- */
-  async function callClaude({ system, messages, model, key, onText, signal }) {
+  async function callClaude({ system, messages, model, key, onText = () => { }, signal, effort = 'medium', max = 32000 }) {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST', signal,
       headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true', 'anthropic-beta': 'server-side-fallback-2026-07-01' },
-      body: JSON.stringify({ model, max_tokens: 32000, stream: true, thinking: { type: 'adaptive' }, output_config: { effort: 'medium' }, fallbacks: 'default', system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }], messages })
+      body: JSON.stringify({ model, max_tokens: max, stream: true, thinking: { type: 'adaptive' }, output_config: { effort }, fallbacks: 'default', system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }], messages })
     });
     if (!r.ok) {
       let m = ''; try { m = (await r.json()).error?.message || ''; } catch { }
@@ -316,7 +316,7 @@ Se ti chiedo modifiche, rispondi con l'oggetto aggiornato nello stesso formato.`
     const io = loadItems(), pgs = [...S.ents.values()].filter(e => e.type === 'pg').sort((a, b) => a.name.localeCompare(b.name));
     io.pgs = io.pgs.filter(id => S.ents.has(id));
     const sel = (k, opts, v) => `<select id="i-${k}">${opts.map(([a, b]) => `<option value="${esc(a)}" ${String(a) === String(v) ? 'selected' : ''}>${esc(b)}</option>`).join('')}</select>`;
-    setView(`<div class="pagehead"><h1>Idee per le sessioni</h1><div class="acts"><a class="btn" href="#/bottino" title="Oggetti e dispense pronti da consegnare al Tavolo">🎁 Bottino pronto${window.__bottino?.tutte().filter(v => !v.consegne?.length).length ? ' · ' + window.__bottino.tutte().filter(v => !v.consegne?.length).length : ''}</a><button class="btn" data-act="ipaste">Salva una risposta di Claude</button><button class="btn" data-act="iset">${api ? 'Claude collegato ✓' : 'Collega Claude'}</button></div></div><div class="orn"></div>
+    setView(`<div class="pagehead"><h1>Idee per le sessioni</h1><div class="acts"><a class="btn" href="#/fine-sessione" title="Claude legge la serata al Tavolo e propone il riassunto e gli aggiornamenti alle schede">🏁 Fine sessione</a><a class="btn" href="#/bottino" title="Oggetti e dispense pronti da consegnare al Tavolo">🎁 Bottino pronto${window.__bottino?.tutte().filter(v => !v.consegne?.length).length ? ' · ' + window.__bottino.tutte().filter(v => !v.consegne?.length).length : ''}</a><button class="btn" data-act="ipaste">Salva una risposta di Claude</button><button class="btn" data-act="iset">${api ? 'Claude collegato ✓' : 'Collega Claude'}</button></div></div><div class="orn"></div>
       <div class="card"><p class="lead" style="margin-top:0">Chiedi a Claude di ideare oneshot, sessioni o missioni partendo da tutto quello che è successo nella campagna: riassunti, schede, PNG, luoghi e segreti. Lo vedi solo tu come DM.</p>
         <div class="idee-grid">
           <label class="f"><span>Cosa ti serve</span>${sel('kind', Object.entries(KINDS).filter(([k]) => k !== 'items').map(([k, v]) => [k, v[0]]), o.kind)}</label>
@@ -455,6 +455,9 @@ Se ti chiedo modifiche, rispondi con l'oggetto aggiornato nello stesso formato.`
       idel: async () => { if (!await ask(`Eliminare l'idea **${i.title}**?`, { danger: true, ok: 'Elimina' })) return; await ideaDel(i.id); location.hash = '#/idee'; }
     });
   });
+
+  // per l'assistente al Tavolo e la revisione di fine sessione (assistente.js): stessa chiave, stesso contesto
+  window.__idee = { callClaude, chiave: () => kvGet('api'), collega: settingsDlg, contesto: o => campaignText({ ctx: 'recent', focus: [], ...o }), MODELS };
 
   // voce «Idee» nel menu, solo per il DM
   claude.use('db').then(() => {
