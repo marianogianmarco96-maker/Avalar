@@ -1,0 +1,33 @@
+# Tiene sveglio Supabase: il piano gratuito mette in pausa il progetto dopo 7 giorni senza attività.
+# Ogni 5 giorni fa qualche lettura innocua (stato del sito, file e accesso), con la sola chiave pubblica.
+# Si può anche lanciare a mano: GitHub › Actions › Supabase sveglio › Run workflow.
+# Se Supabase non risponde (per esempio è già in pausa) il workflow fallisce e GitHub manda un'email al proprietario.
+name: Supabase sveglio
+
+on:
+  schedule:
+    - cron: '17 7 */5 * *'   # giorni 1, 6, 11, 16, 21, 26 (e 31) del mese, alle 8:17 in Italia (9:17 con l'ora legale)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SB_URL: https://zwxwnmcxryfmzkqsakjz.supabase.co
+      SB_KEY: sb_publishable_cAGuilUZdnxhtDeJ-qwuEQ_ihjCyFj0   # chiave pubblica del sito, la stessa di local.js
+    steps:
+      - name: Letture su Supabase
+        run: |
+          set -euo pipefail
+          leggi() { curl -fsS --retry 3 --retry-delay 10 -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" "$@"; }
+          stato=$(leggi "$SB_URL/rest/v1/sito_stato?select=versione,cartella&id=eq.1")
+          echo "sito_stato: $stato"
+          leggi "$SB_URL/auth/v1/health" > /dev/null && echo 'accesso: ok'
+          cartella=$(printf '%s' "$stato" | python3 -c 'import json,sys; s=json.load(sys.stdin); print(s[0]["cartella"] if s and s[0].get("cartella") else "")')
+          if [ -n "$cartella" ]; then
+            curl -fsS --retry 3 -o /dev/null -r 0-0 "$SB_URL/storage/v1/object/public/sito/$cartella/data.enc" && echo 'file: ok'
+          fi
