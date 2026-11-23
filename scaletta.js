@@ -43,7 +43,7 @@
 .sc-dado{all:unset;display:inline-block;padding:0 7px;border-radius:10px;background:#7d253014;border:1px solid #7d253055;color:var(--wine2);font-weight:700;font-size:.92em;white-space:nowrap;line-height:1.35}
 button.sc-dado{cursor:pointer}button.sc-dado:hover{background:var(--wine);color:#fff}
 .sc-list .card{display:flex;gap:16px;align-items:center;flex-wrap:wrap;border:2px dashed #7a3d8a88;background:#7a3d8a0a}
-.sc-dl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 4px}.sc-dl .btn{display:flex;flex-direction:column;gap:2px;padding:14px 10px;height:auto;text-transform:none;letter-spacing:0}.sc-dl .btn b{font:600 1.1rem/1.2 var(--display);letter-spacing:.06em}.sc-dl .btn small{font:400 .85rem/1.2 var(--body);opacity:.8}
+.sc-fmt{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 4px}.sc-fmt .btn{display:flex;flex-direction:column;gap:2px;padding:14px 10px;height:auto;text-transform:none;letter-spacing:0}.sc-fmt .btn b{font:600 1.1rem/1.2 var(--display);letter-spacing:.06em}.sc-fmt .btn small{font:400 .85rem/1.2 var(--body);opacity:.8}
 .sc-list .n{font:700 2rem/1 var(--display);color:#7a3d8a}
 .sc-list .k{font:600 .7rem/1.4 var(--display);letter-spacing:.12em;color:#7a3d8a;text-transform:uppercase}
 .sc-list .t{font:600 1.25rem/1.3 var(--display);color:var(--wine);margin:2px 0;text-decoration:none;display:block}
@@ -132,10 +132,15 @@ dialog .sc-txt{width:100%;min-height:200px;font:13px/1.45 ui-monospace,SFMono-Re
   const dedent = righe => { const m = Math.min(...righe.filter(r => r.trim()).map(r => r.match(/^\s*/)[0].length)); return righe.map(r => r.slice(Number.isFinite(m) ? m : 0)).join('\n').trim(); };
   const CAMPI = [['obiettivo', /^obiettiv/i], ['ostacolo', /^ostacol/i], ['esiti', /^esit/i], ['ricompensa', /^ricompens/i]];
   function scena(titolo, corpo) {
-    // *Obiettivo:* … *Ostacolo:* … *Esiti:* … (anche in grassetto o senza asterischi)
+    // *Obiettivo:* … *Ostacolo:* … *Esiti:* … (anche in grassetto, o senza asterischi a inizio riga)
     const rx = /(\*{1,2})?\b(Obiettiv[oi]|Ostacol[oi]|Esit[oi]|Ricompens[ae])\s*:\s*\1?/gi, pezzi = []; let m, pre = corpo, ultimo = null;
     while ((m = rx.exec(corpo))) {
-      if (ultimo) ultimo.fine = m.index; else pre = corpo.slice(0, m.index);
+      // un campo comincia la riga (anche dopo un punto d'elenco) o ha asterischi suoi: «**Mappa & Ostacoli:**» non è un campo
+      const riga = corpo.slice(corpo.lastIndexOf('\n', m.index - 1) + 1, m.index), prima = corpo[m.index - 1] || ' ';
+      const aCapo = /^[ \t]*(?:(?:[-*•+]|\d+[.)])[ \t]+)?$/.test(riga);
+      if (!aCapo && !(m[1] && /[\s(]/.test(prima))) continue;
+      const da = aCapo ? m.index - riga.length : m.index;   // il punto d'elenco davanti al campo va col campo
+      if (ultimo) ultimo.fine = da; else pre = corpo.slice(0, da);
       ultimo = { k: CAMPI.find(c => c[1].test(m[2]))[0], ini: m.index + m[0].length }; pezzi.push(ultimo);
     }
     const campi = {}; for (const p of pezzi) campi[p.k] = (campi[p.k] ? campi[p.k] + '\n\n' : '') + dedent(corpo.slice(p.ini, p.fine ?? corpo.length).split('\n'));
@@ -708,7 +713,7 @@ ${stile('ListParagraph', 'List Paragraph', '<w:spacing w:after="60"/>', '')}${st
   async function scarica(v) {
     css();
     const d = openDlg(`<form method="dialog"><h3>Scarica la scaletta</h3><p class="hint" style="margin-top:0">Sessione ${v.n}${v.title ? ' · ' + esc(v.title) : ''}: tutto il testo, con scene, PNG e segreti. È un file solo per te.</p>
-      <div class="sc-dl"><button value="docx" class="btn"><b>Word</b><small>.docx · da modificare</small></button><button value="pdf" class="btn"><b>PDF</b><small>da leggere o stampare</small></button></div>
+      <div class="sc-fmt"><button value="docx" class="btn"><b>Word</b><small>.docx · da modificare</small></button><button value="pdf" class="btn"><b>PDF</b><small>da leggere o stampare</small></button></div>
       <menu><button value="cancel" class="btn ghost">Annulla</button></menu></form>`);
     const tipo = await new Promise(res => d.addEventListener('close', () => res(d.returnValue)));
     if (tipo !== 'docx' && tipo !== 'pdf') return;
