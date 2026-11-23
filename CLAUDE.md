@@ -21,3 +21,6 @@
 - Questionari: il giocatore li invia come segnalazione cifrata su GitHub («[Giocatore] X ha compilato il questionario»).
   Il DM li legge dal sito (Strumenti › Questionari dei giocatori, e sotto ogni domanda nella scheda del PG): local.js
   scarica le segnalazioni dall'API pubblica di GitHub e le decifra nel browser con le password dei giocatori.
+- Scaletta del DM (scaletta.js, meta `scaletta:<n>`): il testo resta Markdown, l'editor del sito lo mostra come in Word.
+  Forma usata dall'editor: parti `## Titolo`, scene `### Scena N: Titolo`, titoletti `####`, e nelle scene i campi
+  `**Obiettivo:**`, `**Ostacolo:**`, `**Esiti:**`, `**Ricompensa:**` in paragrafi a sé.
