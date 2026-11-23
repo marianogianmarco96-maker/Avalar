@@ -877,7 +877,7 @@ details.older[open]>summary{display:none}
 </style>
 <style id="grimorio">
 /* ===== Restyling «Grimorio» (novembre 2026): caratteri, barra laterale, carte ===== */
-:root{--display:'Alegreya SC',serif;--title:'Grenze Gotisch',serif;--body:'EB Garamond',Georgia,serif}body{font-size:19px}
+:root{--display:'Alegreya SC',serif;--title:'Grenze Gotisch',serif;--body:'EB Garamond',Georgia,serif}body{font-size:1.1875rem}
 h1,h2,h3,.hm-top .hero .ht{font-family:'Grenze Gotisch',serif!important;letter-spacing:.01em!important}
 /* ===== A · GRIMORIO MINIATO ===== */
 :root{--bg:#e9dcc0;--bg2:#f2e7cf;--paper:#fbf4e2;--paper2:#f4e9cf;--ink:#2a1a12;--ink2:#56402f;--mute:#86705a;--wine:#7a1f2c;--wine2:#9d2b37;--gold:#a9802f;--gold2:#cfa95c;--line:#e0cfa7;--line2:#c6ab73;--side:#2a1215;--sideink:#f2dfb4}
@@ -892,7 +892,7 @@ h1,h2,h3{font-family:var(--display);letter-spacing:.03em}
 :root[data-theme=dark] .pagehead h1::first-letter{color:var(--wine2)}
 h2{font-size:1.25rem}
 @media (min-width:900px){
-  header.top{position:fixed!important;left:0;top:0;bottom:0;width:236px;height:auto!important;flex-direction:column!important;align-items:stretch!important;gap:6px!important;padding:22px 16px 16px!important;background:linear-gradient(180deg,#3a161b,var(--side) 60%)!important;border:0!important;border-right:1px solid #c9a24b55!important;box-shadow:6px 0 30px #0004!important;overflow:auto}
+  header.top{position:fixed!important;left:0;top:0;bottom:0;width:var(--sbw,236px);height:auto!important;flex-direction:column!important;align-items:stretch!important;gap:6px!important;padding:22px 16px 16px!important;background:linear-gradient(180deg,#3a161b,var(--side) 60%)!important;border:0!important;border-right:1px solid #c9a24b55!important;box-shadow:6px 0 30px #0004!important;overflow:auto}
   :root[data-theme=dark] header.top{background:linear-gradient(180deg,#1a0c0d,var(--side) 60%)!important}
   header.top::after{display:none!important}
   header.top #backBtn,header.top #fwdBtn{display:none!important}
@@ -911,7 +911,7 @@ h2{font-size:1.25rem}
   header.top #srchBtn{display:none!important}
   header.top #themeBtn{position:absolute;right:14px;top:14px}
   header.top #tools{margin-top:auto!important;position:static!important}
-  #view{margin-left:236px!important;max-width:none!important;padding:34px 48px 60px!important}
+  #view{margin-left:var(--sbw,236px)!important;max-width:none!important;padding:34px 48px 60px!important}
   #view>.page{max-width:1120px;margin:0 auto}
   .spacer-top{display:none!important}
 }
@@ -973,7 +973,29 @@ html body .hm-top .hero{border-radius:14px!important}
 html body .hm-c .pgs a img{border-radius:10px!important;box-shadow:0 0 0 2px #c9a24b,0 6px 14px #0008!important}
 
 /* Tavolo con la barra laterale: occupa solo lo spazio a destra della barra */
-@media (min-width:900px){html.in-tavolo .tv{left:236px!important;top:0!important;bottom:0!important}}
+@media (min-width:900px){html.in-tavolo .tv{left:var(--sbw,236px)!important;top:0!important;bottom:0!important}}
+
+/* Strumenti: finestra a comparsa accanto alla barra laterale, non più in fondo e tagliata */
+@media (min-width:900px){
+  header.top #tools .ttog{font:600 .78rem/1 var(--display);letter-spacing:.06em}
+  header.top #tools .tlist{position:fixed!important;left:calc(var(--sbw,236px) + 14px)!important;right:auto!important;top:auto!important;bottom:16px!important;min-width:17rem;max-height:calc(100vh - 32px);overflow:auto;padding:14px 10px 10px;gap:2px;border-radius:14px;background:linear-gradient(180deg,#3a161b,#24090d)!important;border:1px solid #c9a24b!important;box-shadow:inset 0 0 0 4px #24090d,inset 0 0 0 5px #c9a24b55,0 18px 50px #000b!important;animation:tlIn .16s ease-out}
+  header.top #tools .tlist::before{content:"";position:absolute;left:-7px;bottom:22px;width:12px;height:12px;background:#24090d;border-left:1px solid #c9a24b;border-bottom:1px solid #c9a24b;transform:rotate(45deg)}
+  header.top #tools .trole{font:600 1.15rem/1.2 var(--title);letter-spacing:.02em;text-transform:none;color:#e0b75c;padding:2px 10px 10px;margin:0 0 6px;border-bottom:1px solid #c9a24b44}
+  header.top #tools .tlist .tbtn{height:auto;min-height:0;padding:9px 12px;border-radius:8px;border:0;background:none;color:#f1e1bd;font:500 .98rem/1.2 var(--display);letter-spacing:.03em;text-transform:none;gap:11px}
+  header.top #tools .tlist .tbtn:hover,header.top #tools .tlist .tbtn:focus-visible{background:#c9a24b1f;color:#f6d58e}
+  header.top #tools .tlist .tbtn .ti,header.top #tools .tlist .tbtn svg{color:#c9a24b;opacity:.9}
+}
+@keyframes tlIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+/* Schermi grandi: pagina più larga e caratteri più grandi, la barra laterale cresce con loro */
+@media (min-width:1500px){
+  html{font-size:clamp(16px,calc(7px + .55vw),22px)}
+  :root{--sbw:15rem}
+  #view{padding:2.2rem 3rem 4rem!important}
+  #view>.page:not(.narrow):not(.consch){max-width:min(100%,calc(62rem + 22vw))!important}
+  #view>.page.narrow{max-width:min(100%,52rem)!important}
+  .sc-wrap{grid-template-columns:14.5rem minmax(0,1fr)!important}
+  header.top .brand::before{width:4.2rem;height:4.2rem}
+}
 </style>
 </head><body>
 <header class="top">
