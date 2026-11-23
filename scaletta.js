@@ -35,6 +35,7 @@
 .sc-dl{margin:0;padding:10px 16px 4px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px}
 .sc-dl dt{font:600 .7rem/1.9 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
 .sc-dl dd{margin:0}
+.sc-dl dt.ric{color:#8a6a24}.sc-dl dd.ric{background:#c9a24b1f;border:1px solid #c9a24b55;border-radius:5px;padding:4px 10px}
 .sc-pre{padding:10px 16px 0}
 .sc-foot{display:flex;gap:8px;padding:6px 16px 12px;justify-content:flex-end}
 .sc-cd{display:inline-block;padding:0 7px;border-radius:10px;background:#c9a24b26;border:1px solid #a9833488;color:#6b4d12;font-weight:700;font-size:.92em;white-space:nowrap;line-height:1.35}
@@ -55,6 +56,29 @@ button.sc-dado{cursor:pointer}button.sc-dado:hover{background:var(--wine);color:
 .sc-drop input{display:none}
 .sc-ok{margin:8px 0 4px;padding:8px 12px;border:1px solid #3f6b4666;background:#3f6b4612;border-radius:5px;font-size:.95rem}
 .sc-ok.ko{border-color:#a8641c66;background:#a8641c12}
+.sc-edw{border:1px solid var(--line2);border-radius:6px;background:var(--paper);overflow:hidden}
+.sc-bar{position:sticky;top:0;z-index:2;display:flex;flex-wrap:wrap;gap:3px;align-items:center;padding:6px;background:var(--paper2);border-bottom:1px solid var(--line2)}
+.sc-bar button{all:unset;box-sizing:border-box;cursor:pointer;padding:5px 9px;border-radius:4px;font:600 .88rem/1.1 var(--body);color:var(--ink);border:1px solid transparent;white-space:nowrap}
+.sc-bar button:hover{background:var(--paper);border-color:var(--line2)}.sc-bar button:focus-visible{outline:2px solid var(--gold)}
+.sc-bar button.sim.on{background:var(--wine);color:#fff}
+.sc-bar.simboli button:not(.sim){opacity:.35;pointer-events:none}
+.sc-bar .sep{width:1px;height:20px;background:var(--line2);margin:0 3px}.sc-bar .sp{flex:1}
+.sc-ed{min-height:300px;max-height:56vh;overflow-y:auto;padding:14px 18px;outline:none;font:400 1.02rem/1.5 var(--body);counter-reset:scena}
+.sc-ed:focus{box-shadow:inset 0 0 0 2px #c9a24b55}
+.sc-ed>:first-child{margin-top:0}
+.sc-ed p{margin:.45em 0}.sc-ed ul,.sc-ed ol{margin:.4em 0;padding-left:1.5em}
+.sc-ed h2{font:600 1.1rem/1.25 var(--display);color:var(--wine);letter-spacing:.04em;text-transform:uppercase;margin:1.1em 0 .4em;padding-top:.6em;border-top:1px solid var(--line2)}
+.sc-ed h4{font:600 1rem/1.25 var(--display);color:#6b4d12;margin:.9em 0 .3em}
+.sc-ed h3.scena{counter-increment:scena;font:600 1.15rem/1.25 var(--display);color:var(--wine);margin:1.4em -18px .5em;padding:10px 18px 6px;border-top:3px double #7a3d8a88;background:#7a3d8a0d}
+.sc-ed h3.scena::before{content:"Scena " counter(scena) " · ";color:#7a3d8a;font-size:.8em;letter-spacing:.08em;text-transform:uppercase}
+.sc-ed p[data-campo]{padding:4px 10px;border-left:3px solid var(--gold);background:#c9a24b14;border-radius:0 4px 4px 0}
+.sc-ed p[data-campo]::before{font:700 .72rem/1 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-right:8px}
+.sc-ed p[data-campo=obiettivo]::before{content:"🎯 Obiettivo"}.sc-ed p[data-campo=ostacolo]::before{content:"⚠ Ostacolo"}.sc-ed p[data-campo=esiti]::before{content:"↪ Esiti"}
+.sc-ed p[data-campo=ricompensa]{border-left-color:#b0802a;background:#e9c46a33}.sc-ed p[data-campo=ricompensa]::before{content:"🎁 Ricompensa";color:#8a6a24}
+.sc-ed blockquote{margin:.5em 0;padding:2px 12px;border-left:3px solid var(--line2);font-style:italic}
+.sc-ed .sc-ln{color:var(--wine);border-bottom:1px dotted currentColor;cursor:default}
+.sc-edw .sc-txt{display:block;border:0;border-radius:0;min-height:300px;max-height:56vh;padding:12px}
+@media (max-width:600px){.sc-bar button{padding:6px 7px;font-size:.82rem}.sc-ed{padding:12px}.sc-ed h3.scena{margin-left:-12px;margin-right:-12px;padding-left:12px}}
 dialog .sc-txt{width:100%;min-height:200px;font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 .sc-row{display:flex;gap:10px}.sc-row>label:first-child{flex:0 0 96px}.sc-row>label:last-child{flex:1}
 @media (max-width:760px){
@@ -106,10 +130,10 @@ dialog .sc-txt{width:100%;min-height:200px;font:13px/1.45 ui-monospace,SFMono-Re
   /* ---------- dal testo alla scaletta ---------- */
   const nudo = t => String(t || '').replace(/\*+/g, '').replace(/[.:]\s*$/, '').trim();
   const dedent = righe => { const m = Math.min(...righe.filter(r => r.trim()).map(r => r.match(/^\s*/)[0].length)); return righe.map(r => r.slice(Number.isFinite(m) ? m : 0)).join('\n').trim(); };
-  const CAMPI = [['obiettivo', /^obiettiv/i], ['ostacolo', /^ostacol/i], ['esiti', /^esit/i]];
+  const CAMPI = [['obiettivo', /^obiettiv/i], ['ostacolo', /^ostacol/i], ['esiti', /^esit/i], ['ricompensa', /^ricompens/i]];
   function scena(titolo, corpo) {
     // *Obiettivo:* … *Ostacolo:* … *Esiti:* … (anche in grassetto o senza asterischi)
-    const rx = /(\*{1,2})?\b(Obiettiv[oi]|Ostacol[oi]|Esit[oi])\s*:\s*\1?/gi, pezzi = []; let m, pre = corpo, ultimo = null;
+    const rx = /(\*{1,2})?\b(Obiettiv[oi]|Ostacol[oi]|Esit[oi]|Ricompens[ae])\s*:\s*\1?/gi, pezzi = []; let m, pre = corpo, ultimo = null;
     while ((m = rx.exec(corpo))) {
       if (ultimo) ultimo.fine = m.index; else pre = corpo.slice(0, m.index);
       ultimo = { k: CAMPI.find(c => c[1].test(m[2]))[0], ini: m.index + m[0].length }; pezzi.push(ultimo);
@@ -293,9 +317,10 @@ dialog .sc-txt{width:100%;min-height:200px;font:13px/1.45 ui-monospace,SFMono-Re
       .replace(/(^|[^\w])(\d{1,2}d(?:4|6|8|10|12|20|100)(?:\s?[+−-]\s?\d{1,2}(?!\d))?)(?![\w])/g, (m, a, f) => a + (dadi ? `<button type="button" class="sc-dado" data-sc-dado="${esc(f.replace(/\s/g, '').replace('−', '-'))}" title="Tira ${esc(f)} (lo vedi solo tu)">🎲 ${f}</button>` : `<span class="sc-dado">🎲 ${f}</span>`))).join('');
   }
   const testo = (t, o = {}) => chip(prose(t), o.dadi);
+  const ETI = { obiettivo: 'Obiettivo', ostacolo: 'Ostacolo', esiti: 'Esiti', ricompensa: '🎁 Ricompensa' };
   // titolo «Esiti» con la sua lista: testo libero
   function cartaScena(x, i, st, o = {}) {
-    const dl = CAMPI.filter(([k]) => x[k]).map(([k]) => `<dt>${k === 'obiettivo' ? 'Obiettivo' : k === 'ostacolo' ? 'Ostacolo' : 'Esiti'}</dt><dd>${testo(x[k], o)}</dd>`).join('');
+    const dl = CAMPI.filter(([k]) => x[k]).map(([k]) => `<dt${k === 'ricompensa' ? ' class="ric"' : ''}>${ETI[k]}</dt><dd${k === 'ricompensa' ? ' class="ric"' : ''}>${testo(x[k], o)}</dd>`).join('');
     return `<details class="sc-sc ${st}" id="sc-s${i}" ${o.chiusa ? '' : 'open'}><summary><span class="num">${st === 'ok' ? '✓' : i + 1}</span><b>${esc(x.t)}</b>${st === 'ok' ? '<span class="st">giocata</span>' : st === 'ora' ? '<span class="st">● ora</span>' : ''}</summary>
       ${x.pre ? `<div class="sc-pre">${testo(x.pre, o)}</div>` : ''}${dl ? `<dl class="sc-dl">${dl}</dl>` : ''}
       <div class="sc-foot"><button type="button" class="btn sm" data-act="${o.act || 'scfatta'}" data-i="${i}">${st === 'ok' ? 'Riapri' : '✓ Segna come giocata'}</button></div></details>`;
@@ -332,20 +357,193 @@ dialog .sc-txt{width:100%;min-height:200px;font:13px/1.45 ui-monospace,SFMono-Re
     });
   });
 
+  /* ---------- l'editor come Word ---------- */
+  // Il testo resta Markdown (lo leggono il Tavolo, i download e Claude): l'editor lo mostra già formattato e lo riscrive
+  // quando si salva. Scene: titoli «Scena N: …»; i campi Obiettivo, Ostacolo, Esiti e Ricompensa sono paragrafi segnati.
+  const LAB = { obiettivo: 'Obiettivo', ostacolo: 'Ostacolo', esiti: 'Esiti', ricompensa: 'Ricompensa' };
+  const RX_CAMPO = /^(obiettiv[oi]|ostacol[oi]|esit[oi]|ricompens[ae])\s*:?\s*$/i;
+  // una forma sola: sezioni «##», scene «### Scena N: titolo» con i campi in paragrafi a sé (anche le scalette vecchie)
+  function canonico(t) {
+    const a = analizza(t); if (!String(t || '').trim()) return '';
+    const out = [];
+    for (const s of a.sezioni) {
+      if (s.scene) { a.scene.forEach((x, i) => out.push(`### Scena ${i + 1}: ${x.t}`, ...(x.pre ? [x.pre] : []), ...CAMPI.filter(([k]) => x[k]).map(([k]) => `**${LAB[k]}:** ${x[k]}`))); continue; }
+      out.push(...(s.t ? ['## ' + s.t] : []), ...(s.md ? [s.md] : []));
+    }
+    return out.join('\n\n').replace(/\n{3,}/g, '\n\n').trim();
+  }
+  const runsHtml = r => r.map(o => { let h = o.id ? `<span class="sc-ln" contenteditable="false" data-id="${esc(o.id)}"${o.al ? ` data-al="1"` : ''}>${esc(o.x)}</span>` : esc(o.x); if (o.i) h = `<i>${h}</i>`; if (o.b) h = `<b>${h}</b>`; return h; }).join('');
+  function mdHtml(t) {
+    let h = ''; const lst = [];
+    const chiudi = liv => { while (lst.length > liv) h += `</li></${lst.pop()}>`; };
+    // i punti di un elenco partono dal livello più basso del loro gruppo (sotto «Esiti:» spesso sono rientrati)
+    const B = blocchi(t, true);
+    for (let i = 0; i < B.length;) { if (B[i].t !== 'li') { i++; continue; } let j = i; while (j < B.length && B[j].t === 'li') j++; const min = Math.min(...B.slice(i, j).map(x => x.liv)); for (let k = i; k < j; k++) B[k] = { ...B[k], liv: B[k].liv - min }; i = j; }
+    for (let b of B) {
+      if (b.t === 'li') {
+        b = { ...b, liv: Math.min(b.liv, lst.length) }; // un elenco non salta livelli
+        const tag = b.num != null ? 'ol' : 'ul';
+        if (lst.length > b.liv + 1) chiudi(b.liv + 1);
+        if (lst.length === b.liv + 1) { if (lst[b.liv] !== tag) chiudi(b.liv); else h += '</li>'; }
+        while (lst.length < b.liv + 1) { h += `<${tag}>`; lst.push(tag); }
+        h += `<li>${runsHtml(b.r)}`; continue;
+      }
+      chiudi(0);
+      if (b.t === 'h') {
+        const tx = b.r.map(o => o.x).join(''), sc = tx.match(/^scena\s*\d*\s*[:.\-–—]?\s*(.*)$/i);
+        if (b.liv === 3 && sc) h += `<h3 class="scena">${esc(sc[1].trim() || 'Scena')}</h3>`;
+        else h += b.liv >= 4 ? `<h4>${runsHtml(b.r)}</h4>` : `<h2>${runsHtml(b.r)}</h2>`;
+      } else if (b.t === 'hr') h += '<hr>';
+      else if (b.t === 'q') h += `<blockquote>${runsHtml(b.r)}</blockquote>`;
+      else {
+        const r = [...b.r]; let campo = '';
+        const m = r[0] && (r[0].b || r[0].i) && r[0].x.trim().match(RX_CAMPO);
+        if (m) { campo = CAMPI.find(c => c[1].test(m[1]))[0]; r.shift(); if (r[0]) r[0] = { ...r[0], x: r[0].x.replace(/^\s*:?\s*/, '') }; }
+        h += `<p${campo ? ` data-campo="${campo}"` : ''}>${runsHtml(r) || '<br>'}</p>`;
+      }
+    }
+    chiudi(0);
+    return h || '<p><br></p>';
+  }
+  // dal documento al Markdown
+  const avvolgi = (t, m) => { const c = t.trim(); return c ? t.match(/^\s*/)[0] + m + c + m + t.match(/\s*$/)[0] : t; };
+  function inlMd(n) {
+    let s = '';
+    for (const c of n.childNodes) {
+      if (c.nodeType === 3) { s += c.nodeValue.replace(/[\s ]+/g, ' '); continue; }
+      if (c.nodeType !== 1) continue;
+      const tg = c.tagName, st = c.style || {};
+      if (c.dataset?.id) { const nome = c.textContent.trim(); s += `[[${c.dataset.id}${c.dataset.al || nome !== nomeScheda(c.dataset.id) ? '|' + nome : ''}]]`; continue; }
+      if (tg === 'BR') { s += ' '; continue; }
+      let t = inlMd(c);
+      if (tg === 'B' || tg === 'STRONG' || /^(bold|[6-9]00)$/.test(st.fontWeight || '')) t = avvolgi(t, '**');
+      if (tg === 'I' || tg === 'EM' || st.fontStyle === 'italic') t = avvolgi(t, '*');
+      s += t;
+    }
+    return s.replace(/\*\*\*\*/g, '');
+  }
+  const BLOCCHI = /^(P|DIV|H[1-6]|UL|OL|BLOCKQUOTE|HR|SECTION|ARTICLE|TABLE|PRE)$/;
+  function htmlMd(root) {
+    const out = []; let scena = 0;
+    const lista = (el, liv) => {
+      let i = 1;
+      for (const li of el.children) {
+        if (li.tagName === 'UL' || li.tagName === 'OL') { lista(li, liv + 1); continue; } // elenco dentro l'elenco (lo fa il browser)
+        if (li.tagName !== 'LI') continue;
+        const cl = li.cloneNode(true); cl.querySelectorAll('ul,ol').forEach(x => x.remove());
+        const t = inlMd(cl).trim(); if (t) out.push('  '.repeat(liv) + (el.tagName === 'OL' ? (i++) + '. ' : '- ') + t);
+        for (const sub of li.querySelectorAll(':scope > ul, :scope > ol')) lista(sub, liv + 1);
+      }
+    };
+    const blocco = n => {
+      if (n.nodeType === 3) { const t = n.nodeValue.trim(); if (t) out.push('', t, ''); return; }
+      if (n.nodeType !== 1) return;
+      const tg = n.tagName, t = () => inlMd(n).trim();
+      if (/^(DIV|SECTION|ARTICLE)$/.test(tg) && [...n.children].some(c => BLOCCHI.test(c.tagName))) { n.childNodes.forEach(blocco); return; }
+      if (tg === 'H3' && n.classList.contains('scena')) out.push('', `### Scena ${++scena}: ${t().replace(/\*+/g, '') || 'Scena'}`, '');
+      else if (/^H[1-3]$/.test(tg)) { if (t()) out.push('', '## ' + t().replace(/\*+/g, ''), ''); }
+      else if (/^H[4-6]$/.test(tg)) { if (t()) out.push('', '#### ' + t().replace(/\*+/g, ''), ''); }
+      else if (tg === 'UL' || tg === 'OL') { out.push(''); lista(n, 0); out.push(''); }
+      else if (tg === 'BLOCKQUOTE') { if (t()) out.push('', '> ' + t(), ''); }
+      else if (tg === 'HR') out.push('', '---', '');
+      else if (tg === 'TABLE') { for (const tr of n.querySelectorAll('tr')) { const c = [...tr.children].map(x => inlMd(x).trim()).filter(Boolean); if (c.length) out.push('- ' + c.join(' · ')); } out.push(''); }
+      else { const c = n.dataset?.campo, x = t(); if (!x && !c) return; out.push('', (c && LAB[c] ? `**${LAB[c]}:** ` : '') + x, ''); }
+    };
+    root.childNodes.forEach(blocco);
+    return out.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+  }
+  // il blocco (paragrafo, titolo, elenco) in cui c'è il cursore
+  function bloccoQui(ed) {
+    let n = getSelection().anchorNode; if (!n || !ed.contains(n)) return null;
+    while (n && n.parentNode !== ed) n = n.parentNode;
+    return n?.nodeType === 1 ? n : null;
+  }
+  const BARRA = [
+    ['b', '<b>G</b>', 'Grassetto (Ctrl+B)'], ['i', '<i>C</i>', 'Corsivo (Ctrl+I)'], ['|'],
+    ['h2', 'Sezione', 'Titolo di una parte: Gancio, PNG, Segreti… (chiude le scene)'], ['h4', 'Sottotitolo', 'Titoletto dentro una scena o una parte'], ['p', 'Normale', 'Testo normale'], ['|'],
+    ['ul', '• Elenco', 'Elenco puntato'], ['ol', '1. Elenco', 'Elenco numerato'], ['|'],
+    ['scena', '✂ Nuova scena', 'Inizia una nuova scena qui: quello che segue fa parte della nuova scena'], ['|'],
+    ['obiettivo', '🎯 Obiettivo', 'Segna questo paragrafo come obiettivo della scena'], ['ostacolo', '⚠ Ostacolo', 'Segna questo paragrafo come ostacolo della scena'],
+    ['esiti', '↪ Esiti', 'Segna questo paragrafo come esiti della scena'], ['ricompensa', '🎁 Ricompensa', 'Segna questo paragrafo come ricompensa di questa scena'], ['|'],
+    ['undo', '↶', 'Annulla (Ctrl+Z)'], ['redo', '↷', 'Ripeti']
+  ];
+  function editore(host, md, onInput) {
+    host.innerHTML = `<div class="sc-bar" role="toolbar" aria-label="Formattazione">${BARRA.map(([k, l, t]) => k === '|' ? '<span class="sep"></span>' : `<button type="button" data-ed="${k}" title="${esc(t)}" aria-label="${esc(t)}">${l}</button>`).join('')}<span class="sp"></span><button type="button" data-ed="sim" class="sim" title="Vedi e modifica il testo con i simboli (Markdown)">Simboli</button></div>
+      <div class="sc-ed" contenteditable="true" spellcheck="true" lang="it"></div><textarea class="sc-txt" hidden spellcheck="false"></textarea>`;
+    const ed = host.querySelector('.sc-ed'), ta = host.querySelector('textarea'), bar = host.querySelector('.sc-bar');
+    let simboli = false;
+    const metti = m => { ed.innerHTML = mdHtml(canonico(m)); };
+    const valore = () => simboli ? ta.value : htmlMd(ed);
+    const cambia = () => onInput?.();
+    metti(md);
+    try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch { }
+    ed.addEventListener('input', cambia);
+    // Invio dopo un campo (Obiettivo…): il nuovo paragrafo è testo normale
+    ed.addEventListener('keydown', e => {
+      if (e.key !== 'Enter' || e.shiftKey) return;
+      setTimeout(() => { const b = bloccoQui(ed), p = b?.previousElementSibling; if (b?.dataset.campo && p?.dataset.campo === b.dataset.campo && !b.textContent.trim()) delete b.dataset.campo; if (b?.classList.contains('scena') && p?.classList.contains('scena') && !b.textContent.trim()) { const q = document.createElement('p'); q.innerHTML = '<br>'; b.replaceWith(q); getSelection().collapse(q, 0); } }, 0);
+    });
+    // incollare: da Word, da una pagina o da Claude (testo con i simboli) arriva già formattato, senza stili strani
+    ed.addEventListener('paste', e => {
+      const html = e.clipboardData.getData('text/html'), txt = e.clipboardData.getData('text/plain');
+      if (!html && !txt) return;
+      e.preventDefault();
+      let m = txt;
+      if (html) { const doc = new DOMParser().parseFromString(html, 'text/html'); doc.querySelectorAll('style,script,meta,link,title,o\\:p').forEach(x => x.remove()); m = htmlMd(doc.body); }
+      const pezzo = mdHtml(m), uno = pezzo.match(/^<p>((?:(?!<\/?p[ >]).)*)<\/p>$/);
+      // più paragrafi dentro un elenco o un titolo si schiaccerebbero in una riga: vanno in un paragrafo nuovo sotto
+      const qui = bloccoQui(ed);
+      if (!uno && qui && /^(UL|OL|H\d)$/.test(qui.tagName)) { const q = document.createElement('p'); q.innerHTML = '<br>'; qui.after(q); getSelection().collapse(q, 0); }
+      document.execCommand('insertHTML', false, uno ? uno[1] : pezzo);
+    });
+    bar.addEventListener('mousedown', e => { if (e.target.closest('[data-ed]') && !simboli) e.preventDefault(); }); // il cursore resta nel testo
+    bar.addEventListener('click', e => {
+      const k = e.target.closest('[data-ed]')?.dataset.ed; if (!k) return;
+      if (k === 'sim') {
+        simboli = !simboli;
+        if (simboli) { ta.value = htmlMd(ed); } else metti(ta.value);
+        ed.hidden = simboli; ta.hidden = !simboli; bar.classList.toggle('simboli', simboli); e.target.classList.toggle('on', simboli);
+        e.target.textContent = simboli ? 'Torna al testo formattato' : 'Simboli';
+        return cambia();
+      }
+      if (simboli) return;
+      ed.focus();
+      if (!bloccoQui(ed) && ed.lastChild) { const r = document.createRange(); r.selectNodeContents(ed.lastChild); r.collapse(false); getSelection().removeAllRanges(); getSelection().addRange(r); }
+      const cmd = (c, v) => document.execCommand(c, false, v);
+      if (k === 'b') cmd('bold'); else if (k === 'i') cmd('italic');
+      else if (k === 'undo') cmd('undo'); else if (k === 'redo') cmd('redo');
+      else if (k === 'ul') cmd('insertUnorderedList'); else if (k === 'ol') cmd('insertOrderedList');
+      else if (k === 'h2' || k === 'h4' || k === 'p') { cmd('formatBlock', k); const b = bloccoQui(ed); if (b) { delete b.dataset.campo; b.classList.remove('scena'); } }
+      else if (k === 'scena') {
+        const b = bloccoQui(ed), h = document.createElement('h3'); h.className = 'scena'; h.textContent = 'Nuova scena';
+        if (b && !b.textContent.trim() && b.tagName === 'P') b.replaceWith(h); else if (b) ed.insertBefore(h, b); else ed.append(h);
+        if (!h.nextSibling) { const p = document.createElement('p'); p.innerHTML = '<br>'; h.after(p); }
+        const r = document.createRange(); r.selectNodeContents(h); getSelection().removeAllRanges(); getSelection().addRange(r);
+        h.scrollIntoView({ block: 'nearest' });
+      } else if (LAB[k]) {
+        let b = bloccoQui(ed); if (!b) return;
+        if (b.tagName !== 'P') { cmd('formatBlock', 'p'); b = bloccoQui(ed); if (!b) return; }
+        if (b.dataset.campo === k) delete b.dataset.campo; else b.dataset.campo = k;
+      }
+      cambia();
+    });
+    return { valore, metti: m => { if (simboli) ta.value = m; else metti(m); cambia(); }, el: ed };
+  }
+
   /* ---------- inserire o cambiare la scaletta ---------- */
   function dlgScaletta(cur, o = {}) {
     css();
     const prox = Math.max(lastSessionN() || 0, ...tutte().map(x => x.n)) + 1;
     const d = openDlg(`<form method="dialog"><h3>${cur ? `Scaletta della sessione ${cur.n}` : 'Nuova sessione da giocare'} <span class="pill dm">🔒 solo DM</span></h3>
       <label class="sc-drop" id="sc-drop" tabindex="0"><b>Trascina qui il file della sessione</b><span class="hint">Word (.docx), PDF, .md o .txt, oppure tocca per sceglierlo</span><input type="file" accept=".md,.markdown,.txt,.docx,.pdf,text/plain,text/markdown,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"></label>
-      <div class="sc-row"><label class="f"><span>Numero</span><input type="text" inputmode="numeric" id="sc-n" value="${cur ? cur.n : prox}" ${cur ? 'disabled' : ''} required autocomplete="off"></label><label class="f"><span>Titolo</span><input type="text" id="sc-t" value="${esc(cur?.title || '')}" autocomplete="off"></label></div>
+      <div class="sc-row"><label class="f"><span>Numero</span><input type="text" inputmode="numeric" id="sc-n" value="${cur ? cur.n : prox}" ${cur ? 'disabled' : ''} required autocomplete="off"></label><label class="f"><span>Titolo</span><input type="text" id="sc-t" value="${esc(cur?.title || (cur ? analizza(cur.text).titolo : '') || '')}" autocomplete="off"></label></div>
       <label class="chk"><input type="checkbox" id="sc-c" ${cur?.inCorso ? 'checked' : ''}> <span><b>In corso</b>: la sessione dura più serate (resta tra le sessioni da giocare finché non la segni come conclusa)</span></label>
-      <label class="f"><span>Testo della sessione${o.file ? '' : ' (puoi anche incollarlo o correggerlo qui)'}</span><textarea class="sc-txt" id="sc-x" rows="12" placeholder="## Titolo&#10;&#10;**In breve:** …&#10;&#10;### Gancio&#10;…&#10;&#10;### Scene&#10;1. **Prima scena.** *Obiettivo:* … *Ostacolo:* … *Esiti:* …">${esc(cur?.text || '')}</textarea></label>
+      <div class="f"><span>Testo della sessione</span><div class="sc-edw" id="sc-ew"></div><small class="hint">Scrivi come in Word. «✂ Nuova scena» divide le scene; i pulsanti 🎯 ⚠ ↪ 🎁 segnano obiettivo, ostacolo, esiti e ricompensa della scena in cui sei.</small></div>
       <div class="sc-ok" id="sc-ok" hidden></div>
       <menu><button value="cancel" class="btn ghost" formnovalidate>Annulla</button><button value="ok" class="btn primary">${cur ? 'Salva' : 'Crea la scaletta'}</button></menu></form>`, 'wide');
-    const x = $('#sc-x', d), t = $('#sc-t', d), ok = $('#sc-ok', d), drop = $('#sc-drop', d), inp = $('input[type=file]', drop);
+    let conta = () => { }; const E = editore($('#sc-ew', d), cur?.text || '', () => conta()), x = { get value() { return E.valore(); }, set value(m) { E.metti(m); } }, t = $('#sc-t', d), ok = $('#sc-ok', d), drop = $('#sc-drop', d), inp = $('input[type=file]', drop);
     let file = cur?.file || '';
-    const conta = () => {
+    conta = () => {
       const a = analizza(x.value); if (!x.value.trim()) { ok.hidden = true; return; }
       if (!t.value.trim() && a.titolo) t.value = a.titolo;
       const sez = a.sezioni.filter(s => !s.scene && s.t).map(s => s.t);
@@ -355,7 +553,7 @@ dialog .sc-txt{width:100%;min-height:200px;font:13px/1.45 ui-monospace,SFMono-Re
     const carica = async f => {
       if (!f) return;
       drop.querySelector('b').textContent = 'Leggo ' + f.name + '…';
-      try { x.value = await leggiFile(f); file = f.name; t.value = ''; conta(); drop.querySelector('b').textContent = '✓ ' + f.name; }
+      try { const raw = await leggiFile(f); file = f.name; t.value = analizza(raw).titolo || ''; x.value = raw; conta(); drop.querySelector('b').textContent = '✓ ' + f.name; }
       catch (e) { drop.querySelector('b').textContent = 'Trascina qui il file della sessione'; toast(e.message || String(e), 'err'); }
     };
     inp.onchange = () => carica(inp.files[0]);
@@ -366,7 +564,6 @@ dialog .sc-txt{width:100%;min-height:200px;font:13px/1.45 ui-monospace,SFMono-Re
     // «11-13» o «11, 12, 13»: una sessione su più serate
     const nn = $('#sc-n', d), cc = $('#sc-c', d);
     nn.oninput = () => { if ((nn.value.match(/\d+/g) || []).length > 1) cc.checked = true; };
-    x.oninput = () => { file = cur && !o.file ? cur.file : file; conta(); };
     conta();
     if (o.file) setTimeout(() => inp.click(), 50);
     d.addEventListener('close', async () => {
@@ -386,9 +583,12 @@ dialog .sc-txt{width:100%;min-height:200px;font:13px/1.45 ui-monospace,SFMono-Re
   /* ---------- scaricare la scaletta completa (Word o PDF) ---------- */
   // dal testo della scaletta (Markdown) a blocchi semplici: titoli, paragrafi, elenchi, citazioni, righe
   const nomeScheda = id => S.ents.get(id)?.name || id.replace(/^[a-z]+-/, '').replace(/-/g, ' ');
-  function inl(s) {
-    s = String(s).replace(/\[\[([^\]|]+?)(?:\|([^\]]+?))?\]\]/g, (m, id, al) => al || nomeScheda(id)).replace(/\[([^\]]+)\]\((?:[^)]+)\)/g, '$1').replace(/`([^`]+)`/g, '$1');
+  // link: i collegamenti [[id]] restano collegamenti (per l'editor), altrimenti diventano il nome
+  function inl(s, link) {
+    const L = [];
+    s = String(s).replace(/\[\[([^\]|]+?)(?:\|([^\]]+?))?\]\]/g, (m, id, al) => link ? (L.push({ id: id.trim(), al: al || '' }), '\uE000' + (L.length - 1) + '\uE001') : al || nomeScheda(id)).replace(/\[([^\]]+)\]\((?:[^)]+)\)/g, '$1').replace(/`([^`]+)`/g, '$1');
     const out = [];
+    if (link) { const r = inl(s); for (const o of r) for (const q of o.x.split(/(\uE000\d+\uE001)/)) { if (!q) continue; const k = q.match(/^\uE000(\d+)\uE001$/); out.push(k ? { ...o, x: L[+k[1]].al || nomeScheda(L[+k[1]].id), id: L[+k[1]].id, al: L[+k[1]].al } : { ...o, x: q }); } return out; }
     for (const p of s.split(/(\*\*\*[^*]+?\*\*\*|\*\*[^*]+?\*\*|(?<![\w*])\*[^*\s][^*]*?\*(?![\w*])|(?<![\w_])_[^_\s][^_]*?_(?![\w_]))/)) {
       if (!p) continue;
       if (/^\*\*\*.+\*\*\*$/.test(p)) out.push({ x: p.slice(3, -3), b: 1, i: 1 });
@@ -398,20 +598,20 @@ dialog .sc-txt{width:100%;min-height:200px;font:13px/1.45 ui-monospace,SFMono-Re
     }
     return out;
   }
-  function blocchi(t) {
+  function blocchi(t, link) {
     const out = []; let par = [];
-    const flush = () => { if (par.length) { out.push({ t: 'p', r: inl(par.join(' ')) }); par = []; } };
+    const flush = () => { if (par.length) { out.push({ t: 'p', r: inl(par.join(' '), link) }); par = []; } };
     for (const raw of String(t || '').replace(/\r/g, '').split('\n')) {
       const r = raw.replace(/\t/g, '    '); let m;
       if (!r.trim()) { flush(); continue; }
-      if ((m = r.match(/^\s*(#{1,6})\s+(.*)$/))) { flush(); out.push({ t: 'h', liv: Math.min(m[1].length, 4), r: inl(m[2]) }); continue; }
+      if ((m = r.match(/^\s*(#{1,6})\s+(.*)$/))) { flush(); out.push({ t: 'h', liv: Math.min(m[1].length, 4), r: inl(m[2], link) }); continue; }
       if (/^\s*([-*_])(\s*\1){2,}\s*$/.test(r)) { flush(); out.push({ t: 'hr' }); continue; }
-      if ((m = r.match(/^(\s*)(?:[-*•+]|(\d+)[.)])\s+(.*)$/))) { flush(); out.push({ t: 'li', liv: Math.min(3, Math.floor(m[1].length / 2)), num: m[2] ? +m[2] : null, r: inl(m[3]) }); continue; }
-      if ((m = r.match(/^\s*>\s?(.*)$/))) { flush(); out.push({ t: 'q', r: inl(m[1]) }); continue; }
-      if (/^\s*\|/.test(r)) { flush(); if (!/^\s*\|?[\s:|-]+$/.test(r)) out.push({ t: 'li', liv: 0, num: null, r: inl(r.trim().replace(/^\||\|$/g, '').split('|').map(x => x.trim()).filter(Boolean).join(' · ')) }); continue; }
+      if ((m = r.match(/^(\s*)(?:[-*•+]|(\d+)[.)])\s+(.*)$/))) { flush(); out.push({ t: 'li', liv: Math.min(3, Math.floor(m[1].length / 2)), num: m[2] ? +m[2] : null, r: inl(m[3], link) }); continue; }
+      if ((m = r.match(/^\s*>\s?(.*)$/))) { flush(); out.push({ t: 'q', r: inl(m[1], link) }); continue; }
+      if (/^\s*\|/.test(r)) { flush(); if (!/^\s*\|?[\s:|-]+$/.test(r)) out.push({ t: 'li', liv: 0, num: null, r: inl(r.trim().replace(/^\||\|$/g, '').split('|').map(x => x.trim()).filter(Boolean).join(' · '), link) }); continue; }
       // riga rientrata sotto un punto dell'elenco: è il seguito di quel punto
       const ult = out[out.length - 1];
-      if (!par.length && ult?.t === 'li' && /^\s{2,}/.test(raw)) { ult.r.push({ x: ' ' }, ...inl(r.trim())); continue; }
+      if (!par.length && ult?.t === 'li' && /^\s{2,}/.test(raw)) { ult.r.push({ x: ' ' }, ...inl(r.trim(), link)); continue; }
       par.push(r.trim());
     }
     flush(); return out;
@@ -580,5 +780,5 @@ ${stile('ListParagraph', 'List Paragraph', '<w:spacing w:after="60"/>', '')}${st
     const v = una(n), a = analizza(v.text), f = fatte(n);
     return { n, title: v.title || a.titolo || '', text: v.text, scene: a.scene.map((x, i) => ({ t: x.t, fatta: f.has(i) })), ora: PAN.scena[n] ?? statoScene(n, a.scene).indexOf('ora') };
   }
-  window.__scaletta = { scarica: n => una(n) && scarica(una(n)), blocchi, riquadro, acts, nuova: () => dlgScaletta(null), dellaSessione: n => window.__RO ? 0 : una(n) ? n : (tutte().find(v => v.inCorso && v.n <= n)?.n || 0), pannello, daAprire, analizza, docxMd, corrente };
+  window.__scaletta = { canonico, mdHtml, htmlMd: h => { const d = document.createElement('div'); d.innerHTML = h; return htmlMd(d); }, scarica: n => una(n) && scarica(una(n)), blocchi, riquadro, acts, nuova: () => dlgScaletta(null), dellaSessione: n => window.__RO ? 0 : una(n) ? n : (tutte().find(v => v.inCorso && v.n <= n)?.n || 0), pannello, daAprire, analizza, docxMd, corrente };
 })();
