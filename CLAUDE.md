@@ -18,3 +18,6 @@
 - Immagini di razze, classi e mostri del Compendio: meta «immagini» ({ 'razza:elfo' | 'classe:mago' | 'mostro:<id>':
   { src, autore, licenza, fonte, titolo } }), solo con licenza libera e fonte citata; mai per i PG del party.
   Razza, classe e livello del party: meta «party», aggiornata dalla Home del DM leggendo le schede del Tavolo.
+- Questionari: il giocatore li invia come segnalazione cifrata su GitHub («[Giocatore] X ha compilato il questionario»).
+  Il DM li legge dal sito (Strumenti › Questionari dei giocatori, e sotto ogni domanda nella scheda del PG): local.js
+  scarica le segnalazioni dall'API pubblica di GitHub e le decifra nel browser con le password dei giocatori.
