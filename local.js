@@ -374,6 +374,7 @@
     if (PLAYER) { mk('🐞', 'Segnala un bug', 'Qualcosa non funziona o si vede male: avvisa il DM', () => { setOpen(false); playerDlg('bug'); }); mk('💡', 'Proponi una miglioria', 'Un\'idea per migliorare il sito: proponila al DM', () => { setOpen(false); playerDlg('idea'); }); }
     if (adm) mk('✎', 'Segnala a Claude', 'Segnala un errore o correggi i contenuti del sito', () => { setOpen(false); reportDlg(); });
     if (adm) mk('🕘', 'Versioni salvate', 'Le ultime versioni salvate dal sito: puoi tornare a una precedente', () => { setOpen(false); versioniDlg(); });
+    if (adm) mk('📝', 'Questionari dei giocatori', 'Leggi le risposte che i giocatori hanno inviato dal sito', () => { setOpen(false); questionariDlg(); });
     if (adm) mk('👥', 'Account giocatori', 'Password dei giocatori: vederle o cambiarle', () => { setOpen(false); accountsDlg(); });
     if (adm) { mk('⇪', 'Importa', 'Importa una sessione o dei dati', () => { setOpen(false); location.hash = '#/import'; }); mk('⛁', 'Backup', 'Scarica o ripristina un backup', () => { setOpen(false); location.hash = '#/backup'; }); }
     const out = mk('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M16 8l4 4-4 4"/><path d="M20 12H9"/></svg>', 'Esci', 'Esci e torna alla schermata di accesso', async () => { out.disabled = true; ls.del('cdnd_remember'); ls.del('cdnd_pkey'); if (DB) { try { const t = DB.transaction('kv', 'readwrite'); t.objectStore('kv').delete('key'); await done(t); } catch { } } location.reload(); });
@@ -823,6 +824,80 @@ html.review #view :is(p,li,h1,h2,h3,h4,h5,dd,dt,td,th,figcaption,blockquote):hov
     d.addEventListener('close', () => d.remove()); d.querySelectorAll('[data-a=close]').forEach(b => b.onclick = () => d.close()); return d;
   }
   const pageName = () => (document.title || '').replace(/ · Campagna D&D.*$/, '');
+
+  /* ---------- questionari dei giocatori (amministratore) ----------
+     Il giocatore invia il questionario come segnalazione su GitHub («[Giocatore] X ha compilato il questionario»),
+     cifrata con la chiave della sua password (playerRequest). Il DM ha le password nei suoi dati, quindi qui il
+     browser legge le segnalazioni (repository pubblico, senza chiavi) e le decifra: il testo non lascia mai il browser. */
+  const API_REPO = ASK_REPO.replace('https://github.com/', 'https://api.github.com/repos/');
+  async function ghGet(path) {
+    const r = await fetch(API_REPO + path, { headers: { Accept: 'application/vnd.github+json' }, cache: 'no-store' });
+    if (!r.ok) throw new Error(r.status === 403 || r.status === 429 ? 'GitHub chiede di aspettare un po\' (troppe letture): riprova tra qualche minuto.' : 'GitHub risponde ' + r.status + '.');
+    return r.json();
+  }
+  // il blocco «AVALAR-GIOCATORE-1 <id> … FINE» di una segnalazione, che può continuare nei commenti («Parte 2 di 3»)
+  async function bloccoGiocatore(issue) {
+    let t = issue.body || '';
+    if (/Parte 1 di \d/.test(t) && issue.comments) for (const c of await ghGet('/issues/' + issue.number + '/comments?per_page=100')) t += '\n' + c.body;
+    const m = t.match(/AVALAR-GIOCATORE-1 ([a-z0-9_-]+)\s*\n([\s\S]*?)\n\s*FINE/);
+    if (!m) return null;
+    return { gid: m[1], b64: m[2].split('\n').map(x => x.trim()).filter(x => /^[A-Za-z0-9+/=]+$/.test(x)).join('') };
+  }
+  async function apriBlocco(b, g) {
+    const all = b64d(b.b64), raw = await deriveRaw(g.code, b64d(g.salt), ITER);
+    let pt = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: all.slice(0, 12) }, await aesKey(raw), all.slice(12)));
+    if (pt[0] === 0x1f && pt[1] === 0x8b) pt = new Uint8Array(await new Response(new Blob([pt]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
+    return JSON.parse(new TextDecoder().decode(pt));
+  }
+  // «**1. Domanda**\nrisposta» → domanda in grassetto e risposta sotto
+  const testoQz = t => t.split(/\n{2,}/).map(par => `<p style="margin:0 0 10px;white-space:pre-wrap">${esc(par).replace(/\*\*(.+?)\*\*/g, '<b style="color:#561820">$1</b>')}</p>`).join('');
+  // tutti i questionari inviati: id del giocatore → invii, dal più recente ({ i: segnalazione, s: contenuto, err })
+  let QZ_CACHE = null;
+  function questionariInviati(fresca) {
+    if (QZ_CACHE && !fresca) return QZ_CACHE;
+    return QZ_CACHE = (async () => {
+      const G = (MEM.meta?.get('giocatori')?.v || []).filter(g => g.code && g.salt), issues = [], per = {};
+      for (let p = 1; p <= 5; p++) { const l = await ghGet('/issues?state=all&per_page=100&page=' + p); issues.push(...l.filter(i => !i.pull_request && /^\[Giocatore\] .* ha compilato il questionario/.test(i.title))); if (l.length < 100) break; }
+      for (const i of issues.sort((a, b) => b.created_at.localeCompare(a.created_at))) {
+        let b = null; try { b = await bloccoGiocatore(i); } catch { }
+        const g = b ? G.find(x => x.id === b.gid) : G.find(x => i.title.startsWith('[Giocatore] ' + x.name + ' '));
+        if (!g) continue;
+        let s = null, err = '';
+        if (!b) err = 'Il testo è in un file allegato alla segnalazione: aprila su GitHub.';
+        else try { s = await apriBlocco(b, g); } catch { err = 'Non riesco ad aprirlo: forse è stato inviato con una password che poi è cambiata.'; }
+        (per[g.id] = per[g.id] || []).push({ i, s, err });
+      }
+      return { G, per };
+    })().catch(x => { QZ_CACHE = null; throw x; });
+  }
+  // le risposte dell'ultimo questionario di un giocatore, domanda per domanda (per la scheda del suo PG, solo DM)
+  window.__questionario = async gid => {
+    if (ROLE !== 'admin') return null;
+    const u = (await questionariInviati()).per[gid]?.[0];
+    if (!u) return { inviato: false };
+    if (!u.s) return { inviato: true, at: u.i.created_at, url: u.i.html_url, err: u.err, risposte: [] };
+    const risposte = [], re = /\*\*(\d+)\. ([\s\S]+?)\*\*\n([\s\S]*?)(?=\n\n\*\*\d+\. |$)/g;
+    for (const m of u.s.text.matchAll(re)) risposte.push({ n: +m[1], domanda: m[2].trim(), risposta: m[3].trim() === '(nessuna risposta)' ? '' : m[3].trim() });
+    return { inviato: true, at: u.s.at || u.i.created_at, url: u.i.html_url, risposte };
+  };
+  async function questionariDlg() {
+    const d = dlg('qzdlg', `<h3 style="${H3}">Questionari dei giocatori</h3><p class="sd" style="margin:0 0 8px">Le risposte inviate dal sito. Arrivano cifrate e le apre solo il tuo accesso da DM.</p><div class="rvl">Carico…</div>
+      <div style="display:flex;margin-top:10px"><button type="button" class="btn ghost" style="margin-left:auto" data-a="close">Chiudi</button></div>`);
+    const body = d.querySelector('.rvl');
+    try {
+      const { G, per } = await questionariInviati(true);
+      if (!G.length) { body.innerHTML = '<p class="sd">Gli account dei giocatori non sono ancora stati creati.</p>'; return; }
+      const quando = x => new Date(x).toLocaleString('it-IT', { dateStyle: 'medium', timeStyle: 'short' });
+      body.innerHTML = G.map(g => {
+        const inv = per[g.id];
+        if (!inv) return `<div class="bugi"><div class="bh"><b>${esc(g.name)}</b><span class="sd">non ancora inviato</span></div></div>`;
+        const [ult, ...prima] = inv;
+        return `<div class="bugi"><details open><summary class="bh" style="cursor:pointer;list-style:none"><b>${esc(g.name)}</b><span class="sd">inviato il ${esc(quando(ult.s?.at || ult.i.created_at))}${prima.length ? ' · ' + (prima.length + 1) + ' invii' : ''}</span></summary>
+          <div style="margin-top:8px">${ult.s ? testoQz(ult.s.text.replace(/^Questionario di [^\n]*\n+/, '')) : `<p class="sd">${esc(ult.err)}</p>`}
+          <p class="sd" style="margin:6px 0 0;font-size:.85rem"><a href="${esc(ult.i.html_url)}" target="_blank" rel="noopener">Segnalazione su GitHub</a>${prima.length ? ' · invii precedenti: ' + prima.map(x => `<a href="${esc(x.i.html_url)}" target="_blank" rel="noopener">${esc(quando(x.i.created_at))}</a>`).join(', ') : ''}</p></div></details></div>`;
+      }).join('');
+    } catch (x) { body.textContent = 'Non riesco a leggere i questionari: ' + (x && x.message || 'riprova.'); }
+  }
 
   /* ---------- account dei giocatori (amministratore) ----------
      Le password stanno nei dati del DM (meta «giocatori»), mai nelle copie dei giocatori. Una password nuova è una

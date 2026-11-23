@@ -191,6 +191,7 @@ fieldset.visf{border:1px solid var(--line2);border-radius:8px;padding:6px 10px 2
 .sec.quest>summary{font-size:1.12rem;flex-wrap:wrap}
 .sec.quest>summary .qico{font-size:1.05em;filter:saturate(.8)}
 .qz>p.hint{margin:2px 0 12px}
+.qzans{margin:8px 0 2px;padding:8px 12px;border-left:3px solid var(--gold);background:var(--paper2);border-radius:0 8px 8px 0;white-space:normal}.qzans .qzlab{display:block;font:600 .72rem/1.2 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--wine2);margin-bottom:3px}.qzans.vuota i{color:var(--mute)}
 .qzq{margin:0 0 14px}.qzq label{display:block;font-weight:600;margin-bottom:2px}.qzq .hint{margin:0 0 6px}
 .qzq textarea{width:100%;box-sizing:border-box;min-height:4.5em;resize:vertical;font:inherit;padding:8px 10px;border:1px solid var(--line2);border-radius:8px;background:var(--paper);color:var(--ink)}
 .qzq textarea:focus{outline:2px solid var(--gold);outline-offset:1px}
@@ -2374,6 +2375,24 @@ function questionarioHtml(sec, si, id) {
     ${sec.entries.map((en, i) => `<div class="qzq"><label for="qz-${i}">${i + 1}. ${inl(qzQ(en.text))}</label>${en.text.includes('\n') ? `<div class="hint">${inl(en.text.split('\n').slice(1).join(' ').trim())}</div>` : ''}<textarea id="qz-${i}" data-qz="${esc(qzQ(en.text))}" rows="3">${esc(ans[qzQ(en.text)] || '')}</textarea></div>`).join('')}
     <div class="qzgo"><button type="button" class="btn primary" data-act="qzSend">${st.sent ? 'Invia di nuovo al DM' : 'Invia al DM'}</button><span class="hint" id="qzm">${st.sent ? 'Inviato il ' + esc(new Date(st.sent).toLocaleString('it-IT', { dateStyle: 'medium', timeStyle: 'short' })) + '. Se cambi qualcosa, puoi rimandarlo.' : 'Le risposte arrivano cifrate: le leggono solo il DM e Claude.'}</span></div></details>`;
 }
+async function qzRisposte(sec, si, gid) {
+  const box = $('#sec-' + si); if (!box) return;
+  const stato = document.createElement('p'); stato.className = 'hint qzstato'; stato.textContent = 'Cerco le risposte inviate…';
+  box.querySelector('summary')?.after(stato);
+  let r; try { r = await window.__questionario(gid); } catch (e) { stato.textContent = 'Non riesco a leggere le risposte: ' + (e.message || 'riprova.'); return; }
+  if (!box.isConnected) return;
+  if (!r || !r.inviato) { stato.textContent = 'Il giocatore non ha ancora inviato il questionario.'; return; }
+  const quando = new Date(r.at).toLocaleString('it-IT', { dateStyle: 'medium', timeStyle: 'short' });
+  stato.innerHTML = `Risposte inviate il ${esc(quando)} · <a href="${esc(r.url)}" target="_blank" rel="noopener">segnalazione</a>${r.err ? '<br>' + esc(r.err) : ''}`;
+  const norm = t => t.replace(/\s+/g, ' ').trim().toLowerCase();
+  box.querySelectorAll('.entry').forEach((el, i) => {
+    const en = sec.entries[i]; if (!en || el.querySelector('.qzans')) return;
+    const a = r.risposte.find(x => norm(x.domanda) === norm(qzQ(en.text))) || r.risposte.find(x => x.n === i + 1 && !sec.entries.some(y => norm(qzQ(y.text)) === norm(x.domanda)));
+    const d = document.createElement('div'); d.className = 'qzans' + (a && a.risposta ? '' : ' vuota');
+    d.innerHTML = a && a.risposta ? `<span class="qzlab">Risposta</span>${esc(a.risposta).replace(/\n/g, '<br>')}` : '<span class="qzlab">Risposta</span><i>nessuna risposta</i>';
+    (el.querySelector('.tx') || el).append(d);
+  });
+}
 function entrySecHtml(sec, si, editable = true, subs = '') {
   const n = sec.entries.length, KEEP = 8;
   const ent = (en, ei) => `<div class="entry${en.dm ? ' dment' : ''}"><div class="tag${en.n != null ? '' : ' dot'}">${en.n != null ? sessLink(en.n) : '·'}</div><div class="tx">${en.dm ? '<span class="pill dm">🔒 solo DM</span>' : ''}${visPill(en)}${en.text.length > 1400 ? `<div class="fold">${prose(en.text)}</div><button type="button" class="more" data-act="unfold">Leggi tutto</button>` : prose(en.text)}</div><div class="eacts"><button class="icb" data-act="editEntry" data-si="${si}" data-ei="${ei}" title="Modifica">✎</button><button class="icb" data-act="delEntry" data-si="${si}" data-ei="${ei}" title="Elimina">✕</button></div></div>`;
@@ -2483,6 +2502,8 @@ route(/^\/scheda\/(.+)$/, async ([id]) => {
     await mutBody(id, bd => { const sc = bd.sections[si]; sc.title = r.t.trim(); if (r.stato) sc.stato = r.stato; if (owner) sc.vis = [owner]; }); rerender();
   };
   // questionario del giocatore: le risposte si salvano a ogni tasto, in questo browser
+  // DM: sotto ogni domanda del questionario la risposta che il giocatore ha inviato (la sezione la vedono solo lui e il DM)
+  if (qz.length && owner && !window.__RO && window.__questionario) qzRisposte(b.sections[qz[0]], qz[0], owner);
   const qzForm = $('.qz');
   if (qzForm) qzForm.addEventListener('input', ev => { const t = ev.target.closest('textarea[data-qz]'); if (!t) return; const st = qzLoad(id); st.a = { ...st.a, [t.dataset.qz]: t.value }; qzSave(id, st); });
   setActs({
