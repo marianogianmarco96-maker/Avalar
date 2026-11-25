@@ -237,7 +237,7 @@
     const p = P.find(x => x.id === ST.id) || null;
     const dm = ST.io.ruolo === 'dm';
     setView(`<div class="dr${ST.aperta && p ? ' aperta' : ''}${dm ? ' dr-dm' : ''}"><aside class="card dr-side"><h2>${dm ? 'I diari del gruppo' : 'Il mio diario'}</h2>${elenco()}</aside>${pagina(p)}${laterale(p)}</div>`, 'raw');
-    document.title = (dm ? 'Diari' : 'Diario') + ' · ' + (getMeta('campaign', null)?.name || 'Campagna D&D');
+    document.title = (dm ? 'Diari' : 'Diario') + ' · ' + (getMeta('campaign', null)?.name || 'Il Grimorio');
     lega(p);
   }
 
