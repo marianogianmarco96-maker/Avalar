@@ -1004,6 +1004,23 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   .tv.gio .tv-ctab:not(.chiusa){display:none}
 }
 .tv-back{display:none}
+.tv-mrz,.tv-mtab{display:none}
+@media (min-width:900px){
+  html.in-tavolo.tv-mi{--sbw:64px!important}
+  html.in-tavolo.tv-mc{--sbw:0px!important}
+  html.in-tavolo.tv-mc header.top{display:none!important}
+  html.in-tavolo.tv-mi header.top{padding:14px 8px!important;overflow:hidden auto;scrollbar-width:none}
+  html.in-tavolo.tv-mi header.top .brand{padding:0 0 10px!important;margin:0 0 6px!important}
+  html.in-tavolo.tv-mi header.top .brand::before{width:40px!important;height:40px!important;margin:0 auto!important;border-radius:10px}
+  html.in-tavolo.tv-mi header.top .brand>span,html.in-tavolo.tv-mi header.top .srch,html.in-tavolo.tv-mi #nav a>span,html.in-tavolo.tv-mi #tools .tl,html.in-tavolo.tv-mi #tools .tr{display:none!important}
+  html.in-tavolo.tv-mi #nav a{justify-content:center;padding:10px 0!important}
+  html.in-tavolo.tv-mi header.top #themeBtn{position:static!important;align-self:center;order:5;margin-top:6px}
+  html.in-tavolo.tv-mi header.top #tools .ttog{justify-content:center;padding:8px 0;min-width:0;width:100%}
+  .tv-mrz{display:block;position:absolute;left:0;top:0;bottom:0;width:6px;z-index:20;cursor:ew-resize;touch-action:none}
+  .tv-mrz:hover,.tv-mrz.on{background:linear-gradient(90deg,#e7cf9a66,transparent)}
+  .tv-mtab{all:unset;box-sizing:border-box;display:flex;position:absolute;left:0;bottom:46px;z-index:21;width:16px;height:42px;align-items:center;justify-content:center;border-radius:0 9px 9px 0;background:#2a1215;color:var(--gold2,#e0c071);border:1px solid #c9a24b66;border-left:0;box-shadow:3px 0 10px #0006;cursor:pointer;font:700 1rem/1 var(--body);opacity:.75}
+  .tv-mtab:hover,.tv-mtab:focus-visible{opacity:1;width:20px}
+}
 @media (max-width:820px){
   html.in-tavolo #nav{display:none!important}
   html.in-tavolo #toasts{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
@@ -1825,7 +1842,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       f.style.bottom = (nav && getComputedStyle(nav).position === 'fixed' ? nav.offsetHeight : 0) + 'px';
     };
     // sul telefono il tavolo prende tutto lo schermo: la barra del sito sparisce (si esce con ‹ accanto al nome della mappa)
-    document.documentElement.classList.add('in-tavolo'); onCleanup(() => document.documentElement.classList.remove('in-tavolo'));
+    document.documentElement.classList.add('in-tavolo'); onCleanup(() => document.documentElement.classList.remove('in-tavolo', 'tv-mi', 'tv-mc'));
+    menuSito();
     fit(); scrollTo(0, 0); addEventListener('resize', fit); addEventListener('resize', alzaAvvisi);
     let vivo = true;
     onCleanup(() => { vivo = false; removeEventListener('resize', fit); removeEventListener('resize', alzaAvvisi); esci(); document.querySelectorAll('.tv-tip').forEach(x => x.remove()); });
@@ -3391,6 +3409,36 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       p.querySelector('[data-k=nas]').onclick = () => { chiudiPop(); Promise.resolve(nasc ? mettiNascosto(t, false) : nascondersi(t)).catch(err => toast(err.message, 'err')); };
       p.querySelector('[data-k=ini]')?.addEventListener('click', () => { chiudiPop(); iniziativa(t, imod); });
     };
+  }
+
+  /* ---------- il menu del sito a sinistra, nel Tavolo: intero, solo icone o chiuso ----------
+     come la chat: si tira il bordo (doppio click: torna intero), e la linguetta passa da un modo all'altro. Ognuno sul suo schermo */
+  const TMENU = 'tavolo-menu';
+  function menuSito() {
+    const tv = $('.tv'), H = document.documentElement; if (!tv) return;
+    let modo = ''; try { modo = localStorage.getItem(TMENU) || ''; } catch { }
+    const metti = m => {
+      modo = m; H.classList.toggle('tv-mi', m === 'icone'); H.classList.toggle('tv-mc', m === 'chiusa');
+      try { m ? localStorage.setItem(TMENU, m) : localStorage.removeItem(TMENU); } catch { }
+      const prossimo = m === '' ? 'icone' : m === 'icone' ? 'chiusa' : '';
+      tab.textContent = m === 'chiusa' ? '›' : '‹';
+      tab.title = { icone: 'Menu del sito: solo icone (tocca per chiuderlo, tira per allargarlo)', chiusa: 'Menu del sito chiuso (tocca per riaprirlo)', '': 'Menu del sito: tocca per lasciare solo le icone, tira per stringerlo o chiuderlo' }[m] || '';
+      tab.setAttribute('aria-label', prossimo === '' ? 'Riapri il menu del sito' : prossimo === 'icone' ? 'Menu del sito: solo icone' : 'Chiudi il menu del sito');
+      dispatchEvent(new Event('resize'));
+    };
+    const rz = document.createElement('i'); rz.className = 'tv-mrz'; rz.setAttribute('aria-hidden', 'true');
+    const tab = document.createElement('button'); tab.type = 'button'; tab.className = 'tv-mtab';
+    tv.append(rz, tab);
+    tab.onclick = () => metti(modo === '' ? 'icone' : modo === 'icone' ? 'chiusa' : '');
+    // tirando: dove si lascia il bordo decide il modo (vicino al bordo chiuso, poco più in là solo icone)
+    rz.onpointerdown = e => {
+      if (e.button) return; e.preventDefault(); rz.setPointerCapture(e.pointerId); rz.classList.add('on');
+      const scegli = x => x < 36 ? 'chiusa' : x < 150 ? 'icone' : '';
+      rz.onpointermove = ev => { const m = scegli(ev.clientX); if (m !== modo) metti(m); };
+      rz.onpointerup = rz.onpointercancel = () => { rz.onpointermove = rz.onpointerup = rz.onpointercancel = null; rz.classList.remove('on'); };
+    };
+    rz.ondblclick = () => metti('');
+    metti(modo);
   }
 
   /* ---------- foto del token a schermo intero ---------- */
