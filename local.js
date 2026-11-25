@@ -397,7 +397,7 @@
   }
   window.__sendRequest = async (title, body) => {
     if (ROLE !== 'admin') return;
-    const w = window.open('', '_blank'), page = (document.title || '').replace(/ · Campagna D&D.*$/, '');
+    const w = window.open('', '_blank'), page = (document.title || '').replace(/ · (?:[^·]* · )?Il Grimorio$/, '');
     const t = '[Richiesta] ' + (title.length > 70 ? title.slice(0, 67) + '…' : title);
     let txt = body.slice(0, 6000) + '\n\n---\nInviata dal sito, pagina: ' + page + ' (' + location.hash + ')';
     txt += '\n\nFirma DM: ' + await firma(txt);
@@ -823,7 +823,7 @@ html.review #view :is(p,li,h1,h2,h3,h4,h5,dd,dt,td,th,figcaption,blockquote):hov
     d = document.createElement('dialog'); d.id = id; d.className = 'segdlg'; d.innerHTML = html; document.body.append(d); d.showModal();
     d.addEventListener('close', () => d.remove()); d.querySelectorAll('[data-a=close]').forEach(b => b.onclick = () => d.close()); return d;
   }
-  const pageName = () => (document.title || '').replace(/ · Campagna D&D.*$/, '');
+  const pageName = () => (document.title || '').replace(/ · (?:[^·]* · )?Il Grimorio$/, '');
 
   /* ---------- questionari dei giocatori (amministratore) ----------
      Il giocatore invia il questionario come segnalazione su GitHub («[Giocatore] X ha compilato il questionario»),
