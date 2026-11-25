@@ -73,6 +73,43 @@ dialog.dlg.sc-dlg .sc-ed,dialog.dlg.sc-dlg .sc-txt{flex:1;min-height:0;max-heigh
 .sc-bar button.sim.on{background:var(--wine);color:#fff}
 .sc-bar.simboli button:not(.sim){opacity:.35;pointer-events:none}
 .sc-bar .sep{width:1px;height:20px;background:var(--line2);margin:0 3px}.sc-bar .sp{flex:1}
+/* barra a gruppi: il nome sopra, i pulsanti sotto; acceso = dove sei */
+.sc-bar{padding:0;gap:0;align-items:stretch}
+.sc-g{display:flex;flex-direction:column;gap:4px;padding:6px 10px 7px;border-right:1px solid var(--line2)}
+.sc-g:last-child{border-right:0;margin-left:auto}
+.sc-g>small{font:700 .62rem/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:#8a6a24}
+:root[data-theme=dark] .sc-g>small{color:var(--gold2)}
+.sc-gr{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.sc-bar .sc-gr button{padding:6px 10px;border-radius:5px;font:600 .95rem/1.1 var(--body);border:1px solid var(--line2);background:var(--paper);display:inline-flex;gap:5px;align-items:center}
+.sc-bar .sc-gr button.ico{min-width:34px;justify-content:center}
+.sc-bar .sc-gr button:hover{border-color:var(--gold)}
+.sc-bar .sc-gr button.on{background:var(--wine);border-color:var(--wine);color:#fff}
+.sc-bar .sc-gr button.prova{background:#2f5d6b;border-color:#2f5d6b;color:#fff}.sc-bar .sc-gr button.prova:hover{background:#244a55}
+.sc-stile{appearance:none;font:600 .95rem/1.1 var(--body);padding:6px 30px 6px 10px;border:1px solid var(--line2);border-radius:5px;background:var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23a98334'/%3E%3C/svg%3E") no-repeat right 10px center;min-width:190px;color:var(--ink);cursor:pointer}
+.sc-bar.simboli select{opacity:.35;pointer-events:none}
+.sc-pos{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;padding:5px 14px;border-bottom:1px solid var(--line2);background:var(--paper);font-size:.88rem;color:var(--ink2,#6b5a3e)}
+.sc-pos b{color:var(--wine)}.sc-pos .k{margin-left:auto;opacity:.7}
+@media (max-width:760px){.sc-g{padding:5px 6px}.sc-g>small{display:none}.sc-stile{min-width:0}.sc-pos .k{display:none}}
+/* prova di abilità */
+.sc-pv{display:inline-flex;gap:5px;align-items:center;padding:1px 4px 1px 9px;border-radius:999px;background:#2f5d6b;color:#fff;font-weight:600;font-size:.94em;line-height:1.45;white-space:nowrap;vertical-align:baseline}
+.sc-pv .sc-cd{background:#fff;color:#2f5d6b;border-color:#fff;border-radius:999px}
+.sc-pvb{margin:.6em 0;padding:8px 12px;border:1px solid #2f5d6b55;border-left:4px solid #2f5d6b;border-radius:0 6px 6px 0;background:#2f5d6b12}
+.sc-pvb .t{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;font-weight:600}
+.sc-pvb .es{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 10px;margin-top:6px}
+.sc-pvb .es b.ok{color:#3f6b46}.sc-pvb .es b.ko{color:#a3322f}
+:root[data-theme=dark] .sc-pvb .es b.ok{color:#8fc59a}:root[data-theme=dark] .sc-pvb .es b.ko{color:#e58a85}
+.sc-ed .sc-pv,.sc-ed .sc-pvb{cursor:pointer}.sc-ed .sc-pvb:hover{border-color:#2f5d6b}
+.sc-pvpop{position:fixed;z-index:50;box-sizing:border-box;overflow:auto;background:var(--paper);border:1px solid var(--gold);border-radius:8px;box-shadow:0 14px 40px #0006;padding:14px 16px;font-size:.98rem;color:var(--ink)}
+.sc-pvpop h4{font:600 1.05rem/1.2 var(--display);color:var(--wine);margin:0 0 6px}
+.sc-pvpop>label,.sc-pvpop #pv-piu>label{display:block;font:700 .66rem/1 var(--display);letter-spacing:.1em;text-transform:uppercase;color:#8a6a24;margin:10px 0 5px}
+.sc-pvpop label.chk{display:flex;gap:6px;align-items:center;font:400 .95rem var(--body);letter-spacing:0;text-transform:none;color:var(--ink);margin:10px 0 0}
+.sc-pvpop select,.sc-pvpop input[type=text]{width:100%;box-sizing:border-box;font:400 1rem var(--body);padding:7px 10px;margin-top:4px}
+.sc-cds{display:flex;gap:5px;flex-wrap:wrap;align-items:stretch}
+.sc-cds button{all:unset;box-sizing:border-box;cursor:pointer;padding:4px 8px;border:1px solid var(--line2);border-radius:5px;font-size:.8rem;background:var(--paper2);text-align:center;min-width:42px}
+.sc-cds button b{display:block;font-size:1.05rem}
+.sc-cds button.on{background:#2f5d6b;color:#fff;border-color:#2f5d6b}
+.sc-cds input{width:70px;font:600 1rem var(--body);padding:4px 8px}
+.sc-pvpop menu{display:flex;justify-content:flex-end;gap:8px;margin:14px 0 0;padding:0}
 .sc-ed{min-height:300px;max-height:56vh;overflow-y:auto;padding:14px 18px;outline:none;font:400 1.02rem/1.5 var(--body);counter-reset:scena}
 .sc-ed:focus{box-shadow:inset 0 0 0 2px #c9a24b55}
 .sc-ed>:first-child{margin-top:0}
@@ -329,9 +366,29 @@ dialog .sc-txt{width:100%;min-height:200px;font:13px/1.45 ui-monospace,SFMono-Re
   function chip(h, dadi) {
     return h.split(/(<[^>]+>)/).map((p, i) => i % 2 ? p : p
       .replace(/\bCD\s?(\d{1,2})\b/g, '<span class="sc-cd">CD $1</span>')
-      .replace(/(^|[^\w])(\d{1,2}d(?:4|6|8|10|12|20|100)(?:\s?[+−-]\s?\d{1,2}(?!\d))?)(?![\w])/g, (m, a, f) => a + (dadi ? `<button type="button" class="sc-dado" data-sc-dado="${esc(f.replace(/\s/g, '').replace('−', '-'))}" title="Tira ${esc(f)} (lo vedi solo tu)">🎲 ${f}</button>` : `<span class="sc-dado">🎲 ${f}</span>`))).join('');
+      .replace(/(^|[^\w])(\d{1,2}d(?:4|6|8|10|12|20|100)(?:\s?[+−-]\s?\d{1,2}(?!\d))?)(?![\w])/g, (m, a, f) => a + (dadi ? `<button type="button" class="sc-dado" data-sc-dado="${esc(f.replace(/\s/g, '').replace('−', '-'))}" title="Tira ${esc(f)} (lo vedi solo tu)">🎲 ${f}</button>` : `<span class="sc-dado">🎲 ${f}</span>`))).join('')
+      .replace(/🎲\s*([^<\n🎲]{1,60}?)\s*<span class="sc-cd">CD (\d{1,2})<\/span>/g, '<span class="sc-pv">🎲 $1 <span class="sc-cd">CD $2</span></span>');
   }
-  const testo = (t, o = {}) => chip(prose(t), o.dadi);
+  // prova di abilità: «🎲 Percezione CD 14» in una frase, o un paragrafo «🎲 Atletica CD 15 — per cosa» con sotto
+  // «- ✓ Successo: …» e «- ✗ Fallimento: …» (lo scrive il pulsante 🎲 dell'editor; si legge bene anche nei download)
+  const RX_PVB = /^\s*🎲\s*(.{1,60}?)\s+CD\s?(\d{1,2})\b\s*(?:[—–-]\s*(.*))?$/;
+  const RX_ES = /^\s*[-*•]\s+([✓✗])\s*(?:\*\*)?(?:successo|fallimento|se riesce|se fallisce)?\s*:?\s*(?:\*\*)?\s*(.*)$/i;
+  function prove(t) {
+    const L = String(t || '').replace(/\r/g, '').split('\n'), out = []; let buf = [];
+    const fuori = () => { if (buf.length) { out.push({ md: buf.join('\n') }); buf = []; } };
+    for (let i = 0; i < L.length; i++) {
+      const m = (i === 0 || !L[i - 1].trim()) && L[i].match(RX_PVB);
+      if (!m || (L[i + 1]?.trim() && !RX_ES.test(L[i + 1]))) { buf.push(L[i]); continue; }
+      const pv = { abil: m[1].replace(/\*+/g, '').trim(), cd: m[2], per: (m[3] || '').trim(), ok: '', ko: '' };
+      let k = i + 1; while (k < L.length && !L[k].trim()) k++;
+      let e, fine = i; while (k < L.length && (e = L[k].match(RX_ES))) { pv[e[1] === '✓' ? 'ok' : 'ko'] = e[2].trim(); fine = k++; }
+      fuori(); out.push({ pv }); i = fine;
+    }
+    fuori(); return out;
+  }
+  const boxPv = (p, r, attr = '') => `<div class="sc-pvb"${attr}><div class="t"><span class="sc-pv">🎲 ${esc(p.abil)} <span class="sc-cd">CD ${esc(p.cd)}</span></span>${p.per ? ` <span class="per">${r(p.per)}</span>` : ''}</div>${p.ok || p.ko ? `<div class="es">${p.ok ? `<b class="ok">✓ Successo</b><span>${r(p.ok)}</span>` : ''}${p.ko ? `<b class="ko">✗ Fallimento</b><span>${r(p.ko)}</span>` : ''}</div>` : ''}</div>`;
+  const rigaPv = (t, o) => chip(md(t).replace(/^<p>([\s\S]*)<\/p>$/, '$1'), o.dadi);
+  const testo = (t, o = {}) => prove(t).map(x => x.pv ? boxPv(x.pv, s => rigaPv(s, o)) : x.md.trim() ? chip(prose(x.md), o.dadi) : '').join('');
   const ETI = { obiettivo: 'Obiettivo', ostacolo: 'Ostacolo', esiti: 'Esiti', ricompensa: '🎁 Ricompensa' };
   // titolo «Esiti» con la sua lista: testo libero
   function cartaScena(x, i, st, o = {}) {
@@ -387,9 +444,13 @@ dialog .sc-txt{width:100%;min-height:200px;font:13px/1.45 ui-monospace,SFMono-Re
     }
     return out.join('\n\n').replace(/\n{3,}/g, '\n\n').trim();
   }
-  const runsHtml = r => r.map(o => { let h = o.id ? `<span class="sc-ln" contenteditable="false" data-id="${esc(o.id)}"${o.al ? ` data-al="1"` : ''}>${esc(o.x)}</span>` : esc(o.x); if (o.i) h = `<i>${h}</i>`; if (o.b) h = `<b>${h}</b>`; return h; }).join('');
+  const RX_PV = /🎲\s*([^\n🎲<]{1,60}?)\s+CD\s?(\d{1,2})\b/g;
+  const pillEd = (a, cd) => `<span class="sc-pv" contenteditable="false" data-abil="${a}" data-cd="${cd}">🎲 ${a} <span class="sc-cd">CD ${cd}</span></span>`;
+  const runsHtml = r => r.map(o => { let h = o.id ? `<span class="sc-ln" contenteditable="false" data-id="${esc(o.id)}"${o.al ? ` data-al="1"` : ''}>${esc(o.x)}</span>` : esc(o.x).replace(RX_PV, (m, a, cd) => pillEd(a.trim(), cd)); if (o.i) h = `<i>${h}</i>`; if (o.b) h = `<b>${h}</b>`; return h; }).join('');
+  const boxEd = p => boxPv(p, s => runsHtml(inl(s, true)), ` contenteditable="false" data-pv="${esc(JSON.stringify(p))}" title="Tocca per cambiare la prova"`);
   function mdHtml(t) {
-    let h = ''; const lst = [];
+    let h = ''; const lst = [], PV = [];
+    t = prove(t).map(x => x.pv ? (PV.push(x.pv), `\n\uE020${PV.length - 1}\n`) : x.md).join('\n');
     const chiudi = liv => { while (lst.length > liv) h += `</li></${lst.pop()}>`; };
     // i punti di un elenco partono dal livello più basso del loro gruppo (sotto «Esiti:» spesso sono rientrati)
     const B = blocchi(t, true);
@@ -410,6 +471,7 @@ dialog .sc-txt{width:100%;min-height:200px;font:13px/1.45 ui-monospace,SFMono-Re
         else h += b.liv >= 4 ? `<h4>${runsHtml(b.r)}</h4>` : `<h2>${runsHtml(b.r)}</h2>`;
       } else if (b.t === 'hr') h += '<hr>';
       else if (b.t === 'q') h += `<blockquote>${runsHtml(b.r)}</blockquote>`;
+      else if (b.r.length === 1 && /^\uE020\d+$/.test(b.r[0].x)) h += boxEd(PV[+b.r[0].x.slice(1)]);
       else {
         const r = [...b.r]; let campo = '';
         const m = r[0] && (r[0].b || r[0].i) && r[0].x.trim().match(RX_CAMPO);
@@ -428,6 +490,7 @@ dialog .sc-txt{width:100%;min-height:200px;font:13px/1.45 ui-monospace,SFMono-Re
       if (c.nodeType === 3) { s += c.nodeValue.replace(/[\s ]+/g, ' '); continue; }
       if (c.nodeType !== 1) continue;
       const tg = c.tagName, st = c.style || {};
+      if (c.classList?.contains('sc-pv')) { s += `🎲 ${c.dataset.abil} CD ${c.dataset.cd}`; continue; }
       if (c.dataset?.id) { const nome = c.textContent.trim(); s += `[[${c.dataset.id}${c.dataset.al || nome !== nomeScheda(c.dataset.id) ? '|' + nome : ''}]]`; continue; }
       if (tg === 'BR') { s += ' '; continue; }
       let t = inlMd(c);
@@ -454,6 +517,7 @@ dialog .sc-txt{width:100%;min-height:200px;font:13px/1.45 ui-monospace,SFMono-Re
       if (n.nodeType === 3) { const t = n.nodeValue.trim(); if (t) out.push('', t, ''); return; }
       if (n.nodeType !== 1) return;
       const tg = n.tagName, t = () => inlMd(n).trim();
+      if (n.classList.contains('sc-pvb')) { let p; try { p = JSON.parse(n.dataset.pv); } catch { return; } out.push('', `🎲 ${p.abil} CD ${p.cd}${p.per ? ' — ' + p.per : ''}`, ...(p.ok || p.ko ? ['', ...(p.ok ? ['- ✓ Successo: ' + p.ok] : []), ...(p.ko ? ['- ✗ Fallimento: ' + p.ko] : [])] : []), ''); return; }
       if (/^(DIV|SECTION|ARTICLE)$/.test(tg) && [...n.children].some(c => BLOCCHI.test(c.tagName))) { n.childNodes.forEach(blocco); return; }
       if (tg === 'H3' && n.classList.contains('scena')) out.push('', `### Scena ${++scena}: ${t().replace(/\*+/g, '') || 'Scena'}`, '');
       else if (/^H[1-3]$/.test(tg)) { if (t()) out.push('', '## ' + t().replace(/\*+/g, ''), ''); }
@@ -473,25 +537,140 @@ dialog .sc-txt{width:100%;min-height:200px;font:13px/1.45 ui-monospace,SFMono-Re
     while (n && n.parentNode !== ed) n = n.parentNode;
     return n?.nodeType === 1 ? n : null;
   }
+  // la barra: gruppi con il nome sopra; il tipo di paragrafo è un menu che mostra sempre dove sei
+  const B_ = (k, l, t, c = '') => `<button type="button" data-ed="${k}" title="${esc(t)}" aria-label="${esc(t)}"${c ? ` class="${c}"` : ''}>${l}</button>`;
+  const STILI = [['p', 'Testo normale'], ['h2', 'Parte (titolo grande)'], ['h4', 'Titoletto'], ['scena', 'Titolo della scena', 1], ['li', 'Elenco', 1]];
   const BARRA = [
-    ['b', '<b>G</b>', 'Grassetto (Ctrl+B)'], ['i', '<i>C</i>', 'Corsivo (Ctrl+I)'], ['|'],
-    ['h2', 'Sezione', 'Titolo di una parte: Gancio, PNG, Segreti… (chiude le scene)'], ['h4', 'Sottotitolo', 'Titoletto dentro una scena o una parte'], ['p', 'Normale', 'Testo normale'], ['|'],
-    ['ul', '• Elenco', 'Elenco puntato'], ['ol', '1. Elenco', 'Elenco numerato'], ['|'],
-    ['scena', '✂ Nuova scena', 'Inizia una nuova scena qui: quello che segue fa parte della nuova scena'], ['|'],
-    ['obiettivo', '🎯 Obiettivo', 'Segna questo paragrafo come obiettivo della scena'], ['ostacolo', '⚠ Ostacolo', 'Segna questo paragrafo come ostacolo della scena'],
-    ['esiti', '↪ Esiti', 'Segna questo paragrafo come esiti della scena'], ['ricompensa', '🎁 Ricompensa', 'Segna questo paragrafo come ricompensa di questa scena'], ['|'],
-    ['undo', '↶', 'Annulla (Ctrl+Z)'], ['redo', '↷', 'Ripeti']
+    ['Paragrafo', `<select class="sc-stile" title="Tipo di paragrafo" aria-label="Tipo di paragrafo">${STILI.map(([k, l, no]) => `<option value="${k}"${no ? ' disabled hidden' : ''}>${l}</option>`).join('')}</select>`],
+    ['Testo', B_('b', '<b>G</b>', 'Grassetto (Ctrl+B)', 'ico') + B_('i', '<i>C</i>', 'Corsivo (Ctrl+I)', 'ico') + B_('ul', '• Elenco', 'Elenco puntato') + B_('ol', '1. Elenco', 'Elenco numerato')],
+    ['Scena', B_('scena', '✂ Nuova scena', 'Inizia una nuova scena qui: quello che segue fa parte della nuova scena') + B_('obiettivo', '🎯 Obiettivo', 'Segna questo paragrafo come obiettivo della scena') + B_('ostacolo', '⚠ Ostacolo', 'Segna questo paragrafo come ostacolo della scena') + B_('esiti', '↪ Esiti', 'Segna questo paragrafo come esiti della scena') + B_('ricompensa', '🎁 Ricompensa', 'Segna questo paragrafo come ricompensa di questa scena')],
+    ['Inserisci', B_('prova', '🎲 Prova di abilità', 'Inserisci una prova di abilità con la sua CD', 'prova')],
+    ['', B_('undo', '↶', 'Annulla (Ctrl+Z)', 'ico') + B_('redo', '↷', 'Ripeti (Ctrl+Y)', 'ico') + B_('sim', 'Simboli', 'Vedi e modifica il testo con i simboli (Markdown)', 'sim')]
   ];
+  const ABIL = [['Abilità', ['Acrobazia (Des)', 'Addestrare animali (Sag)', 'Arcano (Int)', 'Atletica (For)', 'Furtività (Des)', 'Indagare (Int)', 'Inganno (Car)', 'Intimidire (Car)', 'Intrattenere (Car)', 'Intuizione (Sag)', 'Medicina (Sag)', 'Natura (Int)', 'Percezione (Sag)', 'Persuasione (Car)', 'Rapidità di mano (Des)', 'Religione (Int)', 'Sopravvivenza (Sag)', 'Storia (Int)']],
+    ['Tiri salvezza', ['Forza', 'Destrezza', 'Costituzione', 'Intelligenza', 'Saggezza', 'Carisma'].map(c => 'Tiro salvezza su ' + c)],
+    ['Caratteristiche', ['Forza', 'Destrezza', 'Costituzione', 'Intelligenza', 'Saggezza', 'Carisma']]];
+  const CDS = [[5, 'Molto facile'], [10, 'Facile'], [12, ''], [15, 'Media'], [18, ''], [20, 'Difficile'], [25, 'Molto diff.']];
+  const senzaCar = a => a.replace(/\s*\((For|Des|Cos|Int|Sag|Car)\)$/, '');
+  // la finestrella della prova: nuova (al cursore) o per cambiare quella toccata
+  function popProva(ed, btn, vecchia, fatto) {
+    const sel = getSelection(), rng = vecchia ? null : sel.rangeCount && ed.contains(sel.anchorNode) ? sel.getRangeAt(0).cloneRange() : null;
+    let p = { abil: 'Percezione', cd: '15', per: '', ok: '', ko: '' }, inRiga = false;
+    if (vecchia?.classList.contains('sc-pv')) { p = { ...p, abil: vecchia.dataset.abil, cd: vecchia.dataset.cd }; inRiga = true; }
+    else if (vecchia) { try { p = { ...p, ...JSON.parse(vecchia.dataset.pv) }; } catch { } }
+    const gruppo = /\s*\(di gruppo\)$/i.test(p.abil), nome = p.abil.replace(/\s*\(di gruppo\)$/i, '');
+    const tutte = ABIL.flatMap(g => g[1]), scelta = tutte.find(a => senzaCar(a).toLowerCase() === nome.toLowerCase());
+    const dlg = ed.closest('dialog') || document.body, pop = document.createElement('div');
+    pop.className = 'sc-pvpop'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', 'Prova di abilità');
+    pop.innerHTML = `<h4>🎲 Prova di abilità</h4>
+      <label>Abilità</label><select id="pv-a">${ABIL.map(([g, l]) => `<optgroup label="${g}">${l.map(a => `<option${a === scelta ? ' selected' : ''}>${esc(a)}</option>`).join('')}</optgroup>`).join('')}<option value="">Altro…</option></select>
+      <input type="text" id="pv-x" placeholder="Scrivi la prova (es. Attrezzi da scasso)" value="${scelta ? '' : esc(nome)}" ${scelta ? 'hidden' : ''}>
+      <label>Classe Difficoltà</label><div class="sc-cds">${CDS.map(([n, l]) => `<button type="button" data-cd="${n}"><b>${n}</b>${l}</button>`).join('')}<input type="number" id="pv-cd" min="1" max="40" value="${esc(p.cd)}" aria-label="CD"></div>
+      <label class="chk"><input type="checkbox" id="pv-in" ${inRiga ? 'checked' : ''}> Nella frase: solo abilità e CD</label>
+      <div id="pv-piu"><label>Per cosa (facoltativo)</label><input type="text" id="pv-per" value="${esc(p.per)}" placeholder="per scavalcare il bancone">
+      <label>✓ Se riesce (facoltativo)</label><input type="text" id="pv-ok" value="${esc(p.ok)}">
+      <label>✗ Se fallisce (facoltativo)</label><input type="text" id="pv-ko" value="${esc(p.ko)}"></div>
+      <label class="chk"><input type="checkbox" id="pv-gr" ${gruppo ? 'checked' : ''}> Prova di gruppo</label>
+      <menu>${vecchia ? '<button type="button" class="btn ghost" data-pv="del">Elimina</button><span style="flex:1"></span>' : ''}<button type="button" class="btn ghost" data-pv="no">Annulla</button><button type="button" class="btn primary" data-pv="ok">${vecchia ? 'Aggiorna' : 'Inserisci'}</button></menu>`;
+    dlg.append(pop);
+    const q = x => pop.querySelector(x), a = q('#pv-a'), cd = q('#pv-cd');
+    if (!scelta) a.value = '';
+    const r = (btn || vecchia).getBoundingClientRect(), W = Math.min(440, innerWidth - 24);
+    pop.style.width = W + 'px'; pop.style.left = Math.max(12, Math.min(r.right - W, innerWidth - W - 12)) + 'px';
+    const top = r.bottom + 8 + 420 > innerHeight ? Math.max(12, r.top - 8 - Math.min(620, innerHeight - 24)) : r.bottom + 8;
+    pop.style.top = top + 'px'; pop.style.maxHeight = (innerHeight - top - 12) + 'px';
+    const cds = () => pop.querySelectorAll('[data-cd]').forEach(b => b.classList.toggle('on', b.dataset.cd === cd.value));
+    const piu = () => { q('#pv-piu').hidden = q('#pv-in').checked; };
+    cds(); piu();
+    a.onchange = () => { q('#pv-x').hidden = !!a.value; if (!a.value) q('#pv-x').focus(); };
+    cd.oninput = cds; q('#pv-in').onchange = piu;
+    pop.addEventListener('click', e => { const b = e.target.closest('[data-cd]'); if (b) { cd.value = b.dataset.cd; cds(); } });
+    const annullaEsc = e => e.preventDefault();
+    if (dlg.tagName === 'DIALOG') dlg.addEventListener('cancel', annullaEsc);
+    const fuori = e => { if (!pop.contains(e.target) && !e.target.closest('[data-ed=prova]')) chiudi(); };
+    setTimeout(() => document.addEventListener('mousedown', fuori), 0);
+    function chiudi() { pop.remove(); document.removeEventListener('mousedown', fuori); dlg.removeEventListener?.('cancel', annullaEsc); ed.focus(); }
+    pop.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); chiudi(); } else if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); q('[data-pv=ok]').click(); } });
+    pop.addEventListener('click', e => {
+      const k = e.target.closest('[data-pv]')?.dataset.pv; if (!k) return;
+      if (k === 'no') return chiudi();
+      if (k === 'del') { vecchia.remove(); chiudi(); return fatto(); }
+      const nome = senzaCar(a.value || q('#pv-x').value.trim()).replace(/[🎲\n]/g, '').trim(), n = parseInt(cd.value, 10);
+      if (!nome) { q('#pv-x').hidden = false; return q('#pv-x').focus(); }
+      if (!(n >= 1 && n <= 40)) return cd.focus();
+      const np = { abil: nome + (q('#pv-gr').checked ? ' (di gruppo)' : ''), cd: String(n), per: '', ok: '', ko: '' };
+      if (!q('#pv-in').checked) for (const x of ['per', 'ok', 'ko']) np[x] = q('#pv-' + x).value.replace(/\s+/g, ' ').trim();
+      const tmp = document.createElement('div'); tmp.innerHTML = q('#pv-in').checked ? pillEd(esc(np.abil), np.cd) : boxEd(np); const el = tmp.firstChild;
+      // dove va: al posto della vecchia, o al cursore
+      let at = rng; if (vecchia) { at = document.createRange(); at.setStartBefore(vecchia); at.collapse(true); vecchia.remove(); }
+      if (!at) { at = document.createRange(); at.selectNodeContents(ed); at.collapse(false); }
+      let blk = at.startContainer; while (blk && blk !== ed && blk.parentNode !== ed) blk = blk.parentNode;
+      if (el.classList.contains('sc-pv')) {
+        if (blk === ed || !blk) { const pp = document.createElement('p'); pp.append(el); at.insertNode(pp); }
+        else {
+          at.deleteContents();
+          const c = at.startContainer, prima = c.nodeType === 3 ? c.data.slice(0, at.startOffset) : '';
+          at.insertNode(document.createTextNode(' ')); at.insertNode(el);
+          if (/\S$/.test(prima)) el.before(document.createTextNode(' '));
+        }
+      } else {
+        if (blk === ed || !blk) at.insertNode(el);
+        else if (blk.tagName === 'P' && !blk.textContent.trim()) blk.replaceWith(el);
+        else blk.after(el);
+        if (!el.nextElementSibling) { const pp = document.createElement('p'); pp.innerHTML = '<br>'; el.after(pp); }
+      }
+      chiudi();
+      const dopo = el.classList.contains('sc-pv') ? el.nextSibling : el.nextElementSibling;
+      if (dopo) { const r2 = document.createRange(); r2.setStart(dopo, dopo.nodeType === 3 ? Math.min(1, dopo.length) : 0); r2.collapse(true); getSelection().removeAllRanges(); getSelection().addRange(r2); }
+      fatto();
+    });
+    (vecchia ? q('[data-pv=ok]') : a).focus();
+  }
   function editore(host, md, onInput) {
-    host.innerHTML = `<div class="sc-bar" role="toolbar" aria-label="Formattazione">${BARRA.map(([k, l, t]) => k === '|' ? '<span class="sep"></span>' : `<button type="button" data-ed="${k}" title="${esc(t)}" aria-label="${esc(t)}">${l}</button>`).join('')}<span class="sp"></span><button type="button" data-ed="sim" class="sim" title="Vedi e modifica il testo con i simboli (Markdown)">Simboli</button></div>
+    host.innerHTML = `<div class="sc-bar" role="toolbar" aria-label="Formattazione">${BARRA.map(([g, h]) => `<div class="sc-g"><small>${g || '&nbsp;'}</small><div class="sc-gr">${h}</div></div>`).join('')}</div>
+      <div class="sc-pos" aria-live="polite"><span class="dove"></span><span class="k">Ctrl+B grassetto · Ctrl+I corsivo · Ctrl+Z annulla</span></div>
       <div class="sc-ed" contenteditable="true" spellcheck="true" lang="it"></div><textarea class="sc-txt" hidden spellcheck="false"></textarea>`;
-    const ed = host.querySelector('.sc-ed'), ta = host.querySelector('textarea'), bar = host.querySelector('.sc-bar');
+    const ed = host.querySelector('.sc-ed'), ta = host.querySelector('textarea'), bar = host.querySelector('.sc-bar'), stile = bar.querySelector('.sc-stile'), dove = host.querySelector('.sc-pos .dove');
     let simboli = false;
     const metti = m => { ed.innerHTML = mdHtml(canonico(m)); };
     const valore = () => simboli ? ta.value : htmlMd(ed);
     const cambia = () => onInput?.();
     metti(md);
     try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch { }
+    // dove sei: il menu del paragrafo, i pulsanti accesi e la riga «Sei in»
+    const NOMI = { obiettivo: 'Obiettivo', ostacolo: 'Ostacolo', esiti: 'Esiti', ricompensa: 'Ricompensa' };
+    const stato = () => {
+      if (!host.isConnected) return document.removeEventListener('selectionchange', stato);
+      if (simboli) return;
+      const b = bloccoQui(ed), tg = b?.tagName || '';
+      const k = tg === 'H2' ? 'h2' : /^H[4-6]$/.test(tg) ? 'h4' : tg === 'H3' ? 'scena' : /^(UL|OL)$/.test(tg) ? 'li' : 'p';
+      stile.value = k;
+      const on = (x, v) => bar.querySelector(`[data-ed=${x}]`)?.classList.toggle('on', !!v);
+      let bo = false, it = false; try { bo = document.queryCommandState('bold'); it = document.queryCommandState('italic'); } catch { }
+      on('b', b && bo); on('i', b && it); on('ul', tg === 'UL'); on('ol', tg === 'OL');
+      for (const c of Object.keys(NOMI)) on(c, b?.dataset?.campo === c);
+      if (!b) { dove.innerHTML = 'Tocca il testo per scrivere'; return; }
+      let x = b, sc = null; while (x && !(x.tagName === 'H3' && x.classList.contains('scena')) && x.tagName !== 'H2') x = x.previousElementSibling; sc = x;
+      const cosa = b.classList?.contains('sc-pvb') ? 'Prova di abilità' : b.dataset?.campo ? NOMI[b.dataset.campo] : k === 'h4' ? `Titoletto «${b.textContent.trim().slice(0, 50)}»` : k === 'li' ? 'Elenco' : k === 'h2' ? 'Titolo della parte' : k === 'scena' ? 'Titolo della scena' : 'Paragrafo';
+      const dov = !sc ? 'Inizio' : sc.tagName === 'H2' ? `Parte · ${esc(sc.textContent.trim().slice(0, 50))}` : `Scena ${[...ed.querySelectorAll('h3.scena')].indexOf(sc) + 1} · ${esc(sc.textContent.trim().slice(0, 50))}`;
+      dove.innerHTML = `Sei in <b>${dov}</b> › ${esc(cosa)}`;
+    };
+    document.addEventListener('selectionchange', stato);
+    ed.addEventListener('keyup', stato);
+    // il menu del paragrafo prende il posto dei pulsanti Sezione / Sottotitolo / Normale
+    let salvato = null;
+    stile.addEventListener('mousedown', () => { const s = getSelection(); salvato = s.rangeCount && ed.contains(s.anchorNode) ? s.getRangeAt(0).cloneRange() : salvato; });
+    stile.addEventListener('focus', () => { const s = getSelection(); if (s.rangeCount && ed.contains(s.anchorNode)) salvato = s.getRangeAt(0).cloneRange(); });
+    stile.addEventListener('change', () => {
+      ed.focus(); if (salvato) { getSelection().removeAllRanges(); getSelection().addRange(salvato); }
+      if (!bloccoQui(ed) && ed.lastChild) { const r = document.createRange(); r.selectNodeContents(ed.lastChild); r.collapse(false); getSelection().removeAllRanges(); getSelection().addRange(r); }
+      const k = stile.value; let b = bloccoQui(ed);
+      if (b && /^(UL|OL)$/.test(b.tagName) && k === 'p') document.execCommand(b.tagName === 'UL' ? 'insertUnorderedList' : 'insertOrderedList');
+      document.execCommand('formatBlock', false, k); b = bloccoQui(ed); if (b) { delete b.dataset.campo; b.classList.remove('scena'); }
+      stato(); cambia();
+    });
+    // la prova: toccarla la riapre per cambiarla
+    ed.addEventListener('click', e => { const x = e.target.closest('.sc-pv, .sc-pvb'); if (x && ed.contains(x) && !simboli) popProva(ed, null, x.closest('.sc-pvb') || x, () => { stato(); cambia(); }); });
     ed.addEventListener('input', cambia);
     // Invio dopo un campo (Obiettivo…): il nuovo paragrafo è testo normale
     ed.addEventListener('keydown', e => {
@@ -517,7 +696,7 @@ dialog .sc-txt{width:100%;min-height:200px;font:13px/1.45 ui-monospace,SFMono-Re
       if (k === 'sim') {
         simboli = !simboli;
         if (simboli) { ta.value = htmlMd(ed); } else metti(ta.value);
-        ed.hidden = simboli; ta.hidden = !simboli; bar.classList.toggle('simboli', simboli); e.target.classList.toggle('on', simboli);
+        ed.hidden = simboli; ta.hidden = !simboli; bar.classList.toggle('simboli', simboli); e.target.classList.toggle('on', simboli); host.querySelector('.sc-pos').hidden = simboli;
         e.target.textContent = simboli ? 'Torna al testo formattato' : 'Simboli';
         return cambia();
       }
@@ -528,7 +707,7 @@ dialog .sc-txt{width:100%;min-height:200px;font:13px/1.45 ui-monospace,SFMono-Re
       if (k === 'b') cmd('bold'); else if (k === 'i') cmd('italic');
       else if (k === 'undo') cmd('undo'); else if (k === 'redo') cmd('redo');
       else if (k === 'ul') cmd('insertUnorderedList'); else if (k === 'ol') cmd('insertOrderedList');
-      else if (k === 'h2' || k === 'h4' || k === 'p') { cmd('formatBlock', k); const b = bloccoQui(ed); if (b) { delete b.dataset.campo; b.classList.remove('scena'); } }
+      else if (k === 'prova') return popProva(ed, e.target.closest('[data-ed]'), null, () => { stato(); cambia(); });
       else if (k === 'scena') {
         const b = bloccoQui(ed), h = document.createElement('h3'); h.className = 'scena'; h.textContent = 'Nuova scena';
         if (b && !b.textContent.trim() && b.tagName === 'P') b.replaceWith(h); else if (b) ed.insertBefore(h, b); else ed.append(h);
@@ -540,7 +719,7 @@ dialog .sc-txt{width:100%;min-height:200px;font:13px/1.45 ui-monospace,SFMono-Re
         if (b.tagName !== 'P') { cmd('formatBlock', 'p'); b = bloccoQui(ed); if (!b) return; }
         if (b.dataset.campo === k) delete b.dataset.campo; else b.dataset.campo = k;
       }
-      cambia();
+      stato(); cambia();
     });
     return { valore, metti: m => { if (simboli) ta.value = m; else metti(m); cambia(); }, el: ed };
   }
@@ -553,7 +732,7 @@ dialog .sc-txt{width:100%;min-height:200px;font:13px/1.45 ui-monospace,SFMono-Re
       <label class="sc-drop" id="sc-drop" tabindex="0"><b>Trascina qui il file della sessione</b><span class="hint">Word (.docx), PDF, .md o .txt, oppure tocca per sceglierlo</span><input type="file" accept=".md,.markdown,.txt,.docx,.pdf,text/plain,text/markdown,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"></label>
       <div class="sc-row"><label class="f"><span>Numero</span><input type="text" inputmode="numeric" id="sc-n" value="${cur ? cur.n : prox}" ${cur ? 'disabled' : ''} required autocomplete="off"></label><label class="f"><span>Titolo</span><input type="text" id="sc-t" value="${esc(cur?.title || (cur ? analizza(cur.text).titolo : '') || '')}" autocomplete="off"></label></div>
       <label class="chk"><input type="checkbox" id="sc-c" ${cur?.inCorso ? 'checked' : ''}> <span><b>In corso</b>: la sessione dura più serate (resta tra le sessioni da giocare finché non la segni come conclusa)</span></label>
-      <div class="f"><span>Testo della sessione</span><div class="sc-edw" id="sc-ew"></div><small class="hint">Scrivi come in Word. «✂ Nuova scena» divide le scene; i pulsanti 🎯 ⚠ ↪ 🎁 segnano obiettivo, ostacolo, esiti e ricompensa della scena in cui sei.</small></div>
+      <div class="f"><span>Testo della sessione</span><div class="sc-edw" id="sc-ew"></div><small class="hint">Scrivi come in Word. «✂ Nuova scena» divide le scene; 🎯 ⚠ ↪ 🎁 segnano obiettivo, ostacolo, esiti e ricompensa della scena in cui sei; «🎲 Prova di abilità» aggiunge una prova con la sua CD (toccala per cambiarla).</small></div>
       <div class="sc-ok" id="sc-ok" hidden></div>
       <menu><button value="cancel" class="btn ghost" formnovalidate>Annulla</button><button value="ok" class="btn primary">${cur ? 'Salva' : 'Crea la scaletta'}</button></menu></form>`, 'wide sc-dlg');
     let conta = () => { }; const E = editore($('#sc-ew', d), cur?.text || '', () => conta()), x = { get value() { return E.valore(); }, set value(m) { E.metti(m); } }, t = $('#sc-t', d), ok = $('#sc-ok', d), drop = $('#sc-drop', d), inp = $('input[type=file]', drop);
@@ -693,7 +872,7 @@ ${stile('ListParagraph', 'List Paragraph', '<w:spacing w:after="60"/>', '')}${st
     const carica = src => new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('Per creare il PDF serve internet.')); document.head.append(s); });
     if (!window.pdfMake?.vfs) { if (!window.pdfMake) await carica(PDFMAKE + 'pdfmake.min.js'); await carica(PDFMAKE + 'vfs_fonts.min.js'); }
     // le emoji non sono nei caratteri del PDF: si tolgono
-    const pulisci = s => String(s).replace(/[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}️‍]/gu, '').replace(/^\s+(?=\S)/, m => m);
+    const pulisci = s => String(s).replace(/[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}️‍✓✗]/gu, '').replace(/^\s+(?=\S)/, m => m);
     const testo = r => r.map(o => ({ text: pulisci(o.x), bold: !!o.b, italics: !!o.i })).filter(o => o.text);
     const { titolo, sotto } = intestazione(v), num = [0, 0, 0, 0], content = [{ text: pulisci(titolo), style: 'titolo' }, { text: sotto, style: 'sotto' }];
     for (const b of blocchi(senzaTitolo(v))) {
