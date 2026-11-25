@@ -1021,11 +1021,14 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
   .tv-mtab{all:unset;box-sizing:border-box;display:flex;position:absolute;left:0;bottom:46px;z-index:21;width:16px;height:42px;align-items:center;justify-content:center;border-radius:0 9px 9px 0;background:#2a1215;color:var(--gold2,#e0c071);border:1px solid #c9a24b66;border-left:0;box-shadow:3px 0 10px #0006;cursor:pointer;font:700 1rem/1 var(--body);opacity:.75}
   .tv-mtab:hover,.tv-mtab:focus-visible{opacity:1;width:20px}
 }
-@media (max-width:820px){
+/* senza la barra laterale (sotto 900 px, anche telefono in orizzontale) la barra delle sezioni non copre il Tavolo: si esce con ‹ */
+@media (max-width:899px){
   html.in-tavolo #nav{display:none!important}
   html.in-tavolo #toasts{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
   .tv-back{all:unset;display:flex;align-items:center;justify-content:center;width:28px;height:28px;margin:-2px 2px -2px -4px;border-radius:8px;cursor:pointer;color:var(--gold2);font:700 1.4rem/1 var(--body)}
   .tv-back:hover{background:#ffffff14}
+}
+@media (max-width:820px){
   .tv.gio .tv-top,.tv.gio .tv-wrap.con-turno .tv-top{top:8px;justify-content:flex-start}
   .tv.gio .tv-strip{top:52px;right:auto;max-width:calc(100% - 16px)}
   .tv.gio .tv-wrap.con-turno .tv-zoom{top:8px}
@@ -1358,6 +1361,10 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
 .tv-sch .atcfg .conto{grid-column:1/-1;margin:0;font-size:.8rem;color:var(--k);line-height:1.35}
 
 /* telefono: strumenti in basso, mappa a tutta larghezza */
+.tv-rfr{display:none}
+@media (max-width:820px){.tv-rfr{all:unset;box-sizing:border-box;position:absolute;bottom:0;z-index:13;width:30px;height:var(--tv-railh,62px);display:flex;align-items:center;justify-content:center;cursor:pointer;font:700 1.5rem/1 var(--body);color:var(--gold2,#e0c071);pointer-events:auto}.tv-rfr[hidden]{display:none}.tv-rfr.dx{right:0;background:linear-gradient(90deg,transparent,#1a1411 55%)}.tv-rfr.sx{left:0;background:linear-gradient(270deg,transparent,#1a1411 55%)}}
+/* telefono: la chat si apre sopra la barra in basso, che resta visibile: «Chat» la richiude, gli strumenti restano a portata */
+@media (max-width:820px){.tv-chat{bottom:var(--tv-railh,62px)!important;max-height:calc(100% - var(--tv-railh,62px) - 8px)}.tv-chat:not(.scal):not(.sch):not(.asst){height:min(62%,420px)}}
 @media (max-width:820px){
   .tv{flex-direction:column-reverse}
   .tv-rail{width:100%;height:62px;flex-direction:row;overflow-x:auto;overflow-y:hidden;padding:5px 6px;border-right:0;border-top:1px solid #e7cf9a33;gap:2px;box-sizing:border-box;flex:none}
@@ -1856,7 +1863,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     };
     // sul telefono il tavolo prende tutto lo schermo: la barra del sito sparisce (si esce con ‹ accanto al nome della mappa)
     document.documentElement.classList.add('in-tavolo'); onCleanup(() => document.documentElement.classList.remove('in-tavolo', 'tv-mi', 'tv-mc'));
-    menuSito();
+    menuSito(); frecceRail();
     fit(); scrollTo(0, 0); addEventListener('resize', fit); addEventListener('resize', alzaAvvisi);
     let vivo = true;
     onCleanup(() => { vivo = false; removeEventListener('resize', fit); removeEventListener('resize', alzaAvvisi); esci(); document.querySelectorAll('.tv-tip').forEach(x => x.remove()); });
@@ -3426,15 +3433,26 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     };
   }
 
+  /* ---------- telefono: la barra degli strumenti in basso scorre; due frecce dicono che ce ne sono altri e la fanno scorrere ---------- */
+  function frecceRail() {
+    const r = $('#tv-rail'), tv = $('.tv'); if (!r || !tv) return;
+    const f = d => { const b = document.createElement('button'); b.type = 'button'; b.className = 'tv-rfr ' + (d > 0 ? 'dx' : 'sx'); b.textContent = d > 0 ? '›' : '‹'; b.setAttribute('aria-label', d > 0 ? 'Altri strumenti' : 'Strumenti precedenti'); b.title = b.getAttribute('aria-label'); b.onclick = () => r.scrollBy({ left: d * r.clientWidth * .7, behavior: 'smooth' }); tv.append(b); return b; };
+    const sx = f(-1), dx = f(1);
+    const agg = () => { const tel = r.scrollWidth > r.clientWidth + 4 && matchMedia('(max-width:820px)').matches; sx.hidden = !tel || r.scrollLeft < 6; dx.hidden = !tel || r.scrollLeft + r.clientWidth > r.scrollWidth - 6; };
+    r.addEventListener('scroll', agg, { passive: true }); addEventListener('resize', agg); onCleanup(() => removeEventListener('resize', agg));
+    new MutationObserver(agg).observe(r, { childList: true }); agg();
+  }
+
   /* ---------- il menu del sito a sinistra, nel Tavolo: intero, solo icone o chiuso ----------
      come la chat: si tira il bordo (doppio click: torna intero), e la linguetta passa da un modo all'altro. Ognuno sul suo schermo */
   const TMENU = 'tavolo-menu';
   function menuSito() {
     const tv = $('.tv'), H = document.documentElement; if (!tv) return;
-    let modo = ''; try { modo = localStorage.getItem(TMENU) || ''; } catch { }
+    // senza una scelta salvata, sugli schermi bassi (telefono in orizzontale) il menu parte con le sole icone
+    let modo = null; try { modo = localStorage.getItem(TMENU); } catch { }
+    if (modo === null) modo = innerHeight < 520 ? 'icone' : '';
     const metti = m => {
       modo = m; H.classList.toggle('tv-mi', m === 'icone'); H.classList.toggle('tv-mc', m === 'chiusa');
-      try { m ? localStorage.setItem(TMENU, m) : localStorage.removeItem(TMENU); } catch { }
       const prossimo = m === '' ? 'icone' : m === 'icone' ? 'chiusa' : '';
       tab.textContent = m === 'chiusa' ? '›' : '‹';
       tab.title = { icone: 'Menu del sito: solo icone (tocca per chiuderlo, tira per allargarlo)', chiusa: 'Menu del sito chiuso (tocca per riaprirlo)', '': 'Menu del sito: tocca per lasciare solo le icone, tira per stringerlo o chiuderlo' }[m] || '';
@@ -3444,15 +3462,16 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const rz = document.createElement('i'); rz.className = 'tv-mrz'; rz.setAttribute('aria-hidden', 'true');
     const tab = document.createElement('button'); tab.type = 'button'; tab.className = 'tv-mtab';
     tv.append(rz, tab);
-    tab.onclick = () => metti(modo === '' ? 'icone' : modo === 'icone' ? 'chiusa' : '');
+    const salva = m => { try { localStorage.setItem(TMENU, m); } catch { } };
+    tab.onclick = () => { metti(modo === '' ? 'icone' : modo === 'icone' ? 'chiusa' : ''); salva(modo); };
     // tirando: dove si lascia il bordo decide il modo (vicino al bordo chiuso, poco più in là solo icone)
     rz.onpointerdown = e => {
       if (e.button) return; e.preventDefault(); rz.setPointerCapture(e.pointerId); rz.classList.add('on');
       const scegli = x => x < 36 ? 'chiusa' : x < 150 ? 'icone' : '';
       rz.onpointermove = ev => { const m = scegli(ev.clientX); if (m !== modo) metti(m); };
-      rz.onpointerup = rz.onpointercancel = () => { rz.onpointermove = rz.onpointerup = rz.onpointercancel = null; rz.classList.remove('on'); };
+      rz.onpointerup = rz.onpointercancel = () => { rz.onpointermove = rz.onpointerup = rz.onpointercancel = null; rz.classList.remove('on'); salva(modo); };
     };
-    rz.ondblclick = () => metti('');
+    rz.ondblclick = () => { metti(''); salva(''); };
     metti(modo);
   }
 
