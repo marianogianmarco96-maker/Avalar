@@ -461,7 +461,7 @@ body{min-width:0}
 .schtag.on{background:#5a1820;border-color:#e7cf9a;box-shadow:inset 0 1px 4px #0006}
 @media (min-width:621px){.ehead:has(.schtag:not([hidden])) .ehb{padding-right:120px}}
 .page.consch{max-width:1960px}
-.ewrap.open{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:24px;align-items:start}
+.ewrap.open{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
 .esch{position:sticky;top:calc(58px + env(safe-area-inset-top,0px) + 12px);height:calc(100vh - 58px - env(safe-area-inset-top,0px) - 24px);z-index:21}
 @media (max-width:1180px){
   .ewrap.open{display:block}
@@ -913,6 +913,9 @@ h2{font-size:1.25rem}
   header.top #tools{margin-top:auto!important;position:static!important}
   #view{margin-left:var(--sbw,236px)!important;max-width:none!important;padding:34px 48px 60px!important}
   #view>.page{max-width:1120px;margin:0 auto}
+  /* con la scheda del Tavolo aperta accanto la pagina usa tutto lo spazio, così il testo non si stringe */
+  #view>.page.consch{max-width:none}
+  #view:has(>.page.consch){padding-left:24px!important;padding-right:24px!important}
   .spacer-top{display:none!important}
 }
 /* riquadri: cornice doppia da manoscritto con angoli dorati */
