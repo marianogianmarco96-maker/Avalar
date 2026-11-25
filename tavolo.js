@@ -2199,7 +2199,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (t === 'maschera' || t === 'allinea' || t === 'muri' || t === 'griglia' || t === 'difficile' || t === 'effetti' || t === 'segni') { const p = $('#tv-tdp'), sp = $('#tv-sp'); if (p) p.hidden = true; if (sp && !sp.hidden) apriSchede(false); }
     const st = $('#tv-stage'); if (st) { st.classList.toggle('rul', ['righello', 'maschera', 'allinea', 'muri', 'difficile', 'effetti', 'segni'].includes(t)); st.classList.toggle('segni', t === 'segni'); st.classList.toggle('mano', t === 'mano'); st.classList.toggle('muri', t === 'muri'); st.classList.toggle('gmano', t === 'griglia'); }
     if (prima === 'griglia' && t !== 'griglia' && T.gm) annullaGriglia();
-    if (prima === 'muri' && t !== 'muri') T.mu = T.mdown = T.mhov = T.mgom = null;
+    if (prima === 'muri' && t !== 'muri') { T.mu = T.mdown = T.mhov = T.mgom = null; if (T.provaNebbia) programmaMaschera(); }
+    if (t === 'muri' && prima !== 'muri' && T.provaNebbia) programmaMaschera();
     if (prima === 'segni' && t !== 'segni') T.sgSel = null;
     disegnaRail(); disegnaSegnalini(); barraMaschera(); disegnaMuri(); disegnaRighelli();
   }
@@ -2663,6 +2664,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     });
     // il cerchio del pennello della maschera segue il mouse
     st.addEventListener('pointermove', e => {
+      if (provaNebbia() && !T.drag) { T.provaPt = mondo(st, e); programmaMaschera(); }
       const on = isDM() && T.tool === 'maschera' && T.mforma === 'pennello' && e.pointerType === 'mouse';
       if (!on && !T.pcur) return;
       T.pcur = on ? mondo(st, e) : null; disegnaRighelli();
@@ -4444,7 +4446,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       g.filter = `blur(${Math.max(1, 4 * k)}px)`; viste.forEach(o => buca(g, o)); g.filter = 'none';
       if (!isDM() && !viste.length && T.avvisato !== sc.id) { T.avvisato = sc.id; toast('Non hai un token su questa mappa: vedi solo i posti già esplorati.'); }
       // senza i token dei giocatori la nebbia coprirebbe tutto anche al DM: lui la mappa la vede chiara, e glielo dico una volta
-      if (isDM() && !viste.length) {
+      if (isDM() && !viste.length && !provaNebbia()) {
         g.globalCompositeOperation = 'source-over'; g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, W, H); g.setTransform(k, 0, 0, k, 0, 0);
         if (T.avvisatoDm !== sc.id) { T.avvisatoDm = sc.id; toast('Nebbia automatica accesa ma nessun personaggio dei giocatori su questa mappa: loro la vedono tutta buia. Tu la vedi chiara finché non metti i loro token.'); }
       }
@@ -4460,7 +4462,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     T.fxOn = nebbia;
     if (nebbia) { g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-in'; g.drawImage(trameNebbia(stileNebbia(sc)).fondo, 0, 0, W, H); }
     g.globalCompositeOperation = 'source-over'; g.setTransform(k, 0, 0, k, 0, 0);
-    c.hidden = false; c.style.opacity = isDM() ? tono() : 1; T.fogK = k;
+    c.hidden = false; c.style.opacity = isDM() && !provaNebbia() ? tono() : 1; T.fogK = k;
     if (nebbia) animaNebbia(); else { const fx = $('#tv-fogfx'); if (fx) fx.hidden = true; }
     disegnaMuri();
   }
@@ -4624,7 +4626,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   const muriScena = sc => (T.muri || []).filter(m => m.scena === sc.id);
   const chiuso = m => !m.porta || !m.aperta;
   // il DM vede la nebbia come la maschera: sopra la mappa, con la sua opacità
-  const nebbiaQui = sc => !!sc?.visuale && !!T.muri;
+  // «Prova la nebbia» (DM, strumento Muri): la vede come un giocatore, da dove punta il mouse, anche se la nebbia è ancora spenta
+  const provaNebbia = () => isDM() && !!T.provaNebbia && T.tool === 'muri';
+  const nebbiaQui = sc => (!!sc?.visuale || provaNebbia()) && !!T.muri;
   function distSeg(px, py, s) {
     const vx = s[2] - s[0], vy = s[3] - s[1], l2 = vx * vx + vy * vy, q = l2 ? clamp(((px - s[0]) * vx + (py - s[1]) * vy) / l2, 0, 1) : 0;
     return Math.hypot(px - s[0] - q * vx, py - s[1] - q * vy);
@@ -4687,14 +4691,15 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   // chi guarda: per il giocatore i suoi token (con la vista di gruppo anche quelli dei compagni), per il DM tutti quelli dei giocatori
   function occhi(sc) {
     const tutti = isDM() || sc.vista_condivisa, d = T.drag;
-    return [...T.tok.values()].filter(t => t.scena === sc.id && t.giocatore && !t.nascosto && (tutti || t.giocatore === T.me.giocatore)).map(t => {
+    const pv = provaNebbia() && T.provaPt ? [{ id: 'prova', x: clamp(T.provaPt.x, 0, sc.larghezza), y: clamp(T.provaPt.y, 0, sc.altezza), r: 0 }] : [];
+    return pv.concat([...T.tok.values()].filter(t => t.scena === sc.id && t.giocatore && !t.nascosto && (tutti || t.giocatore === T.me.giocatore)).map(t => {
       const l = t.misura * sc.griglia;
       let x = t.x + l / 2, y = t.y + l / 2;
       // mentre lo trascini vede dalla nuova posizione, ma non al di là di un muro
       if (d?.id === t.id && d.mosso && (isDM() || !attraversa(sc, x, y, d.x + l / 2, d.y + l / 2))) { x = d.x + l / 2; y = d.y + l / 2; }
       const cieco = condTok(t).some(c => CIECO.includes(c));
       return { id: t.id, x: clamp(x, 0, sc.larghezza), y: clamp(y, 0, sc.altezza), r: cieco ? l / 2 : t.vista == null ? 0 : l / 2 + t.vista / (sc.metri || 1.5) * sc.griglia };
-    });
+    }));
   }
   // la zona che si vede da un punto: un raggio verso ogni estremo dei muri, fermato dal muro più vicino
   function poligono(o, segs, sc) {
@@ -4742,7 +4747,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     } else g.fillStyle = '#000';
     g.fill(); g.restore();
   }
-  const chiaveVista = sc => [sc.id, sc.visuale, sc.nebbia, sc.cono, sc.esplora, sc.vista_condivisa, sc.griglia, sc.metri, sc.larghezza, sc.altezza, T.wver, isDM(), T.esp?.v, nebbiaQui(sc) ? occhi(sc).map(o => `${o.id}:${Math.round(o.x)}:${Math.round(o.y)}:${Math.round(o.r)}`).join() : ''].join('|');
+  const chiaveVista = sc => [sc.id, sc.visuale, provaNebbia(), sc.nebbia, sc.cono, sc.esplora, sc.vista_condivisa, sc.griglia, sc.metri, sc.larghezza, sc.altezza, T.wver, isDM(), T.esp?.v, nebbiaQui(sc) ? occhi(sc).map(o => `${o.id}:${Math.round(o.x)}:${Math.round(o.y)}:${Math.round(o.r)}`).join() : ''].join('|');
   // le zone già viste restano in penombra: le ricorda il browser di ogni giocatore
   function esplorato(sc) {
     if (T.esp?.id === sc.id) return T.esp;
@@ -4940,6 +4945,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     b.innerHTML = `<div class="g">${sw('visuale', sc.visuale, 'Nebbia automatica', 'I giocatori vedono solo ciò che vedono i loro token: i muri fermano la vista')}</div>
       <div class="g seg">${bt('muro', 'muro', 'Muro di stanza', T.mtool === 'muro', 'Pareti delle stanze: fermano vista e passo, e con la nebbia automatica la stanza chiusa resta buia finché qualcuno non ci guarda dentro. Trascina, oppure clicca punto per punto (doppio clic o Esc per finire)')}${bt('porta', 'porta', 'Porta', T.mtool === 'porta', 'Disegna una porta sopra un muro: si aggancia al muro e da aperta lascia passare')}${bt('gomma', 'gomma', 'Gomma', T.mtool === 'gomma', 'Clicca o passa sui muri per cancellarli')}</div>
       <div class="g seg" title="Coperture: contano negli attacchi, non fanno nebbia">${bt('pieno', 'muro', 'Muro di copertura', T.mtool === 'pieno', 'Copertura totale: colonne, rocce, edifici visti da fuori. Ferma il passo e gli attacchi, ma non fa nebbia né ombra')}${bt('meta', 'muro', 'Muretto ½', T.mtool === 'meta', 'Copertura a metà (+2 CA): muretti, tavoli, botti, ringhiere. Non ferma la vista né il passo')}${bt('tre', 'muro', 'Feritoia ¾', T.mtool === 'tre', 'Copertura a tre quarti (+5 CA): feritoie, banconi alti, tronchi spessi. Non ferma la vista né il passo')}</div>
+      <div class="g">${bt('prova', 'occhio', 'Prova la nebbia', !!T.provaNebbia, 'Solo per te: vedi la nebbia come un giocatore, dal punto dove tieni il mouse. Portalo dentro e fuori da una stanza per controllare che sia chiusa bene. Si spegne uscendo da Muri')}</div>
       <div class="g">${bt('griglia', 'gri', '', aggancioGriglia(), 'Aggancia i punti agli angoli delle caselle (tieni Alt per staccarli)')}${bt('annulla', 'undo', '', false, 'Annulla l\'ultimo muro', !T.mfatti.some(id => T.muri.some(m => m.id === id)))}</div>
       <div class="g sl" title="Solo per te: i giocatori la vedono sempre nera">${svg('luna')}<input type="range" class="tv-rg" data-w="tono" min="0.1" max="0.95" step="0.05" value="${tono()}" aria-label="Opacità della nebbia (solo per te)"><output data-w="tv">${Math.round(tono() * 100)}%</output></div>
       <div class="g">${sw('cono', sc.cono !== false, 'Cono d\'ombra', 'Acceso: i muri proiettano l\'ombra e non si vede cosa c\'è dietro. Spento: restano buie solo le stanze chiuse in cui il token non è')}${sw('esplora', sc.esplora !== false, 'Zone viste', 'I posti già visti restano in penombra')}${sw('vista_condivisa', !!sc.vista_condivisa, 'Vista di gruppo', 'Ogni giocatore vede anche ciò che vedono i compagni')}</div>
@@ -4961,6 +4967,12 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       else if (k === 'griglia') { try { localStorage.setItem(SNAP, aggancioGriglia() ? '0' : '1'); } catch { } }
       else if (k === 'annulla') { const id = [...T.mfatti].reverse().find(i => T.muri.some(m => m.id === i)), m = T.muri.find(x => x.id === id); if (m) { T.mfatti = T.mfatti.filter(i => i !== id); await cancellaMuro(m); await chiudiVarco(id); } }
       else if (k === 'claude') return chiediCoperture(sc);
+      else if (k === 'prova') {
+        T.provaNebbia = !T.provaNebbia;
+        if (T.provaNebbia && !T.provaPt) { const st = $('#tv-stage').getBoundingClientRect(); T.provaPt = { x: (st.width / 2 - T.view.x) / T.view.z, y: (st.height / 2 - T.view.y) / T.view.z }; }
+        programmaMaschera();
+        if (T.provaNebbia) toast(sc.visuale ? 'Prova della nebbia: muovi il mouse sulla mappa, vedi da lì come un giocatore.' : 'Prova della nebbia: la vedi solo tu, i giocatori no finché non accendi «Nebbia automatica». Muovi il mouse sulla mappa.');
+      }
       else if (k === 'dimentica') {
         if (!await ask('Le zone già esplorate tornano buie per tutti i giocatori. Continuare?', { ok: 'Dimentica', title: 'Zone viste' })) return;
         manda('esplorato', { scena: sc.id }); toast('Fatto: i giocatori vedono di nuovo solo ciò che hanno davanti.');
