@@ -26,6 +26,9 @@
   `**Obiettivo:**`, `**Ostacolo:**`, `**Esiti:**`, `**Ricompensa:**` in paragrafi a sé.
   Prove di abilità (pulsante 🎲 dell'editor): in una frase `🎲 Percezione CD 14`; come riquadro un paragrafo
   `🎲 Atletica CD 15 — per cosa` seguito dall'elenco `- ✓ Successo: …` / `- ✗ Fallimento: …`.
+- Immagini delle scene del Tavolo (bucket privato «tavolo»): Claude le vede con `python3 strumenti/scene.py elenco` e
+  `scarica [testo nel nome] [--giorni N]`, che le salva in scene/ (ignorata da git). Passa dalla funzione Supabase
+  `tavolo-bot-immagini` (supabase/functions/, solo lettura, link di un'ora) con la chiave del bot AVALAR_BOT_KEY.
 - Ogni scaletta o sessione che Claude prepara per il DM include sempre, senza che lo chieda:
   - per ogni scena un titoletto `#### Il Luogo` subito sotto `### Scena N`, con un testo da leggere ai giocatori
     (*«…»* in corsivo: cosa vedono, sentono, annusano) e 2-3 punti con dettagli da usare al tavolo;
