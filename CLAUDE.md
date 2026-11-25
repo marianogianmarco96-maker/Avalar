@@ -24,3 +24,8 @@
 - Scaletta del DM (scaletta.js, meta `scaletta:<n>`): il testo resta Markdown, l'editor del sito lo mostra come in Word.
   Forma usata dall'editor: parti `## Titolo`, scene `### Scena N: Titolo`, titoletti `####`, e nelle scene i campi
   `**Obiettivo:**`, `**Ostacolo:**`, `**Esiti:**`, `**Ricompensa:**` in paragrafi a sé.
+- Ogni scaletta o sessione che Claude prepara per il DM include sempre, senza che lo chieda:
+  - per ogni scena un titoletto `#### Il Luogo` subito sotto `### Scena N`, con un testo da leggere ai giocatori
+    (*«…»* in corsivo: cosa vedono, sentono, annusano) e 2-3 punti con dettagli da usare al tavolo;
+  - nella parte `## 🎭 PNG della Sessione`, per ogni PNG l'aspetto (com'è fatto, come si veste, un tic o un modo di
+    parlare) oltre a cosa vuole, e una frase tipica.
