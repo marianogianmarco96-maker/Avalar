@@ -589,8 +589,8 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
 
   /* ---------- razze e classi ----------
      Carte illustrate: l'immagine viene da meta «immagini» ({ 'razza:elfo': { src, autore, licenza, fonte } }), scelta dal DM
-     con licenza libera e la fonte citata sotto. Senza immagine: la foto del personaggio del party di quella razza (o classe),
-     se c'è, altrimenti un simbolo. Razza, classe e livello del party: meta «party», che il DM aggiorna dalla Home. */
+     con licenza libera e la fonte citata sotto. Senza immagine: per le razze un simbolo; per le classi la foto del personaggio del
+     party di quella classe, se c'è, altrimenti un simbolo. Razza, classe e livello del party: meta «party», che il DM aggiorna dalla Home. */
   const RZ = {
     dragonide: ['🐉', '#7a3a1c', 'Fieri discendenti dei draghi, con un soffio elementale e l\'orgoglio di una stirpe antica.'],
     nano: ['⚒️', '#5b4a3a', 'Robusti come la roccia delle loro montagne, tenaci, leali e duri da avvelenare.'],
@@ -654,7 +654,8 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
   function voceRC(k, x, id) {
     const im = immagini()[(k === 'razze' ? 'razza:' : 'classe:') + id], P = delParty(k === 'razze' ? 'razza' : 'classe', x);
     const [em, col, tag] = k === 'razze' ? rzInfo(x) : (KL[id] || ['⚔️', '#4a3a2e', '']);
-    const foto = sicura(im?.src) || P.find(e => e.portrait)?.portrait?.thumb || '';
+    // le razze non usano la foto del party (resta il simbolo); le classi sì
+    const foto = sicura(im?.src) || (k === 'razze' ? '' : P.find(e => e.portrait)?.portrait?.thumb) || '';
     return { im: sicura(im?.src) ? im : null, P, em, col, tag, foto };
   }
   function cartaRC(k, x, id) {
