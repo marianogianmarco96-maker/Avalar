@@ -1161,7 +1161,20 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
 .tv-dk .md{-moz-appearance:textfield;appearance:textfield}.tv-dk .md::-webkit-inner-spin-button,.tv-dk .md::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .tv-dk .sgr{all:unset;box-sizing:border-box;cursor:pointer;height:30px;padding:0 7px;border-radius:9px;border:1px solid var(--line2);background:var(--paper);display:flex;align-items:center;justify-content:center;font:700 .72rem var(--body);color:var(--ink2);white-space:nowrap;flex:none}
 .tv-dk .sgr.on{background:#6b3fa0;border-color:#6b3fa0;color:#fff}
-.tv-dk .in{display:flex;gap:6px}
+.tv-dk .in{display:flex;gap:6px;position:relative}
+.tv-dk .sus{display:flex;align-items:center;gap:6px;margin-top:6px;font:600 .8rem var(--body);color:var(--ink2,#56402f);cursor:pointer;user-select:none;min-width:0}
+.tv-dk .sus input{width:16px;height:16px;margin:0;accent-color:var(--wine,#7a1f2c);flex:none}
+.tv-dk .sus small{color:var(--mute,#86705a);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.tv-dk .sus small.ko{color:#b8322c}
+.tv-dk .sus:has(input:checked) span{color:var(--wine,#7a1f2c)}
+:root[data-theme=dark] .tv-dk .sus:has(input:checked) span{color:var(--gold2)}
+.tv-at{position:absolute;left:0;right:44px;bottom:calc(100% + 6px);z-index:30;display:flex;flex-direction:column;padding:4px;border-radius:12px;background:#211a16f7;border:1px solid #e7cf9a55;box-shadow:0 10px 28px #000b}
+.tv-dk .in .tv-at button{all:unset;cursor:pointer;display:flex;align-items:baseline;gap:8px;padding:7px 10px;border-radius:8px;color:#f1e4c8;font:600 .86rem var(--body)}
+.tv-dk .in .tv-at button b{color:var(--gold2,#e0c071)}
+.tv-dk .in .tv-at button small{color:#b9a888;font-size:.76rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tv-dk .in .tv-at button[aria-selected=true],.tv-dk .in .tv-at button:hover{background:#ffffff14}
+.tv-msg .tx b.at{color:var(--wine,#7a1f2c);font-weight:700}
+:root[data-theme=dark] .tv-msg .tx b.at{color:var(--gold2)}
 .tv-dk .in input{flex:1;min-width:0;height:38px;box-sizing:border-box;border:1px solid var(--line2);border-radius:19px;padding:0 14px;background:var(--paper);color:var(--ink);font:inherit}
 .tv-dk .in button{all:unset;cursor:pointer;width:38px;height:38px;border-radius:50%;background:linear-gradient(var(--acc2),var(--acc));color:#fff;display:flex;align-items:center;justify-content:center;font-size:1rem;box-shadow:0 2px 5px #0005;flex:none}
 .tv-roll{border-radius:12px;padding:8px 10px}
@@ -2186,7 +2199,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (t === 'maschera' || t === 'allinea' || t === 'muri' || t === 'griglia' || t === 'difficile' || t === 'effetti' || t === 'segni') { const p = $('#tv-tdp'), sp = $('#tv-sp'); if (p) p.hidden = true; if (sp && !sp.hidden) apriSchede(false); }
     const st = $('#tv-stage'); if (st) { st.classList.toggle('rul', ['righello', 'maschera', 'allinea', 'muri', 'difficile', 'effetti', 'segni'].includes(t)); st.classList.toggle('segni', t === 'segni'); st.classList.toggle('mano', t === 'mano'); st.classList.toggle('muri', t === 'muri'); st.classList.toggle('gmano', t === 'griglia'); }
     if (prima === 'griglia' && t !== 'griglia' && T.gm) annullaGriglia();
-    if (prima === 'muri' && t !== 'muri') T.mu = T.mdown = T.mhov = T.mgom = null;
+    if (prima === 'muri' && t !== 'muri') { T.mu = T.mdown = T.mhov = T.mgom = null; if (T.provaNebbia) programmaMaschera(); }
+    if (t === 'muri' && prima !== 'muri' && T.provaNebbia) programmaMaschera();
     if (prima === 'segni' && t !== 'segni') T.sgSel = null;
     disegnaRail(); disegnaSegnalini(); barraMaschera(); disegnaMuri(); disegnaRighelli();
   }
@@ -2650,6 +2664,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     });
     // il cerchio del pennello della maschera segue il mouse
     st.addEventListener('pointermove', e => {
+      if (provaNebbia() && !T.drag) { T.provaPt = mondo(st, e); programmaMaschera(); }
       const on = isDM() && T.tool === 'maschera' && T.mforma === 'pennello' && e.pointerType === 'mouse';
       if (!on && !T.pcur) return;
       T.pcur = on ? mondo(st, e) : null; disegnaRighelli();
@@ -3872,8 +3887,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     box.innerHTML = `<i class="tv-crz" data-k="crz" title="Trascina per allargare o stringere la chat" aria-hidden="true"></i><div class="tv-dh">${tabSc || tabAs ? `<span class="tv-dtab" role="tablist"><button type="button" role="tab" data-act="tv-chatab">Chat</button>${tabSc ? '<button type="button" role="tab" data-act="tv-scaletta">Scaletta</button>' : ''}${tabAs ? '<button type="button" role="tab" data-act="tv-assist">✨ Assistente</button>' : ''}</span>` : tabSh ? '<span class="tv-dtab" role="tablist"><button type="button" role="tab" data-act="tv-chatab">Chat</button><button type="button" role="tab" data-act="tv-schtab">Scheda</button></span>' : '<span>Chat</span>'}<span class="dx"><button type="button" class="tv-cx tv-anim ${animazioni() ? 'on' : ''}" data-act="tv-anim" title="Animazioni degli attacchi: ${animazioni() ? 'accese' : 'spente'}" aria-label="Animazioni degli attacchi" aria-pressed="${animazioni()}">✨</button>${isDM() ? '<button type="button" class="tv-cx tv-svuota" data-act="tv-svuota" title="Svuota la chat: cancella tutti i messaggi e i tiri, per tutti" aria-label="Svuota la chat">🗑</button>' : '<button type="button" class="tv-cx" data-act="tv-dadi" title="Chiudi la chat" aria-label="Chiudi la chat">✕</button>'}</span></div><div class="tv-log" id="tv-log"></div>${tabSc ? '<div class="tv-scal" id="tv-scal"></div>' : ''}${tabAs ? '<div class="tv-asst" id="tv-asst"></div>' : ''}${tabSh ? '<div class="tv-schc" id="tv-schc"></div>' : ''}
       <div class="tv-dk"><div class="dd">${DADI.map(f => `<button type="button" data-df="${f}" title="Tira 1d${f}${f === 20 ? ' (con il vantaggio scelto sotto)' : ''}">${dado(f)}d${f}</button>`).join('')}</div>
       <div class="op"><span class="sg" title="Vale per il d20">${[['', 'Normale'], ['kh1', 'Vantaggio'], ['kl1', 'Svantaggio']].map(([v, l]) => `<button type="button" data-cadv="${v}" class="${(T.cadv || '') === v ? 'on' : ''}">${l}</button>`).join('')}</span><input class="md" type="number" data-k="cmod" placeholder="+0" aria-label="Modificatore" value="${esc(T.cmod || '')}"><button type="button" class="sgr ${T.tdpriv ? 'on' : ''}" data-k="cpriv">${T.tdpriv ? '🙈 Nascosto' : '👁 Tutti'}</button></div>
-      <div class="in"><input type="text" id="tv-f" placeholder="Scrivi… (/w nome per sussurrare)" autocomplete="off" aria-label="Scrivi un messaggio"><button type="button" data-act="tv-tira" title="Invia" aria-label="Invia">➤</button></div></div>`;
-    $('#tv-f').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); scrivi(); } };
+      <div class="in"><input type="text" id="tv-f" placeholder="Scrivi… (@nome per taggare)" autocomplete="off" aria-label="Scrivi un messaggio"><button type="button" data-act="tv-tira" title="Invia" aria-label="Invia">➤</button></div>
+      <label class="sus" title="Il messaggio lo leggete solo tu e chi tagghi con @"><input type="checkbox" id="tv-sus"><span>🤫 Sussurro</span><small id="tv-susa"></small></label></div>`;
+    tagChat($('#tv-f'));
     $('#tv-log').onclick = e => { const vb = e.target.closest('[data-voto]'); if (vb) { const [id, v] = vb.dataset.voto.split(':'); return vota(id, v); } const b = e.target.closest('[data-del]'); if (b) cancella(b.dataset.del).catch(err => toast(err.message, 'err')); };
     const dk = box.querySelector('.tv-dk'), cm = dk.querySelector('[data-k=cmod]');
     cm.oninput = () => { T.cmod = cm.value; };
@@ -3991,12 +4007,64 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       'tv-anim': () => { const on = !animazioni(); try { localStorage.setItem(ANIM, on ? '1' : '0'); } catch { } const b = $('.tv-anim'); if (b) { b.classList.toggle('on', on); b.title = 'Animazioni degli attacchi: ' + (on ? 'accese' : 'spente'); b.setAttribute('aria-pressed', on); } toast(on ? 'Animazioni accese.' : 'Animazioni spente: vedrai solo l\'esito dei colpi.'); }
     };
   }
-  // la riga in fondo alla chat: /w nome testo (o /w dm testo) sussurra, il resto è un messaggio per tutti.
-  // i dadi si tirano solo dal Tiradadi
+  // chi si può taggare con @ nella chat: il master e gli altri giocatori, col nome del giocatore o del suo personaggio
+  function destinatari() {
+    const L = [], me = T.me?.giocatore, pg = new Map((T.info?.giocatori || []).map(g => [g.id, S.ents?.get(g.pg)?.name || '']));
+    if (!isDM()) L.push({ per: 'dm', tag: 'master', nome: 'Master', nomi: ['master', 'dm', 'gm'] });
+    for (const m of T.membri || []) {
+      if (!m.giocatore || m.giocatore === me) continue;
+      const tk = [...T.tok.values()].find(t => t.giocatore === m.giocatore && t.nome), sc = T.schede ? [...T.schede.values()].find(x => x.tipo === 'pg' && x.giocatore === m.giocatore) : null;
+      const pers = pg.get(m.giocatore) || sc?.nome || tk?.nome || '', p1 = String(pers).trim().split(/\s+/)[0] || '';
+      const tag = (p1 || m.nome || m.giocatore).replace(/[^\p{L}\d_-]/gu, '');
+      L.push({ per: m.giocatore, tag, nome: pers && norm(pers) !== norm(m.nome) ? `${pers} (${m.nome})` : (m.nome || pers), nomi: [tag, m.nome, m.giocatore, pers, p1, tk?.nome].filter(Boolean).map(x => norm(x).replace(/\s+/g, '')) });
+    }
+    return L;
+  }
+  const chiTag = (t, L = destinatari()) => { for (const [, x] of String(t).matchAll(/@([\p{L}\d_-]+)/gu)) { const n = norm(x); const d = L.find(y => y.nomi.includes(n)) || L.find(y => y.nomi.some(z => z.startsWith(n))); if (d) return d; } return null; };
+  // l'elenco che compare scrivendo @, e la spunta «Sussurro» che dice a chi arriva
+  function tagChat(f) {
+    const box = f.closest('.tv-dk'), sus = box.querySelector('#tv-sus'), a = box.querySelector('#tv-susa');
+    let menu = null, scelte = [], i = 0;
+    const chiudi = () => { menu?.remove(); menu = null; };
+    const aggiorna = () => { const d = sus.checked ? chiTag(f.value) : null; a.textContent = sus.checked ? (d ? '→ ' + d.nome : '→ tagga qualcuno con @') : ''; a.classList.toggle('ko', sus.checked && !d); };
+    const metti = d => {
+      const pos = f.selectionStart ?? f.value.length, prima = f.value.slice(0, pos).replace(/@([\p{L}\d_-]*)$/u, '@' + d.tag + ' ');
+      f.value = prima + f.value.slice(pos).replace(/^\S*\s?/, ''); f.setSelectionRange(prima.length, prima.length); f.focus(); chiudi(); aggiorna();
+    };
+    const mostra = () => {
+      const m = f.value.slice(0, f.selectionStart ?? f.value.length).match(/(?:^|\s)@([\p{L}\d_-]*)$/u);
+      if (!m) return chiudi();
+      const q = norm(m[1]); scelte = destinatari().filter(d => !q || d.nomi.some(z => z.startsWith(q))).slice(0, 6);
+      if (!scelte.length) return chiudi();
+      i = Math.min(i, scelte.length - 1);
+      if (!menu) { menu = document.createElement('div'); menu.className = 'tv-at'; menu.setAttribute('role', 'listbox'); box.querySelector('.in').append(menu); }
+      menu.innerHTML = scelte.map((d, j) => `<button type="button" role="option" data-j="${j}" aria-selected="${j === i}"><b>@${esc(d.tag)}</b><small>${esc(d.nome)}${d.per === 'dm' ? ' · in privato al DM' : ''}</small></button>`).join('');
+      menu.querySelectorAll('[data-j]').forEach(b => { b.onpointerdown = e => e.preventDefault(); b.onclick = () => metti(scelte[+b.dataset.j]); });
+    };
+    f.oninput = () => { i = 0; mostra(); aggiorna(); };
+    f.onblur = () => setTimeout(chiudi, 150);
+    f.onkeydown = e => {
+      if (menu) {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); i = (i + (e.key === 'ArrowDown' ? 1 : scelte.length - 1)) % scelte.length; return mostra(); }
+        if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); return metti(scelte[i]); }
+        if (e.key === 'Escape') { e.preventDefault(); return chiudi(); }
+      }
+      if (e.key === 'Enter') { e.preventDefault(); scrivi(); }
+    };
+    sus.onchange = () => { aggiorna(); if (sus.checked && !chiTag(f.value)) { f.focus(); if (!/@\S*$/.test(f.value)) { f.value = (f.value && !/\s$/.test(f.value) ? f.value + ' ' : f.value) + '@'; } mostra(); } };
+    aggiorna();
+  }
+  // la riga in fondo alla chat: con la spunta «Sussurro» il messaggio va solo a chi è taggato con @ (o /w nome testo),
+  // il resto è un messaggio per tutti. I dadi si tirano solo dal Tiradadi
   async function scrivi() {
     const f = $('#tv-f'), t = f.value.trim(); if (!t) return;
     if (/^\/(r|roll|gr|gmroll)\b/i.test(t)) { toast('I dadi si tirano dai pulsanti qui sopra o dal Tiradadi.', 'err'); return; }
     let testo = t, per = null;
+    const sus = $('#tv-sus');
+    if (sus?.checked) {
+      const d = chiTag(t); if (!d) { toast('Per sussurrare tagga chi deve leggerlo: @Sam, oppure @master per il DM.', 'err'); f.focus(); return; }
+      per = d.per;
+    }
     const w = t.match(/^\/w\s+(\S+)\s+([\s\S]+)$/i);
     if (w) {
       const chi = norm(w[1]);
@@ -4006,7 +4074,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     } else if (/^\//.test(t)) { toast('Per sussurrare: /w nome messaggio (oppure /w dm messaggio)', 'err'); return; }
     const r = await SB.rpc('tavolo_scrivi', { p_testo: testo, p_per: per });
     if (r.error) { toast(r.error.message, 'err'); return; }
-    f.value = ''; const row = Array.isArray(r.data) ? r.data[0] : r.data;
+    f.value = ''; if (sus) { sus.checked = false; sus.dispatchEvent(new Event('change')); } const row = Array.isArray(r.data) ? r.data[0] : r.data;
     if (row && !T.chat.some(x => x.id === row.id)) { T.chat.push(row); nuovoMsg(row); }
   }
   async function tira(formula, extra, segreto, motivo) {
@@ -4137,7 +4205,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (row && !T.chat.some(x => x.id === row.id)) T.chat.push(row);
     disegnaLog();
   }
-  const rigaMsg = m => votoDi(m) ? '' : votoApre(m) ? `<div class="tv-roll tv-msg tv-vmsg">${'<div class="h"><span class="who">⚔ Fine dello scontro</span><span class="dx"><small>' + ora(m.creato) + '</small>' + via('c', m) + '</span></div>'}<div class="tx">${esc(m.testo.replace(/\s*⟦voto:\w+⟧/, ''))}</div>${boxVoto(m, votoApre(m))}</div>` : `<div class="tv-roll tv-msg ${m.per ? 'w' : ''} ${m.autore === T.me.uid ? 'me' : ''}">${tagMsg(m)}<div class="h"><span class="who">${avatar(m.autore, m.nome)}${esc(m.nome)}</span><span class="dx"><small>${ora(m.creato)}</small>${via('c', m)}</span></div><div class="tx">${esc(m.testo)}</div></div>`;
+  const rigaMsg = m => votoDi(m) ? '' : votoApre(m) ? `<div class="tv-roll tv-msg tv-vmsg">${'<div class="h"><span class="who">⚔ Fine dello scontro</span><span class="dx"><small>' + ora(m.creato) + '</small>' + via('c', m) + '</span></div>'}<div class="tx">${esc(m.testo.replace(/\s*⟦voto:\w+⟧/, ''))}</div>${boxVoto(m, votoApre(m))}</div>` : `<div class="tv-roll tv-msg ${m.per ? 'w' : ''} ${m.autore === T.me.uid ? 'me' : ''}">${tagMsg(m)}<div class="h"><span class="who">${avatar(m.autore, m.nome)}${esc(m.nome)}</span><span class="dx"><small>${ora(m.creato)}</small>${via('c', m)}</span></div><div class="tx">${esc(m.testo).replace(/(^|\s)@([\p{L}\d_-]+)/gu, '$1<b class="at">@$2</b>')}</div></div>`;
   async function cancella(k) {
     const [tipo, id] = k.split(':'), tab = tipo === 't' ? 'tavolo_tiri' : 'tavolo_chat';
     const r = await SB.from(tab).delete().eq('id', +id).select('id');
@@ -4378,7 +4446,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       g.filter = `blur(${Math.max(1, 4 * k)}px)`; viste.forEach(o => buca(g, o)); g.filter = 'none';
       if (!isDM() && !viste.length && T.avvisato !== sc.id) { T.avvisato = sc.id; toast('Non hai un token su questa mappa: vedi solo i posti già esplorati.'); }
       // senza i token dei giocatori la nebbia coprirebbe tutto anche al DM: lui la mappa la vede chiara, e glielo dico una volta
-      if (isDM() && !viste.length) {
+      if (isDM() && !viste.length && !provaNebbia()) {
         g.globalCompositeOperation = 'source-over'; g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, W, H); g.setTransform(k, 0, 0, k, 0, 0);
         if (T.avvisatoDm !== sc.id) { T.avvisatoDm = sc.id; toast('Nebbia automatica accesa ma nessun personaggio dei giocatori su questa mappa: loro la vedono tutta buia. Tu la vedi chiara finché non metti i loro token.'); }
       }
@@ -4394,7 +4462,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     T.fxOn = nebbia;
     if (nebbia) { g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-in'; g.drawImage(trameNebbia(stileNebbia(sc)).fondo, 0, 0, W, H); }
     g.globalCompositeOperation = 'source-over'; g.setTransform(k, 0, 0, k, 0, 0);
-    c.hidden = false; c.style.opacity = isDM() ? tono() : 1; T.fogK = k;
+    c.hidden = false; c.style.opacity = isDM() && !provaNebbia() ? tono() : 1; T.fogK = k;
     if (nebbia) animaNebbia(); else { const fx = $('#tv-fogfx'); if (fx) fx.hidden = true; }
     disegnaMuri();
   }
@@ -4558,7 +4626,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   const muriScena = sc => (T.muri || []).filter(m => m.scena === sc.id);
   const chiuso = m => !m.porta || !m.aperta;
   // il DM vede la nebbia come la maschera: sopra la mappa, con la sua opacità
-  const nebbiaQui = sc => !!sc?.visuale && !!T.muri;
+  // «Prova la nebbia» (DM, strumento Muri): la vede come un giocatore, da dove punta il mouse, anche se la nebbia è ancora spenta
+  const provaNebbia = () => isDM() && !!T.provaNebbia && T.tool === 'muri';
+  const nebbiaQui = sc => (!!sc?.visuale || provaNebbia()) && !!T.muri;
   function distSeg(px, py, s) {
     const vx = s[2] - s[0], vy = s[3] - s[1], l2 = vx * vx + vy * vy, q = l2 ? clamp(((px - s[0]) * vx + (py - s[1]) * vy) / l2, 0, 1) : 0;
     return Math.hypot(px - s[0] - q * vx, py - s[1] - q * vy);
@@ -4621,14 +4691,15 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   // chi guarda: per il giocatore i suoi token (con la vista di gruppo anche quelli dei compagni), per il DM tutti quelli dei giocatori
   function occhi(sc) {
     const tutti = isDM() || sc.vista_condivisa, d = T.drag;
-    return [...T.tok.values()].filter(t => t.scena === sc.id && t.giocatore && !t.nascosto && (tutti || t.giocatore === T.me.giocatore)).map(t => {
+    const pv = provaNebbia() && T.provaPt ? [{ id: 'prova', x: clamp(T.provaPt.x, 0, sc.larghezza), y: clamp(T.provaPt.y, 0, sc.altezza), r: 0 }] : [];
+    return pv.concat([...T.tok.values()].filter(t => t.scena === sc.id && t.giocatore && !t.nascosto && (tutti || t.giocatore === T.me.giocatore)).map(t => {
       const l = t.misura * sc.griglia;
       let x = t.x + l / 2, y = t.y + l / 2;
       // mentre lo trascini vede dalla nuova posizione, ma non al di là di un muro
       if (d?.id === t.id && d.mosso && (isDM() || !attraversa(sc, x, y, d.x + l / 2, d.y + l / 2))) { x = d.x + l / 2; y = d.y + l / 2; }
       const cieco = condTok(t).some(c => CIECO.includes(c));
       return { id: t.id, x: clamp(x, 0, sc.larghezza), y: clamp(y, 0, sc.altezza), r: cieco ? l / 2 : t.vista == null ? 0 : l / 2 + t.vista / (sc.metri || 1.5) * sc.griglia };
-    });
+    }));
   }
   // la zona che si vede da un punto: un raggio verso ogni estremo dei muri, fermato dal muro più vicino
   function poligono(o, segs, sc) {
@@ -4676,7 +4747,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     } else g.fillStyle = '#000';
     g.fill(); g.restore();
   }
-  const chiaveVista = sc => [sc.id, sc.visuale, sc.nebbia, sc.cono, sc.esplora, sc.vista_condivisa, sc.griglia, sc.metri, sc.larghezza, sc.altezza, T.wver, isDM(), T.esp?.v, nebbiaQui(sc) ? occhi(sc).map(o => `${o.id}:${Math.round(o.x)}:${Math.round(o.y)}:${Math.round(o.r)}`).join() : ''].join('|');
+  const chiaveVista = sc => [sc.id, sc.visuale, provaNebbia(), sc.nebbia, sc.cono, sc.esplora, sc.vista_condivisa, sc.griglia, sc.metri, sc.larghezza, sc.altezza, T.wver, isDM(), T.esp?.v, nebbiaQui(sc) ? occhi(sc).map(o => `${o.id}:${Math.round(o.x)}:${Math.round(o.y)}:${Math.round(o.r)}`).join() : ''].join('|');
   // le zone già viste restano in penombra: le ricorda il browser di ogni giocatore
   function esplorato(sc) {
     if (T.esp?.id === sc.id) return T.esp;
@@ -4874,6 +4945,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     b.innerHTML = `<div class="g">${sw('visuale', sc.visuale, 'Nebbia automatica', 'I giocatori vedono solo ciò che vedono i loro token: i muri fermano la vista')}</div>
       <div class="g seg">${bt('muro', 'muro', 'Muro di stanza', T.mtool === 'muro', 'Pareti delle stanze: fermano vista e passo, e con la nebbia automatica la stanza chiusa resta buia finché qualcuno non ci guarda dentro. Trascina, oppure clicca punto per punto (doppio clic o Esc per finire)')}${bt('porta', 'porta', 'Porta', T.mtool === 'porta', 'Disegna una porta sopra un muro: si aggancia al muro e da aperta lascia passare')}${bt('gomma', 'gomma', 'Gomma', T.mtool === 'gomma', 'Clicca o passa sui muri per cancellarli')}</div>
       <div class="g seg" title="Coperture: contano negli attacchi, non fanno nebbia">${bt('pieno', 'muro', 'Muro di copertura', T.mtool === 'pieno', 'Copertura totale: colonne, rocce, edifici visti da fuori. Ferma il passo e gli attacchi, ma non fa nebbia né ombra')}${bt('meta', 'muro', 'Muretto ½', T.mtool === 'meta', 'Copertura a metà (+2 CA): muretti, tavoli, botti, ringhiere. Non ferma la vista né il passo')}${bt('tre', 'muro', 'Feritoia ¾', T.mtool === 'tre', 'Copertura a tre quarti (+5 CA): feritoie, banconi alti, tronchi spessi. Non ferma la vista né il passo')}</div>
+      <div class="g">${bt('prova', 'occhio', 'Prova la nebbia', !!T.provaNebbia, 'Solo per te: vedi la nebbia come un giocatore, dal punto dove tieni il mouse. Portalo dentro e fuori da una stanza per controllare che sia chiusa bene. Si spegne uscendo da Muri')}</div>
       <div class="g">${bt('griglia', 'gri', '', aggancioGriglia(), 'Aggancia i punti agli angoli delle caselle (tieni Alt per staccarli)')}${bt('annulla', 'undo', '', false, 'Annulla l\'ultimo muro', !T.mfatti.some(id => T.muri.some(m => m.id === id)))}</div>
       <div class="g sl" title="Solo per te: i giocatori la vedono sempre nera">${svg('luna')}<input type="range" class="tv-rg" data-w="tono" min="0.1" max="0.95" step="0.05" value="${tono()}" aria-label="Opacità della nebbia (solo per te)"><output data-w="tv">${Math.round(tono() * 100)}%</output></div>
       <div class="g">${sw('cono', sc.cono !== false, 'Cono d\'ombra', 'Acceso: i muri proiettano l\'ombra e non si vede cosa c\'è dietro. Spento: restano buie solo le stanze chiuse in cui il token non è')}${sw('esplora', sc.esplora !== false, 'Zone viste', 'I posti già visti restano in penombra')}${sw('vista_condivisa', !!sc.vista_condivisa, 'Vista di gruppo', 'Ogni giocatore vede anche ciò che vedono i compagni')}</div>
@@ -4895,6 +4967,12 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       else if (k === 'griglia') { try { localStorage.setItem(SNAP, aggancioGriglia() ? '0' : '1'); } catch { } }
       else if (k === 'annulla') { const id = [...T.mfatti].reverse().find(i => T.muri.some(m => m.id === i)), m = T.muri.find(x => x.id === id); if (m) { T.mfatti = T.mfatti.filter(i => i !== id); await cancellaMuro(m); await chiudiVarco(id); } }
       else if (k === 'claude') return chiediCoperture(sc);
+      else if (k === 'prova') {
+        T.provaNebbia = !T.provaNebbia;
+        if (T.provaNebbia && !T.provaPt) { const st = $('#tv-stage').getBoundingClientRect(); T.provaPt = { x: (st.width / 2 - T.view.x) / T.view.z, y: (st.height / 2 - T.view.y) / T.view.z }; }
+        programmaMaschera();
+        if (T.provaNebbia) toast(sc.visuale ? 'Prova della nebbia: muovi il mouse sulla mappa, vedi da lì come un giocatore.' : 'Prova della nebbia: la vedi solo tu, i giocatori no finché non accendi «Nebbia automatica». Muovi il mouse sulla mappa.');
+      }
       else if (k === 'dimentica') {
         if (!await ask('Le zone già esplorate tornano buie per tutti i giocatori. Continuare?', { ok: 'Dimentica', title: 'Zone viste' })) return;
         manda('esplorato', { scena: sc.id }); toast('Fatto: i giocatori vedono di nuovo solo ciò che hanno davanti.');
