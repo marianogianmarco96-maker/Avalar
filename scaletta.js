@@ -57,6 +57,16 @@ button.sc-dado{cursor:pointer}button.sc-dado:hover{background:var(--wine);color:
 .sc-ok{margin:8px 0 4px;padding:8px 12px;border:1px solid #3f6b4666;background:#3f6b4612;border-radius:5px;font-size:.95rem}
 .sc-ok.ko{border-color:#a8641c66;background:#a8641c12}
 .sc-edw{border:1px solid var(--line2);border-radius:6px;background:var(--paper);overflow:hidden}
+/* la finestra di modifica usa lo schermo: larga, alta, con testo più grande */
+dialog.dlg.sc-dlg{width:min(1500px,96vw)}
+@media (min-width:761px) and (min-height:560px){
+dialog.dlg.sc-dlg{height:92vh;overflow:hidden}
+dialog.dlg.sc-dlg form{height:100%;box-sizing:border-box;display:flex;flex-direction:column}
+dialog.dlg.sc-dlg .sc-drop{padding:10px 14px}dialog.dlg.sc-dlg .sc-drop b{display:inline;margin:0 8px 0 0}
+dialog.dlg.sc-dlg .f:has(>.sc-edw){flex:1;min-height:220px;display:flex;flex-direction:column}
+dialog.dlg.sc-dlg .sc-edw{flex:1;min-height:0;display:flex;flex-direction:column}
+dialog.dlg.sc-dlg .sc-ed,dialog.dlg.sc-dlg .sc-txt{flex:1;min-height:0;max-height:none;font-size:1.12rem;line-height:1.55}}
+@media (min-width:1100px){dialog.dlg.sc-dlg .sc-ed{padding:18px 28px}dialog.dlg.sc-dlg .sc-ed h3.scena{margin-left:-28px;margin-right:-28px;padding-left:28px}}
 .sc-bar{position:sticky;top:0;z-index:2;display:flex;flex-wrap:wrap;gap:3px;align-items:center;padding:6px;background:var(--paper2);border-bottom:1px solid var(--line2)}
 .sc-bar button{all:unset;box-sizing:border-box;cursor:pointer;padding:5px 9px;border-radius:4px;font:600 .88rem/1.1 var(--body);color:var(--ink);border:1px solid transparent;white-space:nowrap}
 .sc-bar button:hover{background:var(--paper);border-color:var(--line2)}.sc-bar button:focus-visible{outline:2px solid var(--gold)}
@@ -545,7 +555,7 @@ dialog .sc-txt{width:100%;min-height:200px;font:13px/1.45 ui-monospace,SFMono-Re
       <label class="chk"><input type="checkbox" id="sc-c" ${cur?.inCorso ? 'checked' : ''}> <span><b>In corso</b>: la sessione dura più serate (resta tra le sessioni da giocare finché non la segni come conclusa)</span></label>
       <div class="f"><span>Testo della sessione</span><div class="sc-edw" id="sc-ew"></div><small class="hint">Scrivi come in Word. «✂ Nuova scena» divide le scene; i pulsanti 🎯 ⚠ ↪ 🎁 segnano obiettivo, ostacolo, esiti e ricompensa della scena in cui sei.</small></div>
       <div class="sc-ok" id="sc-ok" hidden></div>
-      <menu><button value="cancel" class="btn ghost" formnovalidate>Annulla</button><button value="ok" class="btn primary">${cur ? 'Salva' : 'Crea la scaletta'}</button></menu></form>`, 'wide');
+      <menu><button value="cancel" class="btn ghost" formnovalidate>Annulla</button><button value="ok" class="btn primary">${cur ? 'Salva' : 'Crea la scaletta'}</button></menu></form>`, 'wide sc-dlg');
     let conta = () => { }; const E = editore($('#sc-ew', d), cur?.text || '', () => conta()), x = { get value() { return E.valore(); }, set value(m) { E.metti(m); } }, t = $('#sc-t', d), ok = $('#sc-ok', d), drop = $('#sc-drop', d), inp = $('input[type=file]', drop);
     let file = cur?.file || '';
     conta = () => {
