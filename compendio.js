@@ -589,8 +589,8 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
 
   /* ---------- razze e classi ----------
      Carte illustrate: l'immagine viene da meta «immagini» ({ 'razza:elfo': { src, autore, licenza, fonte } }), scelta dal DM
-     con licenza libera e la fonte citata sotto. Senza immagine: per le razze un simbolo; per le classi la foto del personaggio del
-     party di quella classe, se c'è, altrimenti un simbolo. Razza, classe e livello del party: meta «party», che il DM aggiorna dalla Home. */
+     con licenza libera e la fonte citata sotto. Senza immagine: un simbolo (mai la foto di un
+     personaggio del party). Razza, classe e livello del party: meta «party», che il DM aggiorna dalla Home. */
   const RZ = {
     dragonide: ['🐉', '#7a3a1c', 'Fieri discendenti dei draghi, con un soffio elementale e l\'orgoglio di una stirpe antica.'],
     nano: ['⚒️', '#5b4a3a', 'Robusti come la roccia delle loro montagne, tenaci, leali e duri da avvelenare.'],
@@ -654,8 +654,8 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
   function voceRC(k, x, id) {
     const im = immagini()[(k === 'razze' ? 'razza:' : 'classe:') + id], P = delParty(k === 'razze' ? 'razza' : 'classe', x);
     const [em, col, tag] = k === 'razze' ? rzInfo(x) : (KL[id] || ['⚔️', '#4a3a2e', '']);
-    // le razze non usano la foto del party (resta il simbolo); le classi sì
-    const foto = sicura(im?.src) || (k === 'razze' ? '' : P.find(e => e.portrait)?.portrait?.thumb) || '';
+    // niente foto del party sulle carte: senza immagine resta il simbolo
+    const foto = sicura(im?.src) || '';
     return { im: sicura(im?.src) ? im : null, P, em, col, tag, foto };
   }
   function cartaRC(k, x, id) {
@@ -733,15 +733,19 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
   const maiusc = t => t ? t[0].toUpperCase() + t.slice(1) : t;
   const oggMeta = o => `<span class="badge" style="background:${RAR(o.r)}">${esc(maiusc(o.r))}</span><span class="pill">${esc(o.t)}</span>${o.s ? `<span class="pill cp-k">Richiede sintonia${o.sd ? ' ' + esc(o.sd) : ''}</span>` : ''}`;
   const tipoOgg = o => o.t.split(' (')[0];
-  const ST_OG = { q: '', rar: '', tipo: '', sint: false, aperti: false };
+  const ST_OG = { q: '', rar: '', tipo: '', sint: false, aperti: false, ord: '' };
+  // ordine delle rarità (per quelle variabili conta la prima citata)
+  const RAR_ORD = r => { const n = norm(r); return [['rarita variabile', 6], ['non comune', 1], ['comune', 0], ['molto rar', 3], ['rar', 2], ['leggendari', 4], ['manufatto', 5]].find(([k]) => n.startsWith(k))?.[1] ?? 6; };
   route(/^\/compendio\/oggetti$/, async () => {
     await caricaPagina();
     const draw = solo => {
       const f = ST_OG, q = norm(f.q), l = D.oggetti.filter(o => (!q || norm(o.n).includes(q)) && (!f.rar || norm(o.r).startsWith(norm(f.rar))) && (!f.tipo || tipoOgg(o) === f.tipo) && (!f.sint || o.s));
+      if (f.ord === 'rar') l.sort((a, b) => RAR_ORD(a.r) - RAR_ORD(b.r) || a.n.localeCompare(b.n, 'it'));
+      else l.sort((a, b) => a.n.localeCompare(b.n, 'it'));
       const tipi = [...new Set(D.oggetti.map(tipoOgg))].sort((a, b) => a.localeCompare(b, 'it'));
       ridisegna(`${crumbs(['Oggetti magici'])}<div class="pagehead"><h1>Oggetti magici</h1></div><div class="orn"></div>
         ${filtri(`<input id="cp-q" type="search" placeholder="Cerca un oggetto…" value="${esc(f.q)}" aria-label="Cerca un oggetto">`, `<select data-cp-f="tipo" aria-label="Tipo"><option value="">Ogni tipo</option>${tipi.map(t => `<option${f.tipo === t ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select><select data-cp-f="rar" aria-label="Rarità"><option value="">Ogni rarità</option>${[['Comune', 'Comune'], ['Non comune', 'Non comune'], ['Rar', 'Raro'], ['Molto rar', 'Molto raro'], ['Leggendari', 'Leggendario']].map(([v, t]) => `<option value="${v}"${f.rar === v ? ' selected' : ''}>${t}</option>`).join('')}</select><button type="button" class="chip${f.sint ? ' on' : ''}" data-cp-f="sint">Richiede sintonia</button>`)}
-        <div class="cp-filters"><span class="cp-count">${l.length} oggetti</span></div>
+        <div class="cp-filters"><span class="cp-count">${l.length} oggetti</span><div class="seg cp-seg" role="group" aria-label="Ordina"><button type="button" data-cp-f="ord" data-v="" class="${f.ord ? '' : 'on'}" aria-pressed="${!f.ord}">A–Z</button><button type="button" data-cp-f="ord" data-v="rar" class="${f.ord === 'rar' ? 'on' : ''}" aria-pressed="${f.ord === 'rar'}">Per rarità</button></div></div>
         <div class="cp-list" id="cp-list">${l.map(o => row('ogg:' + o.n, null, o.r, '', o.n, esc(o.t), o.s ? '<span class="pill cp-k">Sintonia</span>' : '', 'ogg', o.n, xOgg(o))).join('') || '<p class="empty">Nessun oggetto con questi filtri.</p>'}</div>
         <p class="cp-foot">Tutti gli oggetti magici dell'SRD 5.1. ${FONTE_SRD}</p>`, solo);
       if (!solo) attivaFiltri(ST_OG, draw);
