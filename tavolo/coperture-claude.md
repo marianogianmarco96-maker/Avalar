@@ -23,3 +23,16 @@ Serve `AVALAR_BOT_KEY` nei segreti dell'ambiente (`select chiave from public.tav
 4. `python3 strumenti/coperture.py salva <id> "breve nota"` — i tratti di un tracciamento precedente di Claude vengono sostituiti,
    quelli del DM restano. Il DM li vede comparire nella mappa e il pulsante dice «Fatta».
 5. Rispondi in una riga: quante mappe, quanti tratti, e cosa è dubbio (per esempio «il bancone l'ho messo a ¾»).
+
+## Come le corregge il DM (da imparare)
+«Uscita passaggio» (vicolo tra le case, novembre 2026): avevo chiuso ogni edificio in un poligono e messo coperture
+su ogni oggetto (103 tratti). Il DM l'ha rifatta con 24:
+- **Solo il confine dello spazio calpestabile.** Una linea `'pieno'` per lato lungo la base delle facciate che danno
+  sulla strada, non il bordo dei tetti né il retro delle case. Dove le case formano un fronte obliquo la linea è
+  obliqua, non a gradini. Quello che sta oltre il confine (tetti, cortili interni, logge e piani alti, vicoli bui
+  tra le case) non si traccia.
+- **La strada si chiude dove finisce il terreno di gioco**: in alto una sola linea alla base del portico, senza
+  colonne né loggia. Ai bordi della mappa la strada resta aperta.
+- **Poche coperture, solo quelle che contano in combattimento**: tavoli, impalcature, cataste grandi, con un
+  quadrilatero ruotato (`ruot` o `linea(..., chiusa=True)`) che segue l'oggetto. Niente botti singole, casse
+  piccole, lampioni, pozzi, assi sparse, e niente oltre il confine.
