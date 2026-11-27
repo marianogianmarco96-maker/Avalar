@@ -347,6 +347,10 @@ dialog.dlg.tv-gd::backdrop{background:transparent}
 .tv-ctab:hover{background:var(--paper2)}
 .tv-ctab.nuovo::after{content:"";position:absolute;top:6px;left:5px;width:9px;height:9px;border-radius:50%;background:#c0392b;box-shadow:0 0 0 2px var(--paper)}
 :root[data-theme=dark] .tv-ctab{color:var(--gold2)}
+.tv-inq{width:min(360px,94vw)}.tv-inq h3{margin:0 0 4px}.tv-inq .vp{position:relative;width:280px;height:280px;max-width:100%;margin:10px auto;overflow:hidden;border-radius:10px;background:#1b1511;touch-action:none;cursor:grab;user-select:none}
+.tv-inq .vp img{position:absolute;left:0;top:0;max-width:none;transform-origin:0 0;pointer-events:none;display:none}.tv-inq .vp.ok img{display:block}.tv-inq .vp.ok .vuoto{display:none}
+.tv-inq .vp i{position:absolute;inset:0;border-radius:50%;box-shadow:0 0 0 999px #000a;outline:2px solid var(--gold,#c9a24b);outline-offset:-2px;pointer-events:none}.tv-inq .vuoto{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#e8dcc0;font-size:.95rem}
+.tv-inq .zm{display:flex;align-items:center;gap:8px;margin:0 6px}.tv-inq .zm input{flex:1;accent-color:var(--wine,#7d2530)}.tv-inq .pie{display:flex;gap:6px;align-items:center;margin-top:12px;flex-wrap:wrap}.tv-inq .pie .sp{flex:1}
 .tv-foto{position:fixed;inset:0;z-index:200;background:#0b0807ee;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;cursor:zoom-out;animation:tvfoto .18s ease-out}
 @keyframes tvfoto{from{opacity:0}}
 .tv-foto img{max-width:94vw;max-height:calc(100vh - 110px);object-fit:contain;border-radius:8px;box-shadow:0 10px 50px #000}
@@ -3262,6 +3266,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const gioc = (T.info.giocatori || []).map(g => `<option value="${esc(g.id)}" ${t.giocatore === g.id ? 'selected' : ''}>${esc(g.name)}</option>`).join('');
     const vista = scena()?.visuale && t.giocatore;
     const gr = tsch + (ft ? tile('foto', '🖼', 'Foto', 'Solo sul tuo schermo') + tile('mostra', '📣', 'Mostra a tutti', 'Si apre a schermo intero a tutti i giocatori') : '')
+      + tile('inq', '✂', 'Inquadra la foto', 'Scegli quale parte della foto si vede nel token')
       + (t.nascosto ? tile('nasc', '⬆', 'Rendi visibile', 'Sposta nei Segnalini: lo vedono tutti') : tile('nasc', '👑', 'Solo per me', 'Sposta nel livello Master: lo vedi solo tu'))
       + (!t.giocatore && pf ? (t.barra ? tile('barra', '🙈', 'Nascondi salute', 'I giocatori vedono la barra della salute di questo token') : tile('barra', '❤', 'Mostra salute', 'Per ora la barra della salute la vedi solo tu')) : '')
       + (!t.giocatore ? tile('ign', '❓', t.ignoto ? 'Sconosciuta: cosa svelare' : 'Rendi sconosciuta', 'I giocatori vedono «???» e solo quello che decidi di svelare') : '')
@@ -3289,6 +3294,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       T.tok.set(id, r2.data); disegnaToken(); chiudiPop();
     });
     pop.querySelector('[data-k=ign]')?.addEventListener('click', () => { chiudiPop(); dlgIgnoto(t); });
+    pop.querySelector('[data-k=inq]')?.addEventListener('click', () => { chiudiPop(); inquadra(t).catch(err => toast(err.message, 'err')); });
     pop.querySelector('[data-k=copia]').onclick = () => { chiudiPop(); copiaToken(t); };
     pop.querySelector('[data-k=nasc]').onclick = async () => { await salva({ nascosto: !t.nascosto }); if (!t.nascosto) manda('nascosto', { id }); };
     pop.querySelector('[data-k=meno]').onclick = () => salva({ misura: t.misura > 1 ? t.misura - 1 : 0.5 });
@@ -3423,11 +3429,12 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (isDM()) return menuToken(t.id, e, true);
       const cnow = condTok(t), giaIn = T.turno.find(x => x.token === t.id), imod = s ? modC(d.des) : 0, ft = haFoto(t), nasc = cnow.includes('Nascosto');
       const p = sub(`<div class="tv-pcond">${cnow.map(c => `<span class="tv-cc"><button type="button"${regolaDi(c)}>${COND_FX[c]?.[0] || ''} ${esc(c)}</button><button type="button" data-tc="${esc(c)}" title="Togli ${esc(c)}" aria-label="Togli ${esc(c)}">✕</button></span>`).join('')}<select data-k="tcond" aria-label="Aggiungi una condizione"><option value="">+ Condizione</option>${CONDIZIONI.filter(c => !cnow.includes(c)).map(c => `<option>${c}</option>`).join('')}</select></div>
-        <div class="gr">${ft ? '<button type="button" data-k="foto" title="Solo sul tuo schermo"><span>🖼</span>Foto</button>' : ''}<button type="button" data-k="nas"><span>${nasc ? '👁' : '🥷'}</span>${nasc ? 'Esci dal nascondiglio' : 'Nasconditi'}</button>${giaIn ? '' : `<button type="button" data-k="ini" title="Tira 1d20${imod ? ' ' + segno(imod) : ''} e entra nell'ordine del turno"><span>🎲</span>Iniziativa</button>`}</div>${giaIn ? `<div class="ini"><span>🎲 Iniziativa</span><b class="gia">${giaIn.valore}</b></div>` : ''}`);
+        <div class="gr">${ft ? '<button type="button" data-k="foto" title="Solo sul tuo schermo"><span>🖼</span>Foto</button>' : ''}${puoInquadrare(t) ? '<button type="button" data-k="inq" title="Scegli quale parte della foto si vede nel token"><span>✂</span>Inquadra la foto</button>' : ''}<button type="button" data-k="nas"><span>${nasc ? '👁' : '🥷'}</span>${nasc ? 'Esci dal nascondiglio' : 'Nasconditi'}</button>${giaIn ? '' : `<button type="button" data-k="ini" title="Tira 1d20${imod ? ' ' + segno(imod) : ''} e entra nell'ordine del turno"><span>🎲</span>Iniziativa</button>`}</div>${giaIn ? `<div class="ini"><span>🎲 Iniziativa</span><b class="gia">${giaIn.valore}</b></div>` : ''}`);
       const metti = async lista => { chiudiPop(); const s2 = t.giocatore ? schedaDi(t) : null; if (s2 && puoScrivere(s2)) { await cambiaCond(s2, null, lista); if (!condTok(T.tok.get(t.id)).includes(lista.at(-1) ?? '')) await condSuToken(t, lista); } else await condSuToken(t, lista); };
       p.querySelectorAll('[data-tc]').forEach(b => b.onclick = () => metti(cnow.filter(c => c !== b.dataset.tc)));
       const sc = p.querySelector('[data-k=tcond]'); sc.onchange = () => { if (sc.value) metti([...cnow, sc.value]); };
       p.querySelector('[data-k=foto]')?.addEventListener('click', () => { chiudiPop(); apriFoto(fotoDi(t)); });
+      p.querySelector('[data-k=inq]')?.addEventListener('click', () => { chiudiPop(); inquadra(t).catch(err => toast(err.message, 'err')); });
       p.querySelector('[data-k=nas]').onclick = () => { chiudiPop(); Promise.resolve(nasc ? mettiNascosto(t, false) : nascondersi(t)).catch(err => toast(err.message, 'err')); };
       p.querySelector('[data-k=ini]')?.addEventListener('click', () => { chiudiPop(); iniziativa(t, imod); });
     };
@@ -3493,6 +3500,68 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     o.onclick = chiudi; addEventListener('keydown', esc_); onCleanup(chiudi);
     // il ritratto a piena risoluzione, se la scheda è nel sito
     if (e?.portrait && !f.foto) dbGet('blobs', e.portrait.id).then(rec => { if (!rec?.blob || !o.isConnected) return; url = URL.createObjectURL(rec.blob); o.querySelector('img').src = url; }).catch(() => { });
+  }
+
+  /* ---------- inquadra la foto del token: si sceglie quale parte della foto mostrare nel cerchio ----------
+     il DM per qualunque token, il giocatore per il suo. Il ritaglio va su tutti i token di quel personaggio
+     e nella scheda del tavolo (dati.ritaglio), così anche i token nuovi partono già inquadrati */
+  const puoInquadrare = t => isDM() || (!!T.me?.giocatore && t.giocatore === T.me.giocatore);
+  async function inquadra(t) {
+    const f = fotoDi(t), e = f.scheda && S.ents?.get(f.scheda);
+    let src = f.foto || null, url = null;
+    if (!src && e?.portrait) { try { const rec = await dbGet('blobs', e.portrait.id); if (rec?.blob) src = url = URL.createObjectURL(rec.blob); } catch { } }
+    src = src || e?.portrait?.thumb || t.immagine || null;
+    const d = document.createElement('dialog'); d.className = 'dlg tv-inq';
+    d.innerHTML = `<form method="dialog"><h3>Inquadra la foto</h3><p class="hint">Trascina la foto e usa lo zoom (o due dita) finché nel cerchio c'è la parte giusta.</p>
+      <div class="vp"><img alt="" draggable="false"><i aria-hidden="true"></i><span class="vuoto">Nessuna foto: caricane una</span></div>
+      <label class="zm">🔍<input type="range" min="1" max="6" step="0.01" value="1" aria-label="Zoom"></label>
+      <div class="pie"><label class="btn sm">Un'altra foto…<input type="file" accept="image/*" hidden></label><span class="sp"></span><button type="button" class="btn" value="no">Annulla</button><button type="button" class="btn prim" data-k="ok">Usa questa</button></div></form>`;
+    document.body.append(d); d.showModal();
+    const chiudi = () => { d.close(); d.remove(); if (url) URL.revokeObjectURL(url); };
+    d.addEventListener('cancel', ev => { ev.preventDefault(); chiudi(); });
+    d.querySelector('[value=no]').onclick = chiudi;
+    const vp = d.querySelector('.vp'), im = d.querySelector('.vp img'), zm = d.querySelector('[type=range]');
+    let W = 0, H = 0, k0 = 1, k = 1, ox = 0, oy = 0;
+    const V = () => vp.clientWidth || 280;
+    const limita = () => { const v = V(); ox = clamp(ox, v - W * k, 0); oy = clamp(oy, v - H * k, 0); };
+    const disegna = () => { limita(); im.style.width = W * k + 'px'; im.style.height = H * k + 'px'; im.style.transform = `translate(${ox}px,${oy}px)`; zm.value = k / k0; };
+    const zoom = (nk, cx, cy) => { nk = clamp(nk, k0, k0 * 6); ox = cx - (cx - ox) * nk / k; oy = cy - (cy - oy) * nk / k; k = nk; disegna(); };
+    const carica = u => new Promise(res => { im.onload = () => { W = im.naturalWidth; H = im.naturalHeight; const v = V(); k = k0 = v / Math.min(W, H); ox = (v - W * k) / 2; oy = (v - H * k) / 2; vp.classList.add('ok'); disegna(); res(); }; im.onerror = () => { vp.classList.remove('ok'); res(); }; im.src = u; });
+    if (src) await carica(src);
+    zm.oninput = () => zoom(k0 * +zm.value, V() / 2, V() / 2);
+    vp.addEventListener('wheel', ev => { ev.preventDefault(); const r = vp.getBoundingClientRect(); zoom(k * Math.exp(-ev.deltaY / 400), ev.clientX - r.left, ev.clientY - r.top); }, { passive: false });
+    const P = new Map(); let ult = null;
+    vp.onpointerdown = ev => { vp.setPointerCapture(ev.pointerId); P.set(ev.pointerId, { x: ev.clientX, y: ev.clientY }); ult = null; };
+    vp.onpointermove = ev => {
+      if (!P.has(ev.pointerId)) return; const pr = P.get(ev.pointerId); P.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+      if (P.size === 1) { ox += ev.clientX - pr.x; oy += ev.clientY - pr.y; disegna(); return; }
+      const [a, b] = [...P.values()], dist = Math.hypot(a.x - b.x, a.y - b.y), r = vp.getBoundingClientRect();
+      if (ult) zoom(k * dist / ult, (a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top); ult = dist;
+    };
+    vp.onpointerup = vp.onpointercancel = ev => { P.delete(ev.pointerId); ult = null; };
+    d.querySelector('[type=file]').onchange = async ev => { const fl = ev.target.files[0]; if (!fl) return; try { if (url) URL.revokeObjectURL(url); url = URL.createObjectURL(fl); await carica(url); } catch (err) { toast(err.message, 'err'); } };
+    d.querySelector('[data-k=ok]').onclick = async () => {
+      if (!W) return toast('Prima carica una foto.', 'err');
+      const L = 200, c = document.createElement('canvas'); c.width = c.height = L;
+      c.getContext('2d').drawImage(im, -ox / k, -oy / k, V() / k, V() / k, 0, 0, L, L);
+      let img = c.toDataURL('image/webp', 0.85); if (!img.startsWith('data:image/webp')) img = c.toDataURL('image/jpeg', 0.85); c.width = c.height = 0;
+      try { await salvaInquadrata(t, img); chiudi(); toast('Foto del token aggiornata.'); } catch (err) { toast(err.message, 'err'); }
+    };
+  }
+  async function salvaInquadrata(t, img) {
+    const s = schedaDi(t);
+    // tutti i token dello stesso personaggio, in tutte le mappe
+    let q = SB.from('tavolo_token').update({ immagine: img });
+    q = t.giocatore && (!s || s.tipo === 'pg') ? q.eq('giocatore', t.giocatore) : t.scheda ? q.eq('scheda', t.scheda) : q.eq('id', t.id);
+    const r = await q.select('id'); if (r.error) throw new Error(r.error.message);
+    const ids = new Set((r.data || []).map(x => x.id)); ids.add(t.id);
+    for (const id of ids) { const x = T.tok.get(id); if (x) T.tok.set(id, { ...x, immagine: img }); }
+    // l'ordine del turno tiene una copia dell'immagine
+    const tu = T.turno.filter(x => ids.has(x.token));
+    if (tu.length) { const v = await SB.from('tavolo_turno').update({ immagine: img }).in('id', tu.map(x => x.id)); if (!v.error) tu.forEach(x => x.immagine = img); }
+    // la scheda del tavolo ricorda il ritaglio: i token nuovi di questo personaggio partono già inquadrati
+    if (s && puoScrivere(s)) { const v = await SB.from('tavolo_schede').update({ immagine: img }).eq('id', s.id); if (!v.error) { s.immagine = img; await salvaScheda(s.id, { ritaglio: true }, true); } }
+    disegnaToken(); if (typeof disegnaTurno === 'function') disegnaTurno();
   }
 
   /* ---------- bottino pronto: oggetti e dispense consegnati durante la partita (bottino.js, tavolo/tappa-20.sql) ---------- */
@@ -3670,6 +3739,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const row = { scena: sc.id, nome: gia ? `${o.nome} ${gia + 1}` : o.nome, immagine: o.img || null, colore: o.colore, misura: mis, giocatore: o.giocatore || null, scheda: o.scheda || null, nascosto: !!master,
       x: aggancia(clamp(cx, 0, sc.larghezza - lato), sc.griglia_x, mis), y: aggancia(clamp(cy, 0, sc.altezza - lato), sc.griglia_y, mis) };
     if (max != null && !row.giocatore) { row.pf = max; row.pf_max = max; }
+    { const sk = sch || schedaDi(row); if (sk?.dati?.ritaglio && sk.immagine) row.immagine = sk.immagine; }
     if (row.giocatore) { const l = postoLibero({ ...row, id: null }, row.x, row.y); if (l) { row.x = l.x; row.y = l.y; } }
     const r = await SB.from('tavolo_token').insert(row).select().single();
     if (r.error) { toast(r.error.message, 'err'); return null; }
@@ -3914,7 +3984,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       <div class="tv-dk"><div class="dd">${DADI.map(f => `<button type="button" data-df="${f}" title="Tira 1d${f}${f === 20 ? ' (con il vantaggio scelto sotto)' : ''}">${dado(f)}d${f}</button>`).join('')}</div>
       <div class="op"><span class="sg" title="Vale per il d20">${[['', 'Normale'], ['kh1', 'Vantaggio'], ['kl1', 'Svantaggio']].map(([v, l]) => `<button type="button" data-cadv="${v}" class="${(T.cadv || '') === v ? 'on' : ''}">${l}</button>`).join('')}</span><input class="md" type="number" data-k="cmod" placeholder="+0" aria-label="Modificatore" value="${esc(T.cmod || '')}"><button type="button" class="sgr ${T.tdpriv ? 'on' : ''}" data-k="cpriv">${T.tdpriv ? '🙈 Nascosto' : '👁 Tutti'}</button></div>
       <div class="in"><input type="text" id="tv-f" placeholder="Scrivi… (@nome per taggare)" autocomplete="off" aria-label="Scrivi un messaggio"><button type="button" data-act="tv-tira" title="Invia" aria-label="Invia">➤</button></div>
-      <label class="sus" title="Il messaggio lo leggete solo tu e chi tagghi con @"><input type="checkbox" id="tv-sus"><span>🤫 Sussurro</span><small id="tv-susa"></small></label></div>`;
+      <label class="sus" title="Il messaggio lo leggete solo tu e chi tagghi con @"><input type="checkbox" id="tv-sus"${T.sus ? ' checked' : ''}><span>🤫 Sussurro</span><small id="tv-susa"></small></label></div>`;
     tagChat($('#tv-f'));
     $('#tv-log').onclick = e => { const vb = e.target.closest('[data-voto]'); if (vb) { const [id, v] = vb.dataset.voto.split(':'); return vota(id, v); } const b = e.target.closest('[data-del]'); if (b) cancella(b.dataset.del).catch(err => toast(err.message, 'err')); };
     const dk = box.querySelector('.tv-dk'), cm = dk.querySelector('[data-k=cmod]');
@@ -4077,7 +4147,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       }
       if (e.key === 'Enter') { e.preventDefault(); scrivi(); }
     };
-    sus.onchange = () => { aggiorna(); if (sus.checked && !chiTag(f.value)) { f.focus(); if (!/@\S*$/.test(f.value)) { f.value = (f.value && !/\s$/.test(f.value) ? f.value + ' ' : f.value) + '@'; } mostra(); } };
+    sus.onchange = () => { T.sus = sus.checked; aggiorna(); if (sus.checked && !chiTag(f.value)) { f.focus(); if (!/@\S*$/.test(f.value)) { f.value = (f.value && !/\s$/.test(f.value) ? f.value + ' ' : f.value) + '@'; } mostra(); } };
     aggiorna();
   }
   // la riga in fondo alla chat: con la spunta «Sussurro» il messaggio va solo a chi è taggato con @ (o /w nome testo),
@@ -4086,9 +4156,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const f = $('#tv-f'), t = f.value.trim(); if (!t) return;
     if (/^\/(r|roll|gr|gmroll)\b/i.test(t)) { toast('I dadi si tirano dai pulsanti qui sopra o dal Tiradadi.', 'err'); return; }
     let testo = t, per = null;
-    const sus = $('#tv-sus');
+    const sus = $('#tv-sus'); let dest = null;
     if (sus?.checked) {
-      const d = chiTag(t); if (!d) { toast('Per sussurrare tagga chi deve leggerlo: @Sam, oppure @master per il DM.', 'err'); f.focus(); return; }
+      const d = dest = chiTag(t); if (!d) { toast('Per sussurrare tagga chi deve leggerlo: @Sam, oppure @master per il DM.', 'err'); f.focus(); return; }
       per = d.per;
     }
     const w = t.match(/^\/w\s+(\S+)\s+([\s\S]+)$/i);
@@ -4100,7 +4170,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     } else if (/^\//.test(t)) { toast('Per sussurrare: /w nome messaggio (oppure /w dm messaggio)', 'err'); return; }
     const r = await SB.rpc('tavolo_scrivi', { p_testo: testo, p_per: per });
     if (r.error) { toast(r.error.message, 'err'); return; }
-    f.value = ''; if (sus) { sus.checked = false; sus.dispatchEvent(new Event('change')); } const row = Array.isArray(r.data) ? r.data[0] : r.data;
+    // la spunta «Sussurro» resta accesa finché non la si toglie: il prossimo messaggio va di nuovo a chi era taggato
+    f.value = dest ? '@' + dest.tag + ' ' : ''; f.dispatchEvent(new Event('input')); const row = Array.isArray(r.data) ? r.data[0] : r.data;
     if (row && !T.chat.some(x => x.id === row.id)) { T.chat.push(row); nuovoMsg(row); }
   }
   async function tira(formula, extra, segreto, motivo) {
@@ -6016,7 +6087,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
   const competenteArma = (s, w) => { const c = competenzeArmi(s); return (w[3] === 'semplice' && c.semplici) || (w[3] === 'guerra' && c.guerra) || c.frasi.has(chiaveArma(w[0])); };
   const piccolo = s => { const R = REG(); return !!R && razzeScheda(R, s.dati).some(x => /piccol/i.test(x.taglia || '')); };
-  const carAtt = (s, a) => a.car === 'acc' ? migliore(s) : a.car && a.car !== 'man' ? a.car : (w => w ? carArma(s, w) : null)(armaAtt(s, a));
+  const carAtt = (s, a) => a.car === 'man' ? null : a.car === 'acc' ? migliore(s) : a.car ? a.car : (w => w ? carArma(s, w) : null)(armaAtt(s, a));
   const dadoAtt = a => String(a.dado || '').replace(/\s+/g, '') || (String(a.danni || '').replace(/\s+/g, '').match(/^\d*d\d+/i) || [''])[0];
   // danni bonus dell'attacco (arma infuocata, veleno…), tirati a parte con il loro tipo
   const TIPI_DANNO = [['acido', 'da acido'], ['contundenti', 'contundenti'], ['forza', 'da forza'], ['freddo', 'da freddo'], ['fulmine', 'da fulmine'], ['fuoco', 'da fuoco'], ['necrotici', 'necrotici'], ['perforanti', 'perforanti'], ['psichici', 'psichici'], ['radiosi', 'radiosi'], ['taglienti', 'taglienti'], ['tuono', 'da tuono'], ['veleno', 'da veleno']];
@@ -6156,7 +6227,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (!s) {
         const r = await SB.from('tavolo_schede').insert({ tipo: 'pg', nome: String(e?.name || g.name).slice(0, 80), giocatore: g.id, entita: g.pg || null, immagine: foto, nascosta: false, dati: { livello: 1, ...BASE } }).select().single();
         if (!r.error && !T.schede.has(r.data.id)) T.schede.set(r.data.id, r.data);
-      } else if (foto && s.immagine !== foto) { const r = await SB.from('tavolo_schede').update({ immagine: foto }).eq('id', s.id); if (!r.error) s.immagine = foto; }
+      } else if (foto && s.immagine !== foto && !s.dati?.ritaglio) { const r = await SB.from('tavolo_schede').update({ immagine: foto }).eq('id', s.id); if (!r.error) s.immagine = foto; }
     }
     disegnaSchede();
   }

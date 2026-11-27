@@ -296,7 +296,7 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
   /* ---------- dati ---------- */
   const SCUOLE = ['Abiurazione', 'Ammaliamento', 'Divinazione', 'Evocazione', 'Illusione', 'Invocazione', 'Necromanzia', 'Trasmutazione'];
   const CLASSI = { bardo: 'Bardo', chierico: 'Chierico', druido: 'Druido', mago: 'Mago', stregone: 'Stregone', warlock: 'Warlock', paladino: 'Paladino', ranger: 'Ranger', artefice: 'Artefice' };
-  const FONTI = { PHB: 'Manuale del Giocatore', XGE: 'Guida di Xanathar', TCE: 'Calderone di Tasha', SCAG: 'Guida della Costa della Spada', FTD: 'Tesoro dei Draghi di Fizban', EGW: 'Guida di Wildemount', DMG: 'Guida del DM' };
+  const FONTI = { PHB: 'Manuale del Giocatore', XGE: 'Guida di Xanathar', TCE: 'Calderone di Tasha', SCAG: 'Guida della Costa della Spada', FTD: 'Tesoro dei Draghi di Fizban', EGW: 'Guida di Wildemount', DMG: 'Guida del DM', SCC: 'Strixhaven', AI: 'Acquisitions Incorporated', GGR: 'Guida di Ravnica', IDRotF: 'Icewind Dale' };
   const LIV = l => l === 0 ? 'Trucchetti' : l + '° livello';
   const scI = s => Math.max(0, SCUOLE.indexOf(s));
   let D = null, P = null;
@@ -697,7 +697,7 @@ dialog.dlg.cp-sheet form{padding:18px 22px}
       setView(`${crumbs(['Razze e classi'])}<div class="pagehead"><h1>Razze e classi</h1></div><div class="orn"></div>
         <div class="rc-tabs"><a href="#/compendio/razze" class="${k === 'razze' ? 'on' : ''}">Razze · ${D.R.razze.length}</a><a href="#/compendio/classi" class="${k === 'classi' ? 'on' : ''}">Classi · ${Object.keys(D.R.classi).length}</a></div>
         <div class="rc"><aside class="card rc-det" id="rc-det">${dettRC(k, x[1], x[0])}</aside><div class="rc-grid">${L.map(([id, y]) => cartaRC(k, y, id)).join('')}</div></div>
-        <p class="cp-foot">Le immagini hanno una licenza libera e la fonte indicata sotto ciascuna. Quelle che mancano le sceglie il DM; finché non c'è, la carta usa la foto del personaggio del party o un simbolo.</p>`, 'rc-p');
+        <p class="cp-foot">Le immagini hanno una licenza libera e la fonte indicata sotto ciascuna. Quelle che mancano le sceglie il DM; finché non c'è, la carta mostra un simbolo.</p>`, 'rc-p');
       $$('[data-rc]').forEach(b => b.onclick = () => {
         ST_RC.sel[k] = b.dataset.rc; draw();
         if (matchMedia('(max-width:900px)').matches) $('#rc-det')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
