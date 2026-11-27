@@ -1000,6 +1000,17 @@ html body .hm-c .pgs a img{border-radius:10px!important;box-shadow:0 0 0 2px #c9
   .sc-wrap{grid-template-columns:14.5rem minmax(0,1fr)!important}
   header.top .brand::before{width:4.2rem;height:4.2rem}
 }
+
+/* Barra laterale: le finestre «Giocatori sul sito» e «Strumenti» escono a destra della barra, intere, sopra il Tavolo */
+@media (min-width:900px){
+  header.top{z-index:40!important}
+  header.top #online{position:static!important}
+  header.top #online .olist{position:fixed!important;left:calc(var(--sbw,236px) + 14px)!important;right:auto!important;top:auto!important;bottom:16px!important;width:19rem;max-width:calc(100vw - var(--sbw,236px) - 28px);max-height:calc(100vh - 32px);overflow:auto;padding:14px 10px 10px;border-radius:14px;background:linear-gradient(180deg,#3a161b,#24090d)!important;border:1px solid #c9a24b!important;box-shadow:inset 0 0 0 4px #24090d,inset 0 0 0 5px #c9a24b55,0 18px 50px #000b!important;animation:tlIn .16s ease-out}
+  header.top #online .ohd{font:600 1.15rem/1.2 var(--title);letter-spacing:.02em;text-transform:none;color:#e0b75c;padding:2px 8px 10px;margin:0 0 6px;border-bottom:1px solid #c9a24b44}
+  /* Tavolo: freccia ben visibile sul bordo per stringere o chiudere il menu del sito */
+  html.in-tavolo .tv .tv-mtab{top:50%!important;bottom:auto!important;transform:translateY(-50%);width:24px!important;height:64px!important;opacity:1!important;font:700 1.5rem/1 var(--body)!important;color:#f3d58c!important;background:linear-gradient(90deg,#3a161b,#24090d)!important;border:1px solid #c9a24b!important;border-left:0!important;border-radius:0 12px 12px 0!important;box-shadow:4px 0 14px #0008!important;cursor:pointer}
+  html.in-tavolo .tv .tv-mtab:hover,html.in-tavolo .tv .tv-mtab:focus-visible{width:30px!important;background:#561820!important;color:#fff!important}
+}
 </style>
 </head><body>
 <header class="top">
