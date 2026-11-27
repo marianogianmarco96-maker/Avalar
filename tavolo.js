@@ -8114,7 +8114,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (di.seg) h += `<div class="gsez"><h5>Segreti magici: da qualsiasi lista ${cnt(G.inc.seg.length, di.seg)}</h5>${righeInc(G, di, 'seg', () => true, I)}</div>`;
     if (di.arc) h += `<div class="gsez"><h5>Arcanum mistico (${di.arcLiv}° livello, una volta per riposo lungo) ${cnt(G.inc.arc.length, 1)}</h5>${righeInc(G, di, 'arc', () => true, I)}</div>`;
     if (di.swap) {
-      const mie = I.filter(x => num(x.livello) > 0 && di.lista.some(y => chiaveInc(y.nome) === chiaveInc(x.nome)));
+      // anche quelli scritti col nome inglese o con note dopo il nome (Eldritch Blast, «Charme su persone, rituale»)
+      const inL = x => [x.nome, x.alt].some(n => { const k = chiaveInc(String(n || '').split(/[,(]/)[0]), m = k && T.srd?.per.get(k); return k && di.lista.some(y => chiaveInc(y.nome) === k || (m && y.nome === m.nome)); });
+      const mie = I.filter(x => num(x.livello) > 0 && inL(x));
       h += `<div class="gsez"><h5>Vuoi sostituirne uno? <small>· facoltativo</small></h5><div class="chips">${mie.map(x => `<button type="button" class="chip${G.inc.via === x.nome ? ' on' : ''}" data-g="via" data-v="${esc(x.nome)}">${esc(x.nome)}</button>`).join('') || '<span class="hint">Nessuno.</span>'}</div>
         ${G.inc.via ? `<p class="hint">Al posto di ${esc(G.inc.via)}:</p>${righeInc(G, di, 'sw', x => x.livello > 0, I)}` : ''}</div>`;
     }
