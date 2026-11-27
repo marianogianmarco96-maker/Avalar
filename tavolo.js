@@ -7530,7 +7530,23 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const x = R.razze.find(r => r.id === rid) || R.razze.flatMap(r => r.sotto || []).find(s => s.id === rid), t = norm(d.razza);
     return !!x && !!t && (t.includes(norm(x.nome)) || norm(x.nome).includes(t));
   };
-  const posseduto = (d, nome) => (d.privilegi || []).some(p => norm(p.nome) === norm(nome));
+  /* cosa c'è già nella scheda, anche scritto a mano: «Talento: Allerta», «Sentinella (talento)», righe dei tratti,
+     incantesimi col nome inglese o nei vecchi riquadri di testo («Marchio del cacciatore, azione bonus (giuramento)») */
+  const nomeBase = n => norm(String(n || '').replace(/^\s*[-•*]?\s*(?:talento|talenti|incantesimo)\s*[:\-–]\s*/i, '').split(/[,(:]/)[0].replace(/\.\s.*$/, '').replace(/\.$/, '')).trim();
+  const nomiPriv = d => {
+    const s = new Set((d.privilegi || []).map(p => nomeBase(p.nome)));
+    for (const t of [d.tratti, d.azioni, d.talenti]) for (const r of String(t || '').split(/\n/)) { const m = r.match(/^\s*[-•*]?\s*([^.:]{2,60}?)\s*[.:](?:\s|$)/); if (m) s.add(nomeBase(m[1])); }
+    s.delete(''); return s;
+  };
+  const posseduto = (d, nome) => { const k = nomeBase(nome); return !!k && nomiPriv(d).has(k); };
+  const chiaviIncDi = d => {
+    const s = new Set(), add = n => { const k = chiaveInc(String(n || '').replace(/^\s*[-•*]\s*/, '').split(/[,(]/)[0]); if (!k) return; s.add(k); const x = T.srd?.per.get(k); if (x) s.add(chiaveInc(x.nome)); };
+    (d.incantesimi || []).forEach(x => { add(x.nome); add(x.alt); });
+    for (let i = 0; i <= 9; i++) String(d['inc_' + i] || '').split(/\n|;/).forEach(add);
+    return s;
+  };
+  // x: un incantesimo del manuale (o il suo nome)
+  const haInc = (d, x) => { const s = chiaviIncDi(d), o = typeof x === 'string' ? { nome: x, ...(T.srd?.per.get(chiaveInc(x)) || {}) } : x; return [o.nome, typeof x === 'string' ? x : '', ...nomiEn(o)].some(n => n && s.has(chiaveInc(n))); };
 
   /* incantesimi: come li lancia una classe, quanti slot, quali si possono scegliere */
   const incDi = (R, c) => { const k = R.classi[c.id]; if (k.inc) return k.inc; const sb = sottoDi(R, c); return sb?.inc3 ? { ...sb.inc3, tipo: 'conosciuti', slot: 'terzo' } : null; };
@@ -7838,7 +7854,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       const r = G.tipo === 'crea' ? G.R.razze.find(x => x.id === G.cr.razza) : null, gia = [d.lingue, r?.lingue].filter(Boolean).join('\n');
       return LINGUE.map(l => ({ nome: l, no: linguaIn(gia, l) ? 'La conosci già' : abil.has(l) ? 'Già scelta' : '' }));
     }
-    if (sc.tipo === 'inc') return (G.R.liste[sc.lista]?.[sc.liv] || []).map(n => ({ nome: n, no: (d.incantesimi || []).some(x => chiaveInc(x.nome) === chiaveInc(n)) ? 'Ce l\'hai già' : '' }));
+    if (sc.tipo === 'inc') return (G.R.liste[sc.lista]?.[sc.liv] || []).map(n => ({ nome: n, no: haInc({ ...G.d0, ...d }, n) ? 'Ce l\'hai già' : '' }));
     return opzioniDi(G, sc, ctx);
   }
   function mancaScelte(G, L, ctx) {
@@ -7846,7 +7862,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     return '';
   }
   function mancaInc(G, ctx) {
-    const di = datiInc(G, ctx), I = ctx.d.incantesimi || [], no = x => I.some(y => chiaveInc(y.nome) === chiaveInc(x.nome));
+    const di = datiInc(G, ctx), I = ctx.d.incantesimi || [], gi = chiaviIncDi({ ...G.d0, incantesimi: I }), no = x => [x.nome, ...nomiEn(x)].some(n => gi.has(chiaveInc(n)));
     const disp = (q, f) => di.lista.filter(f).filter(x => !no(x)).length;
     const need = [['t', Math.min(di.t, disp('t', x => !x.livello)), 'trucchetti'], ['n', Math.min(di.n, disp('n', x => x.livello > 0)), 'incantesimi'], ['seg', di.seg, 'segreti magici'], ['arc', di.arc, 'arcanum mistico'], ['sw', G.inc.via ? 1 : 0, 'incantesimo al posto di quello dimenticato']];
     for (const [q, n, l] of need) if (G.inc[q].length < n) return `Scegli ancora ${n - G.inc[q].length} ${l}`;
@@ -8080,7 +8096,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   const corto2 = x => corto(x.testo, 110);
   function righeInc(G, di, q, filtro, I) {
     const sel = q === 'prep' ? G.inc.prepS || [] : G.inc[q], fl = G.inc.f[q], L = (q === 'seg' ? tuttiInc(G.R, di.max) : q === 'arc' ? (G.R.liste.warlock[di.arcLiv] || []).map(n => incNome(G.R, n)).filter(Boolean) : di.lista).filter(filtro);
-    const livs = [...new Set(L.map(x => x.livello))].sort((a, b) => a - b), ce = x => I.some(y => chiaveInc(y.nome) === chiaveInc(x.nome));
+    const livs = [...new Set(L.map(x => x.livello))].sort((a, b) => a - b), gi = chiaviIncDi({ ...G.d0, incantesimi: I }), ce = x => [x.nome, ...nomiEn(x)].some(n => gi.has(chiaveInc(n)));
     const vis = L.filter(x => fl == null || x.livello === fl);
     return `${livs.length > 1 ? `<div class="lvl"><button type="button" data-g="incf" data-q="${q}" data-v="" class="${fl == null ? 'on' : ''}">Tutti</button>${livs.map(l => `<button type="button" data-g="incf" data-q="${q}" data-v="${l}" class="${fl === l ? 'on' : ''}">${l ? l + '°' : 'Trucchetti'}</button>`).join('')}</div>` : ''}
       ${L.length > 10 ? cercaBox(q, 'Cerca un incantesimo…') : ''}<div class="spls">${vis.map(x => {
