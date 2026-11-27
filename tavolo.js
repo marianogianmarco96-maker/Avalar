@@ -7257,6 +7257,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (f.startsWith('att.')) {
       const [, i, k] = f.split('.'), a = (s.dati.attacchi || []).map(x => ({ ...x })); if (!a[i]) return; a[i][k] = v;
       if (k === 'comp_att') delete a[i].nocomp;
+      // bonus o danni scritti a mano nella riga: l'attacco passa a «Manuale» e il sito non li ricalcola più (⚙ per tornare al calcolo)
+      if ((k === 'colpire' || k === 'danni') && a[i].car !== 'man' && calcAtt(s, s.dati.attacchi[i])) { a[i].car = 'man'; toast('Valori scritti a mano: il sito non li ricalcola più. Con ⚙ puoi tornare al calcolo automatico.'); }
       if (k === 'arma' && v && (!String(a[i].nome || '').trim() || armaAtt(s, { ...a[i], arma: '' }))) a[i].nome = v;
       salvaScheda(s.id, { attacchi: a });
       // le scelte dell'ingranaggio cambiano anche la riga dell'attacco (danni bonus)
