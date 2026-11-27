@@ -3984,7 +3984,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       <div class="tv-dk"><div class="dd">${DADI.map(f => `<button type="button" data-df="${f}" title="Tira 1d${f}${f === 20 ? ' (con il vantaggio scelto sotto)' : ''}">${dado(f)}d${f}</button>`).join('')}</div>
       <div class="op"><span class="sg" title="Vale per il d20">${[['', 'Normale'], ['kh1', 'Vantaggio'], ['kl1', 'Svantaggio']].map(([v, l]) => `<button type="button" data-cadv="${v}" class="${(T.cadv || '') === v ? 'on' : ''}">${l}</button>`).join('')}</span><input class="md" type="number" data-k="cmod" placeholder="+0" aria-label="Modificatore" value="${esc(T.cmod || '')}"><button type="button" class="sgr ${T.tdpriv ? 'on' : ''}" data-k="cpriv">${T.tdpriv ? '🙈 Nascosto' : '👁 Tutti'}</button></div>
       <div class="in"><input type="text" id="tv-f" placeholder="Scrivi… (@nome per taggare)" autocomplete="off" aria-label="Scrivi un messaggio"><button type="button" data-act="tv-tira" title="Invia" aria-label="Invia">➤</button></div>
-      <label class="sus" title="Il messaggio lo leggete solo tu e chi tagghi con @"><input type="checkbox" id="tv-sus"><span>🤫 Sussurro</span><small id="tv-susa"></small></label></div>`;
+      <label class="sus" title="Il messaggio lo leggete solo tu e chi tagghi con @"><input type="checkbox" id="tv-sus"${T.sus ? ' checked' : ''}><span>🤫 Sussurro</span><small id="tv-susa"></small></label></div>`;
     tagChat($('#tv-f'));
     $('#tv-log').onclick = e => { const vb = e.target.closest('[data-voto]'); if (vb) { const [id, v] = vb.dataset.voto.split(':'); return vota(id, v); } const b = e.target.closest('[data-del]'); if (b) cancella(b.dataset.del).catch(err => toast(err.message, 'err')); };
     const dk = box.querySelector('.tv-dk'), cm = dk.querySelector('[data-k=cmod]');
@@ -4147,7 +4147,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       }
       if (e.key === 'Enter') { e.preventDefault(); scrivi(); }
     };
-    sus.onchange = () => { aggiorna(); if (sus.checked && !chiTag(f.value)) { f.focus(); if (!/@\S*$/.test(f.value)) { f.value = (f.value && !/\s$/.test(f.value) ? f.value + ' ' : f.value) + '@'; } mostra(); } };
+    sus.onchange = () => { T.sus = sus.checked; aggiorna(); if (sus.checked && !chiTag(f.value)) { f.focus(); if (!/@\S*$/.test(f.value)) { f.value = (f.value && !/\s$/.test(f.value) ? f.value + ' ' : f.value) + '@'; } mostra(); } };
     aggiorna();
   }
   // la riga in fondo alla chat: con la spunta «Sussurro» il messaggio va solo a chi è taggato con @ (o /w nome testo),
@@ -4156,9 +4156,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const f = $('#tv-f'), t = f.value.trim(); if (!t) return;
     if (/^\/(r|roll|gr|gmroll)\b/i.test(t)) { toast('I dadi si tirano dai pulsanti qui sopra o dal Tiradadi.', 'err'); return; }
     let testo = t, per = null;
-    const sus = $('#tv-sus');
+    const sus = $('#tv-sus'); let dest = null;
     if (sus?.checked) {
-      const d = chiTag(t); if (!d) { toast('Per sussurrare tagga chi deve leggerlo: @Sam, oppure @master per il DM.', 'err'); f.focus(); return; }
+      const d = dest = chiTag(t); if (!d) { toast('Per sussurrare tagga chi deve leggerlo: @Sam, oppure @master per il DM.', 'err'); f.focus(); return; }
       per = d.per;
     }
     const w = t.match(/^\/w\s+(\S+)\s+([\s\S]+)$/i);
@@ -4170,7 +4170,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     } else if (/^\//.test(t)) { toast('Per sussurrare: /w nome messaggio (oppure /w dm messaggio)', 'err'); return; }
     const r = await SB.rpc('tavolo_scrivi', { p_testo: testo, p_per: per });
     if (r.error) { toast(r.error.message, 'err'); return; }
-    f.value = ''; if (sus) { sus.checked = false; sus.dispatchEvent(new Event('change')); } const row = Array.isArray(r.data) ? r.data[0] : r.data;
+    // la spunta «Sussurro» resta accesa finché non la si toglie: il prossimo messaggio va di nuovo a chi era taggato
+    f.value = dest ? '@' + dest.tag + ' ' : ''; f.dispatchEvent(new Event('input')); const row = Array.isArray(r.data) ? r.data[0] : r.data;
     if (row && !T.chat.some(x => x.id === row.id)) { T.chat.push(row); nuovoMsg(row); }
   }
   async function tira(formula, extra, segreto, motivo) {
