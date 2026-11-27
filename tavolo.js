@@ -3478,10 +3478,11 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   /* ---------- foto del token a schermo intero ---------- */
   const ritratto = t => { if (ignotoNasc(t) && !isDM()) return null; const e = t.scheda && S.ents?.get(t.scheda); return e?.portrait || null; };
   const haFoto = t => !!(t.immagine || ritratto(t));
-  const fotoDi = t => ({ nome: t.nome || '', scheda: t.scheda || null, immagine: t.immagine || null });
+  // la foto intera, non il ritaglio quadrato del token: quella caricata nella scheda (dati.foto) o il ritratto della scheda del sito
+  const fotoDi = t => { const s = schedaDi(t), ent = String(t.scheda || '').startsWith('tv:') ? s?.entita : t.scheda; return { nome: t.nome || '', scheda: ent || null, immagine: t.immagine || null, foto: s?.dati?.foto || null }; };
   function apriFoto(f, dalDM) {
     document.querySelectorAll('.tv-foto').forEach(x => x.remove());
-    const e = f.scheda && S.ents?.get(f.scheda), prima = f.immagine || e?.portrait?.thumb;
+    const e = f.scheda && S.ents?.get(f.scheda), prima = f.foto || e?.portrait?.thumb || f.immagine;
     if (!prima && !e?.portrait) return;
     const o = document.createElement('div'); o.className = 'tv-foto'; o.setAttribute('role', 'dialog'); o.setAttribute('aria-label', 'Foto di ' + (f.nome || 'token'));
     o.innerHTML = `<button type="button" aria-label="Chiudi">✕</button><img alt="${esc(f.nome)}" ${prima ? `src="${esc(prima)}"` : ''}><p>${esc(f.nome)}${dalDM ? '<small>Ve la mostra il DM · tocca per chiudere</small>' : ''}</p>`;
@@ -3491,7 +3492,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const esc_ = ev => { if (ev.key === 'Escape') chiudi(); };
     o.onclick = chiudi; addEventListener('keydown', esc_); onCleanup(chiudi);
     // il ritratto a piena risoluzione, se la scheda è nel sito
-    if (e?.portrait) dbGet('blobs', e.portrait.id).then(rec => { if (!rec?.blob || !o.isConnected) return; url = URL.createObjectURL(rec.blob); o.querySelector('img').src = url; }).catch(() => { });
+    if (e?.portrait && !f.foto) dbGet('blobs', e.portrait.id).then(rec => { if (!rec?.blob || !o.isConnected) return; url = URL.createObjectURL(rec.blob); o.querySelector('img').src = url; }).catch(() => { });
   }
 
   /* ---------- bottino pronto: oggetti e dispense consegnati durante la partita (bottino.js, tavolo/tappa-20.sql) ---------- */
@@ -3605,6 +3606,12 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
 
   /* ---------- aggiungi token (DM) ---------- */
+  // la foto senza ritagli, abbastanza piccola da passare ai giocatori con «Mostra a tutti»
+  async function fotoIntera(file) {
+    const bmp = await loadBitmap(file), M = 800, s = Math.min(1, M / Math.max(bmp.width, bmp.height)), c = document.createElement('canvas');
+    c.width = Math.round(bmp.width * s); c.height = Math.round(bmp.height * s); c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height); if (bmp.close) bmp.close();
+    let u = c.toDataURL('image/webp', 0.78); if (!u.startsWith('data:image/webp')) u = c.toDataURL('image/jpeg', 0.78); c.width = c.height = 0; return u;
+  }
   async function immagineToken(file) {
     const bmp = await loadBitmap(file), L = 200, c = document.createElement('canvas'); c.width = c.height = L;
     const w = bmp.width, h = bmp.height, s = Math.max(L / w, L / h);
@@ -7473,6 +7480,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       const f = b.files?.[0]; if (!f) return;
       try {
         const img = await immagineToken(f), prima = s.immagine, r = await SB.from('tavolo_schede').update({ immagine: img }).eq('id', s.id).select().single(); if (r.error) throw new Error(r.error.message); arrivaScheda(r.data);
+        await salvaScheda(s.id, { foto: await fotoIntera(f) }, true);
         // anche i token di questa scheda che non hanno una foto loro prendono la nuova
         for (const t of T.tok.values()) if (schedaDi(t)?.id === s.id && !t.giocatore && (!t.immagine || t.immagine === prima)) {
           const u = await SB.from('tavolo_token').update({ immagine: img }).eq('id', t.id).select().single(); if (!u.error) T.tok.set(t.id, completa(t, u.data));
