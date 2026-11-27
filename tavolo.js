@@ -1014,6 +1014,9 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
 .tv-isp small{display:block;font:600 .78rem/1 var(--display,serif);letter-spacing:.14em;color:#e0b75c;text-transform:uppercase;margin-bottom:6px}
 .tv-isp b{display:block;font:700 1.7rem/1.1 var(--title,serif);color:#fff2cf}
 .tv-isp i{display:block;font-size:.95rem;color:#e9d7b0;margin-top:4px}
+.tv-isp.merda{background:linear-gradient(180deg,#3b2c1cf2,#1e150cf2);border-color:#a8854a;box-shadow:inset 0 0 0 4px #1e150c,inset 0 0 0 5px #a8854a55,0 0 40px #6b4a2266,0 18px 50px #000c}
+.tv-isp.merda .st{background:radial-gradient(circle at 50% 40%,#d8b88a,#8a6a3a 55%,#4a3018);box-shadow:0 0 24px #8a6a3a99}
+.tv-isp.merda small{color:#c9a46a}.tv-isp.merda b{color:#f1e1c4}
 @media (max-width:620px){.tv-isp{top:10%;gap:10px;padding:10px 16px 10px 10px}.tv-isp .st{width:46px;height:46px;font-size:1.4rem}.tv-isp b{font-size:1.25rem}.tv-isp i{font-size:.82rem}}
 @keyframes tvIsp{0%{opacity:0;transform:translate(-50%,-14px) scale(.9)}8%{opacity:1;transform:translate(-50%,0) scale(1.03)}14%{transform:translate(-50%,0) scale(1)}85%{opacity:1}100%{opacity:0;transform:translate(-50%,-8px)}}
 @media (prefers-reduced-motion:reduce){.tv-isp{animation:none}}
@@ -6227,9 +6230,12 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const tv = $('.tv'); if (!tv) return;
     tv.querySelector('.tv-isp')?.remove();
     const b = document.createElement('div'); b.className = 'tv-isp'; b.setAttribute('role', 'status');
-    b.innerHTML = `<div class="st" aria-hidden="true">✦</div><div><small>Il DM concede</small><b>${esc(m.nome)} riceve un punto ispirazione</b><i>Vantaggio a un tiro, quando vuole.</i></div>`;
+    const merda = m.tipo === 'merda'; if (merda) b.classList.add('merda');
+    b.innerHTML = merda
+      ? `<div class="st" aria-hidden="true">💩</div><div><small>Il DM usa un punto merda</small><b>${esc(m.nome)} ha svantaggio</b><i>Al prossimo tiro con il d20: prova, tiro salvezza o attacco.</i></div>`
+      : `<div class="st" aria-hidden="true">✦</div><div><small>Il DM concede</small><b>${esc(m.nome)} riceve un punto ispirazione</b><i>Vantaggio a un tiro, quando vuole.</i></div>`;
     tv.append(b); setTimeout(() => b.remove(), 4800);
-    if (m.tok) mostraLampo({ id: m.tok, col: '#f3d58c', txt: '✦ Ispirazione' });
+    if (m.tok) mostraLampo(merda ? { id: m.tok, col: '#8a6a3a', txt: '💩 Svantaggio' } : { id: m.tok, col: '#f3d58c', txt: '✦ Ispirazione' });
   }
   /* il DM concede un livello: al giocatore appare la «colonna di luce» con il nuovo livello.
      Una volta per livello concesso: se non era connesso la vede appena entra nel Tavolo. */
@@ -7574,6 +7580,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (k === 'merda-usa') {
       if (!num(d.merda)) return;
       await salvaScheda(s.id, { merda: num(d.merda) - 1, merda_attiva: true }, true); disegnaScheda();
+      { const t = [...T.tok.values()].find(x => schedaDi(x)?.id === s.id && x.scena === scena()?.id), m = { tipo: 'merda', nome: s.nome || 'Qualcuno', tok: t?.id || null }; manda('ispira', m); mostraIspira(m); }
       return annuncia(`💩 Il DM usa un punto merda su ${s.nome || 'un personaggio'}: svantaggio al prossimo tiro con il d20.`).catch(() => { });
     }
     if (k === 'tirapf') {
