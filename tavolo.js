@@ -1965,7 +1965,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const pg = (table, f, event = '*') => ch.on('postgres_changes', { event, schema: 'public', table }, f);
     pg('tavolo_token', p => {
       if (p.eventType === 'DELETE') { T.tok.delete(p.old.id); disegnaToken(); return; }
-      const t = completa(T.tok.get(p.new.id), p.new); if (T.drag?.id === t.id) return; T.tok.set(t.id, t); disegnaToken(); togliMorti();
+      const prima = T.tok.get(p.new.id), t = completa(prima, p.new); if (T.drag?.id === t.id) return; T.tok.set(t.id, t); disegnaToken(); togliMorti(); seMuore(prima, t);
       if (T.sv?.tok === t.id) aggiornaFinestra();
     });
     pg('tavolo_pf_gruppo', p => { if (p.eventType === 'DELETE') T.pfg.delete(p.old.giocatore); else T.pfg.set(p.new.giocatore, p.new); disegnaToken(); });
@@ -1992,7 +1992,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     });
     pg('tavolo_stato', async p => {
       const prima = T.stato.scena, primoTurno = T.stato.turno; T.stato = p.new;
-      if (primoTurno !== T.stato.turno || p.old?.round !== p.new.round) { disegnaTurno(); disegnaToken(); disegnaEffetti(); scadenzeEffetti(); if (primoTurno !== T.stato.turno) legInizioTurno(); }
+      if (primoTurno !== T.stato.turno || p.old?.round !== p.new.round) { disegnaTurno(); disegnaToken(); disegnaEffetti(); scadenzeEffetti(); if (primoTurno !== T.stato.turno) { legInizioTurno(); if (T.mira && !T.mira.opp) { fineMira(); toast('Il turno è passato: l\'attacco che stavi mirando è annullato.'); } } }
       if (prima === T.stato.scena) return;
       if (isDM()) { disegnaBarra(); return; }
       // i giocatori seguono il DM nella nuova scena: scena e token arrivano solo ora che è attiva
@@ -2576,6 +2576,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       }
       if (punti.size > 2) return;
       const p = mondo(st, e), el = e.target.closest('.tv-tok'), t = el && T.tok.get(el.dataset.id);
+      // i bollini delle azioni sotto il token di un altro: non scelgono niente e non lo prendono di mira (un attacco in sospeso finiva su di lui)
+      if (t && e.target.closest('.az') && !puoMuovere(t)) { punti.delete(e.pointerId); toast(`Le azioni di ${t.nome || 'questo token'} le sceglie chi lo gioca.`); return; }
       if (T.mira?.area) { T.mira.p = p; disegnaArea(); return; }
       if (T.mira && t) { if (t.id !== T.mira.tok || suSe(T.mira)) scegliBersaglio(t); return; }
       if (T.tool === 'maschera' && isDM()) { mas = inizioMaschera(p); return; }
@@ -5128,7 +5130,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   // Tattica del branco (banditi, lupi, coboldi…): vantaggio se un alleato non incapacitato è entro 1,5 m dal bersaglio
   // effetti in combattimento dei tratti: si scelgono nella ⚙ del tratto (alcuni si riconoscono dal nome)
   const EFFETTI_TR = [['', 'Nessuno: solo testo'], ['branco', 'Vantaggio se un alleato è accanto al bersaglio (Tattica del branco)'], ['vant_att', 'Vantaggio ai suoi tiri per colpire'], ['svant_att', 'Svantaggio ai suoi tiri per colpire'],
-    ['svant_contro', 'Chi lo attacca ha svantaggio'], ['vant_contro', 'Chi lo attacca ha vantaggio'], ['ts_colpo', 'Quando colpisce, il bersaglio fa un tiro salvezza'], ['vant_ts', 'Vantaggio ai suoi tiri salvezza']];
+    ['svant_contro', 'Chi lo attacca ha svantaggio'], ['vant_contro', 'Chi lo attacca ha vantaggio'], ['ts_colpo', 'Quando colpisce, il bersaglio fa un tiro salvezza'], ['vant_ts', 'Vantaggio ai suoi tiri salvezza'],
+    ['pft_morte', 'PF temporanei quando una creatura muore vicino a lui']];
   const effettoDi = p => p.eff !== undefined ? p.eff : /tattic\w* (?:del|di) branco/.test(norm(p.nome)) ? 'branco' : /resistenza alla magia/.test(norm(p.nome)) ? 'vant_ts' : '';
   const effetti = (s, e) => s ? (s.dati.privilegi || []).filter(p => !p.off && effettoDi(p) === e) : [];
   /* punti merda (regola della casa): il contrario dell'ispirazione. Li dà il DM e decide lui quando usarli:
@@ -6036,10 +6039,35 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (!t.giocatore && 'condizioni' in t) { if (!pf && !cc.includes('Morto') && !cc.includes('Svenuto')) ch.condizioni = [...cc, 'Morto']; else if (pf && cc.includes('Morto')) ch.condizioni = cc.filter(c => c !== 'Morto'); }
       const r = await SB.from('tavolo_token').update(ch).eq('id', t.id).select().single();
       if (r.error) return toast(r.error.message, 'err');
-      T.tok.set(t.id, completa(T.tok.get(t.id), r.data)); disegnaToken(); aggiornaFinestra(); effettoPF(t, pf - p.pf); return;
+      const prima = T.tok.get(t.id); T.tok.set(t.id, completa(prima, r.data)); disegnaToken(); aggiornaFinestra(); effettoPF(t, pf - p.pf); seMuore(prima, T.tok.get(t.id)); return;
     }
     await pfScheda(p.s, delta);
   }
+  /* ---------- PF temporanei quando una creatura muore vicino (es. l'anello di Sam) ----------
+     un privilegio con l'effetto «pft_morte»: quando un nemico muore entro la distanza scelta, il personaggio prende
+     quei PF temporanei (non si sommano: resta il valore più alto). Lo fa il DM, una volta sola per morte */
+  const sconfitto = y => { if (!y || y.giocatore) return false; const c = condTok(y), pf = pfDi(y); return c.includes('Morto') || (pf?.max > 0 && pf.pf === 0 && !c.includes('Svenuto')); };
+  async function seMuore(prima, t) {
+    if (!isDM() || !prima || !t || sconfitto(prima) || !sconfitto(t)) return;
+    T.mortiVisti = T.mortiVisti || new Set(); if (T.mortiVisti.has(t.id)) return; T.mortiVisti.add(t.id); setTimeout(() => T.mortiVisti.delete(t.id), 4000);
+    const sc = T.scene?.get(t.scena) || scena(); if (!sc) return;
+    for (const o of T.tok.values()) {
+      if (o.scena !== t.scena || o.id === t.id || !o.giocatore || condTok(o).includes('Morto')) continue;
+      const s = schedaDi(o); if (!s) continue;
+      for (const pv of s.dati.privilegi || []) {
+        if (effettoDi(pv) !== 'pft_morte' || pv.off || !String(pv.pft || '').trim()) continue;
+        if (distanza(o, t, sc) > (num(pv.dist) || 3) + 0.01) continue;
+        const f = String(pv.pft).trim(), n = /d/i.test(f) ? num((await tira(f, null, false, `${pv.nome || 'PF temporanei'} (${o.nome || s.nome})`))?.totale) : num(f);
+        if (!n) continue;
+        const ora = num(s.dati.pf_temp) || 0, nuovi = Math.max(ora, n);
+        if (nuovi > ora) salvaScheda(s.id, { pf_temp: nuovi }, true);
+        const testo = nuovi > ora ? `🛡 ${pv.nome || 'Privilegio'}: ${t.nome || 'una creatura'} è morto entro ${num(pv.dist) || 3} m da ${o.nome || s.nome}, che prende ${n} PF temporanei.`
+          : `🛡 ${pv.nome || 'Privilegio'}: ${o.nome || s.nome} ha già ${ora} PF temporanei, più dei ${n} che darebbe: non si sommano.`;
+        toast(testo); annuncia(testo);
+      }
+    }
+  }
+
   // i danni tolgono prima i PF temporanei
   function pfScheda(s, delta) {
     const d = s.dati, max = num(d.pf_max); let temp = num(d.pf_temp) || 0, pf = num(d.pf) ?? max ?? 0;
@@ -6701,10 +6729,10 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       ${w ? `<div class="rb2"><button type="button" class="mini" data-k="ris-add">+ Risorsa</button><button type="button" class="mini" data-k="riposo-breve" title="Recupera le risorse che tornano col riposo breve">☕ Riposo breve</button><button type="button" class="mini" data-k="riposo-lungo" title="PF al massimo, slot e risorse recuperati">🌙 Riposo lungo</button></div>` : ''}<h6>Risorse</h6></div>`;
   }
   // l'effetto di un tratto in breve, con l'interruttore per spegnerlo (es. Sensibilità alla luce solare solo di giorno)
-  const BREVE_EFF = { branco: 'Tattica del branco', vant_att: 'Vantaggio ai suoi attacchi', svant_att: 'Svantaggio ai suoi attacchi', svant_contro: 'Svantaggio a chi lo attacca', vant_contro: 'Vantaggio a chi lo attacca', vant_ts: 'Vantaggio ai TS' };
+  const BREVE_EFF = { branco: 'Tattica del branco', vant_att: 'Vantaggio ai suoi attacchi', svant_att: 'Svantaggio ai suoi attacchi', svant_contro: 'Svantaggio a chi lo attacca', vant_contro: 'Vantaggio a chi lo attacca', vant_ts: 'Vantaggio ai TS', pft_morte: 'PF temporanei' };
   function chipEff(p, i, w) {
     const e = effettoDi(p); if (!e) return '';
-    const t = e === 'ts_colpo' ? `Colpito: TS ${p.ts_car ? nomeCar(p.ts_car) : '?'}${num(p.ts_cd) ? ' CD ' + num(p.ts_cd) : ''}` : BREVE_EFF[e] + (e === 'vant_ts' && p.ts_car ? ' su ' + nomeCar(p.ts_car) : '');
+    const t = e === 'pft_morte' ? `${String(p.pft || '?').trim()} PF temp. se muore qualcuno entro ${num(p.dist) || 3} m` : e === 'ts_colpo' ? `Colpito: TS ${p.ts_car ? nomeCar(p.ts_car) : '?'}${num(p.ts_cd) ? ' CD ' + num(p.ts_cd) : ''}` : BREVE_EFF[e] + (e === 'vant_ts' && p.ts_car ? ' su ' + nomeCar(p.ts_car) : '');
     return `<span class="effc${p.off ? ' off' : ''}" title="${esc((EFFETTI_TR.find(x => x[0] === e) || [])[1] || '')}: il Tavolo lo applica da solo">⚔ ${esc(t)}</span>${w ? `<label class="sw2${p.off ? '' : ' on'}" title="Spento: il Tavolo non lo applica (es. solo in certe situazioni)"><input type="checkbox" data-k="prv-off" data-i="${i}"${p.off ? '' : ' checked'}>${p.off ? 'spento' : 'attivo'}</label>` : ''}`;
   }
   function voceForm(p, i) {
@@ -6716,7 +6744,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       <div class="pvr"><label>Si usa con <select data-f="prv.${i}.tempo"><option value="">${(t => t ? TEMPI[t] + ' (letto dal testo)' : 'Niente: solo da leggere')(tempoAuto(p))}</option>${Object.entries(TEMPI).map(([k, l]) => `<option value="${k}">${l}</option>`).join('')}<option value="no">Niente: solo da leggere</option></select></label>
         ${tempoDi(p) === 'leg' ? `<label>Costa ${f('costo_leg', '1', 'number', 'u')} punti</label>` : `<label class="ck" title="Usandolo si sceglie chi curare: con la riserva (usi) si decide quanti PF, altrimenti si tirano i dadi"><input type="checkbox" data-f="prv.${i}.cura"> Cura una creatura</label>`}</div>
       <div class="pvr"><label class="eff">Effetto in combattimento <select data-f="prv.${i}.eff">${EFFETTI_TR.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select></label></div>
-      ${(e => e === 'ts_colpo' || e === 'vant_ts' ? `<div class="pvr"><label>${e === 'ts_colpo' ? 'Tiro salvezza su' : 'Su quali tiri salvezza'} <select data-f="prv.${i}.ts_car"><option value="">${e === 'ts_colpo' ? '—' : 'Tutti'}</option>${CAR.map(([k, , n]) => `<option value="${k}">${n}</option>`).join('')}</select></label>${e === 'ts_colpo' ? `<label>CD ${f('ts_cd', '13', 'number', 'u')}</label>` : ''}</div>` : '')(effettoDi(p))}
+      ${(e => e === 'ts_colpo' || e === 'vant_ts' ? `<div class="pvr"><label>${e === 'ts_colpo' ? 'Tiro salvezza su' : 'Su quali tiri salvezza'} <select data-f="prv.${i}.ts_car"><option value="">${e === 'ts_colpo' ? '—' : 'Tutti'}</option>${CAR.map(([k, , n]) => `<option value="${k}">${n}</option>`).join('')}</select></label>${e === 'ts_colpo' ? `<label>CD ${f('ts_cd', '13', 'number', 'u')}</label>` : ''}</div>` : e === 'pft_morte' ? `<div class="pvr"><label>PF temporanei ${f('pft', 'es. 5 o 1d6+2', 'text', 'd')}</label><label>Entro ${f('dist', '3', 'number', 'u')} m</label></div>` : '')(effettoDi(p))}
       <div class="pvr"><button type="button" class="mini" data-k="prv-mod" data-i="${i}">✓ Fatto</button><button type="button" class="mini via" data-k="prv-via" data-i="${i}">Elimina</button></div></div>`;
   }
   /* ---------- privilegi che si usano (Imposizione delle mani, Voto di inimicizia…) e azioni leggendarie ----------
