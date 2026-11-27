@@ -6016,7 +6016,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   }
   const competenteArma = (s, w) => { const c = competenzeArmi(s); return (w[3] === 'semplice' && c.semplici) || (w[3] === 'guerra' && c.guerra) || c.frasi.has(chiaveArma(w[0])); };
   const piccolo = s => { const R = REG(); return !!R && razzeScheda(R, s.dati).some(x => /piccol/i.test(x.taglia || '')); };
-  const carAtt = (s, a) => a.car === 'acc' ? migliore(s) : a.car && a.car !== 'man' ? a.car : (w => w ? carArma(s, w) : null)(armaAtt(s, a));
+  const carAtt = (s, a) => a.car === 'man' ? null : a.car === 'acc' ? migliore(s) : a.car ? a.car : (w => w ? carArma(s, w) : null)(armaAtt(s, a));
   const dadoAtt = a => String(a.dado || '').replace(/\s+/g, '') || (String(a.danni || '').replace(/\s+/g, '').match(/^\d*d\d+/i) || [''])[0];
   // danni bonus dell'attacco (arma infuocata, veleno…), tirati a parte con il loro tipo
   const TIPI_DANNO = [['acido', 'da acido'], ['contundenti', 'contundenti'], ['forza', 'da forza'], ['freddo', 'da freddo'], ['fulmine', 'da fulmine'], ['fuoco', 'da fuoco'], ['necrotici', 'necrotici'], ['perforanti', 'perforanti'], ['psichici', 'psichici'], ['radiosi', 'radiosi'], ['taglienti', 'taglienti'], ['tuono', 'da tuono'], ['veleno', 'da veleno']];
