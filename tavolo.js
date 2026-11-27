@@ -1009,6 +1009,14 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
 }
 .tv-back{display:none}
 .tv-mrz,.tv-mtab{display:none}
+.tv-isp{position:absolute;left:50%;top:14%;z-index:60;display:flex;align-items:center;gap:16px;padding:14px 26px 14px 14px;border-radius:16px;max-width:calc(100% - 40px);pointer-events:none;color:#f6e7c4;background:linear-gradient(180deg,#3a161bf2,#24090df2);border:1px solid #e0b75c;box-shadow:inset 0 0 0 4px #24090d,inset 0 0 0 5px #e0b75c55,0 0 40px #e0b75c55,0 18px 50px #000c;animation:tvIsp 4.8s ease forwards}
+.tv-isp .st{position:relative;flex:none;width:62px;height:62px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#fff6d0,#e0b75c 55%,#8a5a14);display:flex;align-items:center;justify-content:center;font-size:2rem;color:#5a2a05;box-shadow:0 0 24px #f3d58caa}
+.tv-isp small{display:block;font:600 .78rem/1 var(--display,serif);letter-spacing:.14em;color:#e0b75c;text-transform:uppercase;margin-bottom:6px}
+.tv-isp b{display:block;font:700 1.7rem/1.1 var(--title,serif);color:#fff2cf}
+.tv-isp i{display:block;font-size:.95rem;color:#e9d7b0;margin-top:4px}
+@media (max-width:620px){.tv-isp{top:10%;gap:10px;padding:10px 16px 10px 10px}.tv-isp .st{width:46px;height:46px;font-size:1.4rem}.tv-isp b{font-size:1.25rem}.tv-isp i{font-size:.82rem}}
+@keyframes tvIsp{0%{opacity:0;transform:translate(-50%,-14px) scale(.9)}8%{opacity:1;transform:translate(-50%,0) scale(1.03)}14%{transform:translate(-50%,0) scale(1)}85%{opacity:1}100%{opacity:0;transform:translate(-50%,-8px)}}
+@media (prefers-reduced-motion:reduce){.tv-isp{animation:none}}
 @media (min-width:900px){
   html.in-tavolo.tv-mi{--sbw:64px!important}
   html.in-tavolo.tv-mc{--sbw:0px!important}
@@ -2041,6 +2049,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     ch.on('broadcast', { event: 'area' }, ({ payload: m }) => mostraArea(m));
     ch.on('broadcast', { event: 'ts' }, ({ payload: m }) => mostraTS(m));
     ch.on('broadcast', { event: 'lampo' }, ({ payload: m }) => mostraLampo(m));
+    ch.on('broadcast', { event: 'ispira' }, ({ payload: m }) => mostraIspira(m));
     ch.on('broadcast', { event: 'opp' }, ({ payload: m }) => reazioneOpp(m));
     // il DM ha tolto una richiesta di tiro salvezza: sparisce anche dallo schermo del giocatore
     ch.on('broadcast', { event: 'ts-via' }, ({ payload: m }) => { if (T.salv?.delete(m.id)) disegnaSalvezze(); });
@@ -6160,6 +6169,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   const cambiaCA = s => { const c = calcCA(s); return c && !c.incerta && num(s.dati.ca) !== c.ca ? c.ca : null; };
   function salvaScheda(id, patch, subito) {
     const s = T.schede?.get(id); if (!s) return Promise.resolve();
+    // ispirazione: ricorda quanti punti aveva prima, l'avviso parte quando il salvataggio va a buon fine
+    if ('ispirazione' in patch && isDM() && !(T.ispPrima ??= new Map()).has(id)) T.ispPrima.set(id, ispDi(s));
     s.dati = { ...s.dati, ...patch };
     // gli attacchi legati a una caratteristica (⚙) seguono i punteggi, il livello e le loro impostazioni
     const ric = attacchiCalcolati(s); if (ric) { s.dati.attacchi = ric; patch = { ...patch, attacchi: ric }; }
@@ -6174,6 +6185,23 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const r = await SB.rpc('tavolo_scheda_aggiorna', { p_id: id, p_dati: p.dati });
     if (r.error) { toast(r.error.message, 'err'); return; }
     const row = Array.isArray(r.data) ? r.data[0] : r.data; if (row) arrivaScheda(row);
+    if (T.ispPrima?.has(id)) { const prima = T.ispPrima.get(id), s = T.schede?.get(id); T.ispPrima.delete(id); if (s && ispDi(s) > prima) ispirazioneData(s); }
+  }
+  /* il DM dà un punto ispirazione: per qualche secondo un riquadro dorato a tutti, il token brilla e resta la riga in chat */
+  const ispDi = s => { const v = s?.dati?.ispirazione; return typeof v === 'boolean' ? +v : num(v) || 0; };
+  async function ispirazioneData(s) {
+    const n = ispDi(s), t = [...T.tok.values()].find(x => schedaDi(x)?.id === s.id && x.scena === scena()?.id);
+    const m = { nome: s.nome || 'Qualcuno', n, tok: t?.id || null };
+    manda('ispira', m); mostraIspira(m);
+    await annuncia(`✦ ${m.nome} riceve un punto ispirazione (ora ne ha ${n}).`);
+  }
+  function mostraIspira(m) {
+    const tv = $('.tv'); if (!tv) return;
+    tv.querySelector('.tv-isp')?.remove();
+    const b = document.createElement('div'); b.className = 'tv-isp'; b.setAttribute('role', 'status');
+    b.innerHTML = `<div class="st" aria-hidden="true">✦</div><div><small>Il DM concede</small><b>${esc(m.nome)} riceve un punto ispirazione</b><i>Vantaggio a un tiro, quando vuole.</i></div>`;
+    tv.append(b); setTimeout(() => b.remove(), 4800);
+    if (m.tok) mostraLampo({ id: m.tok, col: '#f3d58c', txt: '✦ Ispirazione' });
   }
   /* il DM concede un livello: al giocatore appare la «colonna di luce» con il nuovo livello.
      Una volta per livello concesso: se non era connesso la vede appena entra nel Tavolo. */
