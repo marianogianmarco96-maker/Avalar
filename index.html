@@ -573,6 +573,8 @@ a.chip[class*=" t-"]:hover{border-color:var(--tc)}
 .mamenu .btn:hover{background:var(--paper2)}
 .mamenu .btn.danger{color:var(--bad);background:transparent}
 .eheadacts .mamenu{left:0;right:auto}
+/* la scheda con il ritratto taglia ciò che esce dal riquadro: col menu «Altro» aperto il menu deve restare visibile */
+html body .ehead.hasp:has(.moreacts[open]){overflow:visible!important;z-index:30}
 html.ro .moreacts{display:none}
 /* collegamenti come schedine */
 .relh{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)!important;margin:14px 0 6px}
