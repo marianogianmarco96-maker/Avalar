@@ -5780,7 +5780,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     disegnaStriscia(); disegnaRail();
   }
   const ordinati = () => [...T.turno].sort((a, b) => b.valore - a.valore || (a.creato < b.creato ? -1 : 1));
-  // azione ritardata (tappa-23.sql): chi sta agendo sceglie dopo chi agire; al round dopo torna al suo posto
+  // azione ritardata (tappa-24.sql): chi sta agendo sceglie dopo chi agire; al round dopo torna al suo posto
   const ritTxt = x => { const d = T.turno.find(y => y.id === x.ritardo); return `⏳ agisce dopo ${d?.nome || '?'}`; };
   const dopoDiMe = () => { const L = ordinati(), i = L.findIndex(y => y.id === T.stato?.turno); return i < 0 ? [] : L.slice(i + 1).filter(y => !y.ritardo && (isDM() || !y.nascosto)); };
   const puoRitardare = () => { const c = T.turno.find(y => y.id === T.stato?.turno); return !!c && !c.ritardo && (isDM() || c.giocatore === T.me?.giocatore) && dopoDiMe().length > 0; };
@@ -5793,7 +5793,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     d.querySelectorAll('[data-id]').forEach(b => b.onclick = async () => {
       d.close(); const y = T.turno.find(z => z.id === b.dataset.id);
       const r = await SB.rpc('tavolo_turno_ritarda', { p_dopo: b.dataset.id });
-      if (r.error) return toast(sqlMancante(r.error) ? 'Per ritardare il turno esegui tavolo/tappa-23.sql in Supabase.' : r.error.message, 'err');
+      if (r.error) return toast(sqlMancante(r.error) ? 'Per ritardare il turno esegui tavolo/tappa-24.sql in Supabase.' : r.error.message, 'err');
       annuncia(`⏳ ${c.nome || 'Qualcuno'} ritarda: agirà dopo ${y?.nome || '?'}.`).catch(() => { });
       const x = T.turno.find(z => z.id === r.data); if (x) toast(`Tocca a ${x.nome || '?'}.`);
     });

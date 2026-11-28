@@ -1,4 +1,4 @@
--- Tappa 23: azione ritardata nell'ordine del turno.
+-- Tappa 24: azione ritardata nell'ordine del turno.
 -- Chi sta agendo può «ritardare»: sceglie dopo chi agire in questo round. L'ordine prosegue saltandolo; finito il turno
 -- di quello scelto, tocca a lui; poi si riprende da dove si era. Al round successivo ognuno torna al suo posto
 -- (il valore di iniziativa non cambia mai). Si può rieseguire: crea solo ciò che manca e riscrive le funzioni.
