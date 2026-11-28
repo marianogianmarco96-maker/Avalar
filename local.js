@@ -72,7 +72,9 @@
   let FONTE = null;
   async function fonte(fresca) {
     if (FONTE && !fresca) return FONTE;
-    const gj = fetch('versione.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : {}).catch(() => ({})), gh = gj.then(j => +j.pub || 0);
+    // con ?v= si salta la copia che GitHub Pages tiene fino a 10 minuti: subito dopo un aggiornamento (avviso «Ricarica pagina»)
+    // il ricaricamento deve vedere i dati nuovi, compresa la bozza di Claude da controllare, non quelli di prima
+    const gj = fetch('versione.json?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.json() : {}).catch(() => ({})), gh = gj.then(j => +j.pub || 0);
     // «solo»: Supabase non è affidabile (per esempio dopo un attacco) e il sito usa solo la copia su GitHub
     if ((await gj).solo) { FONTE = { base: '', sbv: 0, ghv: await gh, pronto: false, solo: true }; return FONTE; }
     let sb = null, pronto = false;
@@ -90,7 +92,8 @@
   async function dataFetch(f) {
     const src = await fonte();
     if (src.base) try { const r = await fetch(src.base + f); if (r.ok || r.status === 404) return r; } catch { }
-    return fetch(f, { cache: 'no-cache' });
+    // da GitHub: la versione nel nome evita la copia vecchia della cache di GitHub Pages
+    return fetch(src.ghv ? f + '?v=' + src.ghv : f, { cache: 'no-cache' });
   }
 
   /* ---------- aperture ---------- */
