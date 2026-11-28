@@ -909,7 +909,10 @@ h2{font-size:1.25rem}
   #nav a:hover{background:#ffffff0d}
   #nav a.on,#nav a[aria-current]{background:linear-gradient(90deg,#c9a24b33,#c9a24b08)!important;border-color:#c9a24b66;color:#fff!important;box-shadow:inset 3px 0 0 #e0c071}
   #nav a.on::after,#nav a[aria-current]::after{display:none!important}
-  header.top .srch{order:-1;position:static!important;display:block!important;width:auto!important;margin:0 0 10px}
+  header.top .srch{order:-1;position:relative!important;inset:auto!important;transform:none!important;z-index:60;display:block!important;width:auto!important;margin:0 0 10px}
+  /* risultati della ricerca: sotto la casella e larghi quanto la barra, senza coprirla né uscire a sinistra */
+  header.top #qres{position:absolute!important;left:0!important;right:0!important;top:calc(100% + 6px)!important;width:auto!important;max-width:none!important;max-height:min(60vh,520px);z-index:50;border-radius:10px;border-color:#c9a24b88}
+  header.top #qres a{padding:7px 10px;gap:6px;flex-wrap:wrap;line-height:1.25}
   header.top .srch input[type=search]{border-radius:8px!important;background:#00000040!important}
   header.top #srchBtn{display:none!important}
   header.top #themeBtn{position:absolute;right:14px;top:14px}
@@ -948,6 +951,10 @@ h2{font-size:1.25rem}
   #nav{left:10px!important;right:10px!important;bottom:calc(10px + env(safe-area-inset-bottom,0px))!important;border-radius:18px!important;border:1px solid #c9a24b66!important;background:#24090df2!important;box-shadow:0 10px 30px #0009!important;overflow:hidden}
   #nav a{font-family:var(--display)!important;font-size:.72rem!important;letter-spacing:.02em!important;text-transform:none!important}
   #nav a.on,#nav a[aria-current]{background:radial-gradient(circle at 50% 30%,#c9a24b38,transparent 70%)!important;color:#fff!important}
+  /* tutte le voci entrano nella barra: nessuna resta tagliata a destra */
+  #nav{gap:0!important;padding-left:4px!important;padding-right:4px!important}
+  #nav a{flex:1 1 0!important;min-width:0!important;padding:7px 0 6px!important;overflow:hidden;text-overflow:ellipsis}
+  #nav a>span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .pagehead h1{font-size:2.1rem}
   #view{padding-bottom:110px!important}
 }
@@ -955,6 +962,13 @@ h2{font-size:1.25rem}
 header.top .brand>span{display:block!important}
 .hm-c.party .pgs{grid-template-columns:repeat(4,minmax(0,1fr))!important}
 @media (max-width:899px){header.top .brand b{letter-spacing:.1em!important}}
+@media (max-width:420px){#nav a{font-size:.6rem!important;letter-spacing:0!important}}
+/* party in un riquadro stretto: due ritratti per riga, nomi che non si accavallano */
+.hm-c.party{container-type:inline-size}
+.hm-c.party .pgs b{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@container (max-width:260px){.hm-c.party .pgs{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+/* mappe con finestra stretta: la barra della mappa va a capo invece di finire sopra il pannello a destra */
+@media (max-width:1280px){.mapnav{flex-wrap:wrap;row-gap:6px}.mn-dm{order:3;width:100%}.mn-cur{min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
 @media (max-width:899px){header.top .brand,header.top .brand b{overflow:visible!important;text-overflow:clip!important;max-width:none!important}header.top .brand b{letter-spacing:.12em!important;font-size:1.35rem!important}}
 /* B3 · CARTE DA GIOCO: elenchi in griglia di carte, ritratti grandi, sigilli */
 html body :is(#slist,#elist).vl.flow{background:none!important;border:0!important;box-shadow:none!important;overflow:visible!important}
