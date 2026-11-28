@@ -1012,16 +1012,15 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
 }
 .tv-back{display:none}
 .tv-mrz,.tv-mtab{display:none}
-.tv-isp{position:absolute;left:50%;top:14%;z-index:60;display:flex;align-items:center;gap:16px;padding:14px 26px 14px 14px;border-radius:16px;max-width:calc(100% - 40px);pointer-events:none;color:#f6e7c4;background:linear-gradient(180deg,#3a161bf2,#24090df2);border:1px solid #e0b75c;box-shadow:inset 0 0 0 4px #24090d,inset 0 0 0 5px #e0b75c55,0 0 40px #e0b75c55,0 18px 50px #000c;animation:tvIsp 4.8s ease forwards}
-.tv-isp .st{position:relative;flex:none;width:62px;height:62px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#fff6d0,#e0b75c 55%,#8a5a14);display:flex;align-items:center;justify-content:center;font-size:2rem;color:#5a2a05;box-shadow:0 0 24px #f3d58caa}
-.tv-isp small{display:block;font:600 .78rem/1 var(--display,serif);letter-spacing:.14em;color:#e0b75c;text-transform:uppercase;margin-bottom:6px}
-.tv-isp b{display:block;font:700 1.7rem/1.1 var(--title,serif);color:#fff2cf}
-.tv-isp i{display:block;font-size:.95rem;color:#e9d7b0;margin-top:4px}
-.tv-isp.merda{background:linear-gradient(180deg,#3b2c1cf2,#1e150cf2);border-color:#a8854a;box-shadow:inset 0 0 0 4px #1e150c,inset 0 0 0 5px #a8854a55,0 0 40px #6b4a2266,0 18px 50px #000c}
-.tv-isp.merda .st{background:radial-gradient(circle at 50% 40%,#d8b88a,#8a6a3a 55%,#4a3018);box-shadow:0 0 24px #8a6a3a99}
-.tv-isp.merda small{color:#c9a46a}.tv-isp.merda b{color:#f1e1c4}
-@media (max-width:620px){.tv-isp{top:10%;gap:10px;padding:10px 16px 10px 10px}.tv-isp .st{width:46px;height:46px;font-size:1.4rem}.tv-isp b{font-size:1.25rem}.tv-isp i{font-size:.82rem}}
-@keyframes tvIsp{0%{opacity:0;transform:translate(-50%,-14px) scale(.9)}8%{opacity:1;transform:translate(-50%,0) scale(1.03)}14%{transform:translate(-50%,0) scale(1)}85%{opacity:1}100%{opacity:0;transform:translate(-50%,-8px)}}
+.tv-isp{position:absolute;left:16px;bottom:16px;z-index:60;display:flex;align-items:center;gap:10px;width:min(300px,calc(100% - 32px));padding:9px 12px;border-radius:10px;pointer-events:none;color:#f6e7c4;background:#24090df0;border:1px solid #c9a24b88;border-left:4px solid #e0b75c;box-shadow:0 8px 22px #000a;animation:tvIsp 4.5s ease forwards}
+.tv-isp .st{flex:none;width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#fff6d0,#e0b75c 55%,#8a5a14);display:flex;align-items:center;justify-content:center;font-size:1.05rem;color:#5a2a05}
+.tv-isp b{display:block;font:700 1rem/1.2 var(--title,serif);color:#fff2cf}
+.tv-isp i{display:block;font-style:normal;font-size:.82rem;color:#d9c7a2;margin-top:2px}
+.tv-isp.merda{background:#1e150cf0;border-color:#a8854a88;border-left-color:#a8854a}
+.tv-isp.merda .st{background:radial-gradient(circle at 50% 40%,#d8b88a,#8a6a3a 55%,#4a3018)}
+.tv-isp.merda b{color:#f1e1c4}
+@media (max-width:820px){.tv-isp{bottom:calc(84px + env(safe-area-inset-bottom,0px))}}
+@keyframes tvIsp{0%{opacity:0;transform:translateX(-16px)}8%{opacity:1;transform:none}88%{opacity:1}100%{opacity:0}}
 @media (prefers-reduced-motion:reduce){.tv-isp{animation:none}}
 @media (min-width:900px){
   html.in-tavolo.tv-mi{--sbw:64px!important}
@@ -6239,11 +6238,12 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function mostraIspira(m) {
     const tv = $('.tv'); if (!tv) return;
     tv.querySelector('.tv-isp')?.remove();
+    // biglietto piccolo in basso a sinistra, come le notifiche del sito: non copre la mappa
     const b = document.createElement('div'); b.className = 'tv-isp'; b.setAttribute('role', 'status');
     const merda = m.tipo === 'merda'; if (merda) b.classList.add('merda');
     b.innerHTML = merda
-      ? `<div class="st" aria-hidden="true">💩</div><div><small>Il DM usa un punto merda</small><b>${esc(m.nome)} ha svantaggio</b><i>Al prossimo tiro con il d20: prova, tiro salvezza o attacco.</i></div>`
-      : `<div class="st" aria-hidden="true">✦</div><div><small>Il DM concede</small><b>${esc(m.nome)} riceve un punto ispirazione</b><i>Vantaggio a un tiro, quando vuole.</i></div>`;
+      ? `<div class="st" aria-hidden="true">💩</div><div><b>${esc(m.nome)} ha svantaggio</b><i>Il DM usa un punto merda: prossimo tiro con il d20.</i></div>`
+      : `<div class="st" aria-hidden="true">✦</div><div><b>${esc(m.nome)} riceve un punto ispirazione</b><i>Vantaggio a un tiro, quando vuole.</i></div>`;
     tv.append(b); setTimeout(() => b.remove(), 4800);
     if (m.tok) mostraLampo(merda ? { id: m.tok, col: '#8a6a3a', txt: '💩 Svantaggio' } : { id: m.tok, col: '#f3d58c', txt: '✦ Ispirazione' });
   }
@@ -8561,7 +8561,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
      Il DM e ogni giocatore, appena entrati nel sito, si fanno vedere su un canale riservato ai membri del tavolo
      (con la pagina in cui sono e se il sito è in primo piano). Il DM vede nella barra in alto chi è connesso. */
   const P = { ch: null, me: null, live: false, info: null, stato: {}, da: Date.now(), ko: false };
-  const SEZ = { '': 'Home', sessioni: 'Sessioni', schede: 'Schede', scheda: 'Schede', mappe: 'Mappe', manuali: 'Manuali', tavolo: 'Tavolo', cerca: 'Ricerca', cronologia: 'Cronologia', idee: 'Idee' };
+  const SEZ = { '': 'Home', sessioni: 'Sessioni', schede: 'Archivio', scheda: 'Archivio', mappe: 'Mappe', manuali: 'Manuali', tavolo: 'Tavolo', cerca: 'Ricerca', cronologia: 'Cronologia', idee: 'Idee' };
   const sezione = () => { const k = location.hash.replace(/^#\/?/, '').split(/[/?]/)[0]; return SEZ[k] || (k ? k[0].toUpperCase() + k.slice(1) : 'Home'); };
   const traccia = () => { if (P.ch && P.live) P.ch.track({ nome: P.me.nome, ruolo: P.me.ruolo, giocatore: P.me.giocatore, pagina: sezione(), attivo: !document.hidden, da: P.da }).catch(() => { }); };
   const PCSS = `#online{position:relative;flex:none;z-index:45;font:600 .8rem/1.2 var(--body)}
