@@ -18,12 +18,12 @@ const log = (inizio: number, ...x: unknown[]) => console.log(`[assistente ${Date
 const entro = (ms: number) => AbortSignal.timeout(ms);
 
 // il modello «auto»: il Gemini Pro più recente che la chiave può usare (poi Flash, se Pro non c'è)
-let SCELTO: { chiave: string, modello: string, ts: number } | null = null;
+let SCELTO: { chiave: string, modello: string, lista: string[], ts: number } | null = null;
 // come mandare la chiave: le «AIza…» con x-goog-api-key; i formati nuovi (es. «AQ.…») si provano anche come Bearer
 let MODO: { chiave: string, bearer: boolean } | null = null;
 const intest = (chiave: string): Record<string, string> => MODO?.chiave === chiave && MODO.bearer ? { Authorization: 'Bearer ' + chiave } : { 'x-goog-api-key': chiave };
 async function modelloAuto(chiave: string) {
-  if (SCELTO && SCELTO.chiave === chiave && Date.now() - SCELTO.ts < 6 * 3600e3) return SCELTO.modello;
+  if (SCELTO && SCELTO.chiave === chiave && Date.now() - SCELTO.ts < 6 * 3600e3) return SCELTO.lista;
   let r = await fetch(`${G}/models?pageSize=1000`, { headers: { 'x-goog-api-key': chiave }, signal: entro(20000) });
   console.log('[assistente] elenco modelli (x-goog-api-key):', r.status);
   MODO = { chiave, bearer: false };
@@ -40,9 +40,11 @@ async function modelloAuto(chiave: string) {
   };
   const ok = elenco.filter(m => (m.supportedGenerationMethods || []).includes('generateContent') && voto(m.name) >= 0)
     .sort((a, b) => voto(b.name) - voto(a.name));
-  const modello = (ok[0]?.name || 'models/gemini-2.5-pro').replace(/^models\//, '');
-  SCELTO = { chiave, modello, ts: Date.now() };
-  return modello;
+  const lista = ok.map(m => m.name.replace(/^models\//, ''));
+  if (!lista.length) lista.push('gemini-2.5-flash');
+  console.log('[assistente] modelli in ordine:', lista.slice(0, 8).join(', '));
+  SCELTO = { chiave, modello: lista[0], lista, ts: Date.now() };
+  return lista;
 }
 async function errore(r: Response) {
   let m = ''; try { const j = await r.json(); m = j.error?.message || ''; } catch { /* niente */ }
@@ -77,35 +79,48 @@ async function gestisci(req: Request, ini: number): Promise<Response> {
   if (!chiave) return json({ errore: 'Manca la chiave di Gemini: incollala in «Collega l\'assistente».', manca: true }, 412);
 
   const corpo = await req.json().catch(() => ({}));
-  let modello: string;
-  try { const auto = await modelloAuto(chiave); modello = ai.data?.modello && ai.data.modello !== 'auto' ? ai.data.modello : auto; }
+  let lista: string[];
+  try { lista = await modelloAuto(chiave); }
   catch (e) { if ((e as Error).name === 'TimeoutError') throw e; const s = (e as { stato?: number }).stato || 502; log(ini, 'modelli non letti:', s, (e as Error).message); return json({ errore: (e as Error).message, stato: s }, s); }
-  log(ini, 'modello:', modello, MODO?.bearer ? '(Bearer)' : '(x-goog-api-key)');
+  // prima il modello che ha funzionato l'ultima volta (o quello scelto dal DM), poi gli altri in ordine
+  const scelto = ai.data?.modello && ai.data.modello !== 'auto' ? ai.data.modello : SCELTO?.modello || lista[0];
+  const candidati = [scelto, ...lista.filter(m => m !== scelto)].slice(0, 4);
+  // Google risponde 503/429/500 quando un modello è sovraccarico: si passa al successivo
+  const riprova = (st: number) => st === 503 || st === 429 || st === 500 || st === 504 || st === 404;
 
+  let corpoG: unknown, url2: (m: string) => string, limite: number;
   if (corpo.prova) {
-    const r = await fetch(`${G}/models/${modello}:generateContent`, {
-      method: 'POST', headers: { ...intest(chiave), 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'Rispondi solo: ok' }] }], generationConfig: { maxOutputTokens: 2000 } }), signal: entro(60000)
-    });
-    log(ini, 'prova:', r.status);
-    if (!r.ok) return json({ errore: await errore(r), stato: r.status }, r.status);
-    return json({ ok: true, modello });
+    corpoG = { contents: [{ role: 'user', parts: [{ text: 'Rispondi solo: ok' }] }], generationConfig: { maxOutputTokens: 2000 } };
+    url2 = m => `${G}/models/${m}:generateContent`; limite = 15000;
+  } else {
+    const msgs = Array.isArray(corpo.messages) ? corpo.messages : [];
+    if (!msgs.length) return json({ errore: 'Nessuna domanda.' }, 400);
+    const testo = (c: unknown) => typeof c === 'string' ? c : Array.isArray(c) ? c.map(x => x?.text || '').join('') : '';
+    const contents = msgs.map((m: { role: string, content: unknown }) => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: testo(m.content) }] }));
+    // i modelli che «pensano» contano anche il ragionamento nel limite: gli diamo più spazio di quanto serva alla risposta
+    const max = Math.min(Math.max((Number(corpo.max) || 8000) * 2, 16000), 65536);
+    corpoG = { ...(corpo.system ? { systemInstruction: { parts: [{ text: String(corpo.system) }] } } : {}), contents, generationConfig: { maxOutputTokens: max } };
+    url2 = m => `${G}/models/${m}:streamGenerateContent?alt=sse`; limite = 30000;
   }
-
-  const msgs = Array.isArray(corpo.messages) ? corpo.messages : [];
-  if (!msgs.length) return json({ errore: 'Nessuna domanda.' }, 400);
-  const testo = (c: unknown) => typeof c === 'string' ? c : Array.isArray(c) ? c.map(x => x?.text || '').join('') : '';
-  const contents = msgs.map((m: { role: string, content: unknown }) => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: testo(m.content) }] }));
-  // i modelli che «pensano» contano anche il ragionamento nel limite: gli diamo più spazio di quanto serva alla risposta
-  const max = Math.min(Math.max((Number(corpo.max) || 8000) * 2, 16000), 65536);
-  const r = await fetch(`${G}/models/${modello}:streamGenerateContent?alt=sse`, {
-    method: 'POST', headers: { ...intest(chiave), 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      ...(corpo.system ? { systemInstruction: { parts: [{ text: String(corpo.system) }] } } : {}),
-      contents, generationConfig: { maxOutputTokens: max }
-    }), signal: entro(140000)
-  });
-  log(ini, 'risposta di Gemini:', r.status);
-  if (!r.ok || !r.body) return json({ errore: await errore(r), stato: r.status }, r.status);
-  return new Response(r.body, { headers: { ...CORS, 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'X-Modello': modello, 'Access-Control-Expose-Headers': 'X-Modello' } });
+  let ultimo: Response | null = null, ultimoErr = '';
+  for (const [i, m] of candidati.entries()) {
+    if (!corpo.prova && i > 2) break; // la risposta vera: al massimo 3 modelli, per restare nei 150 s di Supabase
+    let r: Response;
+    try {
+      // il limite vale per l'arrivo della risposta; lo streaming poi continua senza limite
+      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(new DOMException('tempo', 'TimeoutError')), i === 0 && !corpo.prova ? limite * 2 : limite);
+      r = await fetch(url2(m), { method: 'POST', headers: { ...intest(chiave), 'Content-Type': 'application/json' }, body: JSON.stringify(corpoG), signal: ctl.signal });
+      clearTimeout(t);
+    } catch (e) { log(ini, m, 'non risponde:', (e as Error).name); ultimoErr = 'Google non ha risposto in tempo: riprova tra poco.'; continue; }
+    log(ini, corpo.prova ? 'prova' : 'risposta', m, r.status);
+    if (r.ok && (corpo.prova || r.body)) {
+      if (SCELTO) SCELTO.modello = m;
+      if (corpo.prova) return json({ ok: true, modello: m });
+      return new Response(r.body, { headers: { ...CORS, 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'X-Modello': m, 'Access-Control-Expose-Headers': 'X-Modello' } });
+    }
+    if (!riprova(r.status)) return json({ errore: await errore(r), stato: r.status }, r.status);
+    ultimo = r;
+  }
+  if (ultimo) return json({ errore: await errore(ultimo), stato: ultimo.status }, ultimo.status);
+  return json({ errore: ultimoErr || 'Gemini non risponde.' }, 504);
 }
