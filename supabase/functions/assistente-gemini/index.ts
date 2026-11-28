@@ -15,9 +15,17 @@ const G = 'https://generativelanguage.googleapis.com/v1beta';
 
 // il modello «auto»: il Gemini Pro più recente che la chiave può usare (poi Flash, se Pro non c'è)
 let SCELTO: { chiave: string, modello: string, ts: number } | null = null;
+// come mandare la chiave: le «AIza…» con x-goog-api-key; i formati nuovi (es. «AQ.…») si provano anche come Bearer
+let MODO: { chiave: string, bearer: boolean } | null = null;
+const intest = (chiave: string): Record<string, string> => MODO?.chiave === chiave && MODO.bearer ? { Authorization: 'Bearer ' + chiave } : { 'x-goog-api-key': chiave };
 async function modelloAuto(chiave: string) {
   if (SCELTO && SCELTO.chiave === chiave && Date.now() - SCELTO.ts < 6 * 3600e3) return SCELTO.modello;
-  const r = await fetch(`${G}/models?pageSize=1000`, { headers: { 'x-goog-api-key': chiave } });
+  let r = await fetch(`${G}/models?pageSize=1000`, { headers: { 'x-goog-api-key': chiave } });
+  MODO = { chiave, bearer: false };
+  if (!r.ok && !chiave.startsWith('AIza')) {
+    const b = await fetch(`${G}/models?pageSize=1000`, { headers: { Authorization: 'Bearer ' + chiave } });
+    if (b.ok) { r = b; MODO = { chiave, bearer: true }; }
+  }
   if (!r.ok) throw Object.assign(new Error(await errore(r)), { stato: r.status });
   const elenco = ((await r.json()).models || []) as { name: string, supportedGenerationMethods?: string[] }[];
   const voto = (n: string) => {
@@ -54,12 +62,12 @@ Deno.serve(async (req) => {
 
   const corpo = await req.json().catch(() => ({}));
   let modello: string;
-  try { modello = ai.data?.modello && ai.data.modello !== 'auto' ? ai.data.modello : await modelloAuto(chiave); }
+  try { const auto = await modelloAuto(chiave); modello = ai.data?.modello && ai.data.modello !== 'auto' ? ai.data.modello : auto; }
   catch (e) { const s = (e as { stato?: number }).stato || 502; return json({ errore: (e as Error).message, stato: s }, s); }
 
   if (corpo.prova) {
     const r = await fetch(`${G}/models/${modello}:generateContent`, {
-      method: 'POST', headers: { 'x-goog-api-key': chiave, 'Content-Type': 'application/json' },
+      method: 'POST', headers: { ...intest(chiave), 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'Rispondi solo: ok' }] }], generationConfig: { maxOutputTokens: 200 } })
     });
     if (!r.ok) return json({ errore: await errore(r), stato: r.status }, r.status);
@@ -73,7 +81,7 @@ Deno.serve(async (req) => {
   // i modelli che «pensano» contano anche il ragionamento nel limite: gli diamo più spazio di quanto serva alla risposta
   const max = Math.min(Math.max((Number(corpo.max) || 8000) * 2, 16000), 65536);
   const r = await fetch(`${G}/models/${modello}:streamGenerateContent?alt=sse`, {
-    method: 'POST', headers: { 'x-goog-api-key': chiave, 'Content-Type': 'application/json' },
+    method: 'POST', headers: { ...intest(chiave), 'Content-Type': 'application/json' },
     body: JSON.stringify({
       ...(corpo.system ? { systemInstruction: { parts: [{ text: String(corpo.system) }] } } : {}),
       contents, generationConfig: { maxOutputTokens: max }
