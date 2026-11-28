@@ -334,11 +334,11 @@ Se ti chiedo modifiche, rispondi con l'oggetto aggiornato nello stesso formato.`
       title: 'Collega l\'assistente', ok: 'Collega',
       intro: `L'assistente, la revisione di fine sessione e le Idee usano <b>Gemini</b> con i dati della campagna presenti nel sito. Per la chiave:
         <br>1. apri <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> ed entra con il tuo account Google;
-        <br>2. premi «Create API key» (o «Crea chiave API») e copiala: inizia con «AIza…»;
+        <br>2. premi «Create API key» (o «Crea chiave API») e copiala (di solito inizia con «AIza…» o «AQ.»);
         <br>3. incollala qui sotto e premi «Collega».
         <br>La chiave resta su Supabase: non sta in questo browser e i giocatori non la vedono mai.`,
       fields: [
-        { k: 'g', label: 'Chiave di Gemini', value: '', placeholder: s.chiave ? `già salvata (finisce con …${s.coda || ''}): lascia vuoto per tenerla` : 'AIza…' },
+        { k: 'g', label: 'Chiave di Gemini', value: '', placeholder: s.chiave ? `già salvata (finisce con …${s.coda || ''}): lascia vuoto per tenerla` : 'AIza… oppure AQ.…' },
         { k: 'claude', type: 'check', label: 'Usa invece Claude con una mia chiave API (sk-ant-…)', value: !!(cur.key && cur.key !== GEMINI) }
       ]
     });
@@ -346,7 +346,7 @@ Se ti chiedo modifiche, rispondi con l'oggetto aggiornato nello stesso formato.`
     if (r.claude) return claudeDlg();
     const g = r.g.trim().replace(/\s+/g, '');
     if (!g && !s.chiave) { toast('Incolla la chiave di Gemini.', 'err'); return false; }
-    if (g && !/^AIza[\w-]{20,}$/.test(g)) { toast('La chiave di Gemini dovrebbe iniziare con «AIza».', 'err'); return false; }
+    if (g && g.length < 20) { toast('La chiave sembra troppo corta: copiala tutta da AI Studio.', 'err'); return false; } // il formato lo decide la prova vera con Gemini (le chiavi nuove iniziano con «AQ.»)
     try {
       const sb = await window.__sbDM();
       if (g) { const w = await sb.rpc('tavolo_ai_salva', { p_chiave: g }); if (w.error) throw w.error; }

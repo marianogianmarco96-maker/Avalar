@@ -9,7 +9,7 @@
 
 create table if not exists public.tavolo_ai (
   id int primary key default 1 check (id = 1),
-  chiave text not null default '' check (length(chiave) <= 200),
+  chiave text not null default '' check (length(chiave) <= 2000),
   modello text not null default 'auto' check (length(modello) <= 80),
   aggiornata timestamptz not null default now()
 );
@@ -39,3 +39,7 @@ revoke all on function public.tavolo_ai_salva(text, text) from public, anon;
 revoke all on function public.tavolo_ai_stato() from public, anon;
 grant execute on function public.tavolo_ai_salva(text, text) to authenticated;
 grant execute on function public.tavolo_ai_stato() to authenticated;
+
+-- le chiavi nuove di AI Studio («AQ.…») possono essere più lunghe
+alter table public.tavolo_ai drop constraint if exists tavolo_ai_chiave_check;
+alter table public.tavolo_ai add constraint tavolo_ai_chiave_check check (length(chiave) <= 2000);
