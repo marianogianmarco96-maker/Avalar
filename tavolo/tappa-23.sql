@@ -43,3 +43,6 @@ grant execute on function public.tavolo_ai_stato() to authenticated;
 -- le chiavi nuove di AI Studio («AQ.…») possono essere più lunghe
 alter table public.tavolo_ai drop constraint if exists tavolo_ai_chiave_check;
 alter table public.tavolo_ai add constraint tavolo_ai_chiave_check check (length(chiave) <= 2000);
+
+-- l'ultimo modello che ha risposto: la funzione riparte da lì invece di riprovare quelli sovraccarichi
+alter table public.tavolo_ai add column if not exists ultimo text not null default '' check (length(ultimo) <= 80);
