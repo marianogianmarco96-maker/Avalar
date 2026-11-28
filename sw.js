@@ -1,4 +1,4 @@
-const VERSION = '1796600040';
+const VERSION = '1796600060';
 const CORE = ['./', 'index.html', 'copie.js', 'local.js', 'idee.js', 'scaletta.js', 'assistente.js', 'diario.js', 'bottino.js', 'manuali.js', 'compendio.js', 'compendio.json', 'incantesimi.json', 'tavolo.js', 'regole.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'versione.json'];
 const CACHE = 'campagna-' + VERSION, FONTS = 'campagna-fonts';
 self.addEventListener('install', e => {
@@ -55,7 +55,7 @@ self.addEventListener('fetch', e => {
     const c = await caches.open(CACHE);
     if (core) {
       // chiede sempre al server se il file è cambiato, invece di usare la copia del browser (GitHub Pages la tiene 10 minuti)
-      try { const r = await fetch(req.mode === 'navigate' ? new Request(req.url, { cache: 'no-cache', credentials: 'same-origin' }) : new Request(req, { cache: 'no-cache' })); if (r.ok) c.put(req.mode === 'navigate' ? './' : req, r.clone()); return r; }
+      try { const r = await fetch(req.mode === 'navigate' ? new Request(req.url, { cache: 'no-cache', credentials: 'same-origin' }) : new Request(req, { cache: 'no-cache' })); if (r.ok) c.put(req.mode === 'navigate' ? './' : url.search && /\.(enc|json)$/.test(url.pathname) ? url.origin + url.pathname : req, r.clone()); return r; }
       catch { return (await c.match(req, { ignoreSearch: true })) || (await c.match('./')) || Response.error(); }
     }
     const hit = await c.match(req);

@@ -500,7 +500,10 @@ dialog.tv-sw>.rz:hover{background-color:#7d253033}
 .tv-sch .pill span{font:700 .6rem/1.15 var(--body);letter-spacing:.05em;text-transform:uppercase}
 .tv-sch .pill .pv{width:32px;height:28px;flex:none;border:2px solid var(--lin);border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 .95rem var(--display)}
 .tv-sch .pill.largo{border-radius:20px}
-.tv-sch .pill.merda{flex-wrap:wrap}
+.tv-sch .pill.merda,.pill.ispz{flex-wrap:wrap}
+.pill.ispz.on{border-color:#c9a24b;background:#c9a24b1f}
+.pill.ispz .mq{display:flex;gap:3px;margin-left:auto}
+.pill.ispz .isp-dai{color:#8a5a14;border-color:#c9a24b;font-weight:700}
 .tv-sch .usab .pu,.tv-sch .legg .lg{border-bottom:1px dashed var(--lin);padding:5px 0;display:flex;flex-direction:column;gap:4px}
 .tv-sch .usab .pur{display:flex;flex-wrap:wrap;align-items:center;gap:5px}
 .tv-sch .usab .pur b{font:700 .9rem var(--display)}
@@ -1011,23 +1014,22 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
 }
 .tv-back{display:none}
 .tv-mrz,.tv-mtab{display:none}
-.tv-isp{position:absolute;left:50%;top:14%;z-index:60;display:flex;align-items:center;gap:16px;padding:14px 26px 14px 14px;border-radius:16px;max-width:calc(100% - 40px);pointer-events:none;color:#f6e7c4;background:linear-gradient(180deg,#3a161bf2,#24090df2);border:1px solid #e0b75c;box-shadow:inset 0 0 0 4px #24090d,inset 0 0 0 5px #e0b75c55,0 0 40px #e0b75c55,0 18px 50px #000c;animation:tvIsp 4.8s ease forwards}
-.tv-isp .st{position:relative;flex:none;width:62px;height:62px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#fff6d0,#e0b75c 55%,#8a5a14);display:flex;align-items:center;justify-content:center;font-size:2rem;color:#5a2a05;box-shadow:0 0 24px #f3d58caa}
-.tv-isp small{display:block;font:600 .78rem/1 var(--display,serif);letter-spacing:.14em;color:#e0b75c;text-transform:uppercase;margin-bottom:6px}
-.tv-isp b{display:block;font:700 1.7rem/1.1 var(--title,serif);color:#fff2cf}
-.tv-isp i{display:block;font-size:.95rem;color:#e9d7b0;margin-top:4px}
-.tv-isp.merda{background:linear-gradient(180deg,#3b2c1cf2,#1e150cf2);border-color:#a8854a;box-shadow:inset 0 0 0 4px #1e150c,inset 0 0 0 5px #a8854a55,0 0 40px #6b4a2266,0 18px 50px #000c}
-.tv-isp.merda .st{background:radial-gradient(circle at 50% 40%,#d8b88a,#8a6a3a 55%,#4a3018);box-shadow:0 0 24px #8a6a3a99}
-.tv-isp.merda small{color:#c9a46a}.tv-isp.merda b{color:#f1e1c4}
-.tv-isp{width:max-content}.tv-isp.anello{border-color:#7fb2e0}.tv-isp.anello .st{background:radial-gradient(circle at 50% 40%,#d7ecff,#4a7fb5 55%,#1c3350);box-shadow:0 0 24px #4a7fb599}.tv-isp.anello small{color:#9fc7ec}
+.tv-isp{position:absolute;left:16px;bottom:16px;z-index:60;display:flex;align-items:center;gap:10px;width:min(300px,calc(100% - 32px));padding:9px 12px;border-radius:10px;pointer-events:none;color:#f6e7c4;background:#24090df0;border:1px solid #c9a24b88;border-left:4px solid #e0b75c;box-shadow:0 8px 22px #000a;animation:tvIsp 4.5s ease forwards}
+.tv-isp .st{flex:none;width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#fff6d0,#e0b75c 55%,#8a5a14);display:flex;align-items:center;justify-content:center;font-size:1.05rem;color:#5a2a05}
+.tv-isp b{display:block;font:700 1rem/1.2 var(--title,serif);color:#fff2cf}
+.tv-isp i{display:block;font-style:normal;font-size:.82rem;color:#d9c7a2;margin-top:2px}
+.tv-isp.merda{background:#1e150cf0;border-color:#a8854a88;border-left-color:#a8854a}
+.tv-isp.merda .st{background:radial-gradient(circle at 50% 40%,#d8b88a,#8a6a3a 55%,#4a3018)}
+.tv-isp.merda b{color:#f1e1c4}
+@media (max-width:820px){.tv-isp{bottom:calc(84px + env(safe-area-inset-bottom,0px))}}
+@keyframes tvIsp{0%{opacity:0;transform:translateX(-16px)}8%{opacity:1;transform:none}88%{opacity:1}100%{opacity:0}}
+.tv-isp.anello{background:#0f2236f0;border-color:#7fb2e088;border-left-color:#7fb2e0}.tv-isp.anello .st{background:radial-gradient(circle at 50% 40%,#d7ecff,#4a7fb5 55%,#1c3350);color:#fff}
 .effc.on{background:#2f5f8a;color:#eaf5ff}
 @media (max-width:760px){#tv-strip .ac [data-k=rit]{display:none}}
 #tv-strip [data-rit]{opacity:.55;outline:2px dashed #c9a24a;outline-offset:1px}.ora.rit{color:#c9a24a}
 .tv-rit{display:grid;gap:6px;margin:10px 0}.tv-rit button{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;border:1px solid #0002;background:#fff8;text-align:left;font:inherit;cursor:pointer;min-height:44px}.tv-rit button:hover{background:#fff}
 .tv-rit i{flex:none;width:34px;height:34px;border-radius:50%;background:var(--c) center/cover;color:#fff;display:grid;place-items:center;font-style:normal;font-weight:700;font-size:.8rem}.tv-rit span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tv-rit em{font-style:normal;opacity:.6}
 .tv-pop .fine{display:flex;gap:6px;flex-wrap:wrap}.tv-pop .fine .tv-b{flex:1 1 auto;width:auto}
-@media (max-width:620px){.tv-isp{top:10%;gap:10px;padding:10px 16px 10px 10px}.tv-isp .st{width:46px;height:46px;font-size:1.4rem}.tv-isp b{font-size:1.25rem}.tv-isp i{font-size:.82rem}}
-@keyframes tvIsp{0%{opacity:0;transform:translate(-50%,-14px) scale(.9)}8%{opacity:1;transform:translate(-50%,0) scale(1.03)}14%{transform:translate(-50%,0) scale(1)}85%{opacity:1}100%{opacity:0;transform:translate(-50%,-8px)}}
 @media (prefers-reduced-motion:reduce){.tv-isp{animation:none}}
 @media (min-width:900px){
   html.in-tavolo.tv-mi{--sbw:64px!important}
@@ -5180,6 +5182,13 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
      usato, il prossimo tiro con il d20 di quel personaggio (prova, TS, attacco) ha svantaggio */
   const merdaAttiva = s => !!s?.dati?.merda_attiva;
   const consumaMerda = s => { if (s?.dati) { s.dati.merda_attiva = false; salvaScheda(s.id, { merda_attiva: false }, true)?.catch?.(() => { }); } };
+  // ispirazione: niente numero da scrivere. Il DM la concede con «✦ +1» (parte l'avviso per tutti) o toglie un punto; chi ha la scheda la usa
+  function pillIsp(s, w) {
+    const n = ispDi(s), dm = isDM();
+    return `<div class="pill ispz${n ? ' on' : ''}" title="Punti ispirazione: li concede il DM. Usato, vantaggio a un tiro."><b class="pv">${n}</b><span>Ispirazione</span>
+      ${dm ? `<span class="mq"><button type="button" class="mini" data-k="isp-" title="Togli un punto"${n ? '' : ' disabled'}>−</button><button type="button" class="mini isp-dai" data-k="isp+" title="Concedi un punto ispirazione: tutti vedono l'avviso">✦ +1</button></span>`
+        : w && n ? `<span class="mq"><button type="button" class="mini" data-k="isp-usa" title="Usa il punto: vantaggio a un tiro">Usa</button></span>` : ''}</div>`;
+  }
   function pillMerda(s) {
     const d = s.dati, n = num(d.merda) || 0, on = !!d.merda_attiva, dm = isDM();
     return `<div class="pill merda${on ? ' on' : ''}" title="Punti merda: li dà il DM e decide lui quando usarli. Usato, il prossimo tiro con il d20 ha svantaggio."><b class="pv">${n}</b><span>Punti merda${on ? ' · <i>svantaggio al prossimo tiro</i>' : ''}</span>
@@ -6348,12 +6357,13 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function mostraIspira(m) {
     const tv = $('.tv'); if (!tv) return;
     tv.querySelector('.tv-isp')?.remove();
+    // biglietto piccolo in basso a sinistra, come le notifiche del sito: non copre la mappa
     const b = document.createElement('div'); b.className = 'tv-isp'; b.setAttribute('role', 'status');
     const merda = m.tipo === 'merda', an = m.tipo === 'anello'; if (merda) b.classList.add('merda'); if (an) b.classList.add('anello');
-    b.innerHTML = an ? `<div class="st" aria-hidden="true">${esc(m.ic || '💍')}</div><div><small>${esc(m.su || '')}</small><b>${esc(m.titolo || '')}</b><i>${esc(m.testo || '')}</i></div>`
+    b.innerHTML = an ? `<div class="st" aria-hidden="true">${esc(m.ic || '💍')}</div><div><b>${esc(m.titolo || '')}</b><i>${esc([m.su, m.testo].filter(Boolean).join(' · '))}</i></div>`
       : merda
-      ? `<div class="st" aria-hidden="true">💩</div><div><small>Il DM usa un punto merda</small><b>${esc(m.nome)} ha svantaggio</b><i>Al prossimo tiro con il d20: prova, tiro salvezza o attacco.</i></div>`
-      : `<div class="st" aria-hidden="true">✦</div><div><small>Il DM concede</small><b>${esc(m.nome)} riceve un punto ispirazione</b><i>Vantaggio a un tiro, quando vuole.</i></div>`;
+      ? `<div class="st" aria-hidden="true">💩</div><div><b>${esc(m.nome)} ha svantaggio</b><i>Il DM usa un punto merda: prossimo tiro con il d20.</i></div>`
+      : `<div class="st" aria-hidden="true">✦</div><div><b>${esc(m.nome)} riceve un punto ispirazione</b><i>Vantaggio a un tiro, quando vuole.</i></div>`;
     tv.append(b); setTimeout(() => b.remove(), 4800);
     if (m.tok && an) mostraLampo({ id: m.tok, col: '#9fd0ff', txt: `${m.ic || '💍'} ${m.titolo || ''}`.slice(0, 40) });
     else if (m.tok) mostraLampo(merda ? { id: m.tok, col: '#8a6a3a', txt: '💩 Svantaggio' } : { id: m.tok, col: '#f3d58c', txt: '✦ Ispirazione' });
@@ -7416,7 +7426,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         <div class="colA">
           <div class="dueA"><div class="carcol">${car}</div>
             <div class="altA">
-              ${pg ? `<div class="pill isp"><input type="number" class="pv" data-f="ispirazione" min="0" step="1" placeholder="0" aria-label="Punti ispirazione"${dis}><span>Ispirazione</span></div>` : ''}
+              ${pg ? pillIsp(s, w) : ''}
               ${pg || num(d.merda) || d.merda_attiva ? pillMerda(s) : ''}
               <div class="pill"><b class="pv" data-c="comp"></b><span>Bonus di competenza</span></div>
               <div class="pill isp" title="Quante azioni ha a ogni turno: 1 di solito, di più per alcuni mostri o privilegi"><input type="number" class="pv" data-f="n_azioni" min="1" max="9" step="1" placeholder="1" aria-label="Azioni per turno"${dis}><span>Azioni per turno</span></div>
@@ -7719,6 +7729,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (k === 'leg-usa') { const x = leggDi(s)[+b.dataset.i]; return usaLeg(s, tokScheda() || attaccante(s), x); }
     if (k === 'leg-reset') { await salvaScheda(s.id, { leg_usate: 0 }, true); return disegnaScheda(); }
     if (!isDM()) return;
+    if (k === 'isp+' || k === 'isp-') { if (!isDM()) return; await salvaScheda(s.id, { ispirazione: Math.max(0, ispDi(s) + (k === 'isp+' ? 1 : -1)) }, true); return disegnaScheda(); }
+    if (k === 'isp-usa') { const n = ispDi(s); if (!n) return; await salvaScheda(s.id, { ispirazione: n - 1 }, true); disegnaScheda(); return annuncia(`✦ ${s.nome || 'Un personaggio'} usa il punto ispirazione: vantaggio a un tiro.`).catch(() => { }); }
     if (k === 'merda+' || k === 'merda-') { await salvaScheda(s.id, { merda: Math.max(0, (num(d.merda) || 0) + (k === 'merda+' ? 1 : -1)) }, true); return disegnaScheda(); }
     if (k === 'merda-no') { await salvaScheda(s.id, { merda: (num(d.merda) || 0) + 1, merda_attiva: false }, true); return disegnaScheda(); }
     if (k === 'merda-usa') {
@@ -8693,7 +8705,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
      Il DM e ogni giocatore, appena entrati nel sito, si fanno vedere su un canale riservato ai membri del tavolo
      (con la pagina in cui sono e se il sito è in primo piano). Il DM vede nella barra in alto chi è connesso. */
   const P = { ch: null, me: null, live: false, info: null, stato: {}, da: Date.now(), ko: false };
-  const SEZ = { '': 'Home', sessioni: 'Sessioni', schede: 'Schede', scheda: 'Schede', mappe: 'Mappe', manuali: 'Manuali', tavolo: 'Tavolo', cerca: 'Ricerca', cronologia: 'Cronologia', idee: 'Idee' };
+  const SEZ = { '': 'Home', sessioni: 'Sessioni', schede: 'Archivio', scheda: 'Archivio', mappe: 'Mappe', manuali: 'Manuali', tavolo: 'Tavolo', cerca: 'Ricerca', cronologia: 'Cronologia', idee: 'Idee' };
   const sezione = () => { const k = location.hash.replace(/^#\/?/, '').split(/[/?]/)[0]; return SEZ[k] || (k ? k[0].toUpperCase() + k.slice(1) : 'Home'); };
   const traccia = () => { if (P.ch && P.live) P.ch.track({ nome: P.me.nome, ruolo: P.me.ruolo, giocatore: P.me.giocatore, pagina: sezione(), attivo: !document.hidden, da: P.da }).catch(() => { }); };
   const PCSS = `#online{position:relative;flex:none;z-index:45;font:600 .8rem/1.2 var(--body)}
