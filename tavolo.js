@@ -1378,10 +1378,33 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
 .tv-scuro .tv-sch .at input.calcolato{color:#f0a8a0}
 .tv-sch .at .bon{font-size:.74rem;font-weight:700;color:#b4541c;background:#b4541c1a;border-radius:999px;padding:2px 8px;white-space:nowrap}
 .tv-scuro .tv-sch .at .bon{color:#f0b48f}
-.tv-sch .atcfg{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:6px 10px;padding:8px 4px 4px;margin-top:4px;border-top:1px dashed var(--ul)}
-.tv-sch .atcfg label{display:flex;flex-direction:column;gap:2px;font-size:.72rem;color:var(--k2)}
-.tv-sch .atcfg label.ck{flex-direction:row;align-items:center;gap:6px;grid-column:1/-1;font-size:.78rem;color:var(--k)}
+.tv-sch .atcfg{display:grid;gap:10px;padding:10px 2px 4px;margin-top:6px;border-top:1px solid var(--ul)}
+.tv-sch .atcfg label{display:flex;flex-direction:column;gap:2px;font-size:.72rem;color:var(--k2);min-width:0}
+.tv-sch .atcfg label.ck{flex-direction:row;align-items:center;gap:6px;font-size:.78rem;color:var(--k)}
+.tv-sch .atcfg select,.tv-sch .atcfg input:not([type=checkbox]){width:100%;min-width:0}
+.tv-sch .atcfg .riep{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;background:var(--box);border-radius:10px;padding:8px 12px}
+.tv-sch .atcfg .riep b{font:700 1.08rem/1.2 var(--display);color:#7d2530}
+.tv-scuro .tv-sch .atcfg .riep b{color:#f0a8a0}
+.tv-sch .atcfg .riep+.conto{margin-top:-4px;padding:0 4px;color:var(--k2);font-size:.76rem}
+.tv-sch .atcfg h5,.tv-sch .atcfg legend{margin:0 0 6px;padding:0;font:700 .7rem/1.2 var(--body);letter-spacing:.07em;text-transform:uppercase;color:var(--k2)}
+.tv-sch .atcfg legend{float:left;width:100%}
+.tv-sch .atcfg .dadi{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+.tv-sch .atcfg .dadi button{border:1px solid var(--ul);background:var(--box);color:var(--k);border-radius:8px;padding:7px 0;font:700 .9rem/1 var(--display);cursor:pointer}
+.tv-sch .atcfg .dadi button:hover{border-color:#7d2530;color:#7d2530}
+.tv-scuro .tv-sch .atcfg .dadi button:hover{border-color:#f0a8a0;color:#f0a8a0}
+.tv-sch .atcfg .dxl{display:grid;gap:5px;margin-top:6px}
+.tv-sch .atcfg .dxr{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1fr) auto;gap:6px;align-items:center;background:var(--box);border-radius:8px;padding:5px 6px}
+.tv-sch .atcfg .cnt{display:flex;align-items:center;gap:3px}
+.tv-sch .atcfg .cnt button{width:24px;height:24px;border-radius:50%;border:1px solid var(--ul);background:transparent;color:var(--k);cursor:pointer;padding:0;line-height:1;font-weight:700}
+.tv-sch .atcfg .cnt b{min-width:44px;text-align:center;font-family:var(--display)}
+.tv-sch .atcfg .dxx{border:0;background:transparent;color:var(--k2);cursor:pointer;font-size:.9rem;padding:2px 4px}
+.tv-sch .atcfg .dxx:hover{color:#a3262f}
+.tv-sch .atcfg .due{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.tv-sch .atcfg fieldset{border:0;background:var(--box);border-radius:10px;padding:8px 10px 10px;margin:0;display:grid;gap:7px;min-width:0}
+.tv-sch .atcfg .nota{margin:0;font-size:.76rem;color:var(--k2);line-height:1.35}
 .tv-sch .atcfg label.lg{grid-column:1/-1}
+.tv-sch .at .riga .mini.amano{background:transparent;border:1px dashed var(--ul);color:var(--k2);font-size:.74rem;box-shadow:none}
+@media (max-width:480px){.tv-sch .atcfg .dxr{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"c t x" "q q q"}.tv-sch .atcfg .dxr .cnt{grid-area:c}.tv-sch .atcfg .dxr select[data-f$=".t"]{grid-area:t}.tv-sch .atcfg .dxr select[data-f$=".q"]{grid-area:q}.tv-sch .atcfg .dxr .dxx{grid-area:x}}
 .tv-sch .at .arma{display:flex;flex-wrap:wrap;gap:4px;margin:3px 0 1px;font-size:.72rem;color:var(--k2)}
 .tv-sch .at .arma span{background:var(--box);border-radius:999px;padding:1px 7px}
 .tv-sch .at .arma b{color:var(--k)}
@@ -1396,7 +1419,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
 .tv-scuro .tv-sch .cacfg .avvca{color:#ff9a8f}
 .tv-sch .at .atdesc{margin:3px 0 1px;padding:4px 8px;border-left:3px solid #7d2530;background:var(--box);border-radius:0 6px 6px 0;font-size:.8rem;line-height:1.4;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--k)}
 .tv-sch .atcfg textarea.auto{background:var(--box);border-radius:4px;padding:4px 6px;font-size:.82rem}
-.tv-sch .atcfg .conto{grid-column:1/-1;margin:0;font-size:.8rem;color:var(--k);line-height:1.35}
+.tv-sch .atcfg .conto{margin:0;font-size:.8rem;color:var(--k);line-height:1.35}
 
 /* telefono: strumenti in basso, mappa a tutta larghezza */
 .tv-rfr{display:none}
@@ -5449,6 +5472,13 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     for (const p of P) if (p.extra && p.dadi && !L.some(x => (p.id && x.da === p.id) || norm(x.nome) === norm(p.nome))) out.push({ id: 'p-' + (p.id || norm(p.nome)), nome: p.nome, dadi: p.dadi, attivo: !!p.attivo, da: p.id || null });
     return out;
   }
+  // l'ingranaggio cambia i dadi in più di un attacco: la forma di prima (bdadi) passa nella lista
+  const salvaDx = async (s, i, fn) => {
+    const A = (s.dati.attacchi || []).map(x => ({ ...x })); if (!A[i]) return;
+    const L = dxLista(A[i]).map(x => ({ ...x })); fn(L);
+    A[i].dx = L.filter(x => x && x.d); A[i].bdadi = ''; A[i].btipo = '';
+    await salvaScheda(s.id, { attacchi: A }, true); if (T.sv?.id === s.id) disegnaScheda();
+  };
   const salvaExtra = (s, L) => salvaScheda(s.id, { danni_extra: L.map(x => ({ ...x })) }, true).then(() => { if (T.sv?.id === s.id) disegnaScheda(); });
   // attacco furtivo e simili restano accesi (o spenti) finché non si cambia: dalla mira o dalla scheda
   function attivaExtra(s, id, on) {
@@ -5483,13 +5513,16 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (puo && !on) { m.extra.add(fu.id); toast(`Attacco furtivo aggiunto: ${v.adv === 1 ? 'hai vantaggio' : `${v.vicino.nome || 'un alleato'} è accanto a ${b.nome || 'il bersaglio'}`}.`); }
       else if (!puo && on) { m.extra.delete(fu.id); toast(`Attacco furtivo tolto: ${v.adv === 2 ? 'con lo svantaggio non vale' : 'serve il vantaggio o un alleato accanto al bersaglio'}.`); } }
     fineMira(animazioni() ? 1800 : 700);
-    const exP = extraDi(sx).filter(x => m.extra.has(x.id) && x.dadi), bd = m.inc == null ? bonusDadi(at) : '';
+    // dadi in più dell'arma: «sempre», e «una volta per turno» se in questo turno non hanno ancora fatto danni (quelli «al critico» li tira il database)
+    const XS = m.inc == null ? dadiX(at).map((e, j) => ({ ...e, j })).filter(e => !e.q || (e.q === 'turno' && (!inCombattimento() || usoDx.get(`${m.tok}:${m.i}:${e.j}`) !== chiaveTurno()))) : [];
+    const exP = extraDi(sx).filter(x => m.extra.has(x.id) && x.dadi), bd = XS.map(e => e.d).join('+');
     const mk = marchioDi(att), mkx = mk && mk.a === b.id && (m.inc == null || mk.tutti) ? mk : null;
     const pu = m.pu && m.inc == null && v.modo === 'mischia' && slotLiberi(sx, m.pu) ? { lv: m.pu, dadi: `${Math.min(5, m.pu + 1) + (/non\s*mort|immond|demon|diavol/i.test(schedaDi(b)?.dati?.taglia_tipo || '') ? 1 : 0)}d8` } : null;
-    const extra = [bd, ...exP.map(x => x.dadi), mkx?.dadi, pu?.dadi].filter(Boolean).join('+'), exN = [bd ? bonusNome(at) : '', ...exP.map(x => x.nome || 'danni in più'), mkx?.nome, pu && 'Punizione divina'].filter(Boolean).join(' + ');
+    const extra = [bd, ...exP.map(x => x.dadi), mkx?.dadi, pu?.dadi].filter(Boolean).join('+'), exN = [XS.map(nomeDx).join(' + '), ...exP.map(x => x.nome || 'danni in più'), mkx?.nome, pu && 'Punizione divina'].filter(Boolean).join(' + ');
     const r = await SB.rpc('tavolo_attacca', { p_token: m.tok, p_bersaglio: b.id, p_attacco: m.i, p_adv: v.adv, p_privato: m.seg, ...(v.cop?.ca ? { p_cop: v.cop.ca } : {}), ...(extra ? { p_extra: extra, p_extra_nome: exN } : {}), ...(m.inc != null ? { p_inc: m.inc } : {}), p_liv: m.liv || null });
     if (r.error) return toast(v.cop?.ca && /p_cop|function|candidate/i.test(r.error.message) ? 'Per la copertura esegui tavolo/tappa-16.sql in Supabase (oppure scegli «nessuna» nella barra).' : /candidate function/i.test(r.error.message) ? 'In Supabase è rimasta una versione vecchia della funzione: esegui di nuovo tavolo/tappa-9.sql.' : /p_liv/i.test(r.error.message) ? 'Per lanciare con uno slot più alto esegui tavolo/tappa-9.sql in Supabase.' : sqlMancante(r.error) ? 'Per gli attacchi sulla mappa esegui tavolo/tappa-5.sql in Supabase.' : extra && /p_extra|function/i.test(r.error.message) ? 'Per aggiungere i dadi in più esegui tavolo/tappa-7.sql in Supabase.' : r.error.message, 'err');
     const x = Array.isArray(r.data) ? r.data[0] : r.data, a = T.tok.get(m.tok);
+    if (x.colpito && inCombattimento()) XS.filter(e => e.q === 'turno').forEach(e => usoDx.set(`${m.tok}:${m.i}:${e.j}`, chiaveTurno()));
     const mossa = { da: m.tok, a: b.id, anim: v.anim, col: v.col, ritorna: !!v.ritorna, esito: x.colpito === true ? 'si' : x.colpito === false ? 'no' : 'nd', crit: !!x.critico, fallito: !!x.fallito, danni: x.danni || 0 };
     manda('attacco', mossa); mostraAttacco(mossa);
     if (a && condTok(a).includes('Nascosto')) mettiNascosto(a, false); // attaccare svela chi era nascosto
@@ -5509,7 +5542,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     // «se colpisce, TS su Forza CD 16 o cade prono» scritto nelle note dell'attacco: il TS arriva al bersaglio colpito
     if (mossa.esito === 'si' && m.inc == null && !x.salvezza && !x.morto) { const r2 = tsDaNote(at); if (r2) chiediTSTratto(a, b, { ...r2, nome: at.nome || 'attacco' }); }
     const perche = [v.adv === 1 ? 'vantaggio: ' + v.pro.join(', ') : v.adv === 2 ? 'svantaggio: ' + v.contro.join(', ') : ''].filter(Boolean).join('');
-    toast(`${a?.nome || ''} → ${b.nome || ''}: ${mossa.esito === 'nd' ? `tiro ${x.totale}, senza CA nella scheda del bersaglio decide il DM` : mossa.esito === 'si' ? `${x.critico ? 'critico! ' : 'colpito, '}${x.danni} danni${x.danni_extra != null ? ` (di cui ${x.danni_extra} da ${exN})` : ''}` : x.fallito ? '1 naturale, mancato' : 'mancato'}${perche ? ' (' + perche + ')' : ''}${v.ritorna ? ' · il pugnale torna in mano' : ''}`);
+    toast(`${a?.nome || ''} → ${b.nome || ''}: ${mossa.esito === 'nd' ? `tiro ${x.totale}, senza CA nella scheda del bersaglio decide il DM` : mossa.esito === 'si' ? `${x.critico ? 'critico! ' : 'colpito, '}${x.danni} danni${x.danni_extra != null ? ` (di cui ${x.danni_extra} da ${exN || 'danni al critico'})` : ''}` : x.fallito ? '1 naturale, mancato' : 'mancato'}${perche ? ' (' + perche + ')' : ''}${v.ritorna ? ' · il pugnale torna in mano' : ''}`);
   }
 
   // attacco non letale: a 0 punti ferita il bersaglio resta svenuto invece che morto
@@ -6260,22 +6293,34 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   const dadoAtt = a => String(a.dado || '').replace(/\s+/g, '') || (String(a.danni || '').replace(/\s+/g, '').match(/^\d*d\d+/i) || [''])[0];
   // danni bonus dell'attacco (arma infuocata, veleno…), tirati a parte con il loro tipo
   const TIPI_DANNO = [['acido', 'da acido'], ['contundenti', 'contundenti'], ['forza', 'da forza'], ['freddo', 'da freddo'], ['fulmine', 'da fulmine'], ['fuoco', 'da fuoco'], ['necrotici', 'necrotici'], ['perforanti', 'perforanti'], ['psichici', 'psichici'], ['radiosi', 'radiosi'], ['taglienti', 'taglienti'], ['tuono', 'da tuono'], ['veleno', 'da veleno']];
-  const bonusDadi = a => String(a?.bdadi || '').replace(/\s+/g, '');
-  const bonusNome = a => 'danni ' + ((TIPI_DANNO.find(t => t[0] === a?.btipo) || [, 'bonus'])[1]);
+  /* dadi di danno in più dell'arma (⚙): { d: '2d6', t: 'fuoco', q: '' sempre | 'crit' solo al critico | 'turno' una volta per turno };
+     «bdadi» e «btipo» sono la forma di prima (un solo dado bonus) e valgono come il primo della lista */
+  const dxLista = a => [...(String(a?.bdadi || '').trim() ? [{ d: String(a.bdadi).replace(/\s+/g, ''), t: a.btipo || '', q: '' }] : []), ...(Array.isArray(a?.dx) ? a.dx : [])];
+  const DADO_OK = /^\d{0,2}d\d{1,3}([+-]\d{1,3})?$/;
+  const dadiX = a => dxLista(a).map(x => ({ d: String(x.d || '').replace(/\s+/g, '').toLowerCase(), t: x.t || '', q: x.q || '' })).filter(x => DADO_OK.test(x.d));
+  const nomeDx = x => 'danni ' + ((TIPI_DANNO.find(t => t[0] === x.t) || [, 'in più'])[1]);
+  const QUANDO_DX = [['', 'sempre'], ['crit', 'solo al critico'], ['turno', 'una volta per turno']];
+  const usoDx = new Map(); // «una volta per turno»: token:attacco:dado → turno in cui ha già fatto danni
+  // i dadi in più che valgono sempre, tutti insieme (blocco dei PNG, riepilogo)
+  const bonusDadi = a => dadiX(a).filter(x => !x.q).map(x => x.d).join('+');
+  const bonusNome = a => dadiX(a).filter(x => !x.q).map(nomeDx).join(' + ') || 'danni in più';
   function calcAtt(s, a) {
     const k = carAtt(s, a); if (!k || !CAR.some(c => c[0] === k)) return null;
     const w = armaAtt(s, a), m = modC(s.dati[k]);
     // il bonus magico si legge anche dal nome («Spada lunga +1»)
     const mg = a.magia != null && a.magia !== '' ? num(a.magia) || 0 : +(String(a.nome || '').match(/\+\s?([1-3])\b/) || [])[1] || 0;
-    const dd = w ? (a.duemani && versatile(w)) || (w[1] === '1' ? '' : w[1]) : dadoAtt(a);
+    const dd = w ? (a.duemani && versatile(w)) || (w[1] === '1' ? '' : w[1]) : dadoAtt(a), dm = num(a.dmod) || 0; // dmod: modificatore ai danni scritto nell'ingranaggio
     const cp = a.comp_att === 'si' ? true : a.comp_att === 'no' || a.nocomp ? false : w && formaPg(s) ? competenteArma(s, w) : true; // i PNG si considerano competenti nelle loro armi
-    return { k, m, mg, w, cp, colpire: m + (cp ? comp(s) : 0) + mg, danni: dd ? dd + piu(m + mg) : w?.[1] === '1' ? String(Math.max(1, 1 + m + mg)) : '' };
+    return { k, m, mg, w, cp, colpire: m + (cp ? comp(s) : 0) + mg, danni: dd ? dd + piu(m + mg + dm) : w?.[1] === '1' ? String(Math.max(1, 1 + m + mg + dm)) : '' };
   }
   function attacchiCalcolati(s) {
     let cambiati = false;
     const L = (s.dati.attacchi || []).map(a => {
-      const c = calcAtt(s, a); if (!c || (num(a.colpire) === c.colpire && a.danni === c.danni)) return a;
-      cambiati = true; return { ...a, colpire: c.colpire, danni: c.danni };
+      // man_c / man_d: valore scritto a mano nella riga, che il sito lascia com'è
+      const c = calcAtt(s, a); if (!c) return a;
+      const col = a.man_c ? a.colpire : c.colpire, dan = a.man_d ? a.danni : c.danni;
+      if (num(a.colpire) === num(col) && a.danni === dan) return a;
+      cambiati = true; return { ...a, colpire: col, danni: dan };
     });
     return cambiati ? L : null;
   }
@@ -6737,6 +6782,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
   function valoreCampo(s, f) {
     if (f === 'nome') return s.nome;
     if (f.startsWith('att.')) { const [, i, k] = f.split('.'); return (s.dati.attacchi || [])[i]?.[k]; }
+    if (f.startsWith('attdx.')) { const [, i, j, k] = f.split('.'); return dxLista((s.dati.attacchi || [])[i])[j]?.[k] ?? ''; }
     if (f.startsWith('prv.')) { const [, i, k] = f.split('.'); const v = (s.dati.privilegi || [])[i]?.[k]; return k === 'riposo' ? v || 'lungo' : k === 'eff' ? effettoDi((s.dati.privilegi || [])[i] || {}) : v; }
     if (f.startsWith('inc.')) { const [, i, k] = f.split('.'); const v = (s.dati.incantesimi || [])[i]?.[k]; return k === 'livello' ? String(num(v) || 0) : v; }
     if (f.startsWith('tok.')) { const t = tokScheda(), k = f.slice(4); return t ? t[k] ?? (t.pf_max == null ? s.dati[k] : null) : null; }
@@ -6754,10 +6800,13 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (k === 'cd') return String(8 + comp(s) + modC(s.dati[carInc(s)]));
     if (k === 'inc') return segno(comp(s) + modC(s.dati[carInc(s)]));
     if (k === 'ca') { const x = calcCA(s); return !x ? '' : x.incerta ? `Senza armatura la CA sarebbe ${x.ca} (${x.parti.join(' + ')}), ma la scheda dice ${s.dati.ca}: scegli qui sopra l'armatura indossata e la CA si calcola da sola.` : `CA ${x.ca} = ${x.parti.join(' + ')}`; }
+    if (k === 'attc') { const at = (s.dati.attacchi || [])[a]; return at ? '🎯 ' + segno(num(at.colpire) || 0) : ''; }
+    if (k === 'attd') { const at = (s.dati.attacchi || [])[a]; return at ? '💥 ' + (at.danni || '—') : ''; }
     if (k === 'att') {
       const at = (s.dati.attacchi || [])[a], c = at && calcAtt(s, at), bd = bonusDadi(at), piuB = bd ? ` · più ${bd} ${bonusNome(at)}` : '';
       if (!c) return 'Manuale: bonus e danni li scrivi tu nella riga sopra.' + (bd ? ` Danni bonus: ${bd} ${bonusNome(at)}.` : '');
-      return `${segno(c.colpire)} al colpire = ${nomeCar(c.k)} ${segno(c.m)}${c.cp ? ` + competenza ${segno(comp(s))}` : ''}${c.mg ? ` + magia ${segno(c.mg)}` : ''} · danni ${c.danni || 'scrivi il dado'}${c.w?.[2] ? ' ' + c.w[2] : ''}${piuB}`;
+      const dm = num(at.dmod) || 0;
+      return `Colpire ${segno(c.colpire)} = ${nomeCar(c.k)} ${segno(c.m)}${c.cp ? ` + competenza ${segno(comp(s))}` : ''}${c.mg ? ` + magia ${segno(c.mg)}` : ''}${at.man_c ? ' (nella riga hai scritto ' + segno(num(at.colpire) || 0) + ')' : ''} · danni ${c.danni || 'scrivi il dado'}${dm ? ` (con ${segno(dm)} ai danni)` : ''}${c.w?.[2] ? ' ' + c.w[2] : ''}${at.man_d ? ' (nella riga hai scritto ' + (at.danni || '—') + ')' : ''}`;
     }
     return '';
   }
@@ -6777,8 +6826,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const caI = box.querySelector('.scudo [data-f=ca]'), caA = (x => !!x && !x.incerta)(calcCA(s));
     if (caI) { caI.readOnly = caA; caI.classList.toggle('calcolato', caA); caI.title = caA ? 'Calcolata da armatura, scudo e Destrezza: cambiala con ⚙' : ''; }
     box.querySelectorAll('.at[data-ordi]').forEach(el => {
+      // calcolati ma scrivibili: chi scrive nella casella tiene il suo valore (✎ nella riga per tornare al calcolo)
       const a = (s.dati.attacchi || [])[+el.dataset.ordi], auto = !!(a && calcAtt(s, a));
-      el.querySelectorAll('.riga:first-child .ac, .riga:first-child .ad').forEach(x => { x.readOnly = auto; x.classList.toggle('calcolato', auto); x.title = auto ? 'Calcolato dalla caratteristica scelta: cambialo con ⚙' : ''; });
+      el.querySelectorAll('.riga:first-child .ac, .riga:first-child .ad').forEach(x => { const c = auto && !a[x.classList.contains('ac') ? 'man_c' : 'man_d']; x.readOnly = false; x.classList.toggle('calcolato', c); x.title = c ? 'Calcolato dalla scheda: puoi anche scriverci sopra' : ''; });
     });
   }
   // senza field-sizing (Safari, Firefox) l'altezza si calcola a mano; a scheda nascosta si riprova quando si vede
@@ -7414,16 +7464,37 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         return `<div class="arma">${w2.map(t => `<span>${t}</span>`).join('')}${avv.map(t => `<span class="avv">⚠ ${t}</span>`).join('')}</div>`;
       };
       const opzArmi = R ? `<optgroup label="Armi semplici">${R.armi.filter(w => w[3] === 'semplice').map(w => `<option>${esc(w[0])}</option>`).join('')}</optgroup><optgroup label="Armi da guerra">${R.armi.filter(w => w[3] === 'guerra').map(w => `<option>${esc(w[0])}</option>`).join('')}</optgroup>` : '';
+      // i dadi in più nella riga dell'attacco, ognuno con il suo tipo
+      const chipDx = x => dadiX(x).map(e => `<span class="bon" title="Danni in più: si tirano insieme ai danni${e.q === 'crit' ? ', solo con un critico' : e.q === 'turno' ? ', una volta per turno' : ''}">+ ${esc(e.d)} ${esc(nomeDx(e).replace(/^danni /, ''))}${e.q === 'crit' ? ' · al critico' : e.q === 'turno' ? ' · 1/turno' : ''}</span>`).join('');
+      // l'ingranaggio: in alto il risultato, poi i dadi da toccare, poi i riquadri Colpire e Danni
+      const pannelloAtt = (x, i, wa) => {
+        const L = dxLista(x), opz = (L2, v) => L2.map(([k, l]) => `<option value="${k}"${String(v ?? '') === k ? ' selected' : ''}>${l}</option>`).join('');
+        const righe = L.map((e, j) => `<div class="dxr"><span class="cnt"><button type="button" data-k="dxm" data-i="${i}" data-j="${j}" aria-label="Un dado in meno">−</button><b>${esc(String(e.d || '').replace(/\s+/g, ''))}</b><button type="button" data-k="dxp" data-i="${i}" data-j="${j}" aria-label="Un dado in più">+</button></span><select data-f="attdx.${i}.${j}.t" aria-label="Tipo di danno"><option value="">tipo…</option>${TIPI_DANNO.map(([v]) => `<option value="${v}">${v}</option>`).join('')}</select><select data-f="attdx.${i}.${j}.q" aria-label="Quando">${opz(QUANDO_DX)}</select><button type="button" class="dxx" data-k="dxx" data-i="${i}" data-j="${j}" title="Togli" aria-label="Togli questi dadi">✕</button></div>`).join('');
+        return `<div class="atcfg">
+            <div class="riep"><b data-c="attc:${i}"></b><b data-c="attd:${i}"></b>${chipDx(x)}${x.crit && +x.crit < 20 ? `<span class="bon">critico ${+x.crit}–20</span>` : ''}</div>
+            <p class="conto" data-c="att:${i}"></p>
+            <div class="sez"><h5>Dadi di danno in più</h5><div class="dadi">${[4, 6, 8, 10, 12].map(f => `<button type="button" data-k="dxadd" data-i="${i}" data-f="${f}" title="Aggiungi 1d${f}">d${f}</button>`).join('')}</div>
+              ${righe ? `<div class="dxl">${righe}</div>` : '<p class="nota">Tocca un dado per aggiungerlo, due tocchi su d6 fanno 2d6. Per esempio il fuoco di una lama infuocata o il veleno su un pugnale.</p>'}</div>
+            <div class="due">
+              <fieldset><legend>Colpire</legend>
+                ${R ? `<label><span>Arma del manuale</span><select data-f="att.${i}.arma"><option value="">${wa && !x.arma ? 'Dal nome: ' + esc(wa[0]) : 'Dal nome (nessuna)'}</option>${opzArmi}</select></label>` : ''}
+                <label><span>Caratteristica</span><select data-f="att.${i}.car">${CAR_ATT.map(([v, l]) => `<option value="${v}">${v === '' ? (wa ? `Automatica: ${nomeCar(carArma(s, wa))}` : 'Automatica: nessuna arma, scrivi tu') : l}</option>`).join('')}</select></label>
+                <label><span>Competenza</span><select data-f="att.${i}.comp_att"><option value="">${wa ? `Automatica: ${calcAtt(s, x)?.cp ? 'sì' : 'no'}` : 'Sì'}</option><option value="si">Sì, competente</option><option value="no">No, non competente</option></select></label>
+                <label><span>Bonus magico (anche ai danni)</span>${inp(`att.${i}.magia`, '+0', '', 'number')}</label>
+              </fieldset>
+              <fieldset><legend>Danni</legend>
+                ${wa ? (versatile(wa) ? `<label class="ck"><input type="checkbox" data-f="att.${i}.duemani"> A due mani: ${esc(versatile(wa))} invece di ${esc(wa[1])}</label>` : `<p class="nota">Dado dell'arma: ${esc(wa[1])} ${esc(wa[2])}</p>`) : `<label><span>Dado dei danni</span>${inp(`att.${i}.dado`, '1d8')}</label>`}
+                <label><span>Modificatore ai danni</span>${inp(`att.${i}.dmod`, '+0', '', 'number')}</label>
+                <label><span>Critico</span><select data-f="att.${i}.crit"><option value="">con 20</option><option value="19">con 19–20</option><option value="18">con 18–20</option></select></label>
+              </fieldset>
+            </div>
+            <label class="lg"><span>Descrizione dell'oggetto (armi particolari, proprietà magiche…)</span><textarea data-f="att.${i}.desc" class="auto" rows="2" placeholder="Es. lama di ghiaccio forgiata dai nani: brilla al buio e…"></textarea></label>
+          </div>`;
+      };
       const at = (d.attacchi || []).map((x, i) => `<div class="at" data-ordi="${i}"><div class="riga">${w ? '<span class="mano" title="Trascina per spostare" aria-hidden="true">⠿</span>' : ''}${testo(`att.${i}.nome`, 'Arma', 'an')}${inp(`att.${i}.colpire`, '+0', 'ac', 'number')}${inp(`att.${i}.danni`, '1d6+1', 'ad')}</div>
-          <div class="riga az">${stella(d, 'w', x.nome, w)}${testo(`att.${i}.tipo`, 'Tipo e note', 'tp')}${bonusDadi(x) ? `<span class="bon" title="Danni bonus: si tirano insieme ai danni">+ ${esc(bonusDadi(x))} ${esc(bonusNome(x).replace(/^danni /, ''))}</span>` : ''}<button type="button" class="mini" data-roll="att:${i}"${dis} title="Tiro per colpire">🎯 Colpisci</button><button type="button" class="mini" data-roll="dan:${i}"${dis} title="Danni">💥 Danni</button><button type="button" class="mini" data-roll="cri:${i}"${dis} title="Critico: dadi dei danni raddoppiati">✖2 Critico</button>${w ? `<button type="button" class="mini cfg${sv.matt === i ? ' on' : ''}" data-k="attcfg" data-i="${i}" title="Modifica: caratteristica (Forza, Destrezza…), competenza, dado e bonus magico" aria-label="Modifica l'attacco" aria-expanded="${sv.matt === i}">⚙</button><button type="button" class="mini via" data-k="delatt" data-i="${i}" title="Togli l'attacco" aria-label="Togli l'attacco">🗑</button>` : ''}</div>
+          <div class="riga az">${stella(d, 'w', x.nome, w)}${testo(`att.${i}.tipo`, 'Tipo e note', 'tp')}${chipDx(x)}${w && calcAtt(s, x) ? [['c', 'colpire', x.man_c], ['d', 'danni', x.man_d]].filter(z => z[2]).map(([c, l]) => `<button type="button" class="mini amano" data-k="attauto" data-i="${i}" data-c="${c}" title="Scritto a mano: tocca per tornare al calcolo della scheda">✎ ${l} a mano ↺</button>`).join('') : ''}<button type="button" class="mini" data-roll="att:${i}"${dis} title="Tiro per colpire">🎯 Colpisci</button><button type="button" class="mini" data-roll="dan:${i}"${dis} title="Danni">💥 Danni</button><button type="button" class="mini" data-roll="cri:${i}"${dis} title="Critico: dadi dei danni raddoppiati">✖2 Critico</button>${w ? `<button type="button" class="mini cfg${sv.matt === i ? ' on' : ''}" data-k="attcfg" data-i="${i}" title="Modifica l'arma: caratteristica, competenza, dadi di danno in più, critico" aria-label="Modifica l'attacco" aria-expanded="${sv.matt === i}">⚙</button><button type="button" class="mini via" data-k="delatt" data-i="${i}" title="Togli l'attacco" aria-label="Togli l'attacco">🗑</button>` : ''}</div>
           ${infoArma(x)}${String(x.desc || '').trim() && !(w && sv.matt === i) ? `<p class="atdesc">${esc(x.desc)}</p>` : ''}
-          ${w && sv.matt === i ? (wa => `<div class="atcfg"><label class="lg"><span>Descrizione dell'oggetto (armi particolari, proprietà magiche…)</span><textarea data-f="att.${i}.desc" class="auto" rows="2" placeholder="Es. lama di ghiaccio forgiata dai nani: brilla al buio e…"></textarea></label>${R ? `<label class="lg"><span>Arma del manuale</span><select data-f="att.${i}.arma"><option value="">${wa && !x.arma ? 'Riconosciuta dal nome: ' + esc(wa[0]) : 'Dal nome (nessuna arma riconosciuta)'}</option>${opzArmi}</select></label>` : ''}
-            <label><span>Caratteristica</span><select data-f="att.${i}.car">${CAR_ATT.map(([v, l]) => `<option value="${v}">${v === '' ? (wa ? `Automatica: ${nomeCar(carArma(s, wa))}` : 'Automatica: nessuna arma, scrivi tu') : l}</option>`).join('')}</select></label>
-            ${wa ? (versatile(wa) ? `<label class="ck"><input type="checkbox" data-f="att.${i}.duemani"> Impugnata a due mani: ${esc(versatile(wa))} invece di ${esc(wa[1])}</label>` : '') : `<label><span>Dado dei danni</span>${inp(`att.${i}.dado`, '1d8')}</label>`}
-            <label><span>Competenza</span><select data-f="att.${i}.comp_att"><option value="">${wa ? `Automatica: ${calcAtt(s, x)?.cp ? 'sì' : 'no'} (${formaPg(s) ? 'classe e razza' : 'PNG, sempre competente'})` : 'Sì'}</option><option value="si">Sì, competente</option><option value="no">No, non competente</option></select></label>
-            <label><span>Bonus magico</span>${inp(`att.${i}.magia`, '+0', '', 'number')}</label>
-            <label><span>Danni bonus</span>${inp(`att.${i}.bdadi`, '1d6')}</label><label><span>Tipo dei danni bonus</span><select data-f="att.${i}.btipo"><option value="">—</option>${TIPI_DANNO.map(([v]) => `<option value="${v}">${v[0].toUpperCase() + v.slice(1)}</option>`).join('')}</select></label>
-            <p class="conto" data-c="att:${i}"></p></div>`)(armaAtt(s, x)) : ''}</div>`).join('');
+          ${w && sv.matt === i ? pannelloAtt(x, i, armaAtt(s, x)) : ''}</div>`).join('');
       const pf = `<div class="pfmax"><span>Punti ferita massimi</span>${n(tk ? 'tok.pf_max' : 'pf_max', '—')}</div>${n(tk ? 'tok.pf' : 'pf', '—', 'pfa')}
         ${w ? '<div class="q"><button type="button" data-k="pfm" title="Danni">− Danni</button><input type="number" data-k="pfq" value="1" min="1" aria-label="Quanti punti"><button type="button" data-k="pfp" title="Cura">+ Cura</button></div>' : ''}`;
       corpo = `${!pg ? '<button type="button" class="mini agg fine" data-k="fine">✓ Fatto: torna al blocco delle statistiche</button>' : ''}<div class="p1">
@@ -7530,15 +7601,16 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (k === 'livello' || k === 'scuola' || el.type === 'checkbox') { salvaScheda(s.id, { incantesimi: a }, true).then(() => disegnaScheda()); return; }
       salvaScheda(s.id, { incantesimi: a }); return;
     }
+    if (f.startsWith('attdx.')) { const [, i, j, k] = f.split('.'); return salvaDx(s, +i, L => { if (L[j]) L[j][k] = v; }); }
     if (f.startsWith('att.')) {
       const [, i, k] = f.split('.'), a = (s.dati.attacchi || []).map(x => ({ ...x })); if (!a[i]) return; a[i][k] = v;
       if (k === 'comp_att') delete a[i].nocomp;
       // bonus o danni scritti a mano nella riga: l'attacco passa a «Manuale» e il sito non li ricalcola più (⚙ per tornare al calcolo)
-      if ((k === 'colpire' || k === 'danni') && a[i].car !== 'man' && calcAtt(s, s.dati.attacchi[i])) { a[i].car = 'man'; toast('Valori scritti a mano: il sito non li ricalcola più. Con ⚙ puoi tornare al calcolo automatico.'); }
+      if ((k === 'colpire' || k === 'danni') && calcAtt(s, s.dati.attacchi[i])) { const mk = k === 'colpire' ? 'man_c' : 'man_d'; if (!a[i][mk]) { a[i][mk] = true; toast(`${k === 'colpire' ? 'Bonus per colpire' : 'Danni'} scritti a mano: il sito non li ricalcola più. Tocca ✎ nella riga per tornare al calcolo.`); } }
       if (k === 'arma' && v && (!String(a[i].nome || '').trim() || armaAtt(s, { ...a[i], arma: '' }))) a[i].nome = v;
       salvaScheda(s.id, { attacchi: a });
       // le scelte dell'ingranaggio cambiano anche la riga dell'attacco (danni bonus)
-      if (['car', 'btipo', 'comp_att', 'arma', 'duemani'].includes(k) || k === 'nome' && !el.matches(':focus') || (k === 'bdadi' && !el.matches(':focus'))) disegnaScheda(); return;
+      if (['car', 'btipo', 'comp_att', 'arma', 'duemani', 'crit'].includes(k) || k === 'nome' && !el.matches(':focus') || (k === 'bdadi' && !el.matches(':focus'))) disegnaScheda(); return;
     }
     salvaScheda(s.id, { [f]: v });
     if (['ca_auto', 'armatura', 'scudo_ca'].includes(f) || (f === 'equip' && sv.mca && !el.matches(':focus'))) disegnaScheda();
@@ -7630,9 +7702,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         return tiroD20(s, num(at.colpire) || 0, 'Attacco: ' + (at.nome || 'arma'), true);
       }
       if (r === 'dan' || r === 'cri') {
-        const cr = r === 'cri' || T.maiusc, bd = bonusDadi(at); if (!String(at.danni || '').trim()) return toast('Scrivi i danni dell\'attacco, per esempio 1d8+3', 'err');
+        const cr = r === 'cri' || T.maiusc, X = dadiX(at).filter(e => e.q !== 'crit' || cr); if (!String(at.danni || '').trim()) return toast('Scrivi i danni dell\'attacco, per esempio 1d8+3', 'err');
         const t = await tira(cr ? critico(at.danni) : at.danni, cr ? 'critico' : null, sv.seg, `${s.nome} · Danni: ${at.nome || 'arma'}${at.tipo ? ' (' + at.tipo + ')' : ''}`);
-        if (t && bd) await tira(cr ? critico(bd) : bd, cr ? 'critico' : null, sv.seg, `${s.nome} · ${bonusNome(at)[0].toUpperCase() + bonusNome(at).slice(1)}: ${at.nome || 'arma'}`);
+        if (t) for (const e of X) await tira(cr ? critico(e.d) : e.d, cr ? 'critico' : null, sv.seg, `${s.nome} · ${nomeDx(e)[0].toUpperCase() + nomeDx(e).slice(1)}: ${at.nome || 'arma'}`);
         if (t) for (const x of extraDi(s).filter(x => x.attivo && x.dadi)) await tira(cr ? critico(x.dadi) : x.dadi, cr ? 'critico' : null, sv.seg, `${s.nome} · ${x.nome || 'Danno aggiuntivo'}: ${at.nome || 'arma'}`);
         return t;
       }
@@ -7708,6 +7780,15 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (k === 'tz-reset' && tkz) return segnaAzioni(tkz, { az: false, bon: false, rea: false, mov: 0, scatto: false, fatte: [], ox: null, oy: null });
     if (k === 'cacfg') { sv.mca = !sv.mca; return disegnaScheda(); }
     if (k === 'attcfg') { const i = +b.dataset.i; sv.matt = sv.matt === i ? null : i; return disegnaScheda(); }
+    if (k === 'attauto') { const A = (d.attacchi || []).map(x => ({ ...x })), i = +b.dataset.i; if (!A[i]) return; delete A[i][b.dataset.c === 'c' ? 'man_c' : 'man_d']; await salvaScheda(s.id, { attacchi: A }, true); return disegnaScheda(); }
+    if (k === 'dxadd' || k === 'dxp' || k === 'dxm' || k === 'dxx') {
+      const f = +b.dataset.f, j = +b.dataset.j, cambia = (e, n) => { const m = String(e.d || '').replace(/\s+/g, '').match(/^(\d*)d(\d+)(.*)$/i); if (!m) return n > 0 ? { ...e, d: '1d6' } : null; const q = (+m[1] || 1) + n; return q > 0 ? { ...e, d: Math.min(q, 40) + 'd' + m[2] + m[3] } : null; };
+      return salvaDx(s, +b.dataset.i, L => {
+        if (k === 'dxadd') { const u = L[L.length - 1], m = u && String(u.d || '').match(/^\d*d(\d+)$/i); if (m && +m[1] === f) L[L.length - 1] = cambia(u, 1); else L.push({ d: '1d' + f, t: '', q: '' }); }
+        else if (k === 'dxx') L.splice(j, 1);
+        else if (L[j]) L[j] = cambia(L[j], k === 'dxp' ? 1 : -1);
+      });
+    }
     if (k === 'addatt') { sv.matt = (d.attacchi || []).length; await salvaScheda(s.id, { attacchi: [...(d.attacchi || []), { nome: '', colpire: null, danni: '', tipo: '' }] }, true); disegnaScheda(); sv.d.querySelector('.atts .at:last-of-type textarea.an')?.focus(); return; }
     if (k === 'delatt') { await salvaScheda(s.id, { attacchi: (d.attacchi || []).filter((_, i) => i !== +b.dataset.i) }, true); return disegnaScheda(); }
     if (k === 'riposo') { const p = {}; for (let i = 1; i <= 9; i++) if (num(d['usati_' + i])) p['usati_' + i] = 0; return salvaScheda(s.id, p, true); }
