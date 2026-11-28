@@ -74,7 +74,7 @@ async function gestisci(req: Request, ini: number): Promise<Response> {
   if (dm.error || dm.data !== true) return json({ errore: 'L\'assistente è solo per il DM.' }, 403);
 
   const sb = createClient(url, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
-  const ai = await sb.from('tavolo_ai').select('chiave, modello').eq('id', 1).maybeSingle();
+  const ai = await sb.from('tavolo_ai').select('chiave, modello, ultimo').eq('id', 1).maybeSingle();
   const chiave = ai.data?.chiave || '';
   if (!chiave) return json({ errore: 'Manca la chiave di Gemini: incollala in «Collega l\'assistente».', manca: true }, 412);
 
@@ -82,13 +82,15 @@ async function gestisci(req: Request, ini: number): Promise<Response> {
   let lista: string[];
   try { lista = await modelloAuto(chiave); }
   catch (e) { if ((e as Error).name === 'TimeoutError') throw e; const s = (e as { stato?: number }).stato || 502; log(ini, 'modelli non letti:', s, (e as Error).message); return json({ errore: (e as Error).message, stato: s }, s); }
-  // prima il modello che ha funzionato l'ultima volta (o quello scelto dal DM), poi gli altri in ordine
-  const scelto = ai.data?.modello && ai.data.modello !== 'auto' ? ai.data.modello : SCELTO?.modello || lista[0];
+  // prima il modello che ha funzionato l'ultima volta (salvato in tavolo_ai.ultimo) o quello scelto dal DM, poi gli altri in ordine
+  // (la prova di «Collega» riparte dal più nuovo, così se torna disponibile lo si riprende)
+  const scelto = ai.data?.modello && ai.data.modello !== 'auto' ? ai.data.modello
+    : !corpo.prova && ai.data?.ultimo && lista.includes(ai.data.ultimo) ? ai.data.ultimo : lista[0];
   const candidati = [scelto, ...lista.filter(m => m !== scelto)].slice(0, 4);
   // Google risponde 503/429/500 quando un modello è sovraccarico: si passa al successivo
   const riprova = (st: number) => st === 503 || st === 429 || st === 500 || st === 504 || st === 404;
 
-  let corpoG: unknown, url2: (m: string) => string, limite: number;
+  let corpoG: Record<string, unknown>, url2: (m: string) => string, limite: number, pensaPoco = false;
   if (corpo.prova) {
     corpoG = { contents: [{ role: 'user', parts: [{ text: 'Rispondi solo: ok' }] }], generationConfig: { maxOutputTokens: 2000 } };
     url2 = m => `${G}/models/${m}:generateContent`; limite = 15000;
@@ -100,6 +102,8 @@ async function gestisci(req: Request, ini: number): Promise<Response> {
     // i modelli che «pensano» contano anche il ragionamento nel limite: gli diamo più spazio di quanto serva alla risposta
     const max = Math.min(Math.max((Number(corpo.max) || 8000) * 2, 16000), 65536);
     corpoG = { ...(corpo.system ? { systemInstruction: { parts: [{ text: String(corpo.system) }] } } : {}), contents, generationConfig: { maxOutputTokens: max } };
+    // all'assistente durante la partita serve una risposta rapida: i Gemini 3 ragionano poco (se il modello non lo accetta si riprova senza)
+    if (corpo.effort === 'low') pensaPoco = true;
     url2 = m => `${G}/models/${m}:streamGenerateContent?alt=sse`; limite = 30000;
   }
   let ultimo: Response | null = null, ultimoErr = '';
@@ -108,13 +112,17 @@ async function gestisci(req: Request, ini: number): Promise<Response> {
     let r: Response;
     try {
       // il limite vale per l'arrivo della risposta; lo streaming poi continua senza limite
-      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(new DOMException('tempo', 'TimeoutError')), i === 0 && !corpo.prova ? limite * 2 : limite);
-      r = await fetch(url2(m), { method: 'POST', headers: { ...intest(chiave), 'Content-Type': 'application/json' }, body: JSON.stringify(corpoG), signal: ctl.signal });
+      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(new DOMException('tempo', 'TimeoutError')), limite);
+      const conPensiero = (b: Record<string, unknown>) => ({ ...b, generationConfig: { ...(b.generationConfig as object), thinkingConfig: { thinkingLevel: 'low' } } });
+      const poco = pensaPoco && /^gemini-[3-9]/.test(m);
+      r = await fetch(url2(m), { method: 'POST', headers: { ...intest(chiave), 'Content-Type': 'application/json' }, body: JSON.stringify(poco ? conPensiero(corpoG) : corpoG), signal: ctl.signal });
+      if (poco && r.status === 400) { log(ini, m, 'non accetta thinkingLevel: riprovo senza'); r = await fetch(url2(m), { method: 'POST', headers: { ...intest(chiave), 'Content-Type': 'application/json' }, body: JSON.stringify(corpoG), signal: ctl.signal }); }
       clearTimeout(t);
     } catch (e) { log(ini, m, 'non risponde:', (e as Error).name); ultimoErr = 'Google non ha risposto in tempo: riprova tra poco.'; continue; }
     log(ini, corpo.prova ? 'prova' : 'risposta', m, r.status);
     if (r.ok && (corpo.prova || r.body)) {
       if (SCELTO) SCELTO.modello = m;
+      if (ai.data?.ultimo !== m) await sb.from('tavolo_ai').update({ ultimo: m }).eq('id', 1);
       if (corpo.prova) return json({ ok: true, modello: m });
       return new Response(r.body, { headers: { ...CORS, 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'X-Modello': m, 'Access-Control-Expose-Headers': 'X-Modello' } });
     }
