@@ -1022,6 +1022,7 @@ dialog.dlg.tv-side.tv-sw.tv-scuro{background:#1d1814;color:#efe5d0;border-color:
 .tv-isp.merda .st{background:radial-gradient(circle at 50% 40%,#d8b88a,#8a6a3a 55%,#4a3018)}
 .tv-isp.merda b{color:#f1e1c4}
 @media (max-width:820px){.tv-isp{bottom:calc(84px + env(safe-area-inset-bottom,0px))}}
+@media (min-width:821px){.tv-isp{left:82px}.tv.gio .tv-isp{left:70px}}
 @keyframes tvIsp{0%{opacity:0;transform:translateX(-16px)}8%{opacity:1;transform:none}88%{opacity:1}100%{opacity:0}}
 .tv-isp.anello{background:#0f2236f0;border-color:#7fb2e088;border-left-color:#7fb2e0}.tv-isp.anello .st{background:radial-gradient(circle at 50% 40%,#d7ecff,#4a7fb5 55%,#1c3350);color:#fff}
 .effc.on{background:#2f5f8a;color:#eaf5ff}
@@ -6143,7 +6144,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         if (nuovi > ora) salvaScheda(s.id, { pf_temp: nuovi }, true);
         const testo = nuovi > ora ? `🛡 ${pv.nome || 'Privilegio'}: ${t.nome || 'una creatura'} è morto entro ${num(pv.dist) || 3} m da ${o.nome || s.nome}, che prende ${n} PF temporanei.`
           : `🛡 ${pv.nome || 'Privilegio'}: ${o.nome || s.nome} ha già ${ora} PF temporanei, più dei ${n} che darebbe: non si sommano.`;
-        toast(testo); annuncia(testo);
+        if (nuovi <= ora) toast(testo); annuncia(testo);
         if (nuovi > ora) avvisoTutti({ tipo: 'anello', ic: '🛡', su: pv.nome || 'Privilegio', titolo: `${o.nome || s.nome} prende ${n} PF temporanei`, testo: `${t.nome || 'Una creatura'} è caduto entro ${num(pv.dist) || 3} m.`, tok: o.id });
       }
     }
@@ -6365,6 +6366,9 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       ? `<div class="st" aria-hidden="true">💩</div><div><b>${esc(m.nome)} ha svantaggio</b><i>Il DM usa un punto merda: prossimo tiro con il d20.</i></div>`
       : `<div class="st" aria-hidden="true">✦</div><div><b>${esc(m.nome)} riceve un punto ispirazione</b><i>Vantaggio a un tiro, quando vuole.</i></div>`;
     tv.append(b); setTimeout(() => b.remove(), 4800);
+    // se ci sono già avvisi del sito nello stesso angolo, il biglietto sale sopra di loro
+    const tz = document.getElementById('toasts'), hz = tz && [...tz.children].reduce((h, x) => h + x.offsetHeight + 8, 0);
+    if (hz) { const r = tz.getBoundingClientRect(), rt = tv.getBoundingClientRect(); if (r.left < rt.left + 340) b.style.bottom = Math.max(16, rt.bottom - r.bottom + hz + 8) + 'px'; }
     if (m.tok && an) mostraLampo({ id: m.tok, col: '#9fd0ff', txt: `${m.ic || '💍'} ${m.titolo || ''}`.slice(0, 40) });
     else if (m.tok) mostraLampo(merda ? { id: m.tok, col: '#8a6a3a', txt: '💩 Svantaggio' } : { id: m.tok, col: '#f3d58c', txt: '✦ Ispirazione' });
   }
@@ -6877,7 +6881,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       const tt = (on ? `✨ Attivo ancora ${min} min` : `Si attiva per ${num(p.min) || 10} min`) + (pr ? ` · vantaggio alle prove di ${pr}` : '');
       return `<span class="effc${on ? ' on' : ''}" title="Quando lo attivi tutti vedono l'avviso${pr ? '; finché è attivo le prove di ' + pr + ' (non i tiri salvezza) si tirano con vantaggio' : ''}">${esc(tt)}</span>${w ? (on ? `<button type="button" class="mini" data-k="att-off" data-i="${i}">Spegni</button>` : `<button type="button" class="mini" data-k="att-on" data-i="${i}"${num(p.usi) > 0 && !restanti(p) ? ' disabled title="Usi finiti: tornano col riposo"' : ''}>✨ Attiva</button>`) : ''}`;
     }
-    const t = e === 'pft_morte' ? `${String(p.pft || '?').trim()} PF temp. se muore qualcuno entro ${num(p.dist) || 3} m` : e === 'riduci_vicino' ? `Riduce di ${String(p.dadi || '?').trim()} i danni a chi è entro ${String(p.dist || '1,5').replace('.', ',')} m` : e === 'ts_colpo' ? `Colpito: TS ${p.ts_car ? nomeCar(p.ts_car) : '?'}${num(p.ts_cd) ? ' CD ' + num(p.ts_cd) : ''}` : BREVE_EFF[e] + (e === 'vant_ts' && p.ts_car ? ' su ' + nomeCar(p.ts_car) : '');
+    const t = e === 'pft_morte' ? `${/^(liv|livello)$/i.test(String(p.pft || '').trim()) ? 'PF temp. pari al livello' : String(p.pft || '?').trim() + ' PF temp.'} se muore qualcuno entro ${num(p.dist) || 3} m` : e === 'riduci_vicino' ? `Riduce di ${String(p.dadi || '?').trim()} i danni a chi è entro ${String(p.dist || '1,5').replace('.', ',')} m` : e === 'ts_colpo' ? `Colpito: TS ${p.ts_car ? nomeCar(p.ts_car) : '?'}${num(p.ts_cd) ? ' CD ' + num(p.ts_cd) : ''}` : BREVE_EFF[e] + (e === 'vant_ts' && p.ts_car ? ' su ' + nomeCar(p.ts_car) : '');
     return `<span class="effc${p.off ? ' off' : ''}" title="${esc((EFFETTI_TR.find(x => x[0] === e) || [])[1] || '')}: il Tavolo lo applica da solo">⚔ ${esc(t)}</span>${w ? `<label class="sw2${p.off ? '' : ' on'}" title="Spento: il Tavolo non lo applica (es. solo in certe situazioni)"><input type="checkbox" data-k="prv-off" data-i="${i}"${p.off ? '' : ' checked'}>${p.off ? 'spento' : 'attivo'}</label>` : ''}`;
   }
   function voceForm(p, i) {
