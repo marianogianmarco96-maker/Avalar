@@ -223,8 +223,70 @@ Se ti chiedo modifiche, rispondi con l'oggetto aggiornato nello stesso formato.`
   }
   const fitMsg = s => s ? 'Richiesta copiata e accorciata per stare in un messaggio. Per mandare tutta la storia usa «Scarica per Claude» e allega il file' : 'Richiesta copiata: incollala in una chat con Claude';
 
+  /* ---------- l'intelligenza artificiale: Gemini (chiave su Supabase) oppure Claude (chiave in questo browser) ----------
+     kv 'api' = { provider: 'gemini' } | { key: 'sk-ant-…', model } . Con Gemini la chiave non passa mai dal browser:
+     la tiene la funzione assistente-gemini (supabase/functions/, tavolo/tappa-23.sql), che risponde solo al DM. */
+  const GEMINI = 'gemini', SB_URL = 'https://zwxwnmcxryfmzkqsakjz.supabase.co', SB_KEY = 'sb_publishable_cAGuilUZdnxhtDeJ-qwuEQ_ihjCyFj0';
+  const FN = SB_URL + '/functions/v1/assistente-gemini';
+  let STATO = null; // { chiave: bool, coda, modello } letto da Supabase, una volta per pagina
+  async function statoGemini(forza) {
+    if (STATO && !forza) return STATO;
+    try { const sb = await window.__sbDM(); const r = await sb.rpc('tavolo_ai_stato'); if (r.error) throw r.error; return STATO = r.data || { chiave: false }; }
+    catch { return { chiave: false, errore: true }; }
+  }
+  // il collegamento in uso: { key, model } come prima. Con Gemini key = 'gemini' (la chiave vera resta sul server)
+  async function conn() {
+    const a = await kvGet('api');
+    if (a?.key && a.key !== GEMINI) return a;
+    if (a?.provider === GEMINI || !a) { const s = await statoGemini(); if (s.chiave) return { key: GEMINI, model: GEMINI, provider: GEMINI }; }
+    return null;
+  }
+  const nomeAI = c => c?.key === GEMINI ? 'Gemini' : 'Claude';
+  async function callClaude(o) { return o.key === GEMINI ? callGemini(o) : callAnthropic(o); }
+
+  async function chiamaFn(corpo, signal) {
+    const sb = await window.__sbDM(), tok = (await sb.auth.getSession()).data.session?.access_token;
+    if (!tok) throw new Error('Entra come DM per usare l\'assistente.');
+    return fetch(FN, { method: 'POST', signal, headers: { 'content-type': 'application/json', authorization: 'Bearer ' + tok, apikey: SB_KEY }, body: JSON.stringify(corpo) });
+  }
+  async function erroreGemini(r) {
+    let j = {}; try { j = await r.json(); } catch { }
+    const m = j.errore || '';
+    if (j.manca) return new Error('Manca la chiave di Gemini: incollala in «Collega l\'assistente».');
+    if (/api key|API_KEY|permission/i.test(m) || r.status === 401 && /key/i.test(m)) return new Error('La chiave di Gemini non è valida. Controllala in «Collega l\'assistente».');
+    if (r.status === 403) return new Error(m || 'L\'assistente è solo per il DM.');
+    if (r.status === 429 || /quota|exhausted/i.test(m)) return new Error('Gemini ha raggiunto il limite di richieste: riprova tra un minuto.');
+    if (r.status >= 500) return new Error('Gemini è momentaneamente sovraccarico: riprova tra poco.');
+    if (/too long|token count|exceeds/i.test(m)) return new Error('La richiesta è troppo lunga per Gemini: manda meno storia.');
+    return new Error(m || 'Richiesta a Gemini non riuscita (' + r.status + ').');
+  }
+  async function callGemini({ system, messages, onText = () => { }, signal, effort = 'medium', max = 32000 }) {
+    const r = await chiamaFn({ system, messages, effort, max }, signal);
+    if (!r.ok) throw await erroreGemini(r);
+    const rd = r.body.getReader(), dec = new TextDecoder(); let buf = '', txt = '', stop = null, usage = {};
+    const riga = l => {
+      if (!l.startsWith('data:')) return; let ev; try { ev = JSON.parse(l.slice(5)); } catch { return; }
+      if (ev.error) throw new Error(ev.error.message || 'Errore durante la risposta di Gemini.');
+      const c = ev.candidates?.[0];
+      const t = (c?.content?.parts || []).filter(p => !p.thought && p.text).map(p => p.text).join('');
+      if (t) { txt += t; onText(txt); }
+      if (c?.finishReason) stop = c.finishReason;
+      if (ev.usageMetadata) usage = ev.usageMetadata;
+      if (ev.promptFeedback?.blockReason) stop = 'BLOCK';
+    };
+    for (; ;) {
+      const { value, done } = await rd.read(); if (done) break;
+      buf += dec.decode(value, { stream: true }).replace(/\r\n/g, '\n');
+      let i; while ((i = buf.indexOf('\n')) >= 0) { const l = buf.slice(0, i); buf = buf.slice(i + 1); riga(l.trim()); }
+    }
+    riga(buf.trim());
+    if (!txt && /SAFETY|BLOCK|PROHIBITED/.test(stop || '')) throw new Error('Gemini ha rifiutato questa richiesta. Prova a riformularla.');
+    const fine = stop === 'MAX_TOKENS' ? 'max_tokens' : 'end_turn';
+    return { content: [{ type: 'text', text: txt }], text: txt, stop: fine, usage: { input_tokens: usage.promptTokenCount, output_tokens: usage.candidatesTokenCount }, modello: r.headers.get('x-modello') };
+  }
+
   /* ---------- chiamata diretta a Claude (con la chiave API del DM) ---------- */
-  async function callClaude({ system, messages, model, key, onText = () => { }, signal, effort = 'medium', max = 32000 }) {
+  async function callAnthropic({ system, messages, model, key, onText = () => { }, signal, effort = 'medium', max = 32000 }) {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST', signal,
       headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true', 'anthropic-beta': 'server-side-fallback-2026-07-01' },
@@ -264,20 +326,51 @@ Se ti chiedo modifiche, rispondi con l'oggetto aggiornato nello stesso formato.`
     return { content: blocks.filter(Boolean), text: text(), stop, usage };
   }
 
+  // «Collega l'assistente»: Gemini, con la chiave salvata su Supabase (solo il DM la può cambiare, nessuno la può leggere)
   async function settingsDlg() {
+    const cur = (await kvGet('api')) || {}, s = await statoGemini(true);
+    if (s.errore) { toast('Per collegare Gemini entra come DM (serve il collegamento a Supabase).', 'err'); return claudeDlg(); }
+    const r = await formDlg({
+      title: 'Collega l\'assistente', ok: 'Collega',
+      intro: `L'assistente, la revisione di fine sessione e le Idee usano <b>Gemini</b> con i dati della campagna presenti nel sito. Per la chiave:
+        <br>1. apri <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> ed entra con il tuo account Google;
+        <br>2. premi «Create API key» (o «Crea chiave API») e copiala: inizia con «AIza…»;
+        <br>3. incollala qui sotto e premi «Collega».
+        <br>La chiave resta su Supabase: non sta in questo browser e i giocatori non la vedono mai.`,
+      fields: [
+        { k: 'g', label: 'Chiave di Gemini', value: '', placeholder: s.chiave ? `già salvata (finisce con …${s.coda || ''}): lascia vuoto per tenerla` : 'AIza…' },
+        { k: 'claude', type: 'check', label: 'Usa invece Claude con una mia chiave API (sk-ant-…)', value: !!(cur.key && cur.key !== GEMINI) }
+      ]
+    });
+    if (!r) return false;
+    if (r.claude) return claudeDlg();
+    const g = r.g.trim().replace(/\s+/g, '');
+    if (!g && !s.chiave) { toast('Incolla la chiave di Gemini.', 'err'); return false; }
+    if (g && !/^AIza[\w-]{20,}$/.test(g)) { toast('La chiave di Gemini dovrebbe iniziare con «AIza».', 'err'); return false; }
+    try {
+      const sb = await window.__sbDM();
+      if (g) { const w = await sb.rpc('tavolo_ai_salva', { p_chiave: g }); if (w.error) throw w.error; }
+      await kvSet('api', { provider: GEMINI }); STATO = null; await statoGemini(true);
+      toast('Controllo la chiave…');
+      const p = await chiamaFn({ prova: true });
+      if (!p.ok) throw await erroreGemini(p);
+      const j = await p.json(); toast(`Assistente collegato a Gemini (${j.modello})`); return true;
+    } catch (e) { toast(e.message || String(e), 'err'); return false; }
+  }
+  async function claudeDlg() {
     const cur = (await kvGet('api')) || {};
     const r = await formDlg({
       title: 'Collega Claude', ok: 'Salva',
-      intro: 'Con una chiave API di Claude le idee si generano direttamente qui. Creala su <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a> (serve un credito prepagato: ogni richiesta costa qualche decina di centesimi). La chiave resta solo in questo browser. Senza chiave puoi sempre usare «Copia per Claude» e incollare la richiesta in una chat.',
+      intro: 'Con una chiave API di Claude le risposte arrivano da Claude invece che da Gemini. Creala su <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a> (serve un credito prepagato). Questa chiave resta solo in questo browser. Lascia vuoto per tornare a Gemini.',
       fields: [
-        { k: 'key', label: 'Chiave API', value: cur.key || '', placeholder: 'sk-ant-…' },
+        { k: 'key', label: 'Chiave API', value: cur.key && cur.key !== GEMINI ? cur.key : '', placeholder: 'sk-ant-…' },
         { k: 'model', label: 'Modello', type: 'select', value: cur.model || MODELS[0][0], options: MODELS.map(m => [m[0], m[1]]) }
       ]
     });
     if (!r) return false;
     const key = r.key.trim();
     if (key && !/^sk-ant-/.test(key)) { toast('La chiave dovrebbe iniziare con «sk-ant-».', 'err'); return false; }
-    await kvSet('api', key ? { key, model: r.model } : null); toast(key ? 'Claude collegato' : 'Chiave rimossa'); return true;
+    await kvSet('api', key ? { key, model: r.model } : { provider: GEMINI }); toast(key ? 'Claude collegato' : 'Torno a Gemini'); return true;
   }
 
   /* ---------- pagina ---------- */
@@ -312,11 +405,11 @@ Se ti chiedo modifiche, rispondi con l'oggetto aggiornato nello stesso formato.`
   route(/^\/idee$/, async () => {
     if (!await guard()) return; css(); ensureEntList();
     const o = loadForm(); o.focus = o.focus.filter(id => S.ents.has(id));
-    const api = await kvGet('api'), saved = await ideasAll();
+    const api = await conn(), saved = await ideasAll(), AI = api ? nomeAI(api) : 'Gemini';
     const io = loadItems(), pgs = [...S.ents.values()].filter(e => e.type === 'pg').sort((a, b) => a.name.localeCompare(b.name));
     io.pgs = io.pgs.filter(id => S.ents.has(id));
     const sel = (k, opts, v) => `<select id="i-${k}">${opts.map(([a, b]) => `<option value="${esc(a)}" ${String(a) === String(v) ? 'selected' : ''}>${esc(b)}</option>`).join('')}</select>`;
-    setView(`<div class="pagehead"><h1>Idee per le sessioni</h1><div class="acts"><a class="btn" href="#/fine-sessione" title="Claude legge la serata al Tavolo e propone il riassunto e gli aggiornamenti alle schede">🏁 Fine sessione</a><a class="btn" href="#/bottino" title="Oggetti e dispense pronti da consegnare al Tavolo">🎁 Bottino pronto${window.__bottino?.tutte().filter(v => !v.consegne?.length).length ? ' · ' + window.__bottino.tutte().filter(v => !v.consegne?.length).length : ''}</a><button class="btn" data-act="ipaste">Salva una risposta di Claude</button><button class="btn" data-act="iset">${api ? 'Claude collegato ✓' : 'Collega Claude'}</button></div></div><div class="orn"></div>
+    setView(`<div class="pagehead"><h1>Idee per le sessioni</h1><div class="acts"><a class="btn" href="#/fine-sessione" title="Claude legge la serata al Tavolo e propone il riassunto e gli aggiornamenti alle schede">🏁 Fine sessione</a><a class="btn" href="#/bottino" title="Oggetti e dispense pronti da consegnare al Tavolo">🎁 Bottino pronto${window.__bottino?.tutte().filter(v => !v.consegne?.length).length ? ' · ' + window.__bottino.tutte().filter(v => !v.consegne?.length).length : ''}</a><button class="btn" data-act="ipaste">Salva una risposta di Claude</button><button class="btn" data-act="iset">${api ? AI + ' collegato ✓' : 'Collega l\'assistente'}</button></div></div><div class="orn"></div>
       <div class="card"><p class="lead" style="margin-top:0">Chiedi a Claude di ideare oneshot, sessioni o missioni partendo da tutto quello che è successo nella campagna: riassunti, schede, PNG, luoghi e segreti. Lo vedi solo tu come DM.</p>
         <div class="idee-grid">
           <label class="f"><span>Cosa ti serve</span>${sel('kind', Object.entries(KINDS).filter(([k]) => k !== 'items').map(([k, v]) => [k, v[0]]), o.kind)}</label>
@@ -332,8 +425,8 @@ Se ti chiedo modifiche, rispondi con l'oggetto aggiornato nello stesso formato.`
           <label class="f" style="margin-top:8px"><span>Contesto</span>${sel('ctx', [['recent', `Ultime sessioni (consigliato): le ultime ${RECENT} per intero, le altre in breve`], ['short', 'Breve: solo l\'essenziale, per le chat più piccole'], ['full', 'Completo: tutte le sessioni e tutte le schede']], o.ctx)}</label>
           <label class="chk"><input type="checkbox" id="i-docs" ${o.docs ? 'checked' : ''}> <span>Aggiungi anche i tuoi appunti e le scalette delle sessioni (Claude imita il tuo stile, ma la richiesta pesa di più)</span></label>
         </details>
-        <div class="row" style="margin-top:14px"><button class="btn primary" data-act="igen">Genera con Claude</button><button class="btn" data-act="icopy">Copia per Claude</button><button class="btn" data-act="itxt" title="Scarica la richiesta come file da allegare alla chat">Scarica per Claude</button><span class="hint" id="i-size"></span></div>
-        ${api ? '' : '<p class="hint" style="margin-bottom:0">Per generare qui serve collegare Claude con una chiave API. In alternativa «Copia per Claude» prepara la richiesta da incollare in una chat con Claude; poi con «Salva una risposta di Claude» la conservi qui.</p>'}
+        <div class="row" style="margin-top:14px"><button class="btn primary" data-act="igen">Genera con ${AI}</button><button class="btn" data-act="icopy">Copia per Claude</button><button class="btn" data-act="itxt" title="Scarica la richiesta come file da allegare alla chat">Scarica per Claude</button><span class="hint" id="i-size"></span></div>
+        ${api ? '' : '<p class="hint" style="margin-bottom:0">Per generare qui serve collegare l\'assistente (Gemini, con la chiave di Google AI Studio). In alternativa «Copia per Claude» prepara la richiesta da incollare in una chat con Claude; poi con «Salva una risposta di Claude» la conservi qui.</p>'}
       </div>
       <div class="card"><h2>Oggetti</h2><p class="hint" style="margin-top:0">Claude crea oggetti su misura per i personaggi che scegli: armi, equipaggiamento, oggetti magici, ma anche oggetti maledetti o del tutto senza senso per depistare il party.</p>
         <label class="f"><span>Per chi (nessuno = tutto il party)</span><div class="idee-tones" id="it-pgs">${pgs.map(e => `<span class="chip ${io.pgs.includes(e.id) ? 'on' : ''}" role="checkbox" tabindex="0" aria-checked="${io.pgs.includes(e.id)}" data-pg="${esc(e.id)}">${esc(e.name)}</span>`).join('') || '<span class="hint">Nessuna scheda di tipo PG.</span>'}</div></label>
@@ -344,14 +437,14 @@ Se ti chiedo modifiche, rispondi con l'oggetto aggiornato nello stesso formato.`
           <label class="f"><span>Party (facoltativo)</span><input type="text" id="it-level" value="${esc(io.level)}" placeholder="es. 4 PG di livello 3" autocomplete="off"></label>
         </div>
         <label class="f"><span>Indicazioni per Claude (facoltativo)</span><textarea id="it-note" rows="2" placeholder="es. Una spada per Violet legata ai draghi, e qualcosa di inutile ma misterioso per Livion">${esc(io.note)}</textarea></label>
-        <div class="row" style="margin-top:6px"><button class="btn primary" data-act="itgen">Crea oggetti con Claude</button><button class="btn" data-act="itcopy">Copia per Claude</button><button class="btn" data-act="ittxt">Scarica per Claude</button></div>
+        <div class="row" style="margin-top:6px"><button class="btn primary" data-act="itgen">Crea oggetti con ${AI}</button><button class="btn" data-act="itcopy">Copia per Claude</button><button class="btn" data-act="ittxt">Scarica per Claude</button></div>
       </div>
       <div id="i-conv"></div>
       <div class="card"><h2>Idee salvate</h2>${saved.length ? `<div class="idee-list">${saved.map(i => `<a class="erow" href="#/idee/${encodeURIComponent(i.id)}"><div class="main"><div class="t">${esc(i.title)}</div><div class="b">${esc(i.kindLabel || '')}${i.kindLabel ? ' · ' : ''}${esc(new Date(i.ts).toLocaleDateString('it-IT'))}</div></div></a>`).join('')}</div>` : '<p class="empty" style="padding:12px">Nessuna idea salvata. Quando una proposta ti piace, premi «Salva tra le idee».</p>'}<p class="hint" style="margin-bottom:0">Le idee restano in questo browser, separate dai dati della campagna: i giocatori non le vedono mai.</p></div>`);
 
     const read = () => ({ kind: $('#i-kind').value, count: +$('#i-count').value, length: $('#i-length').value, level: $('#i-level').value.trim(), note: $('#i-note').value, ctx: $('#i-ctx').value, docs: $('#i-docs').checked, tones: [...document.querySelectorAll('#i-tones .chip.on')].map(c => c.dataset.tone), extras: [...document.querySelectorAll('#i-extras .chip.on')].map(c => c.dataset.extra), focus: o.focus, v: 2 });
     let sizeT = null;
-    const size = () => { clearTimeout(sizeT); sizeT = setTimeout(async () => { const f = read(); saveForm(f); const p = await buildPrompt(f); const t = tokOf(p.system + p.user); const m = MODELS.find(x => x[0] === (api?.model || MODELS[0][0])); const c = (t * m[2] + 8000 * m[3]) / 1e6; const el = $('#i-size'); if (el) el.textContent = `Circa ${Math.round(t / 1000)} mila token di storia${(p.system + p.user).length > CHAT_MAX ? ' · «Copia» la accorcia per stare in un messaggio, «Scarica» la manda tutta' : ''}${api ? ` · circa ${c.toFixed(2).replace('.', ',')} $ a richiesta` : ''}`; }, 250); };
+    const size = () => { clearTimeout(sizeT); sizeT = setTimeout(async () => { const f = read(); saveForm(f); const p = await buildPrompt(f); const t = tokOf(p.system + p.user); const m = MODELS.find(x => x[0] === api?.model); const c = m ? (t * m[2] + 8000 * m[3]) / 1e6 : 0; const el = $('#i-size'); if (el) el.textContent = `Circa ${Math.round(t / 1000)} mila token di storia${(p.system + p.user).length > CHAT_MAX ? ' · «Copia» la accorcia per stare in un messaggio, «Scarica» la manda tutta' : ''}${m ? ` · circa ${c.toFixed(2).replace('.', ',')} $ a richiesta` : ''}`; }, 250); };
     const paintFocus = () => { $('#i-focus').innerHTML = o.focus.map(id => { const e = S.ents.get(id); return `<span class="chip">${badge(e.type)} ${esc(e.name)}<button type="button" data-unfocus="${esc(id)}" aria-label="Togli ${esc(e.name)}">×</button></span>`; }).join(''); size(); };
     paintFocus();
     const fadd = $('#i-fadd');
@@ -370,14 +463,14 @@ Se ti chiedo modifiche, rispondi con l'oggetto aggiornato nello stesso formato.`
       const conv = $('#i-conv'); if (!conv) return;
       if (!CONV) { conv.innerHTML = ''; return; }
       const failed = CONV.turns[CONV.turns.length - 1].err;
-      conv.innerHTML = `<div class="card idee-out"><div class="spread"><h2 style="margin:0">${CONV.o.kind === 'items' ? 'Gli oggetti di Claude' : esc(KINDS[CONV.o.kind][0]) + ': le proposte di Claude'}</h2><button class="btn sm ghost" data-act="iclear">Chiudi</button></div>
+      conv.innerHTML = `<div class="card idee-out"><div class="spread"><h2 style="margin:0">${CONV.o.kind === 'items' ? 'Gli oggetti proposti' : esc(KINDS[CONV.o.kind][0]) + ': le proposte'}</h2><button class="btn sm ghost" data-act="iclear">Chiudi</button></div>
         ${CONV.turns.map((t, i) => `<div class="idee-turn">${i ? `<div class="idee-q">${esc(t.q)}</div>` : ''}${t.err ? `<p style="color:var(--bad,#a3262f)">${esc(t.err)}</p><button class="btn sm" data-act="iretry">Riprova</button>` : `<div class="${t.live ? 'idee-live' : ''}" id="i-a${i}">${prose(t.a || '…')}</div>`}
           ${!t.live && t.a ? `<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="isave" data-i="${i}">${t.saved ? 'Salvata ✓' : 'Salva tra le idee'}</button><button class="btn sm" data-act="icp" data-i="${i}">Copia</button>${window.__bottino?.daMarkdown(t.a).length ? `<button class="btn sm" data-act="ibot" data-i="${i}" title="Mette gli oggetti nel Bottino pronto, da consegnare al Tavolo">🎁 Prepara per la partita</button>` : ''}${t.stop === 'max_tokens' ? '<span class="hint">La risposta è stata interrotta perché troppo lunga: chiedi di continuare.</span>' : t.stop === 'aborted' ? '<span class="hint">Interrotta da te: se vuoi, chiedi di continuare.</span>' : ''}</div>` : ''}</div>`).join('')}
-        ${failed ? '' : BUSY ? `<div class="row" style="margin-top:12px"><button class="btn sm" data-act="istop">Interrompi</button><span class="hint">Claude sta scrivendo…</span></div>` : `<div class="idee-turn"><label class="f"><span>Continua con Claude</span><textarea id="i-follow" rows="2" placeholder="es. Sviluppa la seconda proposta con i dialoghi di Edward · rendila più cupa · aggiungi un incontro con i Predoni"></textarea></label><button class="btn" data-act="ifollow">Invia</button></div>`}</div>`;
+        ${failed ? '' : BUSY ? `<div class="row" style="margin-top:12px"><button class="btn sm" data-act="istop">Interrompi</button><span class="hint">Sto scrivendo…</span></div>` : `<div class="idee-turn"><label class="f"><span>Continua la conversazione</span><textarea id="i-follow" rows="2" placeholder="es. Sviluppa la seconda proposta con i dialoghi di Edward · rendila più cupa · aggiungi un incontro con i Predoni"></textarea></label><button class="btn" data-act="ifollow">Invia</button></div>`}</div>`;
     };
     const live = i => { const el = $('#i-a' + i); if (el) el.innerHTML = prose(CONV.turns[i].a || '…'); };
     const run = async () => {
-      const a = await kvGet('api'); if (!a) { if (await settingsDlg()) return run(); return; }
+      const a = await conn(); if (!a) { if (await settingsDlg()) return run(); return; }
       const i = CONV.turns.length - 1, t = CONV.turns[i]; t.live = true; BUSY = new AbortController(); paintConv();
       let raf = 0;
       try {
@@ -392,8 +485,8 @@ Se ti chiedo modifiche, rispondi con l'oggetto aggiornato nello stesso formato.`
     };
     paintConv();
     const start = async f => {
-      if (BUSY) return toast('Claude sta ancora scrivendo.');
-      if (!await kvGet('api') && !await settingsDlg()) return;
+      if (BUSY) return toast('La risposta è ancora in arrivo.');
+      if (!await conn() && !await settingsDlg()) return;
       const p = await buildPrompt(f);
       CONV = { o: f, system: p.system, msgs: [{ role: 'user', content: p.user }], turns: [{ q: p.user, a: '' }] };
       await run(); $('#i-conv')?.scrollIntoView({ block: 'start' });
@@ -457,7 +550,7 @@ Se ti chiedo modifiche, rispondi con l'oggetto aggiornato nello stesso formato.`
   });
 
   // per l'assistente al Tavolo e la revisione di fine sessione (assistente.js): stessa chiave, stesso contesto
-  window.__idee = { callClaude, chiave: () => kvGet('api'), collega: settingsDlg, contesto: o => campaignText({ ctx: 'recent', focus: [], ...o }), MODELS };
+  window.__idee = { callClaude, chiave: conn, nome: nomeAI, collega: settingsDlg, contesto: o => campaignText({ ctx: 'recent', focus: [], ...o }), MODELS };
 
   // voce «Idee» nel menu, solo per il DM
   claude.use('db').then(() => {
