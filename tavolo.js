@@ -498,7 +498,10 @@ dialog.tv-sw>.rz:hover{background-color:#7d253033}
 .tv-sch .pill span{font:700 .6rem/1.15 var(--body);letter-spacing:.05em;text-transform:uppercase}
 .tv-sch .pill .pv{width:32px;height:28px;flex:none;border:2px solid var(--lin);border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 .95rem var(--display)}
 .tv-sch .pill.largo{border-radius:20px}
-.tv-sch .pill.merda{flex-wrap:wrap}
+.tv-sch .pill.merda,.pill.ispz{flex-wrap:wrap}
+.pill.ispz.on{border-color:#c9a24b;background:#c9a24b1f}
+.pill.ispz .mq{display:flex;gap:3px;margin-left:auto}
+.pill.ispz .isp-dai{color:#8a5a14;border-color:#c9a24b;font-weight:700}
 .tv-sch .usab .pu,.tv-sch .legg .lg{border-bottom:1px dashed var(--lin);padding:5px 0;display:flex;flex-direction:column;gap:4px}
 .tv-sch .usab .pur{display:flex;flex-wrap:wrap;align-items:center;gap:5px}
 .tv-sch .usab .pur b{font:700 .9rem var(--display)}
@@ -5141,6 +5144,13 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
      usato, il prossimo tiro con il d20 di quel personaggio (prova, TS, attacco) ha svantaggio */
   const merdaAttiva = s => !!s?.dati?.merda_attiva;
   const consumaMerda = s => { if (s?.dati) { s.dati.merda_attiva = false; salvaScheda(s.id, { merda_attiva: false }, true)?.catch?.(() => { }); } };
+  // ispirazione: niente numero da scrivere. Il DM la concede con «✦ +1» (parte l'avviso per tutti) o toglie un punto; chi ha la scheda la usa
+  function pillIsp(s, w) {
+    const n = ispDi(s), dm = isDM();
+    return `<div class="pill ispz${n ? ' on' : ''}" title="Punti ispirazione: li concede il DM. Usato, vantaggio a un tiro."><b class="pv">${n}</b><span>Ispirazione</span>
+      ${dm ? `<span class="mq"><button type="button" class="mini" data-k="isp-" title="Togli un punto"${n ? '' : ' disabled'}>−</button><button type="button" class="mini isp-dai" data-k="isp+" title="Concedi un punto ispirazione: tutti vedono l'avviso">✦ +1</button></span>`
+        : w && n ? `<span class="mq"><button type="button" class="mini" data-k="isp-usa" title="Usa il punto: vantaggio a un tiro">Usa</button></span>` : ''}</div>`;
+  }
   function pillMerda(s) {
     const d = s.dati, n = num(d.merda) || 0, on = !!d.merda_attiva, dm = isDM();
     return `<div class="pill merda${on ? ' on' : ''}" title="Punti merda: li dà il DM e decide lui quando usarli. Usato, il prossimo tiro con il d20 ha svantaggio."><b class="pv">${n}</b><span>Punti merda${on ? ' · <i>svantaggio al prossimo tiro</i>' : ''}</span>
@@ -7287,7 +7297,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         <div class="colA">
           <div class="dueA"><div class="carcol">${car}</div>
             <div class="altA">
-              ${pg ? `<div class="pill isp"><input type="number" class="pv" data-f="ispirazione" min="0" step="1" placeholder="0" aria-label="Punti ispirazione"${dis}><span>Ispirazione</span></div>` : ''}
+              ${pg ? pillIsp(s, w) : ''}
               ${pg || num(d.merda) || d.merda_attiva ? pillMerda(s) : ''}
               <div class="pill"><b class="pv" data-c="comp"></b><span>Bonus di competenza</span></div>
               <div class="pill isp" title="Quante azioni ha a ogni turno: 1 di solito, di più per alcuni mostri o privilegi"><input type="number" class="pv" data-f="n_azioni" min="1" max="9" step="1" placeholder="1" aria-label="Azioni per turno"${dis}><span>Azioni per turno</span></div>
@@ -7575,6 +7585,8 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (k === 'leg-usa') { const x = leggDi(s)[+b.dataset.i]; return usaLeg(s, tokScheda() || attaccante(s), x); }
     if (k === 'leg-reset') { await salvaScheda(s.id, { leg_usate: 0 }, true); return disegnaScheda(); }
     if (!isDM()) return;
+    if (k === 'isp+' || k === 'isp-') { if (!isDM()) return; await salvaScheda(s.id, { ispirazione: Math.max(0, ispDi(s) + (k === 'isp+' ? 1 : -1)) }, true); return disegnaScheda(); }
+    if (k === 'isp-usa') { const n = ispDi(s); if (!n) return; await salvaScheda(s.id, { ispirazione: n - 1 }, true); disegnaScheda(); return annuncia(`✦ ${s.nome || 'Un personaggio'} usa il punto ispirazione: vantaggio a un tiro.`).catch(() => { }); }
     if (k === 'merda+' || k === 'merda-') { await salvaScheda(s.id, { merda: Math.max(0, (num(d.merda) || 0) + (k === 'merda+' ? 1 : -1)) }, true); return disegnaScheda(); }
     if (k === 'merda-no') { await salvaScheda(s.id, { merda: (num(d.merda) || 0) + 1, merda_attiva: false }, true); return disegnaScheda(); }
     if (k === 'merda-usa') {
