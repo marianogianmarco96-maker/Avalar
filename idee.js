@@ -352,7 +352,7 @@ Se ti chiedo modifiche, rispondi con l'oggetto aggiornato nello stesso formato.`
       if (g) { const w = await sb.rpc('tavolo_ai_salva', { p_chiave: g }); if (w.error) throw w.error; }
       await kvSet('api', { provider: GEMINI }); STATO = null; await statoGemini(true);
       toast('Controllo la chiave…');
-      const p = await chiamaFn({ prova: true });
+      const p = await chiamaFn({ prova: true }, AbortSignal.timeout(75000)).catch(e => { throw e.name === 'TimeoutError' ? new Error('Il server non ha risposto entro un minuto: riprova, e se succede ancora scrivilo a Claude.') : e; });
       if (!p.ok) throw await erroreGemini(p);
       const j = await p.json(); toast(`Assistente collegato a Gemini (${j.modello})`); return true;
     } catch (e) { toast(e.message || String(e), 'err'); return false; }
