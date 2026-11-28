@@ -12,6 +12,10 @@ const CORS = {
 };
 const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { ...CORS, 'Content-Type': 'application/json' } });
 const G = 'https://generativelanguage.googleapis.com/v1beta';
+// registro per capire dove si ferma una richiesta (mai la chiave)
+const t0 = () => Date.now();
+const log = (inizio: number, ...x: unknown[]) => console.log(`[assistente ${Date.now() - inizio}ms]`, ...x);
+const entro = (ms: number) => AbortSignal.timeout(ms);
 
 // il modello «auto»: il Gemini Pro più recente che la chiave può usare (poi Flash, se Pro non c'è)
 let SCELTO: { chiave: string, modello: string, ts: number } | null = null;
@@ -20,10 +24,12 @@ let MODO: { chiave: string, bearer: boolean } | null = null;
 const intest = (chiave: string): Record<string, string> => MODO?.chiave === chiave && MODO.bearer ? { Authorization: 'Bearer ' + chiave } : { 'x-goog-api-key': chiave };
 async function modelloAuto(chiave: string) {
   if (SCELTO && SCELTO.chiave === chiave && Date.now() - SCELTO.ts < 6 * 3600e3) return SCELTO.modello;
-  let r = await fetch(`${G}/models?pageSize=1000`, { headers: { 'x-goog-api-key': chiave } });
+  let r = await fetch(`${G}/models?pageSize=1000`, { headers: { 'x-goog-api-key': chiave }, signal: entro(20000) });
+  console.log('[assistente] elenco modelli (x-goog-api-key):', r.status);
   MODO = { chiave, bearer: false };
   if (!r.ok && !chiave.startsWith('AIza')) {
-    const b = await fetch(`${G}/models?pageSize=1000`, { headers: { Authorization: 'Bearer ' + chiave } });
+    const b = await fetch(`${G}/models?pageSize=1000`, { headers: { Authorization: 'Bearer ' + chiave }, signal: entro(20000) });
+    console.log('[assistente] elenco modelli (Bearer):', b.status);
     if (b.ok) { r = b; MODO = { chiave, bearer: true }; }
   }
   if (!r.ok) throw Object.assign(new Error(await errore(r)), { stato: r.status });
@@ -46,6 +52,15 @@ async function errore(r: Response) {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
   if (req.method !== 'POST') return json({ errore: 'solo POST' }, 405);
+  const ini = t0(); log(ini, 'richiesta arrivata');
+  try { return await gestisci(req, ini); }
+  catch (e) {
+    const m = (e as Error).name === 'TimeoutError' ? 'Google non ha risposto in tempo: riprova tra poco.' : (e as Error).message || String(e);
+    log(ini, 'errore:', m); return json({ errore: m }, 504);
+  }
+});
+
+async function gestisci(req: Request, ini: number): Promise<Response> {
 
   // solo il DM: il suo login, controllato con tavolo_e_dm()
   const auth = req.headers.get('Authorization') || '';
@@ -53,6 +68,7 @@ Deno.serve(async (req) => {
   const url = Deno.env.get('SUPABASE_URL')!;
   const lui = createClient(url, Deno.env.get('SUPABASE_ANON_KEY')!, { global: { headers: { Authorization: auth } }, auth: { persistSession: false } });
   const dm = await lui.rpc('tavolo_e_dm');
+  log(ini, 'controllo DM:', dm.error ? dm.error.message : dm.data);
   if (dm.error || dm.data !== true) return json({ errore: 'L\'assistente è solo per il DM.' }, 403);
 
   const sb = createClient(url, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
@@ -63,13 +79,15 @@ Deno.serve(async (req) => {
   const corpo = await req.json().catch(() => ({}));
   let modello: string;
   try { const auto = await modelloAuto(chiave); modello = ai.data?.modello && ai.data.modello !== 'auto' ? ai.data.modello : auto; }
-  catch (e) { const s = (e as { stato?: number }).stato || 502; return json({ errore: (e as Error).message, stato: s }, s); }
+  catch (e) { if ((e as Error).name === 'TimeoutError') throw e; const s = (e as { stato?: number }).stato || 502; log(ini, 'modelli non letti:', s, (e as Error).message); return json({ errore: (e as Error).message, stato: s }, s); }
+  log(ini, 'modello:', modello, MODO?.bearer ? '(Bearer)' : '(x-goog-api-key)');
 
   if (corpo.prova) {
     const r = await fetch(`${G}/models/${modello}:generateContent`, {
       method: 'POST', headers: { ...intest(chiave), 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'Rispondi solo: ok' }] }], generationConfig: { maxOutputTokens: 200 } })
+      body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'Rispondi solo: ok' }] }], generationConfig: { maxOutputTokens: 2000 } }), signal: entro(60000)
     });
+    log(ini, 'prova:', r.status);
     if (!r.ok) return json({ errore: await errore(r), stato: r.status }, r.status);
     return json({ ok: true, modello });
   }
@@ -85,8 +103,9 @@ Deno.serve(async (req) => {
     body: JSON.stringify({
       ...(corpo.system ? { systemInstruction: { parts: [{ text: String(corpo.system) }] } } : {}),
       contents, generationConfig: { maxOutputTokens: max }
-    })
+    }), signal: entro(140000)
   });
+  log(ini, 'risposta di Gemini:', r.status);
   if (!r.ok || !r.body) return json({ errore: await errore(r), stato: r.status }, r.status);
   return new Response(r.body, { headers: { ...CORS, 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'X-Modello': modello, 'Access-Control-Expose-Headers': 'X-Modello' } });
-});
+}
