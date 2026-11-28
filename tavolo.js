@@ -1382,6 +1382,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
 .tv-sch .atcfg label{display:flex;flex-direction:column;gap:2px;font-size:.72rem;color:var(--k2);min-width:0}
 .tv-sch .atcfg label.ck{flex-direction:row;align-items:center;gap:6px;font-size:.78rem;color:var(--k)}
 .tv-sch .atcfg select,.tv-sch .atcfg input:not([type=checkbox]){width:100%;min-width:0}
+.tv-sch .atcfg fieldset input:not([type=checkbox]){background:var(--gr);border:1px solid var(--ul);border-radius:6px;padding:5px 8px;text-align:left;font-size:.88rem;color:var(--k)}
 .tv-sch .atcfg .riep{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;background:var(--box);border-radius:10px;padding:8px 12px}
 .tv-sch .atcfg .riep b{font:700 1.08rem/1.2 var(--display);color:#7d2530}
 .tv-scuro .tv-sch .atcfg .riep b{color:#f0a8a0}
@@ -1400,7 +1401,7 @@ body:has(.tv-wrap.con-hud) #toasts{bottom:var(--tv-avvisi,110px)}
 .tv-sch .atcfg .dxx{border:0;background:transparent;color:var(--k2);cursor:pointer;font-size:.9rem;padding:2px 4px}
 .tv-sch .atcfg .dxx:hover{color:#a3262f}
 .tv-sch .atcfg .due{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
-.tv-sch .atcfg fieldset{border:0;background:var(--box);border-radius:10px;padding:8px 10px 10px;margin:0;display:grid;gap:7px;min-width:0}
+.tv-sch .atcfg fieldset{border:0;background:var(--box);border-radius:10px;padding:8px 10px 10px;margin:0;display:grid;gap:7px;align-content:start;min-width:0}
 .tv-sch .atcfg .nota{margin:0;font-size:.76rem;color:var(--k2);line-height:1.35}
 .tv-sch .atcfg label.lg{grid-column:1/-1}
 .tv-sch .at .riga .mini.amano{background:transparent;border:1px dashed var(--ul);color:var(--k2);font-size:.74rem;box-shadow:none}
@@ -5522,7 +5523,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     const r = await SB.rpc('tavolo_attacca', { p_token: m.tok, p_bersaglio: b.id, p_attacco: m.i, p_adv: v.adv, p_privato: m.seg, ...(v.cop?.ca ? { p_cop: v.cop.ca } : {}), ...(extra ? { p_extra: extra, p_extra_nome: exN } : {}), ...(m.inc != null ? { p_inc: m.inc } : {}), p_liv: m.liv || null });
     if (r.error) return toast(v.cop?.ca && /p_cop|function|candidate/i.test(r.error.message) ? 'Per la copertura esegui tavolo/tappa-16.sql in Supabase (oppure scegli «nessuna» nella barra).' : /candidate function/i.test(r.error.message) ? 'In Supabase è rimasta una versione vecchia della funzione: esegui di nuovo tavolo/tappa-9.sql.' : /p_liv/i.test(r.error.message) ? 'Per lanciare con uno slot più alto esegui tavolo/tappa-9.sql in Supabase.' : sqlMancante(r.error) ? 'Per gli attacchi sulla mappa esegui tavolo/tappa-5.sql in Supabase.' : extra && /p_extra|function/i.test(r.error.message) ? 'Per aggiungere i dadi in più esegui tavolo/tappa-7.sql in Supabase.' : r.error.message, 'err');
     const x = Array.isArray(r.data) ? r.data[0] : r.data, a = T.tok.get(m.tok);
-    if (x.colpito && inCombattimento()) XS.filter(e => e.q === 'turno').forEach(e => usoDx.set(`${m.tok}:${m.i}:${e.j}`, chiaveTurno()));
+    if (x?.colpito && inCombattimento()) XS.filter(e => e.q === 'turno').forEach(e => usoDx.set(`${m.tok}:${m.i}:${e.j}`, chiaveTurno()));
     const mossa = { da: m.tok, a: b.id, anim: v.anim, col: v.col, ritorna: !!v.ritorna, esito: x.colpito === true ? 'si' : x.colpito === false ? 'no' : 'nd', crit: !!x.critico, fallito: !!x.fallito, danni: x.danni || 0 };
     manda('attacco', mossa); mostraAttacco(mossa);
     if (a && condTok(a).includes('Nascosto')) mettiNascosto(a, false); // attaccare svela chi era nascosto
@@ -6731,7 +6732,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     // il nome di un attacco resta su una riga logica: Invio non va a capo
     box.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('textarea.an')) e.preventDefault(); });
     box.addEventListener('input', e => { const el = e.target.closest('[data-f]'); if (el && el.type !== 'checkbox' && el.tagName !== 'SELECT') campo(el, !e.inputType || e.inputType === 'insertReplacementText'); });
-    box.addEventListener('change', e => { const el = e.target.closest('[data-f]'); if (el && (el.type === 'checkbox' || el.tagName === 'SELECT')) campo(el); else if (el && /^inc\.\d+\.nome$/.test(el.dataset.f)) campo(el, true); else if (el && /^att\.\d+\.(bdadi|nome)$/.test(el.dataset.f)) campo(el); else if (e.target.dataset.k) azioneScheda(e.target); });
+    box.addEventListener('change', e => { const el = e.target.closest('[data-f]'); if (el && (el.type === 'checkbox' || el.tagName === 'SELECT')) campo(el); else if (el && /^inc\.\d+\.nome$/.test(el.dataset.f)) campo(el, true); else if (el && /^att\.\d+\.(bdadi|nome|colpire|danni|dmod|magia)$/.test(el.dataset.f)) campo(el); else if (e.target.dataset.k) azioneScheda(e.target); });
     box.addEventListener('click', e => { const b = e.target.closest('button'); T.maiusc = e.shiftKey; if (b && box.contains(b)) azioneScheda(b); });
     // si sposta trascinandola dalla barra scura in alto; la posizione resta per le prossime volte
     box.addEventListener('input', e => { if (e.target.dataset.k !== 'filtro') return; sv.filtro = e.target.value; const fl = norm(sv.filtro); box.querySelectorAll('.prv .pv').forEach(el => { const p = (T.schede.get(id)?.dati.privilegi || [])[+el.dataset.ordi]; el.hidden = !!fl && !norm(`${p?.nome} ${p?.fonte} ${p?.testo}`).includes(fl); }); });
@@ -7473,7 +7474,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
         return `<div class="atcfg">
             <div class="riep"><b data-c="attc:${i}"></b><b data-c="attd:${i}"></b>${chipDx(x)}${x.crit && +x.crit < 20 ? `<span class="bon">critico ${+x.crit}–20</span>` : ''}</div>
             <p class="conto" data-c="att:${i}"></p>
-            <div class="sez"><h5>Dadi di danno in più</h5><div class="dadi">${[4, 6, 8, 10, 12].map(f => `<button type="button" data-k="dxadd" data-i="${i}" data-f="${f}" title="Aggiungi 1d${f}">d${f}</button>`).join('')}</div>
+            <div class="dxs"><h5>Dadi di danno in più</h5><div class="dadi">${[4, 6, 8, 10, 12].map(f => `<button type="button" data-k="dxadd" data-i="${i}" data-f="${f}" title="Aggiungi 1d${f}">d${f}</button>`).join('')}</div>
               ${righe ? `<div class="dxl">${righe}</div>` : '<p class="nota">Tocca un dado per aggiungerlo, due tocchi su d6 fanno 2d6. Per esempio il fuoco di una lama infuocata o il veleno su un pugnale.</p>'}</div>
             <div class="due">
               <fieldset><legend>Colpire</legend>
@@ -7492,7 +7493,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
           </div>`;
       };
       const at = (d.attacchi || []).map((x, i) => `<div class="at" data-ordi="${i}"><div class="riga">${w ? '<span class="mano" title="Trascina per spostare" aria-hidden="true">⠿</span>' : ''}${testo(`att.${i}.nome`, 'Arma', 'an')}${inp(`att.${i}.colpire`, '+0', 'ac', 'number')}${inp(`att.${i}.danni`, '1d6+1', 'ad')}</div>
-          <div class="riga az">${stella(d, 'w', x.nome, w)}${testo(`att.${i}.tipo`, 'Tipo e note', 'tp')}${chipDx(x)}${w && calcAtt(s, x) ? [['c', 'colpire', x.man_c], ['d', 'danni', x.man_d]].filter(z => z[2]).map(([c, l]) => `<button type="button" class="mini amano" data-k="attauto" data-i="${i}" data-c="${c}" title="Scritto a mano: tocca per tornare al calcolo della scheda">✎ ${l} a mano ↺</button>`).join('') : ''}<button type="button" class="mini" data-roll="att:${i}"${dis} title="Tiro per colpire">🎯 Colpisci</button><button type="button" class="mini" data-roll="dan:${i}"${dis} title="Danni">💥 Danni</button><button type="button" class="mini" data-roll="cri:${i}"${dis} title="Critico: dadi dei danni raddoppiati">✖2 Critico</button>${w ? `<button type="button" class="mini cfg${sv.matt === i ? ' on' : ''}" data-k="attcfg" data-i="${i}" title="Modifica l'arma: caratteristica, competenza, dadi di danno in più, critico" aria-label="Modifica l'attacco" aria-expanded="${sv.matt === i}">⚙</button><button type="button" class="mini via" data-k="delatt" data-i="${i}" title="Togli l'attacco" aria-label="Togli l'attacco">🗑</button>` : ''}</div>
+          <div class="riga az">${stella(d, 'w', x.nome, w)}${testo(`att.${i}.tipo`, 'Tipo e note', 'tp')}${chipDx(x)}${w && calcAtt(s, x) ? [['c', 'colpire', x.man_c], ['d', 'danni', x.man_d]].filter(z => z[2]).map(([c, l]) => `<button type="button" class="mini amano" data-k="attauto" data-i="${i}" data-v="${c}" title="Scritto a mano: tocca per tornare al calcolo della scheda">✎ ${l} a mano ↺</button>`).join('') : ''}<button type="button" class="mini" data-roll="att:${i}"${dis} title="Tiro per colpire">🎯 Colpisci</button><button type="button" class="mini" data-roll="dan:${i}"${dis} title="Danni">💥 Danni</button><button type="button" class="mini" data-roll="cri:${i}"${dis} title="Critico: dadi dei danni raddoppiati">✖2 Critico</button>${w ? `<button type="button" class="mini cfg${sv.matt === i ? ' on' : ''}" data-k="attcfg" data-i="${i}" title="Modifica l'arma: caratteristica, competenza, dadi di danno in più, critico" aria-label="Modifica l'attacco" aria-expanded="${sv.matt === i}">⚙</button><button type="button" class="mini via" data-k="delatt" data-i="${i}" title="Togli l'attacco" aria-label="Togli l'attacco">🗑</button>` : ''}</div>
           ${infoArma(x)}${String(x.desc || '').trim() && !(w && sv.matt === i) ? `<p class="atdesc">${esc(x.desc)}</p>` : ''}
           ${w && sv.matt === i ? pannelloAtt(x, i, armaAtt(s, x)) : ''}</div>`).join('');
       const pf = `<div class="pfmax"><span>Punti ferita massimi</span>${n(tk ? 'tok.pf_max' : 'pf_max', '—')}</div>${n(tk ? 'tok.pf' : 'pf', '—', 'pfa')}
@@ -7610,7 +7611,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
       if (k === 'arma' && v && (!String(a[i].nome || '').trim() || armaAtt(s, { ...a[i], arma: '' }))) a[i].nome = v;
       salvaScheda(s.id, { attacchi: a });
       // le scelte dell'ingranaggio cambiano anche la riga dell'attacco (danni bonus)
-      if (['car', 'btipo', 'comp_att', 'arma', 'duemani', 'crit'].includes(k) || k === 'nome' && !el.matches(':focus') || (k === 'bdadi' && !el.matches(':focus'))) disegnaScheda(); return;
+      if (['car', 'btipo', 'comp_att', 'arma', 'duemani', 'crit'].includes(k) || k === 'nome' && !el.matches(':focus') || (k === 'bdadi' && !el.matches(':focus')) || ((k === 'colpire' || k === 'danni' || k === 'dmod' || k === 'magia') && !el.matches(':focus'))) disegnaScheda(); return;
     }
     salvaScheda(s.id, { [f]: v });
     if (['ca_auto', 'armatura', 'scudo_ca'].includes(f) || (f === 'equip' && sv.mca && !el.matches(':focus'))) disegnaScheda();
@@ -7780,7 +7781,7 @@ dialog.dlg.tv-guida{background:#efe4c9;border:0;border-radius:16px}
     if (k === 'tz-reset' && tkz) return segnaAzioni(tkz, { az: false, bon: false, rea: false, mov: 0, scatto: false, fatte: [], ox: null, oy: null });
     if (k === 'cacfg') { sv.mca = !sv.mca; return disegnaScheda(); }
     if (k === 'attcfg') { const i = +b.dataset.i; sv.matt = sv.matt === i ? null : i; return disegnaScheda(); }
-    if (k === 'attauto') { const A = (d.attacchi || []).map(x => ({ ...x })), i = +b.dataset.i; if (!A[i]) return; delete A[i][b.dataset.c === 'c' ? 'man_c' : 'man_d']; await salvaScheda(s.id, { attacchi: A }, true); return disegnaScheda(); }
+    if (k === 'attauto') { const A = (d.attacchi || []).map(x => ({ ...x })), i = +b.dataset.i; if (!A[i]) return; delete A[i][b.dataset.v === 'c' ? 'man_c' : 'man_d']; await salvaScheda(s.id, { attacchi: A }, true); return disegnaScheda(); }
     if (k === 'dxadd' || k === 'dxp' || k === 'dxm' || k === 'dxx') {
       const f = +b.dataset.f, j = +b.dataset.j, cambia = (e, n) => { const m = String(e.d || '').replace(/\s+/g, '').match(/^(\d*)d(\d+)(.*)$/i); if (!m) return n > 0 ? { ...e, d: '1d6' } : null; const q = (+m[1] || 1) + n; return q > 0 ? { ...e, d: Math.min(q, 40) + 'd' + m[2] + m[3] } : null; };
       return salvaDx(s, +b.dataset.i, L => {
