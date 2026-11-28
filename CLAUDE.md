@@ -34,3 +34,7 @@
     (*«…»* in corsivo: cosa vedono, sentono, annusano) e 2-3 punti con dettagli da usare al tavolo;
   - nella parte `## 🎭 PNG della Sessione`, per ogni PNG l'aspetto (com'è fatto, come si veste, un tic o un modo di
     parlare) oltre a cosa vuole, e una frase tipica.
+- Assistente, Fine sessione e Idee usano Gemini: idee.js chiama la funzione Supabase `assistente-gemini`
+  (supabase/functions/, risponde solo al DM e sceglie da sola il Gemini Pro più recente). La chiave di Google AI Studio
+  sta in tavolo_ai (tavolo/tappa-23.sql), che il browser non può leggere: il DM la incolla in «Collega l'assistente».
+  Con una chiave sk-ant-… salvata nel browser si torna a Claude.

@@ -4,7 +4,7 @@
    2. Fine sessione (#/fine-sessione): Claude legge il registro del Tavolo (chat, tiri, oggetti consegnati), la scaletta
       con le scene giocate e le note del DM, e propone il riassunto e gli aggiornamenti alle schede. Il DM tiene o scarta
       ogni proposta e crea una bozza (meta «bozza», come strumenti/bozza.py): online va solo con «Controlla» e «Salva».
-   Usa la chiave di Claude e le funzioni di idee.js (window.__idee) e della pagina principale (route, setView, S, md…). */
+   Usa Gemini (o Claude, se il DM ha messo la sua chiave) tramite le funzioni di idee.js (window.__idee) e della pagina principale (route, setView, S, md…). */
 (() => {
   'use strict';
   const CSS = `.as{display:flex;flex-direction:column;flex:1;min-height:0;background:var(--paper)}
@@ -111,14 +111,14 @@ Rispondi in italiano, BREVE: al massimo 3–6 righe o un elenco di 3–5 punti, 
     return { testo: testo.trim(), fonti, nomi };
   }
   function rispostaHtml(t, i) {
-    if (t.err) return `<div class="as-a err"><div class="as-who">Assistente</div>${esc(t.err)}${t.chiave ? '<div style="margin-top:6px"><button type="button" class="btn sm primary" data-as="collega">Collega Claude</button></div>' : ''}</div>`;
+    if (t.err) return `<div class="as-a err"><div class="as-who">Assistente</div>${esc(t.err)}${t.chiave ? '<div style="margin-top:6px"><button type="button" class="btn sm primary" data-as="collega">Collega l\'assistente</button></div>' : ''}</div>`;
     const d = dividi(t.a || '');
     return `<div class="as-a"><div class="as-who">Assistente</div><div class="${t.live ? 'as-live' : ''}">${t.a ? prose(d.testo) : '<span class="hint">Ci penso…</span>'}</div>`
       + (d.nomi.length && !t.live ? `<div class="as-nm">${d.nomi.map(n => `${AS.ctx?.nuovoPng ? `<button type="button" class="btn sm" data-as="png" data-n="${esc(n)}" title="Crea la scheda di questo PNG al Tavolo (nascosta ai giocatori)">+ ${esc(n)}</button>` : `<button type="button" class="btn sm" data-as="copia" data-n="${esc(n)}" title="Copia il nome">${esc(n)}</button>`}`).join('')}</div>` : '')
       + (!t.live && t.a ? `<div class="as-src">${d.fonti.map(x => { const m = x.match(/^\[\[([^\]|]+?)(?:\|([^\]]+?))?\]\]$/); return m && S.ents.has(m[1]) ? `<a href="#/scheda/${encodeURIComponent(m[1])}" target="_blank" rel="noopener">${esc(m[2] || nomeDi(m[1]))}</a>` : `<span>${esc(pulisci(x))}</span>`; }).join('')}<span style="cursor:pointer;margin-left:auto" data-as="cp" data-i="${i}" title="Copia la risposta">📋 Copia</span></div>` : '') + '</div>';
   }
   function feedHtml() {
-    if (!AS.turns.length) return `<div class="as-vuoto"><b>Chiedi quello che ti serve mentre giochi.</b><br>Per esempio: «Cosa sa il party di Tobi?», «Posso afferrare un nemico prono?», «Un nome per un marinaio». Claude conosce le sessioni, le schede (anche i segreti) e la scaletta di stasera. Le risposte le vedi solo tu.</div>`;
+    if (!AS.turns.length) return `<div class="as-vuoto"><b>Chiedi quello che ti serve mentre giochi.</b><br>Per esempio: «Cosa sa il party di Tobi?», «Posso afferrare un nemico prono?», «Un nome per un marinaio». L'assistente conosce le sessioni, le schede (anche i segreti) e la scaletta di stasera. Le risposte le vedi solo tu.</div>`;
     return AS.turns.map((t, i) => `<div class="as-q">${esc(t.q)}</div>${rispostaHtml(t, i)}`).join('');
   }
   function disegna() {
@@ -130,7 +130,7 @@ Rispondi in italiano, BREVE: al massimo 3–6 righe o un elenco di 3–5 punti, 
   async function chiedi(q) {
     q = String(q || '').trim(); if (!q || AS.busy) return;
     const k = await chiave(), t = { q, a: '', live: true, ts: Date.now() }; AS.turns.push(t);
-    if (!k?.key) { t.live = false; t.err = 'Per usare l\'assistente collega Claude con la tua chiave API (la stessa della pagina Idee).'; t.chiave = true; disegna(); return; }
+    if (!k?.key) { t.live = false; t.err = 'Per usare l\'assistente collegalo a Gemini: serve una volta sola la chiave di Google AI Studio.'; t.chiave = true; disegna(); return; }
     AS.busy = new AbortController(); disegna();
     try {
       const prima = AS.turns.slice(0, -1).filter(x => x.a && !x.err).slice(-6).flatMap(x => [{ role: 'user', content: x.q }, { role: 'assistant', content: x.a }]);
@@ -214,8 +214,8 @@ Questa volta non ti incollo un riassunto: ti do il REGISTRO DEL TAVOLO VIRTUALE 
         `\n=== NOTE DEL DM ===\n${o.note.trim() || '(nessuna)'}`].join('\n');
       const r = await api().callClaude({ system, messages: [{ role: 'user', content: user }], model: k.model, key: k.key, signal: FS.busy.signal, effort: 'medium', max: 32000, onText: x => { FS.live = x; const el = $('#fs-live'); if (el) { el.textContent = x.slice(-900); $('#fs-n').textContent = x.length.toLocaleString('it-IT'); } } });
       FS.raw = r.text;
-      if (r.stop === 'max_tokens') throw new Error('La risposta di Claude è troppo lunga ed è stata interrotta: riprova con meno ore di chat.');
-      const j = parseLoose(r.text); if (!j || typeof j !== 'object') throw new Error('Claude non ha risposto nel formato giusto: riprova.');
+      if (r.stop === 'max_tokens') throw new Error('La risposta è troppo lunga ed è stata interrotta: riprova con meno ore di chat.');
+      const j = parseLoose(r.text); if (!j || typeof j !== 'object') throw new Error('L\'assistente non ha risposto nel formato giusto: riprova.');
       if (!Array.isArray(j.sessioni) && j.sessione) j.sessioni = [j.sessione];
       if (!j.sessioni?.length) j.sessioni = [{ numero: o.n, titolo: o.titolo }];
       j.sessioni = [{ ...j.sessioni[0], numero: o.n, ...(o.titolo ? { titolo: o.titolo } : {}) }]; delete j.sessione;
@@ -272,7 +272,7 @@ Questa volta non ti incollo un riassunto: ti do il REGISTRO DEL TAVOLO VIRTUALE 
     const vecchia = getMeta('bozza', null) || { titoli: [], ops: [] }, tutte = new Map((vecchia.ops || []).map(o => [o.c + '|' + o.id, o]));
     for (const o of nuove) tutte.set(o.c + '|' + o.id, o);
     const bz = { titoli: [...(vecchia.titoli || []).filter(t => t !== titolo), titolo], creata: vecchia.creata || Date.now(), agg: Date.now(), ops: [...tutte.values()] };
-    await runBatch(['meta'], 'Bozza di Claude', async b => b.put('meta', { k: 'bozza', v: bz }));
+    await runBatch(['meta'], 'Bozza dell\'assistente', async b => b.put('meta', { k: 'bozza', v: bz }));
     FS.fatto = { titolo, n: nuove.length, avvisi: P.warns.filter(w => !/esisteva già/.test(w)) };
     disegnaFS();
   }
@@ -310,7 +310,7 @@ Questa volta non ti incollo un riassunto: ti do il REGISTRO DEL TAVOLO VIRTUALE 
   function disegnaFS() {
     if (!location.hash.startsWith('#/fine-sessione')) return;
     const o = FS.opz, step = FS.fatto ? 3 : FS.j ? 2 : 1, reg = FS.reg;
-    const passi = ['Cosa è successo', 'Proposte di Claude', 'Bozza da controllare'].map((t, i) => `<span class="${i + 1 < step ? 'ok' : i + 1 === step ? 'on' : ''}">${i + 1 < step ? '✓ ' : ''}${i + 1} · ${t}</span>`).join('');
+    const passi = ['Cosa è successo', 'Proposte', 'Bozza da controllare'].map((t, i) => `<span class="${i + 1 < step ? 'ok' : i + 1 === step ? 'on' : ''}">${i + 1 < step ? '✓ ' : ''}${i + 1} · ${t}</span>`).join('');
     const sc = window.__scaletta?.corrente?.(o.n);
     const letto = `<div class="card fs-read"><h3 style="margin-top:0">Cosa ho letto</h3>${FS.regErr ? `<p class="hint">${esc(FS.regErr)}</p>` : !reg ? '<p class="hint">Leggo il Tavolo…</p>' : `
       <div>Messaggi in chat<b>${reg.chat.length}</b></div><div>Tiri di dado<b>${reg.tiri.length}</b></div><div>Oggetti e documenti consegnati<b>${reg.cons.length}</b></div>`}
@@ -319,16 +319,16 @@ Questa volta non ti incollo un riassunto: ti do il REGISTRO DEL TAVOLO VIRTUALE 
     let corpo;
     if (step === 1) {
       corpo = `<div class="fs-grid"><div class="fs-side">${letto}</div><div class="card">
-        <p class="lead" style="margin-top:0">Claude legge la chat, i tiri e gli oggetti consegnati al Tavolo, insieme alla scaletta e alle tue note, e ti propone il riassunto della sessione e gli aggiornamenti alle schede. Niente va online finché non lo controlli tu.</p>
+        <p class="lead" style="margin-top:0">L'assistente legge la chat, i tiri e gli oggetti consegnati al Tavolo, insieme alla scaletta e alle tue note, e ti propone il riassunto della sessione e gli aggiornamenti alle schede. Niente va online finché non lo controlli tu.</p>
         <div class="idee-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0 14px">
           <label>Sessione numero<input type="number" id="fs-n0" min="1" value="${o.n}"></label>
-          <label>Titolo<input type="text" id="fs-t" value="${esc(o.titolo)}" placeholder="Lo propone Claude"></label>
+          <label>Titolo<input type="text" id="fs-t" value="${esc(o.titolo)}" placeholder="Lo propone l'assistente"></label>
           <label>Chat da leggere<select id="fs-da">${DA.map(([v, l]) => `<option value="${v}" ${v === o.da ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>
         <label>Cosa vuoi aggiungere tu<textarea id="fs-note" rows="5" placeholder="Quello che non è scritto in chat: scene giocate a voce, decisioni dei giocatori, cosa ti ha colpito…">${esc(o.note)}</textarea></label>
         <label class="chk"><input type="checkbox" id="fs-gen" ${o.generale ? 'checked' : ''}> <span>Aggiorna anche il riassunto generale della campagna</span></label>
         ${FS.err ? `<p class="hint" style="color:#a3291f">⚠ ${esc(FS.err)}</p>` : ''}
-        ${FS.busy ? `<div class="card" style="background:var(--paper2);margin:10px 0 0"><b>Claude sta leggendo la serata…</b> <span class="hint"><span id="fs-n">${FS.live.length.toLocaleString('it-IT')}</span> caratteri</span><div class="fs-live" id="fs-live">${esc(FS.live.slice(-900))}</div><div class="row" style="margin-top:8px"><button class="btn" data-fs="stop">Ferma</button></div></div>`
-          : `<div class="row" style="margin-top:12px"><button class="btn primary" data-fs="via">✨ Chiedi a Claude le proposte</button></div>`}</div></div>`;
+        ${FS.busy ? `<div class="card" style="background:var(--paper2);margin:10px 0 0"><b>L'assistente sta leggendo la serata…</b> <span class="hint"><span id="fs-n">${FS.live.length.toLocaleString('it-IT')}</span> caratteri</span><div class="fs-live" id="fs-live">${esc(FS.live.slice(-900))}</div><div class="row" style="margin-top:8px"><button class="btn" data-fs="stop">Ferma</button></div></div>`
+          : `<div class="row" style="margin-top:12px"><button class="btn primary" data-fs="via">✨ Chiedi le proposte</button></div>`}</div></div>`;
     } else if (step === 2) {
       const L = proposte(FS.j), s = FS.j.sessioni[0], n = L.filter(p => FS.sel.has(p.k)).length;
       corpo = `<div class="fs-grid"><div class="fs-side">${letto}</div><div>
@@ -336,7 +336,7 @@ Questa volta non ti incollo un riassunto: ti do il REGISTRO DEL TAVOLO VIRTUALE 
           <textarea class="fs-sum" id="fs-sum" spellcheck="true">${esc(s.riassunto || '')}</textarea>
           <div class="row" style="margin-top:8px"><button class="btn sm" data-fs="breve">Riscrivi più breve</button><button class="btn sm" data-fs="epico">Più epico</button><span class="hint">Le parti tra [DM] e [/DM] restano nascoste ai giocatori.</span></div></div>
         <div class="card" style="margin-top:14px"><h3 style="margin-top:0">Aggiornamenti proposti <span class="hint" style="font-family:var(--body);text-transform:none;letter-spacing:0">· ${n} di ${L.length} tenuti</span></h3>
-          ${L.length ? GRUPPI.map(([g, t]) => { const l = L.filter(p => p.gruppo === g); return l.length ? `<div class="fs-grp">${t}</div>` + l.map(p => `<div class="fs-p ${FS.sel.has(p.k) ? '' : 'off'}"><input type="checkbox" data-k="${p.k}" ${FS.sel.has(p.k) ? 'checked' : ''} aria-label="Tieni: ${esc(p.nome)}"><div class="tx"><span class="fs-tag" style="background:${p.tipo ? COL[p.tipo] : 'var(--wine)'}">${p.nuovo ? 'Nuova · ' : ''}${esc(p.tipo ? NOMI[p.tipo] : p.tag)}</span><span class="nm">${p.id ? `<a href="#/scheda/${encodeURIComponent(p.id)}" target="_blank" rel="noopener">${esc(p.nome)}</a>` : esc(p.nome)}</span>${p.righe.map(r => `<div class="fs-ba">${r}</div>`).join('')}${p.why ? `<div class="fs-why">Da: ${esc(p.why)}</div>` : ''}</div>${p.ref || p.edit ? `<button class="btn sm" data-fs="mod" data-k="${p.k}">Modifica</button>` : ''}</div>`).join('') : ''; }).join('') : '<p class="hint">Claude non propone aggiornamenti alle schede: resta solo il riassunto.</p>'}
+          ${L.length ? GRUPPI.map(([g, t]) => { const l = L.filter(p => p.gruppo === g); return l.length ? `<div class="fs-grp">${t}</div>` + l.map(p => `<div class="fs-p ${FS.sel.has(p.k) ? '' : 'off'}"><input type="checkbox" data-k="${p.k}" ${FS.sel.has(p.k) ? 'checked' : ''} aria-label="Tieni: ${esc(p.nome)}"><div class="tx"><span class="fs-tag" style="background:${p.tipo ? COL[p.tipo] : 'var(--wine)'}">${p.nuovo ? 'Nuova · ' : ''}${esc(p.tipo ? NOMI[p.tipo] : p.tag)}</span><span class="nm">${p.id ? `<a href="#/scheda/${encodeURIComponent(p.id)}" target="_blank" rel="noopener">${esc(p.nome)}</a>` : esc(p.nome)}</span>${p.righe.map(r => `<div class="fs-ba">${r}</div>`).join('')}${p.why ? `<div class="fs-why">Da: ${esc(p.why)}</div>` : ''}</div>${p.ref || p.edit ? `<button class="btn sm" data-fs="mod" data-k="${p.k}">Modifica</button>` : ''}</div>`).join('') : ''; }).join('') : '<p class="hint">Non ci sono proposte di aggiornamento alle schede: resta solo il riassunto.</p>'}
         </div></div></div>
         <div class="fs-foot"><b style="font-family:var(--display)">${n} aggiornament${n === 1 ? 'o' : 'i'} + riassunto</b><button class="btn" data-fs="scarta">Scarta tutto</button><button class="btn" data-fs="rifai">Chiedi di nuovo</button><span class="h">Poi la controlli con «Controlla» e la mandi online con «Salva».</span><button class="btn primary" data-fs="bozza">Crea la bozza →</button></div>`;
     } else {
@@ -357,8 +357,8 @@ Questa volta non ti incollo un riassunto: ti do il REGISTRO DEL TAVOLO VIRTUALE 
       else if (a === 'stop') FS.busy?.abort();
       else if (a === 'breve' || a === 'epico') riscrivi(a);
       else if (a === 'mod') { const p = proposte(FS.j).find(x => x.k === b.dataset.k); if (p) modifica(p); }
-      else if (a === 'scarta') { if (await ask('Scartare tutte le proposte di Claude? Il riassunto e gli aggiornamenti andranno persi.', { danger: true, ok: 'Scarta' })) { FS.j = null; disegnaFS(); } }
-      else if (a === 'rifai') { if (await ask('Chiedere a Claude nuove proposte? Quelle di adesso, con le tue modifiche, andranno perse.', { ok: 'Chiedi di nuovo' })) { FS.j = null; chiediProposte(o); } }
+      else if (a === 'scarta') { if (await ask('Scartare tutte le proposte? Il riassunto e gli aggiornamenti andranno persi.', { danger: true, ok: 'Scarta' })) { FS.j = null; disegnaFS(); } }
+      else if (a === 'rifai') { if (await ask('Chiedere nuove proposte? Quelle di adesso, con le tue modifiche, andranno perse.', { ok: 'Chiedi di nuovo' })) { FS.j = null; chiediProposte(o); } }
       else if (a === 'bozza') { b.disabled = true; try { await creaBozza(); } catch (e) { b.disabled = false; toast(e.message, 'err'); } }
       else if (a === 'controlla') { const x = [...document.querySelectorAll('#outbox button')].find(y => /Controlla/.test(y.textContent)); if (x) x.click(); else toast('Il riquadro della bozza compare in basso a destra tra un attimo.'); }
       else if (a === 'nuova') { FS.j = null; FS.fatto = null; FS.opz = opzioni(); ricarica(); }
